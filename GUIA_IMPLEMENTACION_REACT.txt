@@ -1,0 +1,142 @@
+﻿╔════════════════════════════════════════════════════════════════════════════╗
+║     GUIA DE IMPLEMENTACION - COMPONENTE REACT PARA FORMULARIO SOLICITUD    ║
+║                      COTIZACION CUW LIAB                                   ║
+╚════════════════════════════════════════════════════════════════════════════╝
+
+GENERADO: 03/05/2026 16:08:02
+
+═══════════════════════════════════════════════════════════════════════════════
+1. ESTRUCTURA GENERAL
+═══════════════════════════════════════════════════════════════════════════════
+
+El formulario se compone de 13 sub-pantallas (subforms) organizadas en:
+
+GRUPO 1: INFORMACION INICIAL
+  - Pantalla 101: Encabezado (Informacion general del formulario)
+  - Pantalla 102: Informacion General (Datos principales de cotizacion)
+
+GRUPO 2: DATOS DETALLADOS
+  - Pantalla 103: Datos de Cotizacion
+  - Pantalla 105: Documentos
+  - Pantalla 213: Subinformacion del Asegurado
+  - Pantalla 239: Valores Asegurados y Deducibles
+
+GRUPO 3: INFORMACION DE PERSONAS (TOMADOR Y ASEGURADO)
+  - Pantalla 106: Informacion del Tomador
+  - Pantalla 107: Informacion del Asegurado
+  - Pantalla 108: Creacion Cliente Tomador (si no existe)
+  - Pantalla 109: Creacion Cliente Asegurado (si no existe)
+
+GRUPO 4: ADICIONALES
+  - Pantalla 113: Plan de Pago
+  - Pantalla 114: Asegurados Adicionales
+  - Pantalla 139: Revision de Mora
+
+═══════════════════════════════════════════════════════════════════════════════
+2. COMPONENTES PRINCIPALES
+═══════════════════════════════════════════════════════════════════════════════
+
+TIPOS DE CAMPOS A IMPLEMENTAR:
+
+  [1] FormInput (45 campos)
+      - Inputs de texto, numero, email
+      - Propiedades: name, label, placeholder, validation, inputType
+
+  [2] FormSelectList (40 campos)
+      - Selects estaticos (con opciones hardcodeadas)
+      - Selects dinamicos (con DataSource/collectionId)
+      - Propiedades: name, label, options (o dataSourceUrl)
+
+  [3] FormDatePicker (11 campos)
+      - Campos de fecha con formato DD/MM/AAAA
+      - Propiedades: name, label, placeholder
+
+  [4] FormTextArea (1 campo)
+      - Campo de texto largo (pantalla 139 - Comentario)
+      - Propiedades: name, label, rows, placeholder
+
+  [5] FormCheckbox
+      - Casillas de verificacion
+
+  [6] FormMultiColumn
+      - Agrupa campos en columnas para layout responsive
+      - Cada columna contiene multiples campos
+
+═══════════════════════════════════════════════════════════════════════════════
+3. VALIDACIONES
+═══════════════════════════════════════════════════════════════════════════════
+
+Total de 49 campos tienen validacion. Los tipos incluyen:
+
+  • REQUIRED: Campo obligatorio
+  • EMAIL: Validacion de email
+  • REGEX: Validacion con expresion regular
+  • NUMBER: Solo numeros
+  • LENGTH: Validacion de longitud
+
+═══════════════════════════════════════════════════════════════════════════════
+4. WATCHERS (REACTIVIDAD)
+═══════════════════════════════════════════════════════════════════════════════
+
+Total de 16 watchers encontrados para implementar reactividad.
+
+IMPLEMENTACION EN REACT:
+  • Usar useEffect para escuchar cambios en campos observados
+  • Llamar a APIs para obtener datos dinamicos
+  • Actualizar otros campos basados en la respuesta
+
+═══════════════════════════════════════════════════════════════════════════════
+5. CAMPOS CON DATASOURCE (DINAMICOS)
+═══════════════════════════════════════════════════════════════════════════════
+
+Total de 27 campos con DataSource que requieren API calls dinamicas.
+
+IMPLEMENTACION:
+  • Llamar a APIs para obtener opciones dinamicamente
+  • Cachear resultados para optimizar rendimiento
+  • Actualizar opciones cuando campos observados cambien
+
+═══════════════════════════════════════════════════════════════════════════════
+6. ESTRUCTURA RECOMENDADA EN REACT
+═══════════════════════════════════════════════════════════════════════════════
+
+SolicitudCotizacionForm/
+├── components/
+│   ├── FormContainer.jsx       (Componente principal)
+│   ├── FormInput.jsx           (Campo de texto)
+│   ├── FormSelect.jsx          (Select estatico/dinamico)
+│   ├── FormDatePicker.jsx      (Selector de fecha)
+│   ├── FormTextArea.jsx        (Area de texto)
+│   ├── FormMultiColumn.jsx     (Layout de columnas)
+│   └── SubformTab.jsx          (Tab para cada subpantalla)
+├── screens/
+│   ├── Screen101.jsx           (Encabezado)
+│   ├── Screen102.jsx           (Informacion General)
+│   ├── Screen103.jsx           (Datos de Cotizacion)
+│   └── Screen239.jsx           (Valores asegurados)
+├── hooks/
+│   ├── useFormValidation.js    (Hook de validacion)
+│   ├── useWatchers.js          (Hook de watchers)
+│   └── useDynamicData.js       (Hook para datos dinamicos)
+├── services/
+│   ├── apiService.js           (Llamadas a API)
+│   └── dataMappers.js          (Mapeo de datos)
+├── constants/
+│   ├── screenConfigs.js        (Configuracion de pantallas)
+│   ├── validationRules.js      (Reglas de validacion)
+│   └── fieldDefinitions.js     (Definicion de campos)
+└── App.jsx
+
+═══════════════════════════════════════════════════════════════════════════════
+7. PROXIMOS PASOS
+═══════════════════════════════════════════════════════════════════════════════
+
+1. Revisar archivos CSV y JSON generados
+2. Crear estructura de componentes React
+3. Implementar validaciones
+4. Configurar watchers y reactividad
+5. Integrar con APIs reales
+6. Aplicar estilos y responsive design
+7. Testing (unitario e integracion)
+
+═══════════════════════════════════════════════════════════════════════════════

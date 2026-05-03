@@ -1,0 +1,778 @@
+﻿EXTRACCIÓN DE CAMPOS - FORMULARIO SOLICITUD COTIZACIÓN CUW LIAB
+
+Generado: 2026-05-03 16:06:48
+
+═══════════════════════════════════════════════════════════════════════════════
+RESUMEN EJECUTIVO
+═══════════════════════════════════════════════════════════════════════════════
+
+
+═══════════════════════════════════════════════════════════════════════════════
+DETALLE COMPLETO
+═══════════════════════════════════════════════════════════════════════════════
+
+
+PANTALLA 101
+Título: COL - CUW LIAB - Subform - Encabezado formularios
+Campos: 6
+
+  SECCIÓN: Subform - CU - COL - Encabezado formularios
+    - form_html_viewer
+      Label: 
+      Type: FormHtmlViewer
+    - frm_caso_cuw_col
+      Label: num caso cuw col
+      Type: FormInput
+    - frm_control_fecha_hoy
+      Label: Control fecha de hoy
+      Type: FormDatePicker
+    - frm_num_cotizacion_cuw_col
+      Label: num cotizacion cuw col
+      Type: FormInput
+    - frm_titulo
+      Label: titulo
+      Type: FormInput
+    - ZurichLogo_Horz_White_CMYK_no_R
+      Label: Imagen
+      Type: FormImage
+
+
+PANTALLA 102
+Título: COL - CUW LIAB - Subform - Información General
+Campos: 34
+
+  SECCIÓN: CU - COL - Subform - Información General
+    - frm_cot_comision_solicitada_pct
+      Label: Comisión solicitada (%)
+      Type: FormInput
+      Validación: SÍ
+    - frm_gen_alcance
+      Label: Alcance
+      Type: FormSelectList
+    - frm_gen_co_corretaje
+      Label: Co-corretaje
+      Type: FormSelectList
+    - frm_gen_coaseguro_requerido
+      Label: Coaseguro requerido
+      Type: FormSelectList
+    - frm_gen_comercial_id frm_gen_comercial_nombre frm_gen_comercial_id_back
+      Label: Comercial Comercial Nombre (oculto) Comercial
+      Type: FormSelectList FormInput FormSelectList
+      InputType:   
+      Validación: SÍ
+      DataSource: SÍ
+      Opciones: 3
+    - frm_gen_correo_adicional_intermediario_principal
+      Label: Desea agregar correos adicionales del intermediario principal?
+      Type: FormSelectList
+    - frm_gen_correo_comercial frm_gen_correo_comercial_test frm_gen_clave_intermediario
+      Label: Correo del comercial Correo del comercial (ambiente TEST) Clave intermediario
+      Type: FormInput FormInput FormInput
+      InputType:   
+    - frm_gen_fecha_esperada_cotizacion frm_gen_fecha_esperada_cotizacion_minimo frm_gen_fecha_esperada_cotizacion_maximo
+      Label: Fecha esperada de cotización frm_gen_fecha_esperada_cotizacion_minimo frm_gen_fecha_esperada_cotizacion_maximo
+      Type: FormDatePicker FormInput FormInput
+      InputType:   
+    - frm_gen_fecha_solicitud
+      Label: Fecha de solicitud
+      Type: FormDatePicker
+    - frm_gen_intermediario_adicional
+      Label: Desea agregar intermediarios adicionales?
+      Type: FormSelectList
+    - frm_gen_intermediario_principal frm_gen_intermediario_principal_num_documento frm_gen_intermediario_principal_nombre
+      Label: Intermediario principal Num intermediario (oculto) Intermediario nombre (oculto)
+      Type: FormSelectList FormInput FormInput
+      InputType:   
+      DataSource: SÍ
+      Opciones: 3
+    - frm_gen_intermediario_principal_correo frm_gen_intermediario_principal_correo_no_uso frm_gen_intermediario_principal_correo_test
+      Label: Correo principal del intermediario Correo principal del intermediario Correo principal del intermediario (ambiente TEST)
+      Type: FormInput FormSelectList FormInput
+      InputType:   
+      Validación: SÍ
+      DataSource: SÍ
+      Opciones: 3
+    - frm_gen_lider_seguidor frm_gen_lider_seguidor_label
+      Label: Líder/Seguidor Líder/Seguidor
+      Type: FormSelectList FormInput
+      InputType:  
+      DataSource: SÍ
+      Opciones: 2
+    - frm_gen_linea_negocio
+      Label: Línea de negocio
+      Type: FormSelectList
+    - frm_gen_nom_informador frm_gen_usuario_informador frm_gen_correo_informador
+      Label: Informador Usuario Informador  (oculto) Correo Informador (oculto)
+      Type: FormInput FormInput FormInput
+      InputType:   
+    - frm_gen_nueva_o_renovacion
+      Label: Nueva/Renovación
+      Type: FormSelectList
+    - frm_gen_num_cotizacion
+      Label: Cotización Fast Flow Nro.
+      Type: FormInput
+    - frm_gen_numero_poliza
+      Label: Nro. de póliza actual
+      Type: FormInput
+      Validación: SÍ
+    - frm_gen_pais frm_gen_sucursal
+      Label: País Sucursal
+      Type: FormSelectList FormSelectList
+      DataSource: SÍ
+      Opciones: 2
+    - frm_gen_participacion_solicitado_pct
+      Label: Participación solicitado (%)
+      Type: FormInput
+      Validación: SÍ
+    - frm_gen_participacion_zurich_pct
+      Label: Participación Zurich solicitado
+      Type: FormInput
+      Validación: SÍ
+    - frm_gen_producto frm_gen_producto_nombre
+      Label: Producto Producto (label)
+      Type: FormSelectList FormInput
+      InputType:  
+      DataSource: SÍ
+      Opciones: 2
+    - frm_gen_reaseguro_requerido
+      Label: Reaseguro requerido
+      Type: FormSelectList
+    - frm_gen_segmento
+      Label: Segmento
+      Type: FormSelectList
+    - frm_gen_suscriptor_asignado_correo_test
+      Label: Correo del suscriptor asignado (ambiente TEST)
+      Type: FormInput
+      Validación: SÍ
+    - frm_gen_suscriptor_asignado_id frm_gen_suscriptor_asignado_nombre frm_gen_suscriptor_asignado_correo frm_gen_suscriptor_asignado_id_pm4
+      Label: Suscriptor asignado Suscriptor asignado nombre (oculto) Suscriptor asignado correo (oculto) Suscriptor asignado id pm4 (oculto)
+      Type: FormSelectList FormInput FormInput FormInput
+      InputType:    
+      DataSource: SÍ
+      Opciones: 4
+    - frm_gen_tipo_coaseguro frm_gen_reaseguro_requerido
+      Label: Tipo de coaseguro requerido Reaseguro requerido
+      Type: FormSelectList FormSelectList
+      DataSource: SÍ
+      Opciones: 2
+    - frm_gen_tipo_reaseguro
+      Label: Tipo de reaseguro requerido
+      Type: FormSelectList
+    - frm_gen_tipo_reaseguro
+      Label: Tipo de reaseguro requerido
+      Type: FormSelectList
+    - Nested Screen
+      Label:   Pantalla anidada
+      Type: FormHtmlViewer FormHtmlViewer FormNestedScreen
+    - Nested Screen
+      Label:   Pantalla anidada
+      Type: FormHtmlViewer FormHtmlViewer FormNestedScreen
+
+  SECCIÓN: Modal Intermediarios Adicionales
+    - frm_gen_correo_intermediario
+      Label: Correo del intermediario
+      Type: FormSelectList
+    - frm_gen_intermediario frm_gen_num_intermediario frm_gen_nombre_intermediario
+      Label: Intermediario Num Identidad Intermediario Nombre Intermediario
+      Type: FormSelectList FormInput FormInput
+      InputType:   
+      DataSource: SÍ
+      Opciones: 3
+    - frm_gen_intermediario_participacion_pct
+      Label: Participación
+      Type: FormInput
+      Validación: SÍ
+
+
+PANTALLA 103
+Título: COL - CUW LIAB - Subform - Datos de cotización
+Campos: 17
+
+  SECCIÓN: CU - COL - Subform - Datos de cotización
+    - frm_cot_actividad_naic
+      Label: Actividad del asegurado principal
+      Type: FormSelectList
+    - frm_cot_base_exposicion
+      Label: Base de exposición (oculto)
+      Type: FormSelectList
+    - frm_cot_codigo_naic frm_cot_nombre_ciiu frm_cot_actividad_grado_riesgo
+      Label: Código NAIC Nombre Actividad Actividad del asegurado principal  (oculto) Grado riesgo (oculto)
+      Type: FormInput FormInput FormInput
+      InputType:   
+    - frm_cot_dias_inicio_fin_vigencia
+      Label: Días
+      Type: FormInput
+    - frm_cot_fecha_fin_vigencia
+      Label: Fin de vigencia
+      Type: FormDatePicker
+    - frm_cot_fecha_inicio_vigencia frm_cot_fecha_inicio_vigencia_minima frm_cot_fecha_vigencia_maxima frm_inicio_vigencia_maxima_31 modal_fechaValidaVigencia
+      Label: Inicio de vigencia Fecha mínima: Fecha maxima 30 dias: Fecha 31 dias: Modal Fecha Válida Vigencia
+      Type: FormDatePicker FormDatePicker FormDatePicker FormDatePicker BWrapperComponent
+    - frm_cot_ingresos_operaciones_anuales frm_cot_ingresos_operaciones_anuales frm_cot_ingresos_operaciones_anuales frm_cot_ingresos_operaciones_anuales
+      Label: Ingresos operacionales anuales Ingresos operacionales anuales Ingresos operacionales anuales Ingresos operacionales anuales
+      Type: FormInput FormInput FormInput FormInput
+      InputType:    
+      Validación: SÍ
+    - frm_cot_ingresos_proyectados_anuales frm_cot_ingresos_proyectados_anuales frm_cot_ingresos_proyectados_anuales frm_cot_ingresos_proyectados_anuales modal_proyectadoAnual
+      Label: Ingresos proyectados anuales Ingresos proyectados anuales Ingresos proyectados anuales Ingresos proyectados anuales Modal Proyectado Anual
+      Type: FormInput FormInput FormInput FormInput BWrapperComponent
+      InputType:     
+      Validación: SÍ
+    - frm_cot_modalidad_cobertura
+      Label: Modalidad de cobertura
+      Type: FormSelectList
+    - frm_cot_moneda
+      Label: Moneda
+      Type: FormSelectList
+    - frm_cot_num_meses_anual frm_cot_num_meses
+      Label: Nro. de meses Nro. de meses
+      Type: FormSelectList FormSelectList
+      DataSource: SÍ
+      Opciones: 2
+    - frm_cot_periodicidad
+      Label: Periodicidad
+      Type: FormSelectList
+    - frm_cot_siniestralidad_fecha_desde
+      Label: Siniestralidad reportada desde
+      Type: FormDatePicker
+    - frm_cot_siniestralidad_fecha_hasta
+      Label: Siniestralidad reportada hasta
+      Type: FormDatePicker
+    - frm_cot_siniestralidad_flag
+      Label: Siniestralidad
+      Type: FormSelectList
+    - frm_cot_siniestralidad_reporte
+      Label: Reporte de siniestralidad
+      Type: FileUpload
+
+  SECCIÓN: modalDoc
+    - frm_cot_siniestralidad_reporte
+      Label:  Vista previa de archivo
+      Type: FormHtmlViewer Viewer
+
+
+PANTALLA 105
+Título: COL - CUW LIAB - Subform - Documentos de solicitud de cotización
+Campos: 9
+
+  SECCIÓN: CU - COL - Subform - Documentos de Cotizador
+    - control_grd_documentos_solicitud_obligatorios form_html_viewer
+      Label:     Documentos obligatorios - descriptivo 
+      Type: FormHtmlViewer FormHtmlViewer FormMultiColumn FormMultiColumn FormInput FormHtmlViewer
+      InputType:      
+      Validación: SÍ
+    - frm_doc_cotizador_adjuntar_otros_documentos
+      Label: Desea adjuntar otros documentos?
+      Type: FormSelectList
+    - frm_doc_cotizador_otros_documentos form_html_viewer
+      Label: Otros documentos 
+      Type: FileUpload FormHtmlViewer
+    - frm_doc_cotizador_otros_documentos_cargar_adicionales form_html_viewer
+      Label: Adjuntar documentos 
+      Type: FileUpload FormHtmlViewer
+    - grd_doc_subir grd_doc_eliminar grd_file grd_observacion
+      Label:    Observación
+      Type: FormButton FormButton FileUpload FormTextArea
+    - grd_documentos_solicitud
+      Label: 
+      Type: FormLoop
+    - grd_seleccion
+      Label:     
+      Type: FormSelectList FormHtmlViewer FormHtmlViewer FormHtmlViewer FormHtmlViewer
+      DataSource: SÍ
+      Opciones: 5
+    - grd_vista
+      Label: 
+      Type: BWrapperComponent
+
+  SECCIÓN: (modal) Docs
+    - grd_file
+      Label:  Vista previa de archivo
+      Type: FormHtmlViewer Viewer
+
+
+PANTALLA 106
+Título: COL - CUW LIAB - Subform - Información del tomador
+Campos: 23
+
+  SECCIÓN: CU - COL - Subform - Información del tomador
+    - btn_consultar_informacion_tomador
+      Label: Consultar cliente
+      Type: FormButton
+    - frm_tom_actividad_asegurada
+      Label: Actividad comercial
+      Type: FormInput
+      Validación: SÍ
+    - frm_tom_actividad_asegurada
+      Label: Actividad comercial
+      Type: FormInput
+    - frm_tom_cc_crear_cliente_flag
+      Label: Crear cliente si no
+      Type: FormInput
+    - frm_tom_correo_facturacion
+      Label: Correo para facturación
+      Type: FormInput
+      Validación: SÍ
+    - frm_tom_correo_facturacion
+      Label: Correo para facturación
+      Type: FormInput
+      Validación: SÍ
+    - frm_tom_departamento frm_tom_departamento_num frm_tom_departamento_nombre
+      Label: Departamento Departamento código (oculto) Departamento nombre (oculto)
+      Type: FormSelectList FormInput FormInput
+      InputType:   
+      DataSource: SÍ
+      Opciones: 3
+    - frm_tom_direccion
+      Label: Dirección
+      Type: FormInput
+    - frm_tom_direccion
+      Label: Dirección
+      Type: FormInput
+      Validación: SÍ
+    - frm_tom_fecha_constitucion
+      Label: Fecha de constitución
+      Type: FormDatePicker
+    - frm_tom_fecha_constitucion
+      Label: Fecha de constitución
+      Type: FormDatePicker
+    - frm_tom_municipio frm_tom_municipio_data frm_tom_municipio_nombre
+      Label: Municipio Data Municipio (oculto) Municipio nombre (oculto)
+      Type: FormSelectList FormInput FormInput
+      InputType:   
+      DataSource: SÍ
+      Opciones: 3
+    - frm_tom_nombres_completos frm_tom_nombre frm_tom_apellido
+      Label: Tomador Tomador Nombre (oculto) Tomador Apellido (oculto)
+      Type: FormInput FormInput FormInput
+      InputType:   
+    - frm_tom_nombres_completos frm_tom_nombre frm_tom_apellido
+      Label: Tomador Tomador Nombre (oculto) Tomador Apellido (oculto)
+      Type: FormInput FormInput FormInput
+      InputType:   
+      Validación: SÍ
+    - frm_tom_num_documento frm_tom_lista_negra
+      Label: Nro. de documento Tomador Lista Negra (oculto)
+      Type: FormInput FormInput
+      InputType:  
+      Validación: SÍ
+    - frm_tom_num_documento frm_tom_lista_negra
+      Label: Nro. de documento Tomador Lista Negra (oculto)
+      Type: FormInput FormInput
+      InputType:  
+      Validación: SÍ
+    - frm_tom_telefono
+      Label: Teléfono
+      Type: FormInput
+      Validación: SÍ
+    - frm_tom_tipo_documento
+      Label: Tipo de documento
+      Type: FormSelectList
+    - frm_tom_tipo_documento frm_tom_tipo_documento_nombre
+      Label: Tipo de documento Tipo de documento nombre (oculto)
+      Type: FormSelectList FormInput
+      InputType:  
+      DataSource: SÍ
+      Opciones: 2
+    - frm_tom_tipo_empresa
+      Label: Tipo de empresa
+      Type: FormSelectList
+    - frm_tom_tipo_empresa
+      Label: Tipo de empresa
+      Type: FormSelectList
+    - tri_respuesta_tia_tomador frm_tomador_response_accion modal_crearCliente
+      Label: tri_respuesta_tia_tomador Tomador response accion modal preventivo CREAR NUEVO CLIENTE
+      Type: FormInput FormInput BWrapperComponent
+      InputType:   
+
+  SECCIÓN: Modal preventivo, crear cliente
+    - form_html_viewer
+      Label: 
+      Type: FormHtmlViewer
+
+
+PANTALLA 107
+Título: COL - CUW LIAB - Subform - Información del asegurado
+Campos: 15
+
+  SECCIÓN: CU - COL - Subform - Información del asegurado
+    - btn_consultar_informacion_asegurado
+      Label: Consultar cliente
+      Type: FormButton
+    - frm_aseg_actividad_comercial
+      Label: Actividad comercial
+      Type: FormInput
+      Validación: SÍ
+    - frm_aseg_cc_crear_cliente_flag
+      Label: Crear cliente si no Asegurado
+      Type: FormInput
+    - frm_aseg_correo_facturacion
+      Label: Correo para facturación
+      Type: FormInput
+      Validación: SÍ
+    - frm_aseg_departamento frm_aseg_departamento_num frm_aseg_departamento_nombre
+      Label: Departamento Departamento código (oculto) Departamento nombre (oculto)
+      Type: FormSelectList FormInput FormInput
+      InputType:   
+      DataSource: SÍ
+      Opciones: 3
+    - frm_aseg_direccion
+      Label: Dirección
+      Type: FormInput
+    - frm_aseg_fecha_constitucion
+      Label: Fecha de constitución
+      Type: FormDatePicker
+    - frm_aseg_municipio frm_aseg_municipio_data frm_aseg_municipio_nombre
+      Label: Municipio Data Municipio (oculto) Municipio nombre (oculto)
+      Type: FormSelectList FormInput FormInput
+      InputType:   
+      DataSource: SÍ
+      Opciones: 3
+    - frm_aseg_nombres_completos frm_aseg_nombre frm_aseg_apellido
+      Label: Asegurado Asegurado Nombre (oculto) Asegurado Apellido (oculto)
+      Type: FormInput FormInput FormInput
+      InputType:   
+    - frm_aseg_num_documento frm_aseg_lista_negra
+      Label: Nro. de documento Asegurado Lista Negra (oculto)
+      Type: FormInput FormInput
+      InputType:  
+      Validación: SÍ
+    - frm_aseg_telefono
+      Label: Teléfono
+      Type: FormInput
+      Validación: SÍ
+    - frm_aseg_tipo_documento frm_aseg_tipo_documento_nombre
+      Label: Tipo de documento Tipo de documento nombre (oculto)
+      Type: FormSelectList FormInput
+      InputType:  
+      DataSource: SÍ
+      Opciones: 2
+    - frm_aseg_tipo_empresa
+      Label: Tipo de empresa
+      Type: FormSelectList
+    - tri_respuesta_tia_asegurado frm_asegurado_response_accion modal_crearClienteAsegurado
+      Label: Asegurado response Asegurado response accion modal preventivo CREAR NUEVO CLIENTE
+      Type: FormInput FormInput BWrapperComponent
+      InputType:   
+
+  SECCIÓN: Modal Preventivo, crear cliente
+    - form_html_viewer
+      Label: 
+      Type: FormHtmlViewer
+
+
+PANTALLA 108
+Título: COL - CUW LIAB - Subform - Creación del cliente tomador
+Campos: 18
+
+  SECCIÓN: COL - CUW - Subform - Creación del tomador
+    - frm_tom_cc_actividad_comercial
+      Label: Actividad comercial
+      Type: FormInput
+      Validación: SÍ
+    - frm_tom_cc_correo_facturacion
+      Label: Correo para facturación
+      Type: FormInput
+      Validación: SÍ
+    - frm_tom_cc_crear_cliente_flag
+      Label: Crear un nuevo cliente tomador?
+      Type: FormSelectList
+    - frm_tom_cc_departamento frm_tom_cc_departamento_num frm_tom_cc_departamento_nombre
+      Label: Departamento Departamento código (oculto) Departamento nombre (oculto)
+      Type: FormSelectList FormInput FormInput
+      InputType:   
+      DataSource: SÍ
+      Opciones: 3
+    - frm_tom_cc_direccion
+      Label: Dirección
+      Type: FormInput
+      Validación: SÍ
+    - frm_tom_cc_estado_tercero
+      Label: Estado del tercero
+      Type: FormSelectList
+    - frm_tom_cc_fecha_constitucion
+      Label: Fecha de constitución
+      Type: FormDatePicker
+    - frm_tom_cc_fecha_expedicion_documento
+      Label: Fecha de expedición del documento
+      Type: FormDatePicker
+    - frm_tom_cc_municipio frm_tom_cc_municipio_data frm_tom_cc_municipio_nombre
+      Label: Municipio Data Municipio (oculto) Municipio nombre (oculto)
+      Type: FormSelectList FormInput FormInput
+      InputType:   
+      DataSource: SÍ
+      Opciones: 3
+    - frm_tom_cc_nombre_compania
+      Label: Nombre compañía
+      Type: FormInput
+      Validación: SÍ
+    - frm_tom_cc_num_documento
+      Label: Nro. de documento
+      Type: FormInput
+      Validación: SÍ
+    - frm_tom_cc_num_duns
+      Label: Número DUNS
+      Type: FormInput
+      Validación: SÍ
+    - frm_tom_cc_representante_legal_nombre
+      Label: Nombre representante legal
+      Type: FormInput
+      Validación: SÍ
+    - frm_tom_cc_representante_legal_num_documento frm_tom_cc_representante_legal_num_documento frm_tom_cc_representante_legal_num_documento
+      Label: Nro. documento representante legal Nro. documento representante legal Nro. documento representante legal
+      Type: FormInput FormInput FormInput
+      InputType:   
+      Validación: SÍ
+    - frm_tom_cc_representante_legal_tipo_documento
+      Label: Tipo documento representante legal
+      Type: FormSelectList
+    - frm_tom_cc_telefono
+      Label: Teléfono
+      Type: FormInput
+      Validación: SÍ
+    - frm_tom_cc_tipo_documento frm_tom_cc_tipo_documento_nombre
+      Label: Tipo de documento Tipo de documento nombre (oculto)
+      Type: FormSelectList FormInput
+      InputType:  
+      DataSource: SÍ
+      Opciones: 2
+    - frm_tom_cc_tipo_empresa
+      Label: Tipo de empresa
+      Type: FormSelectList
+
+
+PANTALLA 109
+Título: COL - CUW LIAB - Subform - Creación del asegurado
+Campos: 18
+
+  SECCIÓN: CU - COL - Subform - Creación del asegurado
+    - frm_aseg_cc_actividad_comercial
+      Label: Actividad comercial
+      Type: FormInput
+      Validación: SÍ
+    - frm_aseg_cc_correo_facturacion
+      Label: Correo para facturación
+      Type: FormInput
+      Validación: SÍ
+    - frm_aseg_cc_crear_cliente_flag
+      Label: Crear un nuevo cliente asegurado?
+      Type: FormSelectList
+    - frm_aseg_cc_departamento frm_aseg_cc_departamento_num frm_aseg_cc_departamento_nombre
+      Label: Departamento Departamento código (oculto) Departamento nombre (oculto)
+      Type: FormSelectList FormInput FormInput
+      InputType:   
+      DataSource: SÍ
+      Opciones: 3
+    - frm_aseg_cc_direccion
+      Label: Dirección
+      Type: FormInput
+      Validación: SÍ
+    - frm_aseg_cc_estado_tercero
+      Label: Estado del tercero
+      Type: FormSelectList
+    - frm_aseg_cc_fecha_constitucion b_wrapper_component_1
+      Label: Fecha de constitución New Bootstrap Wrapper
+      Type: FormDatePicker BWrapperComponent
+    - frm_aseg_cc_fecha_expedicion_documento
+      Label: Fecha de expedición del documento
+      Type: FormDatePicker
+    - frm_aseg_cc_municipio frm_aseg_cc_municipio_data frm_aseg_cc_municipio_nombre
+      Label: Municipio Data Municipio (oculto) Municipio nombre (oculto)
+      Type: FormSelectList FormInput FormInput
+      InputType:   
+      DataSource: SÍ
+      Opciones: 3
+    - frm_aseg_cc_nombre_compania
+      Label: Nombre compañía
+      Type: FormInput
+      Validación: SÍ
+    - frm_aseg_cc_num_documento
+      Label: Nro. de documento
+      Type: FormInput
+      Validación: SÍ
+    - frm_aseg_cc_num_duns
+      Label: Número DUNS
+      Type: FormInput
+      Validación: SÍ
+    - frm_aseg_cc_representante_legal_nombre
+      Label: Nombre representante legal
+      Type: FormInput
+      Validación: SÍ
+    - frm_aseg_cc_representante_legal_num_documento frm_aseg_cc_representante_legal_num_documento frm_aseg_cc_representante_legal_num_documento
+      Label: Nro. documento representante legal Nro. documento representante legal Nro. documento representante legal
+      Type: FormInput FormInput FormInput
+      InputType:   
+      Validación: SÍ
+    - frm_aseg_cc_representante_legal_tipo_documento
+      Label: Tipo documento representante legal
+      Type: FormSelectList
+    - frm_aseg_cc_telefono
+      Label: Teléfono
+      Type: FormInput
+      Validación: SÍ
+    - frm_aseg_cc_tipo_documento frm_aseg_cc_tipo_documento_nombre
+      Label: Tipo de documento Tipo de documento nombre (oculto)
+      Type: FormSelectList FormInput
+      InputType:  
+      DataSource: SÍ
+      Opciones: 2
+    - frm_aseg_cc_tipo_empresa
+      Label: Tipo de empresa
+      Type: FormSelectList
+
+
+PANTALLA 113
+Título: COL - CUW LIAB - Subform - Plan de pago
+Campos: 4
+
+  SECCIÓN: CU - COL - Subform - Plan de pago
+    - frm_plan_pago frm_plan_pago_cantidad_dias
+      Label: Plan de pago Plan de pago (en días)
+      Type: FormSelectList FormInput
+      InputType:  
+      DataSource: SÍ
+      Opciones: 2
+    - frm_plan_pago_frecuencia_cobro
+      Label: Frecuencia de cobro
+      Type: FormSelectList
+    - frm_plan_pago_metodo_pago
+      Label: Método de pago
+      Type: FormSelectList
+    - frm_plan_pago_num_cuotas
+      Label: Número de cuotas
+      Type: FormSelectList
+
+
+PANTALLA 114
+Título: COL - CUW LIAB - Subform - Asegurados adicionales
+Campos: 9
+
+  SECCIÓN: CU - COL - Subform - Asegurados Adicionales
+    - frm_lista_asegurados_adicionales frm_lista_asegurados_adicionales frm_lista_asegurados_adicionales
+      Label:     
+      Type: FormHtmlViewer FormRecordList FormRecordList FormRecordList FormMultiColumn
+    - limite_frm_lista_asegurados_adicionales
+      Label: limite_frm_lista_coaseguro
+      Type: FormInput
+
+  SECCIÓN: Modal Asegurados Adicionales
+    - frm_aseg_adic_actividad_asegurada frm_cot_moneda_dup
+      Label: Actividad Asegurada? Moneda
+      Type: FormSelectList FormSelectList
+      DataSource: SÍ
+      Opciones: 2
+    - frm_aseg_adic_actividad_lista frm_aseg_adic_actividad
+      Label: Actividad Nombre Actividad Asegurada
+      Type: FormSelectList FormInput
+      InputType:  
+      DataSource: SÍ
+      Opciones: 2
+    - frm_aseg_adic_codigo_naic
+      Label: Código NAIC
+      Type: FormInput
+    - frm_aseg_adic_ingresos_operacionales frm_aseg_adic_ingresos_operacionales frm_aseg_adic_ingresos_operacionales frm_aseg_adic_ingresos_operacionales_formateado
+      Label: Ingresos operacionales anuales Ingresos operacionales anuales Ingresos operacionales anuales Ingresos operacionales (formateado)
+      Type: FormInput FormInput FormInput FormInput
+      InputType:    
+      Validación: SÍ
+    - frm_aseg_adic_nombre frm_aseg_adic_relacion
+      Label: Nombre del asegurado Relación con el asegurado principal
+      Type: FormInput FormInput
+      InputType:  
+      Validación: SÍ
+    - frm_vista_cotizador_dup
+      Label: frm_vista_cotizador_dup
+      Type: FormInput
+    - frm_vista_evaluacion_riesgo_dup
+      Label: frm_vista_evaluacion_riesgo_dup
+      Type: FormInput
+
+
+PANTALLA 139
+Título: COL - CUW LIAB - Subform - Revisión Mora
+Campos: 3
+
+  SECCIÓN: CU - COL - Subform - Revisión Mora
+    - frm_revision_mora_cliente_mora
+      Label: ¿El cliente se encuentra en mora?
+      Type: FormSelectList
+    - frm_revision_mora_comentario
+      Label: Comentario:
+      Type: FormTextArea
+    - frm_revision_mora_decision
+      Label: Decisión
+      Type: FormSelectList
+
+
+PANTALLA 213
+Título: COL - CUW LIAB - Subform - Subinformación asegurado
+Campos: 6
+
+  SECCIÓN: COL - CUW - Subform - Subinformación asegurado
+    - frm_aseg_numero_ubicaciones
+      Label: N° de ubicaciones
+      Type: FormInput
+      Validación: SÍ
+    - frm_aseg_realiza_exportaciones_file frm_aseg_realiza_exportaciones_file_flag form_html_viewer
+      Label: Reporte de exportaciones Ha cargado un archivo? 
+      Type: FileUpload FormInput FormHtmlViewer
+      InputType:   
+      Validación: SÍ
+    - frm_aseg_realiza_exportaciones_flag
+      Label: Realiza exportaciones
+      Type: FormSelectList
+    - frm_aseg_territorialidad
+      Label: Territorialidad
+      Type: FormSelectList
+    - frm_tom_asegurado_es_tomador_flag
+      Label: El tomador es el asegurado?
+      Type: FormSelectList
+    - Nested Screen
+      Label:   Pantalla anidada
+      Type: FormHtmlViewer FormHtmlViewer FormNestedScreen
+
+
+PANTALLA 239
+Título: COL - CUW LIAB - Subform - Valores asegurados y deducibles v2
+Campos: 8
+
+  SECCIÓN: CU - COL - Subform - Valores asegurados y deducibles
+    - control_opciones_consecutivas_frm_valores_asegurados_deducibles control_opcion_1_frm_valores_asegurados_deducibles control_opcion_rellenar_valores_asegurados_deducibles
+      Label: Tiene opciones consecutivas, puede continuar? Ha rellenado opción 1, puede continuar? Opción a rellenar
+      Type: FormInput FormInput FormInput
+      InputType:   
+    - frm_valores_asegurados_deducibles frm_valores_asegurados_deducibles frm_valores_asegurados_deducibles form_html_viewer form_html_viewer
+      Label:      
+      Type: FormRecordList FormRecordList FormRecordList FormHtmlViewer FormHtmlViewer FormMultiColumn
+
+  SECCIÓN: Modal Valores asegurados y deducibles
+    - frm_cot_moneda_dup_vad frm_valores_opcion
+      Label: Moneda Opcion
+      Type: FormSelectList FormInput
+      InputType:  
+      DataSource: SÍ
+      Opciones: 2
+    - frm_valores_deducible_minimo frm_valores_deducible_minimo frm_valores_deducible_minimo frm_valores_deducible_minimo_formateado
+      Label: Deducible mínimo (Valor) Deducible mínimo (Valor) Deducible mínimo (Valor) Deducible mínimo (formateado)
+      Type: FormInput FormInput FormInput FormInput
+      InputType:    
+      Validación: SÍ
+    - frm_valores_deducible_minimo_factor
+      Label: Factor de cálculo de deducible mínimo
+      Type: FormSelectList
+    - frm_valores_deducible_minimo_smmlv frm_valores_deducible_minimo_smmlv frm_valores_deducible_minimo_smmlv frm_valores_deducible_minimo_smmlv_formateado
+      Label: Deducible mínimo SMMLV Deducible mínimo SMMLV Deducible mínimo SMMLV Deducible mínimo (formateado)
+      Type: FormInput FormInput FormInput FormInput
+      InputType:    
+      Validación: SÍ
+    - frm_valores_deducible_porcentaje frm_valores_deducible_porcentaje_formateado
+      Label: Deducible mínimo (%) Deducible (formateado)
+      Type: FormInput FormInput
+      InputType:  
+      Validación: SÍ
+    - frm_valores_limite_asegurado frm_valores_limite_asegurado frm_valores_limite_asegurado frm_valores_limite_asegurado_formateado
+      Label: Límite asegurado Límite asegurado Límite asegurado Límite asegurado (formateado)
+      Type: FormInput FormInput FormInput FormInput
+      InputType:    
+      Validación: SÍ
+

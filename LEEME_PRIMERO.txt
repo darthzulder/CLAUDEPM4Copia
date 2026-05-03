@@ -1,0 +1,84 @@
+﻿INSTRUCCIONES DE USO - DOCUMENTACIÓN EXTRAÍDA
+
+Fecha: 03/05/2026 16:08:30
+
+═══════════════════════════════════════════════════════════════════════════════
+ARCHIVO RECOMENDADO PARA COMENZAR: CAMPOS_CAMPOS_EXPORT.csv
+═══════════════════════════════════════════════════════════════════════════════
+
+Este archivo es una tabla CSV (Excel compatible) con TODOS los campos
+de todas las pantallas. Abrirlo en Excel/Google Sheets para:
+
+  1. Filtrar por pantalla (columna ScreenId)
+  2. Filtrar por tipo (columna Type)
+  3. Ver validaciones y datasources
+  4. Obtener una visión general del formulario
+
+═══════════════════════════════════════════════════════════════════════════════
+LECTURA RECOMENDADA EN ORDEN:
+═══════════════════════════════════════════════════════════════════════════════
+
+1. INDICE_DOCUMENTACION.txt
+   - Lee primero para entender qué tiene cada archivo
+
+2. GUIA_IMPLEMENTACION_REACT.txt
+   - Entiende la arquitectura y estructura recomendada en React
+
+3. DOCUMENTACION_CAMPOS_FINAL.txt
+   - Revisión completa de TODOS los campos por pantalla
+
+4. WATCHERS_Y_SCRIPTS.txt
+   - Entiende cómo implementar reactividad (useEffect en React)
+
+5. ESTRUCTURA_COLUMNAS_LAYOUT.txt
+   - Replica exactamente el layout con FormMultiColumn
+
+6. CAMPOS_COMPLETOS.json
+   - Para procesamiento automático si lo necesitas
+
+═══════════════════════════════════════════════════════════════════════════════
+DATOS CLAVE PARA TU IMPLEMENTACIÓN REACT:
+═══════════════════════════════════════════════════════════════════════════════
+
+PANTALLA PRINCIPAL (102 - Información General):
+  - 34 campos
+  - 5 watchers para reactividad
+  - Múltiples selects dinámicos (con DataSource)
+  - Validaciones en campos de porcentaje y email
+
+PANTALLAS DE PERSONAS:
+  - Pantalla 106: Información del Tomador (23 campos)
+  - Pantalla 107: Información del Asegurado (15 campos)
+  - Pantalla 108: Crear Tomador si no existe (18 campos)
+  - Pantalla 109: Crear Asegurado si no existe (18 campos)
+
+CARACTERES ESPECIALES EN LABELS:
+  - Algunos campos tienen tildes (á, é, í, ó, ú)
+  - Algunos labels tienen espacios múltiples (son intencionales)
+  - Algunos campos tienen '(oculto)' en el label (no mostrar en UI)
+
+═══════════════════════════════════════════════════════════════════════════════
+VALIDACIONES A IMPLEMENTAR:
+═══════════════════════════════════════════════════════════════════════════════
+
+49 campos requieren validación:
+  - Email: frm_tom_correo_facturacion, etc.
+  - Números: frm_cot_dias_inicio_fin_vigencia, etc.
+  - Porcentajes: frm_cot_comision_solicitada_pct, etc.
+  - Obligatorios: múltiples campos
+
+═══════════════════════════════════════════════════════════════════════════════
+WATCHERS (16 total) - Implementar con useEffect:
+═══════════════════════════════════════════════════════════════════════════════
+
+Pantalla 102:
+  - frm_gen_intermediario_principal → Cargar datos del intermediario
+  - frm_gen_comercial_id → Cargar datos del comercial
+  - frm_gen_suscriptor_asignado_id → Cargar datos del suscriptor
+
+Pantallas 106, 107, 108, 109:
+  - frm_tom_departamento / frm_aseg_departamento → Cargar municipios
+
+═══════════════════════════════════════════════════════════════════════════════
+FIN DE INSTRUCCIONES
+═══════════════════════════════════════════════════════════════════════════════

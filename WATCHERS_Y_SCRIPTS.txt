@@ -1,0 +1,317 @@
+﻿ANÁLISIS DE WATCHERS Y CONFIGURACIÓN DE SCRIPTS
+
+Este documento describe los watchers (observadores de campos) que disparan scripts
+cuando un campo cambia. Es crítico para implementar la reactividad en React.
+
+═══════════════════════════════════════════════════════════════════════════════
+
+
+PANTALLA 102 - COL - CUW LIAB - Subform - Información General
+─────────────────────────────────────────────────────────────────────────────
+
+Total Watchers: 5
+
+WATCHER:
+  Campo Observado: frm_gen_intermediario_principal
+  Script ID: data_source-4
+  Script Nombre: Listado_intermediarios
+  Script Descripción: 
+  Ejecutar OnLoad: False
+  Sincrónico: False
+  Configuración:
+    - Endpoint: GetRecord
+    - DataSource: 4
+    - Data Mapping:
+        * frm_gen_intermediario_principal_nombre ← data.frm_nombre_entidad
+        * frm_gen_intermediario_principal_num_documento ← data.frm_num_documento
+        * frm_gen_clave_intermediario ← data.frm_clave
+
+WATCHER:
+  Campo Observado: frm_gen_intermediario
+  Script ID: data_source-4
+  Script Nombre: Listado_intermediarios
+  Script Descripción: 
+  Ejecutar OnLoad: False
+  Sincrónico: False
+  Configuración:
+    - Endpoint: GetRecord
+    - DataSource: 4
+    - Data Mapping:
+        * frm_gen_nombre_intermediario ← data.frm_nombre_entidad
+        * frm_gen_num_intermediario ← data.frm_num_documento
+
+WATCHER:
+  Campo Observado: frm_gen_comercial_id
+  Script ID: data_source-5
+  Script Nombre: Listado de comerciales por Intermediario
+  Script Descripción: 
+  Ejecutar OnLoad: True
+  Sincrónico: False
+  Configuración:
+    - Endpoint: GetRecord
+    - DataSource: 5
+    - Data Mapping:
+        * frm_gen_comercial_nombre ← data.frm_nombre_comercial
+        * frm_gen_correo_comercial ← data.frm_mail_comercial
+
+WATCHER:
+  Campo Observado: frm_gen_suscriptor_asignado_id
+  Script ID: data_source-27
+  Script Nombre: CIMMR - COL - Listado Suscriptores
+  Script Descripción: 
+  Ejecutar OnLoad: False
+  Sincrónico: False
+  Configuración:
+    - Endpoint: GetRecord
+    - DataSource: 27
+    - Data Mapping:
+        * frm_gen_suscriptor_asignado_nombre ← data.frm_suscriptores
+        * frm_gen_suscriptor_asignado_correo ← data.frm_correo_suscriptor
+        * frm_gen_suscriptor_asignado_id_pm4 ← data.frm_suscriptor_id_pm4
+
+WATCHER:
+  Campo Observado: frm_gen_comercial_id_2
+  Script ID: data_source-5
+  Script Nombre: Listado de comerciales por Intermediario
+  Script Descripción: 
+  Ejecutar OnLoad: False
+  Sincrónico: False
+  Configuración:
+    - Endpoint: GetRecord
+    - DataSource: 5
+    - Data Mapping:
+        * frm_gen_comercial_nombre_2 ← data.frm_nombre_comercial
+        * frm_gen_correo_comercial_2 ← data.frm_mail_comercial
+
+
+PANTALLA 103 - COL - CUW LIAB - Subform - Datos de cotización
+─────────────────────────────────────────────────────────────────────────────
+
+Total Watchers: 1
+
+WATCHER:
+  Campo Observado: frm_cot_actividad_naic
+  Script ID: data_source-7
+  Script Nombre: CIMMR - COL - CUW - Liability - Actividades CIIU
+  Script Descripción: 
+  Ejecutar OnLoad: True
+  Sincrónico: False
+  Configuración:
+    - Endpoint: Obtener información por Código CIIU
+    - DataSource: 7
+    - Data Mapping:
+        * frm_cot_codigo_naic ← data.0.data.frm_codigo
+        * frm_cot_nombre_ciiu ← data.0.data.frm_actividad
+        * frm_cot_actividad_grado_riesgo ← data.0.data.frm_eeuu_productos
+
+
+PANTALLA 106 - COL - CUW LIAB - Subform - Información del tomador
+─────────────────────────────────────────────────────────────────────────────
+
+Total Watchers: 3
+
+WATCHER:
+  Campo Observado: btn_consultar_informacion_tomador
+  Script ID: script-50
+  Script Nombre: 
+  Script Descripción: Obtener cliente Tia
+  Ejecutar OnLoad: False
+  Sincrónico: True
+  Configuración:
+
+WATCHER:
+  Campo Observado: frm_tom_departamento
+  Script ID: data_source-19
+  Script Nombre: Departamentos_Municipios_COL
+  Script Descripción: 
+  Ejecutar OnLoad: False
+  Sincrónico: False
+  Configuración:
+    - Endpoint: GetRecord
+    - DataSource: 19
+    - Data Mapping:
+        * frm_tom_departamento_nombre ← data.nombre_departamento
+        * frm_tom_departamento_num ← data.codigo_departamento
+
+WATCHER:
+  Campo Observado: frm_tom_municipio
+  Script ID: data_source-19
+  Script Nombre: Departamentos_Municipios_COL
+  Script Descripción: 
+  Ejecutar OnLoad: False
+  Sincrónico: False
+  Configuración:
+    - Endpoint: Obtener un municipio por codigo
+    - DataSource: 19
+    - Data Mapping:
+        * frm_tom_municipio_data ← data
+
+
+PANTALLA 107 - COL - CUW LIAB - Subform - Información del asegurado
+─────────────────────────────────────────────────────────────────────────────
+
+Total Watchers: 3
+
+WATCHER:
+  Campo Observado: btn_consultar_informacion_asegurado
+  Script ID: script-50
+  Script Nombre: 
+  Script Descripción: Obtener cliente Tia
+  Ejecutar OnLoad: False
+  Sincrónico: True
+  Configuración:
+
+WATCHER:
+  Campo Observado: frm_aseg_departamento
+  Script ID: data_source-19
+  Script Nombre: Departamentos_Municipios_COL
+  Script Descripción: 
+  Ejecutar OnLoad: False
+  Sincrónico: False
+  Configuración:
+    - Endpoint: GetRecord
+    - DataSource: 19
+    - Data Mapping:
+        * frm_aseg_departamento_nombre ← data.nombre_departamento
+        * frm_aseg_departamento_num ← data.codigo_departamento
+
+WATCHER:
+  Campo Observado: frm_aseg_municipio
+  Script ID: data_source-19
+  Script Nombre: Departamentos_Municipios_COL
+  Script Descripción: 
+  Ejecutar OnLoad: False
+  Sincrónico: False
+  Configuración:
+    - Endpoint: Obtener un municipio por codigo
+    - DataSource: 19
+    - Data Mapping:
+        * frm_aseg_municipio_data ← data
+
+
+PANTALLA 108 - COL - CUW LIAB - Subform - Creación del cliente tomador
+─────────────────────────────────────────────────────────────────────────────
+
+Total Watchers: 4
+
+WATCHER:
+  Campo Observado: frm_tom_cc_tipo_doc
+  Script ID: script-50
+  Script Nombre: 
+  Script Descripción: Obtener cliente Tia
+  Ejecutar OnLoad: False
+  Sincrónico: False
+  Configuración:
+
+WATCHER:
+  Campo Observado: frm_tom_cc_num_doc
+  Script ID: script-50
+  Script Nombre: 
+  Script Descripción: Obtener cliente Tia
+  Ejecutar OnLoad: False
+  Sincrónico: False
+  Configuración:
+
+WATCHER:
+  Campo Observado: frm_tom_cc_departamento
+  Script ID: data_source-19
+  Script Nombre: Departamentos_Municipios_COL
+  Script Descripción: 
+  Ejecutar OnLoad: False
+  Sincrónico: False
+  Configuración:
+    - Endpoint: GetRecord
+    - DataSource: 19
+    - Data Mapping:
+        * frm_tom_cc_departamento_nombre ← data.nombre_departamento
+        * frm_tom_cc_departamento_num ← data.codigo_departamento
+
+WATCHER:
+  Campo Observado: frm_tom_cc_municipio
+  Script ID: data_source-19
+  Script Nombre: Departamentos_Municipios_COL
+  Script Descripción: 
+  Ejecutar OnLoad: False
+  Sincrónico: False
+  Configuración:
+    - Endpoint: Obtener un municipio por codigo
+    - DataSource: 19
+    - Data Mapping:
+        * frm_tom_cc_municipio_data ← data
+
+
+PANTALLA 109 - COL - CUW LIAB - Subform - Creación del asegurado
+─────────────────────────────────────────────────────────────────────────────
+
+Total Watchers: 2
+
+WATCHER:
+  Campo Observado: frm_aseg_cc_departamento
+  Script ID: data_source-19
+  Script Nombre: Departamentos_Municipios_COL
+  Script Descripción: 
+  Ejecutar OnLoad: False
+  Sincrónico: False
+  Configuración:
+    - Endpoint: GetRecord
+    - DataSource: 19
+    - Data Mapping:
+        * frm_aseg_cc_departamento_nombre ← data.nombre_departamento
+        * frm_aseg_cc_departamento_num ← data.codigo_departamento
+
+WATCHER:
+  Campo Observado: frm_aseg_cc_municipio
+  Script ID: data_source-19
+  Script Nombre: Departamentos_Municipios_COL
+  Script Descripción: 
+  Ejecutar OnLoad: False
+  Sincrónico: False
+  Configuración:
+    - Endpoint: Obtener un municipio por codigo
+    - DataSource: 19
+    - Data Mapping:
+        * frm_aseg_cc_municipio_data ← data
+
+
+PANTALLA 114 - COL - CUW LIAB - Subform - Asegurados adicionales
+─────────────────────────────────────────────────────────────────────────────
+
+Total Watchers: 1
+
+WATCHER:
+  Campo Observado: frm_aseg_adic_actividad_lista
+  Script ID: data_source-7
+  Script Nombre: Actividades CIIU CUW
+  Script Descripción: 
+  Ejecutar OnLoad: False
+  Sincrónico: True
+  Configuración:
+    - Endpoint: GetRecord
+    - DataSource: 7
+    - Data Mapping:
+        * frm_aseg_adic_codigo_naic ← data.frm_codigo
+        * frm_aseg_adic_actividad ← data.frm_actividad
+
+
+PANTALLA 239 - COL - CUW LIAB - Subform - Valores asegurados y deducibles v2
+─────────────────────────────────────────────────────────────────────────────
+
+Total Watchers: 1
+
+WATCHER:
+  Campo Observado: frm_aseg_adic_actividad_lista
+  Script ID: data_source-2
+  Script Nombre: Actividades CIU
+  Script Descripción: 
+  Ejecutar OnLoad: False
+  Sincrónico: True
+  Configuración:
+    - Endpoint: GetRecord
+    - DataSource: 2
+    - Data Mapping:
+        * frm_aseg_adic_codigo_naic ← data.frm_codigo
+        * frm_aseg_adic_actividad ← data.frm_actividad
+
+
+═══════════════════════════════════════════════════════════════════════════════
+

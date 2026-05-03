@@ -1,0 +1,354 @@
+﻿================================================================================
+EXTRACCION COMPLETA - FORMULARIO SOLICITUD COTIZACION CUW LIAB
+PARA GENERACION DE COMPONENTE REACT
+================================================================================
+
+FECHA: 03/05/2026 16:06:39
+
+ESTADISTICAS GENERALES:
+─────────────────────────
+  Total Pantallas: 13
+  Total Campos: 170
+
+
+─────────────────────────────────────────────────────────────
+PANTALLA 101 : COL - CUW LIAB - Subform - Encabezado formularios
+─────────────────────────────────────────────────────────────
+Cantidad de Campos: 6
+Tipos de Componentes: FormDatePicker, FormHtmlViewer, FormImage, FormInput
+
+CAMPOS POR SECCION:
+
+  [SECCION] Subform - CU - COL - Encabezado formularios - 6 campos
+    * form_html_viewer (HtmlViewer) | Label: ''
+    * frm_caso_cuw_col (Input) | Label: 'num caso cuw col'
+    * frm_control_fecha_hoy (DatePicker) | Label: 'Control fecha de hoy'
+    * frm_num_cotizacion_cuw_col (Input) | Label: 'num cotizacion cuw col'
+    * frm_titulo (Input) | Label: 'titulo'
+    * ZurichLogo_Horz_White_CMYK_no_R (Image) | Label: 'Imagen'
+
+
+─────────────────────────────────────────────────────────────
+PANTALLA 102 : COL - CUW LIAB - Subform - Información General
+─────────────────────────────────────────────────────────────
+Cantidad de Campos: 34
+Tipos de Componentes: FormDatePicker, FormDatePicker FormInput FormInput, FormHtmlViewer FormHtmlViewer FormNestedScreen, FormInput, FormInput FormInput FormInput, FormInput FormSelectList FormInput, FormSelectList, FormSelectList FormInput, FormSelectList FormInput FormInput, FormSelectList FormInput FormInput FormInput, FormSelectList FormInput FormSelectList, FormSelectList FormSelectList
+Campos con Validacion: 8
+Campos con DataSource: 9
+
+CAMPOS POR SECCION:
+
+  [SECCION] CU - COL - Subform - Información General - 31 campos
+    * frm_cot_comision_solicitada_pct (Input) | Label: 'Comisión solicitada (%)' [VALIDACION]
+    * frm_gen_alcance (SelectList) | Label: 'Alcance'
+    * frm_gen_co_corretaje (SelectList) | Label: 'Co-corretaje'
+    * frm_gen_coaseguro_requerido (SelectList) | Label: 'Coaseguro requerido'
+    * frm_gen_comercial_id frm_gen_comercial_nombre frm_gen_comercial_id_back (SelectList Input SelectList) | Label: 'Comercial Comercial Nombre (oculto) Comercial' [VALIDACION] [DATASOURCE] [3 opciones]
+    * frm_gen_correo_adicional_intermediario_principal (SelectList) | Label: 'Desea agregar correos adicionales del intermediario principal?'
+    * frm_gen_correo_comercial frm_gen_correo_comercial_test frm_gen_clave_intermediario (Input Input Input) | Label: 'Correo del comercial Correo del comercial (ambiente TEST) Clave intermediario'
+    * frm_gen_fecha_esperada_cotizacion frm_gen_fecha_esperada_cotizacion_minimo frm_gen_fecha_esperada_cotizacion_maximo (DatePicker Input Input) | Label: 'Fecha esperada de cotización frm_gen_fecha_esperada_cotizacion_minimo frm_gen_fecha_esperada_cotizacion_maximo'
+    * frm_gen_fecha_solicitud (DatePicker) | Label: 'Fecha de solicitud'
+    * frm_gen_intermediario_adicional (SelectList) | Label: 'Desea agregar intermediarios adicionales?'
+    * frm_gen_intermediario_principal frm_gen_intermediario_principal_num_documento frm_gen_intermediario_principal_nombre (SelectList Input Input) | Label: 'Intermediario principal Num intermediario (oculto) Intermediario nombre (oculto)' [DATASOURCE] [3 opciones]
+    * frm_gen_intermediario_principal_correo frm_gen_intermediario_principal_correo_no_uso frm_gen_intermediario_principal_correo_test (Input SelectList Input) | Label: 'Correo principal del intermediario Correo principal del intermediario Correo principal del intermediario (ambiente TEST)' [VALIDACION] [DATASOURCE] [3 opciones]
+    * frm_gen_lider_seguidor frm_gen_lider_seguidor_label (SelectList Input) | Label: 'Líder/Seguidor Líder/Seguidor' [DATASOURCE] [2 opciones]
+    * frm_gen_linea_negocio (SelectList) | Label: 'Línea de negocio'
+    * frm_gen_nom_informador frm_gen_usuario_informador frm_gen_correo_informador (Input Input Input) | Label: 'Informador Usuario Informador  (oculto) Correo Informador (oculto)'
+    * frm_gen_nueva_o_renovacion (SelectList) | Label: 'Nueva/Renovación'
+    * frm_gen_num_cotizacion (Input) | Label: 'Cotización Fast Flow Nro.'
+    * frm_gen_numero_poliza (Input) | Label: 'Nro. de póliza actual' [VALIDACION]
+    * frm_gen_pais frm_gen_sucursal (SelectList SelectList) | Label: 'País Sucursal' [DATASOURCE] [2 opciones]
+    * frm_gen_participacion_solicitado_pct (Input) | Label: 'Participación solicitado (%)' [VALIDACION]
+    * frm_gen_participacion_zurich_pct (Input) | Label: 'Participación Zurich solicitado' [VALIDACION]
+    * frm_gen_producto frm_gen_producto_nombre (SelectList Input) | Label: 'Producto Producto (label)' [DATASOURCE] [2 opciones]
+    * frm_gen_reaseguro_requerido (SelectList) | Label: 'Reaseguro requerido'
+    * frm_gen_segmento (SelectList) | Label: 'Segmento'
+    * frm_gen_suscriptor_asignado_correo_test (Input) | Label: 'Correo del suscriptor asignado (ambiente TEST)' [VALIDACION]
+    * frm_gen_suscriptor_asignado_id frm_gen_suscriptor_asignado_nombre frm_gen_suscriptor_asignado_correo frm_gen_suscriptor_asignado_id_pm4 (SelectList Input Input Input) | Label: 'Suscriptor asignado Suscriptor asignado nombre (oculto) Suscriptor asignado correo (oculto) Suscriptor asignado id pm4 (oculto)' [DATASOURCE] [4 opciones]
+    * frm_gen_tipo_coaseguro frm_gen_reaseguro_requerido (SelectList SelectList) | Label: 'Tipo de coaseguro requerido Reaseguro requerido' [DATASOURCE] [2 opciones]
+    * frm_gen_tipo_reaseguro (SelectList) | Label: 'Tipo de reaseguro requerido'
+    * frm_gen_tipo_reaseguro (SelectList) | Label: 'Tipo de reaseguro requerido'
+    * Nested Screen (HtmlViewer HtmlViewer NestedScreen) | Label: '  Pantalla anidada'
+    * Nested Screen (HtmlViewer HtmlViewer NestedScreen) | Label: '  Pantalla anidada'
+
+  [SECCION] Modal Intermediarios Adicionales - 3 campos
+    * frm_gen_correo_intermediario (SelectList) | Label: 'Correo del intermediario'
+    * frm_gen_intermediario frm_gen_num_intermediario frm_gen_nombre_intermediario (SelectList Input Input) | Label: 'Intermediario Num Identidad Intermediario Nombre Intermediario' [DATASOURCE] [3 opciones]
+    * frm_gen_intermediario_participacion_pct (Input) | Label: 'Participación' [VALIDACION]
+
+
+─────────────────────────────────────────────────────────────
+PANTALLA 103 : COL - CUW LIAB - Subform - Datos de cotización
+─────────────────────────────────────────────────────────────
+Cantidad de Campos: 17
+Tipos de Componentes: FileUpload, FormDatePicker, FormDatePicker FormDatePicker FormDatePicker FormDatePicker BWrapperComponent, FormHtmlViewer Viewer, FormInput, FormInput FormInput FormInput, FormInput FormInput FormInput FormInput, FormInput FormInput FormInput FormInput BWrapperComponent, FormSelectList, FormSelectList FormSelectList
+Campos con Validacion: 2
+
+CAMPOS POR SECCION:
+
+  [SECCION] CU - COL - Subform - Datos de cotización - 16 campos
+    * frm_cot_actividad_naic (SelectList) | Label: 'Actividad del asegurado principal'
+    * frm_cot_base_exposicion (SelectList) | Label: 'Base de exposición (oculto)'
+    * frm_cot_codigo_naic frm_cot_nombre_ciiu frm_cot_actividad_grado_riesgo (Input Input Input) | Label: 'Código NAIC Nombre Actividad Actividad del asegurado principal  (oculto) Grado riesgo (oculto)'
+    * frm_cot_dias_inicio_fin_vigencia (Input) | Label: 'Días'
+    * frm_cot_fecha_fin_vigencia (DatePicker) | Label: 'Fin de vigencia'
+    * frm_cot_fecha_inicio_vigencia frm_cot_fecha_inicio_vigencia_minima frm_cot_fecha_vigencia_maxima frm_inicio_vigencia_maxima_31 modal_fechaValidaVigencia (DatePicker DatePicker DatePicker DatePicker BWrapperComponent) | Label: 'Inicio de vigencia Fecha mínima: Fecha maxima 30 dias: Fecha 31 dias: Modal Fecha Válida Vigencia'
+    * frm_cot_ingresos_operaciones_anuales frm_cot_ingresos_operaciones_anuales frm_cot_ingresos_operaciones_anuales frm_cot_ingresos_operaciones_anuales (Input Input Input Input) | Label: 'Ingresos operacionales anuales Ingresos operacionales anuales Ingresos operacionales anuales Ingresos operacionales anuales' [VALIDACION]
+    * frm_cot_ingresos_proyectados_anuales frm_cot_ingresos_proyectados_anuales frm_cot_ingresos_proyectados_anuales frm_cot_ingresos_proyectados_anuales modal_proyectadoAnual (Input Input Input Input BWrapperComponent) | Label: 'Ingresos proyectados anuales Ingresos proyectados anuales Ingresos proyectados anuales Ingresos proyectados anuales Modal Proyectado Anual' [VALIDACION]
+    * frm_cot_modalidad_cobertura (SelectList) | Label: 'Modalidad de cobertura'
+    * frm_cot_moneda (SelectList) | Label: 'Moneda'
+    * frm_cot_num_meses_anual frm_cot_num_meses (SelectList SelectList) | Label: 'Nro. de meses Nro. de meses' [DATASOURCE] [2 opciones]
+    * frm_cot_periodicidad (SelectList) | Label: 'Periodicidad'
+    * frm_cot_siniestralidad_fecha_desde (DatePicker) | Label: 'Siniestralidad reportada desde'
+    * frm_cot_siniestralidad_fecha_hasta (DatePicker) | Label: 'Siniestralidad reportada hasta'
+    * frm_cot_siniestralidad_flag (SelectList) | Label: 'Siniestralidad'
+    * frm_cot_siniestralidad_reporte (FileUpload) | Label: 'Reporte de siniestralidad'
+
+  [SECCION] modalDoc - 1 campos
+    * frm_cot_siniestralidad_reporte (HtmlViewer Viewer) | Label: ' Vista previa de archivo'
+
+
+─────────────────────────────────────────────────────────────
+PANTALLA 105 : COL - CUW LIAB - Subform - Documentos de solicitud de cotización
+─────────────────────────────────────────────────────────────
+Cantidad de Campos: 9
+Tipos de Componentes: BWrapperComponent, FileUpload FormHtmlViewer, FormButton FormButton FileUpload FormTextArea, FormHtmlViewer FormHtmlViewer FormMultiColumn FormMultiColumn FormInput FormHtmlViewer, FormHtmlViewer Viewer, FormLoop, FormSelectList, FormSelectList FormHtmlViewer FormHtmlViewer FormHtmlViewer FormHtmlViewer
+
+CAMPOS POR SECCION:
+
+  [SECCION] (modal) Docs - 1 campos
+    * grd_file (HtmlViewer Viewer) | Label: ' Vista previa de archivo'
+
+  [SECCION] CU - COL - Subform - Documentos de Cotizador - 8 campos
+    * control_grd_documentos_solicitud_obligatorios form_html_viewer (HtmlViewer HtmlViewer MultiColumn MultiColumn Input HtmlViewer) | Label: '    Documentos obligatorios - descriptivo ' [VALIDACION]
+    * frm_doc_cotizador_adjuntar_otros_documentos (SelectList) | Label: 'Desea adjuntar otros documentos?'
+    * frm_doc_cotizador_otros_documentos form_html_viewer (FileUpload HtmlViewer) | Label: 'Otros documentos '
+    * frm_doc_cotizador_otros_documentos_cargar_adicionales form_html_viewer (FileUpload HtmlViewer) | Label: 'Adjuntar documentos '
+    * grd_doc_subir grd_doc_eliminar grd_file grd_observacion (Button Button FileUpload TextArea) | Label: '   Observación'
+    * grd_documentos_solicitud (Loop) | Label: ''
+    * grd_seleccion (SelectList HtmlViewer HtmlViewer HtmlViewer HtmlViewer) | Label: '    ' [DATASOURCE] [5 opciones]
+    * grd_vista (BWrapperComponent) | Label: ''
+
+
+─────────────────────────────────────────────────────────────
+PANTALLA 106 : COL - CUW LIAB - Subform - Información del tomador
+─────────────────────────────────────────────────────────────
+Cantidad de Campos: 23
+Tipos de Componentes: FormButton, FormDatePicker, FormHtmlViewer, FormInput, FormInput FormInput, FormInput FormInput BWrapperComponent, FormInput FormInput FormInput, FormSelectList, FormSelectList FormInput, FormSelectList FormInput FormInput
+Campos con Validacion: 8
+Campos con DataSource: 3
+
+CAMPOS POR SECCION:
+
+  [SECCION] CU - COL - Subform - Información del tomador - 22 campos
+    * btn_consultar_informacion_tomador (Button) | Label: 'Consultar cliente'
+    * frm_tom_actividad_asegurada (Input) | Label: 'Actividad comercial' [VALIDACION]
+    * frm_tom_actividad_asegurada (Input) | Label: 'Actividad comercial'
+    * frm_tom_cc_crear_cliente_flag (Input) | Label: 'Crear cliente si no'
+    * frm_tom_correo_facturacion (Input) | Label: 'Correo para facturación' [VALIDACION]
+    * frm_tom_correo_facturacion (Input) | Label: 'Correo para facturación' [VALIDACION]
+    * frm_tom_departamento frm_tom_departamento_num frm_tom_departamento_nombre (SelectList Input Input) | Label: 'Departamento Departamento código (oculto) Departamento nombre (oculto)' [DATASOURCE] [3 opciones]
+    * frm_tom_direccion (Input) | Label: 'Dirección'
+    * frm_tom_direccion (Input) | Label: 'Dirección' [VALIDACION]
+    * frm_tom_fecha_constitucion (DatePicker) | Label: 'Fecha de constitución'
+    * frm_tom_fecha_constitucion (DatePicker) | Label: 'Fecha de constitución'
+    * frm_tom_municipio frm_tom_municipio_data frm_tom_municipio_nombre (SelectList Input Input) | Label: 'Municipio Data Municipio (oculto) Municipio nombre (oculto)' [DATASOURCE] [3 opciones]
+    * frm_tom_nombres_completos frm_tom_nombre frm_tom_apellido (Input Input Input) | Label: 'Tomador Tomador Nombre (oculto) Tomador Apellido (oculto)'
+    * frm_tom_nombres_completos frm_tom_nombre frm_tom_apellido (Input Input Input) | Label: 'Tomador Tomador Nombre (oculto) Tomador Apellido (oculto)' [VALIDACION]
+    * frm_tom_num_documento frm_tom_lista_negra (Input Input) | Label: 'Nro. de documento Tomador Lista Negra (oculto)' [VALIDACION]
+    * frm_tom_num_documento frm_tom_lista_negra (Input Input) | Label: 'Nro. de documento Tomador Lista Negra (oculto)' [VALIDACION]
+    * frm_tom_telefono (Input) | Label: 'Teléfono' [VALIDACION]
+    * frm_tom_tipo_documento (SelectList) | Label: 'Tipo de documento'
+    * frm_tom_tipo_documento frm_tom_tipo_documento_nombre (SelectList Input) | Label: 'Tipo de documento Tipo de documento nombre (oculto)' [DATASOURCE] [2 opciones]
+    * frm_tom_tipo_empresa (SelectList) | Label: 'Tipo de empresa'
+    * frm_tom_tipo_empresa (SelectList) | Label: 'Tipo de empresa'
+    * tri_respuesta_tia_tomador frm_tomador_response_accion modal_crearCliente (Input Input BWrapperComponent) | Label: 'tri_respuesta_tia_tomador Tomador response accion modal preventivo CREAR NUEVO CLIENTE'
+
+  [SECCION] Modal preventivo, crear cliente - 1 campos
+    * form_html_viewer (HtmlViewer) | Label: ''
+
+
+─────────────────────────────────────────────────────────────
+PANTALLA 107 : COL - CUW LIAB - Subform - Información del asegurado
+─────────────────────────────────────────────────────────────
+Cantidad de Campos: 15
+Tipos de Componentes: FormButton, FormDatePicker, FormHtmlViewer, FormInput, FormInput FormInput, FormInput FormInput BWrapperComponent, FormInput FormInput FormInput, FormSelectList, FormSelectList FormInput, FormSelectList FormInput FormInput
+Campos con Validacion: 4
+Campos con DataSource: 3
+
+CAMPOS POR SECCION:
+
+  [SECCION] CU - COL - Subform - Información del asegurado - 14 campos
+    * btn_consultar_informacion_asegurado (Button) | Label: 'Consultar cliente'
+    * frm_aseg_actividad_comercial (Input) | Label: 'Actividad comercial' [VALIDACION]
+    * frm_aseg_cc_crear_cliente_flag (Input) | Label: 'Crear cliente si no Asegurado'
+    * frm_aseg_correo_facturacion (Input) | Label: 'Correo para facturación' [VALIDACION]
+    * frm_aseg_departamento frm_aseg_departamento_num frm_aseg_departamento_nombre (SelectList Input Input) | Label: 'Departamento Departamento código (oculto) Departamento nombre (oculto)' [DATASOURCE] [3 opciones]
+    * frm_aseg_direccion (Input) | Label: 'Dirección'
+    * frm_aseg_fecha_constitucion (DatePicker) | Label: 'Fecha de constitución'
+    * frm_aseg_municipio frm_aseg_municipio_data frm_aseg_municipio_nombre (SelectList Input Input) | Label: 'Municipio Data Municipio (oculto) Municipio nombre (oculto)' [DATASOURCE] [3 opciones]
+    * frm_aseg_nombres_completos frm_aseg_nombre frm_aseg_apellido (Input Input Input) | Label: 'Asegurado Asegurado Nombre (oculto) Asegurado Apellido (oculto)'
+    * frm_aseg_num_documento frm_aseg_lista_negra (Input Input) | Label: 'Nro. de documento Asegurado Lista Negra (oculto)' [VALIDACION]
+    * frm_aseg_telefono (Input) | Label: 'Teléfono' [VALIDACION]
+    * frm_aseg_tipo_documento frm_aseg_tipo_documento_nombre (SelectList Input) | Label: 'Tipo de documento Tipo de documento nombre (oculto)' [DATASOURCE] [2 opciones]
+    * frm_aseg_tipo_empresa (SelectList) | Label: 'Tipo de empresa'
+    * tri_respuesta_tia_asegurado frm_asegurado_response_accion modal_crearClienteAsegurado (Input Input BWrapperComponent) | Label: 'Asegurado response Asegurado response accion modal preventivo CREAR NUEVO CLIENTE'
+
+  [SECCION] Modal Preventivo, crear cliente - 1 campos
+    * form_html_viewer (HtmlViewer) | Label: ''
+
+
+─────────────────────────────────────────────────────────────
+PANTALLA 108 : COL - CUW LIAB - Subform - Creación del cliente tomador
+─────────────────────────────────────────────────────────────
+Cantidad de Campos: 18
+Tipos de Componentes: FormDatePicker, FormInput, FormInput FormInput FormInput, FormSelectList, FormSelectList FormInput, FormSelectList FormInput FormInput
+Campos con Validacion: 9
+Campos con DataSource: 3
+
+CAMPOS POR SECCION:
+
+  [SECCION] COL - CUW - Subform - Creación del tomador - 18 campos
+    * frm_tom_cc_actividad_comercial (Input) | Label: 'Actividad comercial' [VALIDACION]
+    * frm_tom_cc_correo_facturacion (Input) | Label: 'Correo para facturación' [VALIDACION]
+    * frm_tom_cc_crear_cliente_flag (SelectList) | Label: 'Crear un nuevo cliente tomador?'
+    * frm_tom_cc_departamento frm_tom_cc_departamento_num frm_tom_cc_departamento_nombre (SelectList Input Input) | Label: 'Departamento Departamento código (oculto) Departamento nombre (oculto)' [DATASOURCE] [3 opciones]
+    * frm_tom_cc_direccion (Input) | Label: 'Dirección' [VALIDACION]
+    * frm_tom_cc_estado_tercero (SelectList) | Label: 'Estado del tercero'
+    * frm_tom_cc_fecha_constitucion (DatePicker) | Label: 'Fecha de constitución'
+    * frm_tom_cc_fecha_expedicion_documento (DatePicker) | Label: 'Fecha de expedición del documento'
+    * frm_tom_cc_municipio frm_tom_cc_municipio_data frm_tom_cc_municipio_nombre (SelectList Input Input) | Label: 'Municipio Data Municipio (oculto) Municipio nombre (oculto)' [DATASOURCE] [3 opciones]
+    * frm_tom_cc_nombre_compania (Input) | Label: 'Nombre compañía' [VALIDACION]
+    * frm_tom_cc_num_documento (Input) | Label: 'Nro. de documento' [VALIDACION]
+    * frm_tom_cc_num_duns (Input) | Label: 'Número DUNS' [VALIDACION]
+    * frm_tom_cc_representante_legal_nombre (Input) | Label: 'Nombre representante legal' [VALIDACION]
+    * frm_tom_cc_representante_legal_num_documento frm_tom_cc_representante_legal_num_documento frm_tom_cc_representante_legal_num_documento (Input Input Input) | Label: 'Nro. documento representante legal Nro. documento representante legal Nro. documento representante legal' [VALIDACION]
+    * frm_tom_cc_representante_legal_tipo_documento (SelectList) | Label: 'Tipo documento representante legal'
+    * frm_tom_cc_telefono (Input) | Label: 'Teléfono' [VALIDACION]
+    * frm_tom_cc_tipo_documento frm_tom_cc_tipo_documento_nombre (SelectList Input) | Label: 'Tipo de documento Tipo de documento nombre (oculto)' [DATASOURCE] [2 opciones]
+    * frm_tom_cc_tipo_empresa (SelectList) | Label: 'Tipo de empresa'
+
+
+─────────────────────────────────────────────────────────────
+PANTALLA 109 : COL - CUW LIAB - Subform - Creación del asegurado
+─────────────────────────────────────────────────────────────
+Cantidad de Campos: 18
+Tipos de Componentes: FormDatePicker, FormDatePicker BWrapperComponent, FormInput, FormInput FormInput FormInput, FormSelectList, FormSelectList FormInput, FormSelectList FormInput FormInput
+Campos con Validacion: 9
+Campos con DataSource: 3
+
+CAMPOS POR SECCION:
+
+  [SECCION] CU - COL - Subform - Creación del asegurado - 18 campos
+    * frm_aseg_cc_actividad_comercial (Input) | Label: 'Actividad comercial' [VALIDACION]
+    * frm_aseg_cc_correo_facturacion (Input) | Label: 'Correo para facturación' [VALIDACION]
+    * frm_aseg_cc_crear_cliente_flag (SelectList) | Label: 'Crear un nuevo cliente asegurado?'
+    * frm_aseg_cc_departamento frm_aseg_cc_departamento_num frm_aseg_cc_departamento_nombre (SelectList Input Input) | Label: 'Departamento Departamento código (oculto) Departamento nombre (oculto)' [DATASOURCE] [3 opciones]
+    * frm_aseg_cc_direccion (Input) | Label: 'Dirección' [VALIDACION]
+    * frm_aseg_cc_estado_tercero (SelectList) | Label: 'Estado del tercero'
+    * frm_aseg_cc_fecha_constitucion b_wrapper_component_1 (DatePicker BWrapperComponent) | Label: 'Fecha de constitución New Bootstrap Wrapper'
+    * frm_aseg_cc_fecha_expedicion_documento (DatePicker) | Label: 'Fecha de expedición del documento'
+    * frm_aseg_cc_municipio frm_aseg_cc_municipio_data frm_aseg_cc_municipio_nombre (SelectList Input Input) | Label: 'Municipio Data Municipio (oculto) Municipio nombre (oculto)' [DATASOURCE] [3 opciones]
+    * frm_aseg_cc_nombre_compania (Input) | Label: 'Nombre compañía' [VALIDACION]
+    * frm_aseg_cc_num_documento (Input) | Label: 'Nro. de documento' [VALIDACION]
+    * frm_aseg_cc_num_duns (Input) | Label: 'Número DUNS' [VALIDACION]
+    * frm_aseg_cc_representante_legal_nombre (Input) | Label: 'Nombre representante legal' [VALIDACION]
+    * frm_aseg_cc_representante_legal_num_documento frm_aseg_cc_representante_legal_num_documento frm_aseg_cc_representante_legal_num_documento (Input Input Input) | Label: 'Nro. documento representante legal Nro. documento representante legal Nro. documento representante legal' [VALIDACION]
+    * frm_aseg_cc_representante_legal_tipo_documento (SelectList) | Label: 'Tipo documento representante legal'
+    * frm_aseg_cc_telefono (Input) | Label: 'Teléfono' [VALIDACION]
+    * frm_aseg_cc_tipo_documento frm_aseg_cc_tipo_documento_nombre (SelectList Input) | Label: 'Tipo de documento Tipo de documento nombre (oculto)' [DATASOURCE] [2 opciones]
+    * frm_aseg_cc_tipo_empresa (SelectList) | Label: 'Tipo de empresa'
+
+
+─────────────────────────────────────────────────────────────
+PANTALLA 113 : COL - CUW LIAB - Subform - Plan de pago
+─────────────────────────────────────────────────────────────
+Cantidad de Campos: 4
+Tipos de Componentes: FormSelectList, FormSelectList FormInput
+
+CAMPOS POR SECCION:
+
+  [SECCION] CU - COL - Subform - Plan de pago - 4 campos
+    * frm_plan_pago frm_plan_pago_cantidad_dias (SelectList Input) | Label: 'Plan de pago Plan de pago (en días)' [DATASOURCE] [2 opciones]
+    * frm_plan_pago_frecuencia_cobro (SelectList) | Label: 'Frecuencia de cobro'
+    * frm_plan_pago_metodo_pago (SelectList) | Label: 'Método de pago'
+    * frm_plan_pago_num_cuotas (SelectList) | Label: 'Número de cuotas'
+
+
+─────────────────────────────────────────────────────────────
+PANTALLA 114 : COL - CUW LIAB - Subform - Asegurados adicionales
+─────────────────────────────────────────────────────────────
+Cantidad de Campos: 9
+Tipos de Componentes: FormHtmlViewer FormRecordList FormRecordList FormRecordList FormMultiColumn, FormInput, FormInput FormInput, FormInput FormInput FormInput FormInput, FormSelectList FormInput, FormSelectList FormSelectList
+Campos con Validacion: 2
+Campos con DataSource: 2
+
+CAMPOS POR SECCION:
+
+  [SECCION] CU - COL - Subform - Asegurados Adicionales - 2 campos
+    * frm_lista_asegurados_adicionales frm_lista_asegurados_adicionales frm_lista_asegurados_adicionales (HtmlViewer RecordList RecordList RecordList MultiColumn) | Label: '    '
+    * limite_frm_lista_asegurados_adicionales (Input) | Label: 'limite_frm_lista_coaseguro'
+
+  [SECCION] Modal Asegurados Adicionales - 7 campos
+    * frm_aseg_adic_actividad_asegurada frm_cot_moneda_dup (SelectList SelectList) | Label: 'Actividad Asegurada? Moneda' [DATASOURCE] [2 opciones]
+    * frm_aseg_adic_actividad_lista frm_aseg_adic_actividad (SelectList Input) | Label: 'Actividad Nombre Actividad Asegurada' [DATASOURCE] [2 opciones]
+    * frm_aseg_adic_codigo_naic (Input) | Label: 'Código NAIC'
+    * frm_aseg_adic_ingresos_operacionales frm_aseg_adic_ingresos_operacionales frm_aseg_adic_ingresos_operacionales frm_aseg_adic_ingresos_operacionales_formateado (Input Input Input Input) | Label: 'Ingresos operacionales anuales Ingresos operacionales anuales Ingresos operacionales anuales Ingresos operacionales (formateado)' [VALIDACION]
+    * frm_aseg_adic_nombre frm_aseg_adic_relacion (Input Input) | Label: 'Nombre del asegurado Relación con el asegurado principal' [VALIDACION]
+    * frm_vista_cotizador_dup (Input) | Label: 'frm_vista_cotizador_dup'
+    * frm_vista_evaluacion_riesgo_dup (Input) | Label: 'frm_vista_evaluacion_riesgo_dup'
+
+
+─────────────────────────────────────────────────────────────
+PANTALLA 139 : COL - CUW LIAB - Subform - Revisión Mora
+─────────────────────────────────────────────────────────────
+Cantidad de Campos: 3
+Tipos de Componentes: FormSelectList, FormTextArea
+
+CAMPOS POR SECCION:
+
+  [SECCION] CU - COL - Subform - Revisión Mora - 3 campos
+    * frm_revision_mora_cliente_mora (SelectList) | Label: '¿El cliente se encuentra en mora?'
+    * frm_revision_mora_comentario (TextArea) | Label: 'Comentario:'
+    * frm_revision_mora_decision (SelectList) | Label: 'Decisión'
+
+
+─────────────────────────────────────────────────────────────
+PANTALLA 213 : COL - CUW LIAB - Subform - Subinformación asegurado
+─────────────────────────────────────────────────────────────
+Cantidad de Campos: 6
+Tipos de Componentes: FileUpload FormInput FormHtmlViewer, FormHtmlViewer FormHtmlViewer FormNestedScreen, FormInput, FormSelectList
+Campos con Validacion: 2
+
+CAMPOS POR SECCION:
+
+  [SECCION] COL - CUW - Subform - Subinformación asegurado - 6 campos
+    * frm_aseg_numero_ubicaciones (Input) | Label: 'N° de ubicaciones' [VALIDACION]
+    * frm_aseg_realiza_exportaciones_file frm_aseg_realiza_exportaciones_file_flag form_html_viewer (FileUpload Input HtmlViewer) | Label: 'Reporte de exportaciones Ha cargado un archivo? ' [VALIDACION]
+    * frm_aseg_realiza_exportaciones_flag (SelectList) | Label: 'Realiza exportaciones'
+    * frm_aseg_territorialidad (SelectList) | Label: 'Territorialidad'
+    * frm_tom_asegurado_es_tomador_flag (SelectList) | Label: 'El tomador es el asegurado?'
+    * Nested Screen (HtmlViewer HtmlViewer NestedScreen) | Label: '  Pantalla anidada'
+
+
+─────────────────────────────────────────────────────────────
+PANTALLA 239 : COL - CUW LIAB - Subform - Valores asegurados y deducibles v2
+─────────────────────────────────────────────────────────────
+Cantidad de Campos: 8
+Tipos de Componentes: FormInput FormInput, FormInput FormInput FormInput, FormInput FormInput FormInput FormInput, FormRecordList FormRecordList FormRecordList FormHtmlViewer FormHtmlViewer FormMultiColumn, FormSelectList, FormSelectList FormInput
+Campos con Validacion: 4
+
+CAMPOS POR SECCION:
+
+  [SECCION] CU - COL - Subform - Valores asegurados y deducibles - 2 campos
+    * control_opciones_consecutivas_frm_valores_asegurados_deducibles control_opcion_1_frm_valores_asegurados_deducibles control_opcion_rellenar_valores_asegurados_deducibles (Input Input Input) | Label: 'Tiene opciones consecutivas, puede continuar? Ha rellenado opción 1, puede continuar? Opción a rellenar'
+    * frm_valores_asegurados_deducibles frm_valores_asegurados_deducibles frm_valores_asegurados_deducibles form_html_viewer form_html_viewer (RecordList RecordList RecordList HtmlViewer HtmlViewer MultiColumn) | Label: '     '
+
+  [SECCION] Modal Valores asegurados y deducibles - 6 campos
+    * frm_cot_moneda_dup_vad frm_valores_opcion (SelectList Input) | Label: 'Moneda Opcion' [DATASOURCE] [2 opciones]
+    * frm_valores_deducible_minimo frm_valores_deducible_minimo frm_valores_deducible_minimo frm_valores_deducible_minimo_formateado (Input Input Input Input) | Label: 'Deducible mínimo (Valor) Deducible mínimo (Valor) Deducible mínimo (Valor) Deducible mínimo (formateado)' [VALIDACION]
+    * frm_valores_deducible_minimo_factor (SelectList) | Label: 'Factor de cálculo de deducible mínimo'
+    * frm_valores_deducible_minimo_smmlv frm_valores_deducible_minimo_smmlv frm_valores_deducible_minimo_smmlv frm_valores_deducible_minimo_smmlv_formateado (Input Input Input Input) | Label: 'Deducible mínimo SMMLV Deducible mínimo SMMLV Deducible mínimo SMMLV Deducible mínimo (formateado)' [VALIDACION]
+    * frm_valores_deducible_porcentaje frm_valores_deducible_porcentaje_formateado (Input Input) | Label: 'Deducible mínimo (%) Deducible (formateado)' [VALIDACION]
+    * frm_valores_limite_asegurado frm_valores_limite_asegurado frm_valores_limite_asegurado frm_valores_limite_asegurado_formateado (Input Input Input Input) | Label: 'Límite asegurado Límite asegurado Límite asegurado Límite asegurado (formateado)' [VALIDACION]
+

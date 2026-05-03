@@ -1,0 +1,158 @@
+﻿ANÁLISIS DE ESTRUCTURA DE COLUMNAS (FormMultiColumn)
+
+Las pantallas usan FormMultiColumn para organizar campos en filas y columnas.
+Este documento describe cómo están organizados los campos en el layout.
+
+═══════════════════════════════════════════════════════════════════════════════
+
+
+PANTALLA 101 - COL - CUW LIAB - Subform - Encabezado formularios
+─────────────────────────────────────────────────────────────────────────────
+
+  Sección: Subform - CU - COL - Encabezado formularios
+  Columnas: 1
+  Columnas: 2
+  Columnas: 3
+
+  Sección: Subform - CU - COL - Encabezado formularios
+  Columnas: 4
+
+PANTALLA 102 - COL - CUW LIAB - Subform - Información General
+─────────────────────────────────────────────────────────────────────────────
+
+  Sección: CU - COL - Subform - Información General
+  Columnas: 1
+  Columnas: 32
+
+  Sección: Modal Intermediarios Adicionales
+  Columnas: 1
+
+  Sección: Modal Intermediarios Adicionales
+  Columnas: 2
+
+PANTALLA 103 - COL - CUW LIAB - Subform - Datos de cotización
+─────────────────────────────────────────────────────────────────────────────
+
+  Sección: CU - COL - Subform - Datos de cotización
+  Columnas: 1
+  Columnas: 18
+
+  Sección: modalDoc
+  Columnas: 1
+
+PANTALLA 105 - COL - CUW LIAB - Subform - Documentos de solicitud de cotización
+─────────────────────────────────────────────────────────────────────────────
+
+  Sección: CU - COL - Subform - Documentos de Cotizador
+  Columnas: 1
+  Columnas: 2
+  Columnas: 10
+  Columnas: 5
+  Columnas: 2
+
+  Sección: CU - COL - Subform - Documentos de Cotizador
+  Columnas: 1
+  Columnas: 3
+
+  Sección: (modal) Docs
+  Columnas: 1
+
+PANTALLA 106 - COL - CUW LIAB - Subform - Información del tomador
+─────────────────────────────────────────────────────────────────────────────
+
+  Sección: CU - COL - Subform - Información del tomador
+  Columnas: 1
+  Columnas: 4
+  Columnas: 9
+
+  Sección: CU - COL - Subform - Información del tomador
+  Columnas: 3
+
+  Sección: CU - COL - Subform - Información del tomador
+  Columnas: 1
+  Columnas: 9
+
+  Sección: Modal preventivo, crear cliente
+  Columnas: 1
+
+PANTALLA 107 - COL - CUW LIAB - Subform - Información del asegurado
+─────────────────────────────────────────────────────────────────────────────
+
+  Sección: CU - COL - Subform - Información del asegurado
+  Columnas: 1
+  Columnas: 4
+  Columnas: 9
+
+  Sección: CU - COL - Subform - Información del asegurado
+  Columnas: 3
+
+  Sección: Modal Preventivo, crear cliente
+  Columnas: 1
+
+PANTALLA 108 - COL - CUW LIAB - Subform - Creación del cliente tomador
+─────────────────────────────────────────────────────────────────────────────
+
+  Sección: COL - CUW - Subform - Creación del tomador
+  Columnas: 1
+  Columnas: 22
+
+PANTALLA 109 - COL - CUW LIAB - Subform - Creación del asegurado
+─────────────────────────────────────────────────────────────────────────────
+
+  Sección: CU - COL - Subform - Creación del asegurado
+  Columnas: 1
+  Columnas: 22
+
+PANTALLA 113 - COL - CUW LIAB - Subform - Plan de pago
+─────────────────────────────────────────────────────────────────────────────
+
+  Sección: CU - COL - Subform - Plan de pago
+  Columnas: 2
+
+  Sección: CU - COL - Subform - Plan de pago
+  Columnas: 2
+
+PANTALLA 114 - COL - CUW LIAB - Subform - Asegurados adicionales
+─────────────────────────────────────────────────────────────────────────────
+
+  Sección: CU - COL - Subform - Asegurados Adicionales
+  Columnas: 1
+  Columnas: 6
+
+  Sección: Modal Asegurados Adicionales
+  Columnas: 3
+
+  Sección: Modal Asegurados Adicionales
+  Columnas: 1
+  Columnas: 6
+
+PANTALLA 139 - COL - CUW LIAB - Subform - Revisión Mora
+─────────────────────────────────────────────────────────────────────────────
+
+  Sección: CU - COL - Subform - Revisión Mora
+  Columnas: 1
+  Columnas: 1
+
+PANTALLA 213 - COL - CUW LIAB - Subform - Subinformación asegurado
+─────────────────────────────────────────────────────────────────────────────
+
+  Sección: COL - CUW - Subform - Subinformación asegurado
+  Columnas: 1
+  Columnas: 7
+
+PANTALLA 239 - COL - CUW LIAB - Subform - Valores asegurados y deducibles v2
+─────────────────────────────────────────────────────────────────────────────
+
+  Sección: CU - COL - Subform - Valores asegurados y deducibles
+  Columnas: 1
+  Columnas: 7
+
+  Sección: Modal Valores asegurados y deducibles
+  Columnas: 2
+
+  Sección: Modal Valores asegurados y deducibles
+  Columnas: 2
+  Columnas: 2
+
+  Sección: Modal Valores asegurados y deducibles
+  Columnas: 1

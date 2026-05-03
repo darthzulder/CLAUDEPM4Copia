@@ -1,0 +1,140 @@
+﻿╔════════════════════════════════════════════════════════════════════════════╗
+║                   ÍNDICE DE DOCUMENTACIÓN GENERADA                        ║
+║          Extracción: Formulario Solicitud Cotización CUW LIAB            ║
+╚════════════════════════════════════════════════════════════════════════════╝
+
+FECHA: 03/05/2026 16:07:20
+DIRECTORIO: c:\Proyectos\BPM\CLAUDEPM4\
+
+═══════════════════════════════════════════════════════════════════════════════
+RESUMEN DE EXTRACCIÓN
+═══════════════════════════════════════════════════════════════════════════════
+
+  • Total Pantallas Extraídas: 13
+  • Total Campos Extraídos: 170
+  • Campos con Validación: 49
+  • Campos con DataSource: 27
+
+PANTALLAS POR ID Y CANTIDAD DE CAMPOS:
+─────────────────────────────────────
+  [101] COL - CUW LIAB - Subform - Encabezado formularios
+       └─ 6 campos
+  [102] COL - CUW LIAB - Subform - Información General
+       └─ 34 campos
+  [103] COL - CUW LIAB - Subform - Datos de cotización
+       └─ 17 campos
+  [105] COL - CUW LIAB - Subform - Documentos de solicitud de cotización
+       └─ 9 campos
+  [106] COL - CUW LIAB - Subform - Información del tomador
+       └─ 23 campos
+  [107] COL - CUW LIAB - Subform - Información del asegurado
+       └─ 15 campos
+  [108] COL - CUW LIAB - Subform - Creación del cliente tomador
+       └─ 18 campos
+  [109] COL - CUW LIAB - Subform - Creación del asegurado
+       └─ 18 campos
+  [113] COL - CUW LIAB - Subform - Plan de pago
+       └─ 4 campos
+  [114] COL - CUW LIAB - Subform - Asegurados adicionales
+       └─ 9 campos
+  [139] COL - CUW LIAB - Subform - Revisión Mora
+       └─ 3 campos
+  [213] COL - CUW LIAB - Subform - Subinformación asegurado
+       └─ 6 campos
+  [239] COL - CUW LIAB - Subform - Valores asegurados y deducibles v2
+       └─ 8 campos
+
+═══════════════════════════════════════════════════════════════════════════════
+ARCHIVOS GENERADOS
+═══════════════════════════════════════════════════════════════════════════════
+
+1. CAMPOS_CAMPOS_EXPORT.csv
+   Formato: CSV (Excel compatible)
+   Contenido: Tabla completa con todos los campos, tipos, validaciones
+   Uso: Importar en Excel/Google Sheets para análisis rápido
+
+2. RESUMEN_CAMPOS.txt
+   Formato: Texto estructurado
+   Contenido: Listado detallado de campos por pantalla y sección
+   Uso: Referencia rápida de la estructura
+
+3. DOCUMENTACION_CAMPOS_FINAL.txt
+   Formato: Texto estructurado
+   Contenido: Documentación completa formateada para lectura
+   Uso: Documentación de referencia para desarrolladores
+
+4. WATCHERS_Y_SCRIPTS.txt
+   Formato: Texto estructurado
+   Contenido: Análisis de watchers, scripts y configuraciones
+   Uso: Implementar reactividad y triggers en React
+
+5. ESTRUCTURA_COLUMNAS_LAYOUT.txt
+   Formato: Texto estructurado
+   Contenido: Análisis de FormMultiColumn y layout de campos
+   Uso: Replicar el layout exacto en React
+
+6. CAMPOS_COMPLETOS.json
+   Formato: JSON estructurado
+   Contenido: Estructura completa en JSON para procesamiento programático
+   Uso: Parseador automático, importación a bases de datos
+
+═══════════════════════════════════════════════════════════════════════════════
+CÓMO USAR ESTA DOCUMENTACIÓN
+═══════════════════════════════════════════════════════════════════════════════
+
+PARA GENERAR COMPONENTE REACT:
+  1. Revisar DOCUMENTACION_CAMPOS_FINAL.txt para ver toda la estructura
+  2. Usar CAMPOS_CAMPOS_EXPORT.csv en Excel para análisis visual
+  3. Revisar WATCHERS_Y_SCRIPTS.txt para entender triggers y reactividad
+  4. Revisar ESTRUCTURA_COLUMNAS_LAYOUT.txt para replicar el layout
+  5. Usar CAMPOS_COMPLETOS.json para importación programática
+
+PUNTOS CLAVE A CONSIDERAR:
+  • Pantalla 102 es la principal (Información General) - 34 campos
+  • Hay múltiples campos con DataSource (dinámicos)
+  • Se requieren watchers para cargar datos en cascada
+  • FormMultiColumn se usa para layout responsive
+  • Algunos campos son ocultos (helper text indica)
+  • Validaciones están presentes en 49 campos
+
+═══════════════════════════════════════════════════════════════════════════════
+CAMPOS POR TIPO DE COMPONENTE
+═══════════════════════════════════════════════════════════════════════════════
+
+  • BWrapperComponent : 1 campos
+  • FileUpload : 1 campos
+  • FileUpload HtmlViewer : 2 campos
+  • FileUpload Input HtmlViewer : 1 campos
+  • Button : 2 campos
+  • Button Button FileUpload TextArea : 1 campos
+  • DatePicker : 11 campos
+  • DatePicker BWrapperComponent : 1 campos
+  • DatePicker DatePicker DatePicker DatePicker BWrapperComponent : 1 campos
+  • DatePicker Input Input : 1 campos
+  • HtmlViewer : 3 campos
+  • HtmlViewer HtmlViewer MultiColumn MultiColumn Input HtmlViewer : 1 campos
+  • HtmlViewer HtmlViewer NestedScreen : 3 campos
+  • HtmlViewer RecordList RecordList RecordList MultiColumn : 1 campos
+  • HtmlViewer Viewer : 2 campos
+  • Image : 1 campos
+  • Input : 45 campos
+  • Input Input : 5 campos
+  • Input Input BWrapperComponent : 2 campos
+  • Input Input Input : 9 campos
+  • Input Input Input Input : 5 campos
+  • Input Input Input Input BWrapperComponent : 1 campos
+  • Input SelectList Input : 1 campos
+  • Loop : 1 campos
+  • RecordList RecordList RecordList HtmlViewer HtmlViewer MultiColumn : 1 campos
+  • SelectList : 40 campos
+  • SelectList HtmlViewer HtmlViewer HtmlViewer HtmlViewer : 1 campos
+  • SelectList Input : 9 campos
+  • SelectList Input Input : 10 campos
+  • SelectList Input Input Input : 1 campos
+  • SelectList Input SelectList : 1 campos
+  • SelectList SelectList : 4 campos
+  • TextArea : 1 campos
+
+═══════════════════════════════════════════════════════════════════════════════
+FIN DEL ÍNDICE
+═══════════════════════════════════════════════════════════════════════════════

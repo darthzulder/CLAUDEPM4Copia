@@ -1,0 +1,1404 @@
+﻿==================================================================================
+EXTRACCIÓN COMPLETA DE CAMPOS - FORMULARIO COL - CUW LIAB SOLICITUD COTIZACIÓN
+==================================================================================
+
+Fecha: 2026-05-03 16:05:52
+Total Pantallas: 13
+
+==================================================================================
+PANTALLA 101: COL - CUW LIAB - Subform - Encabezado formularios
+==================================================================================
+
+CAMPOS ENCONTRADOS: 7
+
+  []
+    •  
+      Label: ' '
+      Type:  
+      InputType:  
+      Placeholder: ' '
+      Options: 3 items
+        -  (1)
+        -  (2)
+      DataSource:  
+      Rows:  
+    • form_html_viewer
+      Type: 
+    • frm_caso_cuw_col
+      Label: 'num caso cuw col'
+      Type: 
+    • frm_control_fecha_hoy
+      Label: 'Control fecha de hoy'
+      Type: 
+    • frm_num_cotizacion_cuw_col
+      Label: 'num cotizacion cuw col'
+      Type: 
+    • frm_titulo
+      Label: 'titulo'
+      Type: 
+    • ZurichLogo_Horz_White_CMYK_no_R
+      Label: 'Imagen'
+      Type: 
+
+
+==================================================================================
+PANTALLA 102: COL - CUW LIAB - Subform - Información General
+==================================================================================
+
+WATCHERS:
+  • Campo: frm_gen_intermediario_principal
+    Script: Listado_intermediarios (ID: data_source-4)
+  • Campo: frm_gen_intermediario
+    Script: Listado_intermediarios (ID: data_source-4)
+  • Campo: frm_gen_comercial_id
+    Script: Listado de comerciales por Intermediario (ID: data_source-5)
+    RunOnLoad: True
+  • Campo: frm_gen_suscriptor_asignado_id
+    Script: CIMMR - COL - Listado Suscriptores (ID: data_source-27)
+  • Campo: frm_gen_comercial_id_2
+    Script: Listado de comerciales por Intermediario (ID: data_source-5)
+
+CAMPOS ENCONTRADOS: 35
+
+  []
+    •            
+      Label: '           '
+      Type:            
+      InputType:            
+      Placeholder: '           '
+      Options: 32 items
+        -  (1)
+        -  (2)
+        -  (3)
+      DataSource:            
+      Rows:            
+    •   Nested Screen
+      Label: '  Pantalla anidada'
+      Type:   
+      InputType:   
+      Placeholder: '  '
+      Options: 3 items
+      DataSource:   
+      Rows:   
+    •   Nested Screen
+      Label: '  Pantalla anidada'
+      Type:   
+      InputType:   
+      Placeholder: '  '
+      Options: 3 items
+      DataSource:   
+      Rows:   
+    • frm_cot_comision_solicitada_pct
+      Label: 'Comisión solicitada (%)'
+      Type: 
+      Validation: ; ; 
+    • frm_gen_alcance
+      Label: 'Alcance'
+      Type: 
+      Validation: @{value=required; helper=Comprueba si la longitud de la representación de cadena del valor es >; content=obligatorio}
+      Options:  items
+        -  (content)
+    • frm_gen_co_corretaje
+      Label: 'Co-corretaje'
+      Type: 
+      Validation: @{value=required; helper=Comprueba si la longitud de la representación de cadena del valor es >; content=obligatorio}
+      Options:  items
+        -  (content)
+    • frm_gen_coaseguro_requerido
+      Label: 'Coaseguro requerido'
+      Type: 
+      Validation: @{value=required; helper=Comprueba si la longitud de la representación de cadena del valor es >; content=obligatorio}
+      Options:  items
+        -  (content)
+    • frm_gen_comercial_id frm_gen_comercial_nombre frm_gen_comercial_id_back
+      Label: 'Comercial Comercial Nombre (oculto) Comercial'
+      Type:   
+      InputType:   
+      Placeholder: '  '
+      Validation: ; 
+      Options: 3 items
+        -  (content)
+        -  (content)
+      DataSource:   
+      Rows:   
+    • frm_gen_correo_adicional_intermediario_principal
+      Label: 'Desea agregar correos adicionales del intermediario principal?'
+      Type: 
+      Validation: @{value=required; helper=Comprueba si la longitud de la representación de cadena del valor es >; content=obligatorio}
+      Options:  items
+        -  (content)
+    • frm_gen_correo_comercial frm_gen_correo_comercial_test frm_gen_clave_intermediario
+      Label: 'Correo del comercial Correo del comercial (ambiente TEST) Clave intermediario'
+      Type:   
+      InputType:   
+      Placeholder: '  '
+      Validation: @{value=required; helper=Comprueba si la longitud de la representación de cadena del valor es >; content=obligatorio}
+      Options: 3 items
+      DataSource:   
+      Rows:   
+    • frm_gen_correo_intermediario
+      Label: 'Correo del intermediario'
+      Type: 
+      Options:  items
+        -  (content)
+    • frm_gen_fecha_esperada_cotizacion frm_gen_fecha_esperada_cotizacion_minimo frm_gen_fecha_esperada_cotizacion_maximo
+      Label: 'Fecha esperada de cotización frm_gen_fecha_esperada_cotizacion_minimo frm_gen_fecha_esperada_cotizacion_maximo'
+      Type:   
+      InputType:   
+      Placeholder: 'DD/MM/AAAA  '
+      Validation: @{value=required; helper=Comprueba si la longitud de la representación de cadena del valor es >; content=obligatorio}
+      Options: 3 items
+      DataSource:   
+      Rows:   
+    • frm_gen_fecha_solicitud
+      Label: 'Fecha de solicitud'
+      Type: 
+      Placeholder: 'DD/MM/AAAA'
+    • frm_gen_intermediario frm_gen_num_intermediario frm_gen_nombre_intermediario
+      Label: 'Intermediario Num Identidad Intermediario Nombre Intermediario'
+      Type:   
+      InputType:   
+      Placeholder: '  '
+      Validation: @{value=required; helper=Checks if the length of the String representation of the value is >; content=Required}
+      Options: 3 items
+        -  (content)
+      DataSource:   
+      Rows:   
+    • frm_gen_intermediario_adicional
+      Label: 'Desea agregar intermediarios adicionales?'
+      Type: 
+      Validation: @{value=required; helper=Comprueba si la longitud de la representación de cadena del valor es >; content=obligatorio}
+      Options:  items
+        -  (content)
+    • frm_gen_intermediario_participacion_pct
+      Label: 'Participación'
+      Type: 
+      Validation: @{field=between:; value=between:0,100; helper=El campo bajo validación debe tener un tamaño entre el mínimo y el máximo determinados.; configs=System.Object[]; content=Entre mínimo y máximo; visible=False}
+    • frm_gen_intermediario_principal frm_gen_intermediario_principal_num_documento frm_gen_intermediario_principal_nombre
+      Label: 'Intermediario principal Num intermediario (oculto) Intermediario nombre (oculto)'
+      Type:   
+      InputType:   
+      Placeholder: '  '
+      Validation: @{value=required; helper=Comprueba si la longitud de la representación de cadena del valor es >; content=obligatorio}
+      Options: 3 items
+        -  (content)
+      DataSource:   
+      Rows:   
+    • frm_gen_intermediario_principal_correo frm_gen_intermediario_principal_correo_no_uso frm_gen_intermediario_principal_correo_test
+      Label: 'Correo principal del intermediario Correo principal del intermediario Correo principal del intermediario (ambiente TEST)'
+      Type:   
+      InputType:   
+      Placeholder: '  '
+      Validation: ; ; 
+      Options: 3 items
+        -  (content)
+      DataSource:   
+      Rows:   
+    • frm_gen_lider_seguidor frm_gen_lider_seguidor_label
+      Label: 'Líder/Seguidor Líder/Seguidor'
+      Type:  
+      InputType:  
+      Placeholder: ' '
+      Validation: @{value=required; helper=Comprueba si la longitud de la representación de cadena del valor es >; content=obligatorio}
+      Options: 2 items
+        -  (content)
+      DataSource:  
+      Rows:  
+    • frm_gen_linea_negocio
+      Label: 'Línea de negocio'
+      Type: 
+      Validation: @{value=required; helper=Comprueba si la longitud de la representación de cadena del valor es >; content=obligatorio}
+      Options:  items
+        -  (content)
+    • frm_gen_nom_informador frm_gen_usuario_informador frm_gen_correo_informador
+      Label: 'Informador Usuario Informador  (oculto) Correo Informador (oculto)'
+      Type:   
+      InputType:   
+      Placeholder: '  '
+      Options: 3 items
+      DataSource:   
+      Rows:   
+    • frm_gen_nueva_o_renovacion
+      Label: 'Nueva/Renovación'
+      Type: 
+      Validation: @{value=required; helper=Comprueba si la longitud de la representación de cadena del valor es >; content=obligatorio}
+      Options:  items
+        -  (content)
+    • frm_gen_num_cotizacion
+      Label: 'Cotización Fast Flow Nro.'
+      Type: 
+    • frm_gen_numero_poliza
+      Label: 'Nro. de póliza actual'
+      Type: 
+      Validation: ; ; 
+    • frm_gen_pais frm_gen_sucursal
+      Label: 'País Sucursal'
+      Type:  
+      InputType:  
+      Placeholder: ' '
+      Validation: @{value=required; helper=Comprueba si la longitud de la representación de cadena del valor es >; content=obligatorio}
+      Options: 2 items
+        -  (content)
+        -  (content)
+      DataSource:  
+      Rows:  
+    • frm_gen_participacion_solicitado_pct
+      Label: 'Participación solicitado (%)'
+      Type: 
+      Validation: ; ; 
+    • frm_gen_participacion_zurich_pct
+      Label: 'Participación Zurich solicitado'
+      Type: 
+      Validation: ; 
+    • frm_gen_producto frm_gen_producto_nombre
+      Label: 'Producto Producto (label)'
+      Type:  
+      InputType:  
+      Placeholder: ' '
+      Validation: @{value=required; helper=Comprueba si la longitud de la representación de cadena del valor es >; content=obligatorio}
+      Options: 2 items
+        -  (content)
+      DataSource:  
+      Rows:  
+    • frm_gen_reaseguro_requerido
+      Label: 'Reaseguro requerido'
+      Type: 
+      Validation: @{value=required; helper=Comprueba si la longitud de la representación de cadena del valor es >; content=obligatorio}
+      Options:  items
+        -  (content)
+    • frm_gen_segmento
+      Label: 'Segmento'
+      Type: 
+      Validation: @{value=required; helper=Comprueba si la longitud de la representación de cadena del valor es >; content=obligatorio}
+      Options:  items
+        -  (content)
+    • frm_gen_suscriptor_asignado_correo_test
+      Label: 'Correo del suscriptor asignado (ambiente TEST)'
+      Type: 
+      Validation: @{value=required; helper=Comprueba si la longitud de la representación de cadena del valor es >; content=obligatorio}
+    • frm_gen_suscriptor_asignado_id frm_gen_suscriptor_asignado_nombre frm_gen_suscriptor_asignado_correo frm_gen_suscriptor_asignado_id_pm4
+      Label: 'Suscriptor asignado Suscriptor asignado nombre (oculto) Suscriptor asignado correo (oculto) Suscriptor asignado id pm4 (oculto)'
+      Type:    
+      InputType:    
+      Placeholder: '   '
+      Validation: @{value=required; helper=Comprueba si la longitud de la representación de cadena del valor es >; content=obligatorio}
+      Options: 4 items
+        -  (content)
+      DataSource:    
+      Rows:    
+    • frm_gen_tipo_coaseguro frm_gen_reaseguro_requerido
+      Label: 'Tipo de coaseguro requerido Reaseguro requerido'
+      Type:  
+      InputType:  
+      Placeholder: ' '
+      Validation: ; 
+      Options: 2 items
+        -  (content)
+        -  (content)
+      DataSource:  
+      Rows:  
+    • frm_gen_tipo_reaseguro
+      Label: 'Tipo de reaseguro requerido'
+      Type: 
+      Validation: @{value=required; helper=Comprueba si la longitud de la representación de cadena del valor es >; content=obligatorio}
+      Options:  items
+        -  (content)
+    • frm_gen_tipo_reaseguro
+      Label: 'Tipo de reaseguro requerido'
+      Type: 
+      Validation: @{value=required; helper=Comprueba si la longitud de la representación de cadena del valor es >; content=obligatorio}
+      Options:  items
+        -  (content)
+
+
+==================================================================================
+PANTALLA 103: COL - CUW LIAB - Subform - Datos de cotización
+==================================================================================
+
+WATCHERS:
+  • Campo: frm_cot_actividad_naic
+    Script: CIMMR - COL - CUW - Liability - Actividades CIIU (ID: data_source-7)
+    RunOnLoad: True
+
+CAMPOS ENCONTRADOS: 18
+
+  []
+    •      
+      Label: '     '
+      Type:      
+      InputType:      
+      Placeholder: '     '
+      Options: 18 items
+        -  (1)
+        -  (2)
+        -  (3)
+      DataSource:      
+      Rows:      
+    •  frm_cot_siniestralidad_reporte
+      Label: ' Vista previa de archivo'
+      Type:  
+      InputType:  
+      Placeholder: ' '
+      Options: 2 items
+      DataSource:  
+      Rows:  
+    • frm_cot_actividad_naic
+      Label: 'Actividad del asegurado principal'
+      Type: 
+      Validation: @{value=required; helper=Comprueba si la longitud de la representación de cadena del valor es >; content=obligatorio}
+      Options:  items
+        -  (content)
+    • frm_cot_base_exposicion
+      Label: 'Base de exposición (oculto)'
+      Type: 
+      Options:  items
+        -  (content)
+    • frm_cot_codigo_naic frm_cot_nombre_ciiu frm_cot_actividad_grado_riesgo
+      Label: 'Código NAIC Nombre Actividad Actividad del asegurado principal  (oculto) Grado riesgo (oculto)'
+      Type:   
+      InputType:   
+      Placeholder: '  '
+      Options: 3 items
+      DataSource:   
+      Rows:   
+    • frm_cot_dias_inicio_fin_vigencia
+      Label: 'Días'
+      Type: 
+    • frm_cot_fecha_fin_vigencia
+      Label: 'Fin de vigencia'
+      Type: 
+      Placeholder: 'DD/MM/AAAA'
+    • frm_cot_fecha_inicio_vigencia frm_cot_fecha_inicio_vigencia_minima frm_cot_fecha_vigencia_maxima frm_inicio_vigencia_maxima_31 modal_fechaValidaVigencia
+      Label: 'Inicio de vigencia Fecha mínima: Fecha maxima 30 dias: Fecha 31 dias: Modal Fecha Válida Vigencia'
+      Type:     
+      InputType:     
+      Placeholder: 'DD/MM/AAAA    '
+      Validation: @{value=required; helper=Comprueba si la longitud de la representación de cadena del valor es >; content=obligatorio}
+      Options: 5 items
+      DataSource:     
+      Rows:     
+    • frm_cot_ingresos_operaciones_anuales frm_cot_ingresos_operaciones_anuales frm_cot_ingresos_operaciones_anuales frm_cot_ingresos_operaciones_anuales
+      Label: 'Ingresos operacionales anuales Ingresos operacionales anuales Ingresos operacionales anuales Ingresos operacionales anuales'
+      Type:    
+      InputType:    
+      Placeholder: '   '
+      Validation: ; ; 
+      Options: 4 items
+      DataSource:    
+      Rows:    
+    • frm_cot_ingresos_proyectados_anuales frm_cot_ingresos_proyectados_anuales frm_cot_ingresos_proyectados_anuales frm_cot_ingresos_proyectados_anuales modal_proyectadoAnual
+      Label: 'Ingresos proyectados anuales Ingresos proyectados anuales Ingresos proyectados anuales Ingresos proyectados anuales Modal Proyectado Anual'
+      Type:     
+      InputType:     
+      Placeholder: '    '
+      Validation: ; ; 
+      Options: 5 items
+      DataSource:     
+      Rows:     
+    • frm_cot_modalidad_cobertura
+      Label: 'Modalidad de cobertura'
+      Type: 
+      Validation: @{value=required; helper=Comprueba si la longitud de la representación de cadena del valor es >; content=obligatorio}
+      Options:  items
+        -  (content)
+    • frm_cot_moneda
+      Label: 'Moneda'
+      Type: 
+      Validation: @{value=required; helper=Comprueba si la longitud de la representación de cadena del valor es >; content=obligatorio}
+      Options:  items
+        -  (content)
+    • frm_cot_num_meses_anual frm_cot_num_meses
+      Label: 'Nro. de meses Nro. de meses'
+      Type:  
+      InputType:  
+      Placeholder: ' '
+      Validation: @{value=required; helper=Comprueba si la longitud de la representación de cadena del valor es >; content=obligatorio}
+      Options: 2 items
+        -  (content)
+        -  (content)
+      DataSource:  
+      Rows:  
+    • frm_cot_periodicidad
+      Label: 'Periodicidad'
+      Type: 
+      Validation: @{value=required; helper=Comprueba si la longitud de la representación de cadena del valor es >; content=obligatorio}
+      Options:  items
+        -  (content)
+    • frm_cot_siniestralidad_fecha_desde
+      Label: 'Siniestralidad reportada desde'
+      Type: 
+      Placeholder: 'DD/MM/AAAA'
+      Validation: @{value=required; helper=Comprueba si la longitud de la representación de cadena del valor es >; content=obligatorio}
+    • frm_cot_siniestralidad_fecha_hasta
+      Label: 'Siniestralidad reportada hasta'
+      Type: 
+      Placeholder: 'DD/MM/AAAA'
+      Validation: @{value=required; helper=Comprueba si la longitud de la representación de cadena del valor es >; content=obligatorio}
+    • frm_cot_siniestralidad_flag
+      Label: 'Siniestralidad'
+      Type: 
+      Validation: @{value=required; helper=Comprueba si la longitud de la representación de cadena del valor es >; content=obligatorio}
+      Options:  items
+        -  (content)
+    • frm_cot_siniestralidad_reporte
+      Label: 'Reporte de siniestralidad'
+      Type: 
+      Validation: required
+
+
+==================================================================================
+PANTALLA 105: COL - CUW LIAB - Subform - Documentos de solicitud de cotización
+==================================================================================
+
+CAMPOS ENCONTRADOS: 10
+
+  []
+    •  
+      Label: ' '
+      Type:  
+      InputType:  
+      Placeholder: ' '
+      Options: 2 items
+        -  (1)
+        -  (1)
+      DataSource:  
+      Rows:  
+    •     control_grd_documentos_solicitud_obligatorios form_html_viewer
+      Label: '    Documentos obligatorios - descriptivo '
+      Type:      
+      InputType:      
+      Placeholder: '     '
+      Options: 10 items
+        -  (1)
+        -  (2)
+        -  (3)
+      DataSource:      
+      Rows:      
+    •  grd_file
+      Label: ' Vista previa de archivo'
+      Type:  
+      InputType:  
+      Placeholder: ' '
+      Options: 2 items
+      DataSource:  
+      Rows:  
+    • frm_doc_cotizador_adjuntar_otros_documentos
+      Label: 'Desea adjuntar otros documentos?'
+      Type: 
+      Validation: @{value=required; helper=Comprueba si la longitud de la representación de cadena del valor es >; content=obligatorio}
+      Options:  items
+        -  (content)
+    • frm_doc_cotizador_otros_documentos form_html_viewer
+      Label: 'Otros documentos '
+      Type:  
+      InputType:  
+      Placeholder: ' '
+      Validation: required
+      Options: 2 items
+      DataSource:  
+      Rows:  
+    • frm_doc_cotizador_otros_documentos_cargar_adicionales form_html_viewer
+      Label: 'Adjuntar documentos '
+      Type:  
+      InputType:  
+      Placeholder: ' '
+      Validation: required
+      Options: 2 items
+      DataSource:  
+      Rows:  
+    • grd_doc_subir grd_doc_eliminar grd_file grd_observacion
+      Label: '   Observación'
+      Type:    
+      InputType:    
+      Placeholder: '   '
+      Options: 4 items
+      DataSource:    
+      Rows:    2
+    • grd_documentos_solicitud
+      Type: 
+    • grd_seleccion    
+      Label: '    '
+      Type:     
+      InputType:     
+      Placeholder: '    '
+      Options: 5 items
+        -  (content)
+      DataSource:     
+      Rows:     
+    • grd_vista
+      Type: 
+
+
+==================================================================================
+PANTALLA 106: COL - CUW LIAB - Subform - Información del tomador
+==================================================================================
+
+WATCHERS:
+  • Campo: btn_consultar_informacion_tomador
+    Script:  (ID: script-50)
+  • Campo: frm_tom_departamento
+    Script: Departamentos_Municipios_COL (ID: data_source-19)
+  • Campo: frm_tom_municipio
+    Script: Departamentos_Municipios_COL (ID: data_source-19)
+
+CAMPOS ENCONTRADOS: 26
+
+  []
+    •  
+      Label: ' '
+      Type:  
+      InputType:  
+      Placeholder: ' '
+      Options: 4 items
+        -  (1)
+        -  (2)
+        -  (3)
+      DataSource:  
+      Rows:  
+    •   
+      Label: '  '
+      Type:   
+      InputType:   
+      Placeholder: '  '
+      Options: 9 items
+        -  (1)
+        -  (2)
+        -  (3)
+      DataSource:   
+      Rows:   
+    •   
+      Label: '  '
+      Type:   
+      InputType:   
+      Placeholder: '  '
+      Options: 9 items
+        -  (1)
+        -  (2)
+        -  (3)
+      DataSource:   
+      Rows:   
+    • btn_consultar_informacion_tomador
+      Label: 'Consultar cliente'
+      Type: 
+    • form_html_viewer
+      Type: 
+    • frm_tom_actividad_asegurada
+      Label: 'Actividad comercial'
+      Type: 
+    • frm_tom_actividad_asegurada
+      Label: 'Actividad comercial'
+      Type: 
+      Validation: @{value=required; helper=Comprueba si la longitud de la representación de cadena del valor es >; content=obligatorio}
+    • frm_tom_cc_crear_cliente_flag
+      Label: 'Crear cliente si no'
+      Type: 
+      Placeholder: 'Bandera para identificar si exise o no'
+    • frm_tom_correo_facturacion
+      Label: 'Correo para facturación'
+      Type: 
+      Validation: @{value=email; helper=El campo bajo validación debe formatearse como una dirección de correo electrónico.; content=Correo electrónico}
+    • frm_tom_correo_facturacion
+      Label: 'Correo para facturación'
+      Type: 
+      Validation: @{value=email; helper=El campo bajo validación debe formatearse como una dirección de correo electrónico.; content=Correo electrónico}
+    • frm_tom_departamento frm_tom_departamento_num frm_tom_departamento_nombre
+      Label: 'Departamento Departamento código (oculto) Departamento nombre (oculto)'
+      Type:   
+      InputType:   
+      Placeholder: '  '
+      Validation: @{value=required; helper=Comprueba si la longitud de la representación de cadena del valor es >; content=obligatorio}
+      Options: 3 items
+        -  (content)
+      DataSource:   
+      Rows:   
+    • frm_tom_direccion
+      Label: 'Dirección'
+      Type: 
+      Validation: ; 
+    • frm_tom_direccion
+      Label: 'Dirección'
+      Type: 
+    • frm_tom_fecha_constitucion
+      Label: 'Fecha de constitución'
+      Type: 
+      Placeholder: 'DD-MM-AAAA'
+    • frm_tom_fecha_constitucion
+      Label: 'Fecha de constitución'
+      Type: 
+      Placeholder: 'DD/MM/AAAA'
+    • frm_tom_municipio frm_tom_municipio_data frm_tom_municipio_nombre
+      Label: 'Municipio Data Municipio (oculto) Municipio nombre (oculto)'
+      Type:   
+      InputType:   
+      Placeholder: '  '
+      Validation: @{value=required; helper=Comprueba si la longitud de la representación de cadena del valor es >; content=obligatorio}
+      Options: 3 items
+        -  (content)
+      DataSource:   
+      Rows:   
+    • frm_tom_nombres_completos frm_tom_nombre frm_tom_apellido
+      Label: 'Tomador Tomador Nombre (oculto) Tomador Apellido (oculto)'
+      Type:   
+      InputType:   
+      Placeholder: '  '
+      Options: 3 items
+      DataSource:   
+      Rows:   
+    • frm_tom_nombres_completos frm_tom_nombre frm_tom_apellido
+      Label: 'Tomador Tomador Nombre (oculto) Tomador Apellido (oculto)'
+      Type:   
+      InputType:   
+      Placeholder: '  '
+      Validation: ; 
+      Options: 3 items
+      DataSource:   
+      Rows:   
+    • frm_tom_num_documento frm_tom_lista_negra
+      Label: 'Nro. de documento Tomador Lista Negra (oculto)'
+      Type:  
+      InputType:  
+      Placeholder: ' '
+      Validation: ; 
+      Options: 2 items
+      DataSource:  
+      Rows:  
+    • frm_tom_num_documento frm_tom_lista_negra
+      Label: 'Nro. de documento Tomador Lista Negra (oculto)'
+      Type:  
+      InputType:  
+      Placeholder: ' '
+      Validation: ; 
+      Options: 2 items
+      DataSource:  
+      Rows:  
+    • frm_tom_telefono
+      Label: 'Teléfono'
+      Type: 
+      Validation: ; 
+    • frm_tom_tipo_documento
+      Label: 'Tipo de documento'
+      Type: 
+      Options:  items
+        -  (content)
+    • frm_tom_tipo_documento frm_tom_tipo_documento_nombre
+      Label: 'Tipo de documento Tipo de documento nombre (oculto)'
+      Type:  
+      InputType:  
+      Placeholder: ' '
+      Validation: @{value=required; helper=Comprueba si la longitud de la representación de cadena del valor es >; content=obligatorio}
+      Options: 2 items
+        -  (content)
+      DataSource:  
+      Rows:  
+    • frm_tom_tipo_empresa
+      Label: 'Tipo de empresa'
+      Type: 
+      Options:  items
+        -  (content)
+    • frm_tom_tipo_empresa
+      Label: 'Tipo de empresa'
+      Type: 
+      Options:  items
+        -  (content)
+    • tri_respuesta_tia_tomador frm_tomador_response_accion modal_crearCliente
+      Label: 'tri_respuesta_tia_tomador Tomador response accion modal preventivo CREAR NUEVO CLIENTE'
+      Type:   
+      InputType:   
+      Placeholder: ' Accionar el modal para crear cliente '
+      Options: 3 items
+      DataSource:   
+      Rows:   
+
+
+==================================================================================
+PANTALLA 107: COL - CUW LIAB - Subform - Información del asegurado
+==================================================================================
+
+WATCHERS:
+  • Campo: btn_consultar_informacion_asegurado
+    Script:  (ID: script-50)
+  • Campo: frm_aseg_departamento
+    Script: Departamentos_Municipios_COL (ID: data_source-19)
+  • Campo: frm_aseg_municipio
+    Script: Departamentos_Municipios_COL (ID: data_source-19)
+
+CAMPOS ENCONTRADOS: 17
+
+  []
+    •  
+      Label: ' '
+      Type:  
+      InputType:  
+      Placeholder: ' '
+      Options: 4 items
+        -  (1)
+        -  (2)
+        -  (3)
+      DataSource:  
+      Rows:  
+    •   
+      Label: '  '
+      Type:   
+      InputType:   
+      Placeholder: '  '
+      Options: 9 items
+        -  (1)
+        -  (2)
+        -  (3)
+      DataSource:   
+      Rows:   
+    • btn_consultar_informacion_asegurado
+      Label: 'Consultar cliente'
+      Type: 
+    • form_html_viewer
+      Type: 
+    • frm_aseg_actividad_comercial
+      Label: 'Actividad comercial'
+      Type: 
+      Validation: @{value=required; helper=Comprueba si la longitud de la representación de cadena del valor es >; content=obligatorio}
+    • frm_aseg_cc_crear_cliente_flag
+      Label: 'Crear cliente si no Asegurado'
+      Type: 
+      Placeholder: 'Bandera para identificar si exise o no'
+    • frm_aseg_correo_facturacion
+      Label: 'Correo para facturación'
+      Type: 
+      Validation: @{value=email; helper=El campo bajo validación debe formatearse como una dirección de correo electrónico.; content=Correo electrónico}
+    • frm_aseg_departamento frm_aseg_departamento_num frm_aseg_departamento_nombre
+      Label: 'Departamento Departamento código (oculto) Departamento nombre (oculto)'
+      Type:   
+      InputType:   
+      Placeholder: '  '
+      Validation: @{value=required; helper=Comprueba si la longitud de la representación de cadena del valor es >; content=obligatorio}
+      Options: 3 items
+        -  (content)
+      DataSource:   
+      Rows:   
+    • frm_aseg_direccion
+      Label: 'Dirección'
+      Type: 
+    • frm_aseg_fecha_constitucion
+      Label: 'Fecha de constitución'
+      Type: 
+      Placeholder: 'DD-MM-AAAA'
+    • frm_aseg_municipio frm_aseg_municipio_data frm_aseg_municipio_nombre
+      Label: 'Municipio Data Municipio (oculto) Municipio nombre (oculto)'
+      Type:   
+      InputType:   
+      Placeholder: '  '
+      Validation: @{value=required; helper=Comprueba si la longitud de la representación de cadena del valor es >; content=obligatorio}
+      Options: 3 items
+        -  (content)
+      DataSource:   
+      Rows:   
+    • frm_aseg_nombres_completos frm_aseg_nombre frm_aseg_apellido
+      Label: 'Asegurado Asegurado Nombre (oculto) Asegurado Apellido (oculto)'
+      Type:   
+      InputType:   
+      Placeholder: '  '
+      Validation: @{value=required; helper=Comprueba si la longitud de la representación de cadena del valor es >; content=obligatorio}
+      Options: 3 items
+      DataSource:   
+      Rows:   
+    • frm_aseg_num_documento frm_aseg_lista_negra
+      Label: 'Nro. de documento Asegurado Lista Negra (oculto)'
+      Type:  
+      InputType:  
+      Placeholder: ' '
+      Validation: ; 
+      Options: 2 items
+      DataSource:  
+      Rows:  
+    • frm_aseg_telefono
+      Label: 'Teléfono'
+      Type: 
+      Validation: ; 
+    • frm_aseg_tipo_documento frm_aseg_tipo_documento_nombre
+      Label: 'Tipo de documento Tipo de documento nombre (oculto)'
+      Type:  
+      InputType:  
+      Placeholder: ' '
+      Validation: @{value=required; helper=Comprueba si la longitud de la representación de cadena del valor es >; content=obligatorio}
+      Options: 2 items
+        -  (content)
+      DataSource:  
+      Rows:  
+    • frm_aseg_tipo_empresa
+      Label: 'Tipo de empresa'
+      Type: 
+      Options:  items
+        -  (content)
+    • tri_respuesta_tia_asegurado frm_asegurado_response_accion modal_crearClienteAsegurado
+      Label: 'Asegurado response Asegurado response accion modal preventivo CREAR NUEVO CLIENTE'
+      Type:   
+      InputType:   
+      Placeholder: 'Bandera para identificar si exise o no Accionar el modal para crear cliente '
+      Options: 3 items
+      DataSource:   
+      Rows:   
+
+
+==================================================================================
+PANTALLA 108: COL - CUW LIAB - Subform - Creación del cliente tomador
+==================================================================================
+
+WATCHERS:
+  • Campo: frm_tom_cc_tipo_doc
+    Script:  (ID: script-50)
+  • Campo: frm_tom_cc_num_doc
+    Script:  (ID: script-50)
+  • Campo: frm_tom_cc_departamento
+    Script: Departamentos_Municipios_COL (ID: data_source-19)
+  • Campo: frm_tom_cc_municipio
+    Script: Departamentos_Municipios_COL (ID: data_source-19)
+
+CAMPOS ENCONTRADOS: 19
+
+  []
+    •        
+      Label: '       '
+      Type:        
+      InputType:        
+      Placeholder: '       '
+      Options: 22 items
+        -  (1)
+        -  (2)
+        -  (3)
+      DataSource:        
+      Rows:        
+    • frm_tom_cc_actividad_comercial
+      Label: 'Actividad comercial'
+      Type: 
+      Validation: ; ; 
+    • frm_tom_cc_correo_facturacion
+      Label: 'Correo para facturación'
+      Type: 
+      Validation: @{value=email; helper=El campo bajo validación debe formatearse como una dirección de correo electrónico.; content=Correo electrónico}
+    • frm_tom_cc_crear_cliente_flag
+      Label: 'Crear un nuevo cliente tomador?'
+      Type: 
+      Validation: @{value=required; helper=Comprueba si la longitud de la representación de cadena del valor es >; content=obligatorio}
+      Options:  items
+        -  (content)
+    • frm_tom_cc_departamento frm_tom_cc_departamento_num frm_tom_cc_departamento_nombre
+      Label: 'Departamento Departamento código (oculto) Departamento nombre (oculto)'
+      Type:   
+      InputType:   
+      Placeholder: '  '
+      Validation: @{value=required; helper=Comprueba si la longitud de la representación de cadena del valor es >; content=obligatorio}
+      Options: 3 items
+        -  (content)
+      DataSource:   
+      Rows:   
+    • frm_tom_cc_direccion
+      Label: 'Dirección'
+      Type: 
+      Validation: @{value=required; helper=Comprueba si la longitud de la representación de cadena del valor es >; content=obligatorio}
+    • frm_tom_cc_estado_tercero
+      Label: 'Estado del tercero'
+      Type: 
+      Placeholder: 'Consulta manual en ZH'
+      Options:  items
+        -  (content)
+    • frm_tom_cc_fecha_constitucion
+      Label: 'Fecha de constitución'
+      Type: 
+      Placeholder: 'DD-MM-AAAA'
+    • frm_tom_cc_fecha_expedicion_documento
+      Label: 'Fecha de expedición del documento'
+      Type: 
+      Placeholder: 'DD-MM-AAAA'
+    • frm_tom_cc_municipio frm_tom_cc_municipio_data frm_tom_cc_municipio_nombre
+      Label: 'Municipio Data Municipio (oculto) Municipio nombre (oculto)'
+      Type:   
+      InputType:   
+      Placeholder: '  '
+      Validation: @{value=required; helper=Comprueba si la longitud de la representación de cadena del valor es >; content=obligatorio}
+      Options: 3 items
+        -  (content)
+      DataSource:   
+      Rows:   
+    • frm_tom_cc_nombre_compania
+      Label: 'Nombre compañía'
+      Type: 
+      Validation: ; ; 
+    • frm_tom_cc_num_documento
+      Label: 'Nro. de documento'
+      Type: 
+      Validation: ; ; 
+    • frm_tom_cc_num_duns
+      Label: 'Número DUNS'
+      Type: 
+      Placeholder: 'Consulta manual en ZH'
+      Validation: ; 
+    • frm_tom_cc_representante_legal_nombre
+      Label: 'Nombre representante legal'
+      Type: 
+      Validation: ; 
+    • frm_tom_cc_representante_legal_num_documento frm_tom_cc_representante_legal_num_documento frm_tom_cc_representante_legal_num_documento
+      Label: 'Nro. documento representante legal Nro. documento representante legal Nro. documento representante legal'
+      Type:   
+      InputType:   
+      Placeholder: '  '
+      Validation: ; ; 
+      Options: 3 items
+      DataSource:   
+      Rows:   
+    • frm_tom_cc_representante_legal_tipo_documento
+      Label: 'Tipo documento representante legal'
+      Type: 
+      Options:  items
+        -  (content)
+    • frm_tom_cc_telefono
+      Label: 'Teléfono'
+      Type: 
+      Validation: ; 
+    • frm_tom_cc_tipo_documento frm_tom_cc_tipo_documento_nombre
+      Label: 'Tipo de documento Tipo de documento nombre (oculto)'
+      Type:  
+      InputType:  
+      Placeholder: ' '
+      Validation: @{value=required; helper=Comprueba si la longitud de la representación de cadena del valor es >; content=obligatorio}
+      Options: 2 items
+        -  (content)
+      DataSource:  
+      Rows:  
+    • frm_tom_cc_tipo_empresa
+      Label: 'Tipo de empresa'
+      Type: 
+      Validation: @{value=required; helper=Comprueba si la longitud de la representación de cadena del valor es >; content=obligatorio}
+      Options:  items
+        -  (content)
+
+
+==================================================================================
+PANTALLA 109: COL - CUW LIAB - Subform - Creación del asegurado
+==================================================================================
+
+WATCHERS:
+  • Campo: frm_aseg_cc_departamento
+    Script: Departamentos_Municipios_COL (ID: data_source-19)
+  • Campo: frm_aseg_cc_municipio
+    Script: Departamentos_Municipios_COL (ID: data_source-19)
+
+CAMPOS ENCONTRADOS: 19
+
+  []
+    •        
+      Label: '       '
+      Type:        
+      InputType:        
+      Placeholder: '       '
+      Options: 22 items
+        -  (1)
+        -  (2)
+        -  (3)
+      DataSource:        
+      Rows:        
+    • frm_aseg_cc_actividad_comercial
+      Label: 'Actividad comercial'
+      Type: 
+      Validation: ; ; 
+    • frm_aseg_cc_correo_facturacion
+      Label: 'Correo para facturación'
+      Type: 
+      Validation: @{value=email; helper=El campo bajo validación debe formatearse como una dirección de correo electrónico.; content=Correo electrónico}
+    • frm_aseg_cc_crear_cliente_flag
+      Label: 'Crear un nuevo cliente asegurado?'
+      Type: 
+      Validation: @{value=required; helper=Comprueba si la longitud de la representación de cadena del valor es >; content=obligatorio}
+      Options:  items
+        -  (content)
+    • frm_aseg_cc_departamento frm_aseg_cc_departamento_num frm_aseg_cc_departamento_nombre
+      Label: 'Departamento Departamento código (oculto) Departamento nombre (oculto)'
+      Type:   
+      InputType:   
+      Placeholder: '  '
+      Validation: @{value=required; helper=Comprueba si la longitud de la representación de cadena del valor es >; content=obligatorio}
+      Options: 3 items
+        -  (content)
+      DataSource:   
+      Rows:   
+    • frm_aseg_cc_direccion
+      Label: 'Dirección'
+      Type: 
+      Validation: @{value=required; helper=Comprueba si la longitud de la representación de cadena del valor es >; content=obligatorio}
+    • frm_aseg_cc_estado_tercero
+      Label: 'Estado del tercero'
+      Type: 
+      Placeholder: 'Consulta manual en ZH'
+      Options:  items
+        -  (content)
+    • frm_aseg_cc_fecha_constitucion b_wrapper_component_1
+      Label: 'Fecha de constitución New Bootstrap Wrapper'
+      Type:  
+      InputType:  
+      Placeholder: 'DD/MM/AAAA '
+      Options: 2 items
+      DataSource:  
+      Rows:  
+    • frm_aseg_cc_fecha_expedicion_documento
+      Label: 'Fecha de expedición del documento'
+      Type: 
+      Placeholder: 'DD/MM/AAAA'
+    • frm_aseg_cc_municipio frm_aseg_cc_municipio_data frm_aseg_cc_municipio_nombre
+      Label: 'Municipio Data Municipio (oculto) Municipio nombre (oculto)'
+      Type:   
+      InputType:   
+      Placeholder: '  '
+      Validation: @{value=required; helper=Comprueba si la longitud de la representación de cadena del valor es >; content=obligatorio}
+      Options: 3 items
+        -  (content)
+      DataSource:   
+      Rows:   
+    • frm_aseg_cc_nombre_compania
+      Label: 'Nombre compañía'
+      Type: 
+      Validation: ; ; 
+    • frm_aseg_cc_num_documento
+      Label: 'Nro. de documento'
+      Type: 
+      Validation: ; ; 
+    • frm_aseg_cc_num_duns
+      Label: 'Número DUNS'
+      Type: 
+      Placeholder: 'Consulta manual en ZH'
+      Validation: ; 
+    • frm_aseg_cc_representante_legal_nombre
+      Label: 'Nombre representante legal'
+      Type: 
+      Validation: ; 
+    • frm_aseg_cc_representante_legal_num_documento frm_aseg_cc_representante_legal_num_documento frm_aseg_cc_representante_legal_num_documento
+      Label: 'Nro. documento representante legal Nro. documento representante legal Nro. documento representante legal'
+      Type:   
+      InputType:   
+      Placeholder: '  '
+      Validation: ; ; 
+      Options: 3 items
+      DataSource:   
+      Rows:   
+    • frm_aseg_cc_representante_legal_tipo_documento
+      Label: 'Tipo documento representante legal'
+      Type: 
+      Options:  items
+        -  (content)
+    • frm_aseg_cc_telefono
+      Label: 'Teléfono'
+      Type: 
+      Validation: ; 
+    • frm_aseg_cc_tipo_documento frm_aseg_cc_tipo_documento_nombre
+      Label: 'Tipo de documento Tipo de documento nombre (oculto)'
+      Type:  
+      InputType:  
+      Placeholder: ' '
+      Validation: @{value=required; helper=Comprueba si la longitud de la representación de cadena del valor es >; content=obligatorio}
+      Options: 2 items
+        -  (content)
+      DataSource:  
+      Rows:  
+    • frm_aseg_cc_tipo_empresa
+      Label: 'Tipo de empresa'
+      Type: 
+      Validation: @{value=required; helper=Comprueba si la longitud de la representación de cadena del valor es >; content=obligatorio}
+      Options:  items
+        -  (content)
+
+
+==================================================================================
+PANTALLA 113: COL - CUW LIAB - Subform - Plan de pago
+==================================================================================
+
+CAMPOS ENCONTRADOS: 4
+
+  []
+    • frm_plan_pago frm_plan_pago_cantidad_dias
+      Label: 'Plan de pago Plan de pago (en días)'
+      Type:  
+      InputType:  
+      Placeholder: ' '
+      Validation: @{value=required; helper=Comprueba si la longitud de la representación de cadena del valor es >; content=obligatorio}
+      Options: 2 items
+        -  (content)
+      DataSource:  
+      Rows:  
+    • frm_plan_pago_frecuencia_cobro
+      Label: 'Frecuencia de cobro'
+      Type: 
+      Validation: @{value=required; helper=Comprueba si la longitud de la representación de cadena del valor es >; content=obligatorio}
+      Options:  items
+        -  (content)
+    • frm_plan_pago_metodo_pago
+      Label: 'Método de pago'
+      Type: 
+      Validation: @{value=required; helper=Comprueba si la longitud de la representación de cadena del valor es >; content=obligatorio}
+      Options:  items
+        -  (content)
+    • frm_plan_pago_num_cuotas
+      Label: 'Número de cuotas'
+      Type: 
+      Validation: @{value=required; helper=Comprueba si la longitud de la representación de cadena del valor es >; content=obligatorio}
+      Options:  items
+        -  (content)
+
+
+==================================================================================
+PANTALLA 114: COL - CUW LIAB - Subform - Asegurados adicionales
+==================================================================================
+
+WATCHERS:
+  • Campo: frm_aseg_adic_actividad_lista
+    Script: Actividades CIIU CUW (ID: data_source-7)
+
+CAMPOS ENCONTRADOS: 10
+
+  []
+    •    
+      Label: '   '
+      Type:    
+      InputType:    
+      Placeholder: '   '
+      Options: 6 items
+        -  (1)
+        -  (1)
+        -  (1)
+      DataSource:    
+      Rows:    
+    •  frm_lista_asegurados_adicionales frm_lista_asegurados_adicionales frm_lista_asegurados_adicionales 
+      Label: '    '
+      Type:     
+      InputType:     
+      Placeholder: '    '
+      Options: 6 items
+        -  (1)
+        -  (2)
+      DataSource:     
+      Rows:     
+    • frm_aseg_adic_actividad_asegurada frm_cot_moneda_dup
+      Label: 'Actividad Asegurada? Moneda'
+      Type:  
+      InputType:  
+      Placeholder: ' '
+      Validation: @{value=required; helper=Comprueba si la longitud de la representación de cadena del valor es >; content=obligatorio}
+      Options: 2 items
+        -  (content)
+        -  (content)
+      DataSource:  
+      Rows:  
+    • frm_aseg_adic_actividad_lista frm_aseg_adic_actividad
+      Label: 'Actividad Nombre Actividad Asegurada'
+      Type:  
+      InputType:  
+      Placeholder: ' '
+      Validation: @{value=required; helper=Comprueba si la longitud de la representación de cadena del valor es >; content=obligatorio}
+      Options: 2 items
+        -  (content)
+      DataSource:  
+      Rows:  
+    • frm_aseg_adic_codigo_naic
+      Label: 'Código NAIC'
+      Type: 
+    • frm_aseg_adic_ingresos_operacionales frm_aseg_adic_ingresos_operacionales frm_aseg_adic_ingresos_operacionales frm_aseg_adic_ingresos_operacionales_formateado
+      Label: 'Ingresos operacionales anuales Ingresos operacionales anuales Ingresos operacionales anuales Ingresos operacionales (formateado)'
+      Type:    
+      InputType:    
+      Placeholder: '   '
+      Validation: ; ; 
+      Options: 4 items
+      DataSource:    
+      Rows:    
+    • frm_aseg_adic_nombre frm_aseg_adic_relacion
+      Label: 'Nombre del asegurado Relación con el asegurado principal'
+      Type:  
+      InputType:  
+      Placeholder: ' '
+      Validation: ; ; 
+      Options: 2 items
+      DataSource:  
+      Rows:  
+    • frm_vista_cotizador_dup
+      Label: 'frm_vista_cotizador_dup'
+      Type: 
+    • frm_vista_evaluacion_riesgo_dup
+      Label: 'frm_vista_evaluacion_riesgo_dup'
+      Type: 
+    • limite_frm_lista_asegurados_adicionales
+      Label: 'limite_frm_lista_coaseguro'
+      Type: 
+
+
+==================================================================================
+PANTALLA 139: COL - CUW LIAB - Subform - Revisión Mora
+==================================================================================
+
+CAMPOS ENCONTRADOS: 3
+
+  []
+    • frm_revision_mora_cliente_mora
+      Label: '¿El cliente se encuentra en mora?'
+      Type: 
+      Validation: @{value=required; helper=Comprueba si la longitud de la representación de cadena del valor es >; content=obligatorio}
+      Options:  items
+        -  (content)
+    • frm_revision_mora_comentario
+      Label: 'Comentario:'
+      Type: 
+      Validation: ; ; 
+      Rows: 3
+    • frm_revision_mora_decision
+      Label: 'Decisión'
+      Type: 
+      Validation: @{value=required; helper=Comprueba si la longitud de la representación de cadena del valor es >; content=obligatorio}
+      Options:  items
+        -  (content)
+
+
+==================================================================================
+PANTALLA 213: COL - CUW LIAB - Subform - Subinformación asegurado
+==================================================================================
+
+CAMPOS ENCONTRADOS: 7
+
+  []
+    •    
+      Label: '   '
+      Type:    
+      InputType:    
+      Placeholder: '   '
+      Options: 7 items
+        -  (1)
+        -  (2)
+        -  (1)
+      DataSource:    
+      Rows:    
+    •   Nested Screen
+      Label: '  Pantalla anidada'
+      Type:   
+      InputType:   
+      Placeholder: '  '
+      Options: 3 items
+      DataSource:   
+      Rows:   
+    • frm_aseg_numero_ubicaciones
+      Label: 'N° de ubicaciones'
+      Type: 
+      Validation: ; ; 
+    • frm_aseg_realiza_exportaciones_file frm_aseg_realiza_exportaciones_file_flag form_html_viewer
+      Label: 'Reporte de exportaciones Ha cargado un archivo? '
+      Type:   
+      InputType:   
+      Placeholder: '  '
+      Options: 3 items
+      DataSource:   
+      Rows:   
+    • frm_aseg_realiza_exportaciones_flag
+      Label: 'Realiza exportaciones'
+      Type: 
+      Validation: @{value=required; helper=Comprueba si la longitud de la representación de cadena del valor es >; content=obligatorio}
+      Options:  items
+        -  (content)
+    • frm_aseg_territorialidad
+      Label: 'Territorialidad'
+      Type: 
+      Validation: @{value=required; helper=Comprueba si la longitud de la representación de cadena del valor es >; content=obligatorio}
+      Options:  items
+        -  (content)
+    • frm_tom_asegurado_es_tomador_flag
+      Label: 'El tomador es el asegurado?'
+      Type: 
+      Validation: @{value=required; helper=Comprueba si la longitud de la representación de cadena del valor es >; content=obligatorio}
+      Options:  items
+        -  (content)
+
+
+==================================================================================
+PANTALLA 239: COL - CUW LIAB - Subform - Valores asegurados y deducibles v2
+==================================================================================
+
+WATCHERS:
+  • Campo: frm_aseg_adic_actividad_lista
+    Script: Actividades CIU (ID: data_source-2)
+
+CAMPOS ENCONTRADOS: 9
+
+  []
+    •  
+      Label: ' '
+      Type:  
+      InputType:  
+      Placeholder: ' '
+      Options: 2 items
+        -  (1)
+        -  (1)
+      DataSource:  
+      Rows:  
+    • control_opciones_consecutivas_frm_valores_asegurados_deducibles control_opcion_1_frm_valores_asegurados_deducibles control_opcion_rellenar_valores_asegurados_deducibles
+      Label: 'Tiene opciones consecutivas, puede continuar? Ha rellenado opción 1, puede continuar? Opción a rellenar'
+      Type:   
+      InputType:   
+      Placeholder: '  '
+      Options: 3 items
+      DataSource:   
+      Rows:   
+    • frm_cot_moneda_dup_vad frm_valores_opcion
+      Label: 'Moneda Opcion'
+      Type:  
+      InputType:  
+      Placeholder: ' '
+      Options: 2 items
+        -  (content)
+      DataSource:  
+      Rows:  
+    • frm_valores_asegurados_deducibles frm_valores_asegurados_deducibles frm_valores_asegurados_deducibles form_html_viewer form_html_viewer 
+      Label: '     '
+      Type:      
+      InputType:      
+      Placeholder: '     '
+      Options: 7 items
+        -  (1)
+        -  (2)
+      DataSource:      
+      Rows:      
+    • frm_valores_deducible_minimo frm_valores_deducible_minimo frm_valores_deducible_minimo frm_valores_deducible_minimo_formateado
+      Label: 'Deducible mínimo (Valor) Deducible mínimo (Valor) Deducible mínimo (Valor) Deducible mínimo (formateado)'
+      Type:    
+      InputType:    
+      Placeholder: '   '
+      Validation: ; ; 
+      Options: 4 items
+      DataSource:    
+      Rows:    
+    • frm_valores_deducible_minimo_factor
+      Label: 'Factor de cálculo de deducible mínimo'
+      Type: 
+      Validation: @{value=required; helper=Comprueba si la longitud de la representación de cadena del valor es >; content=obligatorio}
+      Options:  items
+        -  (content)
+    • frm_valores_deducible_minimo_smmlv frm_valores_deducible_minimo_smmlv frm_valores_deducible_minimo_smmlv frm_valores_deducible_minimo_smmlv_formateado
+      Label: 'Deducible mínimo SMMLV Deducible mínimo SMMLV Deducible mínimo SMMLV Deducible mínimo (formateado)'
+      Type:    
+      InputType:    
+      Placeholder: '   '
+      Validation: ; ; 
+      Options: 4 items
+      DataSource:    
+      Rows:    
+    • frm_valores_deducible_porcentaje frm_valores_deducible_porcentaje_formateado
+      Label: 'Deducible mínimo (%) Deducible (formateado)'
+      Type:  
+      InputType:  
+      Placeholder: ' '
+      Validation: ; ; 
+      Options: 2 items
+      DataSource:  
+      Rows:  
+    • frm_valores_limite_asegurado frm_valores_limite_asegurado frm_valores_limite_asegurado frm_valores_limite_asegurado_formateado
+      Label: 'Límite asegurado Límite asegurado Límite asegurado Límite asegurado (formateado)'
+      Type:    
+      InputType:    
+      Placeholder: '   '
+      Validation: ; ; 
+      Options: 4 items
+      DataSource:    
+      Rows:    
+
+

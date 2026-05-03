@@ -1,0 +1,232 @@
+﻿{
+    "screens":  {
+                    "103":  {
+                                "title":  "COL - CUW LIAB - Subform - Datos de cotización",
+                                "sections":  [
+                                                 {
+                                                     "name":  "CU - COL - Subform - Datos de cotización",
+                                                     "fields":  [
+                                                                    {
+                                                                        "label":  null,
+                                                                        "component":  "FormMultiColumn",
+                                                                        "columns":  [
+                                                                                        {
+                                                                                            "items":  [
+                                                                                                          {
+                                                                                                              "label":  null,
+                                                                                                              "component":  null,
+                                                                                                              "name":  null,
+                                                                                                              "inputType":  null
+                                                                                                          }
+                                                                                                      ],
+                                                                                            "index":  0
+                                                                                        }
+                                                                                    ],
+                                                                        "name":  null
+                                                                    }
+                                                                ]
+                                                 },
+                                                 {
+                                                     "name":  "modalProyectosAnuales",
+                                                     "fields":  [
+                                                                    {
+                                                                        "label":  null,
+                                                                        "component":  "FormHtmlViewer",
+                                                                        "name":  null
+                                                                    }
+                                                                ]
+                                                 },
+                                                 {
+                                                     "name":  "modalDoc",
+                                                     "fields":  [
+                                                                    {
+                                                                        "label":  null,
+                                                                        "component":  "FormMultiColumn",
+                                                                        "columns":  [
+                                                                                        {
+                                                                                            "items":  [
+                                                                                                          {
+                                                                                                              "label":  null,
+                                                                                                              "component":  null,
+                                                                                                              "name":  null,
+                                                                                                              "inputType":  null
+                                                                                                          }
+                                                                                                      ],
+                                                                                            "index":  0
+                                                                                        }
+                                                                                    ],
+                                                                        "name":  null
+                                                                    }
+                                                                ]
+                                                 }
+                                             ],
+                                "id":  103
+                            },
+                    "101":  {
+                                "title":  "COL - CUW LIAB - Subform - Encabezado formularios",
+                                "sections":  [
+                                                 {
+                                                     "name":  "Subform - CU - COL - Encabezado formularios",
+                                                     "fields":  [
+                                                                    {
+                                                                        "label":  null,
+                                                                        "component":  "FormMultiColumn",
+                                                                        "columns":  [
+                                                                                        {
+                                                                                            "items":  [
+                                                                                                          {
+                                                                                                              "label":  null,
+                                                                                                              "component":  null,
+                                                                                                              "name":  null,
+                                                                                                              "inputType":  null
+                                                                                                          }
+                                                                                                      ],
+                                                                                            "index":  0
+                                                                                        }
+                                                                                    ],
+                                                                        "name":  null
+                                                                    },
+                                                                    {
+                                                                        "label":  null,
+                                                                        "component":  "FormHtmlViewer",
+                                                                        "name":  "form_html_viewer"
+                                                                    },
+                                                                    {
+                                                                        "label":  null,
+                                                                        "component":  "FormMultiColumn",
+                                                                        "columns":  [
+                                                                                        {
+                                                                                            "items":  [
+                                                                                                          {
+                                                                                                              "label":  null,
+                                                                                                              "component":  null,
+                                                                                                              "name":  null,
+                                                                                                              "inputType":  null
+                                                                                                          }
+                                                                                                      ],
+                                                                                            "index":  0
+                                                                                        },
+                                                                                        {
+                                                                                            "items":  [
+                                                                                                          {
+                                                                                                              "label":  null,
+                                                                                                              "component":  null,
+                                                                                                              "name":  null,
+                                                                                                              "inputType":  null
+                                                                                                          }
+                                                                                                      ],
+                                                                                            "index":  1
+                                                                                        },
+                                                                                        {
+                                                                                            "items":  [
+                                                                                                          {
+                                                                                                              "label":  null,
+                                                                                                              "component":  null,
+                                                                                                              "name":  null,
+                                                                                                              "inputType":  null
+                                                                                                          }
+                                                                                                      ],
+                                                                                            "index":  2
+                                                                                        },
+                                                                                        {
+                                                                                            "items":  [
+                                                                                                          {
+                                                                                                              "label":  null,
+                                                                                                              "component":  null,
+                                                                                                              "name":  null,
+                                                                                                              "inputType":  null
+                                                                                                          }
+                                                                                                      ],
+                                                                                            "index":  3
+                                                                                        }
+                                                                                    ],
+                                                                        "name":  null
+                                                                    }
+                                                                ]
+                                                 }
+                                             ],
+                                "id":  101
+                            },
+                    "102":  {
+                                "title":  "COL - CUW LIAB - Subform - Información General",
+                                "sections":  [
+                                                 {
+                                                     "name":  "CU - COL - Subform - Información General",
+                                                     "fields":  [
+                                                                    {
+                                                                        "label":  null,
+                                                                        "component":  "FormMultiColumn",
+                                                                        "columns":  [
+                                                                                        {
+                                                                                            "items":  [
+                                                                                                          {
+                                                                                                              "label":  null,
+                                                                                                              "component":  null,
+                                                                                                              "name":  null,
+                                                                                                              "inputType":  null
+                                                                                                          }
+                                                                                                      ],
+                                                                                            "index":  0
+                                                                                        }
+                                                                                    ],
+                                                                        "name":  null
+                                                                    }
+                                                                ]
+                                                 },
+                                                 {
+                                                     "name":  "Modal Intermediarios Adicionales",
+                                                     "fields":  [
+                                                                    {
+                                                                        "label":  null,
+                                                                        "component":  "FormMultiColumn",
+                                                                        "columns":  [
+                                                                                        {
+                                                                                            "items":  [
+                                                                                                          {
+                                                                                                              "label":  null,
+                                                                                                              "component":  null,
+                                                                                                              "name":  null,
+                                                                                                              "inputType":  null
+                                                                                                          }
+                                                                                                      ],
+                                                                                            "index":  0
+                                                                                        }
+                                                                                    ],
+                                                                        "name":  null
+                                                                    },
+                                                                    {
+                                                                        "label":  null,
+                                                                        "component":  "FormMultiColumn",
+                                                                        "columns":  [
+                                                                                        {
+                                                                                            "items":  [
+                                                                                                          {
+                                                                                                              "label":  null,
+                                                                                                              "component":  null,
+                                                                                                              "name":  null,
+                                                                                                              "inputType":  null
+                                                                                                          }
+                                                                                                      ],
+                                                                                            "index":  0
+                                                                                        },
+                                                                                        {
+                                                                                            "items":  [
+                                                                                                          {
+                                                                                                              "label":  null,
+                                                                                                              "component":  null,
+                                                                                                              "name":  null,
+                                                                                                              "inputType":  null
+                                                                                                          }
+                                                                                                      ],
+                                                                                            "index":  1
+                                                                                        }
+                                                                                    ],
+                                                                        "name":  null
+                                                                    }
+                                                                ]
+                                                 }
+                                             ],
+                                "id":  102
+                            }
+                }
+}

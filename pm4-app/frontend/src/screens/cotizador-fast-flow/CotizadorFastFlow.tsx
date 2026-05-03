@@ -1,0 +1,568 @@
+import { useEffect } from 'react';
+import { useForm, FieldError } from 'react-hook-form';
+import './styles.css';
+import { useTask } from '../../core/useTask';
+import { useCollection } from '../../core/useCollection';
+import FormSection from '../../components/FormSection';
+import InputField from '../../components/fields/InputField';
+import SelectField from '../../components/fields/SelectField';
+import RadioField from '../../components/fields/RadioField';
+import DateField from '../../components/fields/DateField';
+import { OPTIONS, COLLECTION_DEFS, CotizadorFormData } from './variables';
+
+// ---------------------------------------------------------------------------
+// Helper: muestra el error solo si el campo tiene valor O el form fue enviado.
+// Campos requeridos vacíos no se marcan en rojo hasta el primer intento de submit.
+// ---------------------------------------------------------------------------
+function fieldError(
+  err: FieldError | undefined,
+  value: unknown,
+  isSubmitted: boolean
+): string | undefined {
+  if (!err) return undefined;
+  const isEmpty = value === '' || value === null || value === undefined;
+  if (err.type === 'required' && isEmpty) return isSubmitted ? String(err.message) : undefined;
+  return String(err.message);
+}
+
+// ---------------------------------------------------------------------------
+// Logo Zurich
+// ---------------------------------------------------------------------------
+function ZurichLogo() {
+  return (
+    <svg width="80" height="40" viewBox="0 0 120 60" fill="none">
+      <text x="4" y="42" fontFamily="Arial" fontSize="32" fontWeight="900" fill="#fff" letterSpacing="-1">Z</text>
+      <text x="28" y="38" fontFamily="Arial" fontSize="16" fontWeight="700" fill="#fff">ZURICH</text>
+    </svg>
+  );
+}
+
+// ---------------------------------------------------------------------------
+// Sección: Información general
+// ---------------------------------------------------------------------------
+function InfoGeneral({ form }: { form: ReturnType<typeof useForm<CotizadorFormData>> }) {
+  const { register, formState: { errors, isSubmitted }, watch } = form;
+  const w = watch();
+
+  const { options: intermediarios, loading: loadingInt } = useCollection(
+    COLLECTION_DEFS.intermediarios
+  );
+  const { options: correos, loading: loadingCorreos } = useCollection(
+    COLLECTION_DEFS.correosIntermediari,
+    { frm_gen_intermediario_principal: w.frm_gen_intermediario_principal }
+  );
+
+  const fe = (name: keyof CotizadorFormData) =>
+    fieldError(errors[name] as FieldError | undefined, w[name], isSubmitted);
+
+  return (
+    <FormSection title="Información General">
+      <div className="form-row cols-2">
+        <DateField
+          label="Fecha de cotización"
+          registration={register('frm_gen_fecha_cotizacion')}
+          readOnly
+        />
+        <SelectField
+          label="Producto"
+          name="frm_gen_producto"
+          control={form.control}
+          rules={{ required: 'Campo requerido' }}
+          options={OPTIONS.producto}
+          required
+          error={fe('frm_gen_producto')}
+        />
+      </div>
+
+      <div className="form-row cols-2">
+        <SelectField
+          label="Sucursal"
+          name="frm_gen_sucursal"
+          control={form.control}
+          rules={{ required: 'Campo requerido' }}
+          options={OPTIONS.sucursal}
+          required
+          error={fe('frm_gen_sucursal')}
+        />
+        <SelectField
+          label="Nueva/Renovación"
+          name="frm_gen_nueva_o_renovacion"
+          control={form.control}
+          rules={{ required: 'Campo requerido' }}
+          options={OPTIONS.nuevaRenovacion}
+          required
+          error={fe('frm_gen_nueva_o_renovacion')}
+        />
+      </div>
+
+      <div className="form-row cols-3">
+        <SelectField
+          label="Intermediario"
+          name="frm_gen_intermediario_principal"
+          control={form.control}
+          rules={{ required: 'Campo requerido' }}
+          options={intermediarios}
+          loading={loadingInt}
+          required
+          error={fe('frm_gen_intermediario_principal')}
+        />
+        <SelectField
+          label="Correo Intermediario"
+          name="frm_gen_intermediario_principal_correo_test"
+          control={form.control}
+          rules={{ required: 'Campo requerido' }}
+          options={correos}
+          loading={loadingCorreos}
+          placeholder={w.frm_gen_intermediario_principal ? 'Seleccione...' : 'Seleccione un intermediario primero'}
+          required
+          error={fe('frm_gen_intermediario_principal_correo_test')}
+        />
+        <RadioField
+          label="¿Incluye co-corretaje?"
+          name="frm_gen_incluye_cocorretaje_flag"
+          registration={register('frm_gen_incluye_cocorretaje_flag', { required: 'Campo requerido' })}
+          options={OPTIONS.siNo}
+          required
+          error={fe('frm_gen_incluye_cocorretaje_flag')}
+        />
+      </div>
+
+      <div className="form-row cols-1">
+        <InputField
+          label="Correo intermediario (para pruebas)"
+          registration={register('frm_gen_intermediario_principal_correo', {
+            pattern: {
+              value: /^[^\s@]+@[^\s@]+\.[^\s@]+$/,
+              message: 'Correo electrónico inválido',
+            },
+          })}
+          type="email"
+          helper="Campo para pruebas. Para producción se utilizará el campo anterior."
+          error={fe('frm_gen_intermediario_principal_correo')}
+        />
+      </div>
+    </FormSection>
+  );
+}
+
+// ---------------------------------------------------------------------------
+// Sección: Información del tomador + Territorialidad
+// ---------------------------------------------------------------------------
+function InfoTomador({
+  form,
+  onConsultarCliente,
+}: {
+  form: ReturnType<typeof useForm<CotizadorFormData>>;
+  onConsultarCliente: () => void;
+}) {
+  const { register, formState: { errors, isSubmitted }, watch } = form;
+  const w = watch();
+
+  const fe = (name: keyof CotizadorFormData) =>
+    fieldError(errors[name] as FieldError | undefined, w[name], isSubmitted);
+
+  return (
+    <FormSection title="">
+      <div className="form-subsection">
+        <div className="form-subsection-title">Información del tomador</div>
+        <div className="form-row cols-3 row-align-bottom">
+          <SelectField
+            label="Tipo de documento"
+            name="frm_tomador_tipo_documento"
+            control={form.control}
+            options={OPTIONS.tipoDocumento}
+            disabled
+          />
+          <InputField
+            label="Nro. de documento"
+            registration={register('frm_tomador_numDoc', {
+              required: 'Campo requerido',
+              minLength: { value: 5, message: 'Mínimo 5 caracteres' },
+              pattern: { value: /^\d+$/, message: 'Solo dígitos' },
+            })}
+            type="text"
+            required
+            error={fe('frm_tomador_numDoc')}
+          />
+          <div className="form-group consultar-wrapper">
+            <button type="button" className="btn-consultar" onClick={onConsultarCliente}>
+              🔍 Consultar Cliente
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <div className="section-spacer" />
+
+      <div className="form-row cols-3">
+        <SelectField
+          label="Territorialidad"
+          name="frm_tom_territorialidad"
+          control={form.control}
+          rules={{ required: 'Campo requerido' }}
+          options={[]}
+          required
+          error={fe('frm_tom_territorialidad')}
+        />
+        <SelectField
+          label="N° de ubicaciones"
+          name="frm_tom_num_ubicaciones"
+          control={form.control}
+          rules={{ required: 'Campo requerido' }}
+          options={[]}
+          required
+          error={fe('frm_tom_num_ubicaciones')}
+        />
+        <RadioField
+          label="Realiza exportaciones"
+          name="frm_tom_realiza_exportaciones"
+          registration={register('frm_tom_realiza_exportaciones', { required: 'Campo requerido' })}
+          options={OPTIONS.siNo}
+          required
+          error={fe('frm_tom_realiza_exportaciones')}
+        />
+      </div>
+
+      <div className="form-row cols-1">
+        <RadioField
+          label="¿El tomador es el asegurado?"
+          name="frm_tom_es_asegurado"
+          registration={register('frm_tom_es_asegurado', { required: 'Campo requerido' })}
+          options={OPTIONS.siNo}
+          required
+          error={fe('frm_tom_es_asegurado')}
+        />
+      </div>
+    </FormSection>
+  );
+}
+
+// ---------------------------------------------------------------------------
+// Sección: Datos de la cotización
+// ---------------------------------------------------------------------------
+function DatosCotizacion({ form }: { form: ReturnType<typeof useForm<CotizadorFormData>> }) {
+  const { register, formState: { errors, isSubmitted }, watch, setValue } = form;
+  const w = watch();
+
+  const { options: naicOptions, loading: loadingNaic } = useCollection(
+    COLLECTION_DEFS.naic,
+    { frm_gen_pais: w.frm_gen_pais }
+  );
+
+  const fe = (name: keyof CotizadorFormData) =>
+    fieldError(errors[name] as FieldError | undefined, w[name], isSubmitted);
+
+  // Calcula fin de vigencia automáticamente (365 días)
+  useEffect(() => {
+    if (!w.frm_cot_fecha_inicio_vigencia) return;
+    const d = new Date(w.frm_cot_fecha_inicio_vigencia);
+    d.setFullYear(d.getFullYear() + 1);
+    d.setDate(d.getDate() - 1);
+    setValue('frm_cot_fecha_fin_vigencia', d.toISOString().split('T')[0]);
+    setValue('frm_cot_dias_inicio_fin_vigencia', 365);
+  }, [w.frm_cot_fecha_inicio_vigencia, setValue]);
+
+  return (
+    <FormSection title="Datos de la Cotización">
+      <div className="form-row cols-2">
+        <DateField
+          label="Inicio de vigencia"
+          registration={register('frm_cot_fecha_inicio_vigencia', { required: 'Campo requerido' })}
+          required
+          helper="a las 00:00 horas"
+          error={fe('frm_cot_fecha_inicio_vigencia')}
+        />
+        <DateField
+          label="Fin de vigencia"
+          registration={register('frm_cot_fecha_fin_vigencia')}
+          readOnly
+          helper="a las 24:00 horas"
+        />
+      </div>
+
+      <div className="form-row cols-1">
+        <InputField
+          label="Días"
+          registration={register('frm_cot_dias_inicio_fin_vigencia')}
+          type="number"
+          readOnly
+          helper="Campo automático"
+        />
+      </div>
+
+      <div className="form-row cols-2">
+        <InputField
+          label="Ingresos operacionales anuales"
+          registration={register('frm_cot_ingresos_operaciones_anuales', {
+            required: 'Campo requerido',
+            min: { value: 1, message: 'Debe ser mayor a 0' },
+          })}
+          type="number"
+          required
+          error={fe('frm_cot_ingresos_operaciones_anuales')}
+        />
+        <InputField
+          label="Ingresos proyectados anuales"
+          registration={register('frm_cot_ingresos_proyectados_anuales', {
+            required: 'Campo requerido',
+            min: { value: 1, message: 'Debe ser mayor a 0' },
+          })}
+          type="number"
+          required
+          error={fe('frm_cot_ingresos_proyectados_anuales')}
+        />
+      </div>
+
+      <div className="form-row cols-1">
+        <SelectField
+          label="Actividad NAIC"
+          name="frm_cot_actividad_naic"
+          control={form.control}
+          rules={{ required: 'Campo requerido' }}
+          options={naicOptions}
+          loading={loadingNaic}
+          required
+          error={fe('frm_cot_actividad_naic')}
+        />
+      </div>
+
+      <div className="form-row cols-2">
+        <SelectField
+          label="Modalidad de cobertura"
+          name="frm_cot_modalidad_cobertura"
+          control={form.control}
+          rules={{ required: 'Campo requerido' }}
+          options={OPTIONS.modalidadCobertura}
+          required
+          error={fe('frm_cot_modalidad_cobertura')}
+        />
+        <RadioField
+          label="Siniestralidad"
+          name="frm_cot_siniestralidad_flag"
+          registration={register('frm_cot_siniestralidad_flag', { required: 'Campo requerido' })}
+          options={OPTIONS.siNo}
+          required
+          error={fe('frm_cot_siniestralidad_flag')}
+        />
+      </div>
+    </FormSection>
+  );
+}
+
+// ---------------------------------------------------------------------------
+// Sección: Propuesta económica
+// ---------------------------------------------------------------------------
+function PropuestaEconomica({ form }: { form: ReturnType<typeof useForm<CotizadorFormData>> }) {
+  const { register, formState: { errors, isSubmitted }, watch } = form;
+  const w = watch();
+
+  const fe = (name: keyof CotizadorFormData) =>
+    fieldError(errors[name] as FieldError | undefined, w[name], isSubmitted);
+
+  return (
+    <FormSection title="Propuesta Económica">
+      <div className="form-row cols-2">
+        <div>
+          <div className="propuesta-opcion">
+            <div className="propuesta-opcion-label">Valor asegurado — Opción 1</div>
+            <div className="currency-field">
+              <input
+                {...register('frm_valor_asegurado_opcion1', {
+                  min: { value: 0, message: 'Debe ser 0 o mayor' },
+                })}
+                type="number"
+                step="0.01"
+                className={`form-control${fe('frm_valor_asegurado_opcion1') ? ' is-invalid' : ''}`}
+                defaultValue={0}
+              />
+              <span className="currency-label">COP</span>
+            </div>
+            {fe('frm_valor_asegurado_opcion1') && (
+              <div className="error-note">{fe('frm_valor_asegurado_opcion1')}</div>
+            )}
+            <small className="form-helper">
+              Para continuar, debe ingresar al menos una opción de{' '}
+              <strong>valor asegurado</strong>
+            </small>
+          </div>
+        </div>
+
+        <div>
+          <div className="deducible-section-label">
+            <span className="required-star">* </span>Deducible
+          </div>
+          {OPTIONS.deducible.map((opt) => (
+            <label key={opt.value} className="deducible-option">
+              <input
+                {...register('frm_modal_propuesta_deducible', {
+                  required: 'Debe seleccionar una opción de deducible',
+                })}
+                type="radio"
+                value={opt.value}
+                className="form-check-input"
+              />
+              <span className="deducible-option-text">{opt.label}</span>
+            </label>
+          ))}
+          {fe('frm_modal_propuesta_deducible') && (
+            <div className="error-note">{fe('frm_modal_propuesta_deducible')}</div>
+          )}
+        </div>
+      </div>
+    </FormSection>
+  );
+}
+
+// ---------------------------------------------------------------------------
+// Sección: Plan de pago
+// ---------------------------------------------------------------------------
+function PlanPago({ form }: { form: ReturnType<typeof useForm<CotizadorFormData>> }) {
+  const { formState: { errors, isSubmitted }, watch } = form;
+  const w = watch();
+
+  const fe = (name: keyof CotizadorFormData) =>
+    fieldError(errors[name] as FieldError | undefined, w[name], isSubmitted);
+
+  return (
+    <FormSection title="Plan de Pago">
+      <div className="form-row cols-2">
+        <SelectField
+          label="Plan de pago"
+          name="frm_plan_pago"
+          control={form.control}
+          rules={{ required: 'Campo requerido' }}
+          options={OPTIONS.planPago}
+          required
+          error={fe('frm_plan_pago')}
+        />
+        <SelectField
+          label="Número de cuotas"
+          name="frm_num_cuotas"
+          control={form.control}
+          rules={{ required: 'Campo requerido' }}
+          options={OPTIONS.numCuotas}
+          required
+          error={fe('frm_num_cuotas')}
+        />
+      </div>
+      <div className="form-row cols-2">
+        <SelectField
+          label="Método de pago"
+          name="frm_metodo_pago"
+          control={form.control}
+          rules={{ required: 'Campo requerido' }}
+          options={OPTIONS.metodoPago}
+          required
+          error={fe('frm_metodo_pago')}
+        />
+        <SelectField
+          label="Frecuencia de cobro"
+          name="frm_frecuencia_cobro"
+          control={form.control}
+          rules={{ required: 'Campo requerido' }}
+          options={OPTIONS.frecuenciaCobro}
+          required
+          error={fe('frm_frecuencia_cobro')}
+        />
+      </div>
+    </FormSection>
+  );
+}
+
+// ---------------------------------------------------------------------------
+// Componente principal
+// ---------------------------------------------------------------------------
+export default function CotizadorFastFlow() {
+  const { task, loading, error, submitting, completeTask } = useTask();
+
+  const form = useForm<CotizadorFormData>({
+    mode: 'onChange',
+    reValidateMode: 'onChange',
+    defaultValues: {
+      frm_gen_producto: 'RC',
+      frm_gen_pais: 'CO',
+      frm_gen_fecha_cotizacion: new Date().toISOString().split('T')[0],
+      frm_tomador_tipo_documento: 'NIT',
+      frm_plan_pago: '102',
+      frm_num_cuotas: '1',
+      frm_metodo_pago: 'TRANSFERENCIA',
+      frm_frecuencia_cobro: 'ANUAL',
+      frm_cot_dias_inicio_fin_vigencia: 365,
+      frm_valor_asegurado_opcion1: 0,
+    },
+  });
+
+  // Carga variables del caso cuando la tarea está lista
+  useEffect(() => {
+    if (!task?.data) return;
+    const d = task.data as Partial<CotizadorFormData>;
+    Object.entries(d).forEach(([key, val]) => {
+      if (val !== null && val !== undefined) {
+        form.setValue(key as keyof CotizadorFormData, val as never);
+      }
+    });
+  }, [task, form]);
+
+  const onSubmit = async (data: CotizadorFormData) => {
+    try {
+      await completeTask(data as unknown as Record<string, unknown>);
+      alert('Formulario enviado correctamente. La tarea fue completada.');
+    } catch (e) {
+      alert(`Error al enviar: ${(e as Error).message}`);
+    }
+  };
+
+  const handleConsultarCliente = () => {
+    const numDoc = form.getValues('frm_tomador_numDoc');
+    if (!numDoc) {
+      alert('Ingrese el número de documento primero.');
+      return;
+    }
+    // TODO: invocar watcher "Tomador NIT" via /api/scripts/{id}/execute
+    console.log('[watcher] Consultando cliente con NIT:', numDoc);
+  };
+
+  if (loading) {
+    return (
+      <div className="screen-loading">
+        <div className="spinner" />
+      </div>
+    );
+  }
+
+  if (error) {
+    return <div className="screen-error">⚠️ Error cargando la tarea: {error}</div>;
+  }
+
+  const caseNumber = form.watch('frm_caso') ?? task?.process_request_id ?? '—';
+  const cotizacion = form.watch('frm_gen_num_cotizacion') ?? '—';
+
+  return (
+    <div className="screen-wrapper">
+      <div className="screen-header">
+        <div className="title-block">
+          <h1>Cotizador Fast Flow</h1>
+          <div className="subtitle">
+            <span>Cotización # {cotizacion}</span>
+            <span>Caso # {caseNumber}</span>
+          </div>
+        </div>
+        <ZurichLogo />
+      </div>
+
+      <form onSubmit={form.handleSubmit(onSubmit)} noValidate>
+        <InfoGeneral form={form} />
+        <InfoTomador form={form} onConsultarCliente={handleConsultarCliente} />
+        <DatosCotizacion form={form} />
+        <PropuestaEconomica form={form} />
+        <PlanPago form={form} />
+
+        <div className="submit-bar">
+          <button type="submit" className="btn-enviar" disabled={submitting}>
+            {submitting ? 'Enviando...' : '✈ ENVIAR'}
+          </button>
+        </div>
+      </form>
+    </div>
+  );
+}
