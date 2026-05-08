@@ -144,8 +144,6 @@ function AseguradoModal({ initial, onClose, onAccept }: ModalProps) {
                 label="Actividad asegurada"
                 name="frm_aseg_adic_actividad_asegurada"
                 control={control}
-                required
-                rules={{ required: 'Campo requerido' }}
                 options={ACTIVIDAD_ASEGURADA_OPTIONS}
                 error={errors.frm_aseg_adic_actividad_asegurada?.message}
               />

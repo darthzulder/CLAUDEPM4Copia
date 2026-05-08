@@ -626,3 +626,63 @@
 }
 
 .combo-option:hover { background: #f1f5fb !important; }
+
+/* ──────────────────────────────────────
+   ERROR DE ENVÍO (inline)
+────────────────────────────────────── */
+.submit-error {
+  background: #fff1f2;
+  border: 1px solid #fecdd3;
+  border-left: 4px solid var(--z-red);
+  border-radius: 8px;
+  padding: 12px 16px;
+  color: #be123c;
+  font-size: 13px;
+  font-weight: 500;
+  margin-bottom: 16px;
+}
+
+/* ──────────────────────────────────────
+   PANTALLA DE ÉXITO (sent)
+────────────────────────────────────── */
+.screen-sent {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 340px;
+  background: #fff;
+  border-radius: 12px;
+  box-shadow: var(--z-card-shadow);
+  border: 1px solid rgba(221,227,236,.7);
+  padding: 48px 32px;
+  text-align: center;
+}
+
+.screen-sent-icon {
+  width: 64px;
+  height: 64px;
+  border-radius: 50%;
+  background: var(--z-green);
+  color: #fff;
+  font-size: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 20px;
+  box-shadow: 0 4px 14px rgba(12,164,66,.3);
+}
+
+.screen-sent-title {
+  font-size: 20px;
+  font-weight: 700;
+  color: var(--z-text);
+  margin-bottom: 10px;
+}
+
+.screen-sent-sub {
+  font-size: 14px;
+  color: var(--z-muted);
+  line-height: 1.6;
+  max-width: 380px;
+}

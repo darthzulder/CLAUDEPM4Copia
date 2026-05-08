@@ -304,7 +304,6 @@ function InfoTomador({
                     label=""
                     name={actField}
                     control={control}
-                    rules={{ required: 'Requerido' }}
                     options={options}
                     loading={loading}
                     error={fe(actField)}
@@ -468,6 +467,8 @@ function PlanPago({ form }: { form: ReturnType<typeof useForm<FfFlSolicitudFormD
 export default function SolicitudFfFl() {
   const { task, loading, error, submitting, completeTask } = useTask();
   const [productError, setProductError] = useState('');
+  const [submitError, setSubmitError] = useState('');
+  const [sent, setSent] = useState(false);
 
   const form = useForm<FfFlSolicitudFormData>({
     mode: 'onChange',
@@ -495,6 +496,7 @@ export default function SolicitudFfFl() {
     },
   });
 
+  // Pre-poblar el formulario con los datos del task (variables del proceso)
   useEffect(() => {
     if (!task?.data) return;
     const d = task.data as Partial<FfFlSolicitudFormData>;
@@ -511,22 +513,54 @@ export default function SolicitudFfFl() {
     if (count === 0) { setProductError('Seleccione al menos un producto'); return; }
     if (data.frm_gen_prod_cc && count === 1) { setProductError('Crimen Comercial no puede cotizarse como monolinea'); return; }
     setProductError('');
+    setSubmitError('');
     try {
-      await completeTask(data as unknown as Record<string, unknown>);
+      // Combinar variables originales del proceso con los datos del formulario.
+      // Los datos del formulario tienen precedencia; las variables de PM4 no mostradas
+      // en este form se preservan para que el proceso no las pierda.
+      const payload: Record<string, unknown> = {
+        ...(task?.data ?? {}),
+        ...(data as unknown as Record<string, unknown>),
+      };
+      await completeTask(payload);
+      setSent(true);
     } catch (e) {
-      alert(`Error al enviar: ${(e as Error).message}`);
+      setSubmitError((e as Error).message ?? 'Error desconocido al enviar');
     }
   };
 
   const handleConsultarNIT = () => {
     const nit = form.getValues('frm_tom_nit');
-    if (!nit) { alert('Ingrese el NIT primero.'); return; }
+    if (!nit) { setSubmitError('Ingrese el NIT primero.'); return; }
     // TODO: invocar watcher "Consultar NIT en TIA" via /api/scripts/{scriptId}/execute
     console.log('[watcher] Consultando NIT en TIA:', nit);
   };
 
   if (loading) return <div className="screen-loading"><div className="spinner" /></div>;
   if (error) return <div className="screen-error">⚠ Error cargando la tarea: {error}</div>;
+
+  if (sent) {
+    return (
+      <div className="screen-wrapper">
+        <div className="screen-header">
+          <div className="title-block">
+            <h1>Cotizador Fast Flow — Líneas Financieras</h1>
+          </div>
+          <img src={zurichLogo} alt="Zurich" className="header-logo" />
+        </div>
+        <div className="screen-content">
+          <div className="screen-sent">
+            <div className="screen-sent-icon">✓</div>
+            <div className="screen-sent-title">Solicitud enviada</div>
+            <div className="screen-sent-sub">
+              La cotización fue enviada correctamente a ProcessMaker.<br />
+              El proceso continuará al siguiente nodo automáticamente.
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="screen-wrapper">
@@ -546,6 +580,10 @@ export default function SolicitudFfFl() {
           <InfoTomador form={form} onConsultarNIT={handleConsultarNIT} />
           <DatosCotizacion form={form} />
           <PlanPago form={form} />
+
+          {submitError && (
+            <div className="submit-error">{submitError}</div>
+          )}
 
           <div className="submit-bar">
             <button type="submit" className="btn-continuar" disabled={submitting}>
