@@ -4,7 +4,8 @@
   "workspaces": ["backend", "frontend"],
   "scripts": {
     "dev": "concurrently \"npm run dev --workspace=backend\" \"npm run dev --workspace=frontend\"",
-    "build": "npm run build --workspace=frontend"
+    "build": "npm run build --workspace=frontend && npm run build --workspace=backend",
+    "start": "NODE_ENV=production node backend/dist/server.js"
   },
   "devDependencies": {
     "concurrently": "^8.2.2"

@@ -1,0 +1,14 @@
+services:
+  - type: web
+    name: pm4-app
+    runtime: node
+    rootDir: .
+    buildCommand: npm install && npm run build
+    startCommand: npm run start
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: PM4_BASE_URL
+        sync: false
+      - key: PM4_TOKEN
+        sync: false
