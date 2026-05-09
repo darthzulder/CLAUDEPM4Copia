@@ -107,4 +107,44 @@ router.post('/scripts/:id/execute', (req, res) =>
   pm4Request('POST', `/scripts/execute/${req.params.id}`, req, res)
 );
 
+// Files — list files attached to a request
+router.get('/requests/:request_id/files', (req, res) =>
+  pm4Request('GET', `/requests/${req.params.request_id}/files`, req, res)
+);
+
+// Files — stream binary content (PDF, images, etc.) proxied with auth
+async function streamFile(pmPath: string, req: Request, res: Response) {
+  const token = getToken(req);
+  const base  = process.env.PM4_BASE_URL;
+  const url   = `${base}/api/1.0${pmPath}`;
+
+  console.log(`[file-stream] GET ${url}`);
+  try {
+    const response = await axios.get(url, {
+      responseType: 'stream',
+      headers: { Authorization: `Bearer ${token}` },
+    });
+
+    const ct = (response.headers['content-type'] as string | undefined) ?? 'application/octet-stream';
+    const cd = response.headers['content-disposition'] as string | undefined;
+    res.setHeader('Content-Type', ct);
+    if (cd) res.setHeader('Content-Disposition', cd);
+    console.log(`[file-stream] ← ${response.status} ${ct}`);
+    (response.data as NodeJS.ReadableStream).pipe(res);
+  } catch (err) {
+    const e = err as AxiosError;
+    const status = e.response?.status ?? 500;
+    console.error(`[file-stream] ERROR ${status}:`, e.message);
+    res.status(status).json({ message: e.message });
+  }
+}
+
+router.get('/files/:file_id/contents', (req, res) =>
+  streamFile(`/files/${req.params.file_id}/contents`, req, res)
+);
+
+router.get('/requests/:request_id/files/:file_id/contents', (req, res) =>
+  streamFile(`/requests/${req.params.request_id}/files/${req.params.file_id}/contents`, req, res)
+);
+
 export default router;
