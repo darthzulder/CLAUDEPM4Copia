@@ -10,27 +10,8 @@ export const COLLECTION_DEFS = {
     valueField: 'id',
   } satisfies CollectionDef,
 
-  // TODO: Verificar IDs de colecciones de actividades FL en la instancia PM4
-  actividadesDyO: {
-    id: 20,
-    labelField: 'data.frm_actividad',
-    valueField: 'data.frm_actividad',
-  } satisfies CollectionDef,
-
-  actividadesCC: {
-    id: 21,
-    labelField: 'data.frm_actividad',
-    valueField: 'data.frm_actividad',
-  } satisfies CollectionDef,
-
-  actividadesPDySI: {
-    id: 22,
-    labelField: 'data.frm_actividad',
-    valueField: 'data.frm_actividad',
-  } satisfies CollectionDef,
-
-  actividadesPI: {
-    id: 23,
+  actividadesCIIU: {
+    id: 2,
     labelField: 'data.frm_actividad',
     valueField: 'data.frm_actividad',
   } satisfies CollectionDef,

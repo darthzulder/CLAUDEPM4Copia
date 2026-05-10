@@ -205,16 +205,37 @@ function InfoTomador({
   const ciudades = useMemo(() => CIUDADES_POR_DEPTO[w.frm_tom_departamento ?? ''] ?? [], [w.frm_tom_departamento]);
   useEffect(() => { setValue('frm_tom_ciudad', ''); }, [w.frm_tom_departamento, setValue]);
 
-  const { options: actDyO, loading: loadActDyO } = useCollection(w.frm_gen_prod_dyo ? COLLECTION_DEFS.actividadesDyO : null);
-  const { options: actCC, loading: loadActCC } = useCollection(w.frm_gen_prod_cc ? COLLECTION_DEFS.actividadesCC : null);
-  const { options: actPDySI, loading: loadActPDySI } = useCollection(w.frm_gen_prod_pdysi ? COLLECTION_DEFS.actividadesPDySI : null);
-  const { options: actPI, loading: loadActPI } = useCollection(w.frm_gen_prod_pi ? COLLECTION_DEFS.actividadesPI : null);
+  const anyProductSelected = w.frm_gen_prod_dyo || w.frm_gen_prod_cc || w.frm_gen_prod_pdysi || w.frm_gen_prod_pi;
+  const { options: actOpts, loading: loadAct, rawMap: actRawMap } = useCollection(anyProductSelected ? COLLECTION_DEFS.actividadesCIIU : null);
+
+  // Auto-rellena CIIU y NAIC cuando el usuario elige una actividad
+  useEffect(() => {
+    const pairs = [
+      { act: w.frm_act_dyo_actividad,   ciu: 'frm_act_dyo_cod_ciiu'   as const, naic: 'frm_act_dyo_cod_naic'   as const },
+      { act: w.frm_act_cc_actividad,    ciu: 'frm_act_cc_cod_ciiu'    as const, naic: 'frm_act_cc_cod_naic'    as const },
+      { act: w.frm_act_pdysi_actividad, ciu: 'frm_act_pdysi_cod_ciiu' as const, naic: 'frm_act_pdysi_cod_naic' as const },
+      { act: w.frm_act_pi_actividad,    ciu: 'frm_act_pi_cod_ciiu'    as const, naic: 'frm_act_pi_cod_naic'    as const },
+    ];
+    for (const { act, ciu, naic } of pairs) {
+      if (!act) continue;
+      const rec = actRawMap[act] as { data?: Record<string, unknown> } | undefined;
+      if (!rec) continue;
+      const d = rec.data ?? {};
+      console.log('[actividades] record para', act, d);
+      setValue(ciu,  String(d.frm_ciiu  ?? d.frm_codigo_ciiu  ?? d.frm_codigo ?? ''));
+      setValue(naic, String(d.frm_naic  ?? d.frm_codigo_naic  ?? ''));
+    }
+  }, [
+    w.frm_act_dyo_actividad, w.frm_act_cc_actividad,
+    w.frm_act_pdysi_actividad, w.frm_act_pi_actividad,
+    actRawMap, setValue,
+  ]);
 
   const actRows = [
-    w.frm_gen_prod_dyo ? { prod: 'D&O', actField: 'frm_act_dyo_actividad' as const, ciuField: 'frm_act_dyo_cod_ciiu' as const, naicField: 'frm_act_dyo_cod_naic' as const, options: actDyO, loading: loadActDyO } : null,
-    w.frm_gen_prod_cc ? { prod: 'Crimen Comercial', actField: 'frm_act_cc_actividad' as const, ciuField: 'frm_act_cc_cod_ciiu' as const, naicField: 'frm_act_cc_cod_naic' as const, options: actCC, loading: loadActCC } : null,
-    w.frm_gen_prod_pdysi ? { prod: 'PDySI', actField: 'frm_act_pdysi_actividad' as const, ciuField: 'frm_act_pdysi_cod_ciiu' as const, naicField: 'frm_act_pdysi_cod_naic' as const, options: actPDySI, loading: loadActPDySI } : null,
-    w.frm_gen_prod_pi ? { prod: 'Seg. Profesional', actField: 'frm_act_pi_actividad' as const, ciuField: 'frm_act_pi_cod_ciiu' as const, naicField: 'frm_act_pi_cod_naic' as const, options: actPI, loading: loadActPI } : null,
+    w.frm_gen_prod_dyo ? { prod: 'D&O', actField: 'frm_act_dyo_actividad' as const, ciuField: 'frm_act_dyo_cod_ciiu' as const, naicField: 'frm_act_dyo_cod_naic' as const, options: actOpts, loading: loadAct } : null,
+    w.frm_gen_prod_cc ? { prod: 'Crimen Comercial', actField: 'frm_act_cc_actividad' as const, ciuField: 'frm_act_cc_cod_ciiu' as const, naicField: 'frm_act_cc_cod_naic' as const, options: actOpts, loading: loadAct } : null,
+    w.frm_gen_prod_pdysi ? { prod: 'PDySI', actField: 'frm_act_pdysi_actividad' as const, ciuField: 'frm_act_pdysi_cod_ciiu' as const, naicField: 'frm_act_pdysi_cod_naic' as const, options: actOpts, loading: loadAct } : null,
+    w.frm_gen_prod_pi ? { prod: 'Seg. Profesional', actField: 'frm_act_pi_actividad' as const, ciuField: 'frm_act_pi_cod_ciiu' as const, naicField: 'frm_act_pi_cod_naic' as const, options: actOpts, loading: loadAct } : null,
   ].filter((r): r is NonNullable<typeof r> => r !== null);
 
   return (
@@ -313,7 +334,7 @@ function InfoTomador({
               <div key={prod} className="actividades-table-row">
                 <span className="actividades-prod-label">{prod}</span>
                 <div className="actividades-cell">
-                  <ZdsSelect
+                  <ZdsSuggest
                     label=""
                     name={actField}
                     control={control}

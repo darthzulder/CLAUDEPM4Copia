@@ -111,7 +111,7 @@ export default function CreacionTomador({ form }: { form: Form }) {
             />
           </div>
 
-          <div className="form-subsection-title" className="form-subsection-title--spaced">Representante legal</div>
+          <div className="form-subsection-title form-subsection-title--spaced">Representante legal</div>
           <div className="form-row cols-3">
             <ZdsInput
               control={control}
@@ -138,7 +138,7 @@ export default function CreacionTomador({ form }: { form: Form }) {
             />
           </div>
 
-          <div className="form-subsection-title" className="form-subsection-title--spaced">Dirección</div>
+          <div className="form-subsection-title form-subsection-title--spaced">Dirección</div>
           <div className="form-row cols-1">
             <ZdsInput
               control={control}
