@@ -29,7 +29,18 @@ When a user asks you to build something with the **Zurich Design System**:
 ```
 outputs/
 ├── zurich-index.md                       ← you are here (master index)
-└── react/                                ← React platform
+└── react/                                ← React design system
+    ├── foundations/                      ← Design tokens & guidelines (CSS vars + HTML attrs)
+    │   ├── zurich-typography.md          ← fonts (Zurich Sans, Ogg), emoji setup
+    │   ├── zurich-typography-styles.md   ← --zf-h-*, --zf-ht-*, --zf-body-*, --zf-capt-*, z-heading
+    │   ├── zurich-colors.md              ← brand / secondary / tints / gray / status / overlay taxonomy
+    │   ├── zurich-colors-palettes.md     ← per-shade HEX / HSL / RGB / luminance reference
+    │   ├── zurich-layouts-flex.md        ← z-flex + z-align HTML attributes
+    │   ├── zurich-layouts-grid.md        ← z-grid="main" + column responsive grid
+    │   ├── zurich-spacers.md             ← --zs-* spacing scale tokens
+    │   └── assets/                       ← Subcategory: catalog assets
+    │       ├── zurich-icons.md           ← generic ZDS icon set by category
+    │       └── zurich-brand-icons.md     ← social/third-party brand icons (Color & :mono)
     ├── atoms/                            ← Category: action / interactive primitives
     │   ├── zurich-button.md
     │   ├── zurich-tooltip.md
@@ -44,6 +55,8 @@ outputs/
     │   ├── zurich-textarea.md
     │   ├── zurich-radioselect.md
     │   └── zurich-stepper.md
+    ├── molecules/                        ← Category: composite content surfaces
+    │   └── zurich-tile.md
     └── layout/                           ← Category: containers & structural surfaces
         ├── zurich-form.md
         ├── zurich-card.md
@@ -54,12 +67,26 @@ outputs/
         └── zurich-inputgroup.md
 ```
 
-> When a new platform appears (e.g. Vue, Angular), add a sibling folder next to `react/`.
-> When a new category appears (e.g. `feedback`, `navigation`, `media`), add a sibling folder next to `input/` and `layout/` inside the relevant platform.
+> Everything lives under `react/`. Foundations, atoms, inputs, molecules, layouts — all of them.
+> When a new category appears (e.g. `feedback`, `navigation`, `media`), add a sibling folder next to the existing ones inside `react/`.
 
 ---
 
 ## 2. Component Index by Category
+
+### 2.0 React → Foundations *(design tokens & guidelines)*
+
+| Foundation                  | File                                                                                              | Status         | Purpose                                                                       |
+|-----------------------------|---------------------------------------------------------------------------------------------------|----------------|-------------------------------------------------------------------------------|
+| Typography                  | [`react/foundations/zurich-typography.md`](./react/foundations/zurich-typography.md)              | ✅ Live         | Fonts (Zurich Sans, Ogg), weights, hierarchy, emoji setup.                    |
+| Typography styles           | [`react/foundations/zurich-typography-styles.md`](./react/foundations/zurich-typography-styles.md)| ✅ Live         | Detailed tokens: `--zf-h-*`, `--zf-ht-*`, `--zf-body-*`, `--zf-capt-*`, `z-heading`. |
+| Colors                      | [`react/foundations/zurich-colors.md`](./react/foundations/zurich-colors.md)                      | ✅ Live         | Brand / secondary / tints / gray / status / overlay taxonomy.                  |
+| Color palettes              | [`react/foundations/zurich-colors-palettes.md`](./react/foundations/zurich-colors-palettes.md)    | ✅ Live         | Per-shade HEX / HSL / RGB / luminance reference for every hue.                 |
+| Layouts — Flex              | [`react/foundations/zurich-layouts-flex.md`](./react/foundations/zurich-layouts-flex.md)          | ✅ Live         | `z-flex` + `z-align` HTML attributes (direction / wrap / gap / alignment).    |
+| Layouts — Grid              | [`react/foundations/zurich-layouts-grid.md`](./react/foundations/zurich-layouts-grid.md)          | ✅ Live         | `z-grid="main"` + `column` 12-col responsive grid, breakpoints, rhythm.       |
+| Spacers                     | [`react/foundations/zurich-spacers.md`](./react/foundations/zurich-spacers.md)                    | ✅ Live         | `--zs-*` spacing scale tokens (12/25/50/.../1000 rem-based).                  |
+| Assets — Icons              | [`react/foundations/assets/zurich-icons.md`](./react/foundations/assets/zurich-icons.md)          | ✅ Live         | Generic ZDS icon catalog by category, `name[:line]` syntax, sizes.            |
+| Assets — Brand icons        | [`react/foundations/assets/zurich-brand-icons.md`](./react/foundations/assets/zurich-brand-icons.md)| ✅ Live       | Social / third-party brand logos, Color vs `:mono` variants.                  |
 
 ### 2.1 React → Atoms *(action / interactive primitives)*
 
@@ -83,7 +110,13 @@ outputs/
 | `ZrRangeDateInput` | [`react/input/zurich-rangedateinput.md`](./react/input/zurich-rangedateinput.md)    | ⚠️ Experimental | Date-range field (`[from, to]` ISO tuple) with bounds.          |
 | `ZrStepper`        | [`react/input/zurich-stepper.md`](./react/input/zurich-stepper.md)                  | ⚠️ Experimental | 1-based step counter with prev/next, label, center alignment.   |
 
-### 2.3 React → Layout *(containers & structural surfaces)*
+### 2.3 React → Molecules *(composite content surfaces — atom + content + actions)*
+
+| Component       | File                                                                              | Status         | Purpose                                                         |
+|-----------------|-----------------------------------------------------------------------------------|----------------|-----------------------------------------------------------------|
+| `ZrTile`        | [`react/molecules/zurich-tile.md`](./react/molecules/zurich-tile.md)              | ⚠️ Experimental | Promo / article tile with header + image + content + actions.   |
+
+### 2.4 React → Layout *(containers & structural surfaces)*
 
 | Component       | File                                                                    | Status         | Purpose                                                         |
 |-----------------|-------------------------------------------------------------------------|----------------|-----------------------------------------------------------------|
@@ -106,6 +139,9 @@ outputs/
 import { ZrButton }      from '@zurich/web-components/react/button';
 import { ZrTooltip }     from '@zurich/web-components/react/tooltip';
 import { ZrProgressBar } from '@zurich/web-components/react/progress-bar';
+
+// Molecules
+import { ZrTile }        from '@zurich/web-components/react/tile';
 
 // Layout
 import { ZrForm }       from '@zurich/web-components/react/form';
@@ -313,11 +349,14 @@ This is **exactly** the structure used in the existing `zurich-*.md` files. Foll
 
 ### 6.4 Where to save the new file
 - Decide the **platform** (currently always `react`).
-- Decide the **category**:
-  - `atoms` → action / interactive primitives (button, link, chip, badge, etc.).
-  - `input` → form controls bound to a value (text input, select, checkbox, radio, date picker, etc.).
-  - `layout` → containers & structural surfaces (form, card, modal, table, grid, etc.).
-  - *(future)* `feedback`, `navigation`, `media`, `typography`, etc.
+- Everything lives under `react/`. Decide the **category** inside it:
+  - `foundations` → design tokens & guidelines (typography, colors, layouts, spacers). Save under `react/foundations/`.
+  - `foundations/assets` → catalog assets (icons, brand icons). Save under `react/foundations/assets/`.
+  - `atoms` → action / interactive primitives (button, tooltip, progress bar, link, chip, badge, etc.). Save under `react/atoms/`.
+  - `input` → form controls bound to a value (text input, select, checkbox, radio, date picker, stepper, etc.). Save under `react/input/`.
+  - `molecules` → composite content surfaces combining atoms + content + actions (tile, banner, etc.). Save under `react/molecules/`.
+  - `layout` → containers & structural surfaces (form, card, modal, table, sidebar, tabs, input-group, etc.). Save under `react/layout/`.
+  - *(future)* `feedback`, `navigation`, `media`, `organisms`, etc. — all siblings under `react/`.
 - Save as `react/<category>/zurich-<component>.md`.
 - Add a row to the matching sub-table in §2.
 

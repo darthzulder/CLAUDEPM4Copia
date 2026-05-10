@@ -4,7 +4,7 @@ import type { Control, RegisterOptions, FieldPath, FieldValues, ControllerRender
 import { ZrTextInput }  from '@zurich/web-components/react/text-input';
 import { ZrCheckbox }   from '@zurich/web-components/react/checkbox';
 import { ZrSelect }     from '@zurich/web-components/react/select';
-import { ReactDateInput } from '@zurich/css-components/react';
+import { ZrDateInput }  from '@zurich/web-components/react/date-input';
 
 // Construye props kebab-case para pasarlos con spread (JSX no admite guiones en nombres de prop)
 function kp(error?: string, helpText?: string, inputType?: string): Record<string, unknown> {
@@ -59,7 +59,7 @@ export function ZdsInput<TFV extends FieldValues>({
 }
 
 // ---------------------------------------------------------------------------
-// Date input  →  ReactDateInput (@zurich/css-components)
+// Date input  →  ZrDateInput (@zurich/web-components)
 // ---------------------------------------------------------------------------
 export function ZdsDate<TFV extends FieldValues>({
   control, name, label, required, readOnly, helpText, error, rules,
@@ -71,7 +71,7 @@ export function ZdsDate<TFV extends FieldValues>({
         control={control}
         rules={rules as RegisterOptions<TFV, typeof name>}
         render={({ field }) => (
-          <ReactDateInput
+          <ZrDateInput
             name={field.name}
             model={String(field.value ?? '')}
             label={label}

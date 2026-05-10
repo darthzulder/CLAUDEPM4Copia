@@ -1,6 +1,7 @@
 import { useState, useMemo, useEffect } from 'react';
 import { useForm, FieldError } from 'react-hook-form';
 import { ZdsInput, ZdsDate, ZdsSelect } from './ZdsField';
+import { ZrButton } from '@zurich/web-components/react/button';
 import { OPTIONS, DEPARTAMENTOS, CIUDADES_POR_DEPTO, FfFlSolicitudFormData } from './variables';
 
 type Form = ReturnType<typeof useForm<FfFlSolicitudFormData>>;
@@ -35,14 +36,20 @@ export default function CreacionTomador({ form }: { form: Form }) {
 
   return (
     <div>
-      <button
-        type="button"
-        className="creacion-tomador-toggle"
+      <ZrButton
+        config="secondary"
+        wide
         onClick={() => setOpen(!open)}
+        style={{
+          ['--z-button--bg' as any]:    '#fffbeb',
+          ['--z-button--color' as any]: '#92400e',
+          ['--z-button--radius' as any]: '8px',
+          marginBottom: '14px',
+        }}
       >
         ⚠ {open ? '▾' : '▸'} Creación de tomador — Persona Jurídica
-        <span className="creacion-tomador-hint">(completar si TIA no encontró el tomador)</span>
-      </button>
+        <span style={{ fontWeight: 400, fontSize: 12, marginLeft: 8 }}>(completar si TIA no encontró el tomador)</span>
+      </ZrButton>
 
       {open && (
         <div className="creacion-tomador-body">

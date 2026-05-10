@@ -8,7 +8,8 @@ import FormSection from '../../components/FormSection';
 import CreacionTomador from './CreacionTomador';
 import zurichLogo from '../../resources/zurich/ZurichLogo_Horz_White_CMYK_no_R.png';
 import { ZdsInput, ZdsDate, ZdsCheckboxField, ZdsSelect, ZdsSuggest } from './ZdsField';
-import { ReactButton } from '@zurich/css-components/react';
+import { ZrButton } from '@zurich/web-components/react/button';
+import { ZrForm }   from '@zurich/web-components/react/form';
 import {
   OPTIONS, COLLECTION_DEFS, DEPARTAMENTOS, CIUDADES_POR_DEPTO,
   FfFlSolicitudFormData,
@@ -52,6 +53,7 @@ function InfoGeneral({
 
   return (
     <FormSection title="Información General" color="#2167AE">
+      <ZrForm style={{ ['--z-form--gap' as any]: 'var(--zs-150)' }}>
       <div className="form-row cols-3">
         <ZdsSelect
           label="Sucursal"
@@ -179,6 +181,7 @@ function InfoGeneral({
           ))}
         </div>
       </div>
+      </ZrForm>
     </FormSection>
   );
 }
@@ -219,6 +222,7 @@ function InfoTomador({
 
   return (
     <FormSection title="Información del Tomador" color="#2167AE">
+      <ZrForm style={{ ['--z-form--gap' as any]: 'var(--zs-150)' }}>
       <div className="form-row cols-3 row-align-bottom">
         <ZdsInput
           control={control}
@@ -235,10 +239,15 @@ function InfoTomador({
           helpText="9 dígitos + dígito verificador"
         />
         <ZdsInput control={control} name="frm_tom_tomador" label="Tomador" readOnly helpText="Dato de TIA" />
-        <div className="form-group consultar-wrapper">
-          <button type="button" className="btn-consultar" onClick={onConsultarNIT} disabled={nitLoading}>
-            {nitLoading ? '⏳ Consultando…' : '🔍 Consultar TIA'}
-          </button>
+        <div className="consultar-wrapper">
+          <ZrButton
+            config="secondary"
+            disabled={nitLoading}
+            loading={nitLoading}
+            onClick={onConsultarNIT}
+          >
+            {nitLoading ? 'Consultando…' : 'Consultar TIA'}
+          </ZrButton>
         </div>
       </div>
 
@@ -341,6 +350,7 @@ function InfoTomador({
           <CreacionTomador form={form} />
         </>
       )}
+      </ZrForm>
     </FormSection>
   );
 }
@@ -374,6 +384,7 @@ function DatosCotizacion({ form }: { form: ReturnType<typeof useForm<FfFlSolicit
 
   return (
     <FormSection title="Datos de la Cotización" color="#2167AE">
+      <ZrForm style={{ ['--z-form--gap' as any]: 'var(--zs-150)' }}>
       <div className="form-row cols-4">
         <ZdsDate
           control={control}
@@ -453,6 +464,7 @@ function DatosCotizacion({ form }: { form: ReturnType<typeof useForm<FfFlSolicit
       <input type="hidden" {...register('frm_cot_modalidad_cc')} />
       <input type="hidden" {...register('frm_cot_modalidad_pdysi')} />
       <input type="hidden" {...register('frm_cot_modalidad_pi')} />
+      </ZrForm>
     </FormSection>
   );
 }
@@ -464,6 +476,7 @@ function PlanPago({ form }: { form: ReturnType<typeof useForm<FfFlSolicitudFormD
   const { control } = form;
   return (
     <FormSection title="Plan de Pago" color="#2167AE">
+      <ZrForm style={{ ['--z-form--gap' as any]: 'var(--zs-150)' }}>
       <div className="form-row cols-2">
         <ZdsSelect label="Plan de pago" name="frm_plan_plan_pago" control={control} options={OPTIONS.planPago} />
         <ZdsInput control={control} name="frm_plan_num_cuotas" label="Número de cuotas" readOnly helpText="1 cuota por defecto" />
@@ -472,6 +485,7 @@ function PlanPago({ form }: { form: ReturnType<typeof useForm<FfFlSolicitudFormD
         <ZdsSelect label="Medio de pago" name="frm_plan_medio_pago" control={control} options={OPTIONS.medioPago} />
         <ZdsInput control={control} name="frm_plan_frecuencia_cobro" label="Frecuencia de cobro" readOnly helpText="Anual por defecto" />
       </div>
+      </ZrForm>
     </FormSection>
   );
 }
@@ -657,7 +671,7 @@ export default function SolicitudFfFl() {
       </div>
 
       <div className="screen-content">
-        <form onSubmit={form.handleSubmit(onSubmit)} noValidate>
+        <div>
           <InfoGeneral form={form} productError={productError} />
           <InfoTomador form={form} onConsultarNIT={handleConsultarNIT} nitLoading={nitLoading} nitNotFound={nitNotFound} />
           <DatosCotizacion form={form} />
@@ -666,16 +680,16 @@ export default function SolicitudFfFl() {
           {submitError && <div className="submit-error">{submitError}</div>}
 
           <div className="submit-bar">
-            <ReactButton
+            <ZrButton
               config="primary:l"
               disabled={submitting}
               loading={submitting}
               onClick={() => form.handleSubmit(onSubmit)()}
             >
-              {submitting ? 'Enviando...' : 'CONTINUAR →'}
-            </ReactButton>
+              {submitting ? 'Enviando...' : 'CONTINUAR'}
+            </ZrButton>
           </div>
-        </form>
+        </div>
       </div>
     </div>
   );
