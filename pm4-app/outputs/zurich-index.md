@@ -31,19 +31,27 @@ outputs/
 ├── zurich-index.md                       ← you are here (master index)
 └── react/                                ← React platform
     ├── atoms/                            ← Category: action / interactive primitives
-    │   └── zurich-button.md
+    │   ├── zurich-button.md
+    │   ├── zurich-tooltip.md
+    │   └── zurich-progressbar.md
     ├── input/                            ← Category: form-control inputs
     │   ├── zurich-textinput.md
     │   ├── zurich-select.md
     │   ├── zurich-checkbox.md
     │   ├── zurich-dateinput.md
     │   ├── zurich-calendar.md
-    │   └── zurich-rangedateinput.md
+    │   ├── zurich-rangedateinput.md
+    │   ├── zurich-textarea.md
+    │   ├── zurich-radioselect.md
+    │   └── zurich-stepper.md
     └── layout/                           ← Category: containers & structural surfaces
         ├── zurich-form.md
         ├── zurich-card.md
         ├── zurich-modal.md
-        └── zurich-table.md
+        ├── zurich-table.md
+        ├── zurich-sidebar.md
+        ├── zurich-tabs.md
+        └── zurich-inputgroup.md
 ```
 
 > When a new platform appears (e.g. Vue, Angular), add a sibling folder next to `react/`.
@@ -55,20 +63,25 @@ outputs/
 
 ### 2.1 React → Atoms *(action / interactive primitives)*
 
-| Component       | File                                                                    | Status         | Purpose                                                         |
-|-----------------|-------------------------------------------------------------------------|----------------|-----------------------------------------------------------------|
-| `ZrButton`      | [`react/atoms/zurich-button.md`](./react/atoms/zurich-button.md)        | ⚠️ Experimental | Action button: types, sizes, round, icon, link, submit, popover.|
+| Component       | File                                                                              | Status         | Purpose                                                         |
+|-----------------|-----------------------------------------------------------------------------------|----------------|-----------------------------------------------------------------|
+| `ZrButton`      | [`react/atoms/zurich-button.md`](./react/atoms/zurich-button.md)                  | ⚠️ Experimental | Action button: types, sizes, round, icon, link, submit, popover.|
+| `ZrTooltip`     | [`react/atoms/zurich-tooltip.md`](./react/atoms/zurich-tooltip.md)                | ⚠️ Experimental | Hover hint with side+size config and theme tokens.              |
+| `ZrProgressBar` | [`react/atoms/zurich-progressbar.md`](./react/atoms/zurich-progressbar.md)        | ⚠️ Experimental | Linear / round progress indicator with title, %, highlight.     |
 
 ### 2.2 React → Input *(form controls bound to a value)*
 
 | Component          | File                                                                                | Status         | Purpose                                                         |
 |--------------------|-------------------------------------------------------------------------------------|----------------|-----------------------------------------------------------------|
 | `ZrTextInput`      | [`react/input/zurich-textinput.md`](./react/input/zurich-textinput.md)              | ⚠️ Experimental | Single-line text input (text/tel/email/url) with validation.    |
+| `ZrTextarea`       | [`react/input/zurich-textarea.md`](./react/input/zurich-textarea.md)                | ⚠️ Experimental | Multi-line text input with elastic auto-resize and counter.     |
 | `ZrSelect`         | [`react/input/zurich-select.md`](./react/input/zurich-select.md)                    | ⚠️ Experimental | Dropdown / searchable select with options + slots.              |
+| `ZrRadioSelect`    | [`react/input/zurich-radioselect.md`](./react/input/zurich-radioselect.md)          | ⚠️ Experimental | Single-choice radio group (stacked / inline) with rich slots.   |
 | `ZrCheckbox`       | [`react/input/zurich-checkbox.md`](./react/input/zurich-checkbox.md)                | ⚠️ Experimental | Boolean checkbox with indeterminate, required, invalid states.  |
 | `ZrDateInput`      | [`react/input/zurich-dateinput.md`](./react/input/zurich-dateinput.md)              | ⚠️ Experimental | Date / month / week / datetime field (ISO 8601, optional `custom-ui`). |
 | `ZrCalendar`       | [`react/input/zurich-calendar.md`](./react/input/zurich-calendar.md)                | ⚠️ Experimental | Inline month-grid date selector (no input field).               |
 | `ZrRangeDateInput` | [`react/input/zurich-rangedateinput.md`](./react/input/zurich-rangedateinput.md)    | ⚠️ Experimental | Date-range field (`[from, to]` ISO tuple) with bounds.          |
+| `ZrStepper`        | [`react/input/zurich-stepper.md`](./react/input/zurich-stepper.md)                  | ⚠️ Experimental | 1-based step counter with prev/next, label, center alignment.   |
 
 ### 2.3 React → Layout *(containers & structural surfaces)*
 
@@ -77,7 +90,10 @@ outputs/
 | `ZrForm`        | [`react/layout/zurich-form.md`](./react/layout/zurich-form.md)          | ⚠️ Experimental | Container that cascades size/shape/style to form controls.      |
 | `ZrCard`        | [`react/layout/zurich-card.md`](./react/layout/zurich-card.md)          | ⚠️ Experimental | Container surface (clickable, grid/flex, themable via tokens).  |
 | `ZrModal`       | [`react/layout/zurich-modal.md`](./react/layout/zurich-modal.md)        | ⚠️ Experimental | Dialog overlay (controlled via `model`, themable backdrop).     |
+| `ZrSidebar`     | [`react/layout/zurich-sidebar.md`](./react/layout/zurich-sidebar.md)    | ⚠️ Experimental | Side drawer (left/right) controlled via `model` + tokens.       |
 | `ZrTable`       | [`react/layout/zurich-table.md`](./react/layout/zurich-table.md)        | ⚠️ Experimental | Tabular display (matrix / object / embedded modes; zebra).      |
+| `ZrTabs`        | [`react/layout/zurich-tabs.md`](./react/layout/zurich-tabs.md)          | ⚠️ Experimental | 1-based panel switcher (object / option / slot definition).     |
+| `ZrInputGroup`  | [`react/layout/zurich-inputgroup.md`](./react/layout/zurich-inputgroup.md) | ⚠️ Experimental | Cluster of related inputs with shared config/size and `<output>` separators. |
 
 > Update these tables every time a new component file is created, and add the row under the **right category**.
 
@@ -87,21 +103,29 @@ outputs/
 
 ```tsx
 // Atoms
-import { ZrButton }    from '@zurich/web-components/react/button';
+import { ZrButton }      from '@zurich/web-components/react/button';
+import { ZrTooltip }     from '@zurich/web-components/react/tooltip';
+import { ZrProgressBar } from '@zurich/web-components/react/progress-bar';
 
 // Layout
-import { ZrForm }   from '@zurich/web-components/react/form';
-import { ZrCard }   from '@zurich/web-components/react/card';
-import { ZrModal }  from '@zurich/web-components/react/modal';
-import { ZrTable }  from '@zurich/web-components/react/table';
+import { ZrForm }       from '@zurich/web-components/react/form';
+import { ZrCard }       from '@zurich/web-components/react/card';
+import { ZrModal }      from '@zurich/web-components/react/modal';
+import { ZrSidebar }    from '@zurich/web-components/react/sidebar';
+import { ZrTable }      from '@zurich/web-components/react/table';
+import { ZrTabs }       from '@zurich/web-components/react/tabs';
+import { ZrInputGroup } from '@zurich/web-components/react/input-group';
 
 // Input
 import { ZrTextInput }       from '@zurich/web-components/react/text-input';
+import { ZrTextarea }        from '@zurich/web-components/react/textarea';
 import { ZrSelect }          from '@zurich/web-components/react/select';
+import { ZrRadioSelect }     from '@zurich/web-components/react/radio-select';
 import { ZrCheckbox }        from '@zurich/web-components/react/checkbox';
 import { ZrDateInput }       from '@zurich/web-components/react/date-input';
 import { ZrCalendar }        from '@zurich/web-components/react/calendar';
 import { ZrRangeDateInput }  from '@zurich/web-components/react/range-date-input';
+import { ZrStepper }         from '@zurich/web-components/react/stepper';
 ```
 
 Rule: every Zurich React component is imported from `@zurich/web-components/react/<kebab-case-name>`.

@@ -39,7 +39,7 @@ import { ZrCard } from '@zurich/web-components/react/card';
 
 | Prop         | Type                                                                  | Default     | Required | Description                                                                       |
 |--------------|-----------------------------------------------------------------------|-------------|----------|-----------------------------------------------------------------------------------|
-| `content`    | `string`                             w                                 | —           | No       | Text content of the card. Use the default slot for richer content.                |
+| `content`    | `string`                                                              | —           | No       | Text content of the card. Use the default slot for richer content.                |
 | `config`     | `string` — combine `slim` and/or `grid`/`flex` separated by `:`       | —           | No       | Padding + display modifiers. Examples: `"grid"`, `"flex"`, `"slim:grid"`.         |
 | `display`    | `"grid"` \| `"flex"` \| *(default)*                                   | default     | No       | Inner display strategy. Often configured through `config` instead.                |
 | `slim`       | `boolean`                                                             | `false`     | No       | Removes inner padding. Often configured through `config` instead.                 |
