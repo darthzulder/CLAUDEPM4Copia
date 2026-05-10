@@ -16,8 +16,11 @@ function fe(
   return String(err.message);
 }
 
-export default function CreacionTomador({ form }: { form: Form }) {
+export default function CreacionTomador({ form, forceOpen }: { form: Form; forceOpen?: boolean }) {
   const [open, setOpen] = useState(false);
+  // forceOpen se activa cuando TIA confirma que el NIT no existe.
+  // El botón toggle solo funciona después de haber consultado TIA (forceOpen !== undefined).
+  const isOpen = open || !!forceOpen;
   const { register, control, formState: { errors, isSubmitted }, watch, setValue } = form;
   const w = watch();
 
@@ -35,14 +38,20 @@ export default function CreacionTomador({ form }: { form: Form }) {
 
   return (
     <div>
-      <button type="button" className="creacion-tomador-toggle" onClick={() => setOpen(!open)}>
-        ⚠ {open ? '▾' : '▸'} Creación de tomador — Persona Jurídica
-        <span style={{ fontWeight: 400, fontSize: 12, marginLeft: 8 }}>
-          (completar solo si TIA no retornó datos del tomador)
-        </span>
+      <button
+        type="button"
+        className="creacion-tomador-toggle"
+        disabled={forceOpen === undefined}
+        onClick={() => setOpen(!isOpen)}
+      >
+        ⚠ {isOpen ? '▾' : '▸'} Creación de tomador — Persona Jurídica
+        {forceOpen === undefined
+          ? <span className="creacion-tomador-hint">(consulte el NIT primero)</span>
+          : <span className="creacion-tomador-hint">(se activa automáticamente si TIA no encuentra el NIT)</span>
+        }
       </button>
 
-      {open && (
+      {isOpen && (
         <div className="creacion-tomador-body">
           <div className="form-row cols-3">
             <ZdsInput

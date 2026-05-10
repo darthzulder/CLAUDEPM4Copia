@@ -190,10 +190,12 @@ function InfoTomador({
   form,
   onConsultarNIT,
   nitLoading,
+  nitNotFound,
 }: {
   form: ReturnType<typeof useForm<FfFlSolicitudFormData>>;
   onConsultarNIT: () => void;
   nitLoading: boolean;
+  nitNotFound: boolean;
 }) {
   const { control, formState: { errors, isSubmitted }, watch, setValue } = form;
   const w = watch();
@@ -334,7 +336,7 @@ function InfoTomador({
       )}
 
       <div className="section-spacer" />
-      <CreacionTomador form={form} />
+      <CreacionTomador form={form} forceOpen={nitNotFound} />
     </FormSection>
   );
 }
@@ -479,10 +481,12 @@ export default function SolicitudFfFl() {
   const [submitError, setSubmitError] = useState('');
   const [sent, setSent] = useState(false);
   const [nitLoading, setNitLoading] = useState(false);
+  const [nitNotFound, setNitNotFound] = useState(false);
 
   const form = useForm<FfFlSolicitudFormData>({
     mode: 'onChange',
     reValidateMode: 'onChange',
+    shouldUnregister: true,
     defaultValues: {
       frm_gen_fecha_solicitud: new Date().toISOString().split('T')[0],
       frm_gen_segmento: 'Middle Market',
@@ -558,6 +562,14 @@ export default function SolicitudFfFl() {
       const output = res.data?.response ?? res.data?.output ?? res.data ?? {};
       console.log(`[TIA] Output extraído:`, JSON.stringify(output, null, 2));
 
+      // Si output es string con "No party found" → cliente no existe en TIA
+      if (typeof output === 'string' && (output.includes('No party found') || output.includes('HTTP 400'))) {
+        console.warn('[TIA] No party found — abriendo sección de creación de tomador');
+        setNitNotFound(true);
+        setSubmitError('El NIT no existe en TIA. Complete los datos de Creación de Tomador.');
+        return;
+      }
+
       // 3. Mapear campos TIA → form
       const mappings: Array<[string, keyof FfFlSolicitudFormData]> = [
         ['frm_tomador',              'frm_tom_tomador'],
@@ -588,7 +600,9 @@ export default function SolicitudFfFl() {
         }
       }
       console.log(`[TIA] FIN — ${mapped} campos mapeados. Keys recibidos:`, Object.keys(output as object));
-      if (mapped === 0) {
+      if (mapped > 0) {
+        setNitNotFound(false);  // TIA encontró el cliente → ocultar sección de creación
+      } else {
         setSubmitError('TIA respondió pero sin campos reconocibles. Ver consola.');
       }
 
@@ -641,7 +655,7 @@ export default function SolicitudFfFl() {
       <div className="screen-content">
         <form onSubmit={form.handleSubmit(onSubmit)} noValidate>
           <InfoGeneral form={form} productError={productError} />
-          <InfoTomador form={form} onConsultarNIT={handleConsultarNIT} nitLoading={nitLoading} />
+          <InfoTomador form={form} onConsultarNIT={handleConsultarNIT} nitLoading={nitLoading} nitNotFound={nitNotFound} />
           <DatosCotizacion form={form} />
           <PlanPago form={form} />
 
