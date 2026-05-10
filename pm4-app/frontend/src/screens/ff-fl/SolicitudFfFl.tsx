@@ -541,31 +541,14 @@ export default function SolicitudFfFl() {
 
     setNitLoading(true);
     setSubmitError('');
-    console.log(`[TIA] ── INICIO consulta NIT ──────────────────────`);
-    console.log(`[TIA] NIT ingresado:`, nit);
+    console.log(`[TIA] NIT: ${nit}`);
 
     try {
-      // 1. Token TIA: desde task.data o ejecutando script 43
-      let tokenTia: string = String((task?.data as Record<string, unknown>)?.frm_token_tia ?? '');
-      if (!tokenTia) {
-        console.log('[TIA] Token no en task.data → ejecutando script 43...');
-        const tokenRes = await pm4.post('/scripts/43/execute', { data: {}, config: {} });
-        console.log('[TIA] Script 43 respuesta completa:', JSON.stringify(tokenRes.data, null, 2));
-        const tOut = tokenRes.data?.response ?? tokenRes.data?.output ?? tokenRes.data ?? {};
-        tokenTia = String(tOut?.respuesta_token_tia ?? tOut?.token ?? tOut?.access_token ?? '');
-        console.log('[TIA] Token obtenido:', tokenTia ? `${tokenTia.slice(0, 30)}...` : '(vacío)');
-      } else {
-        console.log('[TIA] Token desde task.data:', `${tokenTia.slice(0, 30)}...`);
-      }
-
-      // 2. Script 50 = "Obtener cliente Tia"
+      // PM4 espera data y config como strings JSON, más sync:true
       const requestBody = {
-        data: {
-          frm_tomador_tipoDoc: 'NIT',
-          frm_tomador_numDoc:  nit,
-          respuesta_token_tia: tokenTia,
-        },
-        config: {},
+        data:   JSON.stringify({ frm_tomador_tipoDoc: 'NIT', frm_tomador_numDoc: nit }),
+        config: JSON.stringify({}),
+        sync:   true,
       };
       console.log(`[TIA] POST /scripts/50/execute`, JSON.stringify(requestBody, null, 2));
 
