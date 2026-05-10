@@ -123,6 +123,8 @@
 }
 
 /* Sub-secciones dentro de un card */
+.form-subsection--activities { margin-top: 8px; }
+.form-group--facturacion { margin-top: 4px; }
 .form-subsection {
   border: 1px solid var(--z-border);
   border-radius: 8px;

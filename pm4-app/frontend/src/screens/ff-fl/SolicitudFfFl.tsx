@@ -9,7 +9,6 @@ import CreacionTomador from './CreacionTomador';
 import zurichLogo from '../../resources/zurich/ZurichLogo_Horz_White_CMYK_no_R.png';
 import { ZdsInput, ZdsDate, ZdsCheckboxField, ZdsSelect, ZdsSuggest } from './ZdsField';
 import { ZrButton } from '@zurich/web-components/react/button';
-import { ZrForm }   from '@zurich/web-components/react/form';
 import {
   OPTIONS, COLLECTION_DEFS, DEPARTAMENTOS, CIUDADES_POR_DEPTO,
   FfFlSolicitudFormData,
@@ -53,7 +52,7 @@ function InfoGeneral({
 
   return (
     <FormSection title="Información General" color="#2167AE">
-      <ZrForm style={{ ['--z-form--gap' as any]: 'var(--zs-150)' }}>
+
       <div className="form-row cols-3">
         <ZdsSelect
           label="Sucursal"
@@ -181,7 +180,7 @@ function InfoGeneral({
           ))}
         </div>
       </div>
-      </ZrForm>
+
     </FormSection>
   );
 }
@@ -243,7 +242,7 @@ function InfoTomador({
 
   return (
     <FormSection title="Información del Tomador" color="#2167AE">
-      <ZrForm style={{ ['--z-form--gap' as any]: 'var(--zs-150)' }}>
+
       <div className="form-row cols-3 row-align-bottom">
         <ZdsInput
           control={control}
@@ -330,7 +329,7 @@ function InfoTomador({
       </div>
 
       {actRows.length > 0 && (
-        <div className="form-subsection" style={{ marginTop: 8 }}>
+        <div className="form-subsection form-subsection--activities">
           <div className="form-subsection-title">Actividades aseguradas</div>
           <div className="actividades-table">
             <div className="actividades-table-header">
@@ -371,7 +370,7 @@ function InfoTomador({
           <CreacionTomador form={form} />
         </>
       )}
-      </ZrForm>
+
     </FormSection>
   );
 }
@@ -405,7 +404,7 @@ function DatosCotizacion({ form }: { form: ReturnType<typeof useForm<FfFlSolicit
 
   return (
     <FormSection title="Datos de la Cotización" color="#2167AE">
-      <ZrForm style={{ ['--z-form--gap' as any]: 'var(--zs-150)' }}>
+
       <div className="form-row cols-4">
         <ZdsDate
           control={control}
@@ -450,7 +449,7 @@ function DatosCotizacion({ form }: { form: ReturnType<typeof useForm<FfFlSolicit
       )}
 
       {hayProductos && (
-        <div className="form-group" style={{ marginTop: 4 }}>
+        <div className="form-group form-group--facturacion">
           <div className="form-label"><span className="required-star">* </span>Facturación total anual (COP)</div>
           <div className="facturacion-grid">
             {w.frm_gen_prod_dyo && (
@@ -485,7 +484,7 @@ function DatosCotizacion({ form }: { form: ReturnType<typeof useForm<FfFlSolicit
       <input type="hidden" {...register('frm_cot_modalidad_cc')} />
       <input type="hidden" {...register('frm_cot_modalidad_pdysi')} />
       <input type="hidden" {...register('frm_cot_modalidad_pi')} />
-      </ZrForm>
+
     </FormSection>
   );
 }
@@ -497,7 +496,7 @@ function PlanPago({ form }: { form: ReturnType<typeof useForm<FfFlSolicitudFormD
   const { control } = form;
   return (
     <FormSection title="Plan de Pago" color="#2167AE">
-      <ZrForm style={{ ['--z-form--gap' as any]: 'var(--zs-150)' }}>
+
       <div className="form-row cols-2">
         <ZdsSelect label="Plan de pago" name="frm_plan_plan_pago" control={control} options={OPTIONS.planPago} />
         <ZdsInput control={control} name="frm_plan_num_cuotas" label="Número de cuotas" readOnly helpText="1 cuota por defecto" />
@@ -506,7 +505,7 @@ function PlanPago({ form }: { form: ReturnType<typeof useForm<FfFlSolicitudFormD
         <ZdsSelect label="Medio de pago" name="frm_plan_medio_pago" control={control} options={OPTIONS.medioPago} />
         <ZdsInput control={control} name="frm_plan_frecuencia_cobro" label="Frecuencia de cobro" readOnly helpText="Anual por defecto" />
       </div>
-      </ZrForm>
+
     </FormSection>
   );
 }
