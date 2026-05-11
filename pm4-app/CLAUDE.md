@@ -30,6 +30,18 @@ http://localhost:5173/?screen=cotizador-fast-flow&task_id=123&token=eyJ...
 
 ---
 
+## ⚠️ Antes de hacer commit / push a git — OBLIGATORIO
+
+Siempre ejecutar el build completo antes de lanzar a git para garantizar que el deploy funcione correctamente:
+
+```bash
+npm run build --workspace=frontend && npm run build --workspace=backend
+```
+
+Si alguno de los dos falla con errores de TypeScript o de empaquetado, **corregir antes de commitear**. No commitear con builds rotos.
+
+---
+
 ## Variables de entorno (`.env` en raíz de pm4-app)
 
 ```
