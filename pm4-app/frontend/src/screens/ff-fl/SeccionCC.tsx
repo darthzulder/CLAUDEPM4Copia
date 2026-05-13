@@ -7,25 +7,35 @@ import { OPTIONS, FfFlSolicitudFormData } from './variables';
 type Form = ReturnType<typeof useForm<FfFlSolicitudFormData>>;
 
 const SECTORES = [
-  'Entidades financieras reguladas por la Superintendencia Financiera de Colombia (bancos, aseguradoras, fondos de inversión, fiduciarias, cooperativas de ahorro y crédito).',
-  'Casas de cambio, remesadoras de dinero y empresas de transferencia de fondos.',
-  'Empresas del sector de criptomonedas, activos digitales o fintech no reguladas por la SFC.',
-  'Casinos, empresas de juegos de azar, apuestas deportivas en línea o loterías.',
+  'Sector financiero (incluyendo, pero no limitado a mercado de valores, banca, entidades de seguros, casas de bolsa, cooperativas de ahorro y crédito, fondo de empleados, gestoras de fondos de inversión y/o de fondos de capital riesgo y cualquier entidad financiera que sea regulada por la Superintendencia Financiera de Colombia, y/o por cualquier otro ente de control).',
+  'Sector farmacéutico y biotecnología',
+  'Sector de las entidades públicas/estatales de capital mixto, así como concesiones con el Estado.',
+  'Servicios públicos.',
+  'Servicios de salud.',
+  'Sector aeronáutico y aviación',
+  'Sector de energía, petróleo y gas (incluyendo refinería y explotación)',
   'Sector armamentístico.',
-  'Empresas en reorganización y/o reestructuración.',
-  'Empresas dedicadas al comercio de metales preciosos, piedras preciosas o arte.',
-  'Entidades públicas o de capital mixto con el Estado, así como concesiones estatales.',
+  'Sector de la minería.',
+  'Clubes deportivos profesionales.',
+  'Sector del tabaco.',
+  'HealthTech (Empresas que utilizan una plataforma tecnológica en línea para proporcionar servicios médicos o asesoramiento médico a un tercero).',
+  'Empresas en reorganización y/o reestructuración',
+  'Proveedores de redes sociales, plataformas y gestión de contenidos',
+  'Supermercados y grandes superficies.',
+  'Call center/ BPO.',
 ] as const;
 
 const REQUISITOS = [
-  '¿Los ingresos anuales consolidados son inferiores y/o iguales a COP 200.000.000.000?',
-  '¿Es una entidad privada con domicilio social en Colombia?',
-  '¿La empresa tiene como mínimo 2 ejercicios fiscales cerrados?',
-  '¿La empresa cuenta con controles internos formalmente documentados para la gestión de efectivo, activos y valores?',
-  '¿La empresa realiza auditorías internas o externas de manera periódica?',
-  '¿Confirma que, al día de hoy, la empresa NO tiene reclamaciones en curso ni conocimiento de ninguna circunstancia que pudiera dar lugar a un reclamo en esta póliza?',
-  '¿En los últimos 3 años, la empresa NO ha sufrido pérdidas por fraude, hurto, malversación u otro acto delictivo que superen COP 100.000.000?',
-  '¿El accionista que posee más del 50% de las acciones se encuentra domiciliado en Colombia?',
+  '¿El importe de los ingresos consolidados es inferior y/o igual a COP100.000.000.000?',
+  '¿Son una entidad privada, su domicilio social está ubicado en Colombia y no tienen empresas filiales y ningún activo fuera de Colombia?',
+  '¿Su antigüedad es como mínimo de 2 ejercicios fiscales cerrados?',
+  '¿Tienen implementado un ciclo de auditoría que garantiza que todas las áreas de la compañía son evaluadas en un periodo máximo de un año?',
+  '¿El número total de predios no excede los 10?',
+  '¿No tienen valores cotizados en cualquier bolsa de valores y no tienen planeado salir a bolsa en los próximos 12 meses?',
+  '¿En los últimos 2 años, el patrimonio consolidado ha sido positivo?',
+  '¿No han tenido despidos masivos durante los últimos 12 meses y no tiene previsto hacerlo en los próximos 12 meses?',
+  '¿Afirman que no tiene reclamos en los últimos 5 años, ni conocimiento de circunstancia alguna que pudiera resultar en la presentación de un reclamo que afecte esta póliza?',
+  '¿El accionista que posee más del 50% de las acciones de la compañía se encuentra domiciliado en Colombia?',
 ] as const;
 
 function SiNoField({ form, name }: { form: Form; name: keyof FfFlSolicitudFormData }) {

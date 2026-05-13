@@ -304,15 +304,12 @@ export interface FfFlSolicitudFormData {
   frm_dyo_prop_02_limite?: string;
   frm_dyo_prop_03_limite?: string;
 
-  // Responsabilidad Civil Profesional — Perfil de cliente (8 sectores — 'SI' | 'NO')
-  frm_pi_perf_01?: string; frm_pi_perf_02?: string; frm_pi_perf_03?: string;
-  frm_pi_perf_04?: string; frm_pi_perf_05?: string; frm_pi_perf_06?: string;
-  frm_pi_perf_07?: string; frm_pi_perf_08?: string;
-
-  // Responsabilidad Civil Profesional — Requisitos (8 preguntas — 'SI' | 'NO')
+  // Responsabilidad Civil Profesional — Requisitos (13 preguntas — 'SI' | 'NO')
   frm_pi_req_01?: string; frm_pi_req_02?: string; frm_pi_req_03?: string;
   frm_pi_req_04?: string; frm_pi_req_05?: string; frm_pi_req_06?: string;
-  frm_pi_req_07?: string; frm_pi_req_08?: string;
+  frm_pi_req_07?: string; frm_pi_req_08?: string; frm_pi_req_09?: string;
+  frm_pi_req_10?: string; frm_pi_req_11?: string; frm_pi_req_12?: string;
+  frm_pi_req_13?: string;
 
   // Responsabilidad Civil Profesional — Documentos de soporte (nombre de archivo)
   frm_pi_doc_01_nombre?: string;
@@ -344,16 +341,33 @@ export interface FfFlSolicitudFormData {
   frm_cc_prop_02_limite?: string;
   frm_cc_prop_03_limite?: string;
 
-  // PDySI — Perfil de cliente (10 sectores — 'SI' | 'NO')
+  // PDySI — Perfil de cliente (28 sectores — 'SI' | 'NO')
   frm_pdysi_perf_01?: string; frm_pdysi_perf_02?: string; frm_pdysi_perf_03?: string;
   frm_pdysi_perf_04?: string; frm_pdysi_perf_05?: string; frm_pdysi_perf_06?: string;
   frm_pdysi_perf_07?: string; frm_pdysi_perf_08?: string; frm_pdysi_perf_09?: string;
-  frm_pdysi_perf_10?: string;
+  frm_pdysi_perf_10?: string; frm_pdysi_perf_11?: string; frm_pdysi_perf_12?: string;
+  frm_pdysi_perf_13?: string; frm_pdysi_perf_14?: string; frm_pdysi_perf_15?: string;
+  frm_pdysi_perf_16?: string; frm_pdysi_perf_17?: string; frm_pdysi_perf_18?: string;
+  frm_pdysi_perf_19?: string; frm_pdysi_perf_20?: string; frm_pdysi_perf_21?: string;
+  frm_pdysi_perf_22?: string; frm_pdysi_perf_23?: string; frm_pdysi_perf_24?: string;
+  frm_pdysi_perf_25?: string; frm_pdysi_perf_26?: string; frm_pdysi_perf_27?: string;
+  frm_pdysi_perf_28?: string;
 
-  // PDySI — Requisitos (8 preguntas — 'SI' | 'NO')
+  // PDySI — Requisitos (7 preguntas — 'SI' | 'NO')
   frm_pdysi_req_01?: string; frm_pdysi_req_02?: string; frm_pdysi_req_03?: string;
   frm_pdysi_req_04?: string; frm_pdysi_req_05?: string; frm_pdysi_req_06?: string;
-  frm_pdysi_req_07?: string; frm_pdysi_req_08?: string;
+  frm_pdysi_req_07?: string;
+
+  // PDySI — Controles en la Gestión del Riesgo - Parte 1 (7 preguntas — 'SI' | 'NO')
+  frm_pdysi_ctrl1_01?: string; frm_pdysi_ctrl1_02?: string; frm_pdysi_ctrl1_03?: string;
+  frm_pdysi_ctrl1_04?: string; frm_pdysi_ctrl1_05?: string; frm_pdysi_ctrl1_06?: string;
+  frm_pdysi_ctrl1_07?: string;
+
+  // PDySI — Controles en la Gestión del Riesgo - Parte 2 (2 preguntas — 'SI' | 'NO')
+  frm_pdysi_ctrl2_01?: string; frm_pdysi_ctrl2_02?: string;
+
+  // PDySI — Controles Adicionales (3 preguntas — 'SI' | 'NO', determina coberturas SLIP)
+  frm_pdysi_ctrlad_01?: string; frm_pdysi_ctrlad_02?: string; frm_pdysi_ctrlad_03?: string;
 
   // PDySI — Documentos de soporte (nombre de archivo)
   frm_pdysi_doc_01_nombre?: string;

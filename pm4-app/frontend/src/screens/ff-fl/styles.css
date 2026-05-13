@@ -830,6 +830,32 @@ zr-date-input[readonly] {
   line-height: 1.4;
 }
 
+.dyo-servicios-list {
+  margin: var(--zs-25) 0 0 0;
+  padding-left: var(--zs-100);
+}
+.dyo-servicios-item {
+  font: var(--zf-body-14);
+  color: var(--z-text);
+  padding: var(--zs-12) 0;
+  line-height: 1.5;
+}
+
+.dyo-prop-input {
+  width: 100%;
+  padding: var(--zs-25) var(--zs-50);
+  border: 1px solid var(--z-border);
+  border-radius: 6px;
+  font: var(--zf-body-14);
+  color: var(--z-text);
+  background: var(--zg-white);
+  outline: none;
+  box-sizing: border-box;
+}
+.dyo-prop-input:focus {
+  border-color: var(--zurich-blue);
+}
+
 @media (max-width: 768px) {
   .dyo-propuesta-header,
   .dyo-propuesta-row { grid-template-columns: 32px 1fr; }

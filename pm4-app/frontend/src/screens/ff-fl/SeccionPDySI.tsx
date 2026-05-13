@@ -1,34 +1,73 @@
 import { useState, useRef } from 'react';
 import { useForm, Controller } from 'react-hook-form';
 import { ZrButton } from '@zurich/web-components/react/button';
-import { ZdsSelect } from './ZdsField';
-import { OPTIONS, FfFlSolicitudFormData } from './variables';
+import { FfFlSolicitudFormData } from './variables';
 
 type Form = ReturnType<typeof useForm<FfFlSolicitudFormData>>;
 
 const SECTORES = [
-  'Sector financiero (bancos, aseguradoras, mercado de valores, cooperativas de ahorro y crédito y cualquier entidad regulada por la Superintendencia Financiera de Colombia).',
-  'Sector salud (hospitales, clínicas, IPS y EPS) que gestionen historiales clínicos de más de 100.000 pacientes.',
-  'Infraestructura crítica: empresas de energía, agua potable y saneamiento, y telecomunicaciones.',
-  'Sector aeronáutico y aviación.',
-  'Sector armamentístico.',
-  'Entidades públicas o de capital mixto con el Estado, así como concesiones estatales.',
-  'Proveedores de servicios en la nube, centros de datos y servicios de hosting masivo.',
-  'Proveedores de redes sociales, plataformas digitales y gestión de contenidos.',
-  'Empresas de juegos de azar, apuestas deportivas en línea o loterías.',
+  'Pólizas para la ejecución de contratos específicos.',
   'Empresas en reorganización y/o reestructuración.',
+  'Servicios Profesionales o consultoría de tipo legal, de tecnología, tributaria, de contabilidad, outsourcing y financiera.',
+  'Entidades sin ánimo de lucro.',
+  'Retail (comercio con venta online superiores al 30% del total de sus ingresos y sistema PoS).',
+  'Compañías Aéreas y Servicios de Transporte.',
+  'Instituciones Financieras y/o Servicios Financieros (Cooperativas de Ahorro y Crédito, Fondos de Empleados, Fondos Mutuos de Inversión, Compañías de Colocación de Créditos de Libranza, Fintech o Similares).',
+  'Casinos / Juegos de Azar / Casas de Apuestas Online.',
+  'Firmas de ingeniería y/o Diseño.',
+  'Empresas de generación de energía, prestación de servicios públicos e infraestructura crítica.',
+  'Entidades públicas (de propiedad del estado o de economía mixta).',
+  'Compañías listadas en Bolsa.',
+  'Servicios de Salud.',
+  'Servicios Profesionales de Tecnología.',
+  'Servicios de Logística.',
+  'Telecomunicaciones.',
+  'Generadores de Contenido Digital o de Medios Audiovisuales.',
+  'Medios de comunicación (radio y televisión).',
+  'Procesadores de Tarjetas de Pago/Crédito.',
+  'Empresas Agregadores de Datos (Proveedores de Servicios en la Nube, Minería de Datos, Bodegas de Datos, Integración de Datos y servicios relacionados o similares).',
+  'Proveedores de Moneda Digital y Empresas de cambio de Moneda Digital.',
+  'Plataformas de Negociación de Mercados Online, Plataformas de Negociación de Títulos Valores, Plataformas de Negociación de Materias Primas y sus proveedores de servicios tecnológicos.',
+  'Empresas suministradoras de contenidos para adultos.',
+  'Redes Sociales.',
+  'Empresas dedicadas al procesamiento y distribución de Marihuana y/o opioides.',
+  'Farmacéuticas.',
+  'Call Center / BPO.',
+  'Servicios de Hospitalidad (Hoteles, Restaurantes, etc.).',
 ] as const;
 
 const REQUISITOS = [
-  '¿Los ingresos anuales consolidados son inferiores y/o iguales a COP 200.000.000.000?',
-  '¿Es una entidad privada con domicilio social en Colombia?',
-  '¿La empresa tiene como mínimo 2 ejercicios fiscales cerrados?',
-  '¿La empresa cuenta con un responsable de seguridad de la información o equipo de TI designado?',
-  '¿La empresa realiza copias de seguridad periódicas de su información y sistemas críticos?',
-  '¿La empresa utiliza autenticación de múltiples factores (MFA) para accesos remotos a sistemas críticos?',
-  '¿Al día de hoy, la empresa NO tiene reclamaciones en curso ni conocimiento de ninguna circunstancia que pudiera dar lugar a un reclamo en esta póliza?',
-  '¿En los últimos 3 años, la empresa NO ha sufrido un incidente de ciberseguridad significativo (ransomware, fuga de datos masiva, interrupción de sistemas, etc.)?',
+  '¿La seguridad informática/cibernética implementada contempla políticas y procedimientos centralizados?',
+  '¿El importe de los ingresos consolidados es inferior y/o igual a COP100.000.000.000?',
+  '¿Afirman que su domicilio social está ubicado en Colombia?',
+  '¿Afirman que llevan más de 2 años desarrollando su actividad?',
+  'Afirman que en los dos últimos años NO han tenido amenazas de extorsión cibernética o NO han tenido lugar interrupciones de los sistemas durante más de 12 horas.',
+  '¿Afirman que en los 2 últimos años NO han tenido investigaciones, solicitudes de información, sanciones por parte de un regulador o una agencia gubernamental en relación con el manejo de la información personal identificable?',
+  '¿El tomador y sus filiales (si aplica) afirma No tener conocimiento de hechos o circunstancias que pudieran dar lugar a reclamos y/o eventos de privacidad y/o de seguridad bajo esta póliza de seguro o conocimiento de hechos o circunstancias que pudieran dar lugar a investigaciones o imposición de sanciones?',
 ] as const;
+
+const CONTROLES_1 = [
+  '¿Cuentan con una política de seguridad de la información que contenga reglas para el uso del correo electrónico e internet, clasificación de la información y confidencialidad de los datos confidenciales, de acuerdo con la ley de protección de datos?',
+  '¿Se capacita anualmente a todos los empleados sobre la política de seguridad de la información, incluyendo amenazas como phishing y malware?',
+  '¿Cuentan con antivirus en todas sus computadoras y firewalls en el perímetro de la red?',
+  '¿Aplican parches de seguridad y actualizaciones para todos los software y sistemas operativos de forma regular?',
+  '¿Se realizan copias de seguridad de datos y de sistemas críticos, al menos una vez a la semana?',
+  '¿Tiene política de construcción de contraseñas complejas y de cambio regular?',
+  '¿La empresa filtra el contenido del correo electrónico y los sitios de internet para bloquear el contenido malicioso, spam y phishing?',
+] as const;
+
+const CONTROLES_2 = [
+  '¿Su nivel de ventas online superiores al 30% del total de ingresos y sistemas PoS?',
+  '¿Exige autenticación multifactor para todos los accesos de la red corporativa y si hay excepciones se las tiene documentadas?',
+] as const;
+
+const CONTROLES_ADICIONALES = [
+  '¿Disponen de planes de respuesta a incidentes, plan de continuidad del negocio y recuperación de desastres que den pruebas y actualizan al menos una vez al año?',
+  'En caso de subcontratar, ¿El proveedor de servicios está obligado contractualmente a cumplir las políticas de seguridad y protecciones de datos?',
+  '¿Aseguran regularmente de que las copias de seguridad de datos son completas, que se puedan restaurar lo más rápido posible y están fuera de sus predios?',
+] as const;
+
+const MSG_BLOQUEO = 'La cotización no puede continuar por este canal y deberá gestionarse con la ayuda del asesor comercial (Case Underwriting).';
 
 function SiNoField({ form, name }: { form: Form; name: keyof FfFlSolicitudFormData }) {
   return (
@@ -55,7 +94,7 @@ function SiNoField({ form, name }: { form: Form; name: keyof FfFlSolicitudFormDa
 }
 
 export default function SeccionPDySI({ form }: { form: Form }) {
-  const { control, watch, setValue, register } = form;
+  const { watch, setValue, register } = form;
   const w = watch();
   const [numDocs, setNumDocs] = useState(1);
   const fileRef1 = useRef<HTMLInputElement>(null);
@@ -70,6 +109,16 @@ export default function SeccionPDySI({ form }: { form: Form }) {
 
   const reqBloqueado = REQUISITOS.some((_, i) => {
     const key = `frm_pdysi_req_${String(i + 1).padStart(2, '0')}` as keyof FfFlSolicitudFormData;
+    return w[key] === 'NO';
+  });
+
+  const ctrl1Bloqueado = CONTROLES_1.some((_, i) => {
+    const key = `frm_pdysi_ctrl1_${String(i + 1).padStart(2, '0')}` as keyof FfFlSolicitudFormData;
+    return w[key] === 'NO';
+  });
+
+  const ctrl2Bloqueado = CONTROLES_2.some((_, i) => {
+    const key = `frm_pdysi_ctrl2_${String(i + 1).padStart(2, '0')}` as keyof FfFlSolicitudFormData;
     return w[key] === 'NO';
   });
 
@@ -102,23 +151,20 @@ export default function SeccionPDySI({ form }: { form: Form }) {
             );
           })}
         </div>
-        {perfBloqueado && (
-          <div className="dyo-warning">
-            La cotización no puede continuar por este canal y deberá gestionarse con la ayuda del asesor comercial (Case Underwriting).
-          </div>
-        )}
+        {perfBloqueado && <div className="dyo-warning">{MSG_BLOQUEO}</div>}
       </div>
 
       {/* ── REQUISITOS ── */}
       <div className="form-subsection dyo-subsection">
         <div className="form-subsection-title">Requisitos</div>
         <p className="dyo-intro-text">
-          La compañía solicitante debe cumplir todos los requisitos siguientes para acceder a la cobertura de seguro propuesta.<br />
-          Si contesta NO a cualquiera de las siguientes preguntas, la cotización no puede continuar.
+          Por favor diligenciar el siguiente cuestionario con la información proporcionada.
+          Si contesta NO a cualquiera de las siguientes preguntas, la cotización no puede continuar
+          por este canal y deberá comunicarse con su director comercial.
         </p>
         <div className="dyo-si-no-table">
           <div className="dyo-si-no-header">
-            <span>La sociedad afirma que:</span>
+            <span>REQUISITOS / La sociedad y sus filiales (si aplica) afirman que:</span>
             <span>SI&nbsp;/&nbsp;NO</span>
           </div>
           {REQUISITOS.map((pregunta, i) => {
@@ -132,11 +178,81 @@ export default function SeccionPDySI({ form }: { form: Form }) {
             );
           })}
         </div>
-        {reqBloqueado && (
-          <div className="dyo-warning">
-            La cotización no puede continuar por este canal y deberá gestionarse con la ayuda del asesor comercial (Case Underwriting).
+        {reqBloqueado && <div className="dyo-warning">{MSG_BLOQUEO}</div>}
+      </div>
+
+      {/* ── CONTROLES EN LA GESTIÓN DEL RIESGO - PARTE 1 ── */}
+      <div className="form-subsection dyo-subsection">
+        <div className="form-subsection-title">Controles en la Gestión del Riesgo - Parte 1</div>
+        <p className="dyo-intro-text">
+          Por favor confirme con la información proporcionada que el tomador y sus filiales (si aplica) afirma que:
+        </p>
+        <div className="dyo-si-no-table">
+          <div className="dyo-si-no-header">
+            <span>REQUISITOS / La sociedad y sus filiales (si aplica) afirman que:</span>
+            <span>SI&nbsp;/&nbsp;NO</span>
           </div>
-        )}
+          {CONTROLES_1.map((pregunta, i) => {
+            const name = `frm_pdysi_ctrl1_${String(i + 1).padStart(2, '0')}` as keyof FfFlSolicitudFormData;
+            return (
+              <div key={name} className="dyo-si-no-row">
+                <span className="dyo-si-no-num">{i + 1}.</span>
+                <span className="dyo-si-no-text">{pregunta}</span>
+                <SiNoField form={form} name={name} />
+              </div>
+            );
+          })}
+        </div>
+        {ctrl1Bloqueado && <div className="dyo-warning">{MSG_BLOQUEO}</div>}
+      </div>
+
+      {/* ── CONTROLES EN LA GESTIÓN DEL RIESGO - PARTE 2 ── */}
+      <div className="form-subsection dyo-subsection">
+        <div className="form-subsection-title">Controles en la Gestión del Riesgo - Parte 2</div>
+        <p className="dyo-intro-text">
+          Por favor confirme con la información proporcionada que el tomador y sus filiales (si aplica) afirma que:
+        </p>
+        <div className="dyo-si-no-table">
+          <div className="dyo-si-no-header">
+            <span></span>
+            <span>SI&nbsp;/&nbsp;NO</span>
+          </div>
+          {CONTROLES_2.map((pregunta, i) => {
+            const name = `frm_pdysi_ctrl2_${String(i + 1).padStart(2, '0')}` as keyof FfFlSolicitudFormData;
+            return (
+              <div key={name} className="dyo-si-no-row">
+                <span className="dyo-si-no-num">{i + 1}.</span>
+                <span className="dyo-si-no-text">{pregunta}</span>
+                <SiNoField form={form} name={name} />
+              </div>
+            );
+          })}
+        </div>
+        {ctrl2Bloqueado && <div className="dyo-warning">{MSG_BLOQUEO}</div>}
+      </div>
+
+      {/* ── CONTROLES ADICIONALES ── */}
+      <div className="form-subsection dyo-subsection">
+        <div className="form-subsection-title">Controles Adicionales</div>
+        <p className="dyo-intro-text">
+          Por favor confirme con la información proporcionada que el tomador y sus filiales (si aplica) afirma que:
+        </p>
+        <div className="dyo-si-no-table">
+          <div className="dyo-si-no-header">
+            <span></span>
+            <span>SI&nbsp;/&nbsp;NO</span>
+          </div>
+          {CONTROLES_ADICIONALES.map((pregunta, i) => {
+            const name = `frm_pdysi_ctrlad_${String(i + 1).padStart(2, '0')}` as keyof FfFlSolicitudFormData;
+            return (
+              <div key={name} className="dyo-si-no-row">
+                <span className="dyo-si-no-num">{i + 1}.</span>
+                <span className="dyo-si-no-text">{pregunta}</span>
+                <SiNoField form={form} name={name} />
+              </div>
+            );
+          })}
+        </div>
       </div>
 
       {/* ── DOCUMENTO DE SOPORTE ── */}
@@ -168,9 +284,7 @@ export default function SeccionPDySI({ form }: { form: Form }) {
                   >
                     {fileName ? fileName : 'Cargar archivo'}
                   </ZrButton>
-                  {fileName && (
-                    <span className="dyo-doc-name">{fileName}</span>
-                  )}
+                  {fileName && <span className="dyo-doc-name">{fileName}</span>}
                 </div>
                 <input type="hidden" {...register(docKey)} />
               </div>
@@ -191,9 +305,6 @@ export default function SeccionPDySI({ form }: { form: Form }) {
       {/* ── PROPUESTA ECONÓMICA ── */}
       <div className="form-subsection dyo-subsection">
         <div className="form-subsection-title">Propuesta económica</div>
-        <p className="dyo-intro-text">
-          El deducible va en 0 por defecto.
-        </p>
         <div className="dyo-propuesta-table">
           <div className="dyo-propuesta-header">
             <span>#</span>
@@ -208,12 +319,12 @@ export default function SeccionPDySI({ form }: { form: Form }) {
             <div key={field} className="dyo-propuesta-row">
               <span className="dyo-prop-num">{n}</span>
               <div className="dyo-prop-limite">
-                <ZdsSelect
-                  label=""
-                  name={field}
-                  control={control}
-                  options={OPTIONS.limitePdySI}
-                  placeholder="Seleccione un límite"
+                <input
+                  type="number"
+                  className="dyo-prop-input"
+                  min="0"
+                  placeholder="0"
+                  {...register(field)}
                 />
               </div>
               <span className="dyo-prop-tipo">
@@ -223,7 +334,7 @@ export default function SeccionPDySI({ form }: { form: Form }) {
           ))}
         </div>
         <p className="dyo-nota">
-          Nota: los Gastos de Defensa son parte del límite y no en adición.
+          Nota: el sistema debe controlar que se ingrese al menos un valor asegurado.
         </p>
       </div>
 

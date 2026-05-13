@@ -23,7 +23,6 @@ const SECTORES = [
   'Proveedores de redes sociales, plataformas y gestión de contenidos.',
   'Supermercados y grandes superficies.',
   'Call center / BPO.',
-  'Empresas cuya actividad principal sea la tenencia de acciones (holdings puros).',
 ] as const;
 
 const REQUISITOS = [
