@@ -512,6 +512,14 @@ function PlanPago({ form }: { form: ReturnType<typeof useForm<FfFlSolicitudFormD
   );
 }
 
+const MSG_CASE_UW =
+  'Esta oportunidad no puede cotizarse con este flujo y deberá ser revisada por el área de Suscripción. ' +
+  'Por favor genera la solicitud correspondiente en JIRA, proporcionando el cuestionario de seguro ' +
+  'debidamente diligenciado, fechado, firmado y acompañado de los Estados Financieros auditados para ' +
+  'los dos últimos periodos contables con sus respectivas notas.';
+
+const TIPOS_EMPRESA_BLOQUEADOS = new Set(['ESTATAL', 'ENTIDAD_PUBLICA', 'EXTRANJERA']);
+
 // ---------------------------------------------------------------------------
 // Componente principal
 // ---------------------------------------------------------------------------
@@ -569,12 +577,17 @@ export default function SolicitudFfFl() {
     setProductError('');
     setSubmitError('');
 
+    if (nitNotFound && TIPOS_EMPRESA_BLOQUEADOS.has(data.frm_cre_tipo_empresa ?? '')) {
+      setSubmitError(MSG_CASE_UW);
+      return;
+    }
+
     if (data.frm_gen_prod_dyo) {
       const d = data as Record<string, unknown>;
       const perfBlocked = Array.from({ length: 17 }, (_, i) => `frm_dyo_perf_${String(i + 1).padStart(2, '0')}`).some(k => d[k] === 'SI');
       const reqBlocked  = Array.from({ length: 8  }, (_, i) => `frm_dyo_req_${String(i + 1).padStart(2, '0')}`).some(k => d[k] === 'NO');
       if (perfBlocked || reqBlocked) {
-        setSubmitError('D&O: La cotización no puede continuar por este canal. Gestione la solicitud con el asesor comercial (Case Underwriting).');
+        setSubmitError(`D&O: ${MSG_CASE_UW}`);
         return;
       }
       const hasLimit = data.frm_dyo_prop_01_limite || data.frm_dyo_prop_02_limite || data.frm_dyo_prop_03_limite;
@@ -583,6 +596,52 @@ export default function SolicitudFfFl() {
         return;
       }
     }
+
+    if (data.frm_gen_prod_cc) {
+      const d = data as Record<string, unknown>;
+      const perfBlocked = Array.from({ length: 8 }, (_, i) => `frm_cc_perf_${String(i + 1).padStart(2, '0')}`).some(k => d[k] === 'SI');
+      const reqBlocked  = Array.from({ length: 8 }, (_, i) => `frm_cc_req_${String(i + 1).padStart(2, '0')}`).some(k => d[k] === 'NO');
+      if (perfBlocked || reqBlocked) {
+        setSubmitError(`Crimen Comercial: ${MSG_CASE_UW}`);
+        return;
+      }
+      const hasLimit = data.frm_cc_prop_01_limite || data.frm_cc_prop_02_limite || data.frm_cc_prop_03_limite;
+      if (!hasLimit) {
+        setSubmitError('Crimen Comercial: Debe ingresar al menos un límite asegurado en la Propuesta Económica.');
+        return;
+      }
+    }
+
+    if (data.frm_gen_prod_pdysi) {
+      const d = data as Record<string, unknown>;
+      const perfBlocked = Array.from({ length: 10 }, (_, i) => `frm_pdysi_perf_${String(i + 1).padStart(2, '0')}`).some(k => d[k] === 'SI');
+      const reqBlocked  = Array.from({ length: 8  }, (_, i) => `frm_pdysi_req_${String(i + 1).padStart(2, '0')}`).some(k => d[k] === 'NO');
+      if (perfBlocked || reqBlocked) {
+        setSubmitError(`Protección de Datos y SI: ${MSG_CASE_UW}`);
+        return;
+      }
+      const hasLimit = data.frm_pdysi_prop_01_limite || data.frm_pdysi_prop_02_limite || data.frm_pdysi_prop_03_limite;
+      if (!hasLimit) {
+        setSubmitError('Protección de Datos y SI: Debe ingresar al menos un límite asegurado en la Propuesta Económica.');
+        return;
+      }
+    }
+
+    if (data.frm_gen_prod_pi) {
+      const d = data as Record<string, unknown>;
+      const perfBlocked = Array.from({ length: 8 }, (_, i) => `frm_pi_perf_${String(i + 1).padStart(2, '0')}`).some(k => d[k] === 'SI');
+      const reqBlocked  = Array.from({ length: 8 }, (_, i) => `frm_pi_req_${String(i + 1).padStart(2, '0')}`).some(k => d[k] === 'NO');
+      if (perfBlocked || reqBlocked) {
+        setSubmitError(`Seg. Profesional: ${MSG_CASE_UW}`);
+        return;
+      }
+      const hasLimit = data.frm_pi_prop_01_limite || data.frm_pi_prop_02_limite || data.frm_pi_prop_03_limite;
+      if (!hasLimit) {
+        setSubmitError('Seg. Profesional: Debe ingresar al menos un límite asegurado en la Propuesta Económica.');
+        return;
+      }
+    }
+
     try {
       const payload: Record<string, unknown> = {
         ...(task?.data ?? {}),

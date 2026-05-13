@@ -1,6 +1,9 @@
 import { useState, useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import SeccionDyO from './SeccionDyO';
+import SeccionCC from './SeccionCC';
+import SeccionPDySI from './SeccionPDySI';
+import SeccionPI from './SeccionPI';
 import { FfFlSolicitudFormData } from './variables';
 
 type Form = ReturnType<typeof useForm<FfFlSolicitudFormData>>;
@@ -45,9 +48,9 @@ export default function SeccionProductos({ form }: { form: Form }) {
 
       <div className="products-tab-body">
         {activeTab === 'dyo'   && <SeccionDyO form={form} />}
-        {activeTab === 'cc'    && <div className="prod-placeholder">Sección Crimen Comercial — próximamente</div>}
-        {activeTab === 'pdysi' && <div className="prod-placeholder">Sección Protección de Datos y SI — próximamente</div>}
-        {activeTab === 'pi'    && <div className="prod-placeholder">Sección Responsabilidad Civil Profesional — próximamente</div>}
+        {activeTab === 'cc'    && <SeccionCC form={form} />}
+        {activeTab === 'pdysi' && <SeccionPDySI form={form} />}
+        {activeTab === 'pi'    && <SeccionPI form={form} />}
       </div>
     </div>
   );

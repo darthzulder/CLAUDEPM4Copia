@@ -829,3 +829,270 @@ zr-date-input[readonly] {
   .dyo-prop-tipo { display: none; }
   .dyo-si-no-text { font: var(--zf-capt-12); }
 }
+
+/* ──────────────────────────────────────
+   COTIZACIONES (CO) — INFO BAR
+────────────────────────────────────── */
+.co-info-bar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--zs-150);
+  background: var(--zg-white);
+  border: 1px solid var(--z-border);
+  border-radius: 10px;
+  padding: var(--zs-100) var(--zs-150);
+  margin-bottom: var(--zs-150);
+  box-shadow: var(--z-card-shadow);
+}
+
+.co-info-item {
+  display: flex;
+  flex-direction: column;
+  gap: var(--zs-12);
+}
+
+.co-info-label {
+  font: var(--zf-capt-12--700);
+  color: var(--z-muted);
+  text-transform: uppercase;
+  letter-spacing: .4px;
+}
+
+.co-info-value {
+  font: var(--zf-capt-14--600);
+  color: var(--z-text);
+}
+
+.co-section-title {
+  font: var(--zf-capt-12--700);
+  color: var(--z-muted);
+  text-transform: uppercase;
+  letter-spacing: .55px;
+  margin-bottom: var(--zs-75);
+  padding-left: var(--zs-25);
+}
+
+/* ──────────────────────────────────────
+   COTIZACIONES (CO) — TARJETAS
+────────────────────────────────────── */
+.co-product-card,
+.co-decision-card {
+  background: var(--zg-white);
+  border-radius: 10px;
+  box-shadow: var(--z-card-shadow);
+  border: 1px solid rgba(221,227,236,.7);
+  margin-bottom: var(--zs-150);
+  overflow: visible;
+}
+
+.co-product-header {
+  background: var(--z-blue);
+  padding: var(--zs-75) var(--zs-150);
+  border-radius: 10px 10px 0 0;
+  color: var(--zg-white-zurich);
+  font: var(--zf-capt-12--700);
+  letter-spacing: .55px;
+  text-transform: uppercase;
+  display: flex;
+  align-items: center;
+  gap: var(--zs-50);
+}
+
+.co-product-header::before {
+  content: '';
+  display: inline-block;
+  width: 3px;
+  height: 14px;
+  background: rgba(255,255,255,.45);
+  border-radius: 2px;
+  flex-shrink: 0;
+}
+
+.co-card-body {
+  padding: var(--zs-150) var(--zs-150) var(--zs-100);
+}
+
+.co-subsection-title {
+  font: var(--zf-capt-14--600);
+  color: var(--z-blue);
+  margin-bottom: var(--zs-50);
+  display: flex;
+  align-items: center;
+  gap: var(--zs-50);
+}
+
+.co-subsection-title::before {
+  content: '';
+  display: inline-block;
+  width: 3px;
+  height: 13px;
+  background: var(--z-blue);
+  border-radius: 2px;
+}
+
+/* ──────────────────────────────────────
+   COTIZACIONES (CO) — TABLA DE OPCIONES
+────────────────────────────────────── */
+.co-table {
+  border: 1px solid var(--z-border);
+  border-radius: 8px;
+  overflow: visible;
+  background: var(--zg-white);
+  margin-bottom: var(--zs-100);
+}
+
+.co-table-head {
+  display: grid;
+  align-items: center;
+  gap: var(--zs-75);
+  background: var(--zg-white-zurich);
+  border-bottom: 2px solid var(--z-border);
+  border-radius: 8px 8px 0 0;
+  padding: var(--zs-50) var(--zs-75);
+  font: var(--zf-capt-12--700);
+  color: var(--z-muted);
+  text-transform: uppercase;
+  letter-spacing: .4px;
+}
+
+.co-table-option-group { border-bottom: 1px solid var(--z-border); }
+.co-table-option-group:last-child { border-bottom: none; border-radius: 0 0 8px 8px; overflow: hidden; }
+
+.co-table-row {
+  display: grid;
+  align-items: center;
+  gap: var(--zs-75);
+  padding: var(--zs-50) var(--zs-75);
+  background: var(--zg-white);
+  transition: background .1s;
+}
+
+.co-table-row:last-child:not(.co-table-row--sub) { border-radius: 0 0 8px 8px; }
+
+.co-table-row--sub {
+  padding-top: var(--zs-25);
+  border-top: 1px dashed var(--z-border);
+  background: var(--zg-white-zurich);
+}
+
+.co-table-row--selected { background: var(--zc-blue-sky-10) !important; }
+
+.co-cell-num {
+  font: var(--zf-capt-12--700);
+  color: var(--z-muted);
+  text-align: center;
+}
+
+.co-cell-val {
+  font: var(--zf-capt-14);
+  color: var(--z-text);
+  white-space: nowrap;
+}
+
+.co-cell-muted {
+  font: var(--zf-capt-12);
+  color: var(--z-muted);
+  font-style: italic;
+  line-height: 1.3;
+}
+
+.co-cell-cob {
+  font: var(--zf-capt-12--700);
+  color: var(--z-blue);
+}
+
+.co-cell-radio {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+/* ──────────────────────────────────────
+   COTIZACIONES (CO) — RADIO SELECCIÓN
+────────────────────────────────────── */
+.co-radio {
+  display: inline-block;
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  border: 2px solid var(--z-border);
+  background: var(--zg-white);
+  cursor: pointer;
+  transition: border-color .12s, background .12s;
+  flex-shrink: 0;
+}
+
+.co-radio:hover { border-color: var(--z-blue); }
+
+.co-radio--active {
+  border-color: var(--z-blue);
+  background: var(--z-blue);
+  box-shadow: inset 0 0 0 3px var(--zg-white);
+}
+
+/* ──────────────────────────────────────
+   COTIZACIONES (CO) — FOOTER DE TARJETA
+────────────────────────────────────── */
+.co-card-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: var(--zs-75);
+  padding-top: var(--zs-75);
+  border-top: 1px dashed var(--z-border);
+  margin-top: var(--zs-75);
+}
+
+.co-nc-toggle {
+  display: flex;
+  align-items: center;
+  gap: var(--zs-75);
+}
+
+.co-nc-label {
+  font: var(--zf-capt-12--700);
+  color: var(--z-muted);
+  text-transform: uppercase;
+  letter-spacing: .3px;
+}
+
+/* ──────────────────────────────────────
+   COTIZACIONES (CO) — DECISIÓN
+────────────────────────────────────── */
+.co-field-wrap { display: flex; flex-direction: column; gap: var(--zs-25); }
+
+.co-field-hint {
+  font: var(--zf-capt-12);
+  color: var(--z-muted);
+  font-weight: 400;
+  margin-left: var(--zs-25);
+}
+
+.co-textarea {
+  width: 100%;
+  min-height: 96px;
+  border: 1.5px solid var(--z-border);
+  border-radius: 8px;
+  padding: var(--zs-75) var(--zs-100);
+  font: var(--zf-capt-14);
+  color: var(--z-text);
+  background: var(--zg-white);
+  resize: vertical;
+  transition: border-color .15s;
+  box-sizing: border-box;
+}
+
+.co-textarea:focus {
+  outline: none;
+  border-color: var(--z-blue);
+}
+
+.co-textarea::placeholder { color: var(--z-muted); }
+
+@media (max-width: 900px) {
+  .co-table-head,
+  .co-table-row { grid-template-columns: 1fr !important; }
+  .co-cell-muted { display: none; }
+  .co-info-bar { flex-direction: column; gap: var(--zs-75); }
+}
