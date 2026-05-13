@@ -6,6 +6,7 @@ import pm4 from '../../api/pm4Client';
 import { useCollection } from '../../core/useCollection';
 import FormSection from '../../components/FormSection';
 import CreacionTomador from './CreacionTomador';
+import SeccionProductos from './SeccionProductos';
 import zurichLogo from '../../resources/zurich/ZurichLogo_Horz_White_CMYK_no_R.png';
 import { ZdsInput, ZdsDate, ZdsCheckboxField, ZdsSelect, ZdsSuggest } from './ZdsField';
 import { ZrButton } from '@zurich/web-components/react/button';
@@ -104,7 +105,7 @@ function InfoGeneral({
         {productError && <div className="product-error">{productError}</div>}
         {soloCC && !productError && (
           <div className="product-warning">
-            ⚠ Crimen Comercial no puede cotizarse como monolinea. Seleccione al menos otro producto.
+            El seguro de Crimen Comercial solo puede cotizarse junto con otro producto. Si solo requiere este producto, la cotización no puede continuar por este canal y deberá gestionarse con la ayuda del asesor comercial.
           </div>
         )}
       </div>
@@ -193,13 +194,19 @@ function InfoTomador({
   onConsultarNIT,
   nitLoading,
   nitNotFound,
+  nitConfirmCreate,
+  onConfirmCreate,
+  onCancelCreate,
 }: {
   form: ReturnType<typeof useForm<FfFlSolicitudFormData>>;
   onConsultarNIT: () => void;
   nitLoading: boolean;
   nitNotFound: boolean;
+  nitConfirmCreate: boolean;
+  onConfirmCreate: () => void;
+  onCancelCreate: () => void;
 }) {
-  const { control, formState: { errors, isSubmitted }, watch, setValue } = form;
+  const { register, control, formState: { errors, isSubmitted }, watch, setValue } = form;
   const w = watch();
   const fe = (name: keyof FfFlSolicitudFormData) =>
     fieldError(errors[name] as FieldError | undefined, w[name], isSubmitted);
@@ -259,9 +266,10 @@ function InfoTomador({
           helpText="9 dígitos + dígito verificador"
         />
         <ZdsInput control={control} name="frm_tom_tomador" label="Tomador" readOnly helpText="Dato de TIA" />
-        <div className="consultar-wrapper">
+        <div style={{ paddingBottom: 'var(--zs-12)' }}>
           <ZrButton
             config="secondary"
+            icon="search:line"
             disabled={nitLoading}
             loading={nitLoading}
             onClick={onConsultarNIT}
@@ -328,6 +336,8 @@ function InfoTomador({
         />
       </div>
 
+      </ZrForm>
+
       {actRows.length > 0 && (
         <div className="form-subsection form-subsection--activities">
           <div className="form-subsection-title">Actividades aseguradas</div>
@@ -336,7 +346,6 @@ function InfoTomador({
               <span>Producto</span>
               <span>Actividad asegurada</span>
               <span>Cód. CIIU</span>
-              <span>Cód. NAIC</span>
             </div>
             {actRows.map(({ prod, actField, ciuField, naicField, options, loading }) => (
               <div key={prod} className="actividades-table-row">
@@ -355,11 +364,25 @@ function InfoTomador({
                 <div className="actividades-cell">
                   <ZdsInput control={control} name={ciuField} label="" readOnly />
                 </div>
-                <div className="actividades-cell">
-                  <ZdsInput control={control} name={naicField} label="" readOnly />
-                </div>
+                <input type="hidden" {...register(naicField)} />
               </div>
             ))}
+          </div>
+        </div>
+      )}
+
+      {nitConfirmCreate && (
+        <div className="tia-confirm-create">
+          <div className="tia-confirm-text">
+            El NIT ingresado no fue encontrado en TIA. ¿Desea crear un nuevo cliente con los datos que va a ingresar?
+          </div>
+          <div className="tia-confirm-actions">
+            <ZrButton config="primary" icon="check:line" onClick={onConfirmCreate}>
+              Sí, crear nuevo cliente
+            </ZrButton>
+            <ZrButton config="secondary" onClick={onCancelCreate}>
+              Cancelar
+            </ZrButton>
           </div>
         </div>
       )}
@@ -425,8 +448,14 @@ function DatosCotizacion({ form }: { form: ReturnType<typeof useForm<FfFlSolicit
         <ZdsInput control={control} name="frm_cot_soporte_ofrecido" label="Soporte ofrecido (%)" readOnly helpText="100% por defecto" />
       </div>
 
+      <input type="hidden" {...register('frm_cot_modalidad_dyo')} />
+      <input type="hidden" {...register('frm_cot_modalidad_cc')} />
+      <input type="hidden" {...register('frm_cot_modalidad_pdysi')} />
+      <input type="hidden" {...register('frm_cot_modalidad_pi')} />
+      </ZrForm>
+
       {w.frm_gen_prod_cc && (
-        <div className="form-row cols-2">
+        <div className="form-row cols-2" style={{ padding: '0 var(--zs-200) var(--zs-100)' }}>
           <ZdsSelect
             label="Número de empleados"
             name="frm_cot_num_empleados"
@@ -510,6 +539,14 @@ function PlanPago({ form }: { form: ReturnType<typeof useForm<FfFlSolicitudFormD
   );
 }
 
+const MSG_CASE_UW =
+  'Esta oportunidad no puede cotizarse con este flujo y deberá ser revisada por el área de Suscripción. ' +
+  'Por favor genera la solicitud correspondiente en JIRA, proporcionando el cuestionario de seguro ' +
+  'debidamente diligenciado, fechado, firmado y acompañado de los Estados Financieros auditados para ' +
+  'los dos últimos periodos contables con sus respectivas notas.';
+
+const TIPOS_EMPRESA_BLOQUEADOS = new Set(['ESTATAL', 'ENTIDAD_PUBLICA', 'EXTRANJERA']);
+
 // ---------------------------------------------------------------------------
 // Componente principal
 // ---------------------------------------------------------------------------
@@ -520,6 +557,7 @@ export default function SolicitudFfFl() {
   const [sent, setSent] = useState(false);
   const [nitLoading, setNitLoading] = useState(false);
   const [nitNotFound, setNitNotFound] = useState(false);
+  const [nitConfirmCreate, setNitConfirmCreate] = useState(false);
 
   const form = useForm<FfFlSolicitudFormData>({
     mode: 'onChange',
@@ -562,9 +600,75 @@ export default function SolicitudFfFl() {
     const prods = [data.frm_gen_prod_dyo, data.frm_gen_prod_cc, data.frm_gen_prod_pdysi, data.frm_gen_prod_pi];
     const count = prods.filter(Boolean).length;
     if (count === 0) { setProductError('Seleccione al menos un producto'); return; }
-    if (data.frm_gen_prod_cc && count === 1) { setProductError('Crimen Comercial no puede cotizarse como monolinea'); return; }
+    if (data.frm_gen_prod_cc && count === 1) { setProductError('El seguro de Crimen Comercial solo puede cotizarse junto con otro producto'); return; }
     setProductError('');
     setSubmitError('');
+
+    if (nitNotFound && TIPOS_EMPRESA_BLOQUEADOS.has(data.frm_cre_tipo_empresa ?? '')) {
+      setSubmitError(MSG_CASE_UW);
+      return;
+    }
+
+    if (data.frm_gen_prod_dyo) {
+      const d = data as Record<string, unknown>;
+      const perfBlocked = Array.from({ length: 17 }, (_, i) => `frm_dyo_perf_${String(i + 1).padStart(2, '0')}`).some(k => d[k] === 'SI');
+      const reqBlocked  = Array.from({ length: 8  }, (_, i) => `frm_dyo_req_${String(i + 1).padStart(2, '0')}`).some(k => d[k] === 'NO');
+      if (perfBlocked || reqBlocked) {
+        setSubmitError(`D&O: ${MSG_CASE_UW}`);
+        return;
+      }
+      const hasLimit = data.frm_dyo_prop_01_limite || data.frm_dyo_prop_02_limite || data.frm_dyo_prop_03_limite;
+      if (!hasLimit) {
+        setSubmitError('D&O: Debe ingresar al menos un límite asegurado en la Propuesta Económica.');
+        return;
+      }
+    }
+
+    if (data.frm_gen_prod_cc) {
+      const d = data as Record<string, unknown>;
+      const perfBlocked = Array.from({ length: 8 }, (_, i) => `frm_cc_perf_${String(i + 1).padStart(2, '0')}`).some(k => d[k] === 'SI');
+      const reqBlocked  = Array.from({ length: 8 }, (_, i) => `frm_cc_req_${String(i + 1).padStart(2, '0')}`).some(k => d[k] === 'NO');
+      if (perfBlocked || reqBlocked) {
+        setSubmitError(`Crimen Comercial: ${MSG_CASE_UW}`);
+        return;
+      }
+      const hasLimit = data.frm_cc_prop_01_limite || data.frm_cc_prop_02_limite || data.frm_cc_prop_03_limite;
+      if (!hasLimit) {
+        setSubmitError('Crimen Comercial: Debe ingresar al menos un límite asegurado en la Propuesta Económica.');
+        return;
+      }
+    }
+
+    if (data.frm_gen_prod_pdysi) {
+      const d = data as Record<string, unknown>;
+      const perfBlocked = Array.from({ length: 10 }, (_, i) => `frm_pdysi_perf_${String(i + 1).padStart(2, '0')}`).some(k => d[k] === 'SI');
+      const reqBlocked  = Array.from({ length: 8  }, (_, i) => `frm_pdysi_req_${String(i + 1).padStart(2, '0')}`).some(k => d[k] === 'NO');
+      if (perfBlocked || reqBlocked) {
+        setSubmitError(`Protección de Datos y SI: ${MSG_CASE_UW}`);
+        return;
+      }
+      const hasLimit = data.frm_pdysi_prop_01_limite || data.frm_pdysi_prop_02_limite || data.frm_pdysi_prop_03_limite;
+      if (!hasLimit) {
+        setSubmitError('Protección de Datos y SI: Debe ingresar al menos un límite asegurado en la Propuesta Económica.');
+        return;
+      }
+    }
+
+    if (data.frm_gen_prod_pi) {
+      const d = data as Record<string, unknown>;
+      const perfBlocked = Array.from({ length: 8 }, (_, i) => `frm_pi_perf_${String(i + 1).padStart(2, '0')}`).some(k => d[k] === 'SI');
+      const reqBlocked  = Array.from({ length: 8 }, (_, i) => `frm_pi_req_${String(i + 1).padStart(2, '0')}`).some(k => d[k] === 'NO');
+      if (perfBlocked || reqBlocked) {
+        setSubmitError(`Seg. Profesional: ${MSG_CASE_UW}`);
+        return;
+      }
+      const hasLimit = data.frm_pi_prop_01_limite || data.frm_pi_prop_02_limite || data.frm_pi_prop_03_limite;
+      if (!hasLimit) {
+        setSubmitError('Seg. Profesional: Debe ingresar al menos un límite asegurado en la Propuesta Económica.');
+        return;
+      }
+    }
+
     try {
       const { _user: _u, _request: _r, ...taskData } = (task?.data ?? {}) as Record<string, unknown>;
       const payload: Record<string, unknown> = {
@@ -603,9 +707,8 @@ export default function SolicitudFfFl() {
 
       // Si output es string con "No party found" → cliente no existe en TIA
       if (typeof output === 'string' && (output.includes('No party found') || output.includes('HTTP 400'))) {
-        console.warn('[TIA] No party found — abriendo sección de creación de tomador');
-        setNitNotFound(true);
-        setSubmitError('El NIT no existe en TIA. Complete los datos de Creación de Tomador.');
+        console.warn('[TIA] No party found — solicitando confirmación para crear tomador');
+        setNitConfirmCreate(true);
         return;
       }
 
@@ -670,8 +773,9 @@ export default function SolicitudFfFl() {
             <div className="screen-sent-icon">✓</div>
             <div className="screen-sent-title">Solicitud enviada</div>
             <div className="screen-sent-sub">
-              La cotización fue enviada correctamente a ProcessMaker.<br />
+              La cotización fue procesada correctamente.<br />
               El proceso continuará al siguiente nodo automáticamente.
+              Un momento, por favor...
             </div>
           </div>
         </div>
@@ -694,7 +798,16 @@ export default function SolicitudFfFl() {
       <div className="screen-content">
         <div>
           <InfoGeneral form={form} productError={productError} />
-          <InfoTomador form={form} onConsultarNIT={handleConsultarNIT} nitLoading={nitLoading} nitNotFound={nitNotFound} />
+          <InfoTomador
+            form={form}
+            onConsultarNIT={handleConsultarNIT}
+            nitLoading={nitLoading}
+            nitNotFound={nitNotFound}
+            nitConfirmCreate={nitConfirmCreate}
+            onConfirmCreate={() => { setNitConfirmCreate(false); setNitNotFound(true); }}
+            onCancelCreate={() => setNitConfirmCreate(false)}
+          />
+          <SeccionProductos form={form} />
           <DatosCotizacion form={form} />
           <PlanPago form={form} />
 
@@ -703,6 +816,7 @@ export default function SolicitudFfFl() {
           <div className="submit-bar">
             <ZrButton
               config="primary:l"
+              icon="arrow-long-right:line"
               disabled={submitting}
               loading={submitting}
               onClick={() => form.handleSubmit(onSubmit)()}

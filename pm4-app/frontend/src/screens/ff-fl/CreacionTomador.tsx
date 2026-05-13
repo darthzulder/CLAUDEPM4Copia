@@ -17,10 +17,14 @@ function fe(
   return String(err.message);
 }
 
+const TIPOS_EMPRESA_BLOQUEADOS = new Set(['ESTATAL', 'ENTIDAD_PUBLICA', 'EXTRANJERA']);
+
 export default function CreacionTomador({ form }: { form: Form }) {
   const [open, setOpen] = useState(true);
   const { register, control, formState: { errors, isSubmitted }, watch, setValue } = form;
   const w = watch();
+
+  const empresaBloqueada = TIPOS_EMPRESA_BLOQUEADOS.has(w.frm_cre_tipo_empresa ?? '');
 
   const ciudadesCre = useMemo(
     () => CIUDADES_POR_DEPTO[w.frm_cre_departamento ?? ''] ?? [],
@@ -39,16 +43,17 @@ export default function CreacionTomador({ form }: { form: Form }) {
       <ZrButton
         config="secondary"
         wide
+        icon="alert-triangle:line"
         onClick={() => setOpen(!open)}
         style={{
-          ['--z-button--bg' as any]:    '#fffbeb',
-          ['--z-button--color' as any]: '#92400e',
+          ['--z-button--bg' as any]:    'var(--zc-lemon-20)',
+          ['--z-button--color' as any]: 'var(--zc-lemon-aa)',
           ['--z-button--radius' as any]: '8px',
-          marginBottom: '14px',
+          marginBottom: 'var(--zs-75)',
         }}
       >
-        ⚠ {open ? '▾' : '▸'} Creación de tomador — Persona Jurídica
-        <span style={{ fontWeight: 400, fontSize: 12, marginLeft: 8 }}>(completar si TIA no encontró el tomador)</span>
+        {open ? '▾' : '▸'} Creación de tomador — Persona Jurídica
+        <span style={{ fontWeight: 400, font: 'var(--zf-capt-12)', marginLeft: 'var(--zs-50)' }}>(completar si TIA no encontró el tomador)</span>
       </ZrButton>
 
       {open && (
@@ -102,6 +107,13 @@ export default function CreacionTomador({ form }: { form: Form }) {
             <ZdsDate control={control} name="frm_cre_fecha_constitucion" label="Fecha de constitución" />
             <ZdsDate control={control} name="frm_cre_fecha_expedicion" label="Fecha de expedición del documento" />
           </div>
+
+          {empresaBloqueada && (
+            <div className="submit-error" style={{ marginTop: 'var(--zs-75)', marginBottom: 0 }}>
+              El tipo de empresa seleccionado no puede cotizarse por este canal, por favor verifique la información.
+              La cotización deberá gestionarse con la ayuda del asesor comercial (Case Underwriting).
+            </div>
+          )}
 
           <div className="form-row cols-1">
             <ZdsInput

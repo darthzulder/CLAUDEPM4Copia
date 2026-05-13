@@ -79,7 +79,6 @@ export const OPTIONS = {
 
   planPago: [
     { value: '102', label: '102 Transferencia bancaria a 30 días' },
-    { value: '105', label: '105 Transferencia bancaria a 60 días' },
   ],
 
   medioPago: [
@@ -94,9 +93,10 @@ export const OPTIONS = {
   tipoEmpresa: [
     { value: 'SA', label: 'Sociedad Anónima' },
     { value: 'LTDA', label: 'Sociedad Limitada' },
-    { value: 'ESTATAL', label: 'Empresa Estatal' },
-    { value: 'EXTRANJERA', label: 'Empresa Extranjera' },
     { value: 'SAS', label: 'Sociedad Anónima Simplificada' },
+    { value: 'ESTATAL', label: 'Empresa Estatal' },
+    { value: 'ENTIDAD_PUBLICA', label: 'Entidad Pública' },
+    { value: 'EXTRANJERA', label: 'Empresa Extranjera' },
   ],
 
   tipoDocRepLegal: [
@@ -104,6 +104,30 @@ export const OPTIONS = {
     { value: 'CE', label: 'Cédula de Extranjería' },
     { value: 'PAS', label: 'Pasaporte' },
   ],
+
+  // D&O — Límite asegurado (Propuesta Económica)
+  limiteDyo: [
+    3_000_000_000, 5_000_000_000, 7_500_000_000, 10_000_000_000,
+    15_000_000_000, 20_000_000_000, 30_000_000_000, 50_000_000_000,
+  ].map((v) => ({ value: String(v), label: cop(v) })),
+
+  // PDySI — Límite asegurado (Propuesta Económica)
+  limitePdySI: [
+    3_000_000_000, 5_000_000_000, 7_500_000_000, 10_000_000_000,
+    15_000_000_000, 20_000_000_000, 30_000_000_000, 50_000_000_000,
+  ].map((v) => ({ value: String(v), label: cop(v) })),
+
+  // Responsabilidad Civil Profesional — Límite asegurado (Propuesta Económica)
+  limitePI: [
+    1_000_000_000, 2_000_000_000, 3_000_000_000, 5_000_000_000,
+    7_500_000_000, 10_000_000_000, 15_000_000_000, 20_000_000_000,
+  ].map((v) => ({ value: String(v), label: cop(v) })),
+
+  // Crimen Comercial — Límite asegurado (Propuesta Económica)
+  limiteCC: [
+    1_000_000_000, 2_000_000_000, 3_000_000_000, 5_000_000_000,
+    7_500_000_000, 10_000_000_000, 15_000_000_000, 20_000_000_000,
+  ].map((v) => ({ value: String(v), label: cop(v) })),
 } as const;
 
 // ---------------------------------------------------------------------------
@@ -256,6 +280,90 @@ export interface FfFlSolicitudFormData {
   frm_plan_num_cuotas?: string;
   frm_plan_medio_pago?: string;
   frm_plan_frecuencia_cobro?: string;
+
+  // D&O — Perfil de cliente (17 sectores — 'SI' | 'NO')
+  frm_dyo_perf_01?: string; frm_dyo_perf_02?: string; frm_dyo_perf_03?: string;
+  frm_dyo_perf_04?: string; frm_dyo_perf_05?: string; frm_dyo_perf_06?: string;
+  frm_dyo_perf_07?: string; frm_dyo_perf_08?: string; frm_dyo_perf_09?: string;
+  frm_dyo_perf_10?: string; frm_dyo_perf_11?: string; frm_dyo_perf_12?: string;
+  frm_dyo_perf_13?: string; frm_dyo_perf_14?: string; frm_dyo_perf_15?: string;
+  frm_dyo_perf_16?: string; frm_dyo_perf_17?: string;
+
+  // D&O — Requisitos (8 preguntas — 'SI' | 'NO')
+  frm_dyo_req_01?: string; frm_dyo_req_02?: string; frm_dyo_req_03?: string;
+  frm_dyo_req_04?: string; frm_dyo_req_05?: string; frm_dyo_req_06?: string;
+  frm_dyo_req_07?: string; frm_dyo_req_08?: string;
+
+  // D&O — Documentos de soporte (nombre de archivo)
+  frm_dyo_doc_01_nombre?: string;
+  frm_dyo_doc_02_nombre?: string;
+  frm_dyo_doc_03_nombre?: string;
+
+  // D&O — Propuesta económica (límite asegurado por opción)
+  frm_dyo_prop_01_limite?: string;
+  frm_dyo_prop_02_limite?: string;
+  frm_dyo_prop_03_limite?: string;
+
+  // Responsabilidad Civil Profesional — Perfil de cliente (8 sectores — 'SI' | 'NO')
+  frm_pi_perf_01?: string; frm_pi_perf_02?: string; frm_pi_perf_03?: string;
+  frm_pi_perf_04?: string; frm_pi_perf_05?: string; frm_pi_perf_06?: string;
+  frm_pi_perf_07?: string; frm_pi_perf_08?: string;
+
+  // Responsabilidad Civil Profesional — Requisitos (8 preguntas — 'SI' | 'NO')
+  frm_pi_req_01?: string; frm_pi_req_02?: string; frm_pi_req_03?: string;
+  frm_pi_req_04?: string; frm_pi_req_05?: string; frm_pi_req_06?: string;
+  frm_pi_req_07?: string; frm_pi_req_08?: string;
+
+  // Responsabilidad Civil Profesional — Documentos de soporte (nombre de archivo)
+  frm_pi_doc_01_nombre?: string;
+  frm_pi_doc_02_nombre?: string;
+  frm_pi_doc_03_nombre?: string;
+
+  // Responsabilidad Civil Profesional — Propuesta económica (límite asegurado por opción)
+  frm_pi_prop_01_limite?: string;
+  frm_pi_prop_02_limite?: string;
+  frm_pi_prop_03_limite?: string;
+
+  // Crimen Comercial — Perfil de cliente (8 sectores — 'SI' | 'NO')
+  frm_cc_perf_01?: string; frm_cc_perf_02?: string; frm_cc_perf_03?: string;
+  frm_cc_perf_04?: string; frm_cc_perf_05?: string; frm_cc_perf_06?: string;
+  frm_cc_perf_07?: string; frm_cc_perf_08?: string;
+
+  // Crimen Comercial — Requisitos (8 preguntas — 'SI' | 'NO')
+  frm_cc_req_01?: string; frm_cc_req_02?: string; frm_cc_req_03?: string;
+  frm_cc_req_04?: string; frm_cc_req_05?: string; frm_cc_req_06?: string;
+  frm_cc_req_07?: string; frm_cc_req_08?: string;
+
+  // Crimen Comercial — Documentos de soporte (nombre de archivo)
+  frm_cc_doc_01_nombre?: string;
+  frm_cc_doc_02_nombre?: string;
+  frm_cc_doc_03_nombre?: string;
+
+  // Crimen Comercial — Propuesta económica (límite asegurado por opción)
+  frm_cc_prop_01_limite?: string;
+  frm_cc_prop_02_limite?: string;
+  frm_cc_prop_03_limite?: string;
+
+  // PDySI — Perfil de cliente (10 sectores — 'SI' | 'NO')
+  frm_pdysi_perf_01?: string; frm_pdysi_perf_02?: string; frm_pdysi_perf_03?: string;
+  frm_pdysi_perf_04?: string; frm_pdysi_perf_05?: string; frm_pdysi_perf_06?: string;
+  frm_pdysi_perf_07?: string; frm_pdysi_perf_08?: string; frm_pdysi_perf_09?: string;
+  frm_pdysi_perf_10?: string;
+
+  // PDySI — Requisitos (8 preguntas — 'SI' | 'NO')
+  frm_pdysi_req_01?: string; frm_pdysi_req_02?: string; frm_pdysi_req_03?: string;
+  frm_pdysi_req_04?: string; frm_pdysi_req_05?: string; frm_pdysi_req_06?: string;
+  frm_pdysi_req_07?: string; frm_pdysi_req_08?: string;
+
+  // PDySI — Documentos de soporte (nombre de archivo)
+  frm_pdysi_doc_01_nombre?: string;
+  frm_pdysi_doc_02_nombre?: string;
+  frm_pdysi_doc_03_nombre?: string;
+
+  // PDySI — Propuesta económica (límite asegurado por opción)
+  frm_pdysi_prop_01_limite?: string;
+  frm_pdysi_prop_02_limite?: string;
+  frm_pdysi_prop_03_limite?: string;
 
   // Creación de tomador - Persona Jurídica (si TIA no retorna datos)
   frm_cre_nombre_compania?: string;

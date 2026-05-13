@@ -7,11 +7,12 @@ import { ZrSelect }     from '@zurich/web-components/react/select';
 import { ZrDateInput }  from '@zurich/web-components/react/date-input';
 
 // Construye props kebab-case para pasarlos con spread (JSX no admite guiones en nombres de prop)
-function kp(error?: string, helpText?: string, inputType?: string): Record<string, unknown> {
+function kp(error?: string, helpText?: string, inputType?: string, icon?: string): Record<string, unknown> {
   const out: Record<string, unknown> = {};
   if (error)          out['help-text']  = error;
   else if (helpText)  out['help-text']  = helpText;
   if (inputType && inputType !== 'text') out['input-type'] = inputType;
+  if (icon)           out['icon']       = icon;
   return out;
 }
 
@@ -28,11 +29,13 @@ interface InputProps<TFV extends FieldValues> {
   error?: string;
   rules?: RegisterOptions<TFV, FieldPath<TFV>>;
   inputType?: 'text' | 'email' | 'tel';
+  icon?: string;
 }
 
 export function ZdsInput<TFV extends FieldValues>({
-  control, name, label, required, readOnly, helpText, error, rules, inputType,
+  control, name, label, required, readOnly, helpText, error, rules, inputType, icon,
 }: InputProps<TFV>) {
+  const effectiveIcon = icon ?? (inputType === 'email' ? 'mail-closed:line' : undefined);
   return (
     // data-zds-readonly añade la clase al host para aplicar el fondo gris desde CSS
     <div data-zds-readonly={readOnly ? '' : undefined} className="zds-field-wrap">
@@ -50,7 +53,7 @@ export function ZdsInput<TFV extends FieldValues>({
             invalid={!!error}
             onChange={(val: string | null) => field.onChange(val ?? '')}
             onBlur={field.onBlur}
-            {...(kp(error, helpText, inputType) as Record<string, unknown>)}
+            {...(kp(error, helpText, inputType, effectiveIcon) as Record<string, unknown>)}
           />
         )}
       />
@@ -62,8 +65,8 @@ export function ZdsInput<TFV extends FieldValues>({
 // Date input  →  ZrDateInput (@zurich/web-components)
 // ---------------------------------------------------------------------------
 export function ZdsDate<TFV extends FieldValues>({
-  control, name, label, required, readOnly, helpText, error, rules,
-}: Omit<InputProps<TFV>, 'inputType'>) {
+  control, name, label, required, readOnly, helpText, error, rules, min,
+}: Omit<InputProps<TFV>, 'inputType' | 'icon'> & { min?: string }) {
   return (
     <div data-zds-readonly={readOnly ? '' : undefined} className="zds-field-wrap">
       <Controller
@@ -80,7 +83,10 @@ export function ZdsDate<TFV extends FieldValues>({
             invalid={!!error}
             onChange={(val: string | null) => field.onChange(val ?? '')}
             onBlur={field.onBlur}
-            {...(kp(error, helpText) as Record<string, unknown>)}
+            {...({
+              ...kp(error, helpText),
+              ...(min ? { min } : {}),
+            } as Record<string, unknown>)}
           />
         )}
       />
@@ -253,6 +259,7 @@ function SuggestInner<TFV extends FieldValues>({
           required={required}
           invalid={!!error}
           readonly={loading}
+          icon="search:line"
           onChange={(val: string | null) => {
             const v = val ?? '';
             setDisplayText(v);

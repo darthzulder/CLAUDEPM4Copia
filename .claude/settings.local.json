@@ -3,7 +3,12 @@
     "allow": [
       "Bash(python -c \"import openpyxl; print\\('openpyxl ok'\\)\")",
       "Bash(python -c \"import pandas; print\\('pandas ok'\\)\")",
-      "Bash(python -c ' *)"
+      "Bash(python -c ' *)",
+      "PowerShell($p = \"c:\\\\Users\\\\Alex\\\\Documents\\\\Desarrollo\\\\BPM 4\\\\test-claude\\\\CLAUDEPM4\\\\pm4-app\\\\node_modules\\\\@zurich\\\\css-components\\\\dist\\\\base.css\"; $c = Get-Content $p -Raw; $i = $c.IndexOf\\('--zg-1:'\\); if\\($i -ge 0\\){ $c.Substring\\([Math]::Max\\(0,$i-200\\), 400\\) })",
+      "PowerShell($p = \"c:\\\\Users\\\\Alex\\\\Documents\\\\Desarrollo\\\\BPM 4\\\\test-claude\\\\CLAUDEPM4\\\\pm4-app\\\\node_modules\\\\@zurich\\\\css-components\\\\dist\\\\base.css\"; $c = Get-Content $p -Raw; $i = $c.IndexOf\\('--zg-1: #0D1115'\\); $c.Substring\\([Math]::Max\\(0,$i-800\\), 900\\))",
+      "PowerShell($p = \"c:\\\\Users\\\\Alex\\\\Documents\\\\Desarrollo\\\\BPM 4\\\\test-claude\\\\CLAUDEPM4\\\\pm4-app\\\\node_modules\\\\@zurich\\\\css-components\\\\dist\\\\base.css\"; $c = Get-Content $p -Raw; $i = $c.IndexOf\\('--zg-1: #0D1115'\\); $c.Substring\\([Math]::Max\\(0,$i-2000\\), 300\\))",
+      "Bash(powershell -Command ' *)",
+      "Bash(npx tsc *)"
     ]
   }
 }
