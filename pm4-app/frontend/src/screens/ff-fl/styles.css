@@ -114,9 +114,14 @@
 }
 
 .form-section-body {
-  padding: var(--zs-150) var(--zs-200) var(--zs-100);
+  padding: var(--zs-150) var(--zs-200) var(--zs-150);
+  display: flex;
+  flex-direction: column;
+  gap: var(--zs-150);
   overflow: visible;
 }
+
+.form-section-body > input[type="hidden"] { display: none; }
 
 /* Sub-secciones dentro de un card */
 .form-subsection--activities { margin-top: 8px; }
@@ -124,8 +129,7 @@
 .form-subsection {
   border: 1px solid var(--z-border);
   border-radius: 8px;
-  padding: var(--zs-100) var(--zs-150) var(--zs-50);
-  margin-bottom: var(--zs-50);
+  padding: var(--zs-100) var(--zs-150) var(--zs-75);
   background: var(--zg-white);
 }
 
@@ -433,7 +437,7 @@ zr-date-input[readonly] {
   gap: var(--zs-75);
   padding: var(--zs-150) var(--zs-200) var(--zs-50);
   border-top: 1px solid var(--z-border);
-  margin-top: var(--zs-50);
+  margin-top: var(--zs-200);
 }
 
 /* ──────────────────────────────────────
@@ -828,6 +832,19 @@ zr-date-input[readonly] {
   color: var(--z-muted);
   font-style: italic;
   line-height: 1.4;
+}
+
+/* CC — tabla propuesta con dos columnas de límite */
+.cc-propuesta-header,
+.cc-propuesta-row {
+  grid-template-columns: 32px 1fr 1fr;
+}
+
+@media (max-width: 768px) {
+  .cc-propuesta-header,
+  .cc-propuesta-row { grid-template-columns: 32px 1fr; }
+  .cc-propuesta-row > .dyo-prop-limite:last-child { display: none; }
+  .cc-propuesta-header > span:last-child { display: none; }
 }
 
 .dyo-servicios-list {

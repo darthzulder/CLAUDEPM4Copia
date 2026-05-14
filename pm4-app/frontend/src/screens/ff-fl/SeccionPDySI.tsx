@@ -1,7 +1,8 @@
 import { useState, useRef } from 'react';
 import { useForm, Controller } from 'react-hook-form';
 import { ZrButton } from '@zurich/web-components/react/button';
-import { FfFlSolicitudFormData } from './variables';
+import { ZdsSelect } from './ZdsField';
+import { OPTIONS, FfFlSolicitudFormData } from './variables';
 
 type Form = ReturnType<typeof useForm<FfFlSolicitudFormData>>;
 
@@ -33,7 +34,6 @@ const SECTORES = [
   'Empresas dedicadas al procesamiento y distribución de Marihuana y/o opioides.',
   'Farmacéuticas.',
   'Call Center / BPO.',
-  'Servicios de Hospitalidad (Hoteles, Restaurantes, etc.).',
 ] as const;
 
 const REQUISITOS = [
@@ -94,7 +94,7 @@ function SiNoField({ form, name }: { form: Form; name: keyof FfFlSolicitudFormDa
 }
 
 export default function SeccionPDySI({ form }: { form: Form }) {
-  const { watch, setValue, register } = form;
+  const { control, watch, setValue, register } = form;
   const w = watch();
   const [numDocs, setNumDocs] = useState(1);
   const fileRef1 = useRef<HTMLInputElement>(null);
@@ -319,12 +319,12 @@ export default function SeccionPDySI({ form }: { form: Form }) {
             <div key={field} className="dyo-propuesta-row">
               <span className="dyo-prop-num">{n}</span>
               <div className="dyo-prop-limite">
-                <input
-                  type="number"
-                  className="dyo-prop-input"
-                  min="0"
-                  placeholder="0"
-                  {...register(field)}
+                <ZdsSelect
+                  label=""
+                  name={field}
+                  control={control}
+                  options={OPTIONS.limitePdySI}
+                  placeholder="Seleccione un límite"
                 />
               </div>
               <span className="dyo-prop-tipo">
