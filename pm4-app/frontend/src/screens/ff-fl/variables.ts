@@ -321,25 +321,29 @@ export interface FfFlSolicitudFormData {
   frm_pi_prop_02_limite?: string;
   frm_pi_prop_03_limite?: string;
 
-  // Crimen Comercial — Perfil de cliente (8 sectores — 'SI' | 'NO')
+  // Crimen Comercial — Perfil de cliente (17 sectores — 'SI' | 'NO')
   frm_cc_perf_01?: string; frm_cc_perf_02?: string; frm_cc_perf_03?: string;
   frm_cc_perf_04?: string; frm_cc_perf_05?: string; frm_cc_perf_06?: string;
-  frm_cc_perf_07?: string; frm_cc_perf_08?: string;
+  frm_cc_perf_07?: string; frm_cc_perf_08?: string; frm_cc_perf_09?: string;
+  frm_cc_perf_10?: string; frm_cc_perf_11?: string; frm_cc_perf_12?: string;
+  frm_cc_perf_13?: string; frm_cc_perf_14?: string; frm_cc_perf_15?: string;
+  frm_cc_perf_16?: string; frm_cc_perf_17?: string;
 
-  // Crimen Comercial — Requisitos (8 preguntas — 'SI' | 'NO')
+  // Crimen Comercial — Requisitos (10 preguntas — 'SI' | 'NO')
   frm_cc_req_01?: string; frm_cc_req_02?: string; frm_cc_req_03?: string;
   frm_cc_req_04?: string; frm_cc_req_05?: string; frm_cc_req_06?: string;
-  frm_cc_req_07?: string; frm_cc_req_08?: string;
+  frm_cc_req_07?: string; frm_cc_req_08?: string; frm_cc_req_09?: string;
+  frm_cc_req_10?: string;
 
   // Crimen Comercial — Documentos de soporte (nombre de archivo)
   frm_cc_doc_01_nombre?: string;
   frm_cc_doc_02_nombre?: string;
   frm_cc_doc_03_nombre?: string;
 
-  // Crimen Comercial — Propuesta económica (límite asegurado por opción)
-  frm_cc_prop_01_limite?: string;
-  frm_cc_prop_02_limite?: string;
-  frm_cc_prop_03_limite?: string;
+  // Crimen Comercial — Propuesta económica (evento + agregado por opción)
+  frm_cc_prop_01_evento?: string; frm_cc_prop_01_agregado?: string;
+  frm_cc_prop_02_evento?: string; frm_cc_prop_02_agregado?: string;
+  frm_cc_prop_03_evento?: string; frm_cc_prop_03_agregado?: string;
 
   // PDySI — Perfil de cliente (28 sectores — 'SI' | 'NO')
   frm_pdysi_perf_01?: string; frm_pdysi_perf_02?: string; frm_pdysi_perf_03?: string;
