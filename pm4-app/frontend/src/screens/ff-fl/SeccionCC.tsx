@@ -1,8 +1,9 @@
 import { useState, useRef } from 'react';
-import { useForm, Controller } from 'react-hook-form';
+import { useForm } from 'react-hook-form';
 import { ZrButton } from '@zurich/web-components/react/button';
 import { ZdsSelect } from './ZdsField';
 import { OPTIONS, FfFlSolicitudFormData } from './variables';
+import { SiNoField, SiNoSelectAll } from './SiNoGroup';
 
 type Form = ReturnType<typeof useForm<FfFlSolicitudFormData>>;
 
@@ -40,30 +41,6 @@ const REQUISITOS = [
 ] as const;
 
 const MSG_BLOQUEO = 'La cotización no puede continuar por este canal y deberá gestionarse con la ayuda del asesor comercial (Case Underwriting).';
-
-function SiNoField({ form, name }: { form: Form; name: keyof FfFlSolicitudFormData }) {
-  return (
-    <Controller
-      name={name}
-      control={form.control}
-      defaultValue="NO"
-      render={({ field }) => (
-        <div className="si-no-btns">
-          <button
-            type="button"
-            className={`si-no-btn si-no-btn--si${field.value === 'SI' ? ' si-no-btn--active' : ''}`}
-            onClick={() => field.onChange('SI')}
-          >SI</button>
-          <button
-            type="button"
-            className={`si-no-btn si-no-btn--no${field.value === 'NO' ? ' si-no-btn--active' : ''}`}
-            onClick={() => field.onChange('NO')}
-          >NO</button>
-        </div>
-      )}
-    />
-  );
-}
 
 export default function SeccionCC({ form, fileRegistry }: { form: Form; fileRegistry: React.MutableRefObject<Map<string, File>> }) {
   const { control, watch, setValue, register } = form;
@@ -104,6 +81,7 @@ export default function SeccionCC({ form, fileRegistry }: { form: Form; fileRegi
         <p className="dyo-intro-text">
           ¿La compañía opera en alguno de los siguientes sectores?
         </p>
+        <SiNoSelectAll form={form} prefix="frm_cc_perf_" count={SECTORES.length} />
         <div className="dyo-si-no-table">
           <div className="dyo-si-no-header">
             <span>Sector</span>
@@ -131,6 +109,7 @@ export default function SeccionCC({ form, fileRegistry }: { form: Form; fileRegi
           cobertura de seguro propuesta.<br />
           Si contesta NO a cualquiera de las siguientes preguntas, la cotización no puede continuar.
         </p>
+        <SiNoSelectAll form={form} prefix="frm_cc_req_" count={REQUISITOS.length} />
         <div className="dyo-si-no-table">
           <div className="dyo-si-no-header">
             <span>REQUISITOS / La sociedad y sus filiales (si aplica) afirman que:</span>

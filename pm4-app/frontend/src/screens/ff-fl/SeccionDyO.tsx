@@ -1,9 +1,9 @@
 import { useState, useRef } from 'react';
-import { useForm, Controller } from 'react-hook-form';
+import { useForm } from 'react-hook-form';
 import { ZrButton } from '@zurich/web-components/react/button';
 import { ZdsSelect } from './ZdsField';
 import { OPTIONS, FfFlSolicitudFormData } from './variables';
-
+import { SiNoField, SiNoSelectAll } from './SiNoGroup';
 type Form = ReturnType<typeof useForm<FfFlSolicitudFormData>>;
 
 const SECTORES = [
@@ -35,30 +35,6 @@ const REQUISITOS = [
   '¿Confirma que en los últimos 5 años la empresa NO ha tenido reclamos, ni tiene conocimiento de alguna circunstancia que pudiera resultar en la presentación de un reclamo que afecte esta póliza?',
   '¿El accionista que posee más del 50% de las acciones se encuentra domiciliado en Colombia?',
 ] as const;
-
-function SiNoField({ form, name }: { form: Form; name: keyof FfFlSolicitudFormData }) {
-  return (
-    <Controller
-      name={name}
-      control={form.control}
-      defaultValue="NO"
-      render={({ field }) => (
-        <div className="si-no-btns">
-          <button
-            type="button"
-            className={`si-no-btn si-no-btn--si${field.value === 'SI' ? ' si-no-btn--active' : ''}`}
-            onClick={() => field.onChange('SI')}
-          >SI</button>
-          <button
-            type="button"
-            className={`si-no-btn si-no-btn--no${field.value === 'NO' ? ' si-no-btn--active' : ''}`}
-            onClick={() => field.onChange('NO')}
-          >NO</button>
-        </div>
-      )}
-    />
-  );
-}
 
 export default function SeccionDyO({ form, fileRegistry }: { form: Form; fileRegistry: React.MutableRefObject<Map<string, File>> }) {
   const { control, watch, setValue, register } = form;
@@ -92,6 +68,7 @@ export default function SeccionDyO({ form, fileRegistry }: { form: Form; fileReg
         <p className="dyo-intro-text">
           ¿La compañía opera en alguno de los siguientes sectores?
         </p>
+        <SiNoSelectAll form={form} prefix="frm_dyo_perf_" count={SECTORES.length} />
         <div className="dyo-si-no-table">
           <div className="dyo-si-no-header">
             <span>Sector</span>
@@ -122,6 +99,7 @@ export default function SeccionDyO({ form, fileRegistry }: { form: Form; fileReg
           La compañía solicitante debe cumplir todos los requisitos siguientes para acceder a la cobertura de seguro propuesta.<br />
           Si contesta NO a cualquiera de las siguientes preguntas, la cotización no puede continuar.
         </p>
+        <SiNoSelectAll form={form} prefix="frm_dyo_req_" count={REQUISITOS.length} />
         <div className="dyo-si-no-table">
           <div className="dyo-si-no-header">
             <span>La sociedad y sus filiales (si aplica) afirman que:</span>

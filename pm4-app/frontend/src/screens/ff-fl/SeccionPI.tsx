@@ -1,8 +1,9 @@
 import { useState, useRef } from 'react';
-import { useForm, Controller } from 'react-hook-form';
+import { useForm } from 'react-hook-form';
 import { ZrButton } from '@zurich/web-components/react/button';
 import { ZdsSelect } from './ZdsField';
 import { OPTIONS, FfFlSolicitudFormData } from './variables';
+import { SiNoField, SiNoSelectAll } from './SiNoGroup';
 
 type Form = ReturnType<typeof useForm<FfFlSolicitudFormData>>;
 
@@ -27,30 +28,6 @@ const REQUISITOS = [
   '¿Confirma que, al día de hoy, la empresa y sus administradores y directivos NO tienen ningún reclamo en curso, ni conocimiento de ninguna circunstancia que pudiera dar lugar a un reclamo en el futuro en su contra?',
   '¿Confirma que en los últimos 5 años la empresa NO ha tenido reclamos, ni tiene conocimiento de alguna circunstancia que pudiera resultar en la presentación de un reclamo que afecte esta póliza?',
 ] as const;
-
-function SiNoField({ form, name }: { form: Form; name: keyof FfFlSolicitudFormData }) {
-  return (
-    <Controller
-      name={name}
-      control={form.control}
-      defaultValue="NO"
-      render={({ field }) => (
-        <div className="si-no-btns">
-          <button
-            type="button"
-            className={`si-no-btn si-no-btn--si${field.value === 'SI' ? ' si-no-btn--active' : ''}`}
-            onClick={() => field.onChange('SI')}
-          >SI</button>
-          <button
-            type="button"
-            className={`si-no-btn si-no-btn--no${field.value === 'NO' ? ' si-no-btn--active' : ''}`}
-            onClick={() => field.onChange('NO')}
-          >NO</button>
-        </div>
-      )}
-    />
-  );
-}
 
 export default function SeccionPI({ form, fileRegistry }: { form: Form; fileRegistry: React.MutableRefObject<Map<string, File>> }) {
   const { control, watch, setValue, register } = form;
@@ -93,6 +70,7 @@ export default function SeccionPI({ form, fileRegistry }: { form: Form; fileRegi
           Si contesta NO a cualquiera de las siguientes preguntas, la cotización no puede continuar
           por este canal y se deberá comunicar con su asesor comercial.
         </p>
+        <SiNoSelectAll form={form} prefix="frm_pi_req_" count={REQUISITOS.length} />
         <div className="dyo-si-no-table">
           <div className="dyo-si-no-header">
             <span>REQUISITOS / La sociedad y sus filiales (si aplica) afirman que:</span>

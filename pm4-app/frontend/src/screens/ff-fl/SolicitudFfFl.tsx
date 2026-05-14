@@ -555,7 +555,7 @@ export default function SolicitudFfFl() {
   const form = useForm<FfFlSolicitudFormData>({
     mode: 'onChange',
     reValidateMode: 'onChange',
-    shouldUnregister: true,
+    shouldUnregister: false,
     defaultValues: {
       frm_gen_fecha_solicitud: new Date().toISOString().split('T')[0],
       frm_gen_segmento: 'Middle Market',

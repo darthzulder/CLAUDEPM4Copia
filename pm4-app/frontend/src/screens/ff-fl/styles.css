@@ -32,9 +32,8 @@
 }
 
 .screen-content {
-  max-width: 1320px;
-  margin: 0 auto;
-  padding: var(--zs-200) var(--zs-150) var(--zs-400);
+  width: 90%;
+  padding: var(--zs-200) 0 var(--zs-400);
 }
 
 /* ──────────────────────────────────────
@@ -89,7 +88,7 @@
    CARDS DE SECCIÓN
 ────────────────────────────────────── */
 .form-section-header {
-  padding: var(--zs-75) var(--zs-150);
+  padding: var(--zs-100) var(--zs-200);
   display: flex;
   align-items: center;
   gap: var(--zs-50);
@@ -114,10 +113,10 @@
 }
 
 .form-section-body {
-  padding: var(--zs-150) var(--zs-200) var(--zs-150);
+  padding: var(--zs-200) var(--zs-300) var(--zs-200);
   display: flex;
   flex-direction: column;
-  gap: var(--zs-150);
+  gap: var(--zs-200);
   overflow: visible;
 }
 
@@ -742,6 +741,31 @@ zr-date-input[readonly] {
   border-color: var(--zc-peach-aa);
   color: var(--zc-peach-aaa);
 }
+
+/* Botones "Marcar todas SI / NO" */
+.si-no-select-all {
+  display: flex;
+  gap: var(--zs-50);
+  justify-content: flex-end;
+  margin-bottom: var(--zs-50);
+}
+.si-no-select-btn {
+  font: var(--zf-capt-12);
+  padding: 3px var(--zs-75);
+  border-radius: 4px;
+  cursor: pointer;
+  border: 1px solid var(--zc-moss-aa);
+  color: var(--zc-moss-aaa);
+  background: var(--zc-moss-20);
+  transition: background .15s, color .15s;
+}
+.si-no-select-btn:hover { background: var(--zc-moss-aa); color: #fff; }
+.si-no-select-btn--no {
+  border-color: var(--zc-peach-aa);
+  color: var(--zc-peach-aaa);
+  background: var(--zc-peach-10);
+}
+.si-no-select-btn--no:hover { background: var(--zc-peach-aa); color: #fff; }
 
 /* ──────────────────────────────────────
    D&O — DOCUMENTOS DE SOPORTE

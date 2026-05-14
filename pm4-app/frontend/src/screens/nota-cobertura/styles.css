@@ -24,7 +24,7 @@
 }
 
 .screen-content {
-  max-width: 960px;
+ width: 90%;
   margin: 0 auto;
   padding: var(--zs-200) var(--zs-150) var(--zs-400);
 }
