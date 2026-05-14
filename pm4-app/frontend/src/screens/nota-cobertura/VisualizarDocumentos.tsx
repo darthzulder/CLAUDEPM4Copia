@@ -4,9 +4,8 @@ import { useRequestFiles, type Pm4File } from '../../core/useRequestFiles';
 import PdfViewer from '../../components/PdfViewer';
 import { ZrButton } from '@zurich/web-components/react/button';
 import { type NotaCoberturaData } from './variables';
+import zurichLogo from '../../resources/zurich/ZurichLogo_Horz_White_CMYK_no_R.png';
 import './styles.css';
-
-const LOGO = 'https://bpm.beesmart.ec/fonts/zurich/zurich-logo-white.svg';
 
 // ──────────────────────────────────────────────────────────────
 // Helpers
@@ -88,17 +87,12 @@ export default function VisualizarDocumentos() {
   // ── Estados de carga/error ───────────────────────────────────
   if (sent) {
     return (
-      <div className="nc-wrapper">
-        <div className="nc-header">
+      <div className="screen-wrapper">
+        <div className="screen-header">
           <div className="title-block">
             <h1>{data.frm_titulo || 'VISUALIZAR DOCUMENTOS DE SALIDA'}</h1>
           </div>
-          <img
-            src={LOGO}
-            alt="Zurich"
-            className="nc-header-logo"
-            onError={(e) => { (e.target as HTMLImageElement).style.display = 'none'; }}
-          />
+          <img src={zurichLogo} alt="Zurich" className="header-logo" />
         </div>
         <div className="screen-sent-wrapper">
           <div className="screen-sent">
@@ -116,8 +110,8 @@ export default function VisualizarDocumentos() {
 
   if (loading) {
     return (
-      <div className="nc-wrapper">
-        <div className="nc-loading">
+      <div className="screen-wrapper">
+        <div className="screen-loading">
           <div className="spinner" />
           <span>Cargando documentos…</span>
         </div>
@@ -127,8 +121,8 @@ export default function VisualizarDocumentos() {
 
   if (error) {
     return (
-      <div className="nc-wrapper">
-        <div className="nc-error">⚠ Error cargando la tarea: {error}</div>
+      <div className="screen-wrapper">
+        <div className="screen-error">⚠ Error cargando la tarea: {error}</div>
       </div>
     );
   }
@@ -138,7 +132,7 @@ export default function VisualizarDocumentos() {
   const numCaso = data.frm_caso;
 
   return (
-    <div className="nc-wrapper">
+    <div className="screen-wrapper">
       {submitting && (
         <div className="loading-overlay">
           <div className="spinner" />
@@ -146,7 +140,7 @@ export default function VisualizarDocumentos() {
       )}
 
       {/* Header */}
-      <div className="nc-header">
+      <div className="screen-header">
         <div className="title-block">
           <h1>{titulo}</h1>
           <div className="subtitle">
@@ -154,16 +148,11 @@ export default function VisualizarDocumentos() {
             {numCaso && <span>Caso # {numCaso}</span>}
           </div>
         </div>
-        <img
-          src={LOGO}
-          alt="Zurich"
-          className="nc-header-logo"
-          onError={(e) => { (e.target as HTMLImageElement).style.display = 'none'; }}
-        />
+        <img src={zurichLogo} alt="Zurich" className="header-logo" />
       </div>
 
       {/* Contenido */}
-      <div className="nc-content">
+      <div className="screen-content">
         <div className="nc-section">
           <div className="nc-section-header">
             <span>Notas de Cobertura Generadas</span>
@@ -202,7 +191,7 @@ export default function VisualizarDocumentos() {
           </div>
 
           {/* Barra de acción */}
-          <div className="nc-submit-bar">
+          <div className="submit-bar">
             <ZrButton
               config="primary:l"
               disabled={submitting}

@@ -1,10 +1,10 @@
 import { useState } from 'react';
 import { createPortal } from 'react-dom';
 import { useTask } from '../../core/useTask';
+import { ZrButton } from '@zurich/web-components/react/button';
 import { RESPUESTA_VALUES, type RespuestaCotizacionData } from './variables';
+import zurichLogo from '../../resources/zurich/ZurichLogo_Horz_White_CMYK_no_R.png';
 import './styles.css';
-
-const LOGO = 'https://bpm.beesmart.ec/fonts/zurich/zurich-logo-white.svg';
 
 // ---------------------------------------------------------------------------
 // Helpers
@@ -80,8 +80,8 @@ function ConfirmModal({ onConfirm, onCancel }: ConfirmProps) {
         <div className="modal-header">Confirmar finalización</div>
         <div className="modal-body">¿Estás seguro de finalizar esta cotización?</div>
         <div className="modal-footer">
-          <button className="btn-cancelar" type="button" onClick={onCancel}>CANCELAR</button>
-          <button className="btn-aceptar" type="button" onClick={onConfirm}>ACEPTAR</button>
+          <ZrButton config="secondary" onClick={onCancel}>CANCELAR</ZrButton>
+          <ZrButton config="primary:l" onClick={onConfirm}>ACEPTAR</ZrButton>
         </div>
       </div>
     </div>,
@@ -114,8 +114,8 @@ export default function RespuestaCotizacion() {
   if (loading) {
     return (
       <div className="screen-wrapper">
-        <div className="state-screen">
-          <div className="loading-spinner" />
+        <div className="screen-loading">
+          <div className="spinner" />
           <span>Cargando resultado…</span>
         </div>
       </div>
@@ -125,10 +125,7 @@ export default function RespuestaCotizacion() {
   if (error) {
     return (
       <div className="screen-wrapper">
-        <div className="state-screen error-state">
-          <strong>Error al cargar el resultado</strong>
-          <span>{error}</span>
-        </div>
+        <div className="screen-error">⚠ Error al cargar el resultado: {error}</div>
       </div>
     );
   }
@@ -138,7 +135,7 @@ export default function RespuestaCotizacion() {
       <div className="screen-wrapper">
         <div className="screen-header">
           <div className="title-block"><h1>{data.frm_titulo || 'RESULTADO DE LA COTIZACIÓN'}</h1></div>
-          <img src={LOGO} alt="Zurich" onError={(e) => { (e.target as HTMLImageElement).style.display = 'none'; }} />
+          <img src={zurichLogo} alt="Zurich" className="header-logo" />
         </div>
         <div className="screen-sent-wrapper">
           <div className="screen-sent">
@@ -162,7 +159,7 @@ export default function RespuestaCotizacion() {
     <div className="screen-wrapper">
       {submitting && (
         <div className="loading-overlay">
-          <div className="loading-spinner" />
+          <div className="spinner" />
         </div>
       )}
 
@@ -175,7 +172,7 @@ export default function RespuestaCotizacion() {
             {numCaso && <span>Caso # {numCaso}</span>}
           </div>
         </div>
-        <img src={LOGO} alt="Zurich" onError={(e) => { (e.target as HTMLImageElement).style.display = 'none'; }} />
+        <img src={zurichLogo} alt="Zurich" className="header-logo" />
       </div>
 
       {/* Content */}
@@ -203,14 +200,14 @@ export default function RespuestaCotizacion() {
         )}
 
         <div className="result-actions">
-          <button
-            type="button"
-            className="btn-finalizar"
+          <ZrButton
+            config="primary:l"
             disabled={submitting}
+            loading={submitting}
             onClick={() => setConfirmOpen(true)}
           >
             FINALIZAR
-          </button>
+          </ZrButton>
         </div>
       </div>
 

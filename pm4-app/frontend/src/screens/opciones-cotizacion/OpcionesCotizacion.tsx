@@ -3,14 +3,14 @@ import { useForm } from 'react-hook-form';
 import { useTask } from '../../core/useTask';
 import { useRequestFiles, resolveFileId } from '../../core/useRequestFiles';
 import PdfViewer from '../../components/PdfViewer';
+import { ZrButton } from '@zurich/web-components/react/button';
 import {
   DECISION_OPTIONS,
   type OpcionesCotizacionData,
   type DecisionValue,
 } from './variables';
+import zurichLogo from '../../resources/zurich/ZurichLogo_Horz_White_CMYK_no_R.png';
 import './styles.css';
-
-const LOGO = 'https://bpm.beesmart.ec/fonts/zurich/zurich-logo-white.svg';
 
 // ---------------------------------------------------------------------------
 // Types
@@ -106,11 +106,7 @@ export default function OpcionesCotizacion() {
           <div className="title-block">
             <h1>{data.frm_titulo || 'VISUALIZAR SLIP Y OPCIONES DE COTIZACIÓN'}</h1>
           </div>
-          <img
-            src={LOGO}
-            alt="Zurich"
-            onError={(e) => { (e.target as HTMLImageElement).style.display = 'none'; }}
-          />
+          <img src={zurichLogo} alt="Zurich" className="header-logo" />
         </div>
         <div className="screen-sent-wrapper">
           <div className="screen-sent">
@@ -129,8 +125,8 @@ export default function OpcionesCotizacion() {
   if (loading) {
     return (
       <div className="screen-wrapper">
-        <div className="state-screen">
-          <div className="loading-spinner" />
+        <div className="screen-loading">
+          <div className="spinner" />
           <span>Cargando cotización…</span>
         </div>
       </div>
@@ -140,10 +136,7 @@ export default function OpcionesCotizacion() {
   if (error) {
     return (
       <div className="screen-wrapper">
-        <div className="state-screen error-state">
-          <strong>Error al cargar la tarea</strong>
-          <span>{error}</span>
-        </div>
+        <div className="screen-error">⚠ Error al cargar la tarea: {error}</div>
       </div>
     );
   }
@@ -157,7 +150,7 @@ export default function OpcionesCotizacion() {
     <div className="screen-wrapper">
       {submitting && (
         <div className="loading-overlay">
-          <div className="loading-spinner" />
+          <div className="spinner" />
         </div>
       )}
 
@@ -170,11 +163,7 @@ export default function OpcionesCotizacion() {
             {numCaso && <span>Caso # {numCaso}</span>}
           </div>
         </div>
-        <img
-          src={LOGO}
-          alt="Zurich"
-          onError={(e) => { (e.target as HTMLImageElement).style.display = 'none'; }}
-        />
+        <img src={zurichLogo} alt="Zurich" className="header-logo" />
       </div>
 
       {/* Body: PDF (izquierda) + Panel decisión (derecha) */}
@@ -276,7 +265,6 @@ export default function OpcionesCotizacion() {
                     target="_blank"
                     rel="noopener noreferrer"
                     className="btn-download"
-                    style={{ display: 'inline-block', marginTop: 4 }}
                   >
                     Ver clausulado
                   </a>
@@ -285,9 +273,9 @@ export default function OpcionesCotizacion() {
             </div>
 
             <div className="decision-actions">
-              <button type="submit" className="btn-submit" disabled={submitting}>
+              <ZrButton config="primary:l" as-submit disabled={submitting} loading={submitting}>
                 DERIVAR
-              </button>
+              </ZrButton>
             </div>
           </div>
         </form>
