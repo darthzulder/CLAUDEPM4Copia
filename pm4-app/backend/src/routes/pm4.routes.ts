@@ -1,11 +1,50 @@
 import { Router, Request, Response } from 'express';
 import axios, { AxiosError } from 'axios';
+import { createDecipheriv, createHash } from 'crypto';
 
 const router = Router();
 
+function decryptToken(blob: string): string {
+  const keyRaw = process.env.IFRAME_ENCRYPTION_KEY;
+  if (!keyRaw) throw new Error('IFRAME_ENCRYPTION_KEY not configured');
+
+  const key = createHash('sha256').update(keyRaw).digest(); // siempre 32 bytes
+  const buf  = Buffer.from(blob.replace(/-/g, '+').replace(/_/g, '/'), 'base64');
+  const iv         = buf.subarray(0, 16);
+  const ciphertext = buf.subarray(16);
+
+  const decipher  = createDecipheriv('aes-256-cbc', key, iv);
+  const decrypted = Buffer.concat([decipher.update(ciphertext), decipher.final()]);
+  const payload   = JSON.parse(decrypted.toString('utf8')) as { token: string; ts: number };
+
+  // TODO: bajar a 300 (5 min) en producción
+  if (Math.floor(Date.now() / 1000) - payload.ts > 3600) {
+    throw new Error('Encrypted token expired (>1h)');
+  }
+
+  return payload.token;
+}
+
 function getToken(req: Request): string {
-  const fromHeader = req.headers['x-pm4-token'] as string | undefined;
-  return fromHeader ?? process.env.PM4_TOKEN ?? '';
+  const raw = (req.headers['x-pm4-token'] as string | undefined) ?? process.env.PM4_TOKEN ?? '';
+
+  // TODO: eliminar estos logs antes de producción
+  console.log('[token] raw header:', raw ? raw.slice(0, 40) + '…' : '(vacío)');
+  console.log('[token] tipo:', !raw ? 'vacío' : raw.startsWith('eyJ') ? 'JWT directo' : 'blob encriptado');
+
+  // JWTs empiezan con "eyJ" — pasar directo (dev local con VITE_PM4_TOKEN)
+  if (!raw || raw.startsWith('eyJ')) return raw;
+
+  // Cualquier otra cosa → blob AES encriptado desde PM4
+  try {
+    const decrypted = decryptToken(raw);
+    // TODO: eliminar este log antes de producción
+    console.log('[token] 🔓 desencriptado:', decrypted.slice(0, 40) + '…');
+    return decrypted;
+  } catch (err) {
+    console.warn('[token] decrypt failed:', (err as Error).message);
+    return raw;
+  }
 }
 
 async function pm4Request(method: string, path: string, req: Request, res: Response) {
