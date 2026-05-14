@@ -65,7 +65,7 @@ function SiNoField({ form, name }: { form: Form; name: keyof FfFlSolicitudFormDa
   );
 }
 
-export default function SeccionCC({ form }: { form: Form }) {
+export default function SeccionCC({ form, fileRegistry }: { form: Form; fileRegistry: React.MutableRefObject<Map<string, File>> }) {
   const { control, watch, setValue, register } = form;
   const w = watch();
   const [numDocs, setNumDocs] = useState(1);
@@ -170,7 +170,10 @@ export default function SeccionCC({ form }: { form: Form }) {
                     style={{ display: 'none' }}
                     onChange={(e) => {
                       const file = e.target.files?.[0];
-                      if (file) setValue(docKey, file.name as never);
+                      if (file) {
+                        setValue(docKey, file.name as never);
+                        fileRegistry.current.set(docKey, file);
+                      }
                     }}
                   />
                   <ZrButton

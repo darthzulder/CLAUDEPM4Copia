@@ -1,6 +1,10 @@
 import { Router, Request, Response } from 'express';
 import axios, { AxiosError } from 'axios';
 import { createDecipheriv, createHash } from 'crypto';
+import multer from 'multer';
+import FormData from 'form-data';
+
+const upload = multer({ storage: multer.memoryStorage() });
 
 const router = Router();
 
@@ -157,6 +161,40 @@ router.post('/scripts/:id/execute', (req, res) =>
 router.get('/requests/:request_id/files', (req, res) =>
   pm4Request('GET', `/requests/${req.params.request_id}/files`, req, res)
 );
+
+// Files — upload a file to a request
+router.post('/requests/:request_id/files', upload.single('file'), async (req, res) => {
+  if (!req.file) { res.status(400).json({ message: 'No file provided' }); return; }
+
+  const token = getToken(req);
+  const base  = process.env.PM4_BASE_URL;
+  const url   = `${base}/api/1.0/requests/${req.params.request_id}/files`;
+
+  const form = new FormData();
+  form.append('file', req.file.buffer, {
+    filename:    req.file.originalname,
+    contentType: req.file.mimetype,
+  });
+
+  if (req.query.data_name) form.append('data_name', String(req.query.data_name));
+
+  console.log(`[file-upload] POST ${url} — ${req.file.originalname} (${req.file.size} bytes)`);
+  try {
+    const response = await axios.post(url, form, {
+      headers: {
+        ...form.getHeaders(),
+        Authorization: `Bearer ${token}`,
+      },
+    });
+    console.log(`[file-upload] ← ${response.status}`, response.data);
+    res.json(response.data);
+  } catch (err) {
+    const e = err as AxiosError;
+    const status = e.response?.status ?? 500;
+    console.error(`[file-upload] ERROR ${status}:`, e.response?.data ?? e.message);
+    res.status(status).json(e.response?.data ?? { message: e.message });
+  }
+});
 
 // Files — stream binary content (PDF, images, etc.) proxied with auth
 async function streamFile(pmPath: string, req: Request, res: Response) {

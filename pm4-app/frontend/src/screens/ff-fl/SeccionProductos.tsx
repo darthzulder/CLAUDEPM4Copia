@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import SeccionDyO from './SeccionDyO';
 import SeccionCC from './SeccionCC';
@@ -15,7 +15,7 @@ const TABS = [
   { key: 'pi',    label: 'Seg. Profesional',          field: 'frm_gen_prod_pi'    as const },
 ] as const;
 
-export default function SeccionProductos({ form }: { form: Form }) {
+export default function SeccionProductos({ form, fileRegistry }: { form: Form; fileRegistry: React.MutableRefObject<Map<string, File>> }) {
   const w = form.watch();
   const [activeTab, setActiveTab] = useState('');
 
@@ -47,10 +47,10 @@ export default function SeccionProductos({ form }: { form: Form }) {
       </div>
 
       <div className="products-tab-body">
-        {activeTab === 'dyo'   && <SeccionDyO form={form} />}
-        {activeTab === 'cc'    && <SeccionCC form={form} />}
-        {activeTab === 'pdysi' && <SeccionPDySI form={form} />}
-        {activeTab === 'pi'    && <SeccionPI form={form} />}
+        {activeTab === 'dyo'   && <SeccionDyO   form={form} fileRegistry={fileRegistry} />}
+        {activeTab === 'cc'    && <SeccionCC    form={form} fileRegistry={fileRegistry} />}
+        {activeTab === 'pdysi' && <SeccionPDySI form={form} fileRegistry={fileRegistry} />}
+        {activeTab === 'pi'    && <SeccionPI    form={form} fileRegistry={fileRegistry} />}
       </div>
     </div>
   );

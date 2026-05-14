@@ -101,10 +101,68 @@ task.data → form.setValue() (pre-popula todos los campos)
         ↓
 Usuario llena el formulario
         ↓
+onSubmit → POST /api/requests/{request_id}/files  (un POST por cada archivo)
+        ↓
 onSubmit → PUT /api/tasks/{task_id}  { status: "COMPLETED", data: formData }
         ↓
 PM4 avanza el proceso al siguiente nodo
 ```
+
+---
+
+## Subida de archivos
+
+Los archivos se suben **antes** de completar la tarea, usando `POST /requests/{request_id}/files`.
+El `request_id` viene de `task.process_request_id` (devuelto por `useTask`).
+
+### Patrón de implementación
+
+**1. `fileRegistry` en el componente raíz** — un `useRef(new Map<string, File>())` que acumula los archivos mientras el usuario navega entre tabs/secciones:
+
+```tsx
+const fileRegistry = useRef(new Map<string, File>());
+// Se pasa como prop hacia abajo: SeccionProductos → SeccionDyO / SeccionCC / etc.
+```
+
+**2. Registro en cada sección** — cuando el usuario selecciona un archivo:
+
+```tsx
+onChange={(e) => {
+  const file = e.target.files?.[0];
+  if (file) {
+    setValue(docKey, file.name as never);       // nombre en el form (para mostrar)
+    fileRegistry.current.set(docKey, file);     // binario en el registry (para subir)
+  }
+}}
+```
+
+El `docKey` es el nombre del campo en PM4, p.ej. `frm_dyo_doc_01_nombre`. PM4 lo recibe como `?data_name=` y lo asocia al request.
+
+**3. Upload en `onSubmit`** — antes de `completeTask`:
+
+```tsx
+for (const [docKey, file] of fileRegistry.current.entries()) {
+  const fd = new FormData();
+  fd.append('file', file);
+  await pm4.post(`/requests/${requestId}/files?data_name=${docKey}`, fd);
+}
+await completeTask(payload);
+```
+
+**4. Endpoint en el backend** — `POST /api/requests/:request_id/files`
+- Middleware: `multer({ storage: multer.memoryStorage() }).single('file')`
+- Reenvía a PM4 como `multipart/form-data` con `form-data` + axios
+- Usa el mismo token que el resto del proxy (`x-pm4-token`)
+- PM4 responde `{ message: "The file was uploaded.", fileUploadId: <number> }`
+
+### Campos de documento por producto (ff-fl)
+
+| Producto | Campos de nombre |
+|----------|-----------------|
+| D&O      | `frm_dyo_doc_01_nombre`, `frm_dyo_doc_02_nombre`, `frm_dyo_doc_03_nombre` |
+| CC       | `frm_cc_doc_01_nombre`, `frm_cc_doc_02_nombre`, `frm_cc_doc_03_nombre` |
+| PDySI    | `frm_pdysi_doc_01_nombre`, `frm_pdysi_doc_02_nombre`, `frm_pdysi_doc_03_nombre` |
+| PI       | `frm_pi_doc_01_nombre`, `frm_pi_doc_02_nombre`, `frm_pi_doc_03_nombre` |
 
 ---
 

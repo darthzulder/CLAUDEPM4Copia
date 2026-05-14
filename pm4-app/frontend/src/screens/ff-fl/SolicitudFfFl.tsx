@@ -1,4 +1,4 @@
-import { useEffect, useState, useMemo } from 'react';
+import { useEffect, useState, useMemo, useRef } from 'react';
 import { useForm, FieldError } from 'react-hook-form';
 import './styles.css';
 import { useTask } from '../../core/useTask';
@@ -550,6 +550,7 @@ export default function SolicitudFfFl() {
   const [nitLoading, setNitLoading] = useState(false);
   const [nitNotFound, setNitNotFound] = useState(false);
   const [nitConfirmCreate, setNitConfirmCreate] = useState(false);
+  const fileRegistry = useRef(new Map<string, File>());
 
   const form = useForm<FfFlSolicitudFormData>({
     mode: 'onChange',
@@ -662,6 +663,22 @@ export default function SolicitudFfFl() {
     }
 
     try {
+      // ── Subir archivos ──────────────────────────────────────────────────────
+      const requestId = task?.process_request_id;
+      if (fileRegistry.current.size > 0 && requestId) {
+        for (const [docKey, file] of fileRegistry.current.entries()) {
+          const fd = new FormData();
+          fd.append('file', file);
+          try {
+            await pm4.post(`/requests/${requestId}/files?data_name=${docKey}`, fd);
+          } catch (uploadErr: unknown) {
+            const e = uploadErr as { response?: { data: unknown }; message: string };
+            throw new Error(`Error subiendo "${file.name}": ${JSON.stringify(e.response?.data ?? e.message)}`);
+          }
+        }
+      }
+
+      // ── Completar task ──────────────────────────────────────────────────────
       const { _user: _u, _request: _r, ...taskData } = (task?.data ?? {}) as Record<string, unknown>;
       const payload: Record<string, unknown> = {
         ...taskData,
@@ -799,7 +816,7 @@ export default function SolicitudFfFl() {
             onConfirmCreate={() => { setNitConfirmCreate(false); setNitNotFound(true); }}
             onCancelCreate={() => setNitConfirmCreate(false)}
           />
-          <SeccionProductos form={form} />
+          <SeccionProductos form={form} fileRegistry={fileRegistry} />
           <DatosCotizacion form={form} />
           <PlanPago form={form} />
 
