@@ -624,7 +624,7 @@ export default function SolicitudFfFl() {
         setSubmitError(`Crimen Comercial: ${MSG_CASE_UW}`);
         return;
       }
-      const hasLimit = data.frm_cc_prop_01_limite || data.frm_cc_prop_02_limite || data.frm_cc_prop_03_limite;
+      const hasLimit = data.frm_cc_prop_01_evento || data.frm_cc_prop_02_evento || data.frm_cc_prop_03_evento;
       if (!hasLimit) {
         setSubmitError('Crimen Comercial: Debe ingresar al menos un límite asegurado en la Propuesta Económica.');
         return;
