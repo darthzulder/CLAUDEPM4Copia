@@ -265,6 +265,7 @@ export default function SeccionPDySI({ form, fileRegistry }: { form: Form; fileR
                   />
                   <ZrButton
                     config="secondary"
+                    icon="file-upload:line"
                     onClick={() => fileRefs[i].current?.click()}
                   >
                     {fileName ? fileName : 'Cargar archivo'}
