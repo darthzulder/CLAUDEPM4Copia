@@ -151,6 +151,7 @@ export default function SeccionDyO({ form, fileRegistry }: { form: Form; fileReg
                   />
                   <ZrButton
                     config="secondary"
+                    icon="file-upload:line"
                     onClick={() => fileRefs[i].current?.click()}
                   >
                     {fileName ? fileName : 'Cargar archivo'}

@@ -157,6 +157,7 @@ export default function SeccionCC({ form, fileRegistry }: { form: Form; fileRegi
                   />
                   <ZrButton
                     config="secondary"
+                    icon="file-upload:line"
                     onClick={() => fileRefs[i].current?.click()}
                   >
                     {fileName ? fileName : 'Cargar archivo'}
