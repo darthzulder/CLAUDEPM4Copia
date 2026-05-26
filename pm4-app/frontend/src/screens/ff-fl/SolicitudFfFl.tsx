@@ -722,37 +722,79 @@ export default function SolicitudFfFl() {
       }
 
       // 3. Mapear campos TIA → form
-      const mappings: Array<[string, keyof FfFlSolicitudFormData]> = [
-        ['frm_tomador',              'frm_tom_tomador'],
-        ['nombre',                   'frm_tom_tomador'],
-        ['frm_tom_tomador',          'frm_tom_tomador'],
-        ['direccion',                'frm_tom_direccion'],
-        ['frm_tom_direccion',        'frm_tom_direccion'],
-        ['departamento',             'frm_tom_departamento'],
-        ['frm_tom_departamento',     'frm_tom_departamento'],
-        ['ciudad',                   'frm_tom_ciudad'],
-        ['frm_tom_ciudad',           'frm_tom_ciudad'],
-        ['correo',                   'frm_tom_correo_facturacion'],
-        ['email',                    'frm_tom_correo_facturacion'],
-        ['frm_tom_correo_facturacion', 'frm_tom_correo_facturacion'],
-        ['sector',                   'frm_tom_sector'],
-        ['frm_tom_sector',           'frm_tom_sector'],
-        ['detalle_actividad',        'frm_tom_detalle_actividad'],
-        ['frm_tom_detalle_actividad', 'frm_tom_detalle_actividad'],
+      // La respuesta viene como { value: {...}, result: {...} } — los datos están en .value
+      const out = output as Record<string, unknown>;
+      const tia = (out.value ?? out) as Record<string, unknown>;
+
+      // Construir mapa de flexAttributes para acceso rápido
+      const flex: Record<string, unknown> = {};
+      const flexAttrs = tia.flexAttributes as Array<{ attributeName: string; attributeValue: unknown }> | undefined;
+      if (Array.isArray(flexAttrs)) {
+        for (const attr of flexAttrs) flex[attr.attributeName] = attr.attributeValue;
+      }
+
+      // Address principal (type: "address")
+      const addresses = tia.addresses as Array<Record<string, unknown>> | undefined;
+      const mainAddr = addresses?.find(a => a.addressType === 'address') ?? {};
+
+      // Nombre del tomador: empresa → name, persona natural → nombres + apellidos
+      const tomadorNombre = (() => {
+        if (tia.partyType === 'INSTITUTION') return tia.name as string | null;
+        const parts = [flex['FIRST_NAME'], flex['SECOND_NAME'], flex['FIRST_SURNAME'], flex['SECOND_SURNAME']]
+          .filter(Boolean);
+        return parts.length ? parts.join(' ') : (tia.name as string | null);
+      })();
+
+      // Dirección: usar street si viene, o construir desde flexAttributes
+      const direccion = (() => {
+        const street = mainAddr.street as string | null;
+        if (street) return street;
+        const via1  = flex['TYPE_VIA']  as string | null;
+        const no1   = flex['NO_VIA']    as number | null;
+        const via2  = flex['TYPE_VIA2'] as string | null;
+        const no2   = flex['NO_VIA2']   as number | null;
+        const placa = flex['PLACA']     as number | null;
+        const det   = flex['DETAILS_ADDRESS'] as string | null;
+        const parts = [via1, no1, '#', via2, no2, placa, det].filter(v => v !== null && v !== undefined && v !== '');
+        return parts.length > 2 ? parts.join(' ') : null;
+      })();
+
+      // Departamento: intentar hacer match contra DEPARTAMENTOS por label (case-insensitive)
+      const rawDepto = (mainAddr.county ?? mainAddr.departmentName ?? flex['STATE']) as string | null;
+      const deptoMatch = rawDepto
+        ? DEPARTAMENTOS.find(d => d.label.toLowerCase() === rawDepto.toLowerCase())?.value ?? null
+        : null;
+
+      // Ciudad: intentar hacer match contra CIUDADES_POR_DEPTO
+      const rawCiudad = mainAddr.city as string | null;
+      const ciudadMatch = (() => {
+        if (!rawCiudad) return null;
+        const deptoKey = deptoMatch ?? '';
+        const allCities = deptoKey
+          ? (CIUDADES_POR_DEPTO[deptoKey] ?? [])
+          : Object.values(CIUDADES_POR_DEPTO).flat();
+        return allCities.find(c => c.label.toLowerCase() === rawCiudad.toLowerCase())?.value ?? null;
+      })();
+
+      const fieldMap: Array<[unknown, keyof FfFlSolicitudFormData]> = [
+        [tomadorNombre,       'frm_tom_tomador'],
+        [direccion,           'frm_tom_direccion'],
+        [deptoMatch,          'frm_tom_departamento'],
+        [ciudadMatch,         'frm_tom_ciudad'],
+        [flex['WEB_EMAIL'],   'frm_tom_correo_facturacion'],
       ];
 
       let mapped = 0;
-      for (const [src, dest] of mappings) {
-        const val = (output as Record<string, unknown>)[src];
+      for (const [val, dest] of fieldMap) {
         if (val !== undefined && val !== null && val !== '') {
-          console.log(`[TIA] Mapeando ${src} → ${dest} =`, val);
+          console.log(`[TIA] Mapeando → ${dest} =`, val);
           form.setValue(dest, String(val), { shouldDirty: true });
           mapped++;
         }
       }
-      console.log(`[TIA] FIN — ${mapped} campos mapeados. Keys recibidos:`, Object.keys(output as object));
+      console.log(`[TIA] FIN — ${mapped} campos mapeados. tia.keys:`, Object.keys(tia));
       if (mapped > 0) {
-        setNitNotFound(false);  // TIA encontró el cliente → ocultar sección de creación
+        setNitNotFound(false);
       } else {
         setSubmitError('TIA respondió pero sin campos reconocibles. Ver consola.');
       }
