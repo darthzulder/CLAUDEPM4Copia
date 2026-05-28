@@ -11,7 +11,7 @@ export const COLLECTION_DEFS = {
   } satisfies CollectionDef,
 
   actividadesCIIU: {
-    id: 2,
+    id: 4,
     labelField: 'data.frm_actividad',
     valueField: 'data.frm_actividad',
   } satisfies CollectionDef,
