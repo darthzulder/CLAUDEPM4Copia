@@ -51,10 +51,13 @@ function getToken(req: Request): string {
   }
 }
 
+function pm4Base(): string {
+  return (process.env.PM4_BASE_URL ?? '').replace(/\/$/, '');
+}
+
 async function pm4Request(method: string, path: string, req: Request, res: Response) {
   const token = getToken(req);
-  const base = process.env.PM4_BASE_URL;
-  const url = `${base}/api/1.0${path}`;
+  const url = `${pm4Base()}/api/1.0${path}`;
 
   console.log(`[proxy] ${method} ${url}`);
   if (['POST', 'PUT', 'PATCH'].includes(method)) {
@@ -101,14 +104,16 @@ router.get('/requests/:id', (req, res) => pm4Request('GET', `/requests/${req.par
 // Resolver task activo a partir de un case_id (request_id)
 router.get('/cases/:case_id/task', async (req, res) => {
   const token = getToken(req);
-  const base = process.env.PM4_BASE_URL;
   const caseId = req.params.case_id;
+  const url = `${pm4Base()}/api/1.0/tasks`;
+
+  console.log(`[cases] GET ${url} process_request_id=${caseId}`);
 
   try {
-    // Buscar tareas del caso — probamos PMQL con request_id numérico
-    const response = await axios.get(`${base}/api/1.0/tasks`, {
+    const response = await axios.get(url, {
       params: {
-        pmql: `process_request_id = ${caseId}`,
+        process_request_id: caseId,
+        status: 'ACTIVE',
         per_page: 100,
         include: 'data',
       },
@@ -167,8 +172,7 @@ router.post('/requests/:request_id/files', upload.single('file'), async (req, re
   if (!req.file) { res.status(400).json({ message: 'No file provided' }); return; }
 
   const token = getToken(req);
-  const base  = process.env.PM4_BASE_URL;
-  const url   = `${base}/api/1.0/requests/${req.params.request_id}/files`;
+  const url   = `${pm4Base()}/api/1.0/requests/${req.params.request_id}/files`;
 
   const form = new FormData();
   form.append('file', req.file.buffer, {
@@ -199,8 +203,7 @@ router.post('/requests/:request_id/files', upload.single('file'), async (req, re
 // Files — stream binary content (PDF, images, etc.) proxied with auth
 async function streamFile(pmPath: string, req: Request, res: Response) {
   const token = getToken(req);
-  const base  = process.env.PM4_BASE_URL;
-  const url   = `${base}/api/1.0${pmPath}`;
+  const url   = `${pm4Base()}/api/1.0${pmPath}`;
 
   console.log(`[file-stream] GET ${url}`);
   try {
