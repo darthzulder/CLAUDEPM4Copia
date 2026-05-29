@@ -8,7 +8,8 @@ import InputField from '../../components/fields/InputField';
 import SelectField from '../../components/fields/SelectField';
 import RadioField from '../../components/fields/RadioField';
 import DateField from '../../components/fields/DateField';
-import { OPTIONS, COLLECTION_DEFS, CotizadorFormData } from './variables';
+import pm4 from '../../api/pm4Client';
+import { OPTIONS, COLLECTION_DEFS, CotizadorFormData, CONSULTAR_CLIENTE_SCRIPT_ID, parseClienteTia } from './variables';
 
 // ---------------------------------------------------------------------------
 // Helper: muestra el error solo si el campo tiene valor O el form fue enviado.
@@ -151,12 +152,17 @@ function InfoGeneral({ form }: { form: ReturnType<typeof useForm<CotizadorFormDa
 function InfoTomador({
   form,
   onConsultarCliente,
+  consultarLoading,
+  tiaFilledFields,
 }: {
   form: ReturnType<typeof useForm<CotizadorFormData>>;
   onConsultarCliente: () => void;
+  consultarLoading: boolean;
+  tiaFilledFields: Set<string>;
 }) {
   const { register, formState: { errors, isSubmitted }, watch } = form;
   const w = watch();
+  const fromTia = (f: keyof CotizadorFormData) => tiaFilledFields.has(f);
 
   const fe = (name: keyof CotizadorFormData) =>
     fieldError(errors[name] as FieldError | undefined, w[name], isSubmitted);
@@ -185,10 +191,34 @@ function InfoTomador({
             error={fe('frm_tomador_numDoc')}
           />
           <div className="form-group consultar-wrapper">
-            <button type="button" className="btn-consultar" onClick={onConsultarCliente}>
-              🔍 Consultar Cliente
+            <button type="button" className="btn-consultar" onClick={onConsultarCliente} disabled={consultarLoading}>
+              {consultarLoading ? '⏳ Consultando…' : '🔍 Consultar Cliente'}
             </button>
           </div>
+        </div>
+
+        <div className="form-row cols-1">
+          <InputField
+            label="Tomador"
+            registration={register('frm_tomador_tomador')}
+            readOnly={fromTia('frm_tomador_tomador')}
+            helper={fromTia('frm_tomador_tomador') ? 'Dato de TIA' : undefined}
+          />
+        </div>
+        <div className="form-row cols-2">
+          <InputField
+            label="Dirección"
+            registration={register('frm_tomador_direccion')}
+            readOnly={fromTia('frm_tomador_direccion')}
+            helper={fromTia('frm_tomador_direccion') ? 'Dato de TIA' : undefined}
+          />
+          <InputField
+            label="Correo de facturación"
+            registration={register('frm_tomador_correo_facturacion')}
+            type="email"
+            readOnly={fromTia('frm_tomador_correo_facturacion')}
+            helper={fromTia('frm_tomador_correo_facturacion') ? 'Dato de TIA' : undefined}
+          />
         </div>
       </div>
 
@@ -475,6 +505,8 @@ function PlanPago({ form }: { form: ReturnType<typeof useForm<CotizadorFormData>
 export default function CotizadorFastFlow() {
   const { task, loading, error, submitting, completeTask } = useTask();
   const [sent, setSent] = useState(false);
+  const [consultarLoading, setConsultarLoading] = useState(false);
+  const [tiaFilledFields, setTiaFilledFields] = useState<Set<string>>(new Set());
 
   const form = useForm<CotizadorFormData>({
     mode: 'onChange',
@@ -513,14 +545,35 @@ export default function CotizadorFastFlow() {
     }
   };
 
-  const handleConsultarCliente = () => {
+  const handleConsultarCliente = async () => {
     const numDoc = form.getValues('frm_tomador_numDoc');
-    if (!numDoc) {
-      alert('Ingrese el número de documento primero.');
-      return;
+    if (!numDoc) { alert('Ingrese el número de documento primero.'); return; }
+
+    setConsultarLoading(true);
+    try {
+      const res = await pm4.post(`/scripts/${CONSULTAR_CLIENTE_SCRIPT_ID}/execute`, {
+        data:   JSON.stringify({ frm_tomador_tipoDoc: 'NIT', frm_tomador_numDoc: numDoc }),
+        config: JSON.stringify({}),
+        sync:   true,
+      });
+
+      const output = res.data?.output ?? res.data ?? {};
+      const tia = (output as Record<string, unknown>)['value'] ?? output;
+      const mapped = parseClienteTia(tia);
+
+      const keys = Object.keys(mapped);
+      for (const [dest, val] of Object.entries(mapped) as Array<[keyof CotizadorFormData, string]>) {
+        form.setValue(dest, val as never, { shouldDirty: true });
+      }
+      setTiaFilledFields(new Set(keys));
+
+      if (!keys.length) alert('TIA respondió pero sin campos reconocibles.');
+    } catch (err: unknown) {
+      const e = err as { response?: { status: number; data: unknown }; message: string };
+      alert(`Error consultando TIA (${e.response?.status ?? 'red'}): ${JSON.stringify(e.response?.data ?? e.message)}`);
+    } finally {
+      setConsultarLoading(false);
     }
-    // TODO: invocar watcher "Tomador NIT" via /api/scripts/{id}/execute
-    console.log('[watcher] Consultando cliente con NIT:', numDoc);
   };
 
   if (loading) {
@@ -574,7 +627,7 @@ export default function CotizadorFastFlow() {
 
       <form onSubmit={form.handleSubmit(onSubmit)} noValidate>
         <InfoGeneral form={form} />
-        <InfoTomador form={form} onConsultarCliente={handleConsultarCliente} />
+        <InfoTomador form={form} onConsultarCliente={handleConsultarCliente} consultarLoading={consultarLoading} tiaFilledFields={tiaFilledFields} />
         <DatosCotizacion form={form} />
         <PropuestaEconomica form={form} />
         <PlanPago form={form} />

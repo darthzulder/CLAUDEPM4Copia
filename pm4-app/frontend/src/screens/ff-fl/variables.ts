@@ -11,7 +11,7 @@ export const COLLECTION_DEFS = {
   } satisfies CollectionDef,
 
   actividadesCIIU: {
-    id: 4,
+    id: 3,
     labelField: 'data.frm_actividad',
     valueField: 'data.frm_actividad',
   } satisfies CollectionDef,
@@ -400,4 +400,60 @@ export interface FfFlSolicitudFormData {
   frm_cre_departamento?: string;
   frm_cre_ciudad?: string;
   frm_cre_correo_facturacion?: string;
+}
+
+// ---------------------------------------------------------------------------
+// Consulta de cliente en TIA — script PM4 configurable
+// ---------------------------------------------------------------------------
+export const CONSULTAR_CLIENTE_SCRIPT_ID = 56;
+
+export function parseClienteTia(rawOutput: unknown): Partial<FfFlSolicitudFormData> {
+  const tia = ((rawOutput as Record<string, unknown> | null | undefined) ?? {}) as Record<string, unknown>;
+
+  const flex: Record<string, unknown> = {};
+  const flexAttrs = tia['flexAttributes'] as Array<{ attributeName: string; attributeValue: unknown }> | undefined;
+  if (Array.isArray(flexAttrs)) {
+    for (const attr of flexAttrs) flex[attr.attributeName] = attr.attributeValue;
+  }
+
+  const addresses = tia['addresses'] as Array<Record<string, unknown>> | undefined;
+  const mainAddr = addresses?.find(a => a['addressType'] === 'address') ?? {};
+
+  const tomadorNombre = (() => {
+    if (tia['partyType'] === 'INSTITUTION') return tia['name'] as string | null;
+    const parts = [flex['FIRST_NAME'], flex['SECOND_NAME'], flex['FIRST_SURNAME'], flex['SECOND_SURNAME']].filter(Boolean);
+    return parts.length ? parts.join(' ') : (tia['name'] as string | null);
+  })();
+
+  const direccion = (() => {
+    const street = mainAddr['street'] as string | null;
+    if (street) return street;
+    const parts = [
+      flex['TYPE_VIA'], flex['NO_VIA'], '#',
+      flex['TYPE_VIA2'], flex['NO_VIA2'], flex['PLACA'], flex['DETAILS_ADDRESS'],
+    ].filter(v => v !== null && v !== undefined && v !== '');
+    return parts.length > 2 ? parts.join(' ') : null;
+  })();
+
+  const rawDepto = (mainAddr['county'] ?? mainAddr['departmentName'] ?? flex['STATE']) as string | null;
+  const deptoMatch = rawDepto
+    ? DEPARTAMENTOS.find(d => d.label.toLowerCase() === rawDepto.toLowerCase())?.value ?? null
+    : null;
+
+  const rawCiudad = mainAddr['city'] as string | null;
+  const ciudadMatch = (() => {
+    if (!rawCiudad) return null;
+    const allCities = deptoMatch
+      ? (CIUDADES_POR_DEPTO[deptoMatch] ?? [])
+      : Object.values(CIUDADES_POR_DEPTO).flat();
+    return allCities.find(c => c.label.toLowerCase() === rawCiudad.toLowerCase())?.value ?? null;
+  })();
+
+  const result: Partial<FfFlSolicitudFormData> = {};
+  if (tomadorNombre)     result.frm_tom_tomador           = tomadorNombre;
+  if (direccion)         result.frm_tom_direccion          = direccion;
+  if (deptoMatch)        result.frm_tom_departamento       = deptoMatch;
+  if (ciudadMatch)       result.frm_tom_ciudad             = ciudadMatch;
+  if (flex['WEB_EMAIL']) result.frm_tom_correo_facturacion = String(flex['WEB_EMAIL']);
+  return result;
 }

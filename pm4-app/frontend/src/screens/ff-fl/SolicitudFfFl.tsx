@@ -12,7 +12,7 @@ import { ZdsInput, ZdsDate, ZdsCheckboxField, ZdsSelect, ZdsSuggest } from './Zd
 import { ZrButton } from '@zurich/web-components/react/button';
 import {
   OPTIONS, COLLECTION_DEFS, DEPARTAMENTOS, CIUDADES_POR_DEPTO,
-  FfFlSolicitudFormData,
+  FfFlSolicitudFormData, CONSULTAR_CLIENTE_SCRIPT_ID, parseClienteTia,
 } from './variables';
 
 function fieldError(
@@ -197,6 +197,7 @@ function InfoTomador({
   nitConfirmCreate,
   onConfirmCreate,
   onCancelCreate,
+  tiaFilledFields,
 }: {
   form: ReturnType<typeof useForm<FfFlSolicitudFormData>>;
   onConsultarNIT: () => void;
@@ -205,11 +206,13 @@ function InfoTomador({
   nitConfirmCreate: boolean;
   onConfirmCreate: () => void;
   onCancelCreate: () => void;
+  tiaFilledFields: Set<string>;
 }) {
   const { register, control, formState: { errors, isSubmitted }, watch, setValue } = form;
   const w = watch();
   const fe = (name: keyof FfFlSolicitudFormData) =>
     fieldError(errors[name] as FieldError | undefined, w[name], isSubmitted);
+  const fromTia = (f: keyof FfFlSolicitudFormData) => tiaFilledFields.has(f);
 
   const ciudades = useMemo(() => CIUDADES_POR_DEPTO[w.frm_tom_departamento ?? ''] ?? [], [w.frm_tom_departamento]);
   useEffect(() => { setValue('frm_tom_ciudad', ''); }, [w.frm_tom_departamento, setValue]);
@@ -265,7 +268,7 @@ function InfoTomador({
           error={fe('frm_tom_nit')}
           helpText="9 dígitos + dígito verificador"
         />
-        <ZdsInput control={control} name="frm_tom_tomador" label="Tomador" readOnly helpText="Dato de TIA" />
+        <ZdsInput control={control} name="frm_tom_tomador" label="Tomador" readOnly={fromTia('frm_tom_tomador')} helpText={fromTia('frm_tom_tomador') ? 'Dato de TIA' : undefined} />
         <div style={{ paddingBottom: 'var(--zs-12)' }}>
           <ZrButton
             config="secondary"
@@ -280,7 +283,7 @@ function InfoTomador({
       </div>
 
       <div className="form-row cols-3">
-        <ZdsInput control={control} name="frm_tom_direccion" label="Dirección" readOnly helpText="Dato de TIA" />
+        <ZdsInput control={control} name="frm_tom_direccion" label="Dirección" readOnly={fromTia('frm_tom_direccion')} helpText={fromTia('frm_tom_direccion') ? 'Dato de TIA' : undefined} />
         <ZdsSelect
           label="Departamento"
           name="frm_tom_departamento"
@@ -550,6 +553,7 @@ export default function SolicitudFfFl() {
   const [nitLoading, setNitLoading] = useState(false);
   const [nitNotFound, setNitNotFound] = useState(false);
   const [nitConfirmCreate, setNitConfirmCreate] = useState(false);
+  const [tiaFilledFields, setTiaFilledFields] = useState<Set<string>>(new Set());
   const fileRegistry = useRef(new Map<string, File>());
 
   const form = useForm<FfFlSolicitudFormData>({
@@ -706,9 +710,9 @@ export default function SolicitudFfFl() {
         config: JSON.stringify({}),
         sync:   true,
       };
-      console.log(`[TIA] POST /scripts/50/execute`, JSON.stringify(requestBody, null, 2));
+      console.log(`[TIA] POST /scripts/${CONSULTAR_CLIENTE_SCRIPT_ID}/execute`, JSON.stringify(requestBody, null, 2));
 
-      const res = await pm4.post('/scripts/50/execute', requestBody);
+      const res = await pm4.post(`/scripts/${CONSULTAR_CLIENTE_SCRIPT_ID}/execute`, requestBody);
       console.log(`[TIA] HTTP ${res.status} — body completo:`, JSON.stringify(res.data, null, 2));
 
       const output = res.data?.response ?? res.data?.output ?? res.data ?? {};
@@ -721,79 +725,18 @@ export default function SolicitudFfFl() {
         return;
       }
 
-      // 3. Mapear campos TIA → form
-      // La respuesta viene como { value: {...}, result: {...} } — los datos están en .value
-      const out = output as Record<string, unknown>;
-      const tia = (out.value ?? out) as Record<string, unknown>;
+      // Mapear campos TIA → form (lógica centralizada en variables.ts)
+      const tia = (output as Record<string, unknown>)['value'] ?? output;
+      const mapped = parseClienteTia(tia);
+      const keys = Object.keys(mapped);
+      console.log(`[TIA] FIN — ${keys.length} campos mapeados:`, mapped);
 
-      // Construir mapa de flexAttributes para acceso rápido
-      const flex: Record<string, unknown> = {};
-      const flexAttrs = tia.flexAttributes as Array<{ attributeName: string; attributeValue: unknown }> | undefined;
-      if (Array.isArray(flexAttrs)) {
-        for (const attr of flexAttrs) flex[attr.attributeName] = attr.attributeValue;
+      for (const [dest, val] of Object.entries(mapped) as Array<[keyof FfFlSolicitudFormData, string]>) {
+        form.setValue(dest, val as never, { shouldDirty: true });
       }
+      setTiaFilledFields(new Set(keys));
 
-      // Address principal (type: "address")
-      const addresses = tia.addresses as Array<Record<string, unknown>> | undefined;
-      const mainAddr = addresses?.find(a => a.addressType === 'address') ?? {};
-
-      // Nombre del tomador: empresa → name, persona natural → nombres + apellidos
-      const tomadorNombre = (() => {
-        if (tia.partyType === 'INSTITUTION') return tia.name as string | null;
-        const parts = [flex['FIRST_NAME'], flex['SECOND_NAME'], flex['FIRST_SURNAME'], flex['SECOND_SURNAME']]
-          .filter(Boolean);
-        return parts.length ? parts.join(' ') : (tia.name as string | null);
-      })();
-
-      // Dirección: usar street si viene, o construir desde flexAttributes
-      const direccion = (() => {
-        const street = mainAddr.street as string | null;
-        if (street) return street;
-        const via1  = flex['TYPE_VIA']  as string | null;
-        const no1   = flex['NO_VIA']    as number | null;
-        const via2  = flex['TYPE_VIA2'] as string | null;
-        const no2   = flex['NO_VIA2']   as number | null;
-        const placa = flex['PLACA']     as number | null;
-        const det   = flex['DETAILS_ADDRESS'] as string | null;
-        const parts = [via1, no1, '#', via2, no2, placa, det].filter(v => v !== null && v !== undefined && v !== '');
-        return parts.length > 2 ? parts.join(' ') : null;
-      })();
-
-      // Departamento: intentar hacer match contra DEPARTAMENTOS por label (case-insensitive)
-      const rawDepto = (mainAddr.county ?? mainAddr.departmentName ?? flex['STATE']) as string | null;
-      const deptoMatch = rawDepto
-        ? DEPARTAMENTOS.find(d => d.label.toLowerCase() === rawDepto.toLowerCase())?.value ?? null
-        : null;
-
-      // Ciudad: intentar hacer match contra CIUDADES_POR_DEPTO
-      const rawCiudad = mainAddr.city as string | null;
-      const ciudadMatch = (() => {
-        if (!rawCiudad) return null;
-        const deptoKey = deptoMatch ?? '';
-        const allCities = deptoKey
-          ? (CIUDADES_POR_DEPTO[deptoKey] ?? [])
-          : Object.values(CIUDADES_POR_DEPTO).flat();
-        return allCities.find(c => c.label.toLowerCase() === rawCiudad.toLowerCase())?.value ?? null;
-      })();
-
-      const fieldMap: Array<[unknown, keyof FfFlSolicitudFormData]> = [
-        [tomadorNombre,       'frm_tom_tomador'],
-        [direccion,           'frm_tom_direccion'],
-        [deptoMatch,          'frm_tom_departamento'],
-        [ciudadMatch,         'frm_tom_ciudad'],
-        [flex['WEB_EMAIL'],   'frm_tom_correo_facturacion'],
-      ];
-
-      let mapped = 0;
-      for (const [val, dest] of fieldMap) {
-        if (val !== undefined && val !== null && val !== '') {
-          console.log(`[TIA] Mapeando → ${dest} =`, val);
-          form.setValue(dest, String(val), { shouldDirty: true });
-          mapped++;
-        }
-      }
-      console.log(`[TIA] FIN — ${mapped} campos mapeados. tia.keys:`, Object.keys(tia));
-      if (mapped > 0) {
+      if (keys.length > 0) {
         setNitNotFound(false);
       } else {
         setSubmitError('TIA respondió pero sin campos reconocibles. Ver consola.');
@@ -857,6 +800,7 @@ export default function SolicitudFfFl() {
             nitConfirmCreate={nitConfirmCreate}
             onConfirmCreate={() => { setNitConfirmCreate(false); setNitNotFound(true); }}
             onCancelCreate={() => setNitConfirmCreate(false)}
+            tiaFilledFields={tiaFilledFields}
           />
           <SeccionProductos form={form} fileRegistry={fileRegistry} />
           <DatosCotizacion form={form} />

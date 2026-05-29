@@ -122,8 +122,49 @@ export const WATCHERS = {
     name: 'Tomador NIT',
     watching: 'frm_tomador_numDoc',
     runOnLoad: false,
+    scriptId: 56,
   },
 } as const;
+
+// ---------------------------------------------------------------------------
+// Consulta de cliente en TIA — script PM4 configurable
+// ---------------------------------------------------------------------------
+export const CONSULTAR_CLIENTE_SCRIPT_ID = 56;
+
+export function parseClienteTia(rawOutput: unknown): Partial<CotizadorFormData> {
+  const tia = ((rawOutput as Record<string, unknown> | null | undefined) ?? {}) as Record<string, unknown>;
+
+  const flex: Record<string, unknown> = {};
+  const flexAttrs = tia['flexAttributes'] as Array<{ attributeName: string; attributeValue: unknown }> | undefined;
+  if (Array.isArray(flexAttrs)) {
+    for (const attr of flexAttrs) flex[attr.attributeName] = attr.attributeValue;
+  }
+
+  const tomadorNombre = (() => {
+    if (tia['partyType'] === 'INSTITUTION') return tia['name'] as string | null;
+    const parts = [flex['FIRST_NAME'], flex['SECOND_NAME'], flex['FIRST_SURNAME'], flex['SECOND_SURNAME']].filter(Boolean);
+    return parts.length ? parts.join(' ') : (tia['name'] as string | null);
+  })();
+
+  const addresses = tia['addresses'] as Array<Record<string, unknown>> | undefined;
+  const mainAddr = addresses?.find(a => a['addressType'] === 'address') ?? {};
+
+  const direccion = (() => {
+    const street = mainAddr['street'] as string | null;
+    if (street) return street;
+    const parts = [
+      flex['TYPE_VIA'], flex['NO_VIA'], '#',
+      flex['TYPE_VIA2'], flex['NO_VIA2'], flex['PLACA'], flex['DETAILS_ADDRESS'],
+    ].filter(v => v !== null && v !== undefined && v !== '');
+    return parts.length > 2 ? parts.join(' ') : null;
+  })();
+
+  const result: Partial<CotizadorFormData> = {};
+  if (tomadorNombre)     result.frm_tomador_tomador            = tomadorNombre;
+  if (direccion)         result.frm_tomador_direccion           = direccion;
+  if (flex['WEB_EMAIL']) result.frm_tomador_correo_facturacion  = String(flex['WEB_EMAIL']);
+  return result;
+}
 
 // ---------------------------------------------------------------------------
 // Tipos del formulario
@@ -145,6 +186,9 @@ export interface CotizadorFormData {
   // Información tomador
   frm_tomador_tipo_documento: string;
   frm_tomador_numDoc: string;
+  frm_tomador_tomador?: string;
+  frm_tomador_direccion?: string;
+  frm_tomador_correo_facturacion?: string;
   // Territorialidad
   frm_tom_territorialidad: string;
   frm_tom_num_ubicaciones: string;
