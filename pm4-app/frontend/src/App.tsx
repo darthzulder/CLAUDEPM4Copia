@@ -5,6 +5,10 @@ import CotizacionFfFl from './screens/ff-fl/CotizacionFfFl';
 import RespuestaCotizacion from './screens/respuesta-cotizacion/RespuestaCotizacion';
 import OpcionesCotizacion from './screens/opciones-cotizacion/OpcionesCotizacion';
 import VisualizarDocumentos from './screens/nota-cobertura/VisualizarDocumentos';
+import DocSARLAFT  from './screens/col-emision/DocSARLAFT';
+import RevSARLAFT  from './screens/col-emision/RevSARLAFT';
+import SolDocEmi   from './screens/col-emision/SolDocEmi';
+import VerDocEmi   from './screens/col-emision/VerDocEmi';
 import EstadoCorreo from './screens/estado-correo/EstadoCorreo';
 
 const SCREENS: Record<string, React.ComponentType> = {
@@ -15,6 +19,10 @@ const SCREENS: Record<string, React.ComponentType> = {
   'respuesta-cotizacion': RespuestaCotizacion,
   'opciones-cotizacion': OpcionesCotizacion,
   'nota-cobertura': VisualizarDocumentos,
+  'doc-sarlaft': DocSARLAFT,
+  'rev-sarlaft': RevSARLAFT,
+  'sol-doc-emi': SolDocEmi,
+  'ver-doc-emi': VerDocEmi,
   'estado-correo': EstadoCorreo,
 };
 
