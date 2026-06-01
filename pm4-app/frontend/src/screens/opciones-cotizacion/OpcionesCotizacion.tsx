@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { useTask } from '../../core/useTask';
-import { useRequestFiles, resolveFileId } from '../../core/useRequestFiles';
+import { resolveFileId } from '../../core/useRequestFiles';
 import PdfViewer from '../../components/PdfViewer';
 import { ZrButton } from '@zurich/web-components/react/button';
 import {
@@ -33,9 +33,6 @@ export default function OpcionesCotizacion() {
 
   const data = (task?.data ?? {}) as unknown as OpcionesCotizacionData;
 
-  const requestId = task?.process_request_id ?? null;
-  const { files, loading: filesLoading } = useRequestFiles(requestId);
-
   // Líneas activas según los productos seleccionados en la solicitud
   const activeLineas = LINEAS_CONFIG.filter((l) => Boolean(data[l.prodField]));
 
@@ -47,16 +44,9 @@ export default function OpcionesCotizacion() {
     }
   }, [activeLineas.map((l) => l.key).join(',')]); // eslint-disable-line react-hooks/exhaustive-deps
 
-  // Resolver el fileId para el tab activo
+  // Resolver el fileId para el tab activo (solo desde output_slipCotizacion_{key})
   const currentLinea = activeLineas.find((l) => l.key === activeTab);
-  const slipFileId = currentLinea ? resolveFileId(data[currentLinea.slipField]) : null;
-  const slipFromFiles = !slipFileId && currentLinea
-    ? files.find((f) => {
-        const name = f.file_name.toLowerCase();
-        return name.includes('slip') && name.includes(currentLinea.key);
-      })
-    : null;
-  const effectiveFileId = slipFileId ?? slipFromFiles?.id ?? null;
+  const effectiveFileId = currentLinea ? resolveFileId(data[currentLinea.slipField]) : null;
 
   const {
     register,
@@ -200,11 +190,6 @@ export default function OpcionesCotizacion() {
               label={currentLinea ? `Slip — ${currentLinea.label}` : 'Slip de Cotización'}
               height={700}
             />
-          ) : filesLoading ? (
-            <div className="pdf-viewer-state">
-              <div className="pdf-spinner" />
-              <span>Buscando slip de cotización…</span>
-            </div>
           ) : (
             <div className="no-file-card">
               <div className="no-file-icon">📄</div>
