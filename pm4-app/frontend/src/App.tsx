@@ -5,6 +5,7 @@ import CotizacionFfFl from './screens/ff-fl/CotizacionFfFl';
 import RespuestaCotizacion from './screens/respuesta-cotizacion/RespuestaCotizacion';
 import OpcionesCotizacion from './screens/opciones-cotizacion/OpcionesCotizacion';
 import VisualizarDocumentos from './screens/nota-cobertura/VisualizarDocumentos';
+import EstadoCorreo from './screens/estado-correo/EstadoCorreo';
 
 const SCREENS: Record<string, React.ComponentType> = {
   'cotizador-fast-flow': CotizadorFastFlow,
@@ -14,6 +15,7 @@ const SCREENS: Record<string, React.ComponentType> = {
   'respuesta-cotizacion': RespuestaCotizacion,
   'opciones-cotizacion': OpcionesCotizacion,
   'nota-cobertura': VisualizarDocumentos,
+  'estado-correo': EstadoCorreo,
 };
 
 const DEBUG_BANNER_STYLE: React.CSSProperties = {
