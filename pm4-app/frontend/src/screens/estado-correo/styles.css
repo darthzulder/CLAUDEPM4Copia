@@ -1,0 +1,248 @@
+/* =====================================================
+   ESTADO DE CORREO ELECTRÓNICO — Estilos de pantalla
+   ===================================================== */
+
+* { box-sizing: border-box; font-family: var(--zf-sans); }
+
+/* ── Wrapper ─────────────────────────────────────── */
+.ec-wrapper {
+  min-height: 100vh;
+  background: var(--zg-white-zurich);
+  display: flex;
+  flex-direction: column;
+}
+
+/* ── Header ──────────────────────────────────────── */
+.ec-header {
+  background: var(--zc-blue-zurich);
+  padding: var(--zs-150) var(--zs-200);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--zs-100);
+}
+
+.ec-header-titles h1 {
+  font: var(--zf-h-24--700);
+  color: var(--zg-white-zurich);
+  margin: 0;
+}
+
+.ec-header-sub {
+  display: flex;
+  gap: var(--zs-150);
+  margin-top: var(--zs-25);
+}
+
+.ec-header-sub span {
+  font: var(--zf-body-14--400);
+  color: rgba(255,255,255,0.8);
+}
+
+.ec-logo {
+  height: 36px;
+  flex-shrink: 0;
+}
+
+/* ── Content ─────────────────────────────────────── */
+.ec-content {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: var(--zs-300) var(--zs-200);
+  gap: var(--zs-200);
+}
+
+/* ── Card ────────────────────────────────────────── */
+.ec-card {
+  width: 100%;
+  max-width: 600px;
+  background: var(--zg-white-zurich);
+  border-radius: 16px;
+  box-shadow: 0 8px 24px rgba(0,0,0,0.08);
+  padding: var(--zs-300) var(--zs-250);
+  text-align: center;
+  border-top: 4px solid transparent;
+  animation: ec-fadein 0.4s ease both;
+}
+
+.ec-card--success { border-top-color: var(--zc-moss-aa); }
+.ec-card--error   { border-top-color: var(--zc-peach-aa); }
+
+@keyframes ec-fadein {
+  from { opacity: 0; transform: translateY(12px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+/* ── Icon ────────────────────────────────────────── */
+.ec-icon {
+  width: 72px;
+  height: 72px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 auto var(--zs-150);
+  font-size: 2rem;
+}
+
+.ec-icon::before {
+  font-family: var(--zf-sans);
+  font-weight: 700;
+}
+
+.ec-icon--check {
+  background: color-mix(in srgb, var(--zc-moss-aa) 12%, transparent);
+  color: var(--zc-moss-aa);
+}
+
+.ec-icon--check::before { content: '✓'; }
+
+.ec-icon--error {
+  background: color-mix(in srgb, var(--zc-peach-aa) 12%, transparent);
+  color: var(--zc-peach-aa);
+}
+
+.ec-icon--error::before { content: '✕'; }
+
+/* ── Typography ──────────────────────────────────── */
+.ec-title {
+  font: var(--zf-h-24--700);
+  color: var(--zc-blue-dark);
+  margin: 0 0 var(--zs-100);
+}
+
+.ec-desc {
+  font: var(--zf-body-16--400);
+  color: var(--zc-blue-dark);
+  margin: var(--zs-50) 0;
+}
+
+.ec-desc--note {
+  margin-top: var(--zs-150);
+  font: var(--zf-body-14--400);
+  color: var(--zg-5);
+  border-top: 1px dashed var(--zg-9);
+  padding-top: var(--zs-100);
+}
+
+/* ── Badge (correos) ─────────────────────────────── */
+.ec-badge {
+  display: inline-block;
+  margin: var(--zs-75) 0;
+  padding: var(--zs-75) var(--zs-150);
+  background: color-mix(in srgb, var(--zc-blue-zurich) 8%, transparent);
+  border: 1px solid var(--zc-blue-zurich);
+  border-radius: 999px;
+  font: var(--zf-body-14--700);
+  color: var(--zc-blue-zurich);
+  word-break: break-all;
+  max-width: 100%;
+}
+
+.ec-badge--error {
+  background: color-mix(in srgb, var(--zc-peach-aa) 8%, transparent);
+  border-color: var(--zc-peach-aa);
+  color: var(--zc-peach-aa);
+}
+
+/* ── Actions ─────────────────────────────────────── */
+.ec-actions {
+  display: flex;
+  justify-content: center;
+}
+
+/* ── Loading overlay ─────────────────────────────── */
+.ec-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(255,255,255,0.75);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: var(--zs-100);
+  z-index: 100;
+  font: var(--zf-body-16--700);
+  color: var(--zc-blue-zurich);
+}
+
+/* ── Modal de confirmación ───────────────────────── */
+.ec-modal-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.4);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 200;
+  animation: ec-fadein 0.2s ease both;
+}
+
+.ec-modal {
+  background: var(--zg-white-zurich);
+  border-radius: 16px;
+  padding: var(--zs-250) var(--zs-250);
+  max-width: 420px;
+  width: 90%;
+  text-align: center;
+  box-shadow: 0 16px 48px rgba(0,0,0,0.18);
+}
+
+.ec-modal-icon {
+  font-size: 2.5rem;
+  color: var(--zc-lemon-aa);
+  margin-bottom: var(--zs-100);
+}
+
+.ec-modal-title {
+  font: var(--zf-h-20--700);
+  color: var(--zc-blue-dark);
+  margin: 0 0 var(--zs-75);
+}
+
+.ec-modal-text {
+  font: var(--zf-body-16--400);
+  color: var(--zc-blue-dark);
+  margin: 0 0 var(--zs-50);
+}
+
+.ec-modal-sub {
+  font: var(--zf-body-14--400);
+  color: var(--zg-5);
+  margin: 0 0 var(--zs-200);
+}
+
+.ec-modal-actions {
+  display: flex;
+  gap: var(--zs-100);
+  justify-content: center;
+}
+
+/* ── Spinner (reutiliza el del proyecto) ─────────── */
+.spinner {
+  width: 36px;
+  height: 36px;
+  border: 3px solid var(--zg-9);
+  border-top-color: var(--zc-blue-zurich);
+  border-radius: 50%;
+  animation: spin 0.7s linear infinite;
+}
+
+@keyframes spin { to { transform: rotate(360deg); } }
+
+.screen-loading {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 60vh;
+}
+
+.screen-error {
+  padding: var(--zs-200);
+  color: var(--zc-peach-aa);
+  font: var(--zf-body-16--400);
+}

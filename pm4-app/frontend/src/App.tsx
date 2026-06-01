@@ -9,6 +9,7 @@ import DocSARLAFT  from './screens/col-emision/DocSARLAFT';
 import RevSARLAFT  from './screens/col-emision/RevSARLAFT';
 import SolDocEmi   from './screens/col-emision/SolDocEmi';
 import VerDocEmi   from './screens/col-emision/VerDocEmi';
+import EstadoCorreo from './screens/estado-correo/EstadoCorreo';
 
 const SCREENS: Record<string, React.ComponentType> = {
   'cotizador-fast-flow': CotizadorFastFlow,
@@ -22,6 +23,7 @@ const SCREENS: Record<string, React.ComponentType> = {
   'rev-sarlaft': RevSARLAFT,
   'sol-doc-emi': SolDocEmi,
   'ver-doc-emi': VerDocEmi,
+  'estado-correo': EstadoCorreo,
 };
 
 const DEBUG_BANNER_STYLE: React.CSSProperties = {
