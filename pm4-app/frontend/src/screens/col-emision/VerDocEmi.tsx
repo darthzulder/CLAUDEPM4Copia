@@ -91,11 +91,10 @@ function DocRow({
       <div className="val-zrselect-wrap">
         <ZrSelect
           config="line"
-          size="s"
           label=""
           model={validacion}
           options={VAL_OPCIONES.map((o) => ({ value: o.value, text: o.label }))}
-          onChange={(v: string) => onValidacion(v as ValidacionDoc)}
+          onChange={(v: string | null) => onValidacion((v ?? '') as ValidacionDoc)}
         />
       </div>
     </div>
@@ -391,13 +390,13 @@ export default function VerDocEmi() {
 
               {derivedDecision === 'INCOMPLETO' && (
                 <div style={{ marginTop: '1rem' }}>
-                  <ZrForm config="line" size="m">
+                  <ZrForm config="line">
                     <ZrTextarea
                       name="frm_comentarios_emision"
                       label="Comentarios *"
                       model={comentarios}
-                      onChange={(v: string) => {
-                        setComentarios(v);
+                      onChange={(v: string | null) => {
+                        setComentarios(v ?? '');
                         setSubmitError(null);
                       }}
                       elastic
