@@ -4,7 +4,7 @@ import { ZrButton } from '@zurich/web-components/react/button';
 import { ZrForm }   from '@zurich/web-components/react/form';
 import { ZdsInput, ZdsSelect } from './ZdsField';
 import { useTask } from '../../core/useTask';
-import { resolveFileId } from '../../core/useRequestFiles';
+import { useRequestFiles, resolveFileId } from '../../core/useRequestFiles';
 import PdfViewer from '../../components/PdfViewer';
 import zurichLogo from '../../resources/zurich/ZurichLogo_Horz_White_CMYK_no_R.png';
 import './styles.css';
@@ -424,6 +424,9 @@ export default function CotizacionFfFl() {
 
   const [slipTab, setSlipTab] = useState('');
 
+  const requestId = task?.process_request_id ?? null;
+  const { files } = useRequestFiles(requestId);
+
   const hasDyo      = Boolean(taskData.frm_gen_prod_dyo);
   const hasCc       = Boolean(taskData.frm_gen_prod_cc);
   const hasPdysi    = Boolean(taskData.frm_gen_prod_pdysi);
@@ -444,9 +447,16 @@ export default function CotizacionFfFl() {
   }, [slipLineas.map((l) => l.key).join(',')]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const currentSlipLinea = slipLineas.find((l) => l.key === slipTab);
-  const effectiveSlipId  = currentSlipLinea
-    ? resolveFileId(taskData[currentSlipLinea.field])
-    : null;
+  const effectiveSlipId = (() => {
+    if (!currentSlipLinea) return null;
+    const fromVar = resolveFileId(taskData[currentSlipLinea.field]);
+    if (fromVar) return fromVar;
+    // Fallback: buscar por nombre de archivo en el File Manager
+    const match = files.find((f) =>
+      f.file_name.toLowerCase().includes('slipcotizacion_' + currentSlipLinea.key)
+    );
+    return match?.id ?? null;
+  })();
 
   const form = useForm<CotizFfFlFormData>({
     mode: 'onChange',
