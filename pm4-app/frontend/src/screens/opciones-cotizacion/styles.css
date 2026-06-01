@@ -81,6 +81,42 @@
   .screen-body { grid-template-columns: 1fr; }
 }
 
+/* ── Slip area con tabs ──────────────────────────── */
+.slip-area {
+  display: flex;
+  flex-direction: column;
+  gap: var(--zs-75);
+}
+
+.slip-tab-bar {
+  display: flex;
+  gap: var(--zs-50);
+  border-bottom: 2px solid var(--z-border);
+  padding-bottom: 0;
+}
+
+.slip-tab {
+  padding: var(--zs-75) var(--zs-125);
+  border: none;
+  background: none;
+  cursor: pointer;
+  font: var(--zf-body-14--400);
+  color: var(--z-muted);
+  border-bottom: 3px solid transparent;
+  margin-bottom: -2px;
+  transition: color 0.15s, border-color 0.15s;
+}
+
+.slip-tab:hover {
+  color: var(--z-blue);
+}
+
+.slip-tab--active {
+  color: var(--z-blue);
+  font: var(--zf-body-14--700);
+  border-bottom-color: var(--z-blue);
+}
+
 /* ── PDF Viewer ──────────────────────────────────── */
 .pdf-viewer { width: 100%; }
 

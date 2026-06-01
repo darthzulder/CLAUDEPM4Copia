@@ -6,6 +6,7 @@ import PdfViewer from '../../components/PdfViewer';
 import { ZrButton } from '@zurich/web-components/react/button';
 import {
   DECISION_OPTIONS,
+  LINEAS_CONFIG,
   type OpcionesCotizacionData,
   type DecisionValue,
 } from './variables';
@@ -28,22 +29,33 @@ interface FormValues {
 export default function OpcionesCotizacion() {
   const { task, loading, error, submitting, completeTask } = useTask();
   const [sent, setSent] = useState(false);
+  const [activeTab, setActiveTab] = useState('');
 
   const data = (task?.data ?? {}) as unknown as OpcionesCotizacionData;
 
-  // Archivos adjuntos del caso
   const requestId = task?.process_request_id ?? null;
   const { files, loading: filesLoading } = useRequestFiles(requestId);
 
-  // Intentar resolver el fileId desde el campo output del slip
-  const slipFileId = resolveFileId(data.output_slipCotizacionCo);
+  // Líneas activas según los productos seleccionados en la solicitud
+  const activeLineas = LINEAS_CONFIG.filter((l) => Boolean(data[l.prodField]));
 
-  // Si no hay fileId directo en el campo output, buscar en los archivos del caso
-  // por nombre de archivo que contenga "slip" (fallback)
-  const slipFromFiles = !slipFileId
-    ? files.find((f) => f.file_name.toLowerCase().includes('slip'))
+  // Activar el primer tab disponible cuando carguen los datos
+  useEffect(() => {
+    if (activeLineas.length === 0) return;
+    if (!activeLineas.find((l) => l.key === activeTab)) {
+      setActiveTab(activeLineas[0].key);
+    }
+  }, [activeLineas.map((l) => l.key).join(',')]); // eslint-disable-line react-hooks/exhaustive-deps
+
+  // Resolver el fileId para el tab activo
+  const currentLinea = activeLineas.find((l) => l.key === activeTab);
+  const slipFileId = currentLinea ? resolveFileId(data[currentLinea.slipField]) : null;
+  const slipFromFiles = !slipFileId && currentLinea
+    ? files.find((f) => {
+        const name = f.file_name.toLowerCase();
+        return name.includes('slip') && name.includes(currentLinea.key);
+      })
     : null;
-
   const effectiveFileId = slipFileId ?? slipFromFiles?.id ?? null;
 
   const {
@@ -61,7 +73,6 @@ export default function OpcionesCotizacion() {
     },
   });
 
-  // Pre-poblar si vienen datos de PM4
   useEffect(() => {
     if (!task?.data) return;
     if (data.frm_respCot_decision)
@@ -72,7 +83,7 @@ export default function OpcionesCotizacion() {
       setValue('frm_respCot_motizoRechazo', data.frm_respCot_motizoRechazo);
     if (data.frm_respCot_personalizacion_excepcion)
       setValue('frm_respCot_personalizacion_excepcion', data.frm_respCot_personalizacion_excepcion);
-  }, [task]);
+  }, [task]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const decision = watch('frm_respCot_decision');
 
@@ -80,11 +91,9 @@ export default function OpcionesCotizacion() {
     try {
       const raw = task?.data as Record<string, unknown> ?? {};
       const payload: Record<string, unknown> = {};
-      // Pasar todos los campos existentes del task (sin _ internos)
       for (const [k, v] of Object.entries(raw)) {
         if (!k.startsWith('_')) payload[k] = v;
       }
-      // Sobreescribir con los valores del formulario
       payload.frm_respCot_decision                  = values.frm_respCot_decision;
       payload.frm_respCot_comentarios               = values.frm_respCot_comentarios;
       payload.frm_respCot_motizoRechazo             = values.frm_respCot_motizoRechazo;
@@ -141,10 +150,9 @@ export default function OpcionesCotizacion() {
     );
   }
 
-  // ── Render ───────────────────────────────────────────────────────────────
-  const titulo   = data.frm_titulo || 'VISUALIZAR SLIP Y OPCIONES DE COTIZACIÓN';
-  const numCot   = data.frm_gen_num_cotizacion;
-  const numCaso  = data.frm_caso;
+  const titulo  = data.frm_titulo || 'VISUALIZAR SLIP Y OPCIONES DE COTIZACIÓN';
+  const numCot  = data.frm_gen_num_cotizacion;
+  const numCaso = data.frm_caso;
 
   return (
     <div className="screen-wrapper">
@@ -169,12 +177,27 @@ export default function OpcionesCotizacion() {
       {/* Body: PDF (izquierda) + Panel decisión (derecha) */}
       <div className="screen-body">
 
-        {/* Slip PDF */}
-        <div>
+        {/* Área de slips con tabs por línea */}
+        <div className="slip-area">
+          {activeLineas.length > 1 && (
+            <div className="slip-tab-bar">
+              {activeLineas.map((l) => (
+                <button
+                  key={l.key}
+                  type="button"
+                  className={`slip-tab${activeTab === l.key ? ' slip-tab--active' : ''}`}
+                  onClick={() => setActiveTab(l.key)}
+                >
+                  {l.label}
+                </button>
+              ))}
+            </div>
+          )}
+
           {effectiveFileId ? (
             <PdfViewer
               fileId={effectiveFileId}
-              label="Slip de Cotización"
+              label={currentLinea ? `Slip — ${currentLinea.label}` : 'Slip de Cotización'}
               height={700}
             />
           ) : filesLoading ? (
@@ -185,7 +208,11 @@ export default function OpcionesCotizacion() {
           ) : (
             <div className="no-file-card">
               <div className="no-file-icon">📄</div>
-              <p>El slip de cotización no está disponible aún.</p>
+              <p>
+                {activeLineas.length === 0
+                  ? 'No hay productos activos en este caso.'
+                  : 'El slip de cotización no está disponible aún.'}
+              </p>
             </div>
           )}
         </div>
@@ -196,7 +223,6 @@ export default function OpcionesCotizacion() {
             <div className="decision-panel-header">Decisión de Cotización</div>
             <div className="decision-panel-body">
 
-              {/* Decisión */}
               <div className="field-group">
                 <label>
                   Decisión<span className="required">*</span>
@@ -214,13 +240,11 @@ export default function OpcionesCotizacion() {
                 )}
               </div>
 
-              {/* Comentarios */}
               <div className="field-group">
                 <label>Comentarios</label>
                 <textarea {...register('frm_respCot_comentarios')} rows={4} />
               </div>
 
-              {/* Motivo de rechazo — solo cuando RECHAZADA */}
               {decision === 'RECHAZADA' && (
                 <div className="field-group">
                   <label>
@@ -238,7 +262,6 @@ export default function OpcionesCotizacion() {
                 </div>
               )}
 
-              {/* Personalización/excepción — solo cuando PERSONALIZACION_EXCEPCION */}
               {decision === 'PERSONALIZACION_EXCEPCION' && (
                 <div className="field-group">
                   <label>
@@ -256,7 +279,6 @@ export default function OpcionesCotizacion() {
                 </div>
               )}
 
-              {/* Enlace clausulado RC */}
               {data.frm_gen_enlace_clausulado_rc && (
                 <div className="field-group">
                   <label>Clausulado RC</label>
