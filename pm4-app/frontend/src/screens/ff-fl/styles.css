@@ -1162,6 +1162,8 @@ zr-date-input[readonly] {
 /* ──────────────────────────────────────
    COTIZACIONES (CO) — SIN SLIP
 ────────────────────────────────────── */
+.co-slip-tabs { margin-bottom: var(--zs-100); }
+
 .co-no-slip {
   display: flex;
   flex-direction: column;

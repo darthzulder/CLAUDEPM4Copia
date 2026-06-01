@@ -4,7 +4,7 @@ import { ZrButton } from '@zurich/web-components/react/button';
 import { ZrForm }   from '@zurich/web-components/react/form';
 import { ZdsInput, ZdsSelect } from './ZdsField';
 import { useTask } from '../../core/useTask';
-import { useRequestFiles, resolveFileId } from '../../core/useRequestFiles';
+import { resolveFileId } from '../../core/useRequestFiles';
 import PdfViewer from '../../components/PdfViewer';
 import zurichLogo from '../../resources/zurich/ZurichLogo_Horz_White_CMYK_no_R.png';
 import './styles.css';
@@ -422,17 +422,31 @@ export default function CotizacionFfFl() {
 
   const taskData = (task?.data ?? {}) as Record<string, unknown>;
 
-  const requestId      = task?.process_request_id ?? null;
-  const { files, loading: filesLoading } = useRequestFiles(requestId);
-  const slipFileId     = resolveFileId(taskData.output_slipCotizacion);
-  const slipFromFiles  = !slipFileId ? files.find((f) => f.file_name.toLowerCase().includes('slip')) : null;
-  const effectiveSlipId = slipFileId ?? slipFromFiles?.id ?? null;
+  const [slipTab, setSlipTab] = useState('');
 
   const hasDyo      = Boolean(taskData.frm_gen_prod_dyo);
   const hasCc       = Boolean(taskData.frm_gen_prod_cc);
   const hasPdysi    = Boolean(taskData.frm_gen_prod_pdysi);
   const hasPi       = Boolean(taskData.frm_gen_prod_pi);
   const mostrarAnexo = hasDyo && taskData.frm_tom_sector === 'OTROS';
+
+  const slipLineas = [
+    hasDyo   ? { key: 'dyo',   label: 'D&O',                     field: 'output_slipCotizacion_dyo'   } : null,
+    hasCc    ? { key: 'cc',    label: 'Crimen Comercial',          field: 'output_slipCotizacion_cc'    } : null,
+    hasPdysi ? { key: 'pdysi', label: 'Protección de Datos y SI',  field: 'output_slipCotizacion_pdysi' } : null,
+    hasPi    ? { key: 'pi',    label: 'Seg. Profesional',          field: 'output_slipCotizacion_pi'    } : null,
+  ].filter((l): l is NonNullable<typeof l> => l !== null);
+
+  useEffect(() => {
+    if (slipLineas.length > 0 && !slipLineas.find((l) => l.key === slipTab)) {
+      setSlipTab(slipLineas[0].key);
+    }
+  }, [slipLineas.map((l) => l.key).join(',')]); // eslint-disable-line react-hooks/exhaustive-deps
+
+  const currentSlipLinea = slipLineas.find((l) => l.key === slipTab);
+  const effectiveSlipId  = currentSlipLinea
+    ? resolveFileId(taskData[currentSlipLinea.field])
+    : null;
 
   const form = useForm<CotizFfFlFormData>({
     mode: 'onChange',
@@ -579,16 +593,27 @@ export default function CotizacionFfFl() {
         <div className="co-product-card">
           <div className="co-product-header">Slip de Cotización</div>
           <div className="co-card-body">
-            {filesLoading && !effectiveSlipId && (
-              <div className="pdf-viewer-state">
-                <div className="pdf-spinner" />
-                <span>Buscando slip de cotización…</span>
+            {slipLineas.length > 1 && (
+              <div className="products-tab-bar co-slip-tabs">
+                {slipLineas.map((l) => (
+                  <button
+                    key={l.key}
+                    type="button"
+                    className={`prod-tab${slipTab === l.key ? ' prod-tab--active' : ''}`}
+                    onClick={() => setSlipTab(l.key)}
+                  >
+                    {l.label}
+                  </button>
+                ))}
               </div>
             )}
-            {effectiveSlipId && (
-              <PdfViewer fileId={effectiveSlipId} label="Slip de Cotización" height={700} />
-            )}
-            {!filesLoading && !effectiveSlipId && (
+            {effectiveSlipId ? (
+              <PdfViewer
+                fileId={effectiveSlipId}
+                label={currentSlipLinea ? `Slip — ${currentSlipLinea.label}` : 'Slip de Cotización'}
+                height={700}
+              />
+            ) : (
               <div className="co-no-slip">
                 <span>📄</span>
                 <span>El slip de cotización no está disponible aún.</span>
