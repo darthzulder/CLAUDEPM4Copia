@@ -217,37 +217,38 @@ function InfoTomador({
   const ciudades = useMemo(() => CIUDADES_POR_DEPTO[w.frm_tom_departamento ?? ''] ?? [], [w.frm_tom_departamento]);
   useEffect(() => { setValue('frm_tom_ciudad', ''); }, [w.frm_tom_departamento, setValue]);
 
-  const anyProductSelected = w.frm_gen_prod_dyo || w.frm_gen_prod_cc || w.frm_gen_prod_pdysi || w.frm_gen_prod_pi;
-  const { options: actOpts, loading: loadAct, rawMap: actRawMap } = useCollection(anyProductSelected ? COLLECTION_DEFS.actividadesCIIU : null);
+  const { options: actOptsDyo,   loading: loadDyo,   rawMap: rawMapDyo   } = useCollection(w.frm_gen_prod_dyo   ? COLLECTION_DEFS.actividadesCIIU_dyo   : null);
+  const { options: actOptsCc,    loading: loadCc,    rawMap: rawMapCc    } = useCollection(w.frm_gen_prod_cc    ? COLLECTION_DEFS.actividadesCIIU_cc    : null);
+  const { options: actOptsPdysi, loading: loadPdysi, rawMap: rawMapPdysi } = useCollection(w.frm_gen_prod_pdysi ? COLLECTION_DEFS.actividadesCIIU_pdysi : null);
+  const { options: actOptsPi,    loading: loadPi,    rawMap: rawMapPi    } = useCollection(w.frm_gen_prod_pi    ? COLLECTION_DEFS.actividadesCIIU_pi    : null);
 
   // Auto-rellena CIIU y NAIC cuando el usuario elige una actividad
   useEffect(() => {
     const pairs = [
-      { act: w.frm_act_dyo_actividad,   ciu: 'frm_act_dyo_cod_ciiu'   as const, naic: 'frm_act_dyo_cod_naic'   as const },
-      { act: w.frm_act_cc_actividad,    ciu: 'frm_act_cc_cod_ciiu'    as const, naic: 'frm_act_cc_cod_naic'    as const },
-      { act: w.frm_act_pdysi_actividad, ciu: 'frm_act_pdysi_cod_ciiu' as const, naic: 'frm_act_pdysi_cod_naic' as const },
-      { act: w.frm_act_pi_actividad,    ciu: 'frm_act_pi_cod_ciiu'    as const, naic: 'frm_act_pi_cod_naic'    as const },
+      { act: w.frm_act_dyo_actividad,   ciu: 'frm_act_dyo_cod_ciiu'   as const, naic: 'frm_act_dyo_cod_naic'   as const, rawMap: rawMapDyo   },
+      { act: w.frm_act_cc_actividad,    ciu: 'frm_act_cc_cod_ciiu'    as const, naic: 'frm_act_cc_cod_naic'    as const, rawMap: rawMapCc    },
+      { act: w.frm_act_pdysi_actividad, ciu: 'frm_act_pdysi_cod_ciiu' as const, naic: 'frm_act_pdysi_cod_naic' as const, rawMap: rawMapPdysi },
+      { act: w.frm_act_pi_actividad,    ciu: 'frm_act_pi_cod_ciiu'    as const, naic: 'frm_act_pi_cod_naic'    as const, rawMap: rawMapPi    },
     ];
-    for (const { act, ciu, naic } of pairs) {
+    for (const { act, ciu, naic, rawMap } of pairs) {
       if (!act) continue;
-      const rec = actRawMap[act] as { data?: Record<string, unknown> } | undefined;
+      const rec = rawMap[act] as { data?: Record<string, unknown> } | undefined;
       if (!rec) continue;
       const d = rec.data ?? {};
-      console.log('[actividades] record para', act, d);
       setValue(ciu,  String(d.frm_ciiu  ?? d.frm_codigo_ciiu  ?? d.frm_codigo ?? ''));
-      setValue(naic, String(d.frm_naic  ?? d.frm_codigo_naic  ?? ''));
+      setValue(naic, String(d.frm_naic  ?? d.frm_codigo_naic  ?? d.frm_codigo ?? ''));
     }
   }, [
     w.frm_act_dyo_actividad, w.frm_act_cc_actividad,
     w.frm_act_pdysi_actividad, w.frm_act_pi_actividad,
-    actRawMap, setValue,
+    rawMapDyo, rawMapCc, rawMapPdysi, rawMapPi, setValue,
   ]);
 
   const actRows = [
-    w.frm_gen_prod_dyo ? { prod: 'D&O', actField: 'frm_act_dyo_actividad' as const, ciuField: 'frm_act_dyo_cod_ciiu' as const, naicField: 'frm_act_dyo_cod_naic' as const, options: actOpts, loading: loadAct } : null,
-    w.frm_gen_prod_cc ? { prod: 'Crimen Comercial', actField: 'frm_act_cc_actividad' as const, ciuField: 'frm_act_cc_cod_ciiu' as const, naicField: 'frm_act_cc_cod_naic' as const, options: actOpts, loading: loadAct } : null,
-    w.frm_gen_prod_pdysi ? { prod: 'PDySI', actField: 'frm_act_pdysi_actividad' as const, ciuField: 'frm_act_pdysi_cod_ciiu' as const, naicField: 'frm_act_pdysi_cod_naic' as const, options: actOpts, loading: loadAct } : null,
-    w.frm_gen_prod_pi ? { prod: 'Seg. Profesional', actField: 'frm_act_pi_actividad' as const, ciuField: 'frm_act_pi_cod_ciiu' as const, naicField: 'frm_act_pi_cod_naic' as const, options: actOpts, loading: loadAct } : null,
+    w.frm_gen_prod_dyo   ? { prod: 'D&O',             actField: 'frm_act_dyo_actividad'   as const, ciuField: 'frm_act_dyo_cod_ciiu'   as const, naicField: 'frm_act_dyo_cod_naic'   as const, options: actOptsDyo,   loading: loadDyo   } : null,
+    w.frm_gen_prod_cc    ? { prod: 'Crimen Comercial', actField: 'frm_act_cc_actividad'    as const, ciuField: 'frm_act_cc_cod_ciiu'    as const, naicField: 'frm_act_cc_cod_naic'    as const, options: actOptsCc,    loading: loadCc    } : null,
+    w.frm_gen_prod_pdysi ? { prod: 'PDySI',            actField: 'frm_act_pdysi_actividad' as const, ciuField: 'frm_act_pdysi_cod_ciiu' as const, naicField: 'frm_act_pdysi_cod_naic' as const, options: actOptsPdysi, loading: loadPdysi } : null,
+    w.frm_gen_prod_pi    ? { prod: 'Seg. Profesional', actField: 'frm_act_pi_actividad'    as const, ciuField: 'frm_act_pi_cod_ciiu'    as const, naicField: 'frm_act_pi_cod_naic'    as const, options: actOptsPi,    loading: loadPi    } : null,
   ].filter((r): r is NonNullable<typeof r> => r !== null);
 
   return (
@@ -601,70 +602,58 @@ export default function SolicitudFfFl() {
     setProductError('');
     setSubmitError('');
 
+    const d = data as Record<string, unknown>;
+    let warning = '';
+
     if (nitNotFound && TIPOS_EMPRESA_BLOQUEADOS.has(data.frm_cre_tipo_empresa ?? '')) {
-      setSubmitError(MSG_CASE_UW);
-      return;
+      warning = MSG_CASE_UW;
     }
 
-    if (data.frm_gen_prod_dyo) {
-      const d = data as Record<string, unknown>;
+    if (!warning && data.frm_gen_prod_dyo) {
       const perfBlocked = Array.from({ length: 17 }, (_, i) => `frm_dyo_perf_${String(i + 1).padStart(2, '0')}`).some(k => d[k] === 'SI');
       const reqBlocked  = Array.from({ length: 8  }, (_, i) => `frm_dyo_req_${String(i + 1).padStart(2, '0')}`).some(k => d[k] === 'NO');
       if (perfBlocked || reqBlocked) {
-        setSubmitError(`D&O: ${MSG_CASE_UW}`);
-        return;
-      }
-      const hasLimit = data.frm_dyo_prop_01_limite || data.frm_dyo_prop_02_limite || data.frm_dyo_prop_03_limite;
-      if (!hasLimit) {
-        setSubmitError('D&O: Debe ingresar al menos un límite asegurado en la Propuesta Económica.');
-        return;
+        warning = `D&O: ${MSG_CASE_UW}`;
+      } else {
+        const hasLimit = data.frm_dyo_prop_01_limite || data.frm_dyo_prop_02_limite || data.frm_dyo_prop_03_limite;
+        if (!hasLimit) { setSubmitError('D&O: Debe ingresar al menos un límite asegurado en la Propuesta Económica.'); return; }
       }
     }
 
-    if (data.frm_gen_prod_cc) {
-      const d = data as Record<string, unknown>;
+    if (!warning && data.frm_gen_prod_cc) {
       const perfBlocked = Array.from({ length: 8 }, (_, i) => `frm_cc_perf_${String(i + 1).padStart(2, '0')}`).some(k => d[k] === 'SI');
       const reqBlocked  = Array.from({ length: 8 }, (_, i) => `frm_cc_req_${String(i + 1).padStart(2, '0')}`).some(k => d[k] === 'NO');
       if (perfBlocked || reqBlocked) {
-        setSubmitError(`Crimen Comercial: ${MSG_CASE_UW}`);
-        return;
-      }
-      const hasLimit = data.frm_cc_prop_01_evento || data.frm_cc_prop_02_evento || data.frm_cc_prop_03_evento;
-      if (!hasLimit) {
-        setSubmitError('Crimen Comercial: Debe ingresar al menos un límite asegurado en la Propuesta Económica.');
-        return;
+        warning = `Crimen Comercial: ${MSG_CASE_UW}`;
+      } else {
+        const hasLimit = data.frm_cc_prop_01_evento || data.frm_cc_prop_02_evento || data.frm_cc_prop_03_evento;
+        if (!hasLimit) { setSubmitError('Crimen Comercial: Debe ingresar al menos un límite asegurado en la Propuesta Económica.'); return; }
       }
     }
 
-    if (data.frm_gen_prod_pdysi) {
-      const d = data as Record<string, unknown>;
+    if (!warning && data.frm_gen_prod_pdysi) {
       const perfBlocked = Array.from({ length: 10 }, (_, i) => `frm_pdysi_perf_${String(i + 1).padStart(2, '0')}`).some(k => d[k] === 'SI');
       const reqBlocked  = Array.from({ length: 8  }, (_, i) => `frm_pdysi_req_${String(i + 1).padStart(2, '0')}`).some(k => d[k] === 'NO');
       if (perfBlocked || reqBlocked) {
-        setSubmitError(`Protección de Datos y SI: ${MSG_CASE_UW}`);
-        return;
-      }
-      const hasLimit = data.frm_pdysi_prop_01_limite || data.frm_pdysi_prop_02_limite || data.frm_pdysi_prop_03_limite;
-      if (!hasLimit) {
-        setSubmitError('Protección de Datos y SI: Debe ingresar al menos un límite asegurado en la Propuesta Económica.');
-        return;
+        warning = `Protección de Datos y SI: ${MSG_CASE_UW}`;
+      } else {
+        const hasLimit = data.frm_pdysi_prop_01_limite || data.frm_pdysi_prop_02_limite || data.frm_pdysi_prop_03_limite;
+        if (!hasLimit) { setSubmitError('Protección de Datos y SI: Debe ingresar al menos un límite asegurado en la Propuesta Económica.'); return; }
       }
     }
 
-    if (data.frm_gen_prod_pi) {
-      const d = data as Record<string, unknown>;
+    if (!warning && data.frm_gen_prod_pi) {
       const perfBlocked = Array.from({ length: 8 }, (_, i) => `frm_pi_perf_${String(i + 1).padStart(2, '0')}`).some(k => d[k] === 'SI');
       const reqBlocked  = Array.from({ length: 8 }, (_, i) => `frm_pi_req_${String(i + 1).padStart(2, '0')}`).some(k => d[k] === 'NO');
       if (perfBlocked || reqBlocked) {
-        setSubmitError(`Seg. Profesional: ${MSG_CASE_UW}`);
-        return;
-      }
-      const hasLimit = data.frm_pi_prop_01_limite || data.frm_pi_prop_02_limite || data.frm_pi_prop_03_limite;
-      if (!hasLimit) {
-        setSubmitError('Seg. Profesional: Debe ingresar al menos un límite asegurado en la Propuesta Económica.');
-        return;
+        warning = `Seg. Profesional: ${MSG_CASE_UW}`;
+      } else {
+        const hasLimit = data.frm_pi_prop_01_limite || data.frm_pi_prop_02_limite || data.frm_pi_prop_03_limite;
+        if (!hasLimit) { setSubmitError('Seg. Profesional: Debe ingresar al menos un límite asegurado en la Propuesta Económica.'); return; }
       }
     }
+
+    if (warning) setSubmitError(warning);
 
     try {
       // ── Subir archivos ──────────────────────────────────────────────────────

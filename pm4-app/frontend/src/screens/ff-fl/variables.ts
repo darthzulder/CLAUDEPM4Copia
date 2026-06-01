@@ -10,8 +10,26 @@ export const COLLECTION_DEFS = {
     valueField: 'id',
   } satisfies CollectionDef,
 
-  actividadesCIIU: {
-    id: 3,
+  actividadesCIIU_dyo: {
+    id: 5,
+    labelField: 'data.frm_actividad',
+    valueField: 'data.frm_actividad',
+  } satisfies CollectionDef,
+
+  actividadesCIIU_cc: {
+    id: 6,
+    labelField: 'data.frm_actividad',
+    valueField: 'data.frm_actividad',
+  } satisfies CollectionDef,
+
+  actividadesCIIU_pdysi: {
+    id: 7,
+    labelField: 'data.frm_actividad',
+    valueField: 'data.frm_actividad',
+  } satisfies CollectionDef,
+
+  actividadesCIIU_pi: {
+    id: 8,
     labelField: 'data.frm_actividad',
     valueField: 'data.frm_actividad',
   } satisfies CollectionDef,
