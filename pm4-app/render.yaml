@@ -12,3 +12,5 @@ services:
         sync: false
       - key: PM4_TOKEN
         sync: false
+      - key: IFRAME_ENCRYPTION_KEY
+        sync: false
