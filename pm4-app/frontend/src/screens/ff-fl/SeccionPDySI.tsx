@@ -86,17 +86,17 @@ export default function SeccionPDySI({ form, fileRegistry }: { form: Form; fileR
 
   const reqBloqueado = REQUISITOS.some((_, i) => {
     const key = `frm_pdysi_req_${String(i + 1).padStart(2, '0')}` as keyof FfFlSolicitudFormData;
-    return w[key] === 'NO';
+    return (w[key] ?? 'NO') === 'NO';
   });
 
   const ctrl1Bloqueado = CONTROLES_1.some((_, i) => {
     const key = `frm_pdysi_ctrl1_${String(i + 1).padStart(2, '0')}` as keyof FfFlSolicitudFormData;
-    return w[key] === 'NO';
+    return (w[key] ?? 'NO') === 'NO';
   });
 
   const ctrl2Bloqueado = CONTROLES_2.some((_, i) => {
     const key = `frm_pdysi_ctrl2_${String(i + 1).padStart(2, '0')}` as keyof FfFlSolicitudFormData;
-    return w[key] === 'NO';
+    return (w[key] ?? 'NO') === 'NO';
   });
 
   const docKeys = [

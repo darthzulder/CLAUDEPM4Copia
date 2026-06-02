@@ -52,7 +52,7 @@ export default function SeccionDyO({ form, fileRegistry }: { form: Form; fileReg
 
   const reqBloqueado = REQUISITOS.some((_, i) => {
     const key = `frm_dyo_req_${String(i + 1).padStart(2, '0')}` as keyof FfFlSolicitudFormData;
-    return w[key] === 'NO';
+    return (w[key] ?? 'NO') === 'NO';
   });
 
   const docKeys = [
