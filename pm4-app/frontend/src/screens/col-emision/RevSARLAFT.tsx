@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useTask } from '../../core/useTask';
-import { useRequestFiles, resolveFileId } from '../../core/useRequestFiles';
+import { useRequestFiles, resolveFileId, resolveParentRequestId } from '../../core/useRequestFiles';
 import PdfViewer from '../../components/PdfViewer';
 import { ZrButton } from '@zurich/web-components/react/button';
 import { ZrModal }  from '@zurich/web-components/react/modal';
@@ -135,9 +135,10 @@ export default function RevSARLAFT() {
   const [infoOpen, setInfoOpen] = useState(false);
   const [sent, setSent]         = useState(false);
 
-  const data      = (task?.data ?? {}) as DocSarlaftData;
-  const requestId = task?.process_request_id ?? null;
-  const { files, loading: filesLoading } = useRequestFiles(requestId);
+  const data            = (task?.data ?? {}) as DocSarlaftData;
+  const requestId       = task?.process_request_id ?? null;
+  const parentRequestId = resolveParentRequestId((task?.data ?? {}) as Record<string, unknown>);
+  const { files, loading: filesLoading } = useRequestFiles(requestId, parentRequestId);
 
   const rawPerfil = data.frm_sarlaft_perfil as string | undefined;
   const perfil: SarlaftPerfil | null =

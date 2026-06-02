@@ -102,14 +102,12 @@ router.put('/tasks/:id', (req, res) => {
 router.get('/requests/:id', (req, res) => pm4Request('GET', `/requests/${req.params.id}`, req, res));
 
 // Resolver task activo a partir de un case_id (request_id)
-// Usa PM4_TOKEN del servidor para la búsqueda (el token de usuario no tiene permisos
-// para listar tareas por process_request_id, solo para acceder a su tarea por ID).
 router.get('/cases/:case_id/task', async (req, res) => {
-  const adminToken = process.env.PM4_TOKEN ?? '';
+  const token = getToken(req);
   const caseId = req.params.case_id;
   const url = `${pm4Base()}/api/1.0/tasks`;
 
-  console.log(`[cases] GET ${url} process_request_id=${caseId} (usando PM4_TOKEN del servidor)`);
+  console.log(`[cases] GET ${url} process_request_id=${caseId}`);
 
   try {
     const response = await axios.get(url, {
@@ -119,7 +117,7 @@ router.get('/cases/:case_id/task', async (req, res) => {
         per_page: 100,
         include: 'data',
       },
-      headers: { Authorization: `Bearer ${adminToken}`, Accept: 'application/json' },
+      headers: { Authorization: `Bearer ${token}`, Accept: 'application/json' },
     });
 
     console.log(`[cases] PM4 tasks response status:`, response.status);

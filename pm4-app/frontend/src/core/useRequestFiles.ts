@@ -11,7 +11,10 @@ export interface Pm4File {
   updated_at: string;
 }
 
-export function useRequestFiles(requestId: number | null | undefined) {
+export function useRequestFiles(
+  requestId: number | null | undefined,
+  parentRequestId?: number | null,
+) {
   const [files, setFiles] = useState<Pm4File[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -21,13 +24,26 @@ export function useRequestFiles(requestId: number | null | undefined) {
     setLoading(true);
     setError(null);
 
-    pm4.get(`/requests/${requestId}/files`)
-      .then((r) => {
-        // PM4 puede devolver { data: [...] } o directamente un array
-        const list: Pm4File[] = Array.isArray(r.data) ? r.data : (r.data?.data ?? []);
-        console.log(`[useRequestFiles] request_id=${requestId} → ${list.length} archivos (raw):`, r.data);
-        console.log(`[useRequestFiles] primeros 3 campos de cada archivo:`, list.slice(0, 5).map(f => Object.keys(f as object)));
-        setFiles(list);
+    const fetches = [
+      pm4.get(`/requests/${requestId}/files`),
+      ...(parentRequestId ? [pm4.get(`/requests/${parentRequestId}/files`)] : []),
+    ];
+
+    Promise.all(fetches)
+      .then((responses) => {
+        const all = responses.flatMap((r) =>
+          Array.isArray(r.data) ? r.data : (r.data?.data ?? [])
+        ) as Pm4File[];
+        // Deduplicar por id
+        const seen = new Set<number>();
+        const deduped = all.filter((f) => {
+          if (seen.has(f.id)) return false;
+          seen.add(f.id);
+          return true;
+        });
+        console.log(`[useRequestFiles] request_id=${requestId} parent=${parentRequestId ?? '-'} → ${deduped.length} archivos (raw):`, responses[0].data);
+        console.log(`[useRequestFiles] keys del primer archivo:`, deduped[0] ? Object.keys(deduped[0] as object) : []);
+        setFiles(deduped);
       })
       .catch((e) => {
         const msg = e.response?.data?.message ?? e.message;
@@ -35,9 +51,18 @@ export function useRequestFiles(requestId: number | null | undefined) {
         setError(msg);
       })
       .finally(() => setLoading(false));
-  }, [requestId]);
+  }, [requestId, parentRequestId]);
 
   return { files, loading, error };
+}
+
+/** Extrae el parent_request_id del _request del task data (subprocesos PM4) */
+export function resolveParentRequestId(taskData: Record<string, unknown>): number | null {
+  const req = taskData['_request'] as Record<string, unknown> | undefined;
+  const pid = req?.['parent_request_id'];
+  if (typeof pid === 'number') return pid;
+  if (typeof pid === 'string') { const n = parseInt(pid, 10); return isNaN(n) ? null : n; }
+  return null;
 }
 
 /** Extrae un file_id de un campo output de PM4 (puede ser number, string, u objeto {id}) */
