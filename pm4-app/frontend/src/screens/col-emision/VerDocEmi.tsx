@@ -214,8 +214,8 @@ export default function VerDocEmi() {
       const match = files.find((f) => f.id === fromTask);
       return { fileId: fromTask, fileName: match?.file_name ?? `Documento ${idx + 1}` };
     }
-    const fallback = files[idx];
-    if (fallback) return { fileId: fallback.id, fileName: fallback.file_name };
+    const byName = files.find((f) => f.file_name === key);
+    if (byName) return { fileId: byName.id, fileName: byName.file_name };
     return { fileId: null, fileName: '' };
   }
 

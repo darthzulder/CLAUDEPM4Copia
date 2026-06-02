@@ -149,15 +149,15 @@ export default function RevSARLAFT() {
 
   // Resuelve el file_id para cada documento:
   // 1.° intenta la variable de proceso (task.data[doc.key])
-  // 2.° cae a la posición en la lista de archivos del request
+  // 2.° busca por file_name === key (coincide con data_name usado en la subida)
   function resolveDoc(key: string, idx: number): { fileId: number | null; fileName: string } {
     const fromTask = resolveFileId((data as Record<string, unknown>)[key]);
     if (fromTask) {
       const match = files.find((f) => f.id === fromTask);
       return { fileId: fromTask, fileName: match?.file_name ?? `Documento ${idx + 1}` };
     }
-    const fallback = files[idx];
-    if (fallback) return { fileId: fallback.id, fileName: fallback.file_name };
+    const byName = files.find((f) => f.file_name === key);
+    if (byName) return { fileId: byName.id, fileName: byName.file_name };
     return { fileId: null, fileName: '' };
   }
 
