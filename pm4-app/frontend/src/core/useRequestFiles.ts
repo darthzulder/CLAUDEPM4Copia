@@ -4,6 +4,7 @@ import pm4 from '../api/pm4Client';
 export interface Pm4File {
   id: number;
   file_name: string;
+  data_name?: string;
   mime_type: string;
   size: number;
   created_at: string;
@@ -24,7 +25,7 @@ export function useRequestFiles(requestId: number | null | undefined) {
       .then((r) => {
         // PM4 puede devolver { data: [...] } o directamente un array
         const list: Pm4File[] = Array.isArray(r.data) ? r.data : (r.data?.data ?? []);
-        console.log(`[useRequestFiles] request_id=${requestId} → ${list.length} archivos`, list.map(f => f.file_name));
+        console.log(`[useRequestFiles] request_id=${requestId} → ${list.length} archivos`, list.map(f => ({ id: f.id, file_name: f.file_name, data_name: f.data_name })));
         setFiles(list);
       })
       .catch((e) => {
