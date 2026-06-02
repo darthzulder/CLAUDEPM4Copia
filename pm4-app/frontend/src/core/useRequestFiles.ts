@@ -25,7 +25,8 @@ export function useRequestFiles(requestId: number | null | undefined) {
       .then((r) => {
         // PM4 puede devolver { data: [...] } o directamente un array
         const list: Pm4File[] = Array.isArray(r.data) ? r.data : (r.data?.data ?? []);
-        console.log(`[useRequestFiles] request_id=${requestId} → ${list.length} archivos`, list.map(f => ({ id: f.id, file_name: f.file_name, data_name: f.data_name })));
+        console.log(`[useRequestFiles] request_id=${requestId} → ${list.length} archivos (raw):`, r.data);
+        console.log(`[useRequestFiles] primeros 3 campos de cada archivo:`, list.slice(0, 5).map(f => Object.keys(f as object)));
         setFiles(list);
       })
       .catch((e) => {

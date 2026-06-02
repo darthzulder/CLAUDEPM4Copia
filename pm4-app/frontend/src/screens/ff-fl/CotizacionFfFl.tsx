@@ -5,6 +5,7 @@ import { ZrForm }   from '@zurich/web-components/react/form';
 import { ZdsInput, ZdsSelect } from './ZdsField';
 import { useTask } from '../../core/useTask';
 import { useRequestFiles, resolveFileId } from '../../core/useRequestFiles';
+import pm4 from '../../api/pm4Client';
 import PdfViewer from '../../components/PdfViewer';
 import zurichLogo from '../../resources/zurich/ZurichLogo_Horz_White_CMYK_no_R.png';
 import './styles.css';
@@ -267,10 +268,11 @@ function TarjetaGenerica({
 // ─── Sección Decisión ─────────────────────────────────────────────────────────
 
 function SeccionDecision({
-  form, fileRef, onEnviar, submitError, submitting,
+  form, fileRef, ordenFirmeFile, onEnviar, submitError, submitting,
 }: {
   form: Form;
   fileRef: React.RefObject<HTMLInputElement>;
+  ordenFirmeFile: React.MutableRefObject<File | null>;
   onEnviar: () => void;
   submitError: string;
   submitting: boolean;
@@ -362,7 +364,10 @@ function SeccionDecision({
                     style={{ display: 'none' }}
                     onChange={(e) => {
                       const file = e.target.files?.[0];
-                      if (file) setValue('cot_orden_firme_nombre', file.name);
+                      if (file) {
+                        setValue('cot_orden_firme_nombre', file.name);
+                        ordenFirmeFile.current = file;
+                      }
                     }}
                   />
                   <ZrButton config="secondary" icon="file-upload:line" onClick={() => fileRef.current?.click()}>
@@ -418,7 +423,8 @@ export default function CotizacionFfFl() {
   const [submitError, setSubmitError] = useState('');
   const [sent, setSent] = useState(false);
   const [personalizacionConfirmada, setPersonalizacionConfirmada] = useState(false);
-  const fileRef = useRef<HTMLInputElement>(null);
+  const fileRef          = useRef<HTMLInputElement>(null);
+  const ordenFirmeFile   = useRef<File | null>(null);
 
   const taskData = (task?.data ?? {}) as Record<string, unknown>;
 
@@ -513,6 +519,13 @@ export default function CotizacionFfFl() {
     }
 
     try {
+      // Subir orden en firme si hay archivo seleccionado
+      if (decision === 'APROBADA' && ordenFirmeFile.current && requestId) {
+        const fd = new FormData();
+        fd.append('file', ordenFirmeFile.current);
+        await pm4.post(`/requests/${requestId}/files?data_name=cot_orden_firme`, fd);
+      }
+
       await completeTask({ ...taskData, ...data });
       setSent(true);
     } catch (e) {
@@ -658,6 +671,7 @@ export default function CotizacionFfFl() {
         <SeccionDecision
           form={form}
           fileRef={fileRef}
+          ordenFirmeFile={ordenFirmeFile}
           onEnviar={handleEnviar}
           submitError={submitError}
           submitting={submitting}
