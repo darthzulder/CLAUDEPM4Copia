@@ -157,8 +157,8 @@ export default function RevSARLAFT() {
       const match = files.find((f) => f.id === fromTask);
       return { fileId: fromTask, fileName: match?.file_name ?? `Documento ${idx + 1}` };
     }
-    const byName = files.find((f) => f.data_name === key || f.file_name === key);
-    if (byName) return { fileId: byName.id, fileName: byName.file_name };
+    const byName = files.find((f) => f.custom_properties?.data_name === key);
+    if (byName) return { fileId: byName.id, fileName: byName.name || byName.file_name };
     return { fileId: null, fileName: '' };
   }
 

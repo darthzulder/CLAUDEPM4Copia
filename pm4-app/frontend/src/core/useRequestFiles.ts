@@ -3,8 +3,12 @@ import pm4 from '../api/pm4Client';
 
 export interface Pm4File {
   id: number;
+  name: string;
   file_name: string;
-  data_name?: string;
+  custom_properties?: {
+    data_name?: string;
+    [key: string]: unknown;
+  };
   mime_type: string;
   size: number;
   created_at: string;
