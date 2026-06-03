@@ -8,7 +8,7 @@ import json, os, sys
 import openpyxl
 
 HERE     = os.path.dirname(os.path.abspath(__file__))
-TEMPLATE = os.path.normpath(os.path.join(HERE, '..', 'frontend', 'src', 'resources', 'cotizador.xlsx'))
+TEMPLATE = os.path.normpath(os.path.join(HERE, '..', 'frontend', 'src', 'resources', 'cotizador2.xlsx'))
 OUTPUT   = os.path.join(HERE, 'tables.json')
 
 print(f'Leyendo {TEMPLATE}…')
@@ -60,7 +60,6 @@ print(f'  D&O: {len(dyo_matrix)} filas × {len(dyo_limites)} límites')
 # ── CC / Infidelidad ──────────────────────────────────────────────────────────
 ws_cc = wb['Nuevas Primas CYBER']
 
-# Primas: col E (clave), col F (prima) — filas 42+
 cc_primas = {}
 for row in range(42, 600):
     k = ws_cc.cell(row, 5).value
@@ -70,7 +69,6 @@ for row in range(42, 600):
     if v is not None and str(v) not in ('N/A', '-', ''):
         cc_primas[str(k)] = float(v)
 
-# Deducibles: col V (clave = limite_evento como COP string), col W (deducible)
 cc_ded = {}
 for row in range(4, 12):
     k = ws_cc.cell(row, 22).value
@@ -82,7 +80,7 @@ for row in range(4, 12):
 tables['cc'] = {'primas': cc_primas, 'deducibles': cc_ded}
 print(f'  CC: {len(cc_primas)} primas, {len(cc_ded)} deducibles')
 
-# ── PDySI / Cyber ─────────────────────────────────────────────────────────────
+# ── PDySI / Cyber (v2: ENTRADAS B27-B30, SALIDAS R23-R25) ────────────────────
 ws_cy = wb['PRIMAS']
 
 cy_primas = {}
@@ -108,16 +106,14 @@ for row in range(57, 100):
 tables['pdysi'] = {'primas': cy_primas, 'deducibles': cy_ded}
 print(f'  PDySI: {len(cy_primas)} primas, {len(cy_ded)} deducibles')
 
-# ── PI ────────────────────────────────────────────────────────────────────────
-# Cada hoja (ABOGADOS, ADMIN PH, CONTADORES) tiene en col F la clave
-# formato: {fac_label}{deducible}{limite}  y en col E la prima
+# ── PI (v2: 3 alternativas, key = {fac}{deducible}{limite}) ───────────────────
 pi_tables = {}
 for sector_name, sheet_name in [('ABOGADOS', 'ABOGADOS'), ('ADMINISTRADORES', 'ADMIN PH'), ('CONTADORES', 'CONTADORES')]:
     ws_pi = wb[sheet_name]
     lookup = {}
     for row in range(1, 800):
-        key = ws_pi.cell(row, 6).value
-        prima = ws_pi.cell(row, 5).value
+        key   = ws_pi.cell(row, 6).value   # col F = llave {fac}{ded}{lim}
+        prima = ws_pi.cell(row, 5).value   # col E = prima
         if key and prima and str(prima) not in ('N/A', '-', 'PRIMA'):
             try: lookup[str(key)] = float(prima)
             except: pass
@@ -125,6 +121,28 @@ for sector_name, sheet_name in [('ABOGADOS', 'ABOGADOS'), ('ADMINISTRADORES', 'A
     print(f'  PI/{sector_name}: {len(lookup)} entradas')
 
 tables['pi'] = pi_tables
+
+# Mapeo limit→deducible por sector (para auto-derivar deducible cuando no se pasa)
+# Formato: {sector: {limite_str: deducible}}
+pi_ded_map = {}
+for sector_name, sheet_name in [('ABOGADOS', 'ABOGADOS'), ('ADMINISTRADORES', 'ADMIN PH'), ('CONTADORES', 'CONTADORES')]:
+    ws_pi = wb[sheet_name]
+    mapping = {}
+    for row in range(1, 800):
+        key   = ws_pi.cell(row, 6).value   # llave
+        prima = ws_pi.cell(row, 5).value
+        ded   = ws_pi.cell(row, 3).value   # col C = deducible
+        lim   = ws_pi.cell(row, 4).value   # col D = limite
+        if key and prima and ded and lim:
+            try:
+                lim_str = str(int(lim))
+                if lim_str not in mapping:   # primer deducible encontrado para ese límite
+                    mapping[lim_str] = int(ded)
+            except: pass
+    pi_ded_map[sector_name] = mapping
+    print(f'  PI deducibles/{sector_name}: {len(mapping)} entradas')
+
+tables['pi_ded_map'] = pi_ded_map
 
 # ── Guardar ───────────────────────────────────────────────────────────────────
 with open(OUTPUT, 'w', encoding='utf-8') as f:

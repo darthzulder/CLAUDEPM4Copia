@@ -39,34 +39,18 @@ function TablaDyO({ result, inputs }: { result: CotizadorResult; inputs: Cotizad
   const d = result.dyo;
   if (!d) return null;
   const { opt1, opt2, opt3 } = d;
-  const lims = [
-    inputs.dyo?.limite1,
-    inputs.dyo?.limite2,
-    inputs.dyo?.limite3,
-  ];
+  const lims = [inputs.dyo?.limite1, inputs.dyo?.limite2, inputs.dyo?.limite3];
   return (
     <div className="cot-res-product">
       <div className="cot-res-product-header">Seguro de Directores y Administradores (D&amp;O)</div>
       <div className="cot-res-table">
-        <TableHeader cols={['Límite asegurado', 'Modalidad', 'Cobertura', 'Prima bruta anual']} />
+        <TableHeader cols={['Límite asegurado', 'Modalidad', 'Prima bruta anual']} />
         {[opt1, opt2, opt3].map((o, i) => (
-          <div key={i} className="cot-res-group">
-            <div className="cot-res-row">
-              <span className="cot-res-label">{i + 1}</span>
-              <span className="cot-res-cell">{cop(Number(lims[i] ?? 0))}</span>
-              <span className="cot-res-cell cot-res-cell--muted">Todo y cada reclamo en el agregado anual</span>
-              <span className="cot-res-cell cot-res-cell--blue">Cobertura 1.1 "A"</span>
-              <span className="cot-res-cell">{cop(o.prima_a)}</span>
-            </div>
-            {o.prima_b !== null && o.prima_b !== undefined && o.prima_b > 0 && (
-              <div className="cot-res-row cot-res-row--sub">
-                <span className="cot-res-label" />
-                <span className="cot-res-cell" />
-                <span className="cot-res-cell" />
-                <span className="cot-res-cell cot-res-cell--blue">Cobertura 1.2 "B"</span>
-                <span className="cot-res-cell">{cop(o.prima_b)}</span>
-              </div>
-            )}
+          <div key={i} className="cot-res-row">
+            <span className="cot-res-label">{i + 1}</span>
+            <span className="cot-res-cell">{cop(Number(lims[i] ?? 0))}</span>
+            <span className="cot-res-cell cot-res-cell--muted">Todo y cada reclamo en el agregado anual</span>
+            <span className="cot-res-cell">{cop(o.prima_a)}</span>
           </div>
         ))}
       </div>
@@ -121,22 +105,25 @@ function TablaPdysi({ result, inputs }: { result: CotizadorResult; inputs: Cotiz
   );
 }
 
-function TablaPi({ result, inputs }: { result: CotizadorResult; inputs: CotizadorInputs }) {
+function TablaPi({ result }: { result: CotizadorResult }) {
   const d = result.pi;
   if (!d) return null;
-  const o = d.opt1;
   return (
     <div className="cot-res-product">
       <div className="cot-res-product-header">Seguro de Responsabilidad Civil Profesional</div>
       <div className="cot-res-table">
         <TableHeader cols={['Límite asegurado', 'Modalidad', 'Deducible', 'Prima bruta anual']} />
-        <div className="cot-res-row">
-          <span className="cot-res-label">1</span>
-          <span className="cot-res-cell">{cop(o.limite ?? Number(inputs.pi?.limite ?? 0))}</span>
-          <span className="cot-res-cell cot-res-cell--muted">Por reclamación (claims made)</span>
-          <span className="cot-res-cell">{cop(o.deducible)}</span>
-          <span className="cot-res-cell">{cop(o.prima)}</span>
-        </div>
+        {([d.opt1, d.opt2, d.opt3] as typeof d.opt1[]).map((o, i) => (
+          o.limite ? (
+            <div key={i} className="cot-res-row">
+              <span className="cot-res-label">{i + 1}</span>
+              <span className="cot-res-cell">{cop(o.limite)}</span>
+              <span className="cot-res-cell cot-res-cell--muted">Por reclamación (claims made)</span>
+              <span className="cot-res-cell">{cop(o.deducible)}</span>
+              <span className="cot-res-cell">{cop(o.prima)}</span>
+            </div>
+          ) : null
+        ))}
       </div>
     </div>
   );
@@ -177,7 +164,7 @@ export default function SeccionResumenCotizacion({
           {hasDyo   && <TablaDyO   result={result} inputs={inputs} />}
           {hasCc    && <TablaCC    result={result} inputs={inputs} />}
           {hasPdysi && <TablaPdysi result={result} inputs={inputs} />}
-          {hasPi    && <TablaPi    result={result} inputs={inputs} />}
+          {hasPi    && <TablaPi    result={result} />}
         </>
       )}
 

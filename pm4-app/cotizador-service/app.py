@@ -66,16 +66,16 @@ def calc_dyo(inp):
     for i, key in enumerate(['opt1','opt2','opt3']):
         lim = to_int(inp.get(f'limite{i+1}', 0))
         prima_a = xlookup(lim, limites, row_data['primas'])
-        # NC prima_b: solo si sector=Otros y anexo=SI
-        prima_b = None
-        ent_limite = None
+        # NC (Anexo): solo si sector=Otros y anexo=SI
+        # v2: SALIDAS col C = DEDUCIBLE (no prima_b)
+        ent_limite   = None
+        ent_deducible = None
         if sector == 'Otros' and anexo:
             nc_entry = t['nc'].get(str(lim))
             if nc_entry:
-                ent_limite = nc_entry.get('limite_nc')
-                # Prima NC ≈ deducible del NC (el Excel lo calcula igual que la prima A para esa tabla)
-                prima_b = xlookup(lim, limites, row_data['primas'])
-        opts[key] = {'prima_a': prima_a, 'prima_b': prima_b, 'deducible': 0, 'ent_limite': ent_limite}
+                ent_limite    = nc_entry.get('limite_nc')
+                ent_deducible = nc_entry.get('deducible')
+        opts[key] = {'prima_a': prima_a, 'deducible': 0, 'ent_limite': ent_limite, 'ent_deducible': ent_deducible}
     return opts
 
 def calc_cc(inp):
@@ -99,6 +99,7 @@ def calc_cc(inp):
     return opts
 
 def calc_pdysi(inp):
+    # v2: ENTRADAS B27(fac) B28-B30(limites), SALIDAS B23-C25
     t = TABLES['pdysi']
     fac = str(to_int(inp.get('facturacion', 0)))
 
@@ -112,28 +113,36 @@ def calc_pdysi(inp):
         }
     return opts
 
+def _pi_sector(actividad: str) -> str:
+    a = actividad.upper()
+    if 'ABOGAD' in a:   return 'ABOGADOS'
+    if 'CONTAD' in a:   return 'CONTADORES'
+    return 'ADMINISTRADORES'
+
 def calc_pi(inp):
+    # v2: 3 alternativas, cada una con limite+deducible propios
+    # ENTRADAS: B35(fac) B36-B38(limites) B39(actividad) B40-B42(deducibles)
     t        = TABLES['pi']
     fac      = cop_label(inp.get('facturacion', 0))
-    lim      = to_int(inp.get('limite', 0))
-    ded      = to_int(inp.get('deducible', 30000000))
     actividad = str(inp.get('actividad', ''))
+    sector_table = t.get(_pi_sector(actividad), t.get('ADMINISTRADORES', {}))
 
-    # Sector mapping: el Excel usa ABOGADOS/ADMINISTRADORES/CONTADORES
-    sector_key = None
-    actividad_upper = actividad.upper()
-    if 'ABOGAD' in actividad_upper:
-        sector_key = 'ABOGADOS'
-    elif 'CONTAD' in actividad_upper:
-        sector_key = 'CONTADORES'
-    else:
-        sector_key = 'ADMINISTRADORES'  # default
+    ded_map = TABLES.get('pi_ded_map', {}).get(_pi_sector(actividad), {})
 
-    lookup_key = f'{fac}{ded}{lim}'
-    sector_table = t.get(sector_key, t.get('ADMINISTRADORES', {}))
-    prima = sector_table.get(lookup_key)
-
-    return {'opt1': {'limite': lim, 'deducible': ded, 'prima': prima}}
+    opts = {}
+    for i, key in enumerate(['opt1','opt2','opt3']):
+        lim = to_int(inp.get(f'limite{i+1}', 0))
+        if lim == 0:
+            opts[key] = {'limite': None, 'deducible': None, 'prima': None}
+            continue
+        # Deducible: usar el pasado o auto-derivar del mapeo
+        ded = to_int(inp.get(f'deducible{i+1}', 0))
+        if ded == 0:
+            ded = ded_map.get(str(lim), 0)
+        lookup_key = f'{fac}{ded}{lim}'
+        prima = sector_table.get(lookup_key)
+        opts[key] = {'limite': lim, 'deducible': ded, 'prima': prima}
+    return opts
 
 # ── Flask ─────────────────────────────────────────────────────────────────────
 

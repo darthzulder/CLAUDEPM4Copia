@@ -644,9 +644,10 @@ export default function SolicitudFfFl() {
     if (hasPi && w.frm_cot_fact_anual_pi) {
       inputs.pi = {
         facturacion: w.frm_cot_fact_anual_pi,
-        limite:      w.frm_pi_prop_01_limite    ?? 0,
-        actividad:   w.frm_act_pi_actividad     ?? '',
-        deducible:   30000000,
+        limite1:     w.frm_pi_prop_01_limite ?? 0,
+        limite2:     w.frm_pi_prop_02_limite ?? 0,
+        limite3:     w.frm_pi_prop_03_limite ?? 0,
+        actividad:   w.frm_act_pi_actividad  ?? '',
       };
     }
 

@@ -30,17 +30,21 @@ export interface CotizadorInputs {
   };
   pi?: {
     facturacion: string | number;
-    limite: string | number;
+    limite1: string | number;
+    limite2?: string | number;
+    limite3?: string | number;
     actividad: string;
-    deducible?: string | number;
+    deducible1?: string | number;
+    deducible2?: string | number;
+    deducible3?: string | number;
   };
 }
 
 export interface CotizadorOptDyo {
   prima_a: number | null;
-  prima_b: number | null;
   deducible: number;
   ent_limite: number | null;
+  ent_deducible: number | null;
 }
 
 export interface CotizadorOptCC {
@@ -63,7 +67,7 @@ export interface CotizadorResult {
   dyo?:   { opt1: CotizadorOptDyo;   opt2: CotizadorOptDyo;   opt3: CotizadorOptDyo };
   cc?:    { opt1: CotizadorOptCC;    opt2: CotizadorOptCC;    opt3: CotizadorOptCC };
   pdysi?: { opt1: CotizadorOptPdysi; opt2: CotizadorOptPdysi; opt3: CotizadorOptPdysi };
-  pi?:    { opt1: CotizadorOptPi };
+  pi?:    { opt1: CotizadorOptPi; opt2: CotizadorOptPi; opt3: CotizadorOptPi };
 }
 
 // ─── Hook ────────────────────────────────────────────────────────────────────
@@ -124,11 +128,10 @@ export function cotizadorResultToPayload(
     for (const n of [1, 2, 3] as const) {
       const k = `opt${n}` as 'opt1' | 'opt2' | 'opt3';
       const o = result.dyo[k];
-      p[`cot_dyo_opt${n}_prima_a`]  = o.prima_a  ?? 0;
-      p[`cot_dyo_opt${n}_prima_b`]  = o.prima_b  ?? 0;
+      p[`cot_dyo_opt${n}_prima_a`]   = o.prima_a      ?? 0;
       p[`cot_dyo_opt${n}_deducible`] = 0;
-      p[`cot_dyo_ent${n}_limite`]   = o.ent_limite ?? 0;
-      p[`cot_dyo_ent${n}_deducible`] = 0;
+      p[`cot_dyo_ent${n}_limite`]    = o.ent_limite   ?? 0;
+      p[`cot_dyo_ent${n}_deducible`] = o.ent_deducible ?? 0;
     }
   }
 
@@ -156,10 +159,13 @@ export function cotizadorResultToPayload(
   }
 
   if (result.pi && inputs.pi) {
-    const o = result.pi.opt1;
-    p['cot_pi_opt1_limite']    = o.limite    ?? inputs.pi.limite ?? 0;
-    p['cot_pi_opt1_deducible'] = o.deducible ?? inputs.pi.deducible ?? 0;
-    p['cot_pi_opt1_prima']     = o.prima     ?? 0;
+    for (const n of [1, 2, 3] as const) {
+      const k = `opt${n}` as 'opt1' | 'opt2' | 'opt3';
+      const o = result.pi[k];
+      p[`cot_pi_opt${n}_limite`]    = o.limite    ?? 0;
+      p[`cot_pi_opt${n}_deducible`] = o.deducible ?? 0;
+      p[`cot_pi_opt${n}_prima`]     = o.prima     ?? 0;
+    }
   }
 
   return p;
