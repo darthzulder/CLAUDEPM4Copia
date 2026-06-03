@@ -1,25 +1,18 @@
 """
-Cotizador API — micro-servicio Flask
-Carga el modelo Excel una vez al arrancar y sirve /calcular vía HTTP.
+Cotizador API — sin scipy, sin formulas library.
+Carga tables.json al arrancar (~1MB) y sirve /calcular con lookups puros.
 """
-import os, sys, json, tempfile, shutil, warnings
-warnings.filterwarnings('ignore')
-
+import os, json
 from flask import Flask, request, jsonify
 
-# ── dependencias ──────────────────────────────────────────────────────────────
-try:
-    import openpyxl
-    import formulas
-except ImportError:
-    import subprocess
-    subprocess.check_call([sys.executable, '-m', 'pip', 'install', 'openpyxl', 'formulas', '-q'])
-    import openpyxl
-    import formulas
+HERE   = os.path.dirname(os.path.abspath(__file__))
+TABLES = json.load(open(os.path.join(HERE, 'tables.json'), encoding='utf-8'))
 
-# ── helpers ───────────────────────────────────────────────────────────────────
+print('[cotizador] tables.json cargado.', flush=True)
 
-def cop_label(n):
+# ── Helpers ───────────────────────────────────────────────────────────────────
+
+def cop_label(n) -> str:
     try: n = int(float(str(n).replace(',','').replace('.',''))) if isinstance(n, str) else int(n)
     except: return str(n)
     parts, t = [], abs(n)
@@ -28,7 +21,7 @@ def cop_label(n):
     parts.append(str(t))
     return 'Hasta COP ' + '.'.join(reversed(parts))
 
-def cop_str(n):
+def cop_str(n) -> str:
     try: n = int(float(str(n).replace(',','').replace('.',''))) if isinstance(n, str) else int(n)
     except: return str(n)
     parts, t = [], abs(n)
@@ -42,125 +35,107 @@ def to_int(v, d=0):
     except: return d
 
 SECTOR_MAP = {
-    'OTROS': 'Otros', 'COPROPIEDADES': 'Copropiedades',
-    'CONSTRUCCION': 'Construcción',
-    'EDUCACION': 'Educación, escolarización y atención a la infancia',
-    'CENTROS_COMERCIALES': 'Centros Comerciales',
+    'OTROS':'Otros','COPROPIEDADES':'Copropiedades','CONSTRUCCION':'Construcción',
+    'EDUCACION':'Educación, escolarización y atención a la infancia',
+    'CENTROS_COMERCIALES':'Centros Comerciales',
 }
 
-def extract_val(r):
-    if r is None: return None
+def xlookup(val, search_list, result_list, default=None):
+    """Equivalente a XLOOKUP: busca val en search_list, retorna el item correspondiente de result_list."""
     try:
-        v = r.value[0][0]
-        if v is None or str(v) in ('nan','N/A','-','empty',''): return None
-        return float(v)
-    except: return None
+        idx = [str(x) for x in search_list].index(str(val))
+        return result_list[idx]
+    except (ValueError, IndexError):
+        return default
 
-# ── cargar modelo ─────────────────────────────────────────────────────────────
+# ── Cálculos por producto ────────────────────────────────────────────────────
 
-HERE     = os.path.dirname(os.path.abspath(__file__))
-TEMPLATE = os.path.normpath(os.path.join(HERE, '..', 'frontend', 'src', 'resources', 'cotizador.xlsx'))
+def calc_dyo(inp):
+    t = TABLES['dyo']
+    fac   = cop_label(inp.get('facturacion', 0))
+    anexo = bool(inp.get('anexo'))
+    sector = SECTOR_MAP.get(str(inp.get('sector','')), inp.get('sector','Otros'))
 
-print(f'[cotizador] Cargando modelo desde {TEMPLATE}…', flush=True)
+    # Encontrar fila por facturación
+    row_data = next((r for r in t['matrix'] if r['fac'] == fac), None)
+    if not row_data:
+        return None
 
-_tmp_dir  = tempfile.mkdtemp(prefix='cotizador_')
-_tmp_path = os.path.join(_tmp_dir, 'model.xlsx')
+    limites = t['limites']
+    opts = {}
+    for i, key in enumerate(['opt1','opt2','opt3']):
+        lim = to_int(inp.get(f'limite{i+1}', 0))
+        prima_a = xlookup(lim, limites, row_data['primas'])
+        # NC prima_b: solo si sector=Otros y anexo=SI
+        prima_b = None
+        ent_limite = None
+        if sector == 'Otros' and anexo:
+            nc_entry = t['nc'].get(str(lim))
+            if nc_entry:
+                ent_limite = nc_entry.get('limite_nc')
+                # Prima NC ≈ deducible del NC (el Excel lo calcula igual que la prima A para esa tabla)
+                prima_b = xlookup(lim, limites, row_data['primas'])
+        opts[key] = {'prima_a': prima_a, 'prima_b': prima_b, 'deducible': 0, 'ent_limite': ent_limite}
+    return opts
 
-wb = openpyxl.load_workbook(TEMPLATE)
-bad = [n for n, d in list(wb.defined_names.items())
-       if 'COP' in str(d.attr_text) or '[' in str(d.attr_text)]
-for n in bad:
-    del wb.defined_names[n]
-wb.save(_tmp_path)
+def calc_cc(inp):
+    t = TABLES['cc']
+    fac      = str(to_int(inp.get('facturacion', 0)))
+    empleados = str(inp.get('empleados', '1-100'))
 
-FNAME = os.path.basename(_tmp_path)
-XL    = formulas.ExcelModel().loads(_tmp_path).finish()
+    opts = {}
+    for i, key in enumerate(['opt1','opt2','opt3']):
+        ev  = cop_str(inp.get(f'limite{i+1}_evento',   0))
+        agr = cop_str(inp.get(f'limite{i+1}_agregado', 0))
+        lookup_key = f'{empleados}-{fac}-{ev}-{agr}'
+        prima      = t['primas'].get(lookup_key)
+        deducible_str = t['deducibles'].get(ev)
+        # Deducible puede venir como "COP30.000.000" — convertir a número
+        ded = None
+        if deducible_str:
+            try: ded = float(deducible_str.replace('COP','').replace('.',''))
+            except: pass
+        opts[key] = {'deducible': ded, 'prima': prima}
+    return opts
 
-print('[cotizador] Modelo listo.', flush=True)
+def calc_pdysi(inp):
+    t = TABLES['pdysi']
+    fac = str(to_int(inp.get('facturacion', 0)))
 
-def ck(sheet, cell):
-    return f"'[{FNAME}]{sheet.upper()}'!{cell.upper()}"
-
-# ── cálculo ───────────────────────────────────────────────────────────────────
-
-def do_calculate(inp):
-    dyo   = inp.get('dyo',   {})
-    cc    = inp.get('cc',    {})
-    pdysi = inp.get('pdysi', {})
-    pi    = inp.get('pi',    {})
-
-    xl_in, xl_out = {}, []
-
-    if dyo:
-        xl_in[ck('ENTRADAS','B3')] = cop_label(dyo.get('facturacion',0))
-        xl_in[ck('ENTRADAS','B4')] = to_int(dyo.get('limite1',0))
-        xl_in[ck('ENTRADAS','B5')] = to_int(dyo.get('limite2',0))
-        xl_in[ck('ENTRADAS','B6')] = to_int(dyo.get('limite3',0))
-        xl_in[ck('ENTRADAS','B8')] = 'SI' if dyo.get('anexo') else 'NO'
-        xl_in[ck('ENTRADAS','B9')] = SECTOR_MAP.get(str(dyo.get('sector','')), dyo.get('sector','Otros'))
-        xl_out += [ck('SALIDAS',c) for c in ['B3','B4','B5','B8','B9','B10','C8','C9','C10']]
-
-    if cc:
-        xl_in[ck('ENTRADAS','B15')] = to_int(cc.get('facturacion',0))
-        for i, k in enumerate(['B16','B17','B18'], 1):
-            xl_in[ck('ENTRADAS',k)] = cop_str(cc.get(f'limite{i}_evento',0))
-        for i, k in enumerate(['B19','B20','B21'], 1):
-            xl_in[ck('ENTRADAS',k)] = cop_str(cc.get(f'limite{i}_agregado',0))
-        for i, k in enumerate(['B24','B25','B26'], 1):
-            xl_in[ck('ENTRADAS',k)] = cop_str(cc.get(f'limite{i}_evento',0))
-        for i, k in enumerate(['B27','B28','B29'], 1):
-            xl_in[ck('ENTRADAS',k)] = cop_str(cc.get(f'limite{i}_agregado',0))
-        xl_in[ck('ENTRADAS','B30')] = str(cc.get('empleados','1-100'))
-        xl_out += [ck('SALIDAS',c) for c in ['B15','B16','B17','C15','C16','C17','B20','B21','B22','C20','C21','C22']]
-
-    if pdysi:
-        xl_in[ck('ENTRADAS','B35')] = to_int(pdysi.get('facturacion',0))
-        xl_in[ck('ENTRADAS','B36')] = to_int(pdysi.get('limite1',0))
-        xl_in[ck('ENTRADAS','B37')] = to_int(pdysi.get('limite2',0))
-        xl_in[ck('ENTRADAS','B38')] = to_int(pdysi.get('limite3',0))
-        xl_out += [ck('SALIDAS',c) for c in ['B29','B30','B31','C29','C30','C31','B34','B35','B36','C34','C35','C36']]
-
-    if pi:
-        xl_in[ck('ENTRADAS','B43')] = cop_label(pi.get('facturacion',0))
-        xl_in[ck('ENTRADAS','B44')] = to_int(pi.get('limite',0))
-        xl_in[ck('ENTRADAS','B45')] = str(pi.get('actividad',''))
-        xl_in[ck('ENTRADAS','B46')] = to_int(pi.get('deducible',30000000))
-        xl_out += [ck('SALIDAS',c) for c in ['A42','B42','C42']]
-
-    if not xl_out:
-        return {}
-
-    res = XL.calculate(inputs=xl_in, outputs=xl_out)
-
-    def gv(s, c):
-        return extract_val(res.get(ck(s, c)))
-
-    out = {}
-    if dyo:
-        out['dyo'] = {
-            'opt1': {'prima_a': gv('SALIDAS','B3'), 'prima_b': gv('SALIDAS','C8'),  'deducible': 0, 'ent_limite': gv('SALIDAS','B8')},
-            'opt2': {'prima_a': gv('SALIDAS','B4'), 'prima_b': gv('SALIDAS','C9'),  'deducible': 0, 'ent_limite': gv('SALIDAS','B9')},
-            'opt3': {'prima_a': gv('SALIDAS','B5'), 'prima_b': gv('SALIDAS','C10'), 'deducible': 0, 'ent_limite': gv('SALIDAS','B10')},
+    opts = {}
+    for i, key in enumerate(['opt1','opt2','opt3']):
+        lim = str(to_int(inp.get(f'limite{i+1}', 0)))
+        lookup_key = f'{fac}-{lim}'
+        opts[key] = {
+            'deducible': t['deducibles'].get(lookup_key),
+            'prima':     t['primas'].get(lookup_key),
         }
-    if cc:
-        out['cc'] = {
-            'opt1': {'deducible': gv('SALIDAS','B15'), 'prima': gv('SALIDAS','C15')},
-            'opt2': {'deducible': gv('SALIDAS','B16'), 'prima': gv('SALIDAS','C16')},
-            'opt3': {'deducible': gv('SALIDAS','B17'), 'prima': gv('SALIDAS','C17')},
-        }
-    if pdysi:
-        out['pdysi'] = {
-            'opt1': {'deducible': gv('SALIDAS','B29'), 'prima': gv('SALIDAS','C29')},
-            'opt2': {'deducible': gv('SALIDAS','B30'), 'prima': gv('SALIDAS','C30')},
-            'opt3': {'deducible': gv('SALIDAS','B31'), 'prima': gv('SALIDAS','C31')},
-        }
-    if pi:
-        out['pi'] = {
-            'opt1': {'limite': gv('SALIDAS','A42'), 'deducible': gv('SALIDAS','B42'), 'prima': gv('SALIDAS','C42')},
-        }
-    return out
+    return opts
 
-# ── Flask app ─────────────────────────────────────────────────────────────────
+def calc_pi(inp):
+    t        = TABLES['pi']
+    fac      = cop_label(inp.get('facturacion', 0))
+    lim      = to_int(inp.get('limite', 0))
+    ded      = to_int(inp.get('deducible', 30000000))
+    actividad = str(inp.get('actividad', ''))
+
+    # Sector mapping: el Excel usa ABOGADOS/ADMINISTRADORES/CONTADORES
+    sector_key = None
+    actividad_upper = actividad.upper()
+    if 'ABOGAD' in actividad_upper:
+        sector_key = 'ABOGADOS'
+    elif 'CONTAD' in actividad_upper:
+        sector_key = 'CONTADORES'
+    else:
+        sector_key = 'ADMINISTRADORES'  # default
+
+    lookup_key = f'{fac}{ded}{lim}'
+    sector_table = t.get(sector_key, t.get('ADMINISTRADORES', {}))
+    prima = sector_table.get(lookup_key)
+
+    return {'opt1': {'limite': lim, 'deducible': ded, 'prima': prima}}
+
+# ── Flask ─────────────────────────────────────────────────────────────────────
 
 app = Flask(__name__)
 
@@ -171,7 +146,12 @@ def health():
 @app.route('/calcular', methods=['POST'])
 def calcular():
     try:
-        result = do_calculate(request.get_json(force=True) or {})
+        inp = request.get_json(force=True) or {}
+        result = {}
+        if inp.get('dyo'):   result['dyo']   = calc_dyo(inp['dyo'])
+        if inp.get('cc'):    result['cc']     = calc_cc(inp['cc'])
+        if inp.get('pdysi'): result['pdysi']  = calc_pdysi(inp['pdysi'])
+        if inp.get('pi'):    result['pi']     = calc_pi(inp['pi'])
         return jsonify({'ok': True, 'result': result})
     except Exception as e:
         import traceback

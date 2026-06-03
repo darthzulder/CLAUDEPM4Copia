@@ -23,8 +23,8 @@ services:
     name: cotizador-api
     runtime: python
     rootDir: cotizador-service
-    buildCommand: pip install -r requirements.txt
-    startCommand: gunicorn --workers=1 --timeout=120 --bind=0.0.0.0:$PORT app:app
+    buildCommand: pip install -r requirements.txt && pip install openpyxl && python export_tables.py
+    startCommand: gunicorn --workers=1 --timeout=60 --bind=0.0.0.0:$PORT app:app
     envVars:
       - key: PYTHON_VERSION
         value: "3.11"
