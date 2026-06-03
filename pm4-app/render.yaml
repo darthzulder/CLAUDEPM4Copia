@@ -3,7 +3,7 @@ services:
     name: pm4-app
     runtime: node
     rootDir: .
-    buildCommand: pip install openpyxl && npm install && npm run build
+    buildCommand: python3 -m pip install openpyxl formulas && npm install && npm run build
     startCommand: npm run start
     envVars:
       - key: NODE_ENV
