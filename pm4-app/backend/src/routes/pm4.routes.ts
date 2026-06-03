@@ -3,8 +3,8 @@ import axios, { AxiosError } from 'axios';
 import { createDecipheriv, createHash } from 'crypto';
 import multer from 'multer';
 import FormData from 'form-data';
-import { spawn } from 'child_process';
 import * as path from 'path';
+import { calculate as cotizadorCalculate } from '../services/cotizadorWorker';
 
 const upload = multer({ storage: multer.memoryStorage() });
 
@@ -236,42 +236,18 @@ router.get('/requests/:request_id/files/:file_id/contents', (req, res) =>
   streamFile(`/requests/${req.params.request_id}/files/${req.params.file_id}/contents`, req, res)
 );
 
-// Cotizador Excel — llama script Python que usa LibreOffice para recalcular
-router.post('/cotizador/calcular', (req: Request, res: Response) => {
+// Cotizador Excel — usa worker Python persistente (modelo cargado una sola vez)
+router.post('/cotizador/calcular', async (req: Request, res: Response) => {
   const inputs = req.body;
-  const scriptPath = path.join(__dirname, '..', '..', 'scripts', 'cotizador_calc.py');
-
-  console.log('[cotizador] Calculando con entradas:', JSON.stringify(inputs).slice(0, 200));
-
-  const pyCmd = process.platform === 'win32' ? 'python' : 'python3';
-  const python = spawn(pyCmd, [scriptPath], { shell: true });
-  python.stdin.write(JSON.stringify(inputs));
-  python.stdin.end();
-
-  let stdout = '';
-  let stderr = '';
-
-  python.stdout.on('data', (d: Buffer) => { stdout += d.toString(); });
-  python.stderr.on('data', (d: Buffer) => { stderr += d.toString(); });
-
-  python.on('close', (code: number) => {
-    console.log(`[cotizador] Python exit ${code}`, stderr ? `stderr: ${stderr.slice(0, 300)}` : '');
-    try {
-      const parsed = JSON.parse(stdout.trim());
-      if (parsed.error) {
-        res.status(500).json({ message: parsed.error, stderr });
-      } else {
-        res.json(parsed);
-      }
-    } catch {
-      res.status(500).json({ message: 'Error parseando respuesta del cotizador', raw: stdout.slice(0, 500), stderr });
-    }
-  });
-
-  python.on('error', (err: Error) => {
-    console.error('[cotizador] Error spawning python3:', err.message);
-    res.status(500).json({ message: `No se pudo ejecutar python3: ${err.message}` });
-  });
+  console.log('[cotizador] Calculando:', JSON.stringify(inputs).slice(0, 200));
+  try {
+    const result = await cotizadorCalculate(inputs);
+    res.json({ ok: true, result });
+  } catch (err) {
+    const msg = (err as Error).message ?? 'Error desconocido';
+    console.error('[cotizador] Error:', msg);
+    res.status(500).json({ message: msg });
+  }
 });
 
 export default router;
