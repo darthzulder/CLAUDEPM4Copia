@@ -427,6 +427,11 @@ function DatosCotizacion({ form }: { form: ReturnType<typeof useForm<FfFlSolicit
     if (w.frm_gen_prod_pi) setValue('frm_cot_modalidad_pi', 'Por reclamación (claims made)');
   }, [w.frm_gen_prod_dyo, w.frm_gen_prod_cc, w.frm_gen_prod_pdysi, w.frm_gen_prod_pi, setValue]);
 
+  useEffect(() => {
+    if (!w.frm_tom_sector) return;
+    setValue('frm_tom_sector_otros_flag', w.frm_tom_sector === 'OTROS');
+  }, [w.frm_tom_sector, setValue]);
+
   const hayProductos = w.frm_gen_prod_dyo || w.frm_gen_prod_cc || w.frm_gen_prod_pdysi || w.frm_gen_prod_pi;
 
   return (
