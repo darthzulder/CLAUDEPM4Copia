@@ -51,6 +51,7 @@ export function ZdsInput<TFV extends FieldValues>({
             required={required}
             readonly={readOnly}
             invalid={!!error}
+            locale="es-CO"
             onChange={(val: string | null) => field.onChange(val ?? '')}
             onBlur={field.onBlur}
             {...(kp(error, helpText, inputType, effectiveIcon) as Record<string, unknown>)}
