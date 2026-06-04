@@ -5,31 +5,31 @@ import type { CollectionDef } from '../../core/useCollection';
 // ---------------------------------------------------------------------------
 export const COLLECTION_DEFS = {
   intermediarios: {
-    id: 4,
+    id: 76,
     labelField: 'data.frm_nombre_entidad',
     valueField: 'id',
   } satisfies CollectionDef,
 
   actividadesCIIU_dyo: {
-    id: 5,
+    id: 77,
     labelField: 'data.frm_actividad',
     valueField: 'data.frm_actividad',
   } satisfies CollectionDef,
 
   actividadesCIIU_cc: {
-    id: 6,
+    id: 78,
     labelField: 'data.frm_actividad',
     valueField: 'data.frm_actividad',
   } satisfies CollectionDef,
 
   actividadesCIIU_pdysi: {
-    id: 7,
+    id: 79,
     labelField: 'data.frm_actividad',
     valueField: 'data.frm_actividad',
   } satisfies CollectionDef,
 
   actividadesCIIU_pi: {
-    id: 8,
+    id: 80,
     labelField: 'data.frm_actividad',
     valueField: 'data.frm_actividad',
   } satisfies CollectionDef,
@@ -425,7 +425,7 @@ export interface FfFlSolicitudFormData {
 // ---------------------------------------------------------------------------
 // Consulta de cliente en TIA — script PM4 configurable
 // ---------------------------------------------------------------------------
-export const CONSULTAR_CLIENTE_SCRIPT_ID = 56;
+export const CONSULTAR_CLIENTE_SCRIPT_ID = 186;
 
 export function parseClienteTia(rawOutput: unknown): Partial<FfFlSolicitudFormData> {
   const tia = ((rawOutput as Record<string, unknown> | null | undefined) ?? {}) as Record<string, unknown>;

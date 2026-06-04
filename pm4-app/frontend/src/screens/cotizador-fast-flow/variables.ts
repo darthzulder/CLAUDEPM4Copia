@@ -10,7 +10,7 @@ export const COLLECTION_DEFS = {
    * Todos los intermediarios registrados.
    */
   intermediarios: {
-    id: 4,
+    id: 76,
     labelField: 'data.frm_nombre_entidad',
     valueField: 'id',
   } satisfies CollectionDef,
@@ -21,7 +21,7 @@ export const COLLECTION_DEFS = {
    * solo se carga cuando el país ya tiene valor y filtra por data.frm_pais.
    */
   naic: {
-    id: 2,
+    id: 75,
     labelField: 'data.frm_actividad',
     valueField: 'data.frm_codigo',
     dependsOn: 'frm_gen_pais',
@@ -34,7 +34,7 @@ export const COLLECTION_DEFS = {
    * Depende de frm_gen_intermediario_principal (ID del intermediario).
    */
   correosIntermediari: {
-    id: 5,
+    id: 76,
     labelField: 'data.frm_mail_intermediario',
     valueField: 'data.frm_mail_intermediario',
     dependsOn: 'frm_gen_intermediario_principal',
@@ -129,7 +129,7 @@ export const WATCHERS = {
 // ---------------------------------------------------------------------------
 // Consulta de cliente en TIA — script PM4 configurable
 // ---------------------------------------------------------------------------
-export const CONSULTAR_CLIENTE_SCRIPT_ID = 56;
+export const CONSULTAR_CLIENTE_SCRIPT_ID = 186;
 
 export function parseClienteTia(rawOutput: unknown): Partial<CotizadorFormData> {
   const tia = ((rawOutput as Record<string, unknown> | null | undefined) ?? {}) as Record<string, unknown>;
