@@ -258,6 +258,8 @@ export interface FfFlSolicitudFormData {
   frm_tom_ciudad?: string;
   frm_tom_correo_facturacion?: string;
   frm_tom_sector?: string;
+  frm_tom_sector_otros_flag?: boolean;
+  frm_tom_sector_otros_str?: string;
   frm_tom_detalle_actividad?: string;
 
   // Actividades aseguradas por producto
