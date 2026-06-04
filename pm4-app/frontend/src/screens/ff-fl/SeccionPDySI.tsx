@@ -1,4 +1,4 @@
-import { useState, useRef } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import { ZrButton } from '@zurich/web-components/react/button';
 import { ZdsSelect } from './ZdsField';
@@ -74,6 +74,24 @@ export default function SeccionPDySI({ form, fileRegistry }: { form: Form; fileR
   const { control, watch, setValue, register } = form;
   const w = watch();
   const [numDocs, setNumDocs] = useState(1);
+
+  // Al montar: default es NO → seteamos 25 en todos
+  useEffect(() => {
+    (['01', '02', '03'] as const).forEach((n) => {
+      setValue(`frm_pdysi_ctrlad_${n}_valor` as never, 25 as never);
+    });
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
+
+  // Al cambiar SI/NO: recalcula el valor
+  useEffect(() => {
+    (['01', '02', '03'] as const).forEach((n) => {
+      const key = `frm_pdysi_ctrlad_${n}` as keyof typeof w;
+      const val = w[key];
+      if (val === 'SI' || val === 'NO') {
+        setValue(`frm_pdysi_ctrlad_${n}_valor` as never, (val === 'SI' ? 50 : 25) as never);
+      }
+    });
+  }, [w.frm_pdysi_ctrlad_01, w.frm_pdysi_ctrlad_02, w.frm_pdysi_ctrlad_03]); // eslint-disable-line react-hooks/exhaustive-deps
   const fileRef1 = useRef<HTMLInputElement>(null);
   const fileRef2 = useRef<HTMLInputElement>(null);
   const fileRef3 = useRef<HTMLInputElement>(null);

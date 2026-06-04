@@ -390,6 +390,8 @@ export interface FfFlSolicitudFormData {
 
   // PDySI — Controles Adicionales (3 preguntas — 'SI' | 'NO', determina coberturas SLIP)
   frm_pdysi_ctrlad_01?: string; frm_pdysi_ctrlad_02?: string; frm_pdysi_ctrlad_03?: string;
+  // SI → 50, NO → 25 (derivados automáticamente)
+  frm_pdysi_ctrlad_01_valor?: number; frm_pdysi_ctrlad_02_valor?: number; frm_pdysi_ctrlad_03_valor?: number;
 
   // PDySI — Documentos de soporte (nombre de archivo)
   frm_pdysi_doc_01_nombre?: string;
