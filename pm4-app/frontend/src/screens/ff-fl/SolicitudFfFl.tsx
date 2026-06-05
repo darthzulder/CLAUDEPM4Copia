@@ -428,10 +428,12 @@ function DatosCotizacion({ form }: { form: ReturnType<typeof useForm<FfFlSolicit
   }, [w.frm_gen_prod_dyo, w.frm_gen_prod_cc, w.frm_gen_prod_pdysi, w.frm_gen_prod_pi, setValue]);
 
   useEffect(() => {
-    if (!w.frm_tom_sector) return;
-    const esOtros = w.frm_tom_sector === 'OTROS';
+    const sector = w.frm_tom_sector;
+    const esOtros = sector === 'OTROS';
+    const esPH    = sector === 'COPROPIEDADES' || sector === 'CENTROS_COMERCIALES';
     setValue('frm_tom_sector_otros_flag', esOtros);
     setValue('frm_tom_sector_otros_str', esOtros ? 'SI' : 'NO');
+    setValue('frm_dyo_propiedad_horizontal_flag', esPH);
   }, [w.frm_tom_sector, setValue]);
 
   const hayProductos = w.frm_gen_prod_dyo || w.frm_gen_prod_cc || w.frm_gen_prod_pdysi || w.frm_gen_prod_pi;

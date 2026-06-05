@@ -260,6 +260,7 @@ export interface FfFlSolicitudFormData {
   frm_tom_sector?: string;
   frm_tom_sector_otros_flag?: boolean;
   frm_tom_sector_otros_str?: string;
+  frm_dyo_propiedad_horizontal_flag?: boolean;
   frm_tom_detalle_actividad?: string;
 
   // Actividades aseguradas por producto
