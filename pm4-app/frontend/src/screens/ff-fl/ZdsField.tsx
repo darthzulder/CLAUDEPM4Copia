@@ -272,6 +272,14 @@ function SuggestInner<TFV extends FieldValues>({
         />
       </div>
 
+      {open && filtered.length === 0 && query.trim().length > 0 && (
+        <ul className="suggest-dropdown" role="listbox" aria-label="Sin resultados">
+          <li role="option" aria-selected="false" aria-disabled="true" className="suggest-option suggest-option--empty">
+            No se encontraron coincidencias
+          </li>
+        </ul>
+      )}
+
       {open && filtered.length > 0 && (
         <ul className="suggest-dropdown" role="listbox" aria-label={`Opciones para ${label}`}>
           {filtered.map(opt => {

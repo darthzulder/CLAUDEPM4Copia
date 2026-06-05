@@ -398,6 +398,18 @@ zr-date-input[readonly] {
   color: var(--z-blue);
 }
 
+.suggest-option--empty {
+  color: var(--zg-5);
+  font-style: italic;
+  cursor: default;
+  pointer-events: none;
+}
+
+.suggest-option--empty:hover {
+  background: none;
+  color: var(--zg-5);
+}
+
 /* ──────────────────────────────────────
    CORREOS ADICIONALES
 ────────────────────────────────────── */
