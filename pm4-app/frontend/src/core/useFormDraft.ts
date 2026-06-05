@@ -60,7 +60,7 @@ export function useFormDraft<T extends FieldValues>(
           const existing = taskData[k];
           if (existing !== null && existing !== undefined && existing !== '') continue;
         }
-        form.setValue(k as keyof T & string, v as never, { shouldDirty: false });
+        form.setValue(k as Parameters<typeof form.setValue>[0], v as never, { shouldDirty: false });
       }
     } catch {
       localStorage.removeItem(storageKey);
