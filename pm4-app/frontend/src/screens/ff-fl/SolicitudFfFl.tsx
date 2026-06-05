@@ -113,7 +113,7 @@ function InfoGeneral({
         )}
       </div>
 
-      <div className="form-row cols-3">
+      <div className={`form-row ${esRenovacion ? 'cols-3' : 'cols-2'}`}>
         <ZdsInput control={control} name="frm_gen_tipo_negocio" label="Tipo de negocio" readOnly />
         <ZdsSelect
           label="Nueva / Renovación"
@@ -124,19 +124,21 @@ function InfoGeneral({
           required
           error={fe('frm_gen_nueva_renovacion')}
         />
-        <ZdsInput
-          control={control}
-          name="frm_gen_nro_poliza"
-          label="Nro. de póliza actual"
-          rules={{
-            required: esRenovacion ? 'Campo requerido para renovaciones' : false,
-            minLength: { value: 4, message: 'Mínimo 4 caracteres' },
-            maxLength: { value: 16, message: 'Máximo 16 caracteres' },
-            pattern: { value: /^[a-zA-Z0-9\-]+$/, message: 'Solo letras, números y guiones' },
-          }}
-          required={esRenovacion}
-          error={fe('frm_gen_nro_poliza')}
-        />
+        {esRenovacion && (
+          <ZdsInput
+            control={control}
+            name="frm_gen_nro_poliza"
+            label="Nro. de póliza actual"
+            rules={{
+              required: 'Campo requerido para renovaciones',
+              minLength: { value: 4, message: 'Mínimo 4 caracteres' },
+              maxLength: { value: 16, message: 'Máximo 16 caracteres' },
+              pattern: { value: /^[a-zA-Z0-9\-]+$/, message: 'Solo letras, números y guiones' },
+            }}
+            required
+            error={fe('frm_gen_nro_poliza')}
+          />
+        )}
       </div>
 
       <div className="form-row cols-2">
@@ -607,7 +609,16 @@ export default function SolicitudFfFl() {
         form.setValue(key as keyof FfFlSolicitudFormData, val as never);
       }
     });
-    restore(task.data as Record<string, unknown>); // draft solo rellena campos que PM4 no tiene
+
+    // Rellenar usuario desde _user del token de PM4
+    const raw = task.data as Record<string, unknown>;
+    const user = raw['_user'] as Record<string, unknown> | undefined;
+    if (user && !raw['frm_gen_usuario']) {
+      const fullname = String(user['fullname'] ?? user['name'] ?? '').trim();
+      if (fullname) form.setValue('frm_gen_usuario', fullname as never);
+    }
+
+    restore(task.data as Record<string, unknown>);
   }, [task]); // eslint-disable-line react-hooks/exhaustive-deps
 
   // ── Cotizador: construir entradas reactivas para el Excel ─────────────────
@@ -880,9 +891,9 @@ export default function SolicitudFfFl() {
             onCancelCreate={() => setNitConfirmCreate(false)}
             tiaFilledFields={tiaFilledFields}
           />
-          <SeccionProductos form={form} fileRegistry={fileRegistry} />
           <DatosCotizacion form={form} />
           <PlanPago form={form} />
+          <SeccionProductos form={form} fileRegistry={fileRegistry} />
 
           <SeccionResumenCotizacion
             result={cotResult}
