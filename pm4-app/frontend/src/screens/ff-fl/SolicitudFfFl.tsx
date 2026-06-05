@@ -676,7 +676,7 @@ export default function SolicitudFfFl() {
     w.frm_cot_fact_anual_pi, w.frm_pi_prop_01_limite, w.frm_act_pi_actividad,
   ]);
 
-  const { result: cotResult, loading: cotLoading, error: cotError } = useCotizador(cotizadorInputs);
+  const { result: cotResult, loading: cotLoading, error: cotError, warmingUp: cotWarmingUp } = useCotizador(cotizadorInputs);
 
   const onSubmit = async (data: FfFlSolicitudFormData) => {
     const prods = [data.frm_gen_prod_dyo, data.frm_gen_prod_cc, data.frm_gen_prod_pdysi, data.frm_gen_prod_pi];
@@ -887,6 +887,7 @@ export default function SolicitudFfFl() {
           <SeccionResumenCotizacion
             result={cotResult}
             loading={cotLoading}
+            warmingUp={cotWarmingUp}
             error={cotError}
             inputs={cotizadorInputs ?? {}}
             hasDyo={Boolean(w.frm_gen_prod_dyo)}

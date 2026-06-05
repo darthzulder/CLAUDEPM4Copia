@@ -73,39 +73,70 @@ export interface CotizadorResult {
 // ─── Hook ────────────────────────────────────────────────────────────────────
 
 export function useCotizador(inputs: CotizadorInputs | null, debounceMs = 800) {
-  const [result, setResult]   = useState<CotizadorResult | null>(null);
-  const [loading, setLoading] = useState(false);
-  const [error, setError]     = useState<string | null>(null);
-  const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const [result, setResult]       = useState<CotizadorResult | null>(null);
+  const [loading, setLoading]     = useState(false);
+  const [error, setError]         = useState<string | null>(null);
+  const [warmingUp, setWarmingUp] = useState(false);
+  const timerRef  = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const retryRef  = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const inputsRef = useRef(inputs);
+
+  // Función de cálculo reutilizable para reintentos
+  const doCalculate = async (inp: CotizadorInputs) => {
+    setLoading(true);
+    setError(null);
+    try {
+      const res = await pm4.post('/cotizador/calcular', inp, { timeout: 35000 });
+      if (res.data?.ok) {
+        setResult(res.data.result as CotizadorResult);
+        setWarmingUp(false);
+      } else {
+        setError(res.data?.message ?? 'Error desconocido del cotizador');
+        setWarmingUp(false);
+      }
+    } catch (e: unknown) {
+      const err = e as { response?: { status?: number }; code?: string; message?: string };
+      const status = err.response?.status ?? 0;
+      const isConnectivity = status === 0 || status === 502 || status === 503 || status === 504
+        || err.code === 'ECONNABORTED' || err.code === 'ERR_NETWORK';
+
+      if (isConnectivity) {
+        console.warn('[useCotizador] Servicio iniciando (cold start), reintentando en 10s…');
+        setWarmingUp(true);
+        setResult(null);
+        // Reintento automático en 10s con los inputs actuales
+        if (retryRef.current) clearTimeout(retryRef.current);
+        retryRef.current = setTimeout(() => {
+          if (inputsRef.current) doCalculate(inputsRef.current);
+        }, 10000);
+      } else {
+        const msg = err.response?.status
+          ? `Error ${err.response.status} del cotizador`
+          : (err.message ?? 'Error al calcular');
+        setError(msg);
+        setWarmingUp(false);
+        console.error('[useCotizador] Error:', msg);
+      }
+    } finally {
+      setLoading(false);
+    }
+  };
 
   useEffect(() => {
+    inputsRef.current = inputs;
     // Si no hay entradas con al menos un producto, limpiar
     if (!inputs || (!inputs.dyo && !inputs.cc && !inputs.pdysi && !inputs.pi)) {
       setResult(null);
       setError(null);
+      setWarmingUp(false);
+      if (retryRef.current) clearTimeout(retryRef.current);
       return;
     }
 
     if (timerRef.current) clearTimeout(timerRef.current);
 
-    timerRef.current = setTimeout(async () => {
-      setLoading(true);
-      setError(null);
-      try {
-        const res = await pm4.post('/cotizador/calcular', inputs);
-        if (res.data?.ok) {
-          setResult(res.data.result as CotizadorResult);
-        } else {
-          setError(res.data?.message ?? 'Error desconocido del cotizador');
-        }
-      } catch (e: unknown) {
-        const msg = (e as { response?: { data?: { message?: string } }; message?: string })
-          .response?.data?.message ?? (e as { message?: string }).message ?? 'Error al calcular';
-        setError(msg);
-        console.error('[useCotizador] Error:', msg);
-      } finally {
-        setLoading(false);
-      }
+    timerRef.current = setTimeout(() => {
+      if (inputs) doCalculate(inputs);
     }, debounceMs);
 
     return () => {
@@ -113,7 +144,7 @@ export function useCotizador(inputs: CotizadorInputs | null, debounceMs = 800) {
     };
   }, [JSON.stringify(inputs)]); // eslint-disable-line react-hooks/exhaustive-deps
 
-  return { result, loading, error };
+  return { result, loading, error, warmingUp };
 }
 
 // ─── Helper: convierte resultado a variables PM4 para incluir en el payload ──

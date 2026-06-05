@@ -18,7 +18,13 @@ function TableHeader({ cols }: { cols: string[] }) {
 
 // ─── Spinner / error ─────────────────────────────────────────────────────────
 
-function Estado({ loading, error }: { loading: boolean; error: string | null }) {
+function Estado({ loading, warmingUp, error }: { loading: boolean; warmingUp: boolean; error: string | null }) {
+  if (warmingUp) return (
+    <div className="cot-res-estado">
+      <div className="cot-spinner" />
+      <span>Inicializando servicio de cotización… (puede tardar ~30 segundos)</span>
+    </div>
+  );
   if (loading) return (
     <div className="cot-res-estado">
       <div className="cot-spinner" />
@@ -134,6 +140,7 @@ function TablaPi({ result }: { result: CotizadorResult }) {
 export default function SeccionResumenCotizacion({
   result,
   loading,
+  warmingUp,
   error,
   inputs,
   hasDyo,
@@ -143,6 +150,7 @@ export default function SeccionResumenCotizacion({
 }: {
   result: CotizadorResult | null;
   loading: boolean;
+  warmingUp: boolean;
   error: string | null;
   inputs: CotizadorInputs;
   hasDyo: boolean;
@@ -157,7 +165,7 @@ export default function SeccionResumenCotizacion({
     <div className="cot-res-wrapper">
       <div className="cot-res-section-title">Resumen de Cotizaciones</div>
 
-      <Estado loading={loading} error={error} />
+      <Estado loading={loading} warmingUp={warmingUp} error={error} />
 
       {result && (
         <>
