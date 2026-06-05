@@ -129,7 +129,7 @@ export function cotizadorResultToPayload(
       const k = `opt${n}` as 'opt1' | 'opt2' | 'opt3';
       const o = result.dyo[k];
       p[`cot_dyo_opt${n}_prima_a`]   = o.prima_a      ?? 0;
-      p[`cot_dyo_opt${n}_deducible`] = 0;
+      p[`cot_dyo_opt${n}_deducible`] = o.deducible    ?? 0;
       p[`cot_dyo_ent${n}_limite`]    = o.ent_limite   ?? 0;
       p[`cot_dyo_ent${n}_deducible`] = o.ent_deducible ?? 0;
     }

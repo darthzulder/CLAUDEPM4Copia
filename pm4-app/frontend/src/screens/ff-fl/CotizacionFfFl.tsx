@@ -52,8 +52,9 @@ const MOTIVOS_RECHAZO = [
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 
 function cop(v: unknown): string {
+  if (v === null || v === undefined || v === '') return '—';
   const n = parseFloat(String(v));
-  if (!v || isNaN(n)) return '—';
+  if (isNaN(n)) return '—';
   return `$${new Intl.NumberFormat('es-CO').format(n)}`;
 }
 
