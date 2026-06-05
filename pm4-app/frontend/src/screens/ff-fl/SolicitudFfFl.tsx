@@ -16,6 +16,7 @@ import {
   FfFlSolicitudFormData, CONSULTAR_CLIENTE_SCRIPT_ID, parseClienteTia,
 } from './variables';
 import { useCotizador, cotizadorResultToPayload, type CotizadorInputs } from '../../core/useCotizador';
+import { useFormDraft } from '../../core/useFormDraft';
 
 function fieldError(
   err: FieldError | undefined,
@@ -559,6 +560,7 @@ const TIPOS_EMPRESA_BLOQUEADOS = new Set(['ESTATAL', 'ENTIDAD_PUBLICA', 'EXTRANJ
 // ---------------------------------------------------------------------------
 export default function SolicitudFfFl() {
   const { task, loading, error, submitting, completeTask } = useTask();
+  const draftKey = task?.id ? `ff-fl-solicitud-${task.id}` : null;
   const [productError, setProductError] = useState('');
   const [submitError, setSubmitError] = useState('');
   const [sent, setSent] = useState(false);
@@ -595,6 +597,8 @@ export default function SolicitudFfFl() {
     },
   });
 
+  const { restore, clearDraft } = useFormDraft(draftKey, form);
+
   useEffect(() => {
     if (!task?.data) return;
     const d = task.data as Partial<FfFlSolicitudFormData>;
@@ -603,7 +607,8 @@ export default function SolicitudFfFl() {
         form.setValue(key as keyof FfFlSolicitudFormData, val as never);
       }
     });
-  }, [task, form]);
+    restore(task.data as Record<string, unknown>); // draft solo rellena campos que PM4 no tiene
+  }, [task]); // eslint-disable-line react-hooks/exhaustive-deps
 
   // ── Cotizador: construir entradas reactivas para el Excel ─────────────────
   const w = form.watch();
@@ -761,6 +766,7 @@ export default function SolicitudFfFl() {
           : {}),
       };
       await completeTask(payload);
+      clearDraft();
       setSent(true);
     } catch (e) {
       setSubmitError((e as Error).message ?? 'Error desconocido al enviar');
