@@ -7,7 +7,6 @@ import { useCollection } from '../../core/useCollection';
 import FormSection from '../../components/FormSection';
 import CreacionTomador from './CreacionTomador';
 import SeccionProductos from './SeccionProductos';
-import SeccionResumenCotizacion from './SeccionResumenCotizacion';
 import zurichLogo from '../../resources/zurich/ZurichLogo_Horz_White_CMYK_no_R.png';
 import { ZdsInput, ZdsDate, ZdsCheckboxField, ZdsSelect, ZdsSuggest } from './ZdsField';
 import { ZrButton } from '@zurich/web-components/react/button';
@@ -15,8 +14,6 @@ import {
   OPTIONS, COLLECTION_DEFS, DEPARTAMENTOS, CIUDADES_POR_DEPTO,
   FfFlSolicitudFormData, CONSULTAR_CLIENTE_SCRIPT_ID, parseClienteTia,
 } from './variables';
-import { useCotizador, cotizadorResultToPayload, type CotizadorInputs } from '../../core/useCotizador';
-import { useFormDraft } from '../../core/useFormDraft';
 
 function fieldError(
   err: FieldError | undefined,
@@ -113,7 +110,7 @@ function InfoGeneral({
         )}
       </div>
 
-      <div className={`form-row ${esRenovacion ? 'cols-3' : 'cols-2'}`}>
+      <div className="form-row cols-3">
         <ZdsInput control={control} name="frm_gen_tipo_negocio" label="Tipo de negocio" readOnly />
         <ZdsSelect
           label="Nueva / Renovación"
@@ -124,21 +121,19 @@ function InfoGeneral({
           required
           error={fe('frm_gen_nueva_renovacion')}
         />
-        {esRenovacion && (
-          <ZdsInput
-            control={control}
-            name="frm_gen_nro_poliza"
-            label="Nro. de póliza actual"
-            rules={{
-              required: 'Campo requerido para renovaciones',
-              minLength: { value: 4, message: 'Mínimo 4 caracteres' },
-              maxLength: { value: 16, message: 'Máximo 16 caracteres' },
-              pattern: { value: /^[a-zA-Z0-9\-]+$/, message: 'Solo letras, números y guiones' },
-            }}
-            required
-            error={fe('frm_gen_nro_poliza')}
-          />
-        )}
+        <ZdsInput
+          control={control}
+          name="frm_gen_nro_poliza"
+          label="Nro. de póliza actual"
+          rules={{
+            required: esRenovacion ? 'Campo requerido para renovaciones' : false,
+            minLength: { value: 4, message: 'Mínimo 4 caracteres' },
+            maxLength: { value: 16, message: 'Máximo 16 caracteres' },
+            pattern: { value: /^[a-zA-Z0-9\-]+$/, message: 'Solo letras, números y guiones' },
+          }}
+          required={esRenovacion}
+          error={fe('frm_gen_nro_poliza')}
+        />
       </div>
 
       <div className="form-row cols-2">
@@ -430,15 +425,6 @@ function DatosCotizacion({ form }: { form: ReturnType<typeof useForm<FfFlSolicit
     if (w.frm_gen_prod_pi) setValue('frm_cot_modalidad_pi', 'Por reclamación (claims made)');
   }, [w.frm_gen_prod_dyo, w.frm_gen_prod_cc, w.frm_gen_prod_pdysi, w.frm_gen_prod_pi, setValue]);
 
-  useEffect(() => {
-    const sector = w.frm_tom_sector;
-    const esOtros = sector === 'OTROS';
-    const esPH    = sector === 'COPROPIEDADES' || sector === 'CENTROS_COMERCIALES';
-    setValue('frm_tom_sector_otros_flag', esOtros);
-    setValue('frm_tom_sector_otros_str', esOtros ? 'SI' : 'NO');
-    setValue('frm_dyo_propiedad_horizontal_flag', esPH);
-  }, [w.frm_tom_sector, setValue]);
-
   const hayProductos = w.frm_gen_prod_dyo || w.frm_gen_prod_cc || w.frm_gen_prod_pdysi || w.frm_gen_prod_pi;
 
   return (
@@ -562,7 +548,6 @@ const TIPOS_EMPRESA_BLOQUEADOS = new Set(['ESTATAL', 'ENTIDAD_PUBLICA', 'EXTRANJ
 // ---------------------------------------------------------------------------
 export default function SolicitudFfFl() {
   const { task, loading, error, submitting, completeTask } = useTask();
-  const draftKey = task?.id ? `ff-fl-solicitud-${task.id}` : null;
   const [productError, setProductError] = useState('');
   const [submitError, setSubmitError] = useState('');
   const [sent, setSent] = useState(false);
@@ -599,8 +584,6 @@ export default function SolicitudFfFl() {
     },
   });
 
-  const { restore, clearDraft } = useFormDraft(draftKey, form);
-
   useEffect(() => {
     if (!task?.data) return;
     const d = task.data as Partial<FfFlSolicitudFormData>;
@@ -609,85 +592,7 @@ export default function SolicitudFfFl() {
         form.setValue(key as keyof FfFlSolicitudFormData, val as never);
       }
     });
-
-    // Rellenar usuario desde _user del token de PM4
-    const raw = task.data as Record<string, unknown>;
-    const user = raw['_user'] as Record<string, unknown> | undefined;
-    if (user && !raw['frm_gen_usuario']) {
-      const fullname = String(user['fullname'] ?? user['name'] ?? '').trim();
-      if (fullname) form.setValue('frm_gen_usuario', fullname as never);
-    }
-
-    restore(task.data as Record<string, unknown>);
-  }, [task]); // eslint-disable-line react-hooks/exhaustive-deps
-
-  // ── Cotizador: construir entradas reactivas para el Excel ─────────────────
-  const w = form.watch();
-
-  const cotizadorInputs = useMemo((): CotizadorInputs | null => {
-    const hasDyo   = Boolean(w.frm_gen_prod_dyo);
-    const hasCc    = Boolean(w.frm_gen_prod_cc);
-    const hasPdysi = Boolean(w.frm_gen_prod_pdysi);
-    const hasPi    = Boolean(w.frm_gen_prod_pi);
-    if (!hasDyo && !hasCc && !hasPdysi && !hasPi) return null;
-
-    const inputs: CotizadorInputs = {};
-
-    if (hasDyo && w.frm_cot_fact_anual_dyo) {
-      inputs.dyo = {
-        facturacion: w.frm_cot_fact_anual_dyo,
-        limite1:     w.frm_dyo_prop_01_limite ?? 0,
-        limite2:     w.frm_dyo_prop_02_limite ?? 0,
-        limite3:     w.frm_dyo_prop_03_limite ?? 0,
-        anexo:       w.frm_tom_sector === 'OTROS',
-        sector:      w.frm_tom_sector ?? 'OTROS',
-      };
-    }
-
-    if (hasCc && w.frm_cot_fact_anual_cc) {
-      inputs.cc = {
-        facturacion:       w.frm_cot_fact_anual_cc,
-        limite1_evento:    w.frm_cc_prop_01_evento   ?? 0,
-        limite2_evento:    w.frm_cc_prop_02_evento   ?? 0,
-        limite3_evento:    w.frm_cc_prop_03_evento   ?? 0,
-        limite1_agregado:  w.frm_cc_prop_01_agregado ?? 0,
-        limite2_agregado:  w.frm_cc_prop_02_agregado ?? 0,
-        limite3_agregado:  w.frm_cc_prop_03_agregado ?? 0,
-        empleados:         w.frm_cot_num_empleados   ?? '1-100',
-      };
-    }
-
-    if (hasPdysi && w.frm_cot_fact_anual_pdysi) {
-      inputs.pdysi = {
-        facturacion: w.frm_cot_fact_anual_pdysi,
-        limite1:     w.frm_pdysi_prop_01_limite ?? 0,
-        limite2:     w.frm_pdysi_prop_02_limite ?? 0,
-        limite3:     w.frm_pdysi_prop_03_limite ?? 0,
-      };
-    }
-
-    if (hasPi && w.frm_cot_fact_anual_pi) {
-      inputs.pi = {
-        facturacion: w.frm_cot_fact_anual_pi,
-        limite1:     w.frm_pi_prop_01_limite ?? 0,
-        limite2:     w.frm_pi_prop_02_limite ?? 0,
-        limite3:     w.frm_pi_prop_03_limite ?? 0,
-        actividad:   w.frm_act_pi_actividad  ?? '',
-      };
-    }
-
-    return inputs;
-  }, [
-    w.frm_gen_prod_dyo, w.frm_gen_prod_cc, w.frm_gen_prod_pdysi, w.frm_gen_prod_pi,
-    w.frm_cot_fact_anual_dyo, w.frm_dyo_prop_01_limite, w.frm_dyo_prop_02_limite, w.frm_dyo_prop_03_limite,
-    w.frm_tom_sector,
-    w.frm_cot_fact_anual_cc, w.frm_cc_prop_01_evento, w.frm_cc_prop_02_evento, w.frm_cc_prop_03_evento,
-    w.frm_cc_prop_01_agregado, w.frm_cc_prop_02_agregado, w.frm_cc_prop_03_agregado, w.frm_cot_num_empleados,
-    w.frm_cot_fact_anual_pdysi, w.frm_pdysi_prop_01_limite, w.frm_pdysi_prop_02_limite, w.frm_pdysi_prop_03_limite,
-    w.frm_cot_fact_anual_pi, w.frm_pi_prop_01_limite, w.frm_act_pi_actividad,
-  ]);
-
-  const { result: cotResult, loading: cotLoading, error: cotError, warmingUp: cotWarmingUp } = useCotizador(cotizadorInputs);
+  }, [task, form]);
 
   const onSubmit = async (data: FfFlSolicitudFormData) => {
     const prods = [data.frm_gen_prod_dyo, data.frm_gen_prod_cc, data.frm_gen_prod_pdysi, data.frm_gen_prod_pi];
@@ -771,13 +676,8 @@ export default function SolicitudFfFl() {
       const payload: Record<string, unknown> = {
         ...taskData,
         ...(data as unknown as Record<string, unknown>),
-        // Resultados del cotizador Excel (primas, deducibles)
-        ...(cotResult && cotizadorInputs
-          ? cotizadorResultToPayload(cotResult, cotizadorInputs)
-          : {}),
       };
       await completeTask(payload);
-      clearDraft();
       setSent(true);
     } catch (e) {
       setSubmitError((e as Error).message ?? 'Error desconocido al enviar');
@@ -891,21 +791,9 @@ export default function SolicitudFfFl() {
             onCancelCreate={() => setNitConfirmCreate(false)}
             tiaFilledFields={tiaFilledFields}
           />
+          <SeccionProductos form={form} fileRegistry={fileRegistry} />
           <DatosCotizacion form={form} />
           <PlanPago form={form} />
-          <SeccionProductos form={form} fileRegistry={fileRegistry} />
-
-          <SeccionResumenCotizacion
-            result={cotResult}
-            loading={cotLoading}
-            warmingUp={cotWarmingUp}
-            error={cotError}
-            inputs={cotizadorInputs ?? {}}
-            hasDyo={Boolean(w.frm_gen_prod_dyo)}
-            hasCc={Boolean(w.frm_gen_prod_cc)}
-            hasPdysi={Boolean(w.frm_gen_prod_pdysi)}
-            hasPi={Boolean(w.frm_gen_prod_pi)}
-          />
 
           {submitError && <div className="submit-error">{submitError}</div>}
 

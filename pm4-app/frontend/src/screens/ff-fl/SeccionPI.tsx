@@ -40,7 +40,7 @@ export default function SeccionPI({ form, fileRegistry }: { form: Form; fileRegi
 
   const reqBloqueado = REQUISITOS.some((_, i) => {
     const key = `frm_pi_req_${String(i + 1).padStart(2, '0')}` as keyof FfFlSolicitudFormData;
-    return (w[key] ?? 'NO') === 'NO';
+    return w[key] === 'NO';
   });
 
   const docKeys = [

@@ -1,5 +1,4 @@
 services:
-  # ── Servicio principal Node.js ────────────────────────────────────────────
   - type: web
     name: pm4-app
     runtime: node
@@ -13,18 +12,3 @@ services:
         sync: false
       - key: PM4_TOKEN
         sync: false
-      - key: IFRAME_ENCRYPTION_KEY
-        sync: false
-      - key: COTIZADOR_API_URL
-        sync: false   # ← poner la URL del servicio cotizador de Render
-
-  # ── Micro-servicio cotizador Python ──────────────────────────────────────
-  - type: web
-    name: cotizador-api
-    runtime: python
-    rootDir: cotizador-service
-    buildCommand: pip install -r requirements.txt && pip install openpyxl && python export_tables.py
-    startCommand: gunicorn --workers=1 --timeout=60 --bind=0.0.0.0:$PORT app:app
-    envVars:
-      - key: PYTHON_VERSION
-        value: "3.11"

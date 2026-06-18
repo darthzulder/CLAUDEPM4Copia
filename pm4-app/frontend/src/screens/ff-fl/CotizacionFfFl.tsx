@@ -5,7 +5,6 @@ import { ZrForm }   from '@zurich/web-components/react/form';
 import { ZdsInput, ZdsSelect } from './ZdsField';
 import { useTask } from '../../core/useTask';
 import { useRequestFiles, resolveFileId } from '../../core/useRequestFiles';
-import pm4 from '../../api/pm4Client';
 import PdfViewer from '../../components/PdfViewer';
 import zurichLogo from '../../resources/zurich/ZurichLogo_Horz_White_CMYK_no_R.png';
 import './styles.css';
@@ -28,8 +27,6 @@ interface CotizFfFlFormData {
   cot_correo_facturacion?: string;
   cot_orden_firme_nombre?: string;
   cot_comision?:        number;
-  frm_gen_fecha_aprobacion?:           string;
-  frm_gen_fecha_aprobacion_formateado?: string;
 }
 
 type Form = ReturnType<typeof useForm<CotizFfFlFormData>>;
@@ -52,9 +49,8 @@ const MOTIVOS_RECHAZO = [
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 
 function cop(v: unknown): string {
-  if (v === null || v === undefined || v === '') return '—';
   const n = parseFloat(String(v));
-  if (isNaN(n)) return '—';
+  if (!v || isNaN(n)) return '—';
   return `$${new Intl.NumberFormat('es-CO').format(n)}`;
 }
 
@@ -271,28 +267,17 @@ function TarjetaGenerica({
 // ─── Sección Decisión ─────────────────────────────────────────────────────────
 
 function SeccionDecision({
-  form, fileRef, ordenFirmeFile, onEnviar, submitError, submitting,
+  form, fileRef, onEnviar, submitError, submitting,
 }: {
   form: Form;
   fileRef: React.RefObject<HTMLInputElement>;
-  ordenFirmeFile: React.MutableRefObject<File | null>;
   onEnviar: () => void;
   submitError: string;
   submitting: boolean;
 }) {
-  const { control, watch, setValue, register, formState: { errors } } = form;
+  const { control, watch, setValue, register } = form;
   const w = watch();
   const decision = w.cot_decision;
-
-  // Captura la fecha de aprobación en el momento en que se selecciona APROBADA
-  useEffect(() => {
-    if (decision !== 'APROBADA') return;
-    const now = new Date();
-    const pad = (n: number) => String(n).padStart(2, '0');
-    const display = `${pad(now.getDate())}/${pad(now.getMonth() + 1)}/${now.getFullYear()} ${pad(now.getHours())}:${pad(now.getMinutes())}`;
-    setValue('frm_gen_fecha_aprobacion', display);
-    setValue('frm_gen_fecha_aprobacion_formateado', `${pad(now.getDate())}/${pad(now.getMonth() + 1)}/${now.getFullYear()}`);
-  }, [decision]); // eslint-disable-line react-hooks/exhaustive-deps
 
   return (
     <div className="co-decision-card">
@@ -300,7 +285,6 @@ function SeccionDecision({
       <div className="co-card-body">
         <ZrForm style={{ ['--z-form--gap' as any]: 'var(--zs-150)' }}>
           <>
-          {/* Decisión + Fecha de aprobación (solo visible cuando APROBADA) */}
           <div className="form-row cols-2">
             <ZdsSelect
               label="Decisión"
@@ -310,14 +294,6 @@ function SeccionDecision({
               rules={{ required: 'Campo requerido' }}
               required
             />
-            {decision === 'APROBADA' && (
-              <ZdsInput
-                control={control}
-                name="frm_gen_fecha_aprobacion"
-                label="Fecha de aprobación"
-                readOnly
-              />
-            )}
           </div>
 
           {decision === 'RECHAZADA' && (
@@ -362,7 +338,6 @@ function SeccionDecision({
 
           {decision === 'APROBADA' && (
             <>
-              {/* Correo para facturación (izquierda) + Orden en firme (derecha) */}
               <div className="form-row cols-2">
                 <ZdsInput
                   control={control}
@@ -375,38 +350,30 @@ function SeccionDecision({
                     maxLength: { value: 254, message: 'Máximo 254 caracteres' },
                   }}
                   required
-                  error={errors.cot_correo_facturacion?.message}
                 />
-                <div className="co-field-wrap">
-                  <label className="form-label">
-                    Orden en firme * <span className="co-field-hint">(PDF o correo)</span>
-                  </label>
-                  <div className="dyo-doc-actions">
-                    <input
-                      ref={fileRef}
-                      type="file"
-                      accept=".pdf,.eml,.msg"
-                      style={{ display: 'none' }}
-                      onChange={(e) => {
-                        const file = e.target.files?.[0];
-                        if (file) {
-                          setValue('cot_orden_firme_nombre', file.name);
-                          ordenFirmeFile.current = file;
-                        }
-                      }}
-                    />
-                    <ZrButton config="secondary" icon="file-upload:line" onClick={() => fileRef.current?.click()}>
-                      {w.cot_orden_firme_nombre ?? 'Cargar archivo'}
-                    </ZrButton>
-                    {w.cot_orden_firme_nombre && (
-                      <span className="dyo-doc-name">{w.cot_orden_firme_nombre}</span>
-                    )}
-                  </div>
-                  <input type="hidden" {...register('cot_orden_firme_nombre')} />
-                </div>
               </div>
-
-              {/* Comisión */}
+              <div className="co-field-wrap">
+                <label className="form-label">Orden en firme * <span className="co-field-hint">(PDF o correo)</span></label>
+                <div className="dyo-doc-actions">
+                  <input
+                    ref={fileRef}
+                    type="file"
+                    accept=".pdf,.eml,.msg"
+                    style={{ display: 'none' }}
+                    onChange={(e) => {
+                      const file = e.target.files?.[0];
+                      if (file) setValue('cot_orden_firme_nombre', file.name);
+                    }}
+                  />
+                  <ZrButton config="secondary" icon="file-upload:line" onClick={() => fileRef.current?.click()}>
+                    {w.cot_orden_firme_nombre ?? 'Cargar archivo'}
+                  </ZrButton>
+                  {w.cot_orden_firme_nombre && (
+                    <span className="dyo-doc-name">{w.cot_orden_firme_nombre}</span>
+                  )}
+                </div>
+                <input type="hidden" {...register('cot_orden_firme_nombre')} />
+              </div>
               <div className="form-row cols-2">
                 <ZdsInput
                   control={control}
@@ -451,8 +418,7 @@ export default function CotizacionFfFl() {
   const [submitError, setSubmitError] = useState('');
   const [sent, setSent] = useState(false);
   const [personalizacionConfirmada, setPersonalizacionConfirmada] = useState(false);
-  const fileRef          = useRef<HTMLInputElement>(null);
-  const ordenFirmeFile   = useRef<File | null>(null);
+  const fileRef = useRef<HTMLInputElement>(null);
 
   const taskData = (task?.data ?? {}) as Record<string, unknown>;
 
@@ -547,13 +513,6 @@ export default function CotizacionFfFl() {
     }
 
     try {
-      // Subir orden en firme si hay archivo seleccionado
-      if (decision === 'APROBADA' && ordenFirmeFile.current && requestId) {
-        const fd = new FormData();
-        fd.append('file', ordenFirmeFile.current);
-        await pm4.post(`/requests/${requestId}/files?data_name=cot_orden_firme`, fd);
-      }
-
       await completeTask({ ...taskData, ...data });
       setSent(true);
     } catch (e) {
@@ -699,7 +658,6 @@ export default function CotizacionFfFl() {
         <SeccionDecision
           form={form}
           fileRef={fileRef}
-          ordenFirmeFile={ordenFirmeFile}
           onEnviar={handleEnviar}
           submitError={submitError}
           submitting={submitting}

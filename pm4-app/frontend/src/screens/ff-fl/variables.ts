@@ -258,9 +258,6 @@ export interface FfFlSolicitudFormData {
   frm_tom_ciudad?: string;
   frm_tom_correo_facturacion?: string;
   frm_tom_sector?: string;
-  frm_tom_sector_otros_flag?: boolean;
-  frm_tom_sector_otros_str?: string;
-  frm_dyo_propiedad_horizontal_flag?: boolean;
   frm_tom_detalle_actividad?: string;
 
   // Actividades aseguradas por producto
@@ -393,8 +390,6 @@ export interface FfFlSolicitudFormData {
 
   // PDySI — Controles Adicionales (3 preguntas — 'SI' | 'NO', determina coberturas SLIP)
   frm_pdysi_ctrlad_01?: string; frm_pdysi_ctrlad_02?: string; frm_pdysi_ctrlad_03?: string;
-  // SI → 50, NO → 25 (derivados automáticamente)
-  frm_pdysi_ctrlad_01_valor?: number; frm_pdysi_ctrlad_02_valor?: number; frm_pdysi_ctrlad_03_valor?: number;
 
   // PDySI — Documentos de soporte (nombre de archivo)
   frm_pdysi_doc_01_nombre?: string;
@@ -428,7 +423,7 @@ export interface FfFlSolicitudFormData {
 // ---------------------------------------------------------------------------
 // Consulta de cliente en TIA — script PM4 configurable
 // ---------------------------------------------------------------------------
-export const CONSULTAR_CLIENTE_SCRIPT_ID = 186;
+export const CONSULTAR_CLIENTE_SCRIPT_ID = 56;
 
 export function parseClienteTia(rawOutput: unknown): Partial<FfFlSolicitudFormData> {
   const tia = ((rawOutput as Record<string, unknown> | null | undefined) ?? {}) as Record<string, unknown>;
@@ -473,41 +468,10 @@ export function parseClienteTia(rawOutput: unknown): Partial<FfFlSolicitudFormDa
   })();
 
   const result: Partial<FfFlSolicitudFormData> = {};
-  if (tomadorNombre) result.frm_tom_tomador = tomadorNombre;
-  if (direccion) result.frm_tom_direccion = direccion;
-  if (deptoMatch) result.frm_tom_departamento = deptoMatch;
-  if (ciudadMatch) result.frm_tom_ciudad = ciudadMatch;
+  if (tomadorNombre)     result.frm_tom_tomador           = tomadorNombre;
+  if (direccion)         result.frm_tom_direccion          = direccion;
+  if (deptoMatch)        result.frm_tom_departamento       = deptoMatch;
+  if (ciudadMatch)       result.frm_tom_ciudad             = ciudadMatch;
   if (flex['WEB_EMAIL']) result.frm_tom_correo_facturacion = String(flex['WEB_EMAIL']);
   return result;
 }
-
-/**
- * Valida un NIT colombiano con dígito de verificación (operación matemática de módulo 11).
- * Soporta longitudes de 7 a 10 dígitos (el último dígito es el DV).
- */
-export function validateNIT(nitStr: string): boolean {
-  if (!/^\d{7,10}$/.test(nitStr)) return false;
-
-  const base = nitStr.slice(0, -1);
-  const dvInput = parseInt(nitStr.slice(-1), 10);
-
-  // Rellenar con ceros a la izquierda hasta tener exactamente 9 dígitos base
-  const padded = base.padStart(9, '0');
-
-  const weights = [41, 37, 29, 23, 19, 17, 13, 7, 3];
-  let sum = 0;
-  for (let i = 0; i < 9; i++) {
-    sum += parseInt(padded[i], 10) * weights[i];
-  }
-
-  const remainder = sum % 11;
-  let computedDv = 0;
-  if (remainder > 1) {
-    computedDv = 11 - remainder;
-  } else {
-    computedDv = remainder;
-  }
-
-  return computedDv === dvInput;
-}
-

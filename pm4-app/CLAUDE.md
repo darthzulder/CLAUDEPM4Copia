@@ -164,57 +164,6 @@ await completeTask(payload);
 | PDySI    | `frm_pdysi_doc_01_nombre`, `frm_pdysi_doc_02_nombre`, `frm_pdysi_doc_03_nombre` |
 | PI       | `frm_pi_doc_01_nombre`, `frm_pi_doc_02_nombre`, `frm_pi_doc_03_nombre` |
 
-### Estructura de un archivo en PM4 (`GET /requests/{id}/files`)
-
-PM4 devuelve cada archivo con esta estructura (verificada en producción):
-
-```json
-{
-  "id": 364,
-  "name": "ACTA DE ENTREGA RECEPCION",
-  "file_name": "ACTA_DE_ENTREGA_RECEPCION.pdf",
-  "mime_type": "application/pdf",
-  "size": 574820,
-  "custom_properties": {
-    "data_name": "doc_autorizacion_datos",
-    "createdBy": 1,
-    "updatedBy": 1
-  },
-  "process_request_id": 10066
-}
-```
-
-| Campo | Descripción |
-|---|---|
-| `id` | ID del archivo — usar para preview/download |
-| `name` | Nombre legible para mostrar al usuario |
-| `file_name` | Nombre físico del archivo con extensión |
-| `custom_properties.data_name` | **Clave del proceso** (`data_name` del upload) — usar para lookup |
-| `process_request_id` | Request al que pertenece (padre o hijo) |
-
-**Importante:** `data_name` está en `custom_properties.data_name`, **no** como campo top-level. Para buscar un archivo por su clave de proceso:
-
-```typescript
-const archivo = files.find((f) => f.custom_properties?.data_name === docKey);
-```
-
-### Archivos en subprocesos
-
-Cuando una pantalla corre dentro de un **subproceso**, `task.process_request_id` apunta al request del subproceso, no al proceso padre. Los archivos subidos en el proceso padre NO aparecen en el request del hijo.
-
-Para acceder a los archivos del padre, usar `resolveParentRequestId()` de `useRequestFiles`:
-
-```typescript
-import { useRequestFiles, resolveParentRequestId } from '../../core/useRequestFiles';
-
-const requestId       = task?.process_request_id ?? null;
-const parentRequestId = resolveParentRequestId((task?.data ?? {}) as Record<string, unknown>);
-const { files } = useRequestFiles(requestId, parentRequestId);
-// `files` combina archivos del request actual + del padre (deduplicados)
-```
-
-`resolveParentRequestId` lee `task.data._request.parent_request_id` que PM4 incluye automáticamente en los datos de tareas de subprocesos.
-
 ---
 
 ## API PM4 (endpoints disponibles en el proxy)

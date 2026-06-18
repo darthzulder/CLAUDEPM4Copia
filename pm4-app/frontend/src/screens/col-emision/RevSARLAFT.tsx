@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useTask } from '../../core/useTask';
-import { useRequestFiles, resolveFileId, resolveParentRequestId } from '../../core/useRequestFiles';
+import { useRequestFiles, resolveFileId } from '../../core/useRequestFiles';
 import PdfViewer from '../../components/PdfViewer';
 import { ZrButton } from '@zurich/web-components/react/button';
 import { ZrModal }  from '@zurich/web-components/react/modal';
@@ -135,10 +135,9 @@ export default function RevSARLAFT() {
   const [infoOpen, setInfoOpen] = useState(false);
   const [sent, setSent]         = useState(false);
 
-  const data            = (task?.data ?? {}) as DocSarlaftData;
-  const requestId       = task?.process_request_id ?? null;
-  const parentRequestId = resolveParentRequestId((task?.data ?? {}) as Record<string, unknown>);
-  const { files, loading: filesLoading } = useRequestFiles(requestId, parentRequestId);
+  const data      = (task?.data ?? {}) as DocSarlaftData;
+  const requestId = task?.process_request_id ?? null;
+  const { files, loading: filesLoading } = useRequestFiles(requestId);
 
   const rawPerfil = data.frm_sarlaft_perfil as string | undefined;
   const perfil: SarlaftPerfil | null =
@@ -150,15 +149,15 @@ export default function RevSARLAFT() {
 
   // Resuelve el file_id para cada documento:
   // 1.° intenta la variable de proceso (task.data[doc.key])
-  // 2.° busca por file_name === key (coincide con data_name usado en la subida)
+  // 2.° cae a la posición en la lista de archivos del request
   function resolveDoc(key: string, idx: number): { fileId: number | null; fileName: string } {
     const fromTask = resolveFileId((data as Record<string, unknown>)[key]);
     if (fromTask) {
       const match = files.find((f) => f.id === fromTask);
       return { fileId: fromTask, fileName: match?.file_name ?? `Documento ${idx + 1}` };
     }
-    const byName = files.find((f) => f.custom_properties?.data_name === key);
-    if (byName) return { fileId: byName.id, fileName: byName.name || byName.file_name };
+    const fallback = files[idx];
+    if (fallback) return { fileId: fallback.id, fileName: fallback.file_name };
     return { fileId: null, fileName: '' };
   }
 

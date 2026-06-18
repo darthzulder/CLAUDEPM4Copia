@@ -1,0 +1,206 @@
+import { useEffect, useRef } from 'react';
+import { useForm } from 'react-hook-form';
+import './styles.css';
+import { useTask } from '../../core/useTask';
+import FormSection from '../../components/FormSection';
+import InputField from '../../components/fields/InputField';
+import SelectField from '../../components/fields/SelectField';
+import RadioField from '../../components/fields/RadioField';
+import pm4 from '../../api/pm4Client';
+import { OPTIONS, RecibirQuejaFormData } from './variables';
+import SeccionConsumidor from './SeccionConsumidor';
+import SeccionClasificacion from './SeccionClasificacion';
+
+function ZurichLogo() {
+  return (
+    <svg width="80" height="40" viewBox="0 0 120 60" fill="none">
+      <text x="4" y="42" fontFamily="Arial" fontSize="32" fontWeight="900" fill="#fff" letterSpacing="-1">Z</text>
+      <text x="28" y="38" fontFamily="Arial" fontSize="16" fontWeight="700" fill="#fff">ZURICH</text>
+    </svg>
+  );
+}
+
+export default function RecibirQueja() {
+  const { task, loading, error, submitting, completeTask } = useTask();
+  const fileRegistry = useRef(new Map<string, File>());
+
+  const form = useForm<RecibirQuejaFormData>({
+    defaultValues: {
+      qd_codigoPais: '170',
+      qd_incluyeAnexos: 'NO',
+    },
+  });
+
+  const { register, control, watch, handleSubmit, reset, setValue, formState: { errors, isSubmitted } } = form;
+  const w = watch();
+
+  // Pre-poblar formulario con datos del task
+  useEffect(() => {
+    if (task?.data) {
+      reset({
+        qd_codigoPais: '170',
+        qd_incluyeAnexos: 'NO',
+        ...(task.data as Partial<RecibirQuejaFormData>),
+      });
+    }
+  }, [task, reset]);
+
+  const onSubmit = async (data: RecibirQuejaFormData) => {
+    try {
+      const requestId = task?.process_request_id;
+      // Subir archivos adjuntos antes de completar la tarea
+      if (requestId && fileRegistry.current.size > 0) {
+        for (const [docKey, file] of fileRegistry.current.entries()) {
+          const fd = new FormData();
+          fd.append('file', file);
+          await pm4.post(`/requests/${requestId}/files?data_name=${docKey}`, fd);
+        }
+      }
+      await completeTask(data as unknown as Record<string, unknown>);
+    } catch (err) {
+      console.error('[RecibirQueja] Error al enviar:', err);
+    }
+  };
+
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      setValue('qd_adjuntoNombre', file.name);
+      fileRegistry.current.set('qd_adjunto', file);
+    }
+  };
+
+  if (loading) {
+    return (
+      <div className="screen-wrapper">
+        <div className="screen-loading"><div className="spinner" /></div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="screen-wrapper">
+        <div className="screen-error">Error al cargar el formulario: {error}</div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="screen-wrapper">
+      {/* ── Encabezado ── */}
+      <div className="screen-header">
+        <div className="title-block">
+          <h1>Recibir / Crear Queja</h1>
+          <div className="subtitle">
+            <span>SCR-001 · P01-T01</span>
+            <span>Gestión de Quejas Directas</span>
+            <span>Rol: Gestor de Experiencia</span>
+          </div>
+        </div>
+        <ZurichLogo />
+      </div>
+
+      <form onSubmit={handleSubmit(onSubmit)} noValidate style={{ maxWidth: 960, margin: '0 auto', padding: '24px 24px 0' }}>
+
+        {/* ── Sección 1: Encabezado del Caso ── */}
+        <FormSection title="📋 Encabezado del Caso">
+          <div className="info-banner">
+            ℹ Complete todos los campos del consumidor y la queja. Al presionar <strong>Crear Queja</strong> el sistema ejecutará validación preventiva automática antes de activar la radicación ante SmartSupervision.
+          </div>
+          <div className="form-row cols-3">
+            <div className="form-group">
+              <label className="form-label">Número de Caso (ID BPM)</label>
+              <input
+                {...register('qd_numeroCaso')}
+                readOnly
+                className="form-control"
+                placeholder="Asignado por el BPM"
+              />
+            </div>
+            <SelectField
+              label="Canal de Recepción"
+              name="qd_canalRecepcion"
+              control={control}
+              rules={{ required: 'Campo requerido' }}
+              options={OPTIONS.canal}
+              required
+              error={isSubmitted && errors.qd_canalRecepcion ? String(errors.qd_canalRecepcion.message) : undefined}
+            />
+            <div className="form-group">
+              <label className="form-label">Fecha y Hora de Creación</label>
+              <input
+                {...register('qd_fechaHoraCreacion')}
+                readOnly
+                className="form-control"
+                placeholder="Generado automáticamente por el BPM"
+              />
+            </div>
+          </div>
+        </FormSection>
+
+        {/* ── Sección 2: Datos del Consumidor ── */}
+        <SeccionConsumidor form={form} />
+
+        {/* ── Sección 3: Clasificación ── */}
+        <SeccionClasificacion form={form} />
+
+        {/* ── Sección 4: Adjuntos ── */}
+        <FormSection title="📎 Adjuntos">
+          <div className="form-row cols-2">
+            <RadioField
+              label="¿Incluye Anexos a la Queja?"
+              name="qd_incluyeAnexos"
+              registration={register('qd_incluyeAnexos', { required: 'Campo requerido' })}
+              options={OPTIONS.incluyeAnexos}
+              required
+              error={isSubmitted && errors.qd_incluyeAnexos ? String(errors.qd_incluyeAnexos.message) : undefined}
+            />
+            <InputField
+              label="Nombre del Archivo Adjunto"
+              registration={register('qd_adjuntoNombre')}
+              readOnly
+              placeholder="Sin archivo seleccionado"
+            />
+          </div>
+
+          {w.qd_incluyeAnexos === 'SI' && (
+            <div className="form-group">
+              <label className="form-label">Archivo Adjunto</label>
+              <label className={`file-upload-zone${w.qd_adjuntoNombre ? ' has-file' : ''}`}>
+                <input
+                  type="file"
+                  accept=".pdf,.doc,.docx,.jpg,.jpeg,.png"
+                  onChange={handleFileChange}
+                />
+                {w.qd_adjuntoNombre
+                  ? <div className="file-upload-name">📎 {w.qd_adjuntoNombre}</div>
+                  : <div className="file-upload-label">Haga clic para seleccionar un archivo o arrástrelo aquí</div>
+                }
+              </label>
+              <small className="form-helper">Formatos aceptados: PDF, DOC, DOCX, JPG, PNG</small>
+            </div>
+          )}
+        </FormSection>
+
+        {/* ── Barra de acciones ── */}
+        <div className="actions-bar">
+          <button type="button" className="btn-cancelar" onClick={() => window.history.back()}>
+            Cancelar
+          </button>
+          <button
+            type="button"
+            className="btn-borrador"
+            disabled={submitting}
+            onClick={() => completeTask({ ...w, _draft: true } as Record<string, unknown>)}
+          >
+            💾 Guardar Borrador
+          </button>
+          <button type="submit" className="btn-crear" disabled={submitting}>
+            {submitting ? 'Enviando...' : 'Crear Queja ▶'}
+          </button>
+        </div>
+      </form>
+    </div>
+  );
+}
