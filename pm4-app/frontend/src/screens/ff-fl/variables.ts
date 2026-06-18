@@ -5,31 +5,31 @@ import type { CollectionDef } from '../../core/useCollection';
 // ---------------------------------------------------------------------------
 export const COLLECTION_DEFS = {
   intermediarios: {
-    id: 76,
+    id: 4,
     labelField: 'data.frm_nombre_entidad',
     valueField: 'id',
   } satisfies CollectionDef,
 
   actividadesCIIU_dyo: {
-    id: 77,
+    id: 5,
     labelField: 'data.frm_actividad',
     valueField: 'data.frm_actividad',
   } satisfies CollectionDef,
 
   actividadesCIIU_cc: {
-    id: 78,
+    id: 6,
     labelField: 'data.frm_actividad',
     valueField: 'data.frm_actividad',
   } satisfies CollectionDef,
 
   actividadesCIIU_pdysi: {
-    id: 79,
+    id: 7,
     labelField: 'data.frm_actividad',
     valueField: 'data.frm_actividad',
   } satisfies CollectionDef,
 
   actividadesCIIU_pi: {
-    id: 80,
+    id: 8,
     labelField: 'data.frm_actividad',
     valueField: 'data.frm_actividad',
   } satisfies CollectionDef,
@@ -473,10 +473,41 @@ export function parseClienteTia(rawOutput: unknown): Partial<FfFlSolicitudFormDa
   })();
 
   const result: Partial<FfFlSolicitudFormData> = {};
-  if (tomadorNombre)     result.frm_tom_tomador           = tomadorNombre;
-  if (direccion)         result.frm_tom_direccion          = direccion;
-  if (deptoMatch)        result.frm_tom_departamento       = deptoMatch;
-  if (ciudadMatch)       result.frm_tom_ciudad             = ciudadMatch;
+  if (tomadorNombre) result.frm_tom_tomador = tomadorNombre;
+  if (direccion) result.frm_tom_direccion = direccion;
+  if (deptoMatch) result.frm_tom_departamento = deptoMatch;
+  if (ciudadMatch) result.frm_tom_ciudad = ciudadMatch;
   if (flex['WEB_EMAIL']) result.frm_tom_correo_facturacion = String(flex['WEB_EMAIL']);
   return result;
 }
+
+/**
+ * Valida un NIT colombiano con dígito de verificación (operación matemática de módulo 11).
+ * Soporta longitudes de 7 a 10 dígitos (el último dígito es el DV).
+ */
+export function validateNIT(nitStr: string): boolean {
+  if (!/^\d{7,10}$/.test(nitStr)) return false;
+
+  const base = nitStr.slice(0, -1);
+  const dvInput = parseInt(nitStr.slice(-1), 10);
+
+  // Rellenar con ceros a la izquierda hasta tener exactamente 9 dígitos base
+  const padded = base.padStart(9, '0');
+
+  const weights = [41, 37, 29, 23, 19, 17, 13, 7, 3];
+  let sum = 0;
+  for (let i = 0; i < 9; i++) {
+    sum += parseInt(padded[i], 10) * weights[i];
+  }
+
+  const remainder = sum % 11;
+  let computedDv = 0;
+  if (remainder > 1) {
+    computedDv = 11 - remainder;
+  } else {
+    computedDv = remainder;
+  }
+
+  return computedDv === dvInput;
+}
+
