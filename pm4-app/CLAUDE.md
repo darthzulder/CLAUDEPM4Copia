@@ -77,7 +77,7 @@ pm4-app/
     │   ├── useToken.ts           ← resolveToken() y resolveTaskId()
     │   ├── useTask.ts            ← GET /tasks/{id}?include=data  |  PUT /tasks/{id}
     │   └── useCollection.ts     ← GET /collections/{id}/records
-    ├── components/fields/        ← InputField, SelectField, RadioField, DateField
+    ├── components/fields/        ← ZdsFields.tsx (fachada única para Zurich DS)
     ├── components/FormSection.tsx
     └── screens/
         └── {screen-slug}/
@@ -225,7 +225,53 @@ await completeTask(payload);
 
 ## Convenciones de código
 
-- Componentes de campo: `InputField`, `SelectField`, `RadioField`, `DateField`
+### Componentes de campo — `ZdsFields.tsx`
+
+Todos los campos de formulario y componentes Zurich DS se importan **exclusivamente** desde:
+
+```tsx
+import { ZdsInput, ZdsSelect, ZdsRadio, ZdsDate, ZdsTextarea,
+         ZdsCheckboxField, ZdsSuggest,
+         ZrButton, ZrModal, ZrForm, ZrCard } from '../../components/fields/ZdsFields';
+```
+
+**Nunca importar directamente de `@zurich/web-components/react/...` en los screens.**
+
+| Wrapper | Componente Zurich | Cuándo usar |
+|---|---|---|
+| `ZdsInput` | `ZrTextInput` + Controller | Texto, email, tel — editable o readOnly |
+| `ZdsSelect` | `ZrSelect` + Controller | Dropdown con opciones |
+| `ZdsRadio` | `ZrRadioSelect` + Controller | Grupo de radio buttons |
+| `ZdsDate` | `ZrDateInput` + Controller | Selector de fecha |
+| `ZdsTextarea` | `ZrTextarea` + Controller | Texto multilínea |
+| `ZdsCheckboxField` | `ZrCheckbox` + Controller | Checkbox booleano |
+| `ZdsSuggest` | `ZrTextInput` + dropdown | Typeahead con lista filtrada |
+| `ZrButton` | re-export directo | Botones de acción |
+| `ZrModal` | re-export directo | Diálogos modales |
+| `ZrForm` | re-export directo | Contenedor de formulario Zurich |
+
+### Patrón de formulario (react-hook-form + ZdsFields)
+
+```tsx
+const { control, handleSubmit, reset, formState: { errors } } = useForm<MiFormData>();
+
+// Los wrappers ZdsXxx usan Controller internamente:
+<ZdsInput
+  name="campo"
+  control={control}
+  label="Mi Campo"
+  rules={{ required: 'Campo requerido' }}
+  required
+  error={errors.campo?.message}
+/>
+```
+
+- `control` reemplaza a `register` para todos los campos ZDS.
+- `register` solo se usa para inputs nativos (ej: `<input type="file">`).
+- Pre-población desde PM4: `reset(task.data)` actualiza todos los campos en una sola llamada.
+
+### Otras convenciones
+
 - `FormSection` para las secciones con header azul
 - `useTask()` maneja loading / error / submitting — siempre mostrar estos estados
 - CSS scoped por pantalla: **nunca** estilos globales fuera de `styles.css` de la pantalla

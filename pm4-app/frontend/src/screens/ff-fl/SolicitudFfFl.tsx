@@ -8,8 +8,7 @@ import FormSection from '../../components/FormSection';
 import CreacionTomador from './CreacionTomador';
 import SeccionProductos from './SeccionProductos';
 import zurichLogo from '../../resources/zurich/ZurichLogo_Horz_White_CMYK_no_R.png';
-import { ZdsInput, ZdsDate, ZdsCheckboxField, ZdsSelect, ZdsSuggest } from './ZdsField';
-import { ZrButton } from '@zurich/web-components/react/button';
+import { ZdsInput, ZdsDate, ZdsCheckboxField, ZdsSelect, ZdsSuggest, ZrButton } from '../../components/fields/ZdsFields';
 import {
   OPTIONS, COLLECTION_DEFS, DEPARTAMENTOS, CIUDADES_POR_DEPTO,
   FfFlSolicitudFormData, CONSULTAR_CLIENTE_SCRIPT_ID, parseClienteTia,

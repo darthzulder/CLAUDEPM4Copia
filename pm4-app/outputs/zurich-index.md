@@ -15,7 +15,7 @@ When a user asks you to build something with the **Zurich Design System**:
 2. **Open the component file** (`react/<category>/zurich-<name>.md`) and follow the section "AI Implementation Instructions" before writing any code.
 3. **Never invent props, events, or imports.** If a prop is not listed in the component's file, do not use it.
 4. **Default to React + TypeScript** unless the user specifies otherwise. Today every documented component lives under `react/`.
-5. **Bind values to React state** (`useState`) — Zurich inputs are not reactive when their `model` is hardcoded.
+5. **Bind values to state** — in standalone usage use `useState`; inside `react-hook-form` screens use `Controller` (via `ZdsFields.tsx` wrappers). Never hardcode `model` — it will not be reactive.
 6. **Wrap related fields** in `<ZrForm>` so design tokens (size, shape, spacing) cascade correctly.
 7. **Use kebab-case attributes** exactly as they appear in the docs (`help-text`, `input-type`, `max-length`, `align-right`, `with-search`, `search-placeholder`, `search-autofocus`, `no-close`, `data-list`, `has-data-list`). The Zurich React wrapper preserves them.
 8. **Events use camelCase** (`onChange`, `onEnter`, `onBlur`, `onValidated`, `onSelect`, `onSubmit`, `onSearch`, `onClick`, `onRestarted`).
@@ -134,6 +134,25 @@ outputs/
 
 ## 3. Canonical Imports
 
+### In this project (PM4 app) — ALWAYS use the ZdsFields facade
+
+```tsx
+// All Zurich DS components are imported from the project facade:
+import {
+  // react-hook-form Controller wrappers (for form fields)
+  ZdsInput, ZdsSelect, ZdsRadio, ZdsDate,
+  ZdsTextarea, ZdsCheckboxField, ZdsSuggest,
+  // Raw re-exports (for components that don't need Controller)
+  ZrButton, ZrModal, ZrForm, ZrCard, ZrTabs, ZrProgressBar,
+  ZrTextInput, ZrTextarea, ZrSelect,
+} from '../../components/fields/ZdsFields';
+```
+
+**Never import directly from `@zurich/web-components/react/...` inside screens.**
+`ZdsFields.tsx` is the single source of truth for Zurich DS in the app.
+
+### Raw imports (only when modifying ZdsFields.tsx itself, or outside screens)
+
 ```tsx
 // Atoms
 import { ZrButton }      from '@zurich/web-components/react/button';
@@ -225,61 +244,83 @@ These conventions apply across the entire design system unless a component file 
 
 ## 5. Recommended Composition Pattern
 
-A typical Zurich React screen looks like this:
+### In this project (PM4 app) — react-hook-form + ZdsFields
 
 ```tsx
-import { useState } from 'react';
-import { ZrCard }      from '@zurich/web-components/react/card';
-import { ZrForm }      from '@zurich/web-components/react/form';
-import { ZrTextInput } from '@zurich/web-components/react/text-input';
-import { ZrSelect }    from '@zurich/web-components/react/select';
-import { ZrCheckbox }  from '@zurich/web-components/react/checkbox';
+import { useEffect } from 'react';
+import { useForm } from 'react-hook-form';
+import { useTask } from '../../core/useTask';
+import FormSection from '../../components/FormSection';
+import { ZdsInput, ZdsSelect, ZrButton } from '../../components/fields/ZdsFields';
+import { OPTIONS, MyFormData } from './variables';
+import './styles.css';
 
-export function ExampleScreen() {
-  const [name, setName]         = useState('');
-  const [country, setCountry]   = useState('');
-  const [accepted, setAccepted] = useState(false);
+export default function MyScreen() {
+  const { task, submitting, completeTask } = useTask();
+  const { control, handleSubmit, reset, formState: { errors } } = useForm<MyFormData>();
+
+  useEffect(() => {
+    if (task?.data) reset(task.data as MyFormData);
+  }, [task, reset]);
+
+  const onSubmit = async (data: MyFormData) => {
+    await completeTask(data as Record<string, unknown>);
+  };
 
   return (
-    <ZrCard config="grid">
-      <ZrForm
-        config="line"
-        size="m"
-        onSubmit={(data) => console.log('submit:', data)}
-        style={{ ['--z-form--gap' as any]: '1rem' }}
-      >
-        <ZrTextInput
-          name="name"
-          label="Full name"
-          model={name}
-          onChange={(v: string) => setName(v)}
-          required
-        />
-        <ZrSelect
-          name="country"
-          label="Country"
-          model={country}
-          options={[
-            { value: 'es', text: 'Spain' },
-            { value: 'ch', text: 'Switzerland' },
-          ]}
-          onChange={(v: string) => setCountry(v)}
-          required
-        />
-        <ZrCheckbox
-          name="terms"
-          label="I accept the terms and conditions"
-          model={accepted}
-          onChange={(v: boolean) => setAccepted(v)}
-          required
-        />
-      </ZrForm>
-    </ZrCard>
+    <form onSubmit={handleSubmit(onSubmit)} noValidate>
+      <FormSection title="My Section">
+        <div className="form-row cols-2">
+          <ZdsInput
+            name="my_field"
+            control={control}
+            label="My Field"
+            rules={{ required: 'Required field' }}
+            required
+            error={errors.my_field?.message}
+          />
+          <ZdsSelect
+            name="my_select"
+            control={control}
+            label="My Select"
+            options={OPTIONS.mySelect}
+            rules={{ required: 'Required field' }}
+            required
+            error={errors.my_select?.message}
+          />
+        </div>
+      </FormSection>
+      <ZrButton type="submit" disabled={submitting}>Save</ZrButton>
+    </form>
   );
 }
 ```
 
-> Rule of thumb: **outer layout → form → inputs → events → state → styling tokens.**
+> Rule of thumb: **`useTask` → `reset(task.data)` → `control` → `ZdsXxx` wrappers → `completeTask`.**
+>
+> `control` from react-hook-form replaces per-field `useState`. PM4 pre-population is done with a single `reset()` call.
+
+### Standalone (without react-hook-form) — direct useState
+
+```tsx
+import { useState } from 'react';
+import { ZrTextInput } from '../../components/fields/ZdsFields';
+
+export function StandaloneExample() {
+  const [name, setName] = useState('');
+
+  return (
+    <ZrTextInput
+      label="Full name"
+      model={name}
+      onChange={(v: string) => setName(v)}
+      required
+    />
+  );
+}
+```
+
+> Use only for components that are not PM4 form screens (e.g. simple confirmation modals).
 
 ---
 
@@ -374,18 +415,19 @@ When the user pastes the docs page for a new Zurich component, the AI should sil
 
 Before returning code that uses a Zurich component, verify:
 
-1. ✅ Import path matches `@zurich/web-components/react/<kebab-case>`.
-2. ✅ Component name is the exact `Zr<PascalCase>` from the docs.
-3. ✅ Every prop used appears in the component's file (§3 Props).
-4. ✅ Reactive props (`model`, etc.) are bound to `useState`.
-5. ✅ Form controls are wrapped in `<ZrForm>` when more than one is present.
-6. ✅ Event handler names are camelCase and listed in §4 Events.
-7. ✅ kebab-case attribute names are kept verbatim (no auto-renaming to camelCase).
-8. ✅ No invented imports, no invented icons, no invented locales.
-9. ✅ ⚠️ Experimental flags are preserved in comments when used.
-10. ✅ Styling uses documented `--z-*` CSS variables.
-11. ✅ Controlled state — when used, both `model` AND `onChange` are present.
-12. ✅ Dynamic slot names follow the documented pattern (e.g. `option-<value>`, `cell-<row>-<prop>`).
+1. ✅ **In screens**: import from `../../components/fields/ZdsFields`, never directly from `@zurich/web-components/react/...`.
+2. ✅ **In ZdsFields.tsx itself**: import path matches `@zurich/web-components/react/<kebab-case>`.
+3. ✅ Component name is the exact `Zr<PascalCase>` from the docs (inside ZdsFields) or `Zds<PascalCase>` wrapper (in screens).
+4. ✅ Every prop used appears in the component's file (§3 Props).
+5. ✅ Reactive props (`model`): in forms use `Controller` via `ZdsXxx` wrappers; standalone use `useState`.
+6. ✅ Form controls use `control` + `name` + `rules` props (not `register`).
+7. ✅ Event handler names are camelCase and listed in §4 Events.
+8. ✅ kebab-case attribute names are kept verbatim (no auto-renaming to camelCase).
+9. ✅ No invented imports, no invented icons, no invented locales.
+10. ✅ ⚠️ Experimental flags are preserved in comments when used.
+11. ✅ Styling uses documented `--z-*` CSS variables and `--zf-*` / `--zs-*` tokens.
+12. ✅ Controlled state — both `model` AND `onChange` always present together.
+13. ✅ Dynamic slot names follow the documented pattern (e.g. `option-<value>`, `cell-<row>-<prop>`).
 
 If any check fails, fix it before delivering the code.
 

@@ -4,9 +4,7 @@ import './styles.css';
 import { useTask } from '../../core/useTask';
 import { useCollection } from '../../core/useCollection';
 import FormSection from '../../components/FormSection';
-import InputField from '../../components/fields/InputField';
-import SelectField from '../../components/fields/SelectField';
-import DateField from '../../components/fields/DateField';
+import { ZdsInput, ZdsSelect, ZdsDate } from '../../components/fields/ZdsFields';
 import { OPTIONS, COLLECTION_DEFS, SolicitudCotizacionFormData } from './variables';
 import pm4 from '../../api/pm4Client';
 import AseguradosAdicionales, { AseguradoAdicional } from './AseguradosAdicionales';
@@ -193,7 +191,7 @@ function TiaBanner({ status, onCrearCliente }: { status: TiaStatus; onCrearClien
 // Sección: Información General (pantalla 102)
 // ---------------------------------------------------------------------------
 function InfoGeneral({ form }: { form: Form }) {
-  const { register, formState: { errors, isSubmitted }, watch } = form;
+  const { control, formState: { errors, isSubmitted }, watch } = form;
   const w = watch();
   const fe = (n: keyof SolicitudCotizacionFormData) =>
     fieldError(errors[n] as FieldError | undefined, w[n], isSubmitted);
@@ -205,53 +203,53 @@ function InfoGeneral({ form }: { form: Form }) {
   return (
     <FormSection title="Información General">
       <div className="form-row cols-3">
-        <DateField label="Fecha de solicitud" registration={register('frm_gen_fecha_solicitud', { required: 'Campo requerido' })} required error={fe('frm_gen_fecha_solicitud')} />
-        <DateField label="Fecha esperada de cotización" registration={register('frm_gen_fecha_esperada_cotizacion')} />
-        <SelectField label="Nueva/Renovación" name="frm_gen_nueva_o_renovacion" control={form.control} rules={{ required: 'Campo requerido' }} options={OPTIONS.nuevaRenovacion} required error={fe('frm_gen_nueva_o_renovacion')} />
+        <ZdsDate label="Fecha de solicitud" name="frm_gen_fecha_solicitud" control={control} rules={{ required: 'Campo requerido' }} required error={fe('frm_gen_fecha_solicitud')} />
+        <ZdsDate label="Fecha esperada de cotización" name="frm_gen_fecha_esperada_cotizacion" control={control} />
+        <ZdsSelect label="Nueva/Renovación" name="frm_gen_nueva_o_renovacion" control={control} rules={{ required: 'Campo requerido' }} options={OPTIONS.nuevaRenovacion} required error={fe('frm_gen_nueva_o_renovacion')} />
       </div>
 
       <div className="form-row cols-3">
-        <SelectField label="País" name="frm_gen_pais" control={form.control} rules={{ required: 'Campo requerido' }} options={OPTIONS.pais} required error={fe('frm_gen_pais')} />
-        <SelectField label="Sucursal" name="frm_gen_sucursal" control={form.control} rules={{ required: 'Campo requerido' }} options={OPTIONS.sucursal} required error={fe('frm_gen_sucursal')} />
-        <SelectField label="Segmento" name="frm_gen_segmento" control={form.control} options={OPTIONS.segmento} />
+        <ZdsSelect label="País" name="frm_gen_pais" control={control} rules={{ required: 'Campo requerido' }} options={OPTIONS.pais} required error={fe('frm_gen_pais')} />
+        <ZdsSelect label="Sucursal" name="frm_gen_sucursal" control={control} rules={{ required: 'Campo requerido' }} options={OPTIONS.sucursal} required error={fe('frm_gen_sucursal')} />
+        <ZdsSelect label="Segmento" name="frm_gen_segmento" control={control} options={OPTIONS.segmento} />
       </div>
 
       <div className="form-row cols-3">
-        <SelectField label="Línea de negocio" name="frm_gen_linea_negocio" control={form.control} options={OPTIONS.lineaNegocio} />
-        <SelectField label="Producto" name="frm_gen_producto" control={form.control} rules={{ required: 'Campo requerido' }} options={OPTIONS.producto} required error={fe('frm_gen_producto')} />
-        <SelectField label="Alcance" name="frm_gen_alcance" control={form.control} options={OPTIONS.alcance} />
+        <ZdsSelect label="Línea de negocio" name="frm_gen_linea_negocio" control={control} options={OPTIONS.lineaNegocio} />
+        <ZdsSelect label="Producto" name="frm_gen_producto" control={control} rules={{ required: 'Campo requerido' }} options={OPTIONS.producto} required error={fe('frm_gen_producto')} />
+        <ZdsSelect label="Alcance" name="frm_gen_alcance" control={control} options={OPTIONS.alcance} />
       </div>
 
       <div className="form-row cols-2">
-        <SelectField label="Intermediario principal" name="frm_gen_intermediario_principal" control={form.control} rules={{ required: 'Campo requerido' }} options={intermediarios} loading={loadingInt} required error={fe('frm_gen_intermediario_principal')} />
-        <SelectField label="Comercial" name="frm_gen_comercial_id" control={form.control} options={comerciales} loading={loadingCom} />
+        <ZdsSelect label="Intermediario principal" name="frm_gen_intermediario_principal" control={control} rules={{ required: 'Campo requerido' }} options={intermediarios} loading={loadingInt} required error={fe('frm_gen_intermediario_principal')} />
+        <ZdsSelect label="Comercial" name="frm_gen_comercial_id" control={control} options={comerciales} loading={loadingCom} />
       </div>
 
       <div className="form-row cols-2">
-        <SelectField label="Suscriptor asignado" name="frm_gen_suscriptor_asignado_id" control={form.control} rules={{ required: 'Campo requerido' }} options={suscriptores} loading={loadingSus} required error={fe('frm_gen_suscriptor_asignado_id')} />
-        <InputField label="Correo suscriptor (TEST)" registration={register('frm_gen_suscriptor_asignado_correo_test', { pattern: { value: /^[^\s@]+@[^\s@]+\.[^\s@]+$/, message: 'Correo inválido' } })} type="email" helper="Ambiente de pruebas" error={fe('frm_gen_suscriptor_asignado_correo_test')} />
+        <ZdsSelect label="Suscriptor asignado" name="frm_gen_suscriptor_asignado_id" control={control} rules={{ required: 'Campo requerido' }} options={suscriptores} loading={loadingSus} required error={fe('frm_gen_suscriptor_asignado_id')} />
+        <ZdsInput label="Correo suscriptor (TEST)" name="frm_gen_suscriptor_asignado_correo_test" control={control} rules={{ pattern: { value: /^[^\s@]+@[^\s@]+\.[^\s@]+$/, message: 'Correo inválido' } }} inputType="email" helpText="Ambiente de pruebas" error={fe('frm_gen_suscriptor_asignado_correo_test')} />
       </div>
 
       <div className="form-row cols-3">
-        <SelectField label="Líder/Seguidor" name="frm_gen_lider_seguidor" control={form.control} options={OPTIONS.liderSeguidor} />
-        <SelectField label="Co-corretaje" name="frm_gen_co_corretaje" control={form.control} options={OPTIONS.siNo} />
-        <InputField label="Comisión solicitada (%)" registration={register('frm_cot_comision_solicitada_pct', { min: { value: 0, message: '>= 0' }, max: { value: 100, message: '<= 100' } })} type="number" />
+        <ZdsSelect label="Líder/Seguidor" name="frm_gen_lider_seguidor" control={control} options={OPTIONS.liderSeguidor} />
+        <ZdsSelect label="Co-corretaje" name="frm_gen_co_corretaje" control={control} options={OPTIONS.siNo} />
+        <ZdsInput label="Comisión solicitada (%)" name="frm_cot_comision_solicitada_pct" control={control} rules={{ min: { value: 0, message: '>= 0' }, max: { value: 100, message: '<= 100' } }} />
       </div>
 
       <div className="form-row cols-3">
-        <SelectField label="Coaseguro requerido" name="frm_gen_coaseguro_requerido" control={form.control} options={OPTIONS.siNo} />
-        {w.frm_gen_coaseguro_requerido === 'SI' && <SelectField label="Tipo de coaseguro" name="frm_gen_tipo_coaseguro" control={form.control} options={OPTIONS.tipoCoaseguro} />}
-        {w.frm_gen_coaseguro_requerido === 'SI' && <InputField label="Participación solicitada (%)" registration={register('frm_gen_participacion_solicitado_pct', { min: { value: 0, message: '>= 0' }, max: { value: 100, message: '<= 100' } })} type="number" />}
+        <ZdsSelect label="Coaseguro requerido" name="frm_gen_coaseguro_requerido" control={control} options={OPTIONS.siNo} />
+        {w.frm_gen_coaseguro_requerido === 'SI' && <ZdsSelect label="Tipo de coaseguro" name="frm_gen_tipo_coaseguro" control={control} options={OPTIONS.tipoCoaseguro} />}
+        {w.frm_gen_coaseguro_requerido === 'SI' && <ZdsInput label="Participación solicitada (%)" name="frm_gen_participacion_solicitado_pct" control={control} rules={{ min: { value: 0, message: '>= 0' }, max: { value: 100, message: '<= 100' } }} />}
       </div>
 
       <div className="form-row cols-3">
-        <SelectField label="Reaseguro requerido" name="frm_gen_reaseguro_requerido" control={form.control} options={OPTIONS.siNo} />
-        {w.frm_gen_reaseguro_requerido === 'SI' && <SelectField label="Tipo de reaseguro" name="frm_gen_tipo_reaseguro" control={form.control} options={OPTIONS.tipoReaseguro} />}
-        <InputField label="Nro. de póliza actual" registration={register('frm_gen_numero_poliza')} type="text" helper="Solo para renovaciones" />
+        <ZdsSelect label="Reaseguro requerido" name="frm_gen_reaseguro_requerido" control={control} options={OPTIONS.siNo} />
+        {w.frm_gen_reaseguro_requerido === 'SI' && <ZdsSelect label="Tipo de reaseguro" name="frm_gen_tipo_reaseguro" control={control} options={OPTIONS.tipoReaseguro} />}
+        <ZdsInput label="Nro. de póliza actual" name="frm_gen_numero_poliza" control={control} helpText="Solo para renovaciones" />
       </div>
 
       <div className="form-row cols-2">
-        <InputField label="Informador" registration={register('frm_gen_nom_informador')} type="text" />
+        <ZdsInput label="Informador" name="frm_gen_nom_informador" control={control} />
       </div>
     </FormSection>
   );
@@ -271,7 +269,7 @@ function InfoTomador({
   onConsultar: () => void;
   onCrearCliente: () => void;
 }) {
-  const { register, formState: { errors, isSubmitted }, watch } = form;
+  const { control, formState: { errors, isSubmitted }, watch } = form;
   const w = watch();
   const fe = (n: keyof SolicitudCotizacionFormData) =>
     fieldError(errors[n] as FieldError | undefined, w[n], isSubmitted);
@@ -288,8 +286,8 @@ function InfoTomador({
   return (
     <FormSection title="Información del Tomador">
       <div className="form-row cols-3 row-align-bottom">
-        <SelectField label="Tipo de documento" name="frm_tom_tipo_documento" control={form.control} rules={{ required: 'Campo requerido' }} options={OPTIONS.tipoDocumento} required error={fe('frm_tom_tipo_documento')} />
-        <InputField label="Nro. de documento" registration={register('frm_tom_num_documento', { required: 'Campo requerido', minLength: { value: 5, message: 'Mínimo 5 caracteres' } })} type="text" required error={fe('frm_tom_num_documento')} />
+        <ZdsSelect label="Tipo de documento" name="frm_tom_tipo_documento" control={control} rules={{ required: 'Campo requerido' }} options={OPTIONS.tipoDocumento} required error={fe('frm_tom_tipo_documento')} />
+        <ZdsInput label="Nro. de documento" name="frm_tom_num_documento" control={control} rules={{ required: 'Campo requerido', minLength: { value: 5, message: 'Mínimo 5 caracteres' } }} required error={fe('frm_tom_num_documento')} />
         <div className="form-group consultar-wrapper">
           <button type="button" className="btn-consultar" onClick={onConsultar} disabled={tiaStatus === 'loading'}>
             {tiaStatus === 'loading' ? '⏳ Consultando…' : '🔍 Consultar Cliente'}
@@ -302,24 +300,24 @@ function InfoTomador({
       {showFields && (
         <>
           <div className="form-row cols-2">
-            <InputField label="Nombre / Razón social" registration={register('frm_tom_nombres_completos', { required: 'Campo requerido' })} type="text" required error={fe('frm_tom_nombres_completos')} readOnly={locked} />
-            <SelectField label="Tipo de empresa" name="frm_tom_tipo_empresa" control={form.control} options={OPTIONS.tipoEmpresa} disabled={locked} />
+            <ZdsInput label="Nombre / Razón social" name="frm_tom_nombres_completos" control={control} rules={{ required: 'Campo requerido' }} required error={fe('frm_tom_nombres_completos')} readOnly={locked} />
+            <ZdsSelect label="Tipo de empresa" name="frm_tom_tipo_empresa" control={control} options={OPTIONS.tipoEmpresa} disabled={locked} />
           </div>
 
           <div className="form-row cols-3">
-            <DateField label="Fecha de constitución" registration={register('frm_tom_fecha_constitucion')} readOnly={locked} />
-            <InputField label="Teléfono" registration={register('frm_tom_telefono', { pattern: { value: /^\d{7,12}$/, message: 'Teléfono inválido' } })} type="text" error={fe('frm_tom_telefono')} readOnly={locked} />
-            <InputField label="Correo para facturación" registration={register('frm_tom_correo_facturacion', { pattern: { value: /^[^\s@]+@[^\s@]+\.[^\s@]+$/, message: 'Correo inválido' } })} type="email" error={fe('frm_tom_correo_facturacion')} readOnly={locked} />
+            <ZdsDate label="Fecha de constitución" name="frm_tom_fecha_constitucion" control={control} readOnly={locked} />
+            <ZdsInput label="Teléfono" name="frm_tom_telefono" control={control} rules={{ pattern: { value: /^\d{7,12}$/, message: 'Teléfono inválido' } }} error={fe('frm_tom_telefono')} readOnly={locked} />
+            <ZdsInput label="Correo para facturación" name="frm_tom_correo_facturacion" control={control} rules={{ pattern: { value: /^[^\s@]+@[^\s@]+\.[^\s@]+$/, message: 'Correo inválido' } }} inputType="email" error={fe('frm_tom_correo_facturacion')} readOnly={locked} />
           </div>
 
           <div className="form-row cols-3">
-            <SelectField label="Departamento" name="frm_tom_departamento" control={form.control} options={departamentos} loading={loadingDep} disabled={locked} />
-            <SelectField label="Municipio" name="frm_tom_municipio" control={form.control} options={municipios} loading={loadingMun} placeholder={w.frm_tom_departamento ? 'Seleccione...' : 'Seleccione un departamento primero'} disabled={locked} />
-            <InputField label="Dirección" registration={register('frm_tom_direccion', { required: 'Campo requerido' })} type="text" required error={fe('frm_tom_direccion')} readOnly={locked} />
+            <ZdsSelect label="Departamento" name="frm_tom_departamento" control={control} options={departamentos} loading={loadingDep} disabled={locked} />
+            <ZdsSelect label="Municipio" name="frm_tom_municipio" control={control} options={municipios} loading={loadingMun} placeholder={w.frm_tom_departamento ? 'Seleccione...' : 'Seleccione un departamento primero'} disabled={locked} />
+            <ZdsInput label="Dirección" name="frm_tom_direccion" control={control} rules={{ required: 'Campo requerido' }} required error={fe('frm_tom_direccion')} readOnly={locked} />
           </div>
 
           <div className="form-row cols-1">
-            <InputField label="Actividad comercial" registration={register('frm_tom_actividad_asegurada', { required: 'Campo requerido' })} type="text" required error={fe('frm_tom_actividad_asegurada')} />
+            <ZdsInput label="Actividad comercial" name="frm_tom_actividad_asegurada" control={control} rules={{ required: 'Campo requerido' }} required error={fe('frm_tom_actividad_asegurada')} />
           </div>
         </>
       )}
@@ -347,12 +345,12 @@ function SubInfoAsegurado({
   return (
     <FormSection title="Información del Asegurado">
       <div className="form-row cols-2">
-        <SelectField label="El tomador es el asegurado?" name="frm_tom_asegurado_es_tomador_flag" control={form.control} rules={{ required: 'Campo requerido' }} options={OPTIONS.siNo} required error={fe('frm_tom_asegurado_es_tomador_flag')} />
-        <SelectField label="Territorialidad" name="frm_aseg_territorialidad" control={form.control} rules={{ required: 'Campo requerido' }} options={OPTIONS.territorialidad} required error={fe('frm_aseg_territorialidad')} />
+        <ZdsSelect label="El tomador es el asegurado?" name="frm_tom_asegurado_es_tomador_flag" control={form.control} rules={{ required: 'Campo requerido' }} options={OPTIONS.siNo} required error={fe('frm_tom_asegurado_es_tomador_flag')} />
+        <ZdsSelect label="Territorialidad" name="frm_aseg_territorialidad" control={form.control} rules={{ required: 'Campo requerido' }} options={OPTIONS.territorialidad} required error={fe('frm_aseg_territorialidad')} />
       </div>
       <div className="form-row cols-2">
-        <InputField label="N° de ubicaciones" registration={form.register('frm_aseg_numero_ubicaciones', { required: 'Campo requerido', min: { value: 1, message: 'Debe ser >= 1' } })} type="number" required error={fe('frm_aseg_numero_ubicaciones')} />
-        <SelectField label="Realiza exportaciones" name="frm_aseg_realiza_exportaciones_flag" control={form.control} rules={{ required: 'Campo requerido' }} options={OPTIONS.siNo} required error={fe('frm_aseg_realiza_exportaciones_flag')} />
+        <ZdsInput label="N° de ubicaciones" name="frm_aseg_numero_ubicaciones" control={form.control} rules={{ required: 'Campo requerido', min: { value: 1, message: 'Debe ser >= 1' } }} required error={fe('frm_aseg_numero_ubicaciones')} />
+        <ZdsSelect label="Realiza exportaciones" name="frm_aseg_realiza_exportaciones_flag" control={form.control} rules={{ required: 'Campo requerido' }} options={OPTIONS.siNo} required error={fe('frm_aseg_realiza_exportaciones_flag')} />
       </div>
 
       {w.frm_aseg_realiza_exportaciones_flag === 'SI' && (
@@ -379,7 +377,7 @@ function InfoAsegurado({
   onConsultar: () => void;
   onCrearCliente: () => void;
 }) {
-  const { register, formState: { errors, isSubmitted }, watch } = form;
+  const { control, formState: { errors, isSubmitted }, watch } = form;
   const w = watch();
   const fe = (n: keyof SolicitudCotizacionFormData) =>
     fieldError(errors[n] as FieldError | undefined, w[n], isSubmitted);
@@ -396,8 +394,8 @@ function InfoAsegurado({
   return (
     <FormSection title="Datos del Asegurado">
       <div className="form-row cols-3 row-align-bottom">
-        <SelectField label="Tipo de documento" name="frm_aseg_tipo_documento" control={form.control} rules={{ required: 'Campo requerido' }} options={OPTIONS.tipoDocumento} required error={fe('frm_aseg_tipo_documento')} />
-        <InputField label="Nro. de documento" registration={register('frm_aseg_num_documento', { required: 'Campo requerido', minLength: { value: 5, message: 'Mínimo 5 caracteres' } })} type="text" required error={fe('frm_aseg_num_documento')} />
+        <ZdsSelect label="Tipo de documento" name="frm_aseg_tipo_documento" control={control} rules={{ required: 'Campo requerido' }} options={OPTIONS.tipoDocumento} required error={fe('frm_aseg_tipo_documento')} />
+        <ZdsInput label="Nro. de documento" name="frm_aseg_num_documento" control={control} rules={{ required: 'Campo requerido', minLength: { value: 5, message: 'Mínimo 5 caracteres' } }} required error={fe('frm_aseg_num_documento')} />
         <div className="form-group consultar-wrapper">
           <button type="button" className="btn-consultar" onClick={onConsultar} disabled={tiaStatus === 'loading'}>
             {tiaStatus === 'loading' ? '⏳ Consultando…' : '🔍 Consultar Cliente'}
@@ -410,24 +408,24 @@ function InfoAsegurado({
       {showFields && (
         <>
           <div className="form-row cols-2">
-            <InputField label="Nombre / Razón social" registration={register('frm_aseg_nombres_completos', { required: 'Campo requerido' })} type="text" required error={fe('frm_aseg_nombres_completos')} readOnly={locked} />
-            <SelectField label="Tipo de empresa" name="frm_aseg_tipo_empresa" control={form.control} options={OPTIONS.tipoEmpresa} disabled={locked} />
+            <ZdsInput label="Nombre / Razón social" name="frm_aseg_nombres_completos" control={control} rules={{ required: 'Campo requerido' }} required error={fe('frm_aseg_nombres_completos')} readOnly={locked} />
+            <ZdsSelect label="Tipo de empresa" name="frm_aseg_tipo_empresa" control={control} options={OPTIONS.tipoEmpresa} disabled={locked} />
           </div>
 
           <div className="form-row cols-3">
-            <DateField label="Fecha de constitución" registration={register('frm_aseg_fecha_constitucion')} readOnly={locked} />
-            <InputField label="Teléfono" registration={register('frm_aseg_telefono', { pattern: { value: /^\d{7,12}$/, message: 'Teléfono inválido' } })} type="text" error={fe('frm_aseg_telefono')} readOnly={locked} />
-            <InputField label="Correo para facturación" registration={register('frm_aseg_correo_facturacion', { pattern: { value: /^[^\s@]+@[^\s@]+\.[^\s@]+$/, message: 'Correo inválido' } })} type="email" error={fe('frm_aseg_correo_facturacion')} readOnly={locked} />
+            <ZdsDate label="Fecha de constitución" name="frm_aseg_fecha_constitucion" control={control} readOnly={locked} />
+            <ZdsInput label="Teléfono" name="frm_aseg_telefono" control={control} rules={{ pattern: { value: /^\d{7,12}$/, message: 'Teléfono inválido' } }} error={fe('frm_aseg_telefono')} readOnly={locked} />
+            <ZdsInput label="Correo para facturación" name="frm_aseg_correo_facturacion" control={control} rules={{ pattern: { value: /^[^\s@]+@[^\s@]+\.[^\s@]+$/, message: 'Correo inválido' } }} inputType="email" error={fe('frm_aseg_correo_facturacion')} readOnly={locked} />
           </div>
 
           <div className="form-row cols-3">
-            <SelectField label="Departamento" name="frm_aseg_departamento" control={form.control} options={departamentos} loading={loadingDep} disabled={locked} />
-            <SelectField label="Municipio" name="frm_aseg_municipio" control={form.control} options={municipios} loading={loadingMun} placeholder={w.frm_aseg_departamento ? 'Seleccione...' : 'Seleccione un departamento primero'} disabled={locked} />
-            <InputField label="Dirección" registration={register('frm_aseg_direccion', { required: 'Campo requerido' })} type="text" required error={fe('frm_aseg_direccion')} readOnly={locked} />
+            <ZdsSelect label="Departamento" name="frm_aseg_departamento" control={control} options={departamentos} loading={loadingDep} disabled={locked} />
+            <ZdsSelect label="Municipio" name="frm_aseg_municipio" control={control} options={municipios} loading={loadingMun} placeholder={w.frm_aseg_departamento ? 'Seleccione...' : 'Seleccione un departamento primero'} disabled={locked} />
+            <ZdsInput label="Dirección" name="frm_aseg_direccion" control={control} rules={{ required: 'Campo requerido' }} required error={fe('frm_aseg_direccion')} readOnly={locked} />
           </div>
 
           <div className="form-row cols-1">
-            <InputField label="Actividad comercial" registration={register('frm_aseg_actividad_comercial', { required: 'Campo requerido' })} type="text" required error={fe('frm_aseg_actividad_comercial')} />
+            <ZdsInput label="Actividad comercial" name="frm_aseg_actividad_comercial" control={control} rules={{ required: 'Campo requerido' }} required error={fe('frm_aseg_actividad_comercial')} />
           </div>
         </>
       )}
@@ -439,7 +437,7 @@ function InfoAsegurado({
 // Sección: Datos de la Cotización (pantalla 103)
 // ---------------------------------------------------------------------------
 function DatosCotizacion({ form }: { form: Form }) {
-  const { register, formState: { errors, isSubmitted }, watch, setValue } = form;
+  const { control, formState: { errors, isSubmitted }, watch, setValue } = form;
   const w = watch();
   const fe = (n: keyof SolicitudCotizacionFormData) =>
     fieldError(errors[n] as FieldError | undefined, w[n], isSubmitted);
@@ -470,36 +468,36 @@ function DatosCotizacion({ form }: { form: Form }) {
   return (
     <FormSection title="Datos de la Cotización">
       <div className="form-row cols-3">
-        <DateField label="Inicio de vigencia" registration={register('frm_cot_fecha_inicio_vigencia', { required: 'Campo requerido' })} required helper="a las 00:00 horas" error={fe('frm_cot_fecha_inicio_vigencia')} />
-        <DateField label="Fin de vigencia" registration={register('frm_cot_fecha_fin_vigencia')} readOnly helper="a las 24:00 horas" />
-        <InputField label="Días" registration={register('frm_cot_dias_inicio_fin_vigencia')} type="number" readOnly />
+        <ZdsDate label="Inicio de vigencia" name="frm_cot_fecha_inicio_vigencia" control={control} rules={{ required: 'Campo requerido' }} required helpText="a las 00:00 horas" error={fe('frm_cot_fecha_inicio_vigencia')} />
+        <ZdsDate label="Fin de vigencia" name="frm_cot_fecha_fin_vigencia" control={control} readOnly helpText="a las 24:00 horas" />
+        <ZdsInput label="Días" name="frm_cot_dias_inicio_fin_vigencia" control={control} readOnly />
       </div>
 
       <div className="form-row cols-1">
-        <SelectField label="Actividad del asegurado principal (NAIC)" name="frm_cot_actividad_naic" control={form.control} rules={{ required: 'Campo requerido' }} options={naicOptions} loading={loadingNaic} required error={fe('frm_cot_actividad_naic')} />
+        <ZdsSelect label="Actividad del asegurado principal (NAIC)" name="frm_cot_actividad_naic" control={control} rules={{ required: 'Campo requerido' }} options={naicOptions} loading={loadingNaic} required error={fe('frm_cot_actividad_naic')} />
       </div>
 
       <div className="form-row cols-3">
-        <InputField label="Código NAIC" registration={register('frm_cot_codigo_naic')} type="text" readOnly helper="Auto" />
-        <InputField label="Nombre actividad" registration={register('frm_cot_nombre_ciiu')} type="text" readOnly helper="Auto" />
-        <SelectField label="Moneda" name="frm_cot_moneda" control={form.control} rules={{ required: 'Campo requerido' }} options={OPTIONS.moneda} required error={fe('frm_cot_moneda')} />
+        <ZdsInput label="Código NAIC" name="frm_cot_codigo_naic" control={control} readOnly helpText="Auto" />
+        <ZdsInput label="Nombre actividad" name="frm_cot_nombre_ciiu" control={control} readOnly helpText="Auto" />
+        <ZdsSelect label="Moneda" name="frm_cot_moneda" control={control} rules={{ required: 'Campo requerido' }} options={OPTIONS.moneda} required error={fe('frm_cot_moneda')} />
       </div>
 
       <div className="form-row cols-2">
-        <InputField label="Ingresos operacionales anuales" registration={register('frm_cot_ingresos_operaciones_anuales', { required: 'Campo requerido', min: { value: 1, message: 'Debe ser mayor a 0' } })} type="number" required error={fe('frm_cot_ingresos_operaciones_anuales')} />
-        <InputField label="Ingresos proyectados anuales" registration={register('frm_cot_ingresos_proyectados_anuales', { required: 'Campo requerido', min: { value: 1, message: 'Debe ser mayor a 0' } })} type="number" required error={fe('frm_cot_ingresos_proyectados_anuales')} />
+        <ZdsInput label="Ingresos operacionales anuales" name="frm_cot_ingresos_operaciones_anuales" control={control} rules={{ required: 'Campo requerido', min: { value: 1, message: 'Debe ser mayor a 0' } }} required error={fe('frm_cot_ingresos_operaciones_anuales')} />
+        <ZdsInput label="Ingresos proyectados anuales" name="frm_cot_ingresos_proyectados_anuales" control={control} rules={{ required: 'Campo requerido', min: { value: 1, message: 'Debe ser mayor a 0' } }} required error={fe('frm_cot_ingresos_proyectados_anuales')} />
       </div>
 
       <div className="form-row cols-3">
-        <SelectField label="Modalidad de cobertura" name="frm_cot_modalidad_cobertura" control={form.control} rules={{ required: 'Campo requerido' }} options={OPTIONS.modalidadCobertura} required error={fe('frm_cot_modalidad_cobertura')} />
-        <SelectField label="Periodicidad" name="frm_cot_periodicidad" control={form.control} options={OPTIONS.periodicidad} />
-        <SelectField label="Siniestralidad" name="frm_cot_siniestralidad_flag" control={form.control} options={OPTIONS.siNo} />
+        <ZdsSelect label="Modalidad de cobertura" name="frm_cot_modalidad_cobertura" control={control} rules={{ required: 'Campo requerido' }} options={OPTIONS.modalidadCobertura} required error={fe('frm_cot_modalidad_cobertura')} />
+        <ZdsSelect label="Periodicidad" name="frm_cot_periodicidad" control={control} options={OPTIONS.periodicidad} />
+        <ZdsSelect label="Siniestralidad" name="frm_cot_siniestralidad_flag" control={control} options={OPTIONS.siNo} />
       </div>
 
       {w.frm_cot_siniestralidad_flag === 'SI' && (
         <div className="form-row cols-2">
-          <DateField label="Siniestralidad reportada desde" registration={register('frm_cot_siniestralidad_fecha_desde')} />
-          <DateField label="Siniestralidad reportada hasta" registration={register('frm_cot_siniestralidad_fecha_hasta')} />
+          <ZdsDate label="Siniestralidad reportada desde" name="frm_cot_siniestralidad_fecha_desde" control={control} />
+          <ZdsDate label="Siniestralidad reportada hasta" name="frm_cot_siniestralidad_fecha_hasta" control={control} />
         </div>
       )}
     </FormSection>
@@ -518,12 +516,12 @@ function PlanPago({ form }: { form: Form }) {
   return (
     <FormSection title="Plan de Pago">
       <div className="form-row cols-2">
-        <SelectField label="Plan de pago" name="frm_plan_pago" control={form.control} rules={{ required: 'Campo requerido' }} options={OPTIONS.planPago} required error={fe('frm_plan_pago')} />
-        <SelectField label="Número de cuotas" name="frm_plan_pago_num_cuotas" control={form.control} rules={{ required: 'Campo requerido' }} options={OPTIONS.numCuotas} required error={fe('frm_plan_pago_num_cuotas')} />
+        <ZdsSelect label="Plan de pago" name="frm_plan_pago" control={form.control} rules={{ required: 'Campo requerido' }} options={OPTIONS.planPago} required error={fe('frm_plan_pago')} />
+        <ZdsSelect label="Número de cuotas" name="frm_plan_pago_num_cuotas" control={form.control} rules={{ required: 'Campo requerido' }} options={OPTIONS.numCuotas} required error={fe('frm_plan_pago_num_cuotas')} />
       </div>
       <div className="form-row cols-2">
-        <SelectField label="Método de pago" name="frm_plan_pago_metodo_pago" control={form.control} rules={{ required: 'Campo requerido' }} options={OPTIONS.metodoPago} required error={fe('frm_plan_pago_metodo_pago')} />
-        <SelectField label="Frecuencia de cobro" name="frm_plan_pago_frecuencia_cobro" control={form.control} rules={{ required: 'Campo requerido' }} options={OPTIONS.frecuenciaCobro} required error={fe('frm_plan_pago_frecuencia_cobro')} />
+        <ZdsSelect label="Método de pago" name="frm_plan_pago_metodo_pago" control={form.control} rules={{ required: 'Campo requerido' }} options={OPTIONS.metodoPago} required error={fe('frm_plan_pago_metodo_pago')} />
+        <ZdsSelect label="Frecuencia de cobro" name="frm_plan_pago_frecuencia_cobro" control={form.control} rules={{ required: 'Campo requerido' }} options={OPTIONS.frecuenciaCobro} required error={fe('frm_plan_pago_frecuencia_cobro')} />
       </div>
     </FormSection>
   );
@@ -541,9 +539,9 @@ function RevisionMora({ form }: { form: Form }) {
   return (
     <FormSection title="Revisión Mora">
       <div className="form-row cols-2">
-        <SelectField label="¿El cliente se encuentra en mora?" name="frm_revision_mora_cliente_mora" control={form.control} rules={{ required: 'Campo requerido' }} options={OPTIONS.clienteMora} required error={fe('frm_revision_mora_cliente_mora')} />
+        <ZdsSelect label="¿El cliente se encuentra en mora?" name="frm_revision_mora_cliente_mora" control={form.control} rules={{ required: 'Campo requerido' }} options={OPTIONS.clienteMora} required error={fe('frm_revision_mora_cliente_mora')} />
         {w.frm_revision_mora_cliente_mora === 'SI' && (
-          <SelectField label="Decisión" name="frm_revision_mora_decision" control={form.control} rules={{ required: 'Campo requerido' }} options={OPTIONS.decisionMora} required error={fe('frm_revision_mora_decision')} />
+          <ZdsSelect label="Decisión" name="frm_revision_mora_decision" control={form.control} rules={{ required: 'Campo requerido' }} options={OPTIONS.decisionMora} required error={fe('frm_revision_mora_decision')} />
         )}
       </div>
       <div className="form-row cols-1">

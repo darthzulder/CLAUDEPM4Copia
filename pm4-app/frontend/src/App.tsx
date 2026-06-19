@@ -15,6 +15,7 @@ import RecibirQueja from './screens/recibir-queja/RecibirQueja';
 import RevisarErrorTecnico from './screens/revisar-error-tecnico/RevisarErrorTecnico';
 import CorregirDatosFormulario from './screens/corregir-datos-formulario/CorregirDatosFormulario';
 import CorregirErrorFuncionalSS from './screens/corregir-error-funcional-ss/CorregirErrorFuncionalSS';
+import RevisarQuejaAsignar from './screens/revisar-queja-asignar/RevisarQuejaAsignar';
 
 class ErrorBoundary extends Component<{ children: ReactNode }, { error: Error | null }> {
   state = { error: null };
@@ -51,6 +52,7 @@ const SCREENS: Record<string, React.ComponentType> = {
   'revisar-error-tecnico': RevisarErrorTecnico,
   'corregir-datos-formulario': CorregirDatosFormulario,
   'corregir-error-funcional-ss': CorregirErrorFuncionalSS,
+  'revisar-queja-asignar': RevisarQuejaAsignar,
 };
 
 const DEBUG_BANNER_STYLE: React.CSSProperties = {
@@ -60,10 +62,60 @@ const DEBUG_BANNER_STYLE: React.CSSProperties = {
   letterSpacing: '.4px', pointerEvents: 'none',
 };
 
+function ScreenIndex() {
+  return (
+    <div style={{ minHeight: '100vh', background: '#f7f9fc', fontFamily: 'sans-serif', padding: '40px 32px' }}>
+      <div style={{ maxWidth: 800, margin: '0 auto' }}>
+        <div style={{ marginBottom: 32 }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 8 }}>
+            <div style={{ width: 6, height: 32, background: '#2167AE', borderRadius: 3 }} />
+            <h1 style={{ margin: 0, fontSize: 24, fontWeight: 700, color: '#1a1a2e' }}>PM4 Screens</h1>
+          </div>
+          <p style={{ margin: '0 0 0 18px', color: '#6b7280', fontSize: 14 }}>
+            {Object.keys(SCREENS).length} pantallas disponibles
+          </p>
+        </div>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(220px, 1fr))', gap: 12 }}>
+          {Object.keys(SCREENS).map((key) => (
+            <a
+              key={key}
+              href={`?screen=${key}`}
+              style={{
+                display: 'block', padding: '14px 16px', background: '#fff',
+                border: '1.5px solid #e5e7eb', borderRadius: 8, textDecoration: 'none',
+                color: '#1a1a2e', fontSize: 13, fontWeight: 500, transition: 'all .15s',
+                boxShadow: '0 1px 3px rgba(0,0,0,.06)',
+              }}
+              onMouseEnter={e => {
+                (e.currentTarget as HTMLAnchorElement).style.borderColor = '#2167AE';
+                (e.currentTarget as HTMLAnchorElement).style.color = '#2167AE';
+                (e.currentTarget as HTMLAnchorElement).style.boxShadow = '0 4px 12px rgba(33,103,174,.15)';
+              }}
+              onMouseLeave={e => {
+                (e.currentTarget as HTMLAnchorElement).style.borderColor = '#e5e7eb';
+                (e.currentTarget as HTMLAnchorElement).style.color = '#1a1a2e';
+                (e.currentTarget as HTMLAnchorElement).style.boxShadow = '0 1px 3px rgba(0,0,0,.06)';
+              }}
+            >
+              <span style={{ display: 'block', color: '#9ca3af', fontSize: 11, marginBottom: 4, fontFamily: 'monospace' }}>
+                ?screen=
+              </span>
+              {key}
+            </a>
+          ))}
+        </div>
+      </div>
+    </div>
+  );
+}
+
 export default function App() {
   const params = new URLSearchParams(window.location.search);
-  const screen = params.get('screen') ?? 'cotizador-fast-flow';
+  const screen = params.get('screen');
   const usingDebugToken = !params.get('token') && !!import.meta.env.VITE_PM4_TOKEN;
+
+  if (!screen) return <ScreenIndex />;
+
   const Screen = SCREENS[screen];
 
   if (!Screen) {
@@ -71,6 +123,7 @@ export default function App() {
       <div style={{ padding: 32, fontFamily: 'sans-serif' }}>
         <h2>Pantalla no encontrada: <code>{screen}</code></h2>
         <p>Pantallas disponibles: {Object.keys(SCREENS).join(', ')}</p>
+        <a href="/" style={{ color: '#2167AE' }}>← Volver al índice</a>
       </div>
     );
   }

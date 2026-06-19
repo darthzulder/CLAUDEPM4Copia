@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useTask } from '../../core/useTask';
-import { ZrButton } from '@zurich/web-components/react/button';
+import { ZrButton } from '../../components/fields/ZdsFields';
 import zurichLogo from '../../resources/zurich/ZurichLogo_Horz_White_CMYK_no_R.png';
 import { type EstadoCorreoData } from './variables';
 import './styles.css';

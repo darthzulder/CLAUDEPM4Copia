@@ -3,9 +3,7 @@ import { useForm } from 'react-hook-form';
 import './styles.css';
 import { useTask } from '../../core/useTask';
 import FormSection from '../../components/FormSection';
-import InputField from '../../components/fields/InputField';
-import SelectField from '../../components/fields/SelectField';
-import RadioField from '../../components/fields/RadioField';
+import { ZdsInput, ZdsSelect, ZdsTextarea, ZdsRadio } from '../../components/fields/ZdsFields';
 import { OPTIONS, CorregirDatosFormData } from './variables';
 import SeccionErroresValidacion from './SeccionErroresValidacion';
 
@@ -25,7 +23,7 @@ export default function CorregirDatosFormulario() {
     defaultValues: { qd_codigoPais: '170', cf_decision: 'REENVIAR' },
   });
 
-  const { register, control, watch, handleSubmit, reset, formState: { errors, isSubmitted } } = form;
+  const { control, watch, handleSubmit, reset, formState: { errors, isSubmitted } } = form;
   const w = watch();
 
   useEffect(() => {
@@ -93,25 +91,23 @@ export default function CorregirDatosFormulario() {
         <SeccionErroresValidacion form={form} />
 
         {/* ── Sección 2: Datos del Consumidor ── */}
-        <FormSection title="👤 Datos del Consumidor">
+        <FormSection title="Datos del Consumidor">
           <div className="warn-banner">
-            ⚠ Revise y corrija los campos marcados con error. Los cambios reemplazarán los datos del paso P01-T01.
+            Revise y corrija los campos marcados con error. Los cambios reemplazarán los datos del paso P01-T01.
           </div>
 
           <div className="form-row cols-3">
             <div className="form-group" style={{ gridColumn: 'span 2' }}>
-              <InputField
+              <ZdsInput
+                name="qd_nombreConsumidor"
+                control={control}
                 label="Nombre Completo del Consumidor"
-                registration={register('qd_nombreConsumidor', {
-                  required: 'Campo requerido',
-                  maxLength: { value: 200, message: 'Máximo 200 caracteres' },
-                })}
                 required
                 error={err('qd_nombreConsumidor')}
-                placeholder="Nombre y apellidos"
+                rules={{ required: 'Campo requerido', maxLength: { value: 200, message: 'Máximo 200 caracteres' } }}
               />
             </div>
-            <SelectField
+            <ZdsSelect
               label="Tipo de Persona"
               name="qd_tipoPersona"
               control={control}
@@ -123,7 +119,7 @@ export default function CorregirDatosFormulario() {
           </div>
 
           <div className="form-row cols-3">
-            <SelectField
+            <ZdsSelect
               label="Tipo de Identificación"
               name="qd_tipoIdentificacion"
               control={control}
@@ -132,52 +128,49 @@ export default function CorregirDatosFormulario() {
               required
               error={err('qd_tipoIdentificacion')}
             />
-            <InputField
+            <ZdsInput
+              name="qd_numeroIdentificacion"
+              control={control}
               label="Número de Identificación"
-              registration={register('qd_numeroIdentificacion', {
-                required: 'Campo requerido',
-                maxLength: { value: 20, message: 'Máximo 20 caracteres' },
-              })}
               required
               error={err('qd_numeroIdentificacion')}
-              placeholder="Número de documento"
+              rules={{ required: 'Campo requerido', maxLength: { value: 20, message: 'Máximo 20 caracteres' } }}
             />
-            <InputField
+            <ZdsInput
+              name="qd_correoElectronico"
+              control={control}
               label="Correo Electrónico"
-              registration={register('qd_correoElectronico', {
-                required: 'Campo requerido',
-                pattern: { value: /^[^\s@]+@[^\s@]+\.[^\s@]+$/, message: 'Correo inválido' },
-              })}
               required
               error={err('qd_correoElectronico')}
-              placeholder="consumidor@ejemplo.com"
+              inputType="email"
+              rules={{ required: 'Campo requerido', pattern: { value: /^[^\s@]+@[^\s@]+\.[^\s@]+$/, message: 'Correo inválido' } }}
             />
           </div>
 
           <div className="form-row cols-3">
-            <SelectField
+            <ZdsSelect
               label="País"
               name="qd_codigoPais"
               control={control}
               options={OPTIONS.codigoPais}
             />
-            <InputField
+            <ZdsInput
+              name="qd_departamento"
+              control={control}
               label="Departamento"
-              registration={register('qd_departamento')}
-              placeholder="Ej. Bogotá D.C."
             />
-            <InputField
+            <ZdsInput
+              name="qd_municipio"
+              control={control}
               label="Municipio"
-              registration={register('qd_municipio')}
-              placeholder="Ej. Bogotá"
             />
           </div>
         </FormSection>
 
         {/* ── Sección 3: Clasificación de la Queja ── */}
-        <FormSection title="📋 Clasificación de la Queja">
+        <FormSection title="Clasificación de la Queja">
           <div className="form-row cols-2">
-            <SelectField
+            <ZdsSelect
               label="Producto SFC"
               name="qd_productoSFC"
               control={control}
@@ -186,7 +179,7 @@ export default function CorregirDatosFormulario() {
               required
               error={err('qd_productoSFC')}
             />
-            <SelectField
+            <ZdsSelect
               label="Motivo SFC"
               name="qd_motivoSFC"
               control={control}
@@ -198,7 +191,7 @@ export default function CorregirDatosFormulario() {
           </div>
 
           <div className="form-row cols-3">
-            <SelectField
+            <ZdsSelect
               label="Tipo de Solicitud"
               name="qd_tipoSolicitud"
               control={control}
@@ -207,7 +200,7 @@ export default function CorregirDatosFormulario() {
               required
               error={err('qd_tipoSolicitud')}
             />
-            <SelectField
+            <ZdsSelect
               label="Instancia de Recepción"
               name="qd_instanciaRecepcion"
               control={control}
@@ -216,7 +209,7 @@ export default function CorregirDatosFormulario() {
               required
               error={err('qd_instanciaRecepcion')}
             />
-            <SelectField
+            <ZdsSelect
               label="Punto de Recepción"
               name="qd_puntoRecepcion"
               control={control}
@@ -228,7 +221,7 @@ export default function CorregirDatosFormulario() {
           </div>
 
           <div className="form-row cols-2">
-            <SelectField
+            <ZdsSelect
               label="Admisión"
               name="qd_admision"
               control={control}
@@ -237,7 +230,7 @@ export default function CorregirDatosFormulario() {
               required
               error={err('qd_admision')}
             />
-            <SelectField
+            <ZdsSelect
               label="Ente de Control"
               name="qd_enteControl"
               control={control}
@@ -249,46 +242,37 @@ export default function CorregirDatosFormulario() {
           </div>
 
           <div className="form-row cols-1">
-            <InputField
+            <ZdsInput
+              name="qd_asunto"
+              control={control}
               label="Asunto"
-              registration={register('qd_asunto', {
-                required: 'Campo requerido',
-                maxLength: { value: 300, message: 'Máximo 300 caracteres' },
-              })}
               required
               error={err('qd_asunto')}
-              placeholder="Resumen breve de la queja"
+              rules={{ required: 'Campo requerido', maxLength: { value: 300, message: 'Máximo 300 caracteres' } }}
             />
           </div>
 
           <div className="form-row cols-1">
-            <div className="form-group">
-              <label className="form-label">
-                <span className="required-star">* </span>Descripción de la Queja
-              </label>
-              <textarea
-                {...register('qd_descripcionQueja', {
-                  required: 'Campo requerido',
-                  maxLength: { value: 4000, message: 'Máximo 4000 caracteres' },
-                })}
-                className={`form-control textarea${errors.qd_descripcionQueja ? ' is-invalid' : ''}`}
-                placeholder="Descripción detallada de los hechos de la queja"
-                rows={4}
-              />
-              {isSubmitted && errors.qd_descripcionQueja && (
-                <div className="invalid-feedback">{String(errors.qd_descripcionQueja.message)}</div>
-              )}
-            </div>
+            <ZdsTextarea
+              name="qd_descripcionQueja"
+              control={control}
+              label="Descripción de la Queja"
+              required
+              error={isSubmitted ? err('qd_descripcionQueja') : undefined}
+              rules={{ required: 'Campo requerido', maxLength: { value: 4000, message: 'Máximo 4000 caracteres' } }}
+              maxLength={4000}
+            />
           </div>
         </FormSection>
 
         {/* ── Sección 4: Decisión ── */}
-        <FormSection title="✅ Decisión">
+        <FormSection title="Decisión">
           <div className="form-row cols-1">
-            <RadioField
+            <ZdsRadio
               label="¿Qué desea hacer con los datos corregidos?"
               name="cf_decision"
-              registration={register('cf_decision', { required: 'Campo requerido' })}
+              control={control}
+              rules={{ required: 'Campo requerido' }}
               options={OPTIONS.decision}
               required
               error={err('cf_decision')}
@@ -297,30 +281,24 @@ export default function CorregirDatosFormulario() {
 
           {w.cf_decision === 'REENVIAR' && (
             <div className="info-banner">
-              ℹ Al confirmar, el sistema volverá a ejecutar la validación preventiva con los datos corregidos y, si pasa, registrará la queja ante SmartSupervision.
+              Al confirmar, el sistema volverá a ejecutar la validación preventiva con los datos corregidos y, si pasa, registrará la queja ante SmartSupervision.
             </div>
           )}
           {w.cf_decision === 'ESCALAR' && (
             <div className="warn-banner">
-              ⚠ La queja será asignada a un supervisor para revisión y radicación manual ante SmartSupervision. Incluya observaciones que justifiquen el escalamiento.
+              La queja será asignada a un supervisor para revisión y radicación manual ante SmartSupervision. Incluya observaciones que justifiquen el escalamiento.
             </div>
           )}
 
           <div className="form-row cols-1">
-            <div className="form-group">
-              <label className="form-label">Observaciones de Corrección</label>
-              <textarea
-                {...register('cf_observacionesCorreccion', {
-                  maxLength: { value: 2000, message: 'Máximo 2000 caracteres' },
-                })}
-                className={`form-control textarea${errors.cf_observacionesCorreccion ? ' is-invalid' : ''}`}
-                placeholder="Describa los cambios realizados o el motivo del escalamiento"
-                rows={3}
-              />
-              {errors.cf_observacionesCorreccion && (
-                <div className="invalid-feedback">{String(errors.cf_observacionesCorreccion.message)}</div>
-              )}
-            </div>
+            <ZdsTextarea
+              name="cf_observacionesCorreccion"
+              control={control}
+              label="Observaciones de Corrección"
+              error={err('cf_observacionesCorreccion')}
+              rules={{ maxLength: { value: 2000, message: 'Máximo 2000 caracteres' } }}
+              maxLength={2000}
+            />
           </div>
         </FormSection>
 

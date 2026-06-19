@@ -4,10 +4,7 @@ import './styles.css';
 import { useTask } from '../../core/useTask';
 import { useCollection } from '../../core/useCollection';
 import FormSection from '../../components/FormSection';
-import InputField from '../../components/fields/InputField';
-import SelectField from '../../components/fields/SelectField';
-import RadioField from '../../components/fields/RadioField';
-import DateField from '../../components/fields/DateField';
+import { ZdsInput, ZdsSelect, ZdsRadio, ZdsDate } from '../../components/fields/ZdsFields';
 import pm4 from '../../api/pm4Client';
 import { OPTIONS, COLLECTION_DEFS, CotizadorFormData, CONSULTAR_CLIENTE_SCRIPT_ID, parseClienteTia } from './variables';
 
@@ -42,7 +39,7 @@ function ZurichLogo() {
 // Sección: Información general
 // ---------------------------------------------------------------------------
 function InfoGeneral({ form }: { form: ReturnType<typeof useForm<CotizadorFormData>> }) {
-  const { register, formState: { errors, isSubmitted }, watch } = form;
+  const { control, formState: { errors, isSubmitted }, watch } = form;
   const w = watch();
 
   const { options: intermediarios, loading: loadingInt } = useCollection(
@@ -59,15 +56,16 @@ function InfoGeneral({ form }: { form: ReturnType<typeof useForm<CotizadorFormDa
   return (
     <FormSection title="Información General">
       <div className="form-row cols-2">
-        <DateField
+        <ZdsDate
           label="Fecha de cotización"
-          registration={register('frm_gen_fecha_cotizacion')}
+          name="frm_gen_fecha_cotizacion"
+          control={control}
           readOnly
         />
-        <SelectField
+        <ZdsSelect
           label="Producto"
           name="frm_gen_producto"
-          control={form.control}
+          control={control}
           rules={{ required: 'Campo requerido' }}
           options={OPTIONS.producto}
           required
@@ -76,19 +74,19 @@ function InfoGeneral({ form }: { form: ReturnType<typeof useForm<CotizadorFormDa
       </div>
 
       <div className="form-row cols-2">
-        <SelectField
+        <ZdsSelect
           label="Sucursal"
           name="frm_gen_sucursal"
-          control={form.control}
+          control={control}
           rules={{ required: 'Campo requerido' }}
           options={OPTIONS.sucursal}
           required
           error={fe('frm_gen_sucursal')}
         />
-        <SelectField
+        <ZdsSelect
           label="Nueva/Renovación"
           name="frm_gen_nueva_o_renovacion"
-          control={form.control}
+          control={control}
           rules={{ required: 'Campo requerido' }}
           options={OPTIONS.nuevaRenovacion}
           required
@@ -97,20 +95,20 @@ function InfoGeneral({ form }: { form: ReturnType<typeof useForm<CotizadorFormDa
       </div>
 
       <div className="form-row cols-3">
-        <SelectField
+        <ZdsSelect
           label="Intermediario"
           name="frm_gen_intermediario_principal"
-          control={form.control}
+          control={control}
           rules={{ required: 'Campo requerido' }}
           options={intermediarios}
           loading={loadingInt}
           required
           error={fe('frm_gen_intermediario_principal')}
         />
-        <SelectField
+        <ZdsSelect
           label="Correo Intermediario"
           name="frm_gen_intermediario_principal_correo_test"
-          control={form.control}
+          control={control}
           rules={{ required: 'Campo requerido' }}
           options={correos}
           loading={loadingCorreos}
@@ -118,10 +116,11 @@ function InfoGeneral({ form }: { form: ReturnType<typeof useForm<CotizadorFormDa
           required
           error={fe('frm_gen_intermediario_principal_correo_test')}
         />
-        <RadioField
+        <ZdsRadio
           label="¿Incluye co-corretaje?"
           name="frm_gen_incluye_cocorretaje_flag"
-          registration={register('frm_gen_incluye_cocorretaje_flag', { required: 'Campo requerido' })}
+          control={control}
+          rules={{ required: 'Campo requerido' }}
           options={OPTIONS.siNo}
           required
           error={fe('frm_gen_incluye_cocorretaje_flag')}
@@ -129,16 +128,18 @@ function InfoGeneral({ form }: { form: ReturnType<typeof useForm<CotizadorFormDa
       </div>
 
       <div className="form-row cols-1">
-        <InputField
+        <ZdsInput
           label="Correo intermediario (para pruebas)"
-          registration={register('frm_gen_intermediario_principal_correo', {
+          name="frm_gen_intermediario_principal_correo"
+          control={control}
+          rules={{
             pattern: {
               value: /^[^\s@]+@[^\s@]+\.[^\s@]+$/,
               message: 'Correo electrónico inválido',
             },
-          })}
-          type="email"
-          helper="Campo para pruebas. Para producción se utilizará el campo anterior."
+          }}
+          inputType="email"
+          helpText="Campo para pruebas. Para producción se utilizará el campo anterior."
           error={fe('frm_gen_intermediario_principal_correo')}
         />
       </div>
@@ -160,7 +161,7 @@ function InfoTomador({
   consultarLoading: boolean;
   tiaFilledFields: Set<string>;
 }) {
-  const { register, formState: { errors, isSubmitted }, watch } = form;
+  const { control, formState: { errors, isSubmitted }, watch } = form;
   const w = watch();
   const fromTia = (f: keyof CotizadorFormData) => tiaFilledFields.has(f);
 
@@ -172,21 +173,22 @@ function InfoTomador({
       <div className="form-subsection">
         <div className="form-subsection-title">Información del tomador</div>
         <div className="form-row cols-3 row-align-bottom">
-          <SelectField
+          <ZdsSelect
             label="Tipo de documento"
             name="frm_tomador_tipo_documento"
-            control={form.control}
+            control={control}
             options={OPTIONS.tipoDocumento}
             disabled
           />
-          <InputField
+          <ZdsInput
             label="Nro. de documento"
-            registration={register('frm_tomador_numDoc', {
+            name="frm_tomador_numDoc"
+            control={control}
+            rules={{
               required: 'Campo requerido',
               minLength: { value: 5, message: 'Mínimo 5 caracteres' },
               pattern: { value: /^\d+$/, message: 'Solo dígitos' },
-            })}
-            type="text"
+            }}
             required
             error={fe('frm_tomador_numDoc')}
           />
@@ -198,26 +200,29 @@ function InfoTomador({
         </div>
 
         <div className="form-row cols-1">
-          <InputField
+          <ZdsInput
             label="Tomador"
-            registration={register('frm_tomador_tomador')}
+            name="frm_tomador_tomador"
+            control={control}
             readOnly={fromTia('frm_tomador_tomador')}
-            helper={fromTia('frm_tomador_tomador') ? 'Dato de TIA' : undefined}
+            helpText={fromTia('frm_tomador_tomador') ? 'Dato de TIA' : undefined}
           />
         </div>
         <div className="form-row cols-2">
-          <InputField
+          <ZdsInput
             label="Dirección"
-            registration={register('frm_tomador_direccion')}
+            name="frm_tomador_direccion"
+            control={control}
             readOnly={fromTia('frm_tomador_direccion')}
-            helper={fromTia('frm_tomador_direccion') ? 'Dato de TIA' : undefined}
+            helpText={fromTia('frm_tomador_direccion') ? 'Dato de TIA' : undefined}
           />
-          <InputField
+          <ZdsInput
             label="Correo de facturación"
-            registration={register('frm_tomador_correo_facturacion')}
-            type="email"
+            name="frm_tomador_correo_facturacion"
+            control={control}
+            inputType="email"
             readOnly={fromTia('frm_tomador_correo_facturacion')}
-            helper={fromTia('frm_tomador_correo_facturacion') ? 'Dato de TIA' : undefined}
+            helpText={fromTia('frm_tomador_correo_facturacion') ? 'Dato de TIA' : undefined}
           />
         </div>
       </div>
@@ -225,28 +230,29 @@ function InfoTomador({
       <div className="section-spacer" />
 
       <div className="form-row cols-3">
-        <SelectField
+        <ZdsSelect
           label="Territorialidad"
           name="frm_tom_territorialidad"
-          control={form.control}
+          control={control}
           rules={{ required: 'Campo requerido' }}
           options={[]}
           required
           error={fe('frm_tom_territorialidad')}
         />
-        <SelectField
+        <ZdsSelect
           label="N° de ubicaciones"
           name="frm_tom_num_ubicaciones"
-          control={form.control}
+          control={control}
           rules={{ required: 'Campo requerido' }}
           options={[]}
           required
           error={fe('frm_tom_num_ubicaciones')}
         />
-        <RadioField
+        <ZdsRadio
           label="Realiza exportaciones"
           name="frm_tom_realiza_exportaciones"
-          registration={register('frm_tom_realiza_exportaciones', { required: 'Campo requerido' })}
+          control={control}
+          rules={{ required: 'Campo requerido' }}
           options={OPTIONS.siNo}
           required
           error={fe('frm_tom_realiza_exportaciones')}
@@ -254,10 +260,11 @@ function InfoTomador({
       </div>
 
       <div className="form-row cols-1">
-        <RadioField
+        <ZdsRadio
           label="¿El tomador es el asegurado?"
           name="frm_tom_es_asegurado"
-          registration={register('frm_tom_es_asegurado', { required: 'Campo requerido' })}
+          control={control}
+          rules={{ required: 'Campo requerido' }}
           options={OPTIONS.siNo}
           required
           error={fe('frm_tom_es_asegurado')}
@@ -271,7 +278,7 @@ function InfoTomador({
 // Sección: Datos de la cotización
 // ---------------------------------------------------------------------------
 function DatosCotizacion({ form }: { form: ReturnType<typeof useForm<CotizadorFormData>> }) {
-  const { register, formState: { errors, isSubmitted }, watch, setValue } = form;
+  const { control, formState: { errors, isSubmitted }, watch, setValue } = form;
   const w = watch();
 
   const { options: naicOptions, loading: loadingNaic } = useCollection(
@@ -295,59 +302,64 @@ function DatosCotizacion({ form }: { form: ReturnType<typeof useForm<CotizadorFo
   return (
     <FormSection title="Datos de la Cotización">
       <div className="form-row cols-2">
-        <DateField
+        <ZdsDate
           label="Inicio de vigencia"
-          registration={register('frm_cot_fecha_inicio_vigencia', { required: 'Campo requerido' })}
+          name="frm_cot_fecha_inicio_vigencia"
+          control={control}
+          rules={{ required: 'Campo requerido' }}
           required
-          helper="a las 00:00 horas"
+          helpText="a las 00:00 horas"
           error={fe('frm_cot_fecha_inicio_vigencia')}
         />
-        <DateField
+        <ZdsDate
           label="Fin de vigencia"
-          registration={register('frm_cot_fecha_fin_vigencia')}
+          name="frm_cot_fecha_fin_vigencia"
+          control={control}
           readOnly
-          helper="a las 24:00 horas"
+          helpText="a las 24:00 horas"
         />
       </div>
 
       <div className="form-row cols-1">
-        <InputField
+        <ZdsInput
           label="Días"
-          registration={register('frm_cot_dias_inicio_fin_vigencia')}
-          type="number"
+          name="frm_cot_dias_inicio_fin_vigencia"
+          control={control}
           readOnly
-          helper="Campo automático"
+          helpText="Campo automático"
         />
       </div>
 
       <div className="form-row cols-2">
-        <InputField
+        <ZdsInput
           label="Ingresos operacionales anuales"
-          registration={register('frm_cot_ingresos_operaciones_anuales', {
+          name="frm_cot_ingresos_operaciones_anuales"
+          control={control}
+          rules={{
             required: 'Campo requerido',
             min: { value: 1, message: 'Debe ser mayor a 0' },
-          })}
-          type="number"
+          }}
           required
           error={fe('frm_cot_ingresos_operaciones_anuales')}
         />
-        <InputField
+        <ZdsInput
           label="Ingresos proyectados anuales"
-          registration={register('frm_cot_ingresos_proyectados_anuales', {
+          name="frm_cot_ingresos_proyectados_anuales"
+          control={control}
+          rules={{
             required: 'Campo requerido',
             min: { value: 1, message: 'Debe ser mayor a 0' },
-          })}
-          type="number"
+          }}
           required
           error={fe('frm_cot_ingresos_proyectados_anuales')}
         />
       </div>
 
       <div className="form-row cols-1">
-        <SelectField
+        <ZdsSelect
           label="Actividad NAIC"
           name="frm_cot_actividad_naic"
-          control={form.control}
+          control={control}
           rules={{ required: 'Campo requerido' }}
           options={naicOptions}
           loading={loadingNaic}
@@ -357,19 +369,20 @@ function DatosCotizacion({ form }: { form: ReturnType<typeof useForm<CotizadorFo
       </div>
 
       <div className="form-row cols-2">
-        <SelectField
+        <ZdsSelect
           label="Modalidad de cobertura"
           name="frm_cot_modalidad_cobertura"
-          control={form.control}
+          control={control}
           rules={{ required: 'Campo requerido' }}
           options={OPTIONS.modalidadCobertura}
           required
           error={fe('frm_cot_modalidad_cobertura')}
         />
-        <RadioField
+        <ZdsRadio
           label="Siniestralidad"
           name="frm_cot_siniestralidad_flag"
-          registration={register('frm_cot_siniestralidad_flag', { required: 'Campo requerido' })}
+          control={control}
+          rules={{ required: 'Campo requerido' }}
           options={OPTIONS.siNo}
           required
           error={fe('frm_cot_siniestralidad_flag')}
@@ -400,7 +413,6 @@ function PropuestaEconomica({ form }: { form: ReturnType<typeof useForm<Cotizado
                 {...register('frm_valor_asegurado_opcion1', {
                   min: { value: 0, message: 'Debe ser 0 o mayor' },
                 })}
-                type="number"
                 step="0.01"
                 className={`form-control${fe('frm_valor_asegurado_opcion1') ? ' is-invalid' : ''}`}
                 defaultValue={0}
@@ -456,7 +468,7 @@ function PlanPago({ form }: { form: ReturnType<typeof useForm<CotizadorFormData>
   return (
     <FormSection title="Plan de Pago">
       <div className="form-row cols-2">
-        <SelectField
+        <ZdsSelect
           label="Plan de pago"
           name="frm_plan_pago"
           control={form.control}
@@ -465,7 +477,7 @@ function PlanPago({ form }: { form: ReturnType<typeof useForm<CotizadorFormData>
           required
           error={fe('frm_plan_pago')}
         />
-        <SelectField
+        <ZdsSelect
           label="Número de cuotas"
           name="frm_num_cuotas"
           control={form.control}
@@ -476,7 +488,7 @@ function PlanPago({ form }: { form: ReturnType<typeof useForm<CotizadorFormData>
         />
       </div>
       <div className="form-row cols-2">
-        <SelectField
+        <ZdsSelect
           label="Método de pago"
           name="frm_metodo_pago"
           control={form.control}
@@ -485,7 +497,7 @@ function PlanPago({ form }: { form: ReturnType<typeof useForm<CotizadorFormData>
           required
           error={fe('frm_metodo_pago')}
         />
-        <SelectField
+        <ZdsSelect
           label="Frecuencia de cobro"
           name="frm_frecuencia_cobro"
           control={form.control}

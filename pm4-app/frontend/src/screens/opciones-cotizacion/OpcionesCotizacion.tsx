@@ -3,7 +3,7 @@ import { useForm } from 'react-hook-form';
 import { useTask } from '../../core/useTask';
 import { resolveFileId } from '../../core/useRequestFiles';
 import PdfViewer from '../../components/PdfViewer';
-import { ZrButton } from '@zurich/web-components/react/button';
+import { ZrButton, ZdsSelect, ZdsTextarea } from '../../components/fields/ZdsFields';
 import {
   DECISION_OPTIONS,
   LINEAS_CONFIG,
@@ -49,10 +49,10 @@ export default function OpcionesCotizacion() {
   const effectiveFileId = currentLinea ? resolveFileId(data[currentLinea.slipField]) : null;
 
   const {
-    register,
+    control,
     watch,
-    setValue,
     handleSubmit,
+    reset,
     formState: { errors },
   } = useForm<FormValues>({
     defaultValues: {
@@ -65,14 +65,12 @@ export default function OpcionesCotizacion() {
 
   useEffect(() => {
     if (!task?.data) return;
-    if (data.frm_respCot_decision)
-      setValue('frm_respCot_decision', data.frm_respCot_decision as DecisionValue);
-    if (data.frm_respCot_comentarios)
-      setValue('frm_respCot_comentarios', data.frm_respCot_comentarios);
-    if (data.frm_respCot_motizoRechazo)
-      setValue('frm_respCot_motizoRechazo', data.frm_respCot_motizoRechazo);
-    if (data.frm_respCot_personalizacion_excepcion)
-      setValue('frm_respCot_personalizacion_excepcion', data.frm_respCot_personalizacion_excepcion);
+    reset({
+      frm_respCot_decision: (data.frm_respCot_decision as DecisionValue) || '',
+      frm_respCot_comentarios: data.frm_respCot_comentarios || '',
+      frm_respCot_motizoRechazo: data.frm_respCot_motizoRechazo || '',
+      frm_respCot_personalizacion_excepcion: data.frm_respCot_personalizacion_excepcion || '',
+    });
   }, [task]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const decision = watch('frm_respCot_decision');
@@ -135,7 +133,7 @@ export default function OpcionesCotizacion() {
   if (error) {
     return (
       <div className="screen-wrapper">
-        <div className="screen-error">⚠ Error al cargar la tarea: {error}</div>
+        <div className="screen-error">Error al cargar la tarea: {error}</div>
       </div>
     );
   }
@@ -192,7 +190,6 @@ export default function OpcionesCotizacion() {
             />
           ) : (
             <div className="no-file-card">
-              <div className="no-file-icon">📄</div>
               <p>
                 {activeLineas.length === 0
                   ? 'No hay productos activos en este caso.'
@@ -208,60 +205,42 @@ export default function OpcionesCotizacion() {
             <div className="decision-panel-header">Decisión de Cotización</div>
             <div className="decision-panel-body">
 
-              <div className="field-group">
-                <label>
-                  Decisión<span className="required">*</span>
-                </label>
-                <select
-                  {...register('frm_respCot_decision', { required: 'Campo requerido' })}
-                >
-                  <option value="">— Seleccione —</option>
-                  {DECISION_OPTIONS.map((o) => (
-                    <option key={o.value} value={o.value}>{o.label}</option>
-                  ))}
-                </select>
-                {errors.frm_respCot_decision && (
-                  <div className="field-error">{errors.frm_respCot_decision.message}</div>
-                )}
-              </div>
+              <ZdsSelect
+                name="frm_respCot_decision"
+                control={control}
+                label="Decisión"
+                options={DECISION_OPTIONS}
+                rules={{ required: 'Campo requerido' }}
+                required
+                error={errors.frm_respCot_decision?.message}
+              />
 
-              <div className="field-group">
-                <label>Comentarios</label>
-                <textarea {...register('frm_respCot_comentarios')} rows={4} />
-              </div>
+              <ZdsTextarea
+                name="frm_respCot_comentarios"
+                control={control}
+                label="Comentarios"
+              />
 
               {decision === 'RECHAZADA' && (
-                <div className="field-group">
-                  <label>
-                    Motivo de rechazo<span className="required">*</span>
-                  </label>
-                  <textarea
-                    {...register('frm_respCot_motizoRechazo', {
-                      required: decision === 'RECHAZADA' ? 'Campo requerido' : false,
-                    })}
-                    rows={3}
-                  />
-                  {errors.frm_respCot_motizoRechazo && (
-                    <div className="field-error">{errors.frm_respCot_motizoRechazo.message}</div>
-                  )}
-                </div>
+                <ZdsTextarea
+                  name="frm_respCot_motizoRechazo"
+                  control={control}
+                  label="Motivo de rechazo"
+                  rules={{ required: 'Campo requerido' }}
+                  required
+                  error={errors.frm_respCot_motizoRechazo?.message}
+                />
               )}
 
               {decision === 'PERSONALIZACION_EXCEPCION' && (
-                <div className="field-group">
-                  <label>
-                    Personalización / Excepción<span className="required">*</span>
-                  </label>
-                  <textarea
-                    {...register('frm_respCot_personalizacion_excepcion', {
-                      required: decision === 'PERSONALIZACION_EXCEPCION' ? 'Campo requerido' : false,
-                    })}
-                    rows={3}
-                  />
-                  {errors.frm_respCot_personalizacion_excepcion && (
-                    <div className="field-error">{errors.frm_respCot_personalizacion_excepcion.message}</div>
-                  )}
-                </div>
+                <ZdsTextarea
+                  name="frm_respCot_personalizacion_excepcion"
+                  control={control}
+                  label="Personalización / Excepción"
+                  rules={{ required: 'Campo requerido' }}
+                  required
+                  error={errors.frm_respCot_personalizacion_excepcion?.message}
+                />
               )}
 
               {data.frm_gen_enlace_clausulado_rc && (

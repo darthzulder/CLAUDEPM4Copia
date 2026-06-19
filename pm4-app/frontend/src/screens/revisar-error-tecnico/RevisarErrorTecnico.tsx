@@ -3,9 +3,7 @@ import { useForm } from 'react-hook-form';
 import './styles.css';
 import { useTask } from '../../core/useTask';
 import FormSection from '../../components/FormSection';
-import InputField from '../../components/fields/InputField';
-import SelectField from '../../components/fields/SelectField';
-import RadioField from '../../components/fields/RadioField';
+import { ZdsInput, ZdsSelect, ZdsTextarea, ZdsRadio } from '../../components/fields/ZdsFields';
 import { OPTIONS, RevisarErrorTecnicoFormData } from './variables';
 import SeccionDetalleError from './SeccionDetalleError';
 
@@ -25,7 +23,7 @@ export default function RevisarErrorTecnico() {
     defaultValues: { et_resolucion: 'REINTENTAR' },
   });
 
-  const { register, control, watch, handleSubmit, reset, formState: { errors, isSubmitted } } = form;
+  const { control, watch, handleSubmit, reset, formState: { errors, isSubmitted } } = form;
   const w = watch();
 
   useEffect(() => {
@@ -75,7 +73,7 @@ export default function RevisarErrorTecnico() {
 
   return (
     <div className="screen-wrapper">
-      {/* ── Encabezado ── */}
+      {/* Encabezado */}
       <div className="screen-header">
         <div className="title-block">
           <h1>Revisar y Corregir Error Técnico</h1>
@@ -90,13 +88,13 @@ export default function RevisarErrorTecnico() {
 
       <form onSubmit={handleSubmit(onSubmit)} noValidate style={{ maxWidth: 960, margin: '0 auto', padding: '24px 24px 0' }}>
 
-        {/* ── Secciones 1 y 2: Error + Queja afectada ── */}
+        {/* Secciones 1 y 2: Error + Queja afectada */}
         <SeccionDetalleError form={form} />
 
-        {/* ── Sección 3: Análisis y Corrección ── */}
-        <FormSection title="🔍 Análisis y Corrección">
+        {/* Sección 3: Análisis y Corrección */}
+        <FormSection title="Análisis y Corrección">
           <div className="form-row cols-2">
-            <SelectField
+            <ZdsSelect
               label="Causa Raíz"
               name="et_causaRaiz"
               control={control}
@@ -105,7 +103,7 @@ export default function RevisarErrorTecnico() {
               required
               error={err('et_causaRaiz')}
             />
-            <SelectField
+            <ZdsSelect
               label="Acción Correctiva"
               name="et_accionCorrectiva"
               control={control}
@@ -117,101 +115,76 @@ export default function RevisarErrorTecnico() {
           </div>
 
           <div className="form-row cols-1">
-            <div className="form-group">
-              <label className="form-label">
-                <span className="required-star">* </span>Descripción de la Causa
-              </label>
-              <textarea
-                {...register('et_descripcionCausa', {
-                  required: 'Campo requerido',
-                  maxLength: { value: 2000, message: 'Máximo 2000 caracteres' },
-                })}
-                className={`form-control textarea${errors.et_descripcionCausa ? ' is-invalid' : ''}`}
-                placeholder="Descripción detallada de la causa raíz identificada"
-                rows={3}
-              />
-              {isSubmitted && errors.et_descripcionCausa && (
-                <div className="invalid-feedback">{String(errors.et_descripcionCausa.message)}</div>
-              )}
-            </div>
+            <ZdsTextarea
+              name="et_descripcionCausa"
+              control={control}
+              label="Descripción de la Causa"
+              rules={{ required: 'Campo requerido', maxLength: { value: 2000, message: 'Máximo 2000 caracteres' } }}
+              maxLength={2000}
+            />
           </div>
 
           <div className="form-row cols-1">
-            <div className="form-group">
-              <label className="form-label">Descripción de la Corrección Aplicada</label>
-              <textarea
-                {...register('et_descripcionCorreccion', {
-                  maxLength: { value: 2000, message: 'Máximo 2000 caracteres' },
-                })}
-                className={`form-control textarea${errors.et_descripcionCorreccion ? ' is-invalid' : ''}`}
-                placeholder="Detalle los cambios realizados para corregir el error (si aplica)"
-                rows={3}
-              />
-              {errors.et_descripcionCorreccion && (
-                <div className="invalid-feedback">{String(errors.et_descripcionCorreccion.message)}</div>
-              )}
-            </div>
+            <ZdsTextarea
+              name="et_descripcionCorreccion"
+              control={control}
+              label="Descripción de la Corrección Aplicada"
+              rules={{ maxLength: { value: 2000, message: 'Máximo 2000 caracteres' } }}
+              maxLength={2000}
+            />
           </div>
         </FormSection>
 
-        {/* ── Sección 4: Resolución ── */}
-        <FormSection title="✅ Resolución">
+        {/* Sección 4: Resolución */}
+        <FormSection title="Resolución">
           <div className="form-row cols-2">
-            <RadioField
+            <ZdsRadio
               label="Decisión de Resolución"
               name="et_resolucion"
-              registration={register('et_resolucion', { required: 'Campo requerido' })}
+              control={control}
+              rules={{ required: 'Campo requerido' }}
               options={OPTIONS.resolucion}
               required
               error={err('et_resolucion')}
             />
-            <InputField
+            <ZdsInput
               label="Responsable Técnico"
-              registration={register('et_responsableTecnico', {
-                required: 'Campo requerido',
-                maxLength: { value: 100, message: 'Máximo 100 caracteres' },
-              })}
+              name="et_responsableTecnico"
+              control={control}
+              rules={{ required: 'Campo requerido', maxLength: { value: 100, message: 'Máximo 100 caracteres' } }}
               required
               error={err('et_responsableTecnico')}
-              placeholder="Nombre del técnico que gestiona este error"
             />
           </div>
 
           <div className="form-row cols-1">
-            <div className="form-group">
-              <label className="form-label">Observaciones Técnicas</label>
-              <textarea
-                {...register('et_observacionesTecnicas', {
-                  maxLength: { value: 2000, message: 'Máximo 2000 caracteres' },
-                })}
-                className={`form-control textarea${errors.et_observacionesTecnicas ? ' is-invalid' : ''}`}
-                placeholder="Información adicional para el equipo técnico o de gestión de quejas"
-                rows={3}
-              />
-              {errors.et_observacionesTecnicas && (
-                <div className="invalid-feedback">{String(errors.et_observacionesTecnicas.message)}</div>
-              )}
-            </div>
+            <ZdsTextarea
+              name="et_observacionesTecnicas"
+              control={control}
+              label="Observaciones Técnicas"
+              rules={{ maxLength: { value: 2000, message: 'Máximo 2000 caracteres' } }}
+              maxLength={2000}
+            />
           </div>
 
           {w.et_resolucion === 'REINTENTAR' && (
             <div className="info-banner">
-              ℹ Al confirmar <strong>Reintentar integración</strong>, el sistema ejecutará nuevamente el envío a SmartSupervision con los datos corregidos. Se generará un nuevo log de intento.
+              Al confirmar <strong>Reintentar integración</strong>, el sistema ejecutará nuevamente el envío a SmartSupervision con los datos corregidos. Se generará un nuevo log de intento.
             </div>
           )}
           {w.et_resolucion === 'ESCALAR' && (
             <div className="warn-banner">
-              ⚠ Al <strong>Escalar a soporte</strong>, se creará un ticket de soporte técnico nivel 2 y se notificará al equipo de sistemas. El proceso quedará pausado hasta recibir resolución.
+              Al <strong>Escalar a soporte</strong>, se creará un ticket de soporte técnico nivel 2 y se notificará al equipo de sistemas. El proceso quedará pausado hasta recibir resolución.
             </div>
           )}
           {w.et_resolucion === 'CERRAR_ERROR' && (
             <div className="error-banner">
-              ⛔ Al <strong>Cerrar con error</strong>, la integración quedará marcada como fallida permanentemente. Complete las observaciones técnicas con la justificación antes de continuar.
+              Al <strong>Cerrar con error</strong>, la integración quedará marcada como fallida permanentemente. Complete las observaciones técnicas con la justificación antes de continuar.
             </div>
           )}
         </FormSection>
 
-        {/* ── Barra de acciones ── */}
+        {/* Barra de acciones */}
         <div className="actions-bar">
           <button type="button" className="btn-cancelar" onClick={() => window.history.back()}>
             Cancelar
@@ -222,7 +195,7 @@ export default function RevisarErrorTecnico() {
             disabled={submitting}
             onClick={() => completeTask({ ...w, _draft: true } as Record<string, unknown>)}
           >
-            💾 Guardar Borrador
+            Guardar Borrador
           </button>
           <button type="submit" className="btn-crear" disabled={submitting}>
             {submitting ? 'Enviando...' : submitLabel}

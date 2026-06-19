@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { createPortal } from 'react-dom';
 import { useTask } from '../../core/useTask';
-import { ZrButton } from '@zurich/web-components/react/button';
+import { ZrButton } from '../../components/fields/ZdsFields';
 import { RESPUESTA_VALUES, type RespuestaCotizacionData } from './variables';
 import zurichLogo from '../../resources/zurich/ZurichLogo_Horz_White_CMYK_no_R.png';
 import './styles.css';

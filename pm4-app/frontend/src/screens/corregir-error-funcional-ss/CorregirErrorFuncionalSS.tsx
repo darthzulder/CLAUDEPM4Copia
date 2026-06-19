@@ -3,9 +3,7 @@ import { useForm } from 'react-hook-form';
 import './styles.css';
 import { useTask } from '../../core/useTask';
 import FormSection from '../../components/FormSection';
-import InputField from '../../components/fields/InputField';
-import SelectField from '../../components/fields/SelectField';
-import RadioField from '../../components/fields/RadioField';
+import { ZdsInput, ZdsSelect, ZdsTextarea, ZdsRadio } from '../../components/fields/ZdsFields';
 import { OPTIONS, CorregirErrorFuncionalSSFormData } from './variables';
 import SeccionErrorSS from './SeccionErrorSS';
 
@@ -25,7 +23,7 @@ export default function CorregirErrorFuncionalSS() {
     defaultValues: { qd_codigoPais: '170', ef_decision: 'CORREGIR_REENVIAR' },
   });
 
-  const { register, control, watch, handleSubmit, reset, formState: { errors, isSubmitted } } = form;
+  const { control, watch, handleSubmit, reset, formState: { errors, isSubmitted } } = form;
   const w = watch();
 
   useEffect(() => {
@@ -85,25 +83,23 @@ export default function CorregirErrorFuncionalSS() {
         <SeccionErrorSS form={form} />
 
         {/* ── Sección 2: Datos del Consumidor ── */}
-        <FormSection title="👤 Datos del Consumidor">
+        <FormSection title="Datos del Consumidor">
           <div className="info-banner">
-            ℹ Corrija únicamente los campos que SmartSupervision rechazó. Los cambios reemplazarán los datos del caso.
+            Corrija únicamente los campos que SmartSupervision rechazó. Los cambios reemplazarán los datos del caso.
           </div>
 
           <div className="form-row cols-3">
             <div style={{ gridColumn: 'span 2' }}>
-              <InputField
+              <ZdsInput
                 label="Nombre Completo del Consumidor"
-                registration={register('qd_nombreConsumidor', {
-                  required: 'Campo requerido',
-                  maxLength: { value: 200, message: 'Máximo 200 caracteres' },
-                })}
+                name="qd_nombreConsumidor"
+                control={control}
+                rules={{ required: 'Campo requerido', maxLength: { value: 200, message: 'Máximo 200 caracteres' } }}
                 required
                 error={err('qd_nombreConsumidor')}
-                placeholder="Nombre y apellidos"
               />
             </div>
-            <SelectField
+            <ZdsSelect
               label="Tipo de Persona"
               name="qd_tipoPersona"
               control={control}
@@ -115,7 +111,7 @@ export default function CorregirErrorFuncionalSS() {
           </div>
 
           <div className="form-row cols-3">
-            <SelectField
+            <ZdsSelect
               label="Tipo de Identificación"
               name="qd_tipoIdentificacion"
               control={control}
@@ -124,52 +120,49 @@ export default function CorregirErrorFuncionalSS() {
               required
               error={err('qd_tipoIdentificacion')}
             />
-            <InputField
+            <ZdsInput
               label="Número de Identificación"
-              registration={register('qd_numeroIdentificacion', {
-                required: 'Campo requerido',
-                maxLength: { value: 20, message: 'Máximo 20 caracteres' },
-              })}
+              name="qd_numeroIdentificacion"
+              control={control}
+              rules={{ required: 'Campo requerido', maxLength: { value: 20, message: 'Máximo 20 caracteres' } }}
               required
               error={err('qd_numeroIdentificacion')}
-              placeholder="Número de documento"
             />
-            <InputField
+            <ZdsInput
               label="Correo Electrónico"
-              registration={register('qd_correoElectronico', {
-                required: 'Campo requerido',
-                pattern: { value: /^[^\s@]+@[^\s@]+\.[^\s@]+$/, message: 'Correo inválido' },
-              })}
+              name="qd_correoElectronico"
+              control={control}
+              rules={{ required: 'Campo requerido', pattern: { value: /^[^\s@]+@[^\s@]+\.[^\s@]+$/, message: 'Correo inválido' } }}
               required
+              inputType="email"
               error={err('qd_correoElectronico')}
-              placeholder="consumidor@ejemplo.com"
             />
           </div>
 
           <div className="form-row cols-3">
-            <SelectField
+            <ZdsSelect
               label="País"
               name="qd_codigoPais"
               control={control}
               options={OPTIONS.codigoPais}
             />
-            <InputField
+            <ZdsInput
               label="Departamento"
-              registration={register('qd_departamento')}
-              placeholder="Ej. Bogotá D.C."
+              name="qd_departamento"
+              control={control}
             />
-            <InputField
+            <ZdsInput
               label="Municipio"
-              registration={register('qd_municipio')}
-              placeholder="Ej. Bogotá"
+              name="qd_municipio"
+              control={control}
             />
           </div>
         </FormSection>
 
         {/* ── Sección 3: Clasificación ── */}
-        <FormSection title="📋 Clasificación de la Queja">
+        <FormSection title="Clasificación de la Queja">
           <div className="form-row cols-2">
-            <SelectField
+            <ZdsSelect
               label="Canal de Recepción"
               name="qd_canalRecepcion"
               control={control}
@@ -178,7 +171,7 @@ export default function CorregirErrorFuncionalSS() {
               required
               error={err('qd_canalRecepcion')}
             />
-            <SelectField
+            <ZdsSelect
               label="Tipo de Solicitud"
               name="qd_tipoSolicitud"
               control={control}
@@ -190,7 +183,7 @@ export default function CorregirErrorFuncionalSS() {
           </div>
 
           <div className="form-row cols-2">
-            <SelectField
+            <ZdsSelect
               label="Producto SFC"
               name="qd_productoSFC"
               control={control}
@@ -199,7 +192,7 @@ export default function CorregirErrorFuncionalSS() {
               required
               error={err('qd_productoSFC')}
             />
-            <SelectField
+            <ZdsSelect
               label="Motivo SFC"
               name="qd_motivoSFC"
               control={control}
@@ -211,7 +204,7 @@ export default function CorregirErrorFuncionalSS() {
           </div>
 
           <div className="form-row cols-3">
-            <SelectField
+            <ZdsSelect
               label="Instancia de Recepción"
               name="qd_instanciaRecepcion"
               control={control}
@@ -220,7 +213,7 @@ export default function CorregirErrorFuncionalSS() {
               required
               error={err('qd_instanciaRecepcion')}
             />
-            <SelectField
+            <ZdsSelect
               label="Punto de Recepción"
               name="qd_puntoRecepcion"
               control={control}
@@ -229,7 +222,7 @@ export default function CorregirErrorFuncionalSS() {
               required
               error={err('qd_puntoRecepcion')}
             />
-            <SelectField
+            <ZdsSelect
               label="Admisión"
               name="qd_admision"
               control={control}
@@ -241,7 +234,7 @@ export default function CorregirErrorFuncionalSS() {
           </div>
 
           <div className="form-row cols-2">
-            <SelectField
+            <ZdsSelect
               label="Ente de Control"
               name="qd_enteControl"
               control={control}
@@ -250,69 +243,52 @@ export default function CorregirErrorFuncionalSS() {
               required
               error={err('qd_enteControl')}
             />
-            <InputField
+            <ZdsInput
               label="Asunto"
-              registration={register('qd_asunto', {
-                required: 'Campo requerido',
-                maxLength: { value: 300, message: 'Máximo 300 caracteres' },
-              })}
+              name="qd_asunto"
+              control={control}
+              rules={{ required: 'Campo requerido', maxLength: { value: 300, message: 'Máximo 300 caracteres' } }}
               required
               error={err('qd_asunto')}
-              placeholder="Resumen breve de la queja"
             />
           </div>
 
           <div className="form-row cols-1">
-            <div className="form-group">
-              <label className="form-label">
-                <span className="required-star">* </span>Descripción de la Queja
-              </label>
-              <textarea
-                {...register('qd_descripcionQueja', {
-                  required: 'Campo requerido',
-                  maxLength: { value: 4000, message: 'Máximo 4000 caracteres' },
-                })}
-                className={`form-control textarea${errors.qd_descripcionQueja ? ' is-invalid' : ''}`}
-                placeholder="Descripción detallada de los hechos de la queja"
-                rows={4}
-              />
-              {isSubmitted && errors.qd_descripcionQueja && (
-                <div className="invalid-feedback">{String(errors.qd_descripcionQueja.message)}</div>
-              )}
-            </div>
+            <ZdsTextarea
+              name="qd_descripcionQueja"
+              control={control}
+              label="Descripción de la Queja"
+              required
+              rules={{ required: 'Campo requerido', maxLength: { value: 4000, message: 'Máximo 4000 caracteres' } }}
+              maxLength={4000}
+              error={isSubmitted ? err('qd_descripcionQueja') : undefined}
+            />
           </div>
         </FormSection>
 
         {/* ── Sección 4: Registro de cambios ── */}
-        <FormSection title="📝 Registro de Correcciones">
+        <FormSection title="Registro de Correcciones">
           <div className="form-row cols-1">
-            <div className="form-group">
-              <label className="form-label">
-                <span className="required-star">* </span>Campos Modificados
-              </label>
-              <textarea
-                {...register('ef_camposCambiados', {
-                  required: 'Indique qué campos modificó',
-                  maxLength: { value: 1000, message: 'Máximo 1000 caracteres' },
-                })}
-                className={`form-control textarea${errors.ef_camposCambiados && isSubmitted ? ' is-invalid' : ''}`}
-                placeholder="Ej: Corregido tipo de identificación de '3-NIT' a '1-CC', actualizado correo electrónico"
-                rows={2}
-              />
-              {isSubmitted && errors.ef_camposCambiados && (
-                <div className="invalid-feedback">{String(errors.ef_camposCambiados.message)}</div>
-              )}
-            </div>
+            <ZdsTextarea
+              name="ef_camposCambiados"
+              control={control}
+              label="Campos Modificados"
+              required
+              rules={{ required: 'Indique qué campos modificó', maxLength: { value: 1000, message: 'Máximo 1000 caracteres' } }}
+              maxLength={1000}
+              error={isSubmitted ? err('ef_camposCambiados') : undefined}
+            />
           </div>
         </FormSection>
 
         {/* ── Sección 5: Decisión ── */}
-        <FormSection title="✅ Decisión">
+        <FormSection title="Decisión">
           <div className="form-row cols-1">
-            <RadioField
+            <ZdsRadio
               label="¿Qué acción tomar con los datos corregidos?"
               name="ef_decision"
-              registration={register('ef_decision', { required: 'Campo requerido' })}
+              control={control}
+              rules={{ required: 'Campo requerido' }}
               options={OPTIONS.decision}
               required
               error={err('ef_decision')}
@@ -321,43 +297,33 @@ export default function CorregirErrorFuncionalSS() {
 
           {w.ef_decision === 'CORREGIR_REENVIAR' && (
             <div className="info-banner">
-              ℹ El sistema enviará nuevamente la queja a SmartSupervision con los datos corregidos. Si SS vuelve a rechazarla con error funcional, volverá a esta pantalla.
+              El sistema enviará nuevamente la queja a SmartSupervision con los datos corregidos. Si SS vuelve a rechazarla con error funcional, volverá a esta pantalla.
             </div>
           )}
           {w.ef_decision === 'ESCALAR' && (
             <div className="warn-banner">
-              ⚠ La queja será asignada a un supervisor para revisión y radicación. Documente en la justificación por qué no fue posible corregir el error.
+              La queja será asignada a un supervisor para revisión y radicación. Documente en la justificación por qué no fue posible corregir el error.
             </div>
           )}
           {w.ef_decision === 'REGISTRAR_MANUAL' && (
             <div className="error-banner">
-              ⛔ Se omitirá SmartSupervision y la queja se registrará manualmente en los sistemas internos. Use esta opción solo si el error en SS es un problema del sistema externo. Requiere justificación obligatoria.
+              Se omitirá SmartSupervision y la queja se registrará manualmente en los sistemas internos. Use esta opción solo si el error en SS es un problema del sistema externo. Requiere justificación obligatoria.
             </div>
           )}
 
           <div className="form-row cols-1">
-            <div className="form-group">
-              <label className="form-label">
-                {w.ef_decision === 'REGISTRAR_MANUAL' && <span className="required-star">* </span>}
-                Justificación
-              </label>
-              <textarea
-                {...register('ef_justificacionCorreccion', {
-                  required: w.ef_decision === 'REGISTRAR_MANUAL' ? 'Justificación obligatoria para registro manual' : false,
-                  maxLength: { value: 2000, message: 'Máximo 2000 caracteres' },
-                })}
-                className={`form-control textarea${errors.ef_justificacionCorreccion && isSubmitted ? ' is-invalid' : ''}`}
-                placeholder={
-                  w.ef_decision === 'REGISTRAR_MANUAL'
-                    ? 'Explique por qué se omite SmartSupervision y cómo se garantiza el registro de la queja'
-                    : 'Observaciones adicionales sobre la corrección o el escalamiento (opcional)'
-                }
-                rows={3}
-              />
-              {isSubmitted && errors.ef_justificacionCorreccion && (
-                <div className="invalid-feedback">{String(errors.ef_justificacionCorreccion.message)}</div>
-              )}
-            </div>
+            <ZdsTextarea
+              name="ef_justificacionCorreccion"
+              control={control}
+              label="Justificación"
+              required={w.ef_decision === 'REGISTRAR_MANUAL'}
+              rules={{
+                required: w.ef_decision === 'REGISTRAR_MANUAL' ? 'Justificación obligatoria para registro manual' : false,
+                maxLength: { value: 2000, message: 'Máximo 2000 caracteres' },
+              }}
+              maxLength={2000}
+              error={isSubmitted ? err('ef_justificacionCorreccion') : undefined}
+            />
           </div>
         </FormSection>
 

@@ -1,8 +1,7 @@
 import { useEffect, useState } from 'react';
 import { createPortal } from 'react-dom';
 import { useForm } from 'react-hook-form';
-import InputField from '../../components/fields/InputField';
-import SelectField from '../../components/fields/SelectField';
+import { ZdsInput, ZdsSelect } from '../../components/fields/ZdsFields';
 import { useCollection } from '../../core/useCollection';
 import type { CollectionDef } from '../../core/useCollection';
 
@@ -57,7 +56,7 @@ interface ModalProps {
 
 function ExportacionModal({ initial, onClose, onAccept }: ModalProps) {
   const isEdit = initial !== null;
-  const { register, control, handleSubmit, watch, setValue, formState: { errors } } =
+  const { control, handleSubmit, watch, setValue, formState: { errors } } =
     useForm<ExportacionRow>({ defaultValues: initial ?? EMPTY_ROW });
 
   const { options: paisOptions, loading: paisLoading, rawMap } = useCollection(PAISES_DEF, {});
@@ -91,7 +90,7 @@ function ExportacionModal({ initial, onClose, onAccept }: ModalProps) {
         </div>
         <form onSubmit={handleSubmit(onSubmit)} noValidate>
           <div className="modal-body">
-            <SelectField<ExportacionRow>
+            <ZdsSelect<ExportacionRow>
               label="País"
               name="frm_exportacion_pais"
               control={control}
@@ -102,34 +101,36 @@ function ExportacionModal({ initial, onClose, onAccept }: ModalProps) {
               error={errors.frm_exportacion_pais?.message}
             />
             <div className="form-row cols-2">
-              <InputField
+              <ZdsInput
                 label="Región"
-                registration={register('frm_exportacion_region_label')}
+                name="frm_exportacion_region_label"
+                control={control}
                 readOnly
-                placeholder="Auto"
               />
-              <InputField
+              <ZdsInput
                 label="Ventas"
                 required
-                type="number"
-                registration={register('frm_exportacion_ventas', {
+                name="frm_exportacion_ventas"
+                control={control}
+                rules={{
                   required: 'Campo requerido',
                   min: { value: 1, message: 'Mínimo 1' },
                   valueAsNumber: true,
-                })}
+                }}
                 error={errors.frm_exportacion_ventas?.message}
               />
             </div>
-            <InputField
+            <ZdsInput
               label="Porcentaje de ventas (%)"
               required
-              type="number"
-              registration={register('frm_exportacion_porcentaje', {
+              name="frm_exportacion_porcentaje"
+              control={control}
+              rules={{
                 required: 'Campo requerido',
                 min: { value: 1, message: 'Mínimo 1' },
                 max: { value: 100, message: 'Máximo 100' },
                 valueAsNumber: true,
-              })}
+              }}
               error={errors.frm_exportacion_porcentaje?.message}
             />
           </div>

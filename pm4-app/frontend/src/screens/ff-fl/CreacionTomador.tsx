@@ -1,7 +1,6 @@
 import { useState, useMemo, useEffect } from 'react';
 import { useForm, FieldError } from 'react-hook-form';
-import { ZdsInput, ZdsDate, ZdsSelect } from './ZdsField';
-import { ZrButton } from '@zurich/web-components/react/button';
+import { ZrButton, ZdsInput, ZdsDate, ZdsSelect } from '../../components/fields/ZdsFields';
 import { OPTIONS, DEPARTAMENTOS, CIUDADES_POR_DEPTO, FfFlSolicitudFormData } from './variables';
 
 type Form = ReturnType<typeof useForm<FfFlSolicitudFormData>>;

@@ -14,7 +14,7 @@
   --z-muted:       var(--zg-5);
 }
 
-* { font-family: var(--z-sans); box-sizing: border-box; }
+* { font-family: var(--zf-sans); box-sizing: border-box; }
 
 .screen-wrapper { min-height: 100vh; background: var(--z-bg); padding: 0 0 var(--zs-300); }
 

@@ -2,11 +2,7 @@ import { useState, useMemo } from 'react';
 import { useTask } from '../../core/useTask';
 import { useRequestFiles, resolveFileId } from '../../core/useRequestFiles';
 import PdfViewer from '../../components/PdfViewer';
-import { ZrButton }   from '@zurich/web-components/react/button';
-import { ZrModal }    from '@zurich/web-components/react/modal';
-import { ZrForm }     from '@zurich/web-components/react/form';
-import { ZrSelect }   from '@zurich/web-components/react/select';
-import { ZrTextarea } from '@zurich/web-components/react/textarea';
+import { ZrButton, ZrModal, ZrForm, ZrSelect, ZrTextarea } from '../../components/fields/ZdsFields';
 import {
   type SolDocEmiData,
   type ValidacionDoc,

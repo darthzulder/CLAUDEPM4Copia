@@ -1,14 +1,9 @@
 /* =====================================================
-   RECIBIR QUEJA — SCR-001 TO-BE v2.0
-   Proceso: P01-T01 | Quejas Directas | Zurich Colombia
+   REVISAR QUEJA Y ASIGNAR RESPONSABLE — SP2-T01
+   Proceso: SP2-T01 | Quejas Directas | Zurich Colombia
    ===================================================== */
 
 :root {
-  /* ── Aliases que mapean tokens Zurich ──
-     Nota: en @zurich/css-components el gris está INVERTIDO:
-     --zg-1 = casi negro (#0D1115), --zg-9 = gris más claro (#C9D0D2)
-     Para fondos claros usar --zg-white (#fff) o --zg-white-zurich (#ECEEEF)
-     Para bordes sutiles usar --zg-9 en vez de --zg-2 ── */
   --z-blue:        var(--zc-blue-zurich);
   --z-blue-dark:   var(--zc-blue-dark);
   --z-green:       var(--zc-moss-aa);
@@ -130,15 +125,12 @@
   pointer-events: none;
 }
 
-/* ---- Textarea ---- */
 .form-control.textarea {
   height: auto;
-  min-height: 100px;
+  min-height: 80px;
   resize: vertical;
   line-height: 1.5;
 }
-
-.input-wrapper { position: relative; }
 
 .form-helper {
   font: var(--zf-capt-12);
@@ -168,28 +160,39 @@
 .form-check-label { font: var(--zf-capt-14); color: var(--z-text); cursor: pointer; margin: 0; }
 
 /* ──────────────────────────────────────
-   ZONA DE CARGA DE ARCHIVOS
+   BADGE DE PRIORIDAD
 ────────────────────────────────────── */
-.file-upload-zone {
-  border: 2px dashed var(--z-border);
+.badge-normal  { display: inline-block; padding: 2px 8px; border-radius: 12px; font: var(--zf-capt-12--600); background: var(--zc-blue-sky-10); color: var(--zc-blue-sky-aa); }
+.badge-alta    { display: inline-block; padding: 2px 8px; border-radius: 12px; font: var(--zf-capt-12--600); background: var(--zc-lemon-20);    color: var(--zc-lemon-aa); }
+.badge-critica { display: inline-block; padding: 2px 8px; border-radius: 12px; font: var(--zf-capt-12--600); background: var(--zc-peach-20);    color: var(--zc-peach-aa); }
+
+/* ──────────────────────────────────────
+   SLA INDICATOR
+────────────────────────────────────── */
+.sla-block {
+  display: flex;
+  align-items: center;
+  gap: var(--zs-100);
+  background: var(--zg-white);
+  border: 1px solid var(--z-border);
   border-radius: 8px;
-  padding: var(--zs-100);
-  text-align: center;
-  background: var(--z-bg);
-  cursor: pointer;
-  transition: border-color .2s, background .2s;
+  padding: var(--zs-75) var(--zs-100);
+  margin-bottom: var(--zs-100);
 }
-.file-upload-zone:hover,
-.file-upload-zone.has-file {
-  border-color: var(--z-blue);
-  background: var(--zc-blue-sky-10);
-}
-.file-upload-zone input[type="file"] { display: none; }
-.file-upload-label { font: var(--zf-capt-12); color: var(--z-muted); cursor: pointer; }
-.file-upload-name {
-  font: var(--zf-capt-12--600);
+.sla-num {
+  font: var(--zf-h-32--700);
   color: var(--z-blue);
-  margin-top: var(--zs-50);
+  min-width: 40px;
+  text-align: center;
+}
+.sla-label {
+  font: var(--zf-capt-12);
+  color: var(--z-muted);
+}
+.sla-label strong {
+  display: block;
+  font: var(--zf-capt-14--600);
+  color: var(--z-text);
 }
 
 /* ──────────────────────────────────────
@@ -268,6 +271,26 @@
   margin-bottom: var(--zs-100);
   line-height: 1.5;
 }
+.error-banner {
+  background: var(--zc-peach-20);
+  border: 1px solid var(--zc-peach-aa);
+  border-radius: 6px;
+  padding: var(--zs-75) var(--zs-100);
+  font: var(--zf-capt-12);
+  color: var(--zc-peach-aa);
+  margin-bottom: var(--zs-100);
+  line-height: 1.5;
+}
+.success-banner {
+  background: var(--zc-moss-10);
+  border: 1px solid var(--zc-moss-aa);
+  border-radius: 6px;
+  padding: var(--zs-75) var(--zs-100);
+  font: var(--zf-capt-12);
+  color: var(--zc-moss-aa);
+  margin-bottom: var(--zs-100);
+  line-height: 1.5;
+}
 
 /* ──────────────────────────────────────
    ESTADOS DE CARGA / ERROR
@@ -293,15 +316,3 @@
   animation: spin 1s linear infinite;
 }
 @keyframes spin { to { transform: rotate(360deg); } }
-
-/* ──────────────────────────────────────
-   READONLY CHIP
-────────────────────────────────────── */
-.readonly-chip {
-  display: inline-block;
-  padding: var(--zs-25) var(--zs-75);
-  background: var(--zg-9);
-  border-radius: 20px;
-  font: var(--zf-capt-12--500);
-  color: var(--z-text);
-}

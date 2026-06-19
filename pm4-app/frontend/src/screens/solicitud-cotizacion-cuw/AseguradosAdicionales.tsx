@@ -1,8 +1,7 @@
 import { useEffect, useState } from 'react';
 import { createPortal } from 'react-dom';
 import { useForm } from 'react-hook-form';
-import InputField from '../../components/fields/InputField';
-import SelectField from '../../components/fields/SelectField';
+import { ZdsInput, ZdsSelect } from '../../components/fields/ZdsFields';
 import { useCollection } from '../../core/useCollection';
 import type { CollectionDef } from '../../core/useCollection';
 
@@ -64,7 +63,6 @@ function AseguradoModal({ initial, onClose, onAccept }: ModalProps) {
   const isEdit = initial !== null;
 
   const {
-    register,
     control,
     handleSubmit,
     watch,
@@ -99,29 +97,33 @@ function AseguradoModal({ initial, onClose, onAccept }: ModalProps) {
         <form onSubmit={handleSubmit(onSubmit)} noValidate>
           <div className="modal-body">
             {/* 1. Nombre */}
-            <InputField
+            <ZdsInput
               label="Nombre del asegurado"
               required
-              registration={register('frm_aseg_adic_nombre', {
+              name="frm_aseg_adic_nombre"
+              control={control}
+              rules={{
                 required: 'Campo requerido',
                 pattern: {
                   value: NOMBRE_REGEX,
                   message: 'Solo letras, números y espacios simples entre palabras',
                 },
-              })}
+              }}
               error={errors.frm_aseg_adic_nombre?.message}
             />
 
             {/* 2. Relación */}
-            <InputField
+            <ZdsInput
               label="Relación con el asegurado principal"
               required
-              registration={register('frm_aseg_adic_relacion', { required: 'Campo requerido' })}
+              name="frm_aseg_adic_relacion"
+              control={control}
+              rules={{ required: 'Campo requerido' }}
               error={errors.frm_aseg_adic_relacion?.message}
             />
 
             {/* 3. Actividad (NAIC suggest) */}
-            <SelectField<AseguradoAdicional>
+            <ZdsSelect
               label="Actividad"
               name="frm_aseg_adic_actividad_lista"
               control={control}
@@ -134,13 +136,13 @@ function AseguradoModal({ initial, onClose, onAccept }: ModalProps) {
 
             {/* 4. Código NAIC (readonly) + Actividad asegurada */}
             <div className="form-row cols-2">
-              <InputField
+              <ZdsInput
                 label="Código NAIC"
-                registration={register('frm_aseg_adic_codigo_naic')}
+                name="frm_aseg_adic_codigo_naic"
+                control={control}
                 readOnly
-                placeholder="Campo automático"
               />
-              <SelectField<AseguradoAdicional>
+              <ZdsSelect
                 label="Actividad asegurada"
                 name="frm_aseg_adic_actividad_asegurada"
                 control={control}
@@ -150,16 +152,17 @@ function AseguradoModal({ initial, onClose, onAccept }: ModalProps) {
             </div>
 
             {/* 5. Ingresos operacionales */}
-            <InputField
+            <ZdsInput
               label="Ingresos operacionales anuales (COP)"
               required
-              type="number"
-              registration={register('frm_aseg_adic_ingresos_operacionales', {
+              name="frm_aseg_adic_ingresos_operacionales"
+              control={control}
+              rules={{
                 required: 'Campo requerido',
                 min: { value: 500000000, message: 'Mínimo 500.000.000' },
                 max: { value: 417500000000, message: 'Máximo 417.500.000.000' },
                 valueAsNumber: true,
-              })}
+              }}
               error={errors.frm_aseg_adic_ingresos_operacionales?.message}
             />
           </div>

@@ -1,12 +1,28 @@
 import { useState, useEffect, useMemo } from 'react';
 import { Controller } from 'react-hook-form';
 import type { Control, RegisterOptions, FieldPath, FieldValues, ControllerRenderProps } from 'react-hook-form';
-import { ZrTextInput }  from '@zurich/web-components/react/text-input';
-import { ZrCheckbox }   from '@zurich/web-components/react/checkbox';
-import { ZrSelect }     from '@zurich/web-components/react/select';
-import { ZrDateInput }  from '@zurich/web-components/react/date-input';
+import { ZrTextInput }   from '@zurich/web-components/react/text-input';
+import { ZrCheckbox }    from '@zurich/web-components/react/checkbox';
+import { ZrSelect }      from '@zurich/web-components/react/select';
+import { ZrDateInput }   from '@zurich/web-components/react/date-input';
+import { ZrTextarea }    from '@zurich/web-components/react/textarea';
+import { ZrRadioSelect } from '@zurich/web-components/react/radio-select';
 
-// Construye props kebab-case para pasarlos con spread (JSX no admite guiones en nombres de prop)
+// ─── Re-exports: raw Zurich DS components (facade única para toda la app) ───
+export { ZrTextInput };
+export { ZrTextarea };
+export { ZrSelect };
+export { ZrCheckbox };
+export { ZrDateInput };
+export { ZrRadioSelect };
+export { ZrButton }      from '@zurich/web-components/react/button';
+export { ZrModal }       from '@zurich/web-components/react/modal';
+export { ZrForm }        from '@zurich/web-components/react/form';
+export { ZrCard }        from '@zurich/web-components/react/card';
+export { ZrTabs }        from '@zurich/web-components/react/tabs';
+export { ZrProgressBar } from '@zurich/web-components/react/progress-bar';
+
+// ─── kp: construye props kebab-case (JSX no admite guiones en nombres de prop) ─
 function kp(error?: string, helpText?: string, inputType?: string, icon?: string): Record<string, unknown> {
   const out: Record<string, unknown> = {};
   if (error)          out['help-text']  = error;
@@ -16,9 +32,7 @@ function kp(error?: string, helpText?: string, inputType?: string, icon?: string
   return out;
 }
 
-// ---------------------------------------------------------------------------
-// Text / email / tel input  →  ZrTextInput (@zurich/web-components)
-// ---------------------------------------------------------------------------
+// ─── ZdsInput — ZrTextInput + Controller ─────────────────────────────────────
 interface InputProps<TFV extends FieldValues> {
   control: Control<TFV>;
   name: FieldPath<TFV>;
@@ -37,7 +51,6 @@ export function ZdsInput<TFV extends FieldValues>({
 }: InputProps<TFV>) {
   const effectiveIcon = icon ?? (inputType === 'email' ? 'mail-closed:line' : undefined);
   return (
-    // data-zds-readonly añade la clase al host para aplicar el fondo gris desde CSS
     <div data-zds-readonly={readOnly ? '' : undefined} className="zds-field-wrap">
       <Controller
         name={name}
@@ -61,9 +74,7 @@ export function ZdsInput<TFV extends FieldValues>({
   );
 }
 
-// ---------------------------------------------------------------------------
-// Date input  →  ZrDateInput (@zurich/web-components)
-// ---------------------------------------------------------------------------
+// ─── ZdsDate — ZrDateInput + Controller ──────────────────────────────────────
 export function ZdsDate<TFV extends FieldValues>({
   control, name, label, required, readOnly, helpText, error, rules, min,
 }: Omit<InputProps<TFV>, 'inputType' | 'icon'> & { min?: string }) {
@@ -94,9 +105,50 @@ export function ZdsDate<TFV extends FieldValues>({
   );
 }
 
-// ---------------------------------------------------------------------------
-// Checkbox  →  ZrCheckbox (@zurich/web-components)
-// ---------------------------------------------------------------------------
+// ─── ZdsTextarea — ZrTextarea + Controller ────────────────────────────────────
+interface TextareaProps<TFV extends FieldValues> {
+  control: Control<TFV>;
+  name: FieldPath<TFV>;
+  label: string;
+  required?: boolean;
+  readOnly?: boolean;
+  helpText?: string;
+  error?: string;
+  rules?: RegisterOptions<TFV, FieldPath<TFV>>;
+  maxLength?: number;
+  elastic?: boolean;
+}
+
+export function ZdsTextarea<TFV extends FieldValues>({
+  control, name, label, required, readOnly, helpText, error, rules, maxLength, elastic,
+}: TextareaProps<TFV>) {
+  return (
+    <Controller
+      name={name}
+      control={control}
+      rules={rules as RegisterOptions<TFV, typeof name>}
+      render={({ field }) => (
+        <ZrTextarea
+          name={field.name}
+          model={String(field.value ?? '')}
+          label={label}
+          required={required}
+          readonly={readOnly}
+          invalid={!!error}
+          elastic={elastic ?? true}
+          onChange={(val: string | null) => field.onChange(val ?? '')}
+          onBlur={field.onBlur}
+          {...({
+            ...kp(error, helpText),
+            ...(maxLength ? { 'max-length': maxLength } : {}),
+          } as Record<string, unknown>)}
+        />
+      )}
+    />
+  );
+}
+
+// ─── ZdsCheckboxField — ZrCheckbox + Controller ───────────────────────────────
 export function ZdsCheckboxField<TFV extends FieldValues>({
   control, name, label,
 }: {
@@ -121,13 +173,7 @@ export function ZdsCheckboxField<TFV extends FieldValues>({
   );
 }
 
-// ---------------------------------------------------------------------------
-// Select  →  ZrSelect (@zurich/web-components)
-//
-// Usa un wrapper de altura fija (.zds-select-wrap) para que el ZrSelect sea
-// position:absolute dentro de su celda de grid. Cuando el dropdown se abre,
-// el componente crece hacia abajo SOBRE el contenido (no lo empuja).
-// ---------------------------------------------------------------------------
+// ─── ZdsSelect — ZrSelect + Controller ───────────────────────────────────────
 type ZdsOption = { value: string; label?: string; text?: string; disabled?: boolean };
 
 interface SelectProps<TFV extends FieldValues> {
@@ -160,7 +206,6 @@ export function ZdsSelect<TFV extends FieldValues>({
     : zdsOptions;
 
   return (
-    // Wrapper de altura fija: la celda del grid no crece con el dropdown
     <div className="zds-select-wrap">
       <Controller
         name={name}
@@ -188,9 +233,55 @@ export function ZdsSelect<TFV extends FieldValues>({
   );
 }
 
-// ---------------------------------------------------------------------------
-// Suggest (typeahead)  —  input libre + dropdown filtrado, máx 10 resultados
-// ---------------------------------------------------------------------------
+// ─── ZdsRadio — ZrRadioSelect + Controller ────────────────────────────────────
+type ZdsRadioOption = { value: string; label?: string; text?: string; disabled?: boolean };
+
+interface RadioProps<TFV extends FieldValues> {
+  control: Control<TFV>;
+  name: FieldPath<TFV>;
+  label: string;
+  options: readonly ZdsRadioOption[];
+  rules?: RegisterOptions<TFV, FieldPath<TFV>>;
+  required?: boolean;
+  error?: string;
+  inline?: boolean;
+}
+
+export function ZdsRadio<TFV extends FieldValues>({
+  control, name, label, options, rules, required, error, inline,
+}: RadioProps<TFV>) {
+  const zdsOptions = options.map((o) => ({
+    value:    o.value,
+    text:     o.text ?? o.label ?? o.value,
+    disabled: o.disabled,
+  }));
+
+  return (
+    <Controller
+      name={name}
+      control={control}
+      rules={rules as RegisterOptions<TFV, typeof name>}
+      render={({ field }) => (
+        <ZrRadioSelect
+          name={field.name}
+          model={String(field.value ?? '')}
+          label={label}
+          options={zdsOptions}
+          required={required}
+          invalid={!!error}
+          onChange={(val: string | null) => field.onChange(val ?? '')}
+          onBlur={field.onBlur}
+          {...({
+            ...(error ? { 'help-text': error } : {}),
+            ...(inline ? { config: 'inline' } : {}),
+          } as Record<string, unknown>)}
+        />
+      )}
+    />
+  );
+}
+
+// ─── ZdsSuggest — typeahead input con dropdown filtrado ───────────────────────
 type SuggestOption = { value: string; label?: string; text?: string };
 
 interface SuggestProps<TFV extends FieldValues> {
@@ -204,14 +295,8 @@ interface SuggestProps<TFV extends FieldValues> {
   error?: string;
 }
 
-// Inner component para poder usar hooks dentro del render del Controller
 function SuggestInner<TFV extends FieldValues>({
-  field,
-  label,
-  options,
-  required,
-  loading,
-  error,
+  field, label, options, required, loading, error,
 }: {
   field: ControllerRenderProps<TFV, FieldPath<TFV>>;
   label: string;
@@ -224,7 +309,6 @@ function SuggestInner<TFV extends FieldValues>({
   const [query, setQuery]             = useState('');
   const [open, setOpen]               = useState(false);
 
-  // Cuando el valor se pre-popula desde PM4 y los options ya cargaron
   useEffect(() => {
     if (!field.value || !options.length) return;
     const match = options.find(o => o.value === String(field.value));
@@ -248,7 +332,6 @@ function SuggestInner<TFV extends FieldValues>({
 
   return (
     <div className="zds-suggest-wrap">
-      {/* focus bubbles desde el input del web component hasta este div */}
       <div
         onFocus={() => { setQuery(displayText); setOpen(true); }}
         onBlur={() => setTimeout(() => setOpen(false), 120)}
@@ -265,7 +348,7 @@ function SuggestInner<TFV extends FieldValues>({
             setDisplayText(v);
             setQuery(v);
             setOpen(true);
-            field.onChange('');  // limpia valor guardado mientras el usuario escribe
+            field.onChange('');
           }}
           onBlur={field.onBlur}
           {...(error ? { 'help-text': error } : loading ? { 'help-text': 'Cargando...' } : {})}
@@ -278,23 +361,15 @@ function SuggestInner<TFV extends FieldValues>({
             const text = opt.text ?? opt.label ?? opt.value;
             const q    = query.trim().toLowerCase();
             const idx  = q ? text.toLowerCase().indexOf(q) : -1;
-
             return (
               <li
                 key={opt.value}
                 role="option"
                 className="suggest-option"
-                onMouseDown={(e) => {
-                  e.preventDefault();  // evita que el blur cierre el dropdown antes del click
-                  selectOption(opt);
-                }}
+                onMouseDown={(e) => { e.preventDefault(); selectOption(opt); }}
               >
                 {idx >= 0 ? (
-                  <>
-                    {text.slice(0, idx)}
-                    <strong>{text.slice(idx, idx + q.length)}</strong>
-                    {text.slice(idx + q.length)}
-                  </>
+                  <>{text.slice(0, idx)}<strong>{text.slice(idx, idx + q.length)}</strong>{text.slice(idx + q.length)}</>
                 ) : text}
               </li>
             );

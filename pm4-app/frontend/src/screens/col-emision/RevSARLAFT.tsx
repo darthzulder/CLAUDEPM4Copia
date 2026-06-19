@@ -2,8 +2,7 @@ import { useState } from 'react';
 import { useTask } from '../../core/useTask';
 import { useRequestFiles, resolveFileId } from '../../core/useRequestFiles';
 import PdfViewer from '../../components/PdfViewer';
-import { ZrButton } from '@zurich/web-components/react/button';
-import { ZrModal }  from '@zurich/web-components/react/modal';
+import { ZrButton, ZrModal } from '../../components/fields/ZdsFields';
 import {
   type DocSarlaftData,
   type SarlaftPerfil,

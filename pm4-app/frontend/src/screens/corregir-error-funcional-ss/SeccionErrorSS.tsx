@@ -1,6 +1,6 @@
 import { useForm } from 'react-hook-form';
 import FormSection from '../../components/FormSection';
-import SelectField from '../../components/fields/SelectField';
+import { ZdsInput, ZdsSelect, ZdsTextarea } from '../../components/fields/ZdsFields';
 import { OPTIONS, CorregirErrorFuncionalSSFormData } from './variables';
 
 type FormInstance = ReturnType<typeof useForm<CorregirErrorFuncionalSSFormData>>;
@@ -17,12 +17,12 @@ function parseCampos(raw: string): string[] {
 interface Props { form: FormInstance }
 
 export default function SeccionErrorSS({ form }: Props) {
-  const { register, control, watch } = form;
+  const { control, watch } = form;
   const campos = parseCampos(watch('ss_camposAfectados') ?? '');
   const intento = watch('ss_intentoNumero');
 
   return (
-    <FormSection title="🚫 Error Funcional Devuelto por SmartSupervision" color="#B44444">
+    <FormSection title="Error Funcional Devuelto por SmartSupervision" color="#B44444">
       <div className="error-banner">
         SmartSupervision <strong>rechazó la radicación</strong> con un error funcional.
         Revise el detalle, corrija los campos indicados y reenvíe.
@@ -31,38 +31,25 @@ export default function SeccionErrorSS({ form }: Props) {
 
       {/* Metadatos del error */}
       <div className="form-row cols-3">
-        <div className="form-group">
-          <label className="form-label">Número de Caso (ID BPM)</label>
-          <input {...register('ss_numeroCaso')} readOnly className="form-control" placeholder="—" />
-        </div>
-        <div className="form-group">
-          <label className="form-label">Fecha Respuesta SS</label>
-          <input {...register('ss_fechaRespuesta')} readOnly className="form-control" placeholder="—" />
-        </div>
-        <div className="form-group">
-          <label className="form-label">Código de Error SS</label>
-          <input {...register('ss_codigoError')} readOnly className="form-control code-input" placeholder="—" />
-        </div>
+        <ZdsInput name="ss_numeroCaso" control={control} label="Número de Caso (ID BPM)" readOnly />
+        <ZdsInput name="ss_fechaRespuesta" control={control} label="Fecha Respuesta SS" readOnly />
+        <ZdsInput name="ss_codigoError" control={control} label="Código de Error SS" readOnly />
       </div>
 
       {/* Mensaje completo */}
       <div className="form-row cols-1">
-        <div className="form-group">
-          <label className="form-label">Mensaje de Error (SmartSupervision)</label>
-          <textarea
-            {...register('ss_mensajeError')}
-            readOnly
-            className="form-control textarea code-input"
-            rows={3}
-            placeholder="Sin mensaje registrado"
-          />
-          <span className="form-helper">Respuesta textual devuelta por la API de SmartSupervision — solo lectura.</span>
-        </div>
+        <ZdsTextarea
+          name="ss_mensajeError"
+          control={control}
+          label="Mensaje de Error (SmartSupervision)"
+          readOnly
+          helpText="Respuesta textual devuelta por la API de SmartSupervision — solo lectura."
+        />
       </div>
 
       {/* Clasificación del error (editable para que el gestor la confirme / ajuste) */}
       <div className="form-row cols-2">
-        <SelectField
+        <ZdsSelect
           label="Categoría del Error"
           name="ss_categoriaError"
           control={control}
@@ -76,7 +63,7 @@ export default function SeccionErrorSS({ form }: Props) {
               {campos.map((c, i) => <span key={i} className="campo-tag">{c}</span>)}
             </div>
           ) : (
-            <input readOnly className="form-control" placeholder="Sin campos específicos indicados" />
+            <ZdsInput name="ss_camposAfectados" control={control} label="Campos Afectados (según SS)" readOnly />
           )}
         </div>
       </div>

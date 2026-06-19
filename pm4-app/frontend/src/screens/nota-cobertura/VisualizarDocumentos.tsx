@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { useTask } from '../../core/useTask';
 import { useRequestFiles, type Pm4File } from '../../core/useRequestFiles';
 import PdfViewer from '../../components/PdfViewer';
-import { ZrButton } from '@zurich/web-components/react/button';
+import { ZrButton } from '../../components/fields/ZdsFields';
 import { type NotaCoberturaData } from './variables';
 import zurichLogo from '../../resources/zurich/ZurichLogo_Horz_White_CMYK_no_R.png';
 import './styles.css';

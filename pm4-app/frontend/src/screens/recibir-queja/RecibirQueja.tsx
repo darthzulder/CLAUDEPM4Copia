@@ -3,9 +3,7 @@ import { useForm } from 'react-hook-form';
 import './styles.css';
 import { useTask } from '../../core/useTask';
 import FormSection from '../../components/FormSection';
-import InputField from '../../components/fields/InputField';
-import SelectField from '../../components/fields/SelectField';
-import RadioField from '../../components/fields/RadioField';
+import { ZdsInput, ZdsSelect, ZdsRadio } from '../../components/fields/ZdsFields';
 import pm4 from '../../api/pm4Client';
 import { OPTIONS, RecibirQuejaFormData } from './variables';
 import SeccionConsumidor from './SeccionConsumidor';
@@ -31,7 +29,7 @@ export default function RecibirQueja() {
     },
   });
 
-  const { register, control, watch, handleSubmit, reset, setValue, formState: { errors, isSubmitted } } = form;
+  const { control, watch, handleSubmit, reset, setValue, formState: { errors, isSubmitted } } = form;
   const w = watch();
 
   // Pre-poblar formulario con datos del task
@@ -104,38 +102,32 @@ export default function RecibirQueja() {
       <form onSubmit={handleSubmit(onSubmit)} noValidate style={{ maxWidth: 960, margin: '0 auto', padding: '24px 24px 0' }}>
 
         {/* ── Sección 1: Encabezado del Caso ── */}
-        <FormSection title="📋 Encabezado del Caso">
+        <FormSection title="Encabezado del Caso">
           <div className="info-banner">
-            ℹ Complete todos los campos del consumidor y la queja. Al presionar <strong>Crear Queja</strong> el sistema ejecutará validación preventiva automática antes de activar la radicación ante SmartSupervision.
+            Complete todos los campos del consumidor y la queja. Al presionar <strong>Crear Queja</strong> el sistema ejecutará validación preventiva automática antes de activar la radicación ante SmartSupervision.
           </div>
           <div className="form-row cols-3">
-            <div className="form-group">
-              <label className="form-label">Número de Caso (ID BPM)</label>
-              <input
-                {...register('qd_numeroCaso')}
-                readOnly
-                className="form-control"
-                placeholder="Asignado por el BPM"
-              />
-            </div>
-            <SelectField
-              label="Canal de Recepción"
+            <ZdsInput
+              name="qd_numeroCaso"
+              control={control}
+              label="Número de Caso (ID BPM)"
+              readOnly
+            />
+            <ZdsSelect
               name="qd_canalRecepcion"
               control={control}
-              rules={{ required: 'Campo requerido' }}
+              label="Canal de Recepción"
               options={OPTIONS.canal}
+              rules={{ required: 'Campo requerido' }}
               required
               error={isSubmitted && errors.qd_canalRecepcion ? String(errors.qd_canalRecepcion.message) : undefined}
             />
-            <div className="form-group">
-              <label className="form-label">Fecha y Hora de Creación</label>
-              <input
-                {...register('qd_fechaHoraCreacion')}
-                readOnly
-                className="form-control"
-                placeholder="Generado automáticamente por el BPM"
-              />
-            </div>
+            <ZdsInput
+              name="qd_fechaHoraCreacion"
+              control={control}
+              label="Fecha y Hora de Creación"
+              readOnly
+            />
           </div>
         </FormSection>
 
@@ -146,21 +138,22 @@ export default function RecibirQueja() {
         <SeccionClasificacion form={form} />
 
         {/* ── Sección 4: Adjuntos ── */}
-        <FormSection title="📎 Adjuntos">
+        <FormSection title="Adjuntos">
           <div className="form-row cols-2">
-            <RadioField
-              label="¿Incluye Anexos a la Queja?"
+            <ZdsRadio
               name="qd_incluyeAnexos"
-              registration={register('qd_incluyeAnexos', { required: 'Campo requerido' })}
+              control={control}
+              label="¿Incluye Anexos a la Queja?"
               options={OPTIONS.incluyeAnexos}
+              rules={{ required: 'Campo requerido' }}
               required
               error={isSubmitted && errors.qd_incluyeAnexos ? String(errors.qd_incluyeAnexos.message) : undefined}
             />
-            <InputField
+            <ZdsInput
+              name="qd_adjuntoNombre"
+              control={control}
               label="Nombre del Archivo Adjunto"
-              registration={register('qd_adjuntoNombre')}
               readOnly
-              placeholder="Sin archivo seleccionado"
             />
           </div>
 
@@ -174,7 +167,7 @@ export default function RecibirQueja() {
                   onChange={handleFileChange}
                 />
                 {w.qd_adjuntoNombre
-                  ? <div className="file-upload-name">📎 {w.qd_adjuntoNombre}</div>
+                  ? <div className="file-upload-name">{w.qd_adjuntoNombre}</div>
                   : <div className="file-upload-label">Haga clic para seleccionar un archivo o arrástrelo aquí</div>
                 }
               </label>
@@ -194,7 +187,7 @@ export default function RecibirQueja() {
             disabled={submitting}
             onClick={() => completeTask({ ...w, _draft: true } as Record<string, unknown>)}
           >
-            💾 Guardar Borrador
+            Guardar Borrador
           </button>
           <button type="submit" className="btn-crear" disabled={submitting}>
             {submitting ? 'Enviando...' : 'Crear Queja ▶'}

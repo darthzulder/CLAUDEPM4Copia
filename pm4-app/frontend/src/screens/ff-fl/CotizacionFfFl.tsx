@@ -1,8 +1,6 @@
 import { useState, useEffect, useRef } from 'react';
 import { useForm, Controller } from 'react-hook-form';
-import { ZrButton } from '@zurich/web-components/react/button';
-import { ZrForm }   from '@zurich/web-components/react/form';
-import { ZdsInput, ZdsSelect } from './ZdsField';
+import { ZrButton, ZrForm, ZdsInput, ZdsSelect } from '../../components/fields/ZdsFields';
 import { useTask } from '../../core/useTask';
 import { useRequestFiles, resolveFileId } from '../../core/useRequestFiles';
 import PdfViewer from '../../components/PdfViewer';

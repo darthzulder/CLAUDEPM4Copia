@@ -15,7 +15,7 @@
   --z-card-shadow: 0 1px 3px rgba(0,0,0,.07), 0 6px 18px rgba(0,0,0,.06);
 }
 
-* { font-family: var(--z-sans); box-sizing: border-box; }
+* { font-family: var(--zf-sans); box-sizing: border-box; }
 
 /* ──────────────────────────────────────
    LAYOUT PRINCIPAL

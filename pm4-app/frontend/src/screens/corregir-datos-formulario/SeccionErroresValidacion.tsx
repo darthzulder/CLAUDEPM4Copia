@@ -1,5 +1,6 @@
 import { useForm } from 'react-hook-form';
 import FormSection from '../../components/FormSection';
+import { ZdsInput } from '../../components/fields/ZdsFields';
 import { CorregirDatosFormData } from './variables';
 
 type FormInstance = ReturnType<typeof useForm<CorregirDatosFormData>>;
@@ -26,13 +27,13 @@ interface Props {
 }
 
 export default function SeccionErroresValidacion({ form }: Props) {
-  const { register, watch } = form;
+  const { control, watch } = form;
   const raw = watch('cf_erroresValidacion') ?? '';
   const errores = parseErrores(raw);
   const total = watch('cf_totalErrores') ?? String(errores.length);
 
   return (
-    <FormSection title="⚠ Errores Detectados por Validación Preventiva" color="#B44444">
+    <FormSection title="Errores Detectados por Validación Preventiva" color="#B44444">
       <div className="error-banner" style={{ marginBottom: 'var(--zs-100)' }}>
         Se detectaron <strong>{total} error(es)</strong> al intentar radicar la queja ante SmartSupervision.
         Corrija los campos indicados y vuelva a enviar, o escale para revisión manual.
@@ -50,24 +51,18 @@ export default function SeccionErroresValidacion({ form }: Props) {
       )}
 
       <div className="form-row cols-2" style={{ marginTop: 'var(--zs-100)' }}>
-        <div className="form-group">
-          <label className="form-label">Número de Caso (ID BPM)</label>
-          <input
-            {...register('cf_numeroCaso')}
-            readOnly
-            className="form-control"
-            placeholder="Asignado por el BPM"
-          />
-        </div>
-        <div className="form-group">
-          <label className="form-label">Fecha y Hora de Validación</label>
-          <input
-            {...register('cf_fechaValidacion')}
-            readOnly
-            className="form-control"
-            placeholder="—"
-          />
-        </div>
+        <ZdsInput
+          name="cf_numeroCaso"
+          control={control}
+          label="Número de Caso (ID BPM)"
+          readOnly
+        />
+        <ZdsInput
+          name="cf_fechaValidacion"
+          control={control}
+          label="Fecha y Hora de Validación"
+          readOnly
+        />
       </div>
     </FormSection>
   );
