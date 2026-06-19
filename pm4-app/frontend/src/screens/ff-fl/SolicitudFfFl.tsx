@@ -7,6 +7,8 @@ import { useCollection } from '../../core/useCollection';
 import FormSection from '../../components/FormSection';
 import CreacionTomador from './CreacionTomador';
 import SeccionProductos from './SeccionProductos';
+import SeccionResumenCotizacion from './SeccionResumenCotizacion';
+import { useCotizador, cotizadorResultToPayload, type CotizadorInputs } from '../../core/useCotizador';
 import zurichLogo from '../../resources/zurich/ZurichLogo_Horz_White_CMYK_no_R.png';
 import { ZdsInput, ZdsDate, ZdsCheckboxField, ZdsSelect, ZdsSuggest, ZrButton } from '../../components/fields/ZdsFields';
 import {
@@ -593,6 +595,73 @@ export default function SolicitudFfFl() {
     });
   }, [task, form]);
 
+  const w = form.watch();
+
+  const cotizadorInputs = useMemo((): CotizadorInputs | null => {
+    const hasDyo   = Boolean(w.frm_gen_prod_dyo);
+    const hasCc    = Boolean(w.frm_gen_prod_cc);
+    const hasPdysi = Boolean(w.frm_gen_prod_pdysi);
+    const hasPi    = Boolean(w.frm_gen_prod_pi);
+    if (!hasDyo && !hasCc && !hasPdysi && !hasPi) return null;
+
+    const inputs: CotizadorInputs = {};
+
+    if (hasDyo && w.frm_cot_fact_anual_dyo) {
+      inputs.dyo = {
+        facturacion: w.frm_cot_fact_anual_dyo,
+        limite1:     w.frm_dyo_prop_01_limite ?? 0,
+        limite2:     w.frm_dyo_prop_02_limite ?? 0,
+        limite3:     w.frm_dyo_prop_03_limite ?? 0,
+        anexo:       w.frm_tom_sector === 'OTROS',
+        sector:      w.frm_tom_sector ?? 'OTROS',
+      };
+    }
+
+    if (hasCc && w.frm_cot_fact_anual_cc) {
+      inputs.cc = {
+        facturacion:       w.frm_cot_fact_anual_cc,
+        limite1_evento:    w.frm_cc_prop_01_evento   ?? 0,
+        limite2_evento:    w.frm_cc_prop_02_evento   ?? 0,
+        limite3_evento:    w.frm_cc_prop_03_evento   ?? 0,
+        limite1_agregado:  w.frm_cc_prop_01_agregado ?? 0,
+        limite2_agregado:  w.frm_cc_prop_02_agregado ?? 0,
+        limite3_agregado:  w.frm_cc_prop_03_agregado ?? 0,
+        empleados:         w.frm_cot_num_empleados   ?? '1-100',
+      };
+    }
+
+    if (hasPdysi && w.frm_cot_fact_anual_pdysi) {
+      inputs.pdysi = {
+        facturacion: w.frm_cot_fact_anual_pdysi,
+        limite1:     w.frm_pdysi_prop_01_limite ?? 0,
+        limite2:     w.frm_pdysi_prop_02_limite ?? 0,
+        limite3:     w.frm_pdysi_prop_03_limite ?? 0,
+      };
+    }
+
+    if (hasPi && w.frm_cot_fact_anual_pi) {
+      inputs.pi = {
+        facturacion: w.frm_cot_fact_anual_pi,
+        limite1:     w.frm_pi_prop_01_limite ?? 0,
+        limite2:     w.frm_pi_prop_02_limite ?? 0,
+        limite3:     w.frm_pi_prop_03_limite ?? 0,
+        actividad:   w.frm_act_pi_actividad  ?? '',
+      };
+    }
+
+    return inputs;
+  }, [
+    w.frm_gen_prod_dyo, w.frm_gen_prod_cc, w.frm_gen_prod_pdysi, w.frm_gen_prod_pi,
+    w.frm_cot_fact_anual_dyo, w.frm_dyo_prop_01_limite, w.frm_dyo_prop_02_limite, w.frm_dyo_prop_03_limite,
+    w.frm_tom_sector,
+    w.frm_cot_fact_anual_cc, w.frm_cc_prop_01_evento, w.frm_cc_prop_02_evento, w.frm_cc_prop_03_evento,
+    w.frm_cc_prop_01_agregado, w.frm_cc_prop_02_agregado, w.frm_cc_prop_03_agregado, w.frm_cot_num_empleados,
+    w.frm_cot_fact_anual_pdysi, w.frm_pdysi_prop_01_limite, w.frm_pdysi_prop_02_limite, w.frm_pdysi_prop_03_limite,
+    w.frm_cot_fact_anual_pi, w.frm_pi_prop_01_limite, w.frm_act_pi_actividad,
+  ]);
+
+  const { result: cotResult, loading: cotLoading, error: cotError, warmingUp: cotWarmingUp } = useCotizador(cotizadorInputs);
+
   const onSubmit = async (data: FfFlSolicitudFormData) => {
     const prods = [data.frm_gen_prod_dyo, data.frm_gen_prod_cc, data.frm_gen_prod_pdysi, data.frm_gen_prod_pi];
     const count = prods.filter(Boolean).length;
@@ -675,6 +744,7 @@ export default function SolicitudFfFl() {
       const payload: Record<string, unknown> = {
         ...taskData,
         ...(data as unknown as Record<string, unknown>),
+        ...(cotResult && cotizadorInputs ? cotizadorResultToPayload(cotResult, cotizadorInputs) : {}),
       };
       await completeTask(payload);
       setSent(true);
@@ -793,6 +863,18 @@ export default function SolicitudFfFl() {
           <SeccionProductos form={form} fileRegistry={fileRegistry} />
           <DatosCotizacion form={form} />
           <PlanPago form={form} />
+
+          <SeccionResumenCotizacion
+            result={cotResult}
+            loading={cotLoading}
+            warmingUp={cotWarmingUp}
+            error={cotError}
+            inputs={cotizadorInputs ?? {}}
+            hasDyo={Boolean(w.frm_gen_prod_dyo)}
+            hasCc={Boolean(w.frm_gen_prod_cc)}
+            hasPdysi={Boolean(w.frm_gen_prod_pdysi)}
+            hasPi={Boolean(w.frm_gen_prod_pi)}
+          />
 
           {submitError && <div className="submit-error">{submitError}</div>}
 

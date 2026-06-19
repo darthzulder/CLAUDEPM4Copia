@@ -11,7 +11,8 @@
       "Bash(npx tsc *)",
       "Bash(Get-ChildItem -Path \"G:\\\\DockerProys\\\\CLAUDEPM4Copia\\\\pm4-app\\\\frontend\\\\src\\\\screens\" -Directory)",
       "Bash(Select-Object Name)",
-      "Bash(docker exec *)"
+      "Bash(docker exec *)",
+      "WebFetch(domain:zds.zurich.com)"
     ]
   }
 }
