@@ -13,6 +13,8 @@ import VerDocEmi   from './screens/col-emision/VerDocEmi';
 import EstadoCorreo from './screens/estado-correo/EstadoCorreo';
 import RecibirQueja from './screens/recibir-queja/RecibirQueja';
 import RevisarErrorTecnico from './screens/revisar-error-tecnico/RevisarErrorTecnico';
+import CorregirDatosFormulario from './screens/corregir-datos-formulario/CorregirDatosFormulario';
+import CorregirErrorFuncionalSS from './screens/corregir-error-funcional-ss/CorregirErrorFuncionalSS';
 
 class ErrorBoundary extends Component<{ children: ReactNode }, { error: Error | null }> {
   state = { error: null };
@@ -47,6 +49,8 @@ const SCREENS: Record<string, React.ComponentType> = {
   'estado-correo': EstadoCorreo,
   'recibir-queja': RecibirQueja,
   'revisar-error-tecnico': RevisarErrorTecnico,
+  'corregir-datos-formulario': CorregirDatosFormulario,
+  'corregir-error-funcional-ss': CorregirErrorFuncionalSS,
 };
 
 const DEBUG_BANNER_STYLE: React.CSSProperties = {

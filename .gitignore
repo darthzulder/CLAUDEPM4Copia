@@ -1,3 +1,6 @@
+#LocalFiles
+LocalFiles/
+
 # Graphify outputs
 graphify-out/
 graph.json
