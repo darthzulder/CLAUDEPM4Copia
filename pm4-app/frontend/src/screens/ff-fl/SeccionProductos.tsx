@@ -4,6 +4,7 @@ import SeccionDyO from './SeccionDyO';
 import SeccionCC from './SeccionCC';
 import SeccionPDySI from './SeccionPDySI';
 import SeccionPI from './SeccionPI';
+import { ZrTabs } from '../../components/fields/ZdsFields';
 import { FfFlSolicitudFormData } from './variables';
 
 type Form = ReturnType<typeof useForm<FfFlSolicitudFormData>>;
@@ -33,18 +34,11 @@ export default function SeccionProductos({ form, fileRegistry }: { form: Form; f
 
   return (
     <div className="products-card">
-      <div className="products-tab-bar">
-        {activeTabs.map((tab) => (
-          <button
-            key={tab.key}
-            type="button"
-            className={`prod-tab${activeTab === tab.key ? ' prod-tab--active' : ''}`}
-            onClick={() => setActiveTab(tab.key)}
-          >
-            {tab.label}
-          </button>
-        ))}
-      </div>
+      <ZrTabs
+        model={Math.max(0, activeTabs.findIndex((t) => t.key === activeTab))}
+        onChange={(idx: number) => setActiveTab(activeTabs[idx].key)}
+        {...({ tabs: activeTabs.map((t) => ({ name: t.label })) } as Record<string, unknown>)}
+      />
 
       <div className="products-tab-body">
         {activeTab === 'dyo'   && <SeccionDyO   form={form} fileRegistry={fileRegistry} />}

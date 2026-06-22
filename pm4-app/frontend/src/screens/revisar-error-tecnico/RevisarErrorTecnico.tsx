@@ -3,18 +3,10 @@ import { useForm } from 'react-hook-form';
 import './styles.css';
 import { useTask } from '../../core/useTask';
 import FormSection from '../../components/FormSection';
-import { ZdsInput, ZdsSelect, ZdsTextarea, ZdsRadio } from '../../components/fields/ZdsFields';
+import { ZdsInput, ZdsSelect, ZdsTextarea, ZdsRadio, ZrButton, ZrAlert } from '../../components/fields/ZdsFields';
 import { OPTIONS, RevisarErrorTecnicoFormData } from './variables';
 import SeccionDetalleError from './SeccionDetalleError';
-
-function ZurichLogo() {
-  return (
-    <svg width="80" height="40" viewBox="0 0 120 60" fill="none">
-      <text x="4" y="42" fontFamily="Arial" fontSize="32" fontWeight="900" fill="#fff" letterSpacing="-1">Z</text>
-      <text x="28" y="38" fontFamily="Arial" fontSize="16" fontWeight="700" fill="#fff">ZURICH</text>
-    </svg>
-  );
-}
+import zurichLogo from '../../resources/zurich/ZurichLogo_Horz_White_CMYK_no_R.png';
 
 export default function RevisarErrorTecnico() {
   const { task, loading, error, submitting, completeTask } = useTask();
@@ -83,7 +75,7 @@ export default function RevisarErrorTecnico() {
             <span>Rol: Técnico de Integración</span>
           </div>
         </div>
-        <ZurichLogo />
+        <img src={zurichLogo} alt="Zurich" className="header-logo" />
       </div>
 
       <form onSubmit={handleSubmit(onSubmit)} noValidate style={{ maxWidth: 960, margin: '0 auto', padding: '24px 24px 0' }}>
@@ -168,38 +160,33 @@ export default function RevisarErrorTecnico() {
           </div>
 
           {w.et_resolucion === 'REINTENTAR' && (
-            <div className="info-banner">
+            <ZrAlert config="info" {...({ 'hide-close': true } as object)}>
               Al confirmar <strong>Reintentar integración</strong>, el sistema ejecutará nuevamente el envío a SmartSupervision con los datos corregidos. Se generará un nuevo log de intento.
-            </div>
+            </ZrAlert>
           )}
           {w.et_resolucion === 'ESCALAR' && (
-            <div className="warn-banner">
+            <ZrAlert config="alert" {...({ 'hide-close': true } as object)}>
               Al <strong>Escalar a soporte</strong>, se creará un ticket de soporte técnico nivel 2 y se notificará al equipo de sistemas. El proceso quedará pausado hasta recibir resolución.
-            </div>
+            </ZrAlert>
           )}
           {w.et_resolucion === 'CERRAR_ERROR' && (
-            <div className="error-banner">
+            <ZrAlert config="negative" {...({ 'hide-close': true } as object)}>
               Al <strong>Cerrar con error</strong>, la integración quedará marcada como fallida permanentemente. Complete las observaciones técnicas con la justificación antes de continuar.
-            </div>
+            </ZrAlert>
           )}
         </FormSection>
 
         {/* Barra de acciones */}
         <div className="actions-bar">
-          <button type="button" className="btn-cancelar" onClick={() => window.history.back()}>
-            Cancelar
-          </button>
-          <button
-            type="button"
-            className="btn-borrador"
+          <ZrButton config="secondary:s" onClick={() => window.history.back()}>Cancelar</ZrButton>
+          <ZrButton
+            config="secondary:s"
             disabled={submitting}
             onClick={() => completeTask({ ...w, _draft: true } as Record<string, unknown>)}
           >
             Guardar Borrador
-          </button>
-          <button type="submit" className="btn-crear" disabled={submitting}>
-            {submitting ? 'Enviando...' : submitLabel}
-          </button>
+          </ZrButton>
+          <ZrButton config="positive:s" onClick={() => { handleSubmit(onSubmit)(); }} loading={submitting} disabled={submitting}>{submitLabel}</ZrButton>
         </div>
       </form>
     </div>

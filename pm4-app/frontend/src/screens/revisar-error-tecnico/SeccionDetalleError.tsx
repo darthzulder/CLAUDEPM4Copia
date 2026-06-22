@@ -1,6 +1,6 @@
 import { useForm } from 'react-hook-form';
 import FormSection from '../../components/FormSection';
-import { ZdsInput, ZdsSelect, ZdsTextarea } from '../../components/fields/ZdsFields';
+import { ZdsInput, ZdsSelect, ZdsTextarea, ZrAlert } from '../../components/fields/ZdsFields';
 import { OPTIONS, RevisarErrorTecnicoFormData } from './variables';
 
 type FormInstance = ReturnType<typeof useForm<RevisarErrorTecnicoFormData>>;
@@ -52,9 +52,9 @@ export default function SeccionDetalleError({ form }: Props) {
 
       {/* Sección 2: Queja Afectada */}
       <FormSection title="Queja Afectada (Solo Lectura)">
-        <div className="info-banner">
+        <ZrAlert config="info" {...({ 'hide-close': true } as object)}>
           Los datos del consumidor y la queja son de solo lectura. Fueron registrados en el paso anterior del proceso (P01-T01).
-        </div>
+        </ZrAlert>
 
         <div className="form-row cols-3">
           <ZdsInput name="et_nombreConsumidor" control={control} label="Nombre del Consumidor" readOnly />

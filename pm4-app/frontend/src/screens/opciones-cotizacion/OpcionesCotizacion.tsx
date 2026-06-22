@@ -3,7 +3,7 @@ import { useForm } from 'react-hook-form';
 import { useTask } from '../../core/useTask';
 import { resolveFileId } from '../../core/useRequestFiles';
 import PdfViewer from '../../components/PdfViewer';
-import { ZrButton, ZdsSelect, ZdsTextarea } from '../../components/fields/ZdsFields';
+import { ZrButton, ZdsSelect, ZdsTextarea, ZrTabs } from '../../components/fields/ZdsFields';
 import {
   DECISION_OPTIONS,
   LINEAS_CONFIG,
@@ -168,18 +168,11 @@ export default function OpcionesCotizacion() {
         {/* Área de slips con tabs por línea */}
         <div className="slip-area">
           {activeLineas.length > 1 && (
-            <div className="slip-tab-bar">
-              {activeLineas.map((l) => (
-                <button
-                  key={l.key}
-                  type="button"
-                  className={`slip-tab${activeTab === l.key ? ' slip-tab--active' : ''}`}
-                  onClick={() => setActiveTab(l.key)}
-                >
-                  {l.label}
-                </button>
-              ))}
-            </div>
+            <ZrTabs
+              model={Math.max(0, activeLineas.findIndex((l) => l.key === activeTab))}
+              onChange={(idx: number) => setActiveTab(activeLineas[idx].key)}
+              {...({ tabs: activeLineas.map((l) => ({ name: l.label })) } as Record<string, unknown>)}
+            />
           )}
 
           {effectiveFileId ? (
@@ -244,24 +237,19 @@ export default function OpcionesCotizacion() {
               )}
 
               {data.frm_gen_enlace_clausulado_rc && (
-                <div className="field-group">
-                  <label>Clausulado RC</label>
-                  <a
-                    href={data.frm_gen_enlace_clausulado_rc}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="btn-download"
-                  >
-                    Ver clausulado
-                  </a>
-                </div>
+                <ZrButton
+                  config="secondary:s"
+                  icon="file-blank:line"
+                  href={data.frm_gen_enlace_clausulado_rc}
+                  target="_blank"
+                >
+                  Ver clausulado RC
+                </ZrButton>
               )}
             </div>
 
             <div className="decision-actions">
-              <ZrButton config="primary:l" as-submit disabled={submitting} loading={submitting}>
-                DERIVAR
-              </ZrButton>
+              <ZrButton config="primary:l" onClick={() => { handleSubmit(onSubmit)(); }} disabled={submitting} loading={submitting}>DERIVAR</ZrButton>
             </div>
           </div>
         </form>

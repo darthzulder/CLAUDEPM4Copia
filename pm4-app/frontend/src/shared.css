@@ -1,0 +1,409 @@
+/* ==========================================================================
+   SHARED — estilos comunes a todas las pantallas PM4
+   Importado UNA SOLA VEZ en main.tsx. No duplicar en styles.css de screens.
+   ========================================================================== */
+
+/* ── Aliases que mapean tokens Zurich ──────────────────────────────────────
+   En @zurich/css-components el gris está INVERTIDO:
+   --zg-1 = casi negro (#0D1115),  --zg-9 = gris más claro (#C9D0D2)
+   Para fondos claros: --zg-white (#fff) o --zg-white-zurich (#ECEEEF)
+   Para bordes sutiles: --zg-9                                              */
+:root {
+  --z-blue:        var(--zc-blue-zurich);
+  --z-blue-dark:   var(--zc-blue-dark);
+  --z-blue-light:  var(--zc-blue-sky-10);
+  --z-green:       var(--zc-moss-aa);
+  --z-red:         var(--zc-peach-aa);
+  --z-orange:      var(--zc-lemon-aa);
+  --z-bg:          var(--zg-white-zurich);
+  --z-border:      var(--zg-9);
+  --z-text:        var(--zc-blue-dark);
+  --z-muted:       var(--zg-5);
+  --z-card-shadow: 0 1px 3px rgba(0,0,0,.07), 0 6px 18px rgba(0,0,0,.06);
+}
+
+* { font-family: var(--zf-sans); box-sizing: border-box; }
+
+/* ── Layout principal ──────────────────────────────────────────────────── */
+.screen-wrapper {
+  min-height: 100vh;
+  background: var(--z-bg);
+}
+
+.screen-content {
+  padding: var(--zs-150) var(--zs-200) var(--zs-400);
+}
+
+/* ── Header institucional ──────────────────────────────────────────────── */
+.screen-header {
+  background: var(--z-blue);
+  padding: var(--zs-150) var(--zs-200);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  box-shadow: 0 4px 12px rgba(33,103,174,.35);
+}
+
+.screen-header .title-block { color: var(--zg-white-zurich); }
+
+.screen-header .title-block h1 {
+  font: var(--zf-body-16--700);
+  margin: 0 0 var(--zs-25);
+  text-transform: uppercase;
+  letter-spacing: .6px;
+}
+
+.screen-header .subtitle {
+  display: flex;
+  gap: var(--zs-100);
+  font: var(--zf-capt-12);
+  color: rgba(255,255,255,.80);
+}
+
+.screen-header .subtitle span {
+  display: flex;
+  align-items: center;
+  gap: var(--zs-25);
+}
+
+.screen-header .subtitle span::before {
+  content: '';
+  display: inline-block;
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background: rgba(255,255,255,.55);
+}
+
+.screen-header .subtitle span:first-child::before { display: none; }
+
+/* Logo Zurich en la esquina superior derecha (todas las pantallas) */
+.header-logo { height: 44px; width: auto; object-fit: contain; flex-shrink: 0; }
+
+/* ── Estados de carga y error ──────────────────────────────────────────── */
+.screen-loading {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 60vh;
+  gap: var(--zs-100);
+  color: var(--z-muted);
+  font: var(--zf-capt-14);
+}
+
+.screen-error {
+  margin: var(--zs-250) auto;
+  max-width: 480px;
+  background: var(--zg-white);
+  border: 1px solid var(--zc-peach-40);
+  border-left: 4px solid var(--z-red);
+  border-radius: 10px;
+  padding: var(--zs-150);
+  color: var(--z-red);
+  font: var(--zf-capt-14);
+  box-shadow: var(--z-card-shadow);
+}
+
+.spinner {
+  width: 44px;
+  height: 44px;
+  border: 4px solid var(--zg-9);
+  border-top-color: var(--z-blue);
+  border-radius: 50%;
+  animation: spin .9s linear infinite;
+}
+
+@keyframes spin { to { rotate: 360deg; } }
+
+.loading-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(255,255,255,.7);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+}
+
+/* ── Grid de columnas para campos de formulario ────────────────────────── */
+.form-row { display: grid; gap: var(--zs-150); margin-bottom: 0; overflow: visible; }
+.form-row.cols-1 { grid-template-columns: 1fr; }
+.form-row.cols-2 { grid-template-columns: 1fr 1fr; }
+.form-row.cols-3 { grid-template-columns: 1fr 1fr 1fr; }
+.form-row.cols-4 { grid-template-columns: 1fr 1fr 1fr 1fr; }
+
+@media (max-width: 900px) {
+  .form-row.cols-3,
+  .form-row.cols-4 { grid-template-columns: 1fr 1fr; }
+}
+@media (max-width: 600px) {
+  .form-row.cols-2,
+  .form-row.cols-3,
+  .form-row.cols-4 { grid-template-columns: 1fr; }
+}
+
+.form-row.row-align-bottom { align-items: flex-end; }
+.section-spacer { height: var(--zs-100); }
+
+/* ── FormSection — header y body (usado por FormSection.tsx) ──────────── */
+.form-section-header {
+  padding: var(--zs-100) var(--zs-200);
+  display: flex;
+  align-items: center;
+  gap: var(--zs-50);
+  border-radius: 12px 12px 0 0;
+}
+
+.form-section-header span {
+  color: var(--zg-white-zurich);
+  font: var(--zf-capt-12--700);
+  letter-spacing: .55px;
+  text-transform: uppercase;
+}
+
+.form-section-header::before {
+  content: '';
+  display: inline-block;
+  width: 3px;
+  height: 16px;
+  background: rgba(255,255,255,.45);
+  border-radius: 2px;
+  flex-shrink: 0;
+}
+
+.form-section-body {
+  padding: var(--zs-200) var(--zs-300) var(--zs-200);
+  display: flex;
+  flex-direction: column;
+  gap: var(--zs-200);
+  overflow: visible;
+}
+
+/* ── Pantalla de éxito post-submit ─────────────────────────────────────── */
+.screen-sent-wrapper {
+  max-width: 960px;
+  margin: 0 auto;
+  padding: var(--zs-200) var(--zs-150) var(--zs-400);
+}
+
+.screen-sent {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 340px;
+  background: var(--zg-white);
+  border-radius: 12px;
+  box-shadow: var(--z-card-shadow);
+  border: 1px solid var(--z-border);
+  padding: var(--zs-300) var(--zs-200);
+  text-align: center;
+}
+
+.screen-sent-icon {
+  width: 64px;
+  height: 64px;
+  border-radius: 50%;
+  background: var(--z-green);
+  color: var(--zg-white-zurich);
+  font-size: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: var(--zs-100);
+  box-shadow: 0 4px 14px rgba(12,164,66,.3);
+}
+
+.screen-sent-title {
+  font: var(--zf-body-20--700);
+  color: var(--z-text);
+  margin-bottom: var(--zs-50);
+}
+
+.screen-sent-sub {
+  font: var(--zf-capt-14);
+  color: var(--z-muted);
+  line-height: 1.6;
+  max-width: 380px;
+}
+
+/* ── Campos Zurich — editable vs readonly (global, todas las pantallas) ── */
+zr-text-input:not([readonly]),
+zr-date-input:not([readonly]) {
+  background: var(--zg-white);
+  border-radius: 28px;
+}
+
+zr-text-input[readonly],
+zr-date-input[readonly] {
+  background: var(--zg-white-zurich);
+  border-radius: 28px;
+}
+
+[data-zds-readonly] zr-text-input,
+[data-zds-readonly] zr-date-input {
+  background: var(--zg-white-zurich);
+  border-radius: 28px;
+}
+
+/* ── Sub-secciones (caja con borde + título, reutilizable; el DS no la cubre) ── */
+.form-subsection {
+  border: 1px solid var(--z-border);
+  border-radius: 8px;
+  padding: var(--zs-100) var(--zs-150) var(--zs-75);
+  background: var(--zg-white);
+}
+
+.form-subsection-title {
+  font: var(--zf-capt-14--600);
+  color: var(--z-blue);
+  margin-bottom: var(--zs-100);
+  display: flex;
+  align-items: center;
+  gap: var(--zs-50);
+}
+
+.form-subsection-title--spaced { margin-top: var(--zs-75); }
+.form-subsection-title::before {
+  content: '';
+  display: inline-block;
+  width: 3px;
+  height: 13px;
+  background: var(--z-blue);
+  border-radius: 2px;
+}
+
+/* ── Visor PDF (componente PdfViewer, compartido) ──────────────────────── */
+.pdf-viewer { width: 100%; }
+
+.pdf-viewer-label {
+  font: var(--zf-capt-12--700);
+  color: var(--z-muted);
+  text-transform: uppercase;
+  letter-spacing: .4px;
+  margin-bottom: var(--zs-50);
+}
+
+.pdf-viewer-state {
+  display: flex;
+  align-items: center;
+  gap: var(--zs-75);
+  padding: var(--zs-150);
+  background: var(--zg-white-zurich);
+  border: 1px solid var(--z-border);
+  border-radius: 8px;
+  color: var(--z-muted);
+  font: var(--zf-capt-14);
+}
+
+.pdf-viewer-error { color: var(--z-red); }
+
+.pdf-viewer-actions {
+  display: flex;
+  justify-content: flex-end;
+  padding-top: var(--zs-50);
+}
+
+.pdf-spinner {
+  width: 20px;
+  height: 20px;
+  border: 3px solid var(--z-border);
+  border-top-color: var(--z-blue);
+  border-radius: 50%;
+  animation: spin .9s linear infinite;
+  flex-shrink: 0;
+}
+
+/* ── Tarjeta "sin archivo disponible" (estado vacío de visor) ───────────── */
+.no-file-card {
+  background: var(--zg-white);
+  border: 1px solid var(--z-border);
+  border-radius: 8px;
+  padding: var(--zs-300) var(--zs-150);
+  text-align: center;
+  color: var(--z-muted);
+  font: var(--zf-capt-14);
+}
+.no-file-card .no-file-icon { font-size: 36px; margin-bottom: var(--zs-50); }
+
+/* ── Sección tipo tarjeta con header azul (variante div de FormSection) ─── */
+.nc-section {
+  background: var(--zg-white);
+  border: 1px solid var(--z-border);
+  border-radius: 12px;
+  box-shadow: var(--z-card-shadow);
+  margin-bottom: var(--zs-150);
+  /* sin overflow:hidden para no recortar dropdowns de ZrSelect */
+}
+.nc-section-header {
+  background: var(--z-blue);
+  padding: var(--zs-100) var(--zs-200);
+  display: flex;
+  align-items: center;
+  gap: var(--zs-50);
+  border-radius: 12px 12px 0 0;
+}
+.nc-section-header::before {
+  content: '';
+  display: inline-block;
+  width: 3px;
+  height: 16px;
+  background: rgba(255,255,255,.45);
+  border-radius: 2px;
+  flex-shrink: 0;
+}
+.nc-section-header span {
+  color: var(--zg-white-zurich);
+  font: var(--zf-capt-12--700);
+  letter-spacing: .55px;
+  text-transform: uppercase;
+}
+.nc-section-body {
+  padding: var(--zs-200) var(--zs-200) var(--zs-100);
+  display: flex;
+  flex-direction: column;
+  gap: var(--zs-100);
+}
+
+/* ── Wrappers de campos ZDS ────────────────────────────────────────────── */
+.zds-field-wrap { width: 100%; }
+
+.zds-select-wrap {
+  position: relative;
+  height: 68px;
+  overflow: visible;
+  z-index: 0;
+}
+
+.zds-select-wrap:focus-within { z-index: 200; }
+
+.zds-select-wrap > * {
+  position: absolute;
+  width: 100%;
+  top: 0;
+}
+
+/* ── Barra de submit (al pie del formulario, no sticky) ─────────────────── */
+.submit-bar {
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  gap: var(--zs-75);
+  padding: var(--zs-150) var(--zs-200) var(--zs-50);
+  border-top: 1px solid var(--z-border);
+  margin-top: var(--zs-150);
+}
+
+/* ── Barra de acciones — botones (estática, igual que .submit-bar) ─────── */
+.actions-bar {
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  gap: var(--zs-75);
+  padding: var(--zs-150) var(--zs-200);
+  border-top: 1px solid var(--z-border);
+  margin-top: var(--zs-150);
+}
+
+/* Banners (.info-banner/.warn-banner/.error-banner) → migrados a ZrAlert */

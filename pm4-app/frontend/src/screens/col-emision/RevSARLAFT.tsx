@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { useTask } from '../../core/useTask';
 import { useRequestFiles, resolveFileId } from '../../core/useRequestFiles';
 import PdfViewer from '../../components/PdfViewer';
-import { ZrButton, ZrModal } from '../../components/fields/ZdsFields';
+import { ZrButton, ZrModal, ZrAlert } from '../../components/fields/ZdsFields';
 import {
   type DocSarlaftData,
   type SarlaftPerfil,
@@ -252,9 +252,9 @@ export default function RevSARLAFT() {
             <div className="nc-section-body">
 
               {!perfil && (
-                <div className="perfil-aviso">
-                  ℹ No se detectó perfil SARLAFT en la tarea. Se muestran todos los documentos posibles.
-                </div>
+                <ZrAlert config="info" {...({ 'hide-close': true } as object)}>
+                  No se detectó perfil SARLAFT en la tarea. Se muestran todos los documentos posibles.
+                </ZrAlert>
               )}
 
               <div className="sarlaft-doc-list">

@@ -7,6 +7,7 @@ import FormSection from '../../components/FormSection';
 import { ZdsInput, ZdsSelect, ZdsRadio, ZdsDate } from '../../components/fields/ZdsFields';
 import pm4 from '../../api/pm4Client';
 import { OPTIONS, COLLECTION_DEFS, CotizadorFormData, CONSULTAR_CLIENTE_SCRIPT_ID, parseClienteTia } from './variables';
+import zurichLogo from '../../resources/zurich/ZurichLogo_Horz_White_CMYK_no_R.png';
 
 // ---------------------------------------------------------------------------
 // Helper: muestra el error solo si el campo tiene valor O el form fue enviado.
@@ -21,18 +22,6 @@ function fieldError(
   const isEmpty = value === '' || value === null || value === undefined;
   if (err.type === 'required' && isEmpty) return isSubmitted ? String(err.message) : undefined;
   return String(err.message);
-}
-
-// ---------------------------------------------------------------------------
-// Logo Zurich
-// ---------------------------------------------------------------------------
-function ZurichLogo() {
-  return (
-    <svg width="80" height="40" viewBox="0 0 120 60" fill="none">
-      <text x="4" y="42" fontFamily="Arial" fontSize="32" fontWeight="900" fill="#fff" letterSpacing="-1">Z</text>
-      <text x="28" y="38" fontFamily="Arial" fontSize="16" fontWeight="700" fill="#fff">ZURICH</text>
-    </svg>
-  );
 }
 
 // ---------------------------------------------------------------------------
@@ -605,7 +594,7 @@ export default function CotizadorFastFlow() {
       <div className="screen-wrapper">
         <div className="screen-header">
           <div className="title-block"><h1>Cotizador Fast Flow</h1></div>
-          <ZurichLogo />
+          <img src={zurichLogo} alt="Zurich" className="header-logo" />
         </div>
         <div className="screen-sent-wrapper">
           <div className="screen-sent">
@@ -634,7 +623,7 @@ export default function CotizadorFastFlow() {
             <span>Caso # {caseNumber}</span>
           </div>
         </div>
-        <ZurichLogo />
+        <img src={zurichLogo} alt="Zurich" className="header-logo" />
       </div>
 
       <form onSubmit={form.handleSubmit(onSubmit)} noValidate>

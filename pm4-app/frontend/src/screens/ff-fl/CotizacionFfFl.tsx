@@ -1,6 +1,6 @@
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect } from 'react';
 import { useForm, Controller } from 'react-hook-form';
-import { ZrButton, ZrForm, ZdsInput, ZdsSelect } from '../../components/fields/ZdsFields';
+import { ZrButton, ZrForm, ZdsInput, ZdsSelect, ZdsTextarea, ZrAlert, ZrTabs, ZrSegmentedControl, ZrFileInput } from '../../components/fields/ZdsFields';
 import { useTask } from '../../core/useTask';
 import { useRequestFiles, resolveFileId } from '../../core/useRequestFiles';
 import PdfViewer from '../../components/PdfViewer';
@@ -85,18 +85,13 @@ function NcToggle({ form, name }: { form: Form; name: keyof CotizFfFlFormData })
       control={form.control}
       defaultValue={false}
       render={({ field }) => (
-        <div className="si-no-btns">
-          <button
-            type="button"
-            className={`si-no-btn si-no-btn--si${field.value ? ' si-no-btn--active' : ''}`}
-            onClick={() => field.onChange(true)}
-          >SI</button>
-          <button
-            type="button"
-            className={`si-no-btn si-no-btn--no${!field.value ? ' si-no-btn--active' : ''}`}
-            onClick={() => field.onChange(false)}
-          >NO</button>
-        </div>
+        <ZrSegmentedControl
+          name={field.name}
+          model={field.value ? 'SI' : 'NO'}
+          onChange={(val: string | null) => field.onChange(val === 'SI')}
+          onBlur={field.onBlur}
+          {...({ options: [{ value: 'SI', text: 'SÍ' }, { value: 'NO', text: 'NO' }] } as Record<string, unknown>)}
+        />
       )}
     />
   );
@@ -265,10 +260,9 @@ function TarjetaGenerica({
 // ─── Sección Decisión ─────────────────────────────────────────────────────────
 
 function SeccionDecision({
-  form, fileRef, onEnviar, submitError, submitting,
+  form, onEnviar, submitError, submitting,
 }: {
   form: Form;
-  fileRef: React.RefObject<HTMLInputElement>;
   onEnviar: () => void;
   submitError: string;
   submitting: boolean;
@@ -307,30 +301,28 @@ function SeccionDecision({
                 />
               </div>
               <div className="form-row cols-1">
-                <div className="co-field-wrap">
-                  <label className="form-label">Comentarios *</label>
-                  <textarea
-                    className="co-textarea"
-                    maxLength={500}
-                    placeholder="Ingrese los comentarios del rechazo..."
-                    {...register('cot_comentarios')}
-                  />
-                </div>
+                <ZdsTextarea
+                  control={control}
+                  name="cot_comentarios"
+                  label="Comentarios"
+                  required
+                  maxLength={500}
+                  placeholder="Ingrese los comentarios del rechazo..."
+                />
               </div>
             </>
           )}
 
           {decision === 'PERSONALIZACION' && (
             <div className="form-row cols-1">
-              <div className="co-field-wrap">
-                <label className="form-label">Personalización / Excepción requerida *</label>
-                <textarea
-                  className="co-textarea"
-                  maxLength={500}
-                  placeholder="Describa la personalización o excepción requerida..."
-                  {...register('cot_personalizacion')}
-                />
-              </div>
+              <ZdsTextarea
+                control={control}
+                name="cot_personalizacion"
+                label="Personalización / Excepción requerida"
+                required
+                maxLength={500}
+                placeholder="Describa la personalización o excepción requerida..."
+              />
             </div>
           )}
 
@@ -352,24 +344,16 @@ function SeccionDecision({
               </div>
               <div className="co-field-wrap">
                 <label className="form-label">Orden en firme * <span className="co-field-hint">(PDF o correo)</span></label>
-                <div className="dyo-doc-actions">
-                  <input
-                    ref={fileRef}
-                    type="file"
-                    accept=".pdf,.eml,.msg"
-                    style={{ display: 'none' }}
-                    onChange={(e) => {
-                      const file = e.target.files?.[0];
-                      if (file) setValue('cot_orden_firme_nombre', file.name);
-                    }}
-                  />
-                  <ZrButton config="secondary" icon="file-upload:line" onClick={() => fileRef.current?.click()}>
-                    {w.cot_orden_firme_nombre ?? 'Cargar archivo'}
-                  </ZrButton>
-                  {w.cot_orden_firme_nombre && (
-                    <span className="dyo-doc-name">{w.cot_orden_firme_nombre}</span>
-                  )}
-                </div>
+                <ZrFileInput
+                  label=""
+                  model={w.cot_orden_firme_nombre || null}
+                  droppable
+                  onChange={(file: File | string | null) => {
+                    if (file && typeof file !== 'string') setValue('cot_orden_firme_nombre', file.name);
+                    else if (!file) setValue('cot_orden_firme_nombre', '');
+                  }}
+                  {...({ accept: ['.pdf', '.eml', '.msg'] } as Record<string, unknown>)}
+                />
                 <input type="hidden" {...register('cot_orden_firme_nombre')} />
               </div>
               <div className="form-row cols-2">
@@ -381,16 +365,16 @@ function SeccionDecision({
                   helpText="Se ajusta al 21% si se aprueban 2 o más productos"
                 />
               </div>
-              <div className="product-warning">
+              <ZrAlert config="alert" {...({ 'hide-close': true } as object)}>
                 En caso de existir una orden en firme para dos o más productos, la comisión aplicable será del 21% para cada uno de los productos incluidos.
-              </div>
+              </ZrAlert>
             </>
           )}
           </>
         </ZrForm>
 
         {submitError && (
-          <div className="submit-error" style={{ marginTop: 'var(--zs-100)' }}>{submitError}</div>
+          <ZrAlert config="negative" style={{ marginTop: 'var(--zs-100)' }} {...({ 'hide-close': true } as object)}>{submitError}</ZrAlert>
         )}
 
         <div className="submit-bar">
@@ -416,7 +400,6 @@ export default function CotizacionFfFl() {
   const [submitError, setSubmitError] = useState('');
   const [sent, setSent] = useState(false);
   const [personalizacionConfirmada, setPersonalizacionConfirmada] = useState(false);
-  const fileRef = useRef<HTMLInputElement>(null);
 
   const taskData = (task?.data ?? {}) as Record<string, unknown>;
 
@@ -602,17 +585,12 @@ export default function CotizacionFfFl() {
           <div className="co-product-header">Slip de Cotización</div>
           <div className="co-card-body">
             {slipLineas.length > 1 && (
-              <div className="products-tab-bar co-slip-tabs">
-                {slipLineas.map((l) => (
-                  <button
-                    key={l.key}
-                    type="button"
-                    className={`prod-tab${slipTab === l.key ? ' prod-tab--active' : ''}`}
-                    onClick={() => setSlipTab(l.key)}
-                  >
-                    {l.label}
-                  </button>
-                ))}
+              <div className="co-slip-tabs">
+                <ZrTabs
+                  model={Math.max(0, slipLineas.findIndex((l) => l.key === slipTab))}
+                  onChange={(idx: number) => setSlipTab(slipLineas[idx].key)}
+                  {...({ tabs: slipLineas.map((l) => ({ name: l.label })) } as Record<string, unknown>)}
+                />
               </div>
             )}
             {effectiveSlipId ? (
@@ -655,7 +633,6 @@ export default function CotizacionFfFl() {
 
         <SeccionDecision
           form={form}
-          fileRef={fileRef}
           onEnviar={handleEnviar}
           submitError={submitError}
           submitting={submitting}

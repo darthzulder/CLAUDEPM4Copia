@@ -1,6 +1,6 @@
 import { useForm } from 'react-hook-form';
 import FormSection from '../../components/FormSection';
-import { ZdsInput } from '../../components/fields/ZdsFields';
+import { ZdsInput, ZrAlert } from '../../components/fields/ZdsFields';
 import { CorregirDatosFormData } from './variables';
 
 type FormInstance = ReturnType<typeof useForm<CorregirDatosFormData>>;
@@ -34,10 +34,10 @@ export default function SeccionErroresValidacion({ form }: Props) {
 
   return (
     <FormSection title="Errores Detectados por Validación Preventiva" color="#B44444">
-      <div className="error-banner" style={{ marginBottom: 'var(--zs-100)' }}>
+      <ZrAlert config="negative" {...({ 'hide-close': true } as object)} style={{ marginBottom: 'var(--zs-100)' }}>
         Se detectaron <strong>{total} error(es)</strong> al intentar radicar la queja ante SmartSupervision.
         Corrija los campos indicados y vuelva a enviar, o escale para revisión manual.
-      </div>
+      </ZrAlert>
 
       {errores.length > 0 && (
         <div className="error-list">

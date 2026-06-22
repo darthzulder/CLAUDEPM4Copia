@@ -1,6 +1,6 @@
 import { useState, useMemo, useEffect } from 'react';
 import { useForm, FieldError } from 'react-hook-form';
-import { ZrButton, ZdsInput, ZdsDate, ZdsSelect } from '../../components/fields/ZdsFields';
+import { ZrButton, ZdsInput, ZdsDate, ZdsSelect, ZrAlert } from '../../components/fields/ZdsFields';
 import { OPTIONS, DEPARTAMENTOS, CIUDADES_POR_DEPTO, FfFlSolicitudFormData } from './variables';
 
 type Form = ReturnType<typeof useForm<FfFlSolicitudFormData>>;
@@ -108,10 +108,10 @@ export default function CreacionTomador({ form }: { form: Form }) {
           </div>
 
           {empresaBloqueada && (
-            <div className="submit-error" style={{ marginTop: 'var(--zs-75)', marginBottom: 0 }}>
+            <ZrAlert config="negative" style={{ marginTop: 'var(--zs-75)', marginBottom: 0 }} {...({ 'hide-close': true } as object)}>
               El tipo de empresa seleccionado no puede cotizarse por este canal, por favor verifique la información.
               La cotización deberá gestionarse con la ayuda del asesor comercial (Case Underwriting).
-            </div>
+            </ZrAlert>
           )}
 
           <div className="form-row cols-1">

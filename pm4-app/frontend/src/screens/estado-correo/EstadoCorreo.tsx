@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useTask } from '../../core/useTask';
-import { ZrButton } from '../../components/fields/ZdsFields';
+import { ZrButton, ZrModal } from '../../components/fields/ZdsFields';
 import zurichLogo from '../../resources/zurich/ZurichLogo_Horz_White_CMYK_no_R.png';
 import { type EstadoCorreoData } from './variables';
 import './styles.css';
@@ -34,7 +34,7 @@ export default function EstadoCorreo() {
   // ── Loading / Error ──────────────────────────────────────────────────────
   if (loading) {
     return (
-      <div className="ec-wrapper">
+      <div className="screen-wrapper">
         <div className="screen-loading"><div className="spinner" /></div>
       </div>
     );
@@ -42,7 +42,7 @@ export default function EstadoCorreo() {
 
   if (error) {
     return (
-      <div className="ec-wrapper">
+      <div className="screen-wrapper">
         <div className="screen-error">⚠ Error al cargar la tarea: {error}</div>
       </div>
     );
@@ -51,7 +51,7 @@ export default function EstadoCorreo() {
   // ── Sent ─────────────────────────────────────────────────────────────────
   if (sent) {
     return (
-      <div className="ec-wrapper">
+      <div className="screen-wrapper">
         <Header data={data} />
         <div className="ec-content">
           <div className="ec-card ec-card--success">
@@ -65,7 +65,7 @@ export default function EstadoCorreo() {
   }
 
   return (
-    <div className="ec-wrapper">
+    <div className="screen-wrapper">
       {submitting && (
         <div className="ec-overlay">
           <div className="spinner" />
@@ -137,24 +137,21 @@ export default function EstadoCorreo() {
 
       {/* Modal de confirmación */}
       {showConfirm && (
-        <div className="ec-modal-backdrop" onClick={() => setShowConfirm(false)}>
-          <div className="ec-modal" onClick={(e) => e.stopPropagation()}>
-            <div className="ec-modal-icon">⚠</div>
-            <h3 className="ec-modal-title">¿Estás seguro de continuar?</h3>
-            <p className="ec-modal-text">
-              Esta acción enviará el formulario para su procesamiento.
-            </p>
-            <p className="ec-modal-sub">Una vez confirmado, no podrá realizar cambios adicionales.</p>
-            <div className="ec-modal-actions">
-              <ZrButton config="primary" onClick={handleConfirm}>
-                Sí, continuar
-              </ZrButton>
-              <ZrButton config="secondary" onClick={() => setShowConfirm(false)}>
-                Cancelar
-              </ZrButton>
-            </div>
+        <ZrModal model={showConfirm} onChange={(open: boolean) => setShowConfirm(open)}>
+          <h3 style={{ margin: '0 0 var(--zs-75)', font: 'var(--zf-h-20--700)', color: 'var(--z-text)' }}>
+            ¿Estás seguro de continuar?
+          </h3>
+          <p style={{ margin: '0 0 var(--zs-50)', font: 'var(--zf-body-16--400)', color: 'var(--z-text)' }}>
+            Esta acción enviará el formulario para su procesamiento.
+          </p>
+          <p style={{ margin: '0 0 var(--zs-200)', font: 'var(--zf-capt-14)', color: 'var(--z-muted)' }}>
+            Una vez confirmado, no podrá realizar cambios adicionales.
+          </p>
+          <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 'var(--zs-75)' }}>
+            <ZrButton config="secondary" onClick={() => setShowConfirm(false)}>Cancelar</ZrButton>
+            <ZrButton config="primary:l" onClick={handleConfirm}>Sí, continuar</ZrButton>
           </div>
-        </div>
+        </ZrModal>
       )}
     </div>
   );
@@ -162,15 +159,15 @@ export default function EstadoCorreo() {
 
 function Header({ data }: { data: TaskData }) {
   return (
-    <div className="ec-header">
-      <div className="ec-header-titles">
+    <div className="screen-header">
+      <div className="title-block">
         <h1>Estado de correo electrónico</h1>
-        <div className="ec-header-sub">
+        <div className="subtitle">
           {data.frm_gen_num_cotizacion && <span>Cotización # {data.frm_gen_num_cotizacion}</span>}
           {data.frm_caso && <span>Caso # {data.frm_caso}</span>}
         </div>
       </div>
-      <img src={zurichLogo} alt="Zurich" className="ec-logo" />
+      <img src={zurichLogo} alt="Zurich" className="header-logo" />
     </div>
   );
 }

@@ -1,6 +1,6 @@
-import { useState, useRef } from 'react';
+import { useState } from 'react';
 import { useForm } from 'react-hook-form';
-import { ZrButton, ZdsSelect } from '../../components/fields/ZdsFields';
+import { ZrButton, ZdsSelect, ZrAlert, ZrFileInput } from '../../components/fields/ZdsFields';
 import { OPTIONS, FfFlSolicitudFormData } from './variables';
 import { SiNoField, SiNoSelectAll } from './SiNoGroup';
 
@@ -73,10 +73,6 @@ export default function SeccionPDySI({ form, fileRegistry }: { form: Form; fileR
   const { control, watch, setValue, register } = form;
   const w = watch();
   const [numDocs, setNumDocs] = useState(1);
-  const fileRef1 = useRef<HTMLInputElement>(null);
-  const fileRef2 = useRef<HTMLInputElement>(null);
-  const fileRef3 = useRef<HTMLInputElement>(null);
-  const fileRefs = [fileRef1, fileRef2, fileRef3];
 
   const perfBloqueado = SECTORES.some((_, i) => {
     const key = `frm_pdysi_perf_${String(i + 1).padStart(2, '0')}` as keyof FfFlSolicitudFormData;
@@ -128,7 +124,7 @@ export default function SeccionPDySI({ form, fileRegistry }: { form: Form; fileR
             );
           })}
         </div>
-        {perfBloqueado && <div className="dyo-warning">{MSG_BLOQUEO}</div>}
+        {perfBloqueado && <ZrAlert config="alert" {...({ 'hide-close': true } as object)}>{MSG_BLOQUEO}</ZrAlert>}
       </div>
 
       {/* ── REQUISITOS ── */}
@@ -156,7 +152,7 @@ export default function SeccionPDySI({ form, fileRegistry }: { form: Form; fileR
             );
           })}
         </div>
-        {reqBloqueado && <div className="dyo-warning">{MSG_BLOQUEO}</div>}
+        {reqBloqueado && <ZrAlert config="alert" {...({ 'hide-close': true } as object)}>{MSG_BLOQUEO}</ZrAlert>}
       </div>
 
       {/* ── CONTROLES EN LA GESTIÓN DEL RIESGO - PARTE 1 ── */}
@@ -182,7 +178,7 @@ export default function SeccionPDySI({ form, fileRegistry }: { form: Form; fileR
             );
           })}
         </div>
-        {ctrl1Bloqueado && <div className="dyo-warning">{MSG_BLOQUEO}</div>}
+        {ctrl1Bloqueado && <ZrAlert config="alert" {...({ 'hide-close': true } as object)}>{MSG_BLOQUEO}</ZrAlert>}
       </div>
 
       {/* ── CONTROLES EN LA GESTIÓN DEL RIESGO - PARTE 2 ── */}
@@ -208,7 +204,7 @@ export default function SeccionPDySI({ form, fileRegistry }: { form: Form; fileR
             );
           })}
         </div>
-        {ctrl2Bloqueado && <div className="dyo-warning">{MSG_BLOQUEO}</div>}
+        {ctrl2Bloqueado && <ZrAlert config="alert" {...({ 'hide-close': true } as object)}>{MSG_BLOQUEO}</ZrAlert>}
       </div>
 
       {/* ── CONTROLES ADICIONALES ── */}
@@ -249,28 +245,21 @@ export default function SeccionPDySI({ form, fileRegistry }: { form: Form; fileR
             return (
               <div key={docKey} className="dyo-doc-row">
                 <span className="dyo-doc-label">Documento {i + 1}</span>
-                <div className="dyo-doc-actions">
-                  <input
-                    ref={fileRefs[i]}
-                    type="file"
-                    style={{ display: 'none' }}
-                    onChange={(e) => {
-                      const file = e.target.files?.[0];
-                      if (file) {
-                        setValue(docKey, file.name as never);
-                        fileRegistry.current.set(docKey, file);
-                      }
-                    }}
-                  />
-                  <ZrButton
-                    config="secondary"
-                    icon="file-upload:line"
-                    onClick={() => fileRefs[i].current?.click()}
-                  >
-                    {fileName ? fileName : 'Cargar archivo'}
-                  </ZrButton>
-                  {fileName && <span className="dyo-doc-name">{fileName}</span>}
-                </div>
+                <ZrFileInput
+                  label=""
+                  model={fileName || null}
+                  droppable
+                  onChange={(file: File | string | null) => {
+                    if (file && typeof file !== 'string') {
+                      setValue(docKey, file.name as never);
+                      fileRegistry.current.set(docKey, file);
+                    } else if (!file) {
+                      setValue(docKey, '' as never);
+                      fileRegistry.current.delete(docKey);
+                    }
+                  }}
+                  {...({ accept: ['.pdf', '.doc', '.docx', '.jpg', '.jpeg', '.png'] } as Record<string, unknown>)}
+                />
                 <input type="hidden" {...register(docKey)} />
               </div>
             );

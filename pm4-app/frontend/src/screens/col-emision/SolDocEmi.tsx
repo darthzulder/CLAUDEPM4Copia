@@ -1,6 +1,6 @@
 import { useState, useRef, useCallback } from 'react';
 import { useTask } from '../../core/useTask';
-import { ZrButton, ZrModal } from '../../components/fields/ZdsFields';
+import { ZrButton, ZrModal, ZrAlert } from '../../components/fields/ZdsFields';
 import pm4 from '../../api/pm4Client';
 import {
   type SolDocEmiData,
@@ -298,9 +298,9 @@ export default function SolDocEmi() {
             <div className="nc-section-body">
 
               {docsActivos.length === 0 && (
-                <div className="perfil-aviso">
-                  ℹ No se detectaron productos activos en la tarea. Se muestran todos los documentos posibles.
-                </div>
+                <ZrAlert config="info" {...({ 'hide-close': true } as object)}>
+                  No se detectaron productos activos en la tarea. Se muestran todos los documentos posibles.
+                </ZrAlert>
               )}
 
               <div className="sarlaft-doc-list">

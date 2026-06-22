@@ -3,20 +3,12 @@ import { useForm } from 'react-hook-form';
 import './styles.css';
 import { useTask } from '../../core/useTask';
 import FormSection from '../../components/FormSection';
-import { ZdsInput, ZdsSelect, ZdsRadio } from '../../components/fields/ZdsFields';
+import { ZdsInput, ZdsSelect, ZdsRadio, ZrButton, ZrAlert, ZrFileInput } from '../../components/fields/ZdsFields';
 import pm4 from '../../api/pm4Client';
 import { OPTIONS, RecibirQuejaFormData } from './variables';
 import SeccionConsumidor from './SeccionConsumidor';
 import SeccionClasificacion from './SeccionClasificacion';
-
-function ZurichLogo() {
-  return (
-    <svg width="80" height="40" viewBox="0 0 120 60" fill="none">
-      <text x="4" y="42" fontFamily="Arial" fontSize="32" fontWeight="900" fill="#fff" letterSpacing="-1">Z</text>
-      <text x="28" y="38" fontFamily="Arial" fontSize="16" fontWeight="700" fill="#fff">ZURICH</text>
-    </svg>
-  );
-}
+import zurichLogo from '../../resources/zurich/ZurichLogo_Horz_White_CMYK_no_R.png';
 
 export default function RecibirQueja() {
   const { task, loading, error, submitting, completeTask } = useTask();
@@ -60,13 +52,6 @@ export default function RecibirQueja() {
     }
   };
 
-  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (file) {
-      setValue('qd_adjuntoNombre', file.name);
-      fileRegistry.current.set('qd_adjunto', file);
-    }
-  };
 
   if (loading) {
     return (
@@ -96,16 +81,16 @@ export default function RecibirQueja() {
             <span>Rol: Gestor de Experiencia</span>
           </div>
         </div>
-        <ZurichLogo />
+        <img src={zurichLogo} alt="Zurich" className="header-logo" />
       </div>
 
       <form onSubmit={handleSubmit(onSubmit)} noValidate style={{ maxWidth: 960, margin: '0 auto', padding: '24px 24px 0' }}>
 
         {/* ── Sección 1: Encabezado del Caso ── */}
         <FormSection title="Encabezado del Caso">
-          <div className="info-banner">
+          <ZrAlert config="info" {...({ 'hide-close': true } as object)}>
             Complete todos los campos del consumidor y la queja. Al presionar <strong>Crear Queja</strong> el sistema ejecutará validación preventiva automática antes de activar la radicación ante SmartSupervision.
-          </div>
+          </ZrAlert>
           <div className="form-row cols-3">
             <ZdsInput
               name="qd_numeroCaso"
@@ -158,40 +143,38 @@ export default function RecibirQueja() {
           </div>
 
           {w.qd_incluyeAnexos === 'SI' && (
-            <div className="form-group">
-              <label className="form-label">Archivo Adjunto</label>
-              <label className={`file-upload-zone${w.qd_adjuntoNombre ? ' has-file' : ''}`}>
-                <input
-                  type="file"
-                  accept=".pdf,.doc,.docx,.jpg,.jpeg,.png"
-                  onChange={handleFileChange}
-                />
-                {w.qd_adjuntoNombre
-                  ? <div className="file-upload-name">{w.qd_adjuntoNombre}</div>
-                  : <div className="file-upload-label">Haga clic para seleccionar un archivo o arrástrelo aquí</div>
+            <ZrFileInput
+              label="Archivo Adjunto"
+              model={w.qd_adjuntoNombre || null}
+              droppable
+              onChange={(file: File | string | null) => {
+                if (file && typeof file !== 'string') {
+                  setValue('qd_adjuntoNombre', file.name);
+                  fileRegistry.current.set('qd_adjunto', file);
+                } else if (!file) {
+                  setValue('qd_adjuntoNombre', '');
+                  fileRegistry.current.delete('qd_adjunto');
                 }
-              </label>
-              <small className="form-helper">Formatos aceptados: PDF, DOC, DOCX, JPG, PNG</small>
-            </div>
+              }}
+              {...({
+                accept: ['.pdf', '.doc', '.docx', '.jpg', '.jpeg', '.png'],
+                'help-text': 'Formatos aceptados: PDF, DOC, DOCX, JPG, PNG',
+              } as Record<string, unknown>)}
+            />
           )}
         </FormSection>
 
         {/* ── Barra de acciones ── */}
         <div className="actions-bar">
-          <button type="button" className="btn-cancelar" onClick={() => window.history.back()}>
-            Cancelar
-          </button>
-          <button
-            type="button"
-            className="btn-borrador"
+          <ZrButton config="secondary:s" onClick={() => window.history.back()}>Cancelar</ZrButton>
+          <ZrButton
+            config="secondary:s"
             disabled={submitting}
             onClick={() => completeTask({ ...w, _draft: true } as Record<string, unknown>)}
           >
             Guardar Borrador
-          </button>
-          <button type="submit" className="btn-crear" disabled={submitting}>
-            {submitting ? 'Enviando...' : 'Crear Queja ▶'}
-          </button>
+          </ZrButton>
+          <ZrButton config="positive:s" onClick={() => { handleSubmit(onSubmit)(); }} loading={submitting} disabled={submitting}>Crear Queja</ZrButton>
         </div>
       </form>
     </div>

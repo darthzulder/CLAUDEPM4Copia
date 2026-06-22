@@ -2,215 +2,12 @@
    FF FL — SOLICITUD
    ===================================================== */
 
-:root {
-  /* ── Aliases que mapean tokens Zurich ──
-     Nota: en @zurich/css-components el gris está INVERTIDO:
-     --zg-1 = casi negro (#0D1115), --zg-9 = gris más claro (#C9D0D2)
-     Para fondos claros usar --zg-white (#fff) o --zg-white-zurich (#ECEEEF)
-     Para bordes sutiles usar --zg-9 en vez de --zg-2 ── */
-  --z-blue:        var(--zc-blue-zurich);
-  --z-blue-dark:   var(--zc-blue-dark);
-  --z-blue-light:  var(--zc-blue-sky-10);
-  --z-green:       var(--zc-moss-aa);
-  --z-red:         var(--zc-peach-aa);
-  --z-orange:      var(--zc-lemon-aa);
-  --z-bg:          var(--zg-white-zurich);
-  --z-border:      var(--zg-9);
-  --z-text:        var(--zc-blue-dark);
-  --z-muted:       var(--zg-5);
-  --z-card-shadow: 0 1px 3px rgba(0,0,0,.07), 0 6px 18px rgba(0,0,0,.06);
-}
-
-* { font-family: var(--zf-sans); box-sizing: border-box; }
-
-/* ──────────────────────────────────────
-   LAYOUT PRINCIPAL
-────────────────────────────────────── */
-.screen-wrapper {
-  min-height: 100vh;
-  background: var(--z-bg);
-}
-
-.screen-content {
-  width: 90%;
-  padding: var(--zs-200) 0 var(--zs-400);
-}
-
-/* ──────────────────────────────────────
-   HEADER INSTITUCIONAL
-────────────────────────────────────── */
-.screen-header {
-  background: var(--z-blue);
-  padding: var(--zs-150) var(--zs-200);
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  box-shadow: 0 4px 12px rgba(33,103,174,.35);
-  margin-bottom: var(--zs-200);
-}
-
-.screen-header .title-block { color: var(--zg-white-zurich); }
-
-.screen-header .title-block h1 {
-  font: var(--zf-body-16--700);
-  margin: 0 0 var(--zs-25);
-  text-transform: uppercase;
-  letter-spacing: .6px;
-}
-
-.screen-header .subtitle {
-  display: flex;
-  gap: var(--zs-100);
-  font: var(--zf-capt-12);
-  color: rgba(255,255,255,.80);
-}
-
-.screen-header .subtitle span {
-  display: flex;
-  align-items: center;
-  gap: var(--zs-25);
-}
-
-.screen-header .subtitle span::before {
-  content: '';
-  display: inline-block;
-  width: 5px;
-  height: 5px;
-  border-radius: 50%;
-  background: rgba(255,255,255,.55);
-}
-
-.screen-header .subtitle span:first-child::before { display: none; }
-
-.header-logo { height: 44px; width: auto; object-fit: contain; }
-
-/* ──────────────────────────────────────
-   CARDS DE SECCIÓN
-────────────────────────────────────── */
-.form-section-header {
-  padding: var(--zs-100) var(--zs-200);
-  display: flex;
-  align-items: center;
-  gap: var(--zs-50);
-  border-radius: 12px 12px 0 0;
-}
-
-.form-section-header span {
-  color: var(--zg-white-zurich);
-  font: var(--zf-capt-12--700);
-  letter-spacing: .55px;
-  text-transform: uppercase;
-}
-
-.form-section-header::before {
-  content: '';
-  display: inline-block;
-  width: 3px;
-  height: 16px;
-  background: rgba(255,255,255,.45);
-  border-radius: 2px;
-  flex-shrink: 0;
-}
-
-.form-section-body {
-  padding: var(--zs-200) var(--zs-300) var(--zs-200);
-  display: flex;
-  flex-direction: column;
-  gap: var(--zs-200);
-  overflow: visible;
-}
-
-.form-section-body > input[type="hidden"] { display: none; }
-
-/* Sub-secciones dentro de un card */
+/* .form-subsection* → movido a shared.css (reutilizado por ff-fl + 2 legacy) */
+/* Modificadores específicos de ff-fl: */
 .form-subsection--activities { margin-top: 8px; }
 .form-group--facturacion { margin-top: 4px; }
-.form-subsection {
-  border: 1px solid var(--z-border);
-  border-radius: 8px;
-  padding: var(--zs-100) var(--zs-150) var(--zs-75);
-  background: var(--zg-white);
-}
 
-.form-subsection-title {
-  font: var(--zf-capt-14--600);
-  color: var(--z-blue);
-  margin-bottom: var(--zs-100);
-  display: flex;
-  align-items: center;
-  gap: var(--zs-50);
-}
-
-.form-subsection-title--spaced { margin-top: var(--zs-75); }
-.form-subsection-title::before {
-  content: '';
-  display: inline-block;
-  width: 3px;
-  height: 13px;
-  background: var(--z-blue);
-  border-radius: 2px;
-}
-
-/* ──────────────────────────────────────
-   GRID DE COLUMNAS
-────────────────────────────────────── */
-.form-row { display: grid; gap: var(--zs-150); margin-bottom: 0; overflow: visible; }
-.form-row.cols-1 { grid-template-columns: 1fr; }
-.form-row.cols-2 { grid-template-columns: 1fr 1fr; }
-.form-row.cols-3 { grid-template-columns: 1fr 1fr 1fr; }
-.form-row.cols-4 { grid-template-columns: 1fr 1fr 1fr 1fr; }
-
-@media (max-width: 900px) {
-  .form-row.cols-3,
-  .form-row.cols-4 { grid-template-columns: 1fr 1fr; }
-}
-@media (max-width: 600px) {
-  .form-row.cols-2,
-  .form-row.cols-3,
-  .form-row.cols-4 { grid-template-columns: 1fr; }
-}
-
-/* ──────────────────────────────────────
-   CAMPOS ZURICH — EDITABLE vs READONLY
-────────────────────────────────────── */
-.zds-field-wrap { width: 100%; }
-
-zr-text-input:not([readonly]),
-zr-date-input:not([readonly]) {
-  background: var(--zg-white);
-  border-radius: 28px;
-}
-
-zr-text-input[readonly],
-zr-date-input[readonly] {
-  background: var(--zg-white-zurich);
-  border-radius: 28px;
-}
-
-[data-zds-readonly] zr-text-input,
-[data-zds-readonly] zr-date-input {
-  background: var(--zg-white-zurich);
-  border-radius: 28px;
-}
-
-/* ──────────────────────────────────────
-   SELECT OVERLAY — evita que el dropdown
-   empuje el contenido hacia abajo
-────────────────────────────────────── */
-.zds-select-wrap {
-  position: relative;
-  height: 68px;
-  overflow: visible;
-  z-index: 0;
-}
-
-.zds-select-wrap:focus-within { z-index: 200; }
-
-.zds-select-wrap > * {
-  position: absolute;
-  width: 100%;
-  top: 0;
-}
+/* Campos Zurich editable/readonly → movidos a shared.css (alcance global) */
 
 /* ──────────────────────────────────────
    ETIQUETAS Y WRAPPERS GENÉRICOS
@@ -256,22 +53,7 @@ zr-date-input[readonly] {
   gap: var(--zs-25);
 }
 
-.product-warning {
-  font: var(--zf-capt-12);
-  color: var(--zc-lemon-aa);
-  background: var(--zc-lemon-20);
-  border: 1px solid var(--zc-lemon-80);
-  border-left: 4px solid var(--z-orange);
-  border-radius: 6px;
-  padding: var(--zs-50) var(--zs-75);
-  margin-top: var(--zs-50);
-}
-
-/* ──────────────────────────────────────
-   ALINEACIONES
-────────────────────────────────────── */
-.form-row.row-align-bottom { align-items: flex-end; }
-.section-spacer { height: var(--zs-100); }
+/* product-warning → migrado a ZrAlert */
 
 /* ──────────────────────────────────────
    TABLA DE ACTIVIDADES ASEGURADAS
@@ -280,19 +62,18 @@ zr-date-input[readonly] {
   border: 1px solid var(--z-border);
   border-radius: 8px;
   overflow: visible;
-  background: #fff;
+  background: var(--zg-white);
   /* El borde redondeado se aplica manualmente en cabecera y última fila */
 }
 
 .actividades-table-header {
   display: grid;
   grid-template-columns: 170px 1fr 110px 110px;
-  background: #f1f5fb;
+  background: var(--zg-white-zurich);
   border: 1px solid var(--z-border);
   border-radius: 8px 8px 0 0;
-  padding: 9px 14px;
-  font-size: 11px;
-  font-weight: 700;
+  padding: var(--zs-50) var(--zs-100);
+  font: var(--zf-capt-12--700);
   color: var(--z-muted);
   text-transform: uppercase;
   letter-spacing: .4px;
@@ -305,13 +86,13 @@ zr-date-input[readonly] {
   padding: 6px 14px;
   border: 1px solid var(--z-border);
   border-top: none;
-  background: #fff;
+  background: var(--zg-white);
   transition: background .1s;
   overflow: visible;
   position: relative;
 }
 
-.actividades-table-row:hover { background: #fafbfd; }
+.actividades-table-row:hover { background: var(--zc-blue-sky-10); }
 .actividades-table-row:last-child { border-radius: 0 0 8px 8px; }
 
 .actividades-prod-label {
@@ -354,49 +135,6 @@ zr-date-input[readonly] {
   letter-spacing: .3px;
 }
 
-/* ──────────────────────────────────────
-   SUGGEST (TYPEAHEAD)
-────────────────────────────────────── */
-.zds-suggest-wrap {
-  position: relative;
-  width: 100%;
-}
-
-.suggest-dropdown {
-  position: absolute;
-  top: calc(100% + 2px);
-  left: 0;
-  right: 0;
-  background: var(--zg-white);
-  border: 1px solid var(--z-border);
-  border-radius: 8px;
-  box-shadow: 0 8px 24px rgba(0,0,0,.12);
-  margin: 0;
-  padding: var(--zs-25) 0;
-  list-style: none;
-  max-height: 320px;
-  overflow-y: auto;
-  z-index: 300;
-}
-
-.suggest-option {
-  padding: var(--zs-50) var(--zs-100);
-  font: var(--zf-capt-14);
-  color: var(--z-text);
-  cursor: pointer;
-  transition: background .1s;
-  line-height: 1.4;
-}
-
-.suggest-option:hover {
-  background: var(--z-blue-light);
-  color: var(--z-blue);
-}
-
-.suggest-option strong {
-  font-weight: 700;
-  color: var(--z-blue);
-}
 
 /* ──────────────────────────────────────
    CORREOS ADICIONALES
@@ -429,114 +167,14 @@ zr-date-input[readonly] {
 /* ──────────────────────────────────────
    BARRA DE SUBMIT
 ────────────────────────────────────── */
-.submit-bar {
-  display: flex;
-  justify-content: flex-end;
-  align-items: center;
-  gap: var(--zs-75);
-  padding: var(--zs-150) var(--zs-200) var(--zs-50);
-  border-top: 1px solid var(--z-border);
-  margin-top: var(--zs-200);
-}
-
-/* ──────────────────────────────────────
-   ESTADOS LOADING / ERROR
-────────────────────────────────────── */
-.screen-loading {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  min-height: 60vh;
-  gap: var(--zs-100);
-  color: var(--z-muted);
-  font: var(--zf-capt-14);
-}
-
-.screen-error {
-  margin: var(--zs-250) auto;
-  max-width: 480px;
-  background: var(--zg-white);
-  border: 1px solid var(--zc-peach-40);
-  border-left: 4px solid var(--z-red);
-  border-radius: 10px;
-  padding: var(--zs-150);
-  color: var(--z-red);
-  font: var(--zf-capt-14);
-  box-shadow: var(--z-card-shadow);
-}
-
-/* ──────────────────────────────────────
-   SPINNER
-────────────────────────────────────── */
-.spinner {
-  width: 44px;
-  height: 44px;
-  border: 4px solid var(--zg-9);
-  border-top-color: var(--z-blue);
-  border-radius: 50%;
-  animation: spin .9s linear infinite;
-}
-
-@keyframes spin { to { rotate: 360deg; } }
+/* .submit-bar → centralizado en shared.css */
 
 /* ──────────────────────────────────────
    ERROR DE ENVÍO (inline)
 ────────────────────────────────────── */
-.submit-error {
-  background: var(--zc-peach-10);
-  border: 1px solid var(--zc-peach-40);
-  border-left: 4px solid var(--z-red);
-  border-radius: 8px;
-  padding: var(--zs-75) var(--zs-100);
-  color: var(--zc-peach-aaa);
-  font: var(--zf-capt-14--500);
-  margin-bottom: var(--zs-100);
-}
+/* submit-error → migrado a ZrAlert */
 
-/* ──────────────────────────────────────
-   PANTALLA DE ÉXITO (sent)
-────────────────────────────────────── */
-.screen-sent {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  min-height: 340px;
-  background: var(--zg-white);
-  border-radius: 12px;
-  box-shadow: var(--z-card-shadow);
-  border: 1px solid var(--z-border);
-  padding: var(--zs-300) var(--zs-200);
-  text-align: center;
-}
-
-.screen-sent-icon {
-  width: 64px;
-  height: 64px;
-  border-radius: 50%;
-  background: var(--z-green);
-  color: var(--zg-white-zurich);
-  font-size: 32px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  margin-bottom: var(--zs-100);
-  box-shadow: 0 4px 14px rgba(12,164,66,.3);
-}
-
-.screen-sent-title {
-  font: var(--zf-body-20--700);
-  color: var(--z-text);
-  margin-bottom: var(--zs-50);
-}
-
-.screen-sent-sub {
-  font: var(--zf-capt-14);
-  color: var(--z-muted);
-  line-height: 1.6;
-  max-width: 380px;
-}
+/* .screen-sent* → en shared.css */
 
 /* ──────────────────────────────────────
    SECCIÓN POR PRODUCTO — CARD CON TABS
@@ -550,39 +188,7 @@ zr-date-input[readonly] {
   border: 1px solid rgba(221,227,236,.7);
 }
 
-.products-tab-bar {
-  background: var(--z-blue);
-  padding: var(--zs-50) var(--zs-150);
-  border-radius: 10px 10px 0 0;
-  display: flex;
-  align-items: center;
-  gap: var(--zs-25);
-  flex-wrap: wrap;
-}
-
-.prod-tab {
-  border: none;
-  border-radius: 6px;
-  padding: var(--zs-25) var(--zs-100);
-  font: var(--zf-capt-12--700);
-  letter-spacing: .4px;
-  text-transform: uppercase;
-  cursor: pointer;
-  transition: background .15s, color .15s;
-  background: transparent;
-  color: rgba(255,255,255,.70);
-  white-space: nowrap;
-}
-
-.prod-tab:hover {
-  background: rgba(255,255,255,.15);
-  color: var(--zg-white);
-}
-
-.prod-tab--active {
-  background: var(--zg-white);
-  color: var(--z-blue);
-}
+/* products-tab-bar / prod-tab → migrados a ZrTabs */
 
 .products-tab-body {
   padding: var(--zs-150) var(--zs-200) var(--zs-100);
@@ -635,16 +241,7 @@ zr-date-input[readonly] {
   line-height: 1.5;
 }
 
-.dyo-warning {
-  font: var(--zf-capt-12--500);
-  color: var(--zc-lemon-aa);
-  background: var(--zc-lemon-20);
-  border: 1px solid var(--zc-lemon-80);
-  border-left: 4px solid var(--z-orange);
-  border-radius: 6px;
-  padding: var(--zs-50) var(--zs-75);
-  margin-top: var(--zs-75);
-}
+/* dyo-warning → migrado a ZrAlert */
 
 .dyo-nota {
   font: var(--zf-capt-12);
@@ -709,63 +306,13 @@ zr-date-input[readonly] {
 /* ──────────────────────────────────────
    D&O — BOTONES SI / NO
 ────────────────────────────────────── */
-.si-no-btns {
-  display: flex;
-  gap: 4px;
-  flex-shrink: 0;
-}
-
-.si-no-btn {
-  width: 40px;
-  height: 30px;
-  border: 1.5px solid var(--z-border);
-  border-radius: 6px;
-  background: var(--zg-white);
-  font: var(--zf-capt-12--700);
-  color: var(--z-muted);
-  cursor: pointer;
-  transition: background .12s, color .12s, border-color .12s;
-  letter-spacing: .3px;
-}
-
-.si-no-btn:hover { border-color: var(--z-blue); color: var(--z-blue); }
-
-.si-no-btn--si.si-no-btn--active {
-  background: var(--zc-moss-20);
-  border-color: var(--zc-moss-aa);
-  color: var(--zc-moss-aa);
-}
-
-.si-no-btn--no.si-no-btn--active {
-  background: var(--zc-peach-10);
-  border-color: var(--zc-peach-aa);
-  color: var(--zc-peach-aaa);
-}
-
-/* Botones "Marcar todas SI / NO" */
+/* si-no-btn* → migrados a ZrSegmentedControl; si-no-select-btn* → ZrButton */
 .si-no-select-all {
   display: flex;
   gap: var(--zs-50);
   justify-content: flex-end;
   margin-bottom: var(--zs-50);
 }
-.si-no-select-btn {
-  font: var(--zf-capt-12);
-  padding: 3px var(--zs-75);
-  border-radius: 4px;
-  cursor: pointer;
-  border: 1px solid var(--zc-moss-aa);
-  color: var(--zc-moss-aaa);
-  background: var(--zc-moss-20);
-  transition: background .15s, color .15s;
-}
-.si-no-select-btn:hover { background: var(--zc-moss-aa); color: #fff; }
-.si-no-select-btn--no {
-  border-color: var(--zc-peach-aa);
-  color: var(--zc-peach-aaa);
-  background: var(--zc-peach-10);
-}
-.si-no-select-btn--no:hover { background: var(--zc-peach-aa); color: #fff; }
 
 /* ──────────────────────────────────────
    D&O — DOCUMENTOS DE SOPORTE
@@ -793,21 +340,7 @@ zr-date-input[readonly] {
   flex-shrink: 0;
 }
 
-.dyo-doc-actions {
-  display: flex;
-  align-items: center;
-  gap: var(--zs-50);
-  flex: 1;
-}
-
-.dyo-doc-name {
-  font: var(--zf-capt-12);
-  color: var(--z-muted);
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-  max-width: 240px;
-}
+/* .dyo-doc-actions, .dyo-doc-name → eliminados (doc rows usan ZrFileInput) */
 
 /* ──────────────────────────────────────
    D&O — PROPUESTA ECONÓMICA
@@ -882,20 +415,7 @@ zr-date-input[readonly] {
   line-height: 1.5;
 }
 
-.dyo-prop-input {
-  width: 100%;
-  padding: var(--zs-25) var(--zs-50);
-  border: 1px solid var(--z-border);
-  border-radius: 6px;
-  font: var(--zf-body-14);
-  color: var(--z-text);
-  background: var(--zg-white);
-  outline: none;
-  box-sizing: border-box;
-}
-.dyo-prop-input:focus {
-  border-color: var(--zurich-blue);
-}
+/* .dyo-prop-input → CSS muerto (no usado en TSX), eliminado */
 
 @media (max-width: 768px) {
   .dyo-propuesta-header,
@@ -904,60 +424,9 @@ zr-date-input[readonly] {
   .dyo-si-no-text { font: var(--zf-capt-12); }
 }
 
-/* ──────────────────────────────────────
-   PDF VIEWER (compartido)
-────────────────────────────────────── */
-.pdf-viewer { width: 100%; }
+/* PDF VIEWER → centralizado en shared.css */
 
-.pdf-viewer-label {
-  font: var(--zf-capt-12--700);
-  color: var(--z-muted);
-  text-transform: uppercase;
-  letter-spacing: .4px;
-  margin-bottom: var(--zs-50);
-}
-
-.pdf-viewer-state {
-  display: flex;
-  align-items: center;
-  gap: var(--zs-75);
-  padding: var(--zs-150);
-  background: var(--zg-white-zurich);
-  border: 1px solid var(--z-border);
-  border-radius: 8px;
-  color: var(--z-muted);
-  font: var(--zf-capt-13);
-}
-
-.pdf-viewer-error { color: var(--z-red); }
-
-.pdf-viewer-actions {
-  display: flex;
-  justify-content: flex-end;
-  padding-top: var(--zs-50);
-}
-
-.pdf-spinner {
-  width: 20px;
-  height: 20px;
-  border: 3px solid var(--z-border);
-  border-top-color: var(--z-blue);
-  border-radius: 50%;
-  animation: spin .9s linear infinite;
-  flex-shrink: 0;
-}
-
-.btn-download {
-  display: inline-block;
-  background: var(--z-blue);
-  color: var(--zg-white-zurich);
-  text-decoration: none;
-  padding: var(--zs-50) var(--zs-100);
-  border-radius: 6px;
-  font: var(--zf-capt-12--700);
-  letter-spacing: .4px;
-}
-.btn-download:hover { background: var(--z-blue-dark); }
+/* .btn-download → eliminado (no usado; descargas usan ZrButton href) */
 
 /* ──────────────────────────────────────
    COTIZACIONES (CO) — INFO BAR
@@ -1217,26 +686,7 @@ zr-date-input[readonly] {
   margin-left: var(--zs-25);
 }
 
-.co-textarea {
-  width: 100%;
-  min-height: 96px;
-  border: 1.5px solid var(--z-border);
-  border-radius: 8px;
-  padding: var(--zs-75) var(--zs-100);
-  font: var(--zf-capt-14);
-  color: var(--z-text);
-  background: var(--zg-white);
-  resize: vertical;
-  transition: border-color .15s;
-  box-sizing: border-box;
-}
-
-.co-textarea:focus {
-  outline: none;
-  border-color: var(--z-blue);
-}
-
-.co-textarea::placeholder { color: var(--z-muted); }
+/* .co-textarea → migrado a ZdsTextarea */
 
 /* ──────────────────────────────────────
    RESUMEN DE COTIZACIONES (ff-fl preview)
@@ -1300,12 +750,12 @@ zr-date-input[readonly] {
 }
 
 .cot-res-cell {
-  font: var(--zf-body-14--400);
+  font: var(--zf-body-14);
   color: var(--zc-blue-dark);
 }
 
 .cot-res-cell--muted {
-  font: var(--zf-body-12--400);
+  font: var(--zf-body-12);
   color: var(--zg-5);
 }
 
@@ -1323,7 +773,7 @@ zr-date-input[readonly] {
   align-items: center;
   gap: var(--zs-75);
   padding: var(--zs-100) var(--zs-200);
-  font: var(--zf-body-14--400);
+  font: var(--zf-body-14);
   color: var(--zg-5);
 }
 

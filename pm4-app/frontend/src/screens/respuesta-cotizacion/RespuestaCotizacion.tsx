@@ -1,7 +1,6 @@
 import { useState } from 'react';
-import { createPortal } from 'react-dom';
 import { useTask } from '../../core/useTask';
-import { ZrButton } from '../../components/fields/ZdsFields';
+import { ZrButton, ZrModal } from '../../components/fields/ZdsFields';
 import { RESPUESTA_VALUES, type RespuestaCotizacionData } from './variables';
 import zurichLogo from '../../resources/zurich/ZurichLogo_Horz_White_CMYK_no_R.png';
 import './styles.css';
@@ -74,18 +73,14 @@ interface ConfirmProps {
 }
 
 function ConfirmModal({ onConfirm, onCancel }: ConfirmProps) {
-  return createPortal(
-    <div className="modal-overlay" onClick={(e) => { if (e.target === e.currentTarget) onCancel(); }}>
-      <div className="modal-dialog">
-        <div className="modal-header">Confirmar finalización</div>
-        <div className="modal-body">¿Estás seguro de finalizar esta cotización?</div>
-        <div className="modal-footer">
-          <ZrButton config="secondary" onClick={onCancel}>CANCELAR</ZrButton>
-          <ZrButton config="primary:l" onClick={onConfirm}>ACEPTAR</ZrButton>
-        </div>
+  return (
+    <ZrModal model={true} onChange={(open: boolean) => { if (!open) onCancel(); }} {...({ 'no-close': true } as object)}>
+      <p>¿Estás seguro de finalizar esta cotización?</p>
+      <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 'var(--zs-75)', marginTop: 'var(--zs-100)' }}>
+        <ZrButton config="secondary" onClick={onCancel}>CANCELAR</ZrButton>
+        <ZrButton config="primary:l" onClick={onConfirm}>ACEPTAR</ZrButton>
       </div>
-    </div>,
-    document.body
+    </ZrModal>
   );
 }
 

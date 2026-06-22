@@ -12,7 +12,12 @@
       "Bash(Get-ChildItem -Path \"G:\\\\DockerProys\\\\CLAUDEPM4Copia\\\\pm4-app\\\\frontend\\\\src\\\\screens\" -Directory)",
       "Bash(Select-Object Name)",
       "Bash(docker exec *)",
-      "WebFetch(domain:zds.zurich.com)"
+      "WebFetch(domain:zds.zurich.com)",
+      "mcp__Claude_in_Chrome__list_connected_browsers",
+      "mcp__Claude_in_Chrome__computer",
+      "mcp__Claude_in_Chrome__browser_batch",
+      "mcp__Claude_in_Chrome__read_page",
+      "mcp__Claude_in_Chrome__javascript_tool"
     ]
   }
 }

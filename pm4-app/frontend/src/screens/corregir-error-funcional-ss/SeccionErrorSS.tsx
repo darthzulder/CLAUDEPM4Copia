@@ -1,6 +1,6 @@
 import { useForm } from 'react-hook-form';
 import FormSection from '../../components/FormSection';
-import { ZdsInput, ZdsSelect, ZdsTextarea } from '../../components/fields/ZdsFields';
+import { ZdsInput, ZdsSelect, ZdsTextarea, ZrAlert, ZrTag } from '../../components/fields/ZdsFields';
 import { OPTIONS, CorregirErrorFuncionalSSFormData } from './variables';
 
 type FormInstance = ReturnType<typeof useForm<CorregirErrorFuncionalSSFormData>>;
@@ -23,11 +23,11 @@ export default function SeccionErrorSS({ form }: Props) {
 
   return (
     <FormSection title="Error Funcional Devuelto por SmartSupervision" color="#B44444">
-      <div className="error-banner">
+      <ZrAlert config="negative" {...({ 'hide-close': true } as object)}>
         SmartSupervision <strong>rechazó la radicación</strong> con un error funcional.
         Revise el detalle, corrija los campos indicados y reenvíe.
         {intento && <> — Intento <strong>#{intento}</strong>.</>}
-      </div>
+      </ZrAlert>
 
       {/* Metadatos del error */}
       <div className="form-row cols-3">
@@ -60,7 +60,7 @@ export default function SeccionErrorSS({ form }: Props) {
           <label className="form-label">Campos Afectados (según SS)</label>
           {campos.length > 0 ? (
             <div className="campos-afectados-list">
-              {campos.map((c, i) => <span key={i} className="campo-tag">{c}</span>)}
+              {campos.map((c, i) => <ZrTag key={i} fill="peach">{c}</ZrTag>)}
             </div>
           ) : (
             <ZdsInput name="ss_camposAfectados" control={control} label="Campos Afectados (según SS)" readOnly />

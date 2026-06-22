@@ -4,7 +4,7 @@ interface Props {
   color?: string;
 }
 
-export default function FormSection({ title, children, color = '#1a3c6e' }: Props) {
+export default function FormSection({ title, children, color = 'var(--z-blue)' }: Props) {
   return (
     <div style={{
       marginBottom: 'var(--zs-250)',

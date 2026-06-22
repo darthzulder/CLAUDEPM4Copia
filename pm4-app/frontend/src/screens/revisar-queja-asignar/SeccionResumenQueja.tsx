@@ -1,7 +1,7 @@
 import { UseFormReturn } from 'react-hook-form';
 import FormSection from '../../components/FormSection';
 import { RevisarQuejaAsignarFormData } from './variables';
-import { ZrTextInput, ZrTextarea } from '../../components/fields/ZdsFields';
+import { ZrTextInput, ZrTextarea, ZrAlert } from '../../components/fields/ZdsFields';
 
 interface Props {
   form: UseFormReturn<RevisarQuejaAsignarFormData>;
@@ -30,9 +30,9 @@ export default function SeccionResumenQueja({ form }: Props) {
     <>
       {/* Sección 1: Encabezado del Caso Radicado */}
       <FormSection title="Encabezado del Caso Radicado">
-        <div className="info-banner">
+        <ZrAlert config="info" {...({ 'hide-close': true } as object)}>
           Esta queja fue radicada ante SmartSupervision (SFC). Los datos mostrados son de solo lectura. Solo puede modificar la asignación y las observaciones.
-        </div>
+        </ZrAlert>
 
         <div className="form-row cols-3">
           <ReadField label="N° de Caso (BPM)" value={w.qd_numeroCaso} />

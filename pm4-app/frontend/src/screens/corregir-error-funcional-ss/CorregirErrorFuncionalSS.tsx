@@ -3,18 +3,10 @@ import { useForm } from 'react-hook-form';
 import './styles.css';
 import { useTask } from '../../core/useTask';
 import FormSection from '../../components/FormSection';
-import { ZdsInput, ZdsSelect, ZdsTextarea, ZdsRadio } from '../../components/fields/ZdsFields';
+import { ZdsInput, ZdsSelect, ZdsTextarea, ZdsRadio, ZrButton, ZrAlert } from '../../components/fields/ZdsFields';
 import { OPTIONS, CorregirErrorFuncionalSSFormData } from './variables';
 import SeccionErrorSS from './SeccionErrorSS';
-
-function ZurichLogo() {
-  return (
-    <svg width="80" height="40" viewBox="0 0 120 60" fill="none">
-      <text x="4" y="42" fontFamily="Arial" fontSize="32" fontWeight="900" fill="#fff" letterSpacing="-1">Z</text>
-      <text x="28" y="38" fontFamily="Arial" fontSize="16" fontWeight="700" fill="#fff">ZURICH</text>
-    </svg>
-  );
-}
+import zurichLogo from '../../resources/zurich/ZurichLogo_Horz_White_CMYK_no_R.png';
 
 export default function CorregirErrorFuncionalSS() {
   const { task, loading, error, submitting, completeTask } = useTask();
@@ -74,7 +66,7 @@ export default function CorregirErrorFuncionalSS() {
             <span>Rol: Gestor de Experiencia</span>
           </div>
         </div>
-        <ZurichLogo />
+        <img src={zurichLogo} alt="Zurich" className="header-logo" />
       </div>
 
       <form onSubmit={handleSubmit(onSubmit)} noValidate style={{ maxWidth: 960, margin: '0 auto', padding: '24px 24px 0' }}>
@@ -84,9 +76,9 @@ export default function CorregirErrorFuncionalSS() {
 
         {/* ── Sección 2: Datos del Consumidor ── */}
         <FormSection title="Datos del Consumidor">
-          <div className="info-banner">
+          <ZrAlert config="info" {...({ 'hide-close': true } as object)}>
             Corrija únicamente los campos que SmartSupervision rechazó. Los cambios reemplazarán los datos del caso.
-          </div>
+          </ZrAlert>
 
           <div className="form-row cols-3">
             <div style={{ gridColumn: 'span 2' }}>
@@ -296,19 +288,19 @@ export default function CorregirErrorFuncionalSS() {
           </div>
 
           {w.ef_decision === 'CORREGIR_REENVIAR' && (
-            <div className="info-banner">
+            <ZrAlert config="info" {...({ 'hide-close': true } as object)}>
               El sistema enviará nuevamente la queja a SmartSupervision con los datos corregidos. Si SS vuelve a rechazarla con error funcional, volverá a esta pantalla.
-            </div>
+            </ZrAlert>
           )}
           {w.ef_decision === 'ESCALAR' && (
-            <div className="warn-banner">
+            <ZrAlert config="alert" {...({ 'hide-close': true } as object)}>
               La queja será asignada a un supervisor para revisión y radicación. Documente en la justificación por qué no fue posible corregir el error.
-            </div>
+            </ZrAlert>
           )}
           {w.ef_decision === 'REGISTRAR_MANUAL' && (
-            <div className="error-banner">
+            <ZrAlert config="negative" {...({ 'hide-close': true } as object)}>
               Se omitirá SmartSupervision y la queja se registrará manualmente en los sistemas internos. Use esta opción solo si el error en SS es un problema del sistema externo. Requiere justificación obligatoria.
-            </div>
+            </ZrAlert>
           )}
 
           <div className="form-row cols-1">
@@ -329,20 +321,15 @@ export default function CorregirErrorFuncionalSS() {
 
         {/* ── Barra de acciones ── */}
         <div className="actions-bar">
-          <button type="button" className="btn-cancelar" onClick={() => window.history.back()}>
-            Cancelar
-          </button>
-          <button
-            type="button"
-            className="btn-borrador"
+          <ZrButton config="secondary:s" onClick={() => window.history.back()}>Cancelar</ZrButton>
+          <ZrButton
+            config="secondary:s"
             disabled={submitting}
             onClick={() => completeTask({ ...w, _draft: true } as Record<string, unknown>)}
           >
-            💾 Guardar Borrador
-          </button>
-          <button type="submit" className="btn-crear" disabled={submitting}>
-            {submitting ? 'Enviando...' : submitLabel}
-          </button>
+            Guardar Borrador
+          </ZrButton>
+          <ZrButton config="positive:s" onClick={() => { handleSubmit(onSubmit)(); }} loading={submitting} disabled={submitting}>{submitLabel}</ZrButton>
         </div>
       </form>
     </div>

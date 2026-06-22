@@ -1,7 +1,13 @@
 import { useForm, Controller } from 'react-hook-form';
+import { ZrSegmentedControl, ZrButton } from '../../components/fields/ZdsFields';
 import { FfFlSolicitudFormData } from './variables';
 
 type Form = ReturnType<typeof useForm<FfFlSolicitudFormData>>;
+
+const SI_NO_OPTIONS = [
+  { value: 'SI', text: 'SÍ' },
+  { value: 'NO', text: 'NO' },
+];
 
 export function SiNoField({ form, name }: { form: Form; name: keyof FfFlSolicitudFormData }) {
   return (
@@ -10,18 +16,13 @@ export function SiNoField({ form, name }: { form: Form; name: keyof FfFlSolicitu
       control={form.control}
       defaultValue="NO"
       render={({ field }) => (
-        <div className="si-no-btns">
-          <button
-            type="button"
-            className={`si-no-btn si-no-btn--si${field.value === 'SI' ? ' si-no-btn--active' : ''}`}
-            onClick={() => field.onChange('SI')}
-          >SI</button>
-          <button
-            type="button"
-            className={`si-no-btn si-no-btn--no${field.value === 'NO' ? ' si-no-btn--active' : ''}`}
-            onClick={() => field.onChange('NO')}
-          >NO</button>
-        </div>
+        <ZrSegmentedControl
+          name={field.name}
+          model={field.value ? String(field.value) : 'NO'}
+          onChange={(val: string | null) => field.onChange(val ?? 'NO')}
+          onBlur={field.onBlur}
+          {...({ options: SI_NO_OPTIONS } as Record<string, unknown>)}
+        />
       )}
     />
   );
@@ -38,20 +39,12 @@ export function SiNoSelectAll({ form, prefix, count }: {
   );
   return (
     <div className="si-no-select-all">
-      <button
-        type="button"
-        className="si-no-select-btn"
-        onClick={() => keys.forEach((k) => setValue(k, 'SI'))}
-      >
-        Marcar todas SI
-      </button>
-      <button
-        type="button"
-        className="si-no-select-btn si-no-select-btn--no"
-        onClick={() => keys.forEach((k) => setValue(k, 'NO'))}
-      >
+      <ZrButton config="secondary:s" icon="check:line" onClick={() => keys.forEach((k) => setValue(k, 'SI'))}>
+        Marcar todas SÍ
+      </ZrButton>
+      <ZrButton config="secondary:s" icon="close:line" onClick={() => keys.forEach((k) => setValue(k, 'NO'))}>
         Marcar todas NO
-      </button>
+      </ZrButton>
     </div>
   );
 }

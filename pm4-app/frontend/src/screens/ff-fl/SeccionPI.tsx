@@ -1,6 +1,6 @@
-import { useState, useRef } from 'react';
+import { useState } from 'react';
 import { useForm } from 'react-hook-form';
-import { ZrButton, ZdsSelect } from '../../components/fields/ZdsFields';
+import { ZrButton, ZdsSelect, ZrAlert, ZrFileInput } from '../../components/fields/ZdsFields';
 import { OPTIONS, FfFlSolicitudFormData } from './variables';
 import { SiNoField, SiNoSelectAll } from './SiNoGroup';
 
@@ -32,10 +32,6 @@ export default function SeccionPI({ form, fileRegistry }: { form: Form; fileRegi
   const { control, watch, setValue, register } = form;
   const w = watch();
   const [numDocs, setNumDocs] = useState(1);
-  const fileRef1 = useRef<HTMLInputElement>(null);
-  const fileRef2 = useRef<HTMLInputElement>(null);
-  const fileRef3 = useRef<HTMLInputElement>(null);
-  const fileRefs = [fileRef1, fileRef2, fileRef3];
 
   const reqBloqueado = REQUISITOS.some((_, i) => {
     const key = `frm_pi_req_${String(i + 1).padStart(2, '0')}` as keyof FfFlSolicitudFormData;
@@ -87,9 +83,9 @@ export default function SeccionPI({ form, fileRegistry }: { form: Form; fileRegi
           })}
         </div>
         {reqBloqueado && (
-          <div className="dyo-warning">
+          <ZrAlert config="alert" {...({ 'hide-close': true } as object)}>
             La cotización no puede continuar por este canal y deberá gestionarse con la ayuda del asesor comercial.
-          </div>
+          </ZrAlert>
         )}
       </div>
 
@@ -106,28 +102,21 @@ export default function SeccionPI({ form, fileRegistry }: { form: Form; fileRegi
             return (
               <div key={docKey} className="dyo-doc-row">
                 <span className="dyo-doc-label">Documento {i + 1}</span>
-                <div className="dyo-doc-actions">
-                  <input
-                    ref={fileRefs[i]}
-                    type="file"
-                    style={{ display: 'none' }}
-                    onChange={(e) => {
-                      const file = e.target.files?.[0];
-                      if (file) {
-                        setValue(docKey, file.name as never);
-                        fileRegistry.current.set(docKey, file);
-                      }
-                    }}
-                  />
-                  <ZrButton
-                    config="secondary"
-                    icon="file-upload:line"
-                    onClick={() => fileRefs[i].current?.click()}
-                  >
-                    {fileName ? fileName : 'Cargar archivo'}
-                  </ZrButton>
-                  {fileName && <span className="dyo-doc-name">{fileName}</span>}
-                </div>
+                <ZrFileInput
+                  label=""
+                  model={fileName || null}
+                  droppable
+                  onChange={(file: File | string | null) => {
+                    if (file && typeof file !== 'string') {
+                      setValue(docKey, file.name as never);
+                      fileRegistry.current.set(docKey, file);
+                    } else if (!file) {
+                      setValue(docKey, '' as never);
+                      fileRegistry.current.delete(docKey);
+                    }
+                  }}
+                  {...({ accept: ['.pdf', '.doc', '.docx', '.jpg', '.jpeg', '.png'] } as Record<string, unknown>)}
+                />
                 <input type="hidden" {...register(docKey)} />
               </div>
             );

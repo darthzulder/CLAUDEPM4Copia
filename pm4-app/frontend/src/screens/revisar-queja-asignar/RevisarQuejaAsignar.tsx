@@ -3,18 +3,10 @@ import { useForm } from 'react-hook-form';
 import './styles.css';
 import { useTask } from '../../core/useTask';
 import FormSection from '../../components/FormSection';
-import { ZdsInput, ZdsSelect, ZdsTextarea, ZdsRadio } from '../../components/fields/ZdsFields';
+import { ZdsInput, ZdsSelect, ZdsTextarea, ZdsRadio, ZrButton, ZrAlert } from '../../components/fields/ZdsFields';
 import { OPTIONS, RevisarQuejaAsignarFormData } from './variables';
 import SeccionResumenQueja from './SeccionResumenQueja';
-
-function ZurichLogo() {
-  return (
-    <svg width="80" height="40" viewBox="0 0 120 60" fill="none">
-      <text x="4" y="42" fontFamily="Arial" fontSize="32" fontWeight="900" fill="#fff" letterSpacing="-1">Z</text>
-      <text x="28" y="38" fontFamily="Arial" fontSize="16" fontWeight="700" fill="#fff">ZURICH</text>
-    </svg>
-  );
-}
+import zurichLogo from '../../resources/zurich/ZurichLogo_Horz_White_CMYK_no_R.png';
 
 export default function RevisarQuejaAsignar() {
   const { task, loading, error, submitting, completeTask } = useTask();
@@ -84,7 +76,7 @@ export default function RevisarQuejaAsignar() {
             <span>Rol: Supervisor / Coordinador de Quejas</span>
           </div>
         </div>
-        <ZurichLogo />
+        <img src={zurichLogo} alt="Zurich" className="header-logo" />
       </div>
 
       <form onSubmit={handleSubmit(onSubmit)} noValidate style={{ maxWidth: 960, margin: '0 auto', padding: '24px 24px 0' }}>
@@ -128,14 +120,14 @@ export default function RevisarQuejaAsignar() {
           </div>
 
           {w.ra_prioridad === 'CRITICA' && (
-            <div className="error-banner">
+            <ZrAlert config="negative" {...({ 'hide-close': true } as object)}>
               <strong>Prioridad Crítica:</strong> Esta queja requiere atención inmediata. El responsable asignado será notificado y el caso quedará marcado como prioritario en el sistema.
-            </div>
+            </ZrAlert>
           )}
           {w.ra_prioridad === 'ALTA' && (
-            <div className="warn-banner">
+            <ZrAlert config="alert" {...({ 'hide-close': true } as object)}>
               <strong>Prioridad Alta:</strong> Se recomienda gestionar esta queja antes del plazo SLA para evitar incumplimiento regulatorio.
-            </div>
+            </ZrAlert>
           )}
 
           <div className="form-row cols-1">
@@ -177,38 +169,33 @@ export default function RevisarQuejaAsignar() {
           </div>
 
           {w.ra_decision === 'ASIGNAR' && (
-            <div className="success-banner">
+            <ZrAlert config="positive" {...({ 'hide-close': true } as object)}>
               Al confirmar, la queja será asignada al responsable seleccionado y el proceso continuará con la gestión de la respuesta al consumidor.
-            </div>
+            </ZrAlert>
           )}
           {w.ra_decision === 'DEVOLVER' && (
-            <div className="warn-banner">
+            <ZrAlert config="alert" {...({ 'hide-close': true } as object)}>
               La queja será devuelta al Gestor de Experiencia para corrección de datos antes de continuar. Incluya observaciones que justifiquen la devolución.
-            </div>
+            </ZrAlert>
           )}
           {w.ra_decision === 'ESCALAR' && (
-            <div className="error-banner">
+            <ZrAlert config="negative" {...({ 'hide-close': true } as object)}>
               La queja será escalada a un supervisor senior para revisión adicional. El proceso quedará en espera hasta recibir la decisión del escalamiento.
-            </div>
+            </ZrAlert>
           )}
         </FormSection>
 
         {/* Barra de acciones */}
         <div className="actions-bar">
-          <button type="button" className="btn-cancelar" onClick={() => window.history.back()}>
-            Cancelar
-          </button>
-          <button
-            type="button"
-            className="btn-borrador"
+          <ZrButton config="secondary:s" onClick={() => window.history.back()}>Cancelar</ZrButton>
+          <ZrButton
+            config="secondary:s"
             disabled={submitting}
             onClick={() => completeTask({ ...w, _draft: true } as Record<string, unknown>)}
           >
             Guardar Borrador
-          </button>
-          <button type="submit" className="btn-crear" disabled={submitting}>
-            {submitting ? 'Enviando...' : submitLabel}
-          </button>
+          </ZrButton>
+          <ZrButton config="positive:s" onClick={() => { handleSubmit(onSubmit)(); }} loading={submitting} disabled={submitting}>{submitLabel}</ZrButton>
         </div>
       </form>
     </div>

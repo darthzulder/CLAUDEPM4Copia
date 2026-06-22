@@ -1,12 +1,12 @@
-import { useState, useEffect, useMemo } from 'react';
 import { Controller } from 'react-hook-form';
-import type { Control, RegisterOptions, FieldPath, FieldValues, ControllerRenderProps } from 'react-hook-form';
-import { ZrTextInput }   from '@zurich/web-components/react/text-input';
-import { ZrCheckbox }    from '@zurich/web-components/react/checkbox';
-import { ZrSelect }      from '@zurich/web-components/react/select';
-import { ZrDateInput }   from '@zurich/web-components/react/date-input';
-import { ZrTextarea }    from '@zurich/web-components/react/textarea';
-import { ZrRadioSelect } from '@zurich/web-components/react/radio-select';
+import type { Control, RegisterOptions, FieldPath, FieldValues } from 'react-hook-form';
+import { ZrTextInput }        from '@zurich/web-components/react/text-input';
+import { ZrCheckbox }         from '@zurich/web-components/react/checkbox';
+import { ZrSelect }           from '@zurich/web-components/react/select';
+import { ZrDateInput }        from '@zurich/web-components/react/date-input';
+import { ZrTextarea }         from '@zurich/web-components/react/textarea';
+import { ZrRadioSelect }      from '@zurich/web-components/react/radio-select';
+import { ZrSegmentedControl } from '@zurich/web-components/react/segmented-control';
 
 // ─── Re-exports: raw Zurich DS components (facade única para toda la app) ───
 export { ZrTextInput };
@@ -15,12 +15,18 @@ export { ZrSelect };
 export { ZrCheckbox };
 export { ZrDateInput };
 export { ZrRadioSelect };
+export { ZrSegmentedControl };
 export { ZrButton }      from '@zurich/web-components/react/button';
 export { ZrModal }       from '@zurich/web-components/react/modal';
 export { ZrForm }        from '@zurich/web-components/react/form';
 export { ZrCard }        from '@zurich/web-components/react/card';
 export { ZrTabs }        from '@zurich/web-components/react/tabs';
 export { ZrProgressBar } from '@zurich/web-components/react/progress-bar';
+export { ZrAlert }       from '@zurich/web-components/react/alert';
+export { ZrBadge }       from '@zurich/web-components/react/badge';
+export { ZrChip }        from '@zurich/web-components/react/chip';
+export { ZrTag }         from '@zurich/web-components/react/tag';
+export { ZrFileInput }   from '@zurich/web-components/react/file-input';
 
 // ─── kp: construye props kebab-case (JSX no admite guiones en nombres de prop) ─
 function kp(error?: string, helpText?: string, inputType?: string, icon?: string): Record<string, unknown> {
@@ -117,10 +123,11 @@ interface TextareaProps<TFV extends FieldValues> {
   rules?: RegisterOptions<TFV, FieldPath<TFV>>;
   maxLength?: number;
   elastic?: boolean;
+  placeholder?: string;
 }
 
 export function ZdsTextarea<TFV extends FieldValues>({
-  control, name, label, required, readOnly, helpText, error, rules, maxLength, elastic,
+  control, name, label, required, readOnly, helpText, error, rules, maxLength, elastic, placeholder,
 }: TextareaProps<TFV>) {
   return (
     <Controller
@@ -141,6 +148,7 @@ export function ZdsTextarea<TFV extends FieldValues>({
           {...({
             ...kp(error, helpText),
             ...(maxLength ? { 'max-length': maxLength } : {}),
+            ...(placeholder ? { placeholder } : {}),
           } as Record<string, unknown>)}
         />
       )}
@@ -281,123 +289,41 @@ export function ZdsRadio<TFV extends FieldValues>({
   );
 }
 
-// ─── ZdsSuggest — typeahead input con dropdown filtrado ───────────────────────
-type SuggestOption = { value: string; label?: string; text?: string };
-
-interface SuggestProps<TFV extends FieldValues> {
+// ─── ZdsSegmented — ZrSegmentedControl + Controller (toggle SÍ/NO, etc.) ─────
+interface SegmentedProps<TFV extends FieldValues> {
   control: Control<TFV>;
   name: FieldPath<TFV>;
-  label: string;
-  options: readonly SuggestOption[];
+  options: readonly { value: string; label?: string; text?: string; icon?: string; disabled?: boolean }[];
   rules?: RegisterOptions<TFV, FieldPath<TFV>>;
-  required?: boolean;
-  loading?: boolean;
-  error?: string;
+  disabled?: boolean;
 }
 
-function SuggestInner<TFV extends FieldValues>({
-  field, label, options, required, loading, error,
-}: {
-  field: ControllerRenderProps<TFV, FieldPath<TFV>>;
-  label: string;
-  options: readonly SuggestOption[];
-  required?: boolean;
-  loading?: boolean;
-  error?: string;
-}) {
-  const [displayText, setDisplayText] = useState('');
-  const [query, setQuery]             = useState('');
-  const [open, setOpen]               = useState(false);
+export function ZdsSegmented<TFV extends FieldValues>({
+  control, name, options, rules, disabled,
+}: SegmentedProps<TFV>) {
+  const zdsOptions = options.map((o) => ({
+    value:    o.value,
+    text:     o.text ?? o.label ?? o.value,
+    disabled: o.disabled,
+    ...(o.icon ? { icon: o.icon } : {}),
+  }));
 
-  useEffect(() => {
-    if (!field.value || !options.length) return;
-    const match = options.find(o => o.value === String(field.value));
-    if (match) setDisplayText(match.text ?? match.label ?? String(field.value));
-  }, [field.value, options]);
-
-  const filtered = useMemo(() => {
-    const q = query.trim().toLowerCase();
-    if (!q) return options.slice(0, 10);
-    return options
-      .filter(o => (o.text ?? o.label ?? o.value).toLowerCase().includes(q))
-      .slice(0, 10);
-  }, [query, options]);
-
-  function selectOption(opt: SuggestOption) {
-    field.onChange(opt.value);
-    setDisplayText(opt.text ?? opt.label ?? opt.value);
-    setQuery('');
-    setOpen(false);
-  }
-
-  return (
-    <div className="zds-suggest-wrap">
-      <div
-        onFocus={() => { setQuery(displayText); setOpen(true); }}
-        onBlur={() => setTimeout(() => setOpen(false), 120)}
-      >
-        <ZrTextInput
-          label={label}
-          model={displayText}
-          required={required}
-          invalid={!!error}
-          readonly={loading}
-          icon="search:line"
-          onChange={(val: string | null) => {
-            const v = val ?? '';
-            setDisplayText(v);
-            setQuery(v);
-            setOpen(true);
-            field.onChange('');
-          }}
-          onBlur={field.onBlur}
-          {...(error ? { 'help-text': error } : loading ? { 'help-text': 'Cargando...' } : {})}
-        />
-      </div>
-
-      {open && filtered.length > 0 && (
-        <ul className="suggest-dropdown" role="listbox" aria-label={`Opciones para ${label}`}>
-          {filtered.map(opt => {
-            const text = opt.text ?? opt.label ?? opt.value;
-            const q    = query.trim().toLowerCase();
-            const idx  = q ? text.toLowerCase().indexOf(q) : -1;
-            return (
-              <li
-                key={opt.value}
-                role="option"
-                className="suggest-option"
-                onMouseDown={(e) => { e.preventDefault(); selectOption(opt); }}
-              >
-                {idx >= 0 ? (
-                  <>{text.slice(0, idx)}<strong>{text.slice(idx, idx + q.length)}</strong>{text.slice(idx + q.length)}</>
-                ) : text}
-              </li>
-            );
-          })}
-        </ul>
-      )}
-    </div>
-  );
-}
-
-export function ZdsSuggest<TFV extends FieldValues>({
-  control, name, label, options, rules, required, loading, error,
-}: SuggestProps<TFV>) {
   return (
     <Controller
       name={name}
       control={control}
       rules={rules as RegisterOptions<TFV, typeof name>}
       render={({ field }) => (
-        <SuggestInner
-          field={field as ControllerRenderProps<TFV, FieldPath<TFV>>}
-          label={label}
-          options={options}
-          required={required}
-          loading={loading}
-          error={error}
+        <ZrSegmentedControl
+          name={field.name}
+          model={field.value ? String(field.value) : null}
+          disabled={disabled}
+          onChange={(val: string | null) => field.onChange(val ?? '')}
+          onBlur={field.onBlur}
+          {...({ options: zdsOptions } as Record<string, unknown>)}
         />
       )}
     />
   );
 }
+

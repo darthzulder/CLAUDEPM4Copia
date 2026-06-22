@@ -10,7 +10,7 @@ import SeccionProductos from './SeccionProductos';
 import SeccionResumenCotizacion from './SeccionResumenCotizacion';
 import { useCotizador, cotizadorResultToPayload, type CotizadorInputs } from '../../core/useCotizador';
 import zurichLogo from '../../resources/zurich/ZurichLogo_Horz_White_CMYK_no_R.png';
-import { ZdsInput, ZdsDate, ZdsCheckboxField, ZdsSelect, ZdsSuggest, ZrButton } from '../../components/fields/ZdsFields';
+import { ZdsInput, ZdsDate, ZdsCheckboxField, ZdsSelect, ZrButton, ZrAlert } from '../../components/fields/ZdsFields';
 import {
   OPTIONS, COLLECTION_DEFS, DEPARTAMENTOS, CIUDADES_POR_DEPTO,
   FfFlSolicitudFormData, CONSULTAR_CLIENTE_SCRIPT_ID, parseClienteTia,
@@ -105,9 +105,9 @@ function InfoGeneral({
         </div>
         {productError && <div className="product-error">{productError}</div>}
         {soloCC && !productError && (
-          <div className="product-warning">
+          <ZrAlert config="alert" {...({ 'hide-close': true } as object)}>
             El seguro de Crimen Comercial solo puede cotizarse junto con otro producto. Si solo requiere este producto, la cotización no puede continuar por este canal y deberá gestionarse con la ayuda del asesor comercial.
-          </div>
+          </ZrAlert>
         )}
       </div>
 
@@ -138,7 +138,7 @@ function InfoGeneral({
       </div>
 
       <div className="form-row cols-2">
-        <ZdsSuggest
+        <ZdsSelect
           label="Intermediario"
           name="frm_gen_intermediario"
           control={control}
@@ -146,6 +146,7 @@ function InfoGeneral({
           loading={loadingInt}
           rules={{ required: 'Campo requerido' }}
           required
+          withSearch
           error={fe('frm_gen_intermediario')}
         />
         <ZdsInput
@@ -354,13 +355,14 @@ function InfoTomador({
               <div key={prod} className="actividades-table-row">
                 <span className="actividades-prod-label">{prod}</span>
                 <div className="actividades-cell">
-                  <ZdsSuggest
+                  <ZdsSelect
                     label=""
                     name={actField}
                     control={control}
                     rules={{ required: 'Requerido' }}
                     options={options}
                     loading={loading}
+                    withSearch
                     error={fe(actField)}
                   />
                 </div>
@@ -876,7 +878,7 @@ export default function SolicitudFfFl() {
             hasPi={Boolean(w.frm_gen_prod_pi)}
           />
 
-          {submitError && <div className="submit-error">{submitError}</div>}
+          {submitError && <ZrAlert config="negative" {...({ 'hide-close': true } as object)}>{submitError}</ZrAlert>}
 
           <div className="submit-bar">
             <ZrButton

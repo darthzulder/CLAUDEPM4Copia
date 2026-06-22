@@ -10,6 +10,7 @@ import pm4 from '../../api/pm4Client';
 import AseguradosAdicionales, { AseguradoAdicional } from './AseguradosAdicionales';
 import ValoresDeducibles, { ValorDeducible, INITIAL_VALORES } from './ValoresDeducibles';
 import DetalleExportaciones, { ExportacionRow } from './DetalleExportaciones';
+import zurichLogo from '../../resources/zurich/ZurichLogo_Horz_White_CMYK_no_R.png';
 
 // ---------------------------------------------------------------------------
 // Tipos
@@ -154,18 +155,6 @@ function mapTiaFields(
   const tipoEmpresa = ['GOVERNMENT', 'PUBLIC'].includes(pt) ? 'PUBLICA'
     : ['MIXED', 'MIXTA'].includes(pt) ? 'MIXTA' : 'PRIVADA';
   form.setValue(`${prefix}_tipo_empresa` as keyof SolicitudCotizacionFormData, tipoEmpresa as never);
-}
-
-// ---------------------------------------------------------------------------
-// Logo
-// ---------------------------------------------------------------------------
-function ZurichLogo() {
-  return (
-    <svg width="80" height="40" viewBox="0 0 120 60" fill="none">
-      <text x="4" y="42" fontFamily="Arial" fontSize="32" fontWeight="900" fill="#fff" letterSpacing="-1">Z</text>
-      <text x="28" y="38" fontFamily="Arial" fontSize="16" fontWeight="700" fill="#fff">ZURICH</text>
-    </svg>
-  );
 }
 
 // ---------------------------------------------------------------------------
@@ -674,7 +663,7 @@ export default function SolicitudCotizacionCuw() {
       <div className="screen-wrapper">
         <div className="screen-header">
           <div className="title-block"><h1>Solicitud de Cotización CUW</h1></div>
-          <ZurichLogo />
+          <img src={zurichLogo} alt="Zurich" className="header-logo" />
         </div>
         <div className="screen-sent-wrapper">
           <div className="screen-sent">
@@ -704,7 +693,7 @@ export default function SolicitudCotizacionCuw() {
             <span>Caso # {caso}</span>
           </div>
         </div>
-        <ZurichLogo />
+        <img src={zurichLogo} alt="Zurich" className="header-logo" />
       </div>
 
       <form onSubmit={form.handleSubmit(onSubmit)} noValidate>

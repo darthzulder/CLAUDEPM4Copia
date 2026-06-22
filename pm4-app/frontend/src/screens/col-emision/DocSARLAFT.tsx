@@ -1,6 +1,6 @@
 import { useState, useRef, useCallback } from 'react';
 import { useTask } from '../../core/useTask';
-import { ZrButton, ZrModal } from '../../components/fields/ZdsFields';
+import { ZrButton, ZrModal, ZrAlert } from '../../components/fields/ZdsFields';
 import pm4 from '../../api/pm4Client';
 import {
   type DocSarlaftData,
@@ -305,9 +305,9 @@ export default function DocSARLAFT() {
             <div className="nc-section-body">
 
               {!perfil && (
-                <div className="perfil-aviso">
-                  ℹ No se detectó perfil SARLAFT en la tarea. Se muestran todos los documentos posibles.
-                </div>
+                <ZrAlert config="info" {...({ 'hide-close': true } as object)}>
+                  No se detectó perfil SARLAFT en la tarea. Se muestran todos los documentos posibles.
+                </ZrAlert>
               )}
 
               <div className="sarlaft-doc-list">
