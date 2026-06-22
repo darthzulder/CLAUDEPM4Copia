@@ -82,8 +82,7 @@ pm4-app/
     └── screens/
         └── {screen-slug}/
             ├── variables.ts      ← OPTIONS estáticas, COLLECTIONS ids, tipos TS, WATCHERS
-            ├── styles.css        ← TODO el CSS de esta pantalla (Zurich base + específico)
-            └── NombrePantalla.tsx
+            └── NombrePantalla.tsx  ← Componente React. No crear styles.css por pantalla (DRY).
 ```
 
 ---
@@ -212,7 +211,7 @@ await completeTask(payload);
    - `COLLECTIONS` — IDs de colecciones PM4 que usan los selects dinámicos
    - `WATCHERS` — definición de watchers (campo que observan, script ID, run_onload)
    - Interface TypeScript de los datos del formulario
-3. Crear `styles.css` con el CSS base de Zurich + específico de la pantalla
+3. **No crear `styles.css` local.** Los diseños deben ser DRY y utilizar únicamente elementos y componentes de ZurichDS. Si son necesarios estilos CSS específicos e inevitables para la pantalla, agrégalos de forma centralizada al final de `frontend/src/shared.css` utilizando un prefijo de clase adecuado (ej. `.screen-<slug>--<elemento>`).
 4. Crear `NombrePantalla.tsx` — componente React (<300 líneas por archivo)
 5. Registrar en `App.tsx` en el objeto `SCREENS`
 
@@ -274,7 +273,7 @@ const { control, handleSubmit, reset, formState: { errors } } = useForm<MiFormDa
 
 - `FormSection` para las secciones con header azul
 - `useTask()` maneja loading / error / submitting — siempre mostrar estos estados
-- CSS scoped por pantalla: **nunca** estilos globales fuera de `styles.css` de la pantalla
+- Diseños DRY y ZurichDS: Utilizar únicamente componentes de ZurichDS de forma limpia. No se permiten archivos `styles.css` locales por pantalla. Cualquier estilo específico y justificado debe centralizarse en `frontend/src/shared.css` de forma DRY.
 - `OPTIONS` en `variables.ts` usan `as const` → pasarlos directamente a los campos (aceptan `readonly`)
 - Componente principal < 300 líneas; secciones grandes van como funciones locales en el mismo archivo o archivos separados en la misma carpeta
 

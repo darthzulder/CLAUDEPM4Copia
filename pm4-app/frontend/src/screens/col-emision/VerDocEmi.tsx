@@ -2,7 +2,9 @@ import { useState, useMemo } from 'react';
 import { useTask } from '../../core/useTask';
 import { useRequestFiles, resolveFileId } from '../../core/useRequestFiles';
 import PdfViewer from '../../components/PdfViewer';
-import { ZrButton, ZrModal, ZrForm, ZrSelect, ZrTextarea } from '../../components/fields/ZdsFields';
+import { ZrButton, ZrModal, ZrForm, ZrSelect, ZrTextarea, ZrAlert } from '../../components/fields/ZdsFields';
+import ResultCard from '../../components/ResultCard';
+import FormSection from '../../components/FormSection';
 import {
   type SolDocEmiData,
   type ValidacionDoc,
@@ -10,7 +12,6 @@ import {
   PRODUCTO_DOC_DEFS,
 } from './variables';
 import zurichLogo from '../../resources/zurich/ZurichLogo_Horz_White_CMYK_no_R.png';
-import './styles.css';
 
 // ──────────────────────────────────────────────────────────────
 // Types
@@ -71,16 +72,14 @@ function DocRow({
         ) : (
           <span className="file-name-empty">Sin documento</span>
         )}
-        <button
-          type="button"
-          className={`btn-preview${!cargado ? ' btn-preview--disabled' : ''}`}
+        <ZrButton
+          config="secondary:s"
+          icon="visibility-on:line"
           disabled={!cargado}
-          title={cargado ? 'Ver documento' : 'No hay documento cargado'}
           onClick={onPreview}
         >
-          <span>👁</span>
-          <span className="btn-preview-label">Ver</span>
-        </button>
+          Ver
+        </ZrButton>
       </div>
 
       {/* Select de validación — ZrSelect ZDS */}
@@ -103,29 +102,22 @@ function DocRow({
 function DecisionBanner({ decision }: { decision: DecisionEmi | null }) {
   if (decision === null) {
     return (
-      <div className="decision-banner decision-banner--pending">
-        <span className="decision-banner-icon">⏳</span>
-        <span>Valide todos los documentos para determinar la decisión.</span>
-      </div>
+      <ZrAlert config="info" {...({ 'hide-close': true } as object)}>
+        Valide todos los documentos para determinar la decisión.
+      </ZrAlert>
     );
   }
   if (decision === 'COMPLETO') {
     return (
-      <div className="decision-banner decision-banner--completo">
-        <span className="decision-banner-icon">✓</span>
-        <div>
-          <strong>Documentos completos — se procederá a emitir la póliza.</strong>
-        </div>
-      </div>
+      <ZrAlert config="positive" {...({ 'hide-close': true } as object)}>
+        <strong>Documentos completos — se procederá a emitir la póliza.</strong>
+      </ZrAlert>
     );
   }
   return (
-    <div className="decision-banner decision-banner--incompleto">
-      <span className="decision-banner-icon">✗</span>
-      <div>
-        <strong>Documentos incompletos — se solicitarán nuevos documentos.</strong>
-      </div>
-    </div>
+    <ZrAlert config="negative" {...({ 'hide-close': true } as object)}>
+      <strong>Documentos incompletos — se solicitarán nuevos documentos.</strong>
+    </ZrAlert>
   );
 }
 
@@ -267,14 +259,12 @@ export default function VerDocEmi() {
           <img src={zurichLogo} alt="Zurich" className="header-logo" />
         </div>
         <div className="screen-sent-wrapper">
-          <div className="screen-sent">
-            <div className="screen-sent-icon">✓</div>
-            <div className="screen-sent-title">Verificación completada</div>
-            <div className="screen-sent-sub">
+          <ResultCard variant="success" title="Verificación completada">
+            <p>
               La decisión fue registrada correctamente.<br />
               El proceso continuará al siguiente nodo automáticamente.
-            </div>
-          </div>
+            </p>
+          </ResultCard>
         </div>
       </div>
     );
@@ -330,97 +320,89 @@ export default function VerDocEmi() {
       <div className="screen-content">
         <div className="verdoc-layout">
 
-          <div className="nc-section">
-            <div className="nc-section-header">
-              <span>Documentos de Emisión</span>
-              <button
-                type="button"
-                className="btn-info-help"
-                onClick={() => setInfoOpen(true)}
-                title="Ver criterios de verificación"
-              >
-                i
-              </button>
-            </div>
+          <FormSection
+            title="Documentos de Emisión"
+            action={<ZrButton config="secondary:xs" icon="info:line" onClick={() => setInfoOpen(true)} />}
+            footer={
+              <>
+                {/* Sección de Decisión */}
+                <div className="verdoc-decision-section">
+                  <div className="verdoc-decision-title">
+                    <span className="verdoc-decision-acento" />
+                    Decisión
+                  </div>
 
-            <div className="nc-section-body">
-              {/* Cabecera de columnas */}
-              <div className="verdoc-table-header">
-                <span style={{ flex: 1 }}>Documento</span>
-                <span style={{ width: 200 }}>Archivo</span>
-                <span style={{ width: 180 }}>Validación</span>
-              </div>
+                  <DecisionBanner decision={derivedDecision} />
 
-              <div className="sarlaft-doc-list">
-                {docs.map((doc, i) => {
-                  const { fileId, fileName } = resolveDoc(doc.key, i);
-                  return (
-                    <DocRow
-                      key={doc.key}
-                      index={i + 1}
-                      descripcion={doc.descripcion}
-                      fileId={fileId}
-                      fileName={fileName}
-                      validacion={getValidacion(doc.key)}
-                      onValidacion={(v) => {
-                        setValidaciones((prev) => ({ ...prev, [doc.key]: v }));
-                        setSubmitError(null);
-                      }}
-                      onPreview={() => {
-                        if (fileId) setPreview({ fileId, descripcion: doc.descripcion, fileName });
-                      }}
-                    />
-                  );
-                })}
-              </div>
-            </div>
+                  {derivedDecision === 'INCOMPLETO' && (
+                    <div style={{ marginTop: '1rem' }}>
+                      <ZrForm config="line">
+                        <ZrTextarea
+                          name="frm_comentarios_emision"
+                          label="Comentarios *"
+                          model={comentarios}
+                          onChange={(v: string | null) => {
+                            setComentarios(v ?? '');
+                            setSubmitError(null);
+                          }}
+                          elastic
+                          help-text="Describa las razones por las cuales los documentos están incompletos."
+                          required
+                        />
+                      </ZrForm>
+                    </div>
+                  )}
 
-            {/* Sección de Decisión */}
-            <div className="verdoc-decision-section">
-              <div className="verdoc-decision-title">
-                <span className="verdoc-decision-acento" />
-                Decisión
-              </div>
-
-              <DecisionBanner decision={derivedDecision} />
-
-              {derivedDecision === 'INCOMPLETO' && (
-                <div style={{ marginTop: '1rem' }}>
-                  <ZrForm config="line">
-                    <ZrTextarea
-                      name="frm_comentarios_emision"
-                      label="Comentarios *"
-                      model={comentarios}
-                      onChange={(v: string | null) => {
-                        setComentarios(v ?? '');
-                        setSubmitError(null);
-                      }}
-                      elastic
-                      help-text="Describa las razones por las cuales los documentos están incompletos."
-                      required
-                    />
-                  </ZrForm>
+                  {submitError && (
+                    <ZrAlert config="negative" style={{ marginTop: '0.75rem' }} {...({ 'hide-close': true } as object)}>
+                      {submitError}
+                    </ZrAlert>
+                  )}
                 </div>
-              )}
 
-              {submitError && (
-                <div className="validation-error" style={{ marginTop: '0.75rem' }}>
-                  ⚠ {submitError}
+                <div className="submit-bar">
+                  <ZrButton
+                    config="primary:l"
+                    disabled={submitting || derivedDecision === null}
+                    loading={submitting}
+                    onClick={handleContinuar}
+                  >
+                    {submitting ? 'Guardando…' : 'CONTINUAR'}
+                  </ZrButton>
                 </div>
-              )}
+              </>
+            }
+          >
+            {/* Cabecera de columnas */}
+            <div className="verdoc-table-header">
+              <span style={{ flex: 1 }}>Documento</span>
+              <span style={{ width: 200 }}>Archivo</span>
+              <span style={{ width: 180 }}>Validación</span>
             </div>
 
-            <div className="submit-bar">
-              <ZrButton
-                config="primary:l"
-                disabled={submitting || derivedDecision === null}
-                loading={submitting}
-                onClick={handleContinuar}
-              >
-                {submitting ? 'Guardando…' : 'CONTINUAR'}
-              </ZrButton>
+            <div className="sarlaft-doc-list">
+              {docs.map((doc, i) => {
+                const { fileId, fileName } = resolveDoc(doc.key, i);
+                return (
+                  <DocRow
+                    key={doc.key}
+                    index={i + 1}
+                    descripcion={doc.descripcion}
+                    fileId={fileId}
+                    fileName={fileName}
+                    validacion={getValidacion(doc.key)}
+                    onValidacion={(v) => {
+                      setValidaciones((prev) => ({ ...prev, [doc.key]: v }));
+                      setSubmitError(null);
+                    }}
+                    onPreview={() => {
+                      if (fileId) setPreview({ fileId, descripcion: doc.descripcion, fileName });
+                    }}
+                  />
+                );
+              })}
             </div>
-          </div>
+          </FormSection>
 
         </div>
       </div>

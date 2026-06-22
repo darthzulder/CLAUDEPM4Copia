@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useForm } from 'react-hook-form';
-import { ZrButton, ZdsSelect, ZrAlert, ZrFileInput } from '../../components/fields/ZdsFields';
+import { ZrButton, ZdsSelect, ZrAlert, ZrFileInput, ZrTable } from '../../components/fields/ZdsFields';
 import { OPTIONS, FfFlSolicitudFormData } from './variables';
 import { SiNoField, SiNoSelectAll } from './SiNoGroup';
 
@@ -66,22 +66,29 @@ export default function SeccionPI({ form, fileRegistry }: { form: Form; fileRegi
           por este canal y se deberá comunicar con su asesor comercial.
         </p>
         <SiNoSelectAll form={form} prefix="frm_pi_req_" count={REQUISITOS.length} />
-        <div className="dyo-si-no-table">
-          <div className="dyo-si-no-header">
-            <span>REQUISITOS / La sociedad y sus filiales (si aplica) afirman que:</span>
-            <span>SI&nbsp;/&nbsp;NO</span>
-          </div>
-          {REQUISITOS.map((pregunta, i) => {
-            const name = `frm_pi_req_${String(i + 1).padStart(2, '0')}` as keyof FfFlSolicitudFormData;
-            return (
-              <div key={name} className="dyo-si-no-row">
-                <span className="dyo-si-no-num">{i + 1}.</span>
-                <span className="dyo-si-no-text">{pregunta}</span>
-                <SiNoField form={form} name={name} />
-              </div>
-            );
-          })}
-        </div>
+        <ZrTable>
+          <table>
+            <thead>
+              <tr>
+                <th style={{ width: 40 }} {...({ config: 'center' } as object)}>#</th>
+                <th>La sociedad y sus filiales (si aplica) afirman que:</th>
+                <th style={{ width: 120 }} {...({ config: 'center' } as object)}>SÍ / NO</th>
+              </tr>
+            </thead>
+            <tbody>
+              {REQUISITOS.map((pregunta, i) => {
+                const name = `frm_pi_req_${String(i + 1).padStart(2, '0')}` as keyof FfFlSolicitudFormData;
+                return (
+                  <tr key={name}>
+                    <td {...({ config: 'center' } as object)}>{i + 1}</td>
+                    <td>{pregunta}</td>
+                    <td {...({ config: 'center' } as object)}><SiNoField form={form} name={name} /></td>
+                  </tr>
+                );
+              })}
+            </tbody>
+          </table>
+        </ZrTable>
         {reqBloqueado && (
           <ZrAlert config="alert" {...({ 'hide-close': true } as object)}>
             La cotización no puede continuar por este canal y deberá gestionarse con la ayuda del asesor comercial.
@@ -127,8 +134,9 @@ export default function SeccionPI({ form, fileRegistry }: { form: Form; fileRegi
             config="secondary"
             onClick={() => setNumDocs((n) => n + 1)}
             style={{ marginTop: 'var(--zs-75)' }}
+            icon="plus:line"
           >
-            + Agregar documento
+            Agregar documento
           </ZrButton>
         )}
       </div>
@@ -136,34 +144,38 @@ export default function SeccionPI({ form, fileRegistry }: { form: Form; fileRegi
       {/* ── PROPUESTA ECONÓMICA ── */}
       <div className="form-subsection dyo-subsection">
         <div className="form-subsection-title">Propuesta económica</div>
-        <div className="dyo-propuesta-table">
-          <div className="dyo-propuesta-header">
-            <span>#</span>
-            <span>Límite asegurado</span>
-            <span>Modalidad de cobertura</span>
-          </div>
-          {([
-            ['frm_pi_prop_01_limite', 1],
-            ['frm_pi_prop_02_limite', 2],
-            ['frm_pi_prop_03_limite', 3],
-          ] as const).map(([field, n]) => (
-            <div key={field} className="dyo-propuesta-row">
-              <span className="dyo-prop-num">{n}</span>
-              <div className="dyo-prop-limite">
-                <ZdsSelect
-                  label=""
-                  name={field}
-                  control={control}
-                  options={OPTIONS.limitePI}
-                  placeholder="Seleccione un límite"
-                />
-              </div>
-              <span className="dyo-prop-tipo">
-                Todo y cada reclamo en el agregado anual
-              </span>
-            </div>
-          ))}
-        </div>
+        <ZrTable>
+          <table>
+            <thead>
+              <tr>
+                <th style={{ width: 40 }} {...({ config: 'center' } as object)}>#</th>
+                <th>Límite asegurado</th>
+                <th>Modalidad de cobertura</th>
+              </tr>
+            </thead>
+            <tbody>
+              {([
+                ['frm_pi_prop_01_limite', 1],
+                ['frm_pi_prop_02_limite', 2],
+                ['frm_pi_prop_03_limite', 3],
+              ] as const).map(([field, n]) => (
+                <tr key={field}>
+                  <td {...({ config: 'center' } as object)}>{n}</td>
+                  <td>
+                    <ZdsSelect
+                      label=""
+                      name={field}
+                      control={control}
+                      options={OPTIONS.limitePI}
+                      placeholder="Seleccione un límite"
+                    />
+                  </td>
+                  <td>Todo y cada reclamo en el agregado anual</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </ZrTable>
         <p className="dyo-nota">
           Nota: el sistema debe controlar que se ingrese al menos un valor asegurado.
         </p>

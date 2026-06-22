@@ -3,7 +3,9 @@ import { useForm } from 'react-hook-form';
 import { useTask } from '../../core/useTask';
 import { resolveFileId } from '../../core/useRequestFiles';
 import PdfViewer from '../../components/PdfViewer';
-import { ZrButton, ZdsSelect, ZdsTextarea, ZrTabs } from '../../components/fields/ZdsFields';
+import { ZrButton, ZdsSelect, ZdsTextarea, ZrTabs, ZrAlert } from '../../components/fields/ZdsFields';
+import ResultCard from '../../components/ResultCard';
+import FormSection from '../../components/FormSection';
 import {
   DECISION_OPTIONS,
   LINEAS_CONFIG,
@@ -11,7 +13,6 @@ import {
   type DecisionValue,
 } from './variables';
 import zurichLogo from '../../resources/zurich/ZurichLogo_Horz_White_CMYK_no_R.png';
-import './styles.css';
 
 // ---------------------------------------------------------------------------
 // Types
@@ -106,14 +107,12 @@ export default function OpcionesCotizacion() {
           <img src={zurichLogo} alt="Zurich" className="header-logo" />
         </div>
         <div className="screen-sent-wrapper">
-          <div className="screen-sent">
-            <div className="screen-sent-icon">✓</div>
-            <div className="screen-sent-title">Decisión enviada</div>
-            <div className="screen-sent-sub">
+          <ResultCard variant="success" title="Decisión enviada">
+            <p>
               La decisión fue enviada correctamente a ProcessMaker.<br />
               El proceso continuará al siguiente nodo automáticamente.
-            </div>
-          </div>
+            </p>
+          </ResultCard>
         </div>
       </div>
     );
@@ -182,76 +181,73 @@ export default function OpcionesCotizacion() {
               height={700}
             />
           ) : (
-            <div className="no-file-card">
-              <p>
-                {activeLineas.length === 0
-                  ? 'No hay productos activos en este caso.'
-                  : 'El slip de cotización no está disponible aún.'}
-              </p>
-            </div>
+            <ZrAlert config="info" {...({ 'hide-close': true } as object)}>
+              {activeLineas.length === 0
+                ? 'No hay productos activos en este caso.'
+                : 'El slip de cotización no está disponible aún.'}
+            </ZrAlert>
           )}
         </div>
 
         {/* Panel de decisión */}
         <form onSubmit={handleSubmit(onSubmit)} noValidate>
-          <div className="decision-panel">
-            <div className="decision-panel-header">Decisión de Cotización</div>
-            <div className="decision-panel-body">
+          <FormSection
+            title="Decisión de Cotización"
+            footer={
+              <div className="decision-actions">
+                <ZrButton config="primary:l" onClick={() => { handleSubmit(onSubmit)(); }} disabled={submitting} loading={submitting}>DERIVAR</ZrButton>
+              </div>
+            }
+          >
+            <ZdsSelect
+              name="frm_respCot_decision"
+              control={control}
+              label="Decisión"
+              options={DECISION_OPTIONS}
+              rules={{ required: 'Campo requerido' }}
+              required
+              error={errors.frm_respCot_decision?.message}
+            />
 
-              <ZdsSelect
-                name="frm_respCot_decision"
+            <ZdsTextarea
+              name="frm_respCot_comentarios"
+              control={control}
+              label="Comentarios"
+            />
+
+            {decision === 'RECHAZADA' && (
+              <ZdsTextarea
+                name="frm_respCot_motizoRechazo"
                 control={control}
-                label="Decisión"
-                options={DECISION_OPTIONS}
+                label="Motivo de rechazo"
                 rules={{ required: 'Campo requerido' }}
                 required
-                error={errors.frm_respCot_decision?.message}
+                error={errors.frm_respCot_motizoRechazo?.message}
               />
+            )}
 
+            {decision === 'PERSONALIZACION_EXCEPCION' && (
               <ZdsTextarea
-                name="frm_respCot_comentarios"
+                name="frm_respCot_personalizacion_excepcion"
                 control={control}
-                label="Comentarios"
+                label="Personalización / Excepción"
+                rules={{ required: 'Campo requerido' }}
+                required
+                error={errors.frm_respCot_personalizacion_excepcion?.message}
               />
+            )}
 
-              {decision === 'RECHAZADA' && (
-                <ZdsTextarea
-                  name="frm_respCot_motizoRechazo"
-                  control={control}
-                  label="Motivo de rechazo"
-                  rules={{ required: 'Campo requerido' }}
-                  required
-                  error={errors.frm_respCot_motizoRechazo?.message}
-                />
-              )}
-
-              {decision === 'PERSONALIZACION_EXCEPCION' && (
-                <ZdsTextarea
-                  name="frm_respCot_personalizacion_excepcion"
-                  control={control}
-                  label="Personalización / Excepción"
-                  rules={{ required: 'Campo requerido' }}
-                  required
-                  error={errors.frm_respCot_personalizacion_excepcion?.message}
-                />
-              )}
-
-              {data.frm_gen_enlace_clausulado_rc && (
-                <ZrButton
-                  config="secondary:s"
-                  icon="file-blank:line"
-                  href={data.frm_gen_enlace_clausulado_rc}
-                  target="_blank"
-                >
-                  Ver clausulado RC
-                </ZrButton>
-              )}
-            </div>
-
-            <div className="decision-actions">
-              <ZrButton config="primary:l" onClick={() => { handleSubmit(onSubmit)(); }} disabled={submitting} loading={submitting}>DERIVAR</ZrButton>
-            </div>
-          </div>
+            {data.frm_gen_enlace_clausulado_rc && (
+              <ZrButton
+                config="secondary:s"
+                icon="file-blank:line"
+                href={data.frm_gen_enlace_clausulado_rc}
+                target="_blank"
+              >
+                Ver clausulado RC
+              </ZrButton>
+            )}
+          </FormSection>
         </form>
       </div>
     </div>

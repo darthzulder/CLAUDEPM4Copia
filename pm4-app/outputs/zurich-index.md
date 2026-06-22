@@ -253,7 +253,7 @@ import { useTask } from '../../core/useTask';
 import FormSection from '../../components/FormSection';
 import { ZdsInput, ZdsSelect, ZrButton } from '../../components/fields/ZdsFields';
 import { OPTIONS, MyFormData } from './variables';
-import './styles.css';
+// No importar styles.css locales. Todos los estilos específicos se manejan de forma DRY en shared.css.
 
 export default function MyScreen() {
   const { task, submitting, completeTask } = useTask();

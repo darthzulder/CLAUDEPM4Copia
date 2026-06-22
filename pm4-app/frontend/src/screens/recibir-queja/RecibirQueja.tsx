@@ -1,6 +1,5 @@
 import { useEffect, useRef } from 'react';
 import { useForm } from 'react-hook-form';
-import './styles.css';
 import { useTask } from '../../core/useTask';
 import FormSection from '../../components/FormSection';
 import { ZdsInput, ZdsSelect, ZdsRadio, ZrButton, ZrAlert, ZrFileInput } from '../../components/fields/ZdsFields';

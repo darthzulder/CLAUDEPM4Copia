@@ -1,7 +1,6 @@
 import { useState } from 'react';
-import { createPortal } from 'react-dom';
 import { useForm } from 'react-hook-form';
-import { ZdsInput, ZdsSelect } from '../../components/fields/ZdsFields';
+import { ZdsInput, ZdsSelect, ZrModal, ZrButton, ZrTable } from '../../components/fields/ZdsFields';
 
 // ---------------------------------------------------------------------------
 // Types
@@ -62,15 +61,10 @@ function ValorDeducibleModal({ initial, onClose, onSave }: ModalProps) {
     onSave(data);
   }
 
-  return createPortal(
-    <div className="modal-overlay" onClick={(e) => { if (e.target === e.currentTarget) onClose(); }}>
-      <div className="modal-dialog">
-        <div className="modal-header">
-          <h3>Editar registro</h3>
-          <button className="modal-close" type="button" onClick={onClose} aria-label="Cerrar">&times;</button>
-        </div>
-        <form onSubmit={handleSubmit(onSubmit)} noValidate>
-          <div className="modal-body">
+  return (
+    <ZrModal model={true} onChange={(open: boolean) => { if (!open) onClose(); }}>
+      <h3 style={{ margin: '0 0 var(--zs-100)', font: 'var(--zf-h-20)', color: 'var(--z-text)' }}>Editar registro</h3>
+      <div>
             {/* Row 1: Límite asegurado | Deducible % */}
             <div className="form-row cols-2">
               <ZdsInput
@@ -141,15 +135,12 @@ function ValorDeducibleModal({ initial, onClose, onSave }: ModalProps) {
                 />
               )}
             </div>
-          </div>
-          <div className="modal-footer">
-            <button type="button" className="btn-cancelar" onClick={onClose}>CANCELAR</button>
-            <button type="submit" className="btn-guardar">GUARDAR</button>
-          </div>
-        </form>
       </div>
-    </div>,
-    document.body
+      <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 'var(--zs-75)', marginTop: 'var(--zs-150)' }}>
+        <ZrButton config="secondary" onClick={onClose}>CANCELAR</ZrButton>
+        <ZrButton config="primary:l" onClick={() => { handleSubmit(onSubmit)(); }}>GUARDAR</ZrButton>
+      </div>
+    </ZrModal>
   );
 }
 
@@ -173,7 +164,8 @@ export default function ValoresDeducibles({ value, onChange }: Props) {
 
   return (
     <div>
-      <table className="record-table">
+      <ZrTable zebra>
+      <table>
         <thead>
           <tr>
             <th>Opción</th>
@@ -195,19 +187,13 @@ export default function ValoresDeducibles({ value, onChange }: Props) {
               <td>{row.frm_valores_deducible_minimo !== '' ? row.frm_valores_deducible_minimo : ''}</td>
               <td>{row.frm_valores_deducible_minimo_smmlv !== '' ? row.frm_valores_deducible_minimo_smmlv : ''}</td>
               <td>
-                <button
-                  type="button"
-                  className="btn-icon"
-                  title="Editar"
-                  onClick={() => handleEdit(i)}
-                >
-                  ✏️
-                </button>
+                <ZrButton config="secondary:s" icon="edit:line" onClick={() => handleEdit(i)}>Editar</ZrButton>
               </td>
             </tr>
           ))}
         </tbody>
       </table>
+      </ZrTable>
 
       {showValidationMsg && (
         <div className="record-validation-msg">

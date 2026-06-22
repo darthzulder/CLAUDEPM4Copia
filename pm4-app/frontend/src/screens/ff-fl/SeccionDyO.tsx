@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useForm } from 'react-hook-form';
-import { ZrButton, ZdsSelect, ZrAlert, ZrFileInput } from '../../components/fields/ZdsFields';
+import { ZrButton, ZdsSelect, ZrAlert, ZrFileInput, ZrTable } from '../../components/fields/ZdsFields';
 import { OPTIONS, FfFlSolicitudFormData } from './variables';
 import { SiNoField, SiNoSelectAll } from './SiNoGroup';
 type Form = ReturnType<typeof useForm<FfFlSolicitudFormData>>;
@@ -64,22 +64,29 @@ export default function SeccionDyO({ form, fileRegistry }: { form: Form; fileReg
           ¿La compañía opera en alguno de los siguientes sectores?
         </p>
         <SiNoSelectAll form={form} prefix="frm_dyo_perf_" count={SECTORES.length} />
-        <div className="dyo-si-no-table">
-          <div className="dyo-si-no-header">
-            <span>Sector</span>
-            <span>SI&nbsp;/&nbsp;NO</span>
-          </div>
-          {SECTORES.map((sector, i) => {
-            const name = `frm_dyo_perf_${String(i + 1).padStart(2, '0')}` as keyof FfFlSolicitudFormData;
-            return (
-              <div key={name} className="dyo-si-no-row">
-                <span className="dyo-si-no-num">{i + 1}.</span>
-                <span className="dyo-si-no-text">{sector}</span>
-                <SiNoField form={form} name={name} />
-              </div>
-            );
-          })}
-        </div>
+        <ZrTable>
+          <table>
+            <thead>
+              <tr>
+                <th style={{ width: 40 }} {...({ config: 'center' } as object)}>#</th>
+                <th>Sector</th>
+                <th style={{ width: 120 }} {...({ config: 'center' } as object)}>SÍ / NO</th>
+              </tr>
+            </thead>
+            <tbody>
+              {SECTORES.map((sector, i) => {
+                const name = `frm_dyo_perf_${String(i + 1).padStart(2, '0')}` as keyof FfFlSolicitudFormData;
+                return (
+                  <tr key={name}>
+                    <td {...({ config: 'center' } as object)}>{i + 1}</td>
+                    <td>{sector}</td>
+                    <td {...({ config: 'center' } as object)}><SiNoField form={form} name={name} /></td>
+                  </tr>
+                );
+              })}
+            </tbody>
+          </table>
+        </ZrTable>
         {perfBloqueado && (
           <ZrAlert config="alert" {...({ 'hide-close': true } as object)}>
             La cotización no puede continuar por este canal y deberá gestionarse con la ayuda del asesor comercial (Case Underwriting).
@@ -95,22 +102,29 @@ export default function SeccionDyO({ form, fileRegistry }: { form: Form; fileReg
           Si contesta NO a cualquiera de las siguientes preguntas, la cotización no puede continuar.
         </p>
         <SiNoSelectAll form={form} prefix="frm_dyo_req_" count={REQUISITOS.length} />
-        <div className="dyo-si-no-table">
-          <div className="dyo-si-no-header">
-            <span>La sociedad y sus filiales (si aplica) afirman que:</span>
-            <span>SI&nbsp;/&nbsp;NO</span>
-          </div>
-          {REQUISITOS.map((pregunta, i) => {
-            const name = `frm_dyo_req_${String(i + 1).padStart(2, '0')}` as keyof FfFlSolicitudFormData;
-            return (
-              <div key={name} className="dyo-si-no-row">
-                <span className="dyo-si-no-num">{i + 1}.</span>
-                <span className="dyo-si-no-text">{pregunta}</span>
-                <SiNoField form={form} name={name} />
-              </div>
-            );
-          })}
-        </div>
+        <ZrTable>
+          <table>
+            <thead>
+              <tr>
+                <th style={{ width: 40 }} {...({ config: 'center' } as object)}>#</th>
+                <th>La sociedad y sus filiales (si aplica) afirman que:</th>
+                <th style={{ width: 120 }} {...({ config: 'center' } as object)}>SÍ / NO</th>
+              </tr>
+            </thead>
+            <tbody>
+              {REQUISITOS.map((pregunta, i) => {
+                const name = `frm_dyo_req_${String(i + 1).padStart(2, '0')}` as keyof FfFlSolicitudFormData;
+                return (
+                  <tr key={name}>
+                    <td {...({ config: 'center' } as object)}>{i + 1}</td>
+                    <td>{pregunta}</td>
+                    <td {...({ config: 'center' } as object)}><SiNoField form={form} name={name} /></td>
+                  </tr>
+                );
+              })}
+            </tbody>
+          </table>
+        </ZrTable>
         {reqBloqueado && (
           <ZrAlert config="alert" {...({ 'hide-close': true } as object)}>
             La cotización no puede continuar por este canal y deberá gestionarse con la ayuda del asesor comercial (Case Underwriting).
@@ -156,8 +170,9 @@ export default function SeccionDyO({ form, fileRegistry }: { form: Form; fileReg
             config="secondary"
             onClick={() => setNumDocs((n) => n + 1)}
             style={{ marginTop: 'var(--zs-75)' }}
+            icon="plus:line"
           >
-            + Agregar documento
+            Agregar documento
           </ZrButton>
         )}
       </div>
@@ -168,34 +183,38 @@ export default function SeccionDyO({ form, fileRegistry }: { form: Form; fileReg
         <p className="dyo-intro-text">
           El deducible va en 0 por defecto.
         </p>
-        <div className="dyo-propuesta-table">
-          <div className="dyo-propuesta-header">
-            <span>#</span>
-            <span>Límite asegurado</span>
-            <span>Modalidad de cobertura</span>
-          </div>
-          {([
-            ['frm_dyo_prop_01_limite', 1],
-            ['frm_dyo_prop_02_limite', 2],
-            ['frm_dyo_prop_03_limite', 3],
-          ] as const).map(([field, n]) => (
-            <div key={field} className="dyo-propuesta-row">
-              <span className="dyo-prop-num">{n}</span>
-              <div className="dyo-prop-limite">
-                <ZdsSelect
-                  label=""
-                  name={field}
-                  control={control}
-                  options={OPTIONS.limiteDyo}
-                  placeholder="Seleccione un límite"
-                />
-              </div>
-              <span className="dyo-prop-tipo">
-                Todo y cada reclamo en el agregado anual
-              </span>
-            </div>
-          ))}
-        </div>
+        <ZrTable>
+          <table>
+            <thead>
+              <tr>
+                <th style={{ width: 40 }} {...({ config: 'center' } as object)}>#</th>
+                <th>Límite asegurado</th>
+                <th>Modalidad de cobertura</th>
+              </tr>
+            </thead>
+            <tbody>
+              {([
+                ['frm_dyo_prop_01_limite', 1],
+                ['frm_dyo_prop_02_limite', 2],
+                ['frm_dyo_prop_03_limite', 3],
+              ] as const).map(([field, n]) => (
+                <tr key={field}>
+                  <td {...({ config: 'center' } as object)}>{n}</td>
+                  <td>
+                    <ZdsSelect
+                      label=""
+                      name={field}
+                      control={control}
+                      options={OPTIONS.limiteDyo}
+                      placeholder="Seleccione un límite"
+                    />
+                  </td>
+                  <td>Todo y cada reclamo en el agregado anual</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </ZrTable>
         <p className="dyo-nota">
           Nota: los Gastos de Defensa son parte del límite y no en adición.
         </p>

@@ -33,7 +33,7 @@ export default function SeccionErroresValidacion({ form }: Props) {
   const total = watch('cf_totalErrores') ?? String(errores.length);
 
   return (
-    <FormSection title="Errores Detectados por Validación Preventiva" color="#B44444">
+    <FormSection title="Errores Detectados por Validación Preventiva" color="var(--z-red)">
       <ZrAlert config="negative" {...({ 'hide-close': true } as object)} style={{ marginBottom: 'var(--zs-100)' }}>
         Se detectaron <strong>{total} error(es)</strong> al intentar radicar la queja ante SmartSupervision.
         Corrija los campos indicados y vuelva a enviar, o escale para revisión manual.

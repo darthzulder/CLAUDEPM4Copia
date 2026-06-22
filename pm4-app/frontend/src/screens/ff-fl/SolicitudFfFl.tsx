@@ -1,6 +1,5 @@
 import { useEffect, useState, useMemo, useRef } from 'react';
 import { useForm, FieldError } from 'react-hook-form';
-import './styles.css';
 import { useTask } from '../../core/useTask';
 import pm4 from '../../api/pm4Client';
 import { useCollection } from '../../core/useCollection';
@@ -10,7 +9,8 @@ import SeccionProductos from './SeccionProductos';
 import SeccionResumenCotizacion from './SeccionResumenCotizacion';
 import { useCotizador, cotizadorResultToPayload, type CotizadorInputs } from '../../core/useCotizador';
 import zurichLogo from '../../resources/zurich/ZurichLogo_Horz_White_CMYK_no_R.png';
-import { ZdsInput, ZdsDate, ZdsCheckboxField, ZdsSelect, ZrButton, ZrAlert } from '../../components/fields/ZdsFields';
+import { ZdsInput, ZdsDate, ZdsCheckboxField, ZdsSelect, ZrButton, ZrAlert, ZrTable } from '../../components/fields/ZdsFields';
+import ResultCard from '../../components/ResultCard';
 import {
   OPTIONS, COLLECTION_DEFS, DEPARTAMENTOS, CIUDADES_POR_DEPTO,
   FfFlSolicitudFormData, CONSULTAR_CLIENTE_SCRIPT_ID, parseClienteTia,
@@ -53,7 +53,7 @@ function InfoGeneral({
   ] as const;
 
   return (
-    <FormSection title="Información General" color="#2167AE">
+    <FormSection title="Información General">
 
       <div className="form-row cols-3">
         <ZdsSelect
@@ -103,7 +103,7 @@ function InfoGeneral({
             <ZdsCheckboxField key={name} control={control} name={name} label={label} />
           ))}
         </div>
-        {productError && <div className="product-error">{productError}</div>}
+        {productError && <ZrAlert config="negative" {...({ 'hide-close': true } as object)}>{productError}</ZrAlert>}
         {soloCC && !productError && (
           <ZrAlert config="alert" {...({ 'hide-close': true } as object)}>
             El seguro de Crimen Comercial solo puede cotizarse junto con otro producto. Si solo requiere este producto, la cotización no puede continuar por este canal y deberá gestionarse con la ayuda del asesor comercial.
@@ -254,7 +254,7 @@ function InfoTomador({
   ].filter((r): r is NonNullable<typeof r> => r !== null);
 
   return (
-    <FormSection title="Información del Tomador" color="#2167AE">
+    <FormSection title="Información del Tomador">
 
       <div className="form-row cols-3 row-align-bottom">
         <ZdsInput
@@ -345,34 +345,40 @@ function InfoTomador({
       {actRows.length > 0 && (
         <div className="form-subsection form-subsection--activities">
           <div className="form-subsection-title">Actividades aseguradas</div>
-          <div className="actividades-table">
-            <div className="actividades-table-header">
-              <span>Producto</span>
-              <span>Actividad asegurada</span>
-              <span>Cód. CIIU</span>
-            </div>
-            {actRows.map(({ prod, actField, ciuField, naicField, options, loading }) => (
-              <div key={prod} className="actividades-table-row">
-                <span className="actividades-prod-label">{prod}</span>
-                <div className="actividades-cell">
-                  <ZdsSelect
-                    label=""
-                    name={actField}
-                    control={control}
-                    rules={{ required: 'Requerido' }}
-                    options={options}
-                    loading={loading}
-                    withSearch
-                    error={fe(actField)}
-                  />
-                </div>
-                <div className="actividades-cell">
-                  <ZdsInput control={control} name={ciuField} label="" readOnly />
-                </div>
-                <input type="hidden" {...register(naicField)} />
-              </div>
-            ))}
-          </div>
+          <ZrTable>
+            <table>
+              <thead>
+                <tr>
+                  <th style={{ width: 170 }}>Producto</th>
+                  <th>Actividad asegurada</th>
+                  <th style={{ width: 140 }}>Cód. CIIU</th>
+                </tr>
+              </thead>
+              <tbody>
+                {actRows.map(({ prod, actField, ciuField, naicField, options, loading }) => (
+                  <tr key={prod}>
+                    <td className="actividades-prod-label">{prod}</td>
+                    <td>
+                      <ZdsSelect
+                        label=""
+                        name={actField}
+                        control={control}
+                        rules={{ required: 'Requerido' }}
+                        options={options}
+                        loading={loading}
+                        withSearch
+                        error={fe(actField)}
+                      />
+                      <input type="hidden" {...register(naicField)} />
+                    </td>
+                    <td>
+                      <ZdsInput control={control} name={ciuField} label="" readOnly />
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </ZrTable>
         </div>
       )}
 
@@ -431,7 +437,7 @@ function DatosCotizacion({ form }: { form: ReturnType<typeof useForm<FfFlSolicit
   const hayProductos = w.frm_gen_prod_dyo || w.frm_gen_prod_cc || w.frm_gen_prod_pdysi || w.frm_gen_prod_pi;
 
   return (
-    <FormSection title="Datos de la Cotización" color="#2167AE">
+    <FormSection title="Datos de la Cotización">
 
       <div className="form-row cols-4">
         <ZdsDate
@@ -523,7 +529,7 @@ function DatosCotizacion({ form }: { form: ReturnType<typeof useForm<FfFlSolicit
 function PlanPago({ form }: { form: ReturnType<typeof useForm<FfFlSolicitudFormData>> }) {
   const { control } = form;
   return (
-    <FormSection title="Plan de Pago" color="#2167AE">
+    <FormSection title="Plan de Pago">
 
       <div className="form-row cols-2">
         <ZdsSelect label="Plan de pago" name="frm_plan_plan_pago" control={control} options={OPTIONS.planPago} />
@@ -823,15 +829,13 @@ export default function SolicitudFfFl() {
           <img src={zurichLogo} alt="Zurich" className="header-logo" />
         </div>
         <div className="screen-content">
-          <div className="screen-sent">
-            <div className="screen-sent-icon">✓</div>
-            <div className="screen-sent-title">Solicitud enviada</div>
-            <div className="screen-sent-sub">
+          <ResultCard variant="success" title="Solicitud enviada">
+            <p>
               La cotización fue procesada correctamente.<br />
               El proceso continuará al siguiente nodo automáticamente.
               Un momento, por favor...
-            </div>
-          </div>
+            </p>
+          </ResultCard>
         </div>
       </div>
     );

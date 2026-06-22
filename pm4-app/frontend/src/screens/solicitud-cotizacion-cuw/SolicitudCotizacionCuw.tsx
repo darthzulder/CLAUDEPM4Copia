@@ -1,10 +1,10 @@
 import { useEffect, useState } from 'react';
 import { useForm, FieldError } from 'react-hook-form';
-import './styles.css';
 import { useTask } from '../../core/useTask';
 import { useCollection } from '../../core/useCollection';
 import FormSection from '../../components/FormSection';
-import { ZdsInput, ZdsSelect, ZdsDate } from '../../components/fields/ZdsFields';
+import { ZdsInput, ZdsSelect, ZdsDate, ZdsTextarea, ZrButton, ZrAlert } from '../../components/fields/ZdsFields';
+import ResultCard from '../../components/ResultCard';
 import { OPTIONS, COLLECTION_DEFS, SolicitudCotizacionFormData } from './variables';
 import pm4 from '../../api/pm4Client';
 import AseguradosAdicionales, { AseguradoAdicional } from './AseguradosAdicionales';
@@ -162,17 +162,17 @@ function mapTiaFields(
 // ---------------------------------------------------------------------------
 function TiaBanner({ status, onCrearCliente }: { status: TiaStatus; onCrearCliente: () => void }) {
   if (status === 'idle') return null;
-  if (status === 'loading') return <div className="tia-banner tia-loading">⏳ Consultando TIA…</div>;
-  if (status === 'found') return <div className="tia-banner tia-found">✅ Cliente encontrado en TIA. Campos bloqueados.</div>;
+  if (status === 'loading') return <ZrAlert config="info" {...({ 'hide-close': true } as object)}>Consultando TIA…</ZrAlert>;
+  if (status === 'found') return <ZrAlert config="positive" {...({ 'hide-close': true } as object)}>Cliente encontrado en TIA. Campos bloqueados.</ZrAlert>;
   if (status === 'notFound') return (
-    <div className="tia-banner tia-notfound">
-      <span>⚠️ Cliente no encontrado en TIA.</span>
-      <button type="button" className="btn-crear-cliente" onClick={onCrearCliente}>
-        + Agregar nuevo cliente
-      </button>
-    </div>
+    <ZrAlert config="alert" {...({ 'hide-close': true } as object)}>
+      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 'var(--zs-100)', flexWrap: 'wrap' }}>
+        <span>Cliente no encontrado en TIA.</span>
+        <ZrButton config="secondary:s" icon="plus:line" onClick={onCrearCliente}>Agregar nuevo cliente</ZrButton>
+      </div>
+    </ZrAlert>
   );
-  if (status === 'createNew') return <div className="tia-banner tia-create">✏️ Ingrese los datos del nuevo cliente.</div>;
+  if (status === 'createNew') return <ZrAlert config="info" {...({ 'hide-close': true } as object)}>Ingrese los datos del nuevo cliente.</ZrAlert>;
   return null;
 }
 
@@ -278,9 +278,9 @@ function InfoTomador({
         <ZdsSelect label="Tipo de documento" name="frm_tom_tipo_documento" control={control} rules={{ required: 'Campo requerido' }} options={OPTIONS.tipoDocumento} required error={fe('frm_tom_tipo_documento')} />
         <ZdsInput label="Nro. de documento" name="frm_tom_num_documento" control={control} rules={{ required: 'Campo requerido', minLength: { value: 5, message: 'Mínimo 5 caracteres' } }} required error={fe('frm_tom_num_documento')} />
         <div className="form-group consultar-wrapper">
-          <button type="button" className="btn-consultar" onClick={onConsultar} disabled={tiaStatus === 'loading'}>
-            {tiaStatus === 'loading' ? '⏳ Consultando…' : '🔍 Consultar Cliente'}
-          </button>
+          <ZrButton config="secondary" icon="search:line" onClick={onConsultar} loading={tiaStatus === 'loading'} disabled={tiaStatus === 'loading'}>
+            Consultar Cliente
+          </ZrButton>
         </div>
       </div>
 
@@ -386,9 +386,9 @@ function InfoAsegurado({
         <ZdsSelect label="Tipo de documento" name="frm_aseg_tipo_documento" control={control} rules={{ required: 'Campo requerido' }} options={OPTIONS.tipoDocumento} required error={fe('frm_aseg_tipo_documento')} />
         <ZdsInput label="Nro. de documento" name="frm_aseg_num_documento" control={control} rules={{ required: 'Campo requerido', minLength: { value: 5, message: 'Mínimo 5 caracteres' } }} required error={fe('frm_aseg_num_documento')} />
         <div className="form-group consultar-wrapper">
-          <button type="button" className="btn-consultar" onClick={onConsultar} disabled={tiaStatus === 'loading'}>
-            {tiaStatus === 'loading' ? '⏳ Consultando…' : '🔍 Consultar Cliente'}
-          </button>
+          <ZrButton config="secondary" icon="search:line" onClick={onConsultar} loading={tiaStatus === 'loading'} disabled={tiaStatus === 'loading'}>
+            Consultar Cliente
+          </ZrButton>
         </div>
       </div>
 
@@ -520,7 +520,7 @@ function PlanPago({ form }: { form: Form }) {
 // Sección: Revisión Mora (pantalla 139)
 // ---------------------------------------------------------------------------
 function RevisionMora({ form }: { form: Form }) {
-  const { register, formState: { errors, isSubmitted }, watch } = form;
+  const { formState: { errors, isSubmitted }, watch } = form;
   const w = watch();
   const fe = (n: keyof SolicitudCotizacionFormData) =>
     fieldError(errors[n] as FieldError | undefined, w[n], isSubmitted);
@@ -534,10 +534,7 @@ function RevisionMora({ form }: { form: Form }) {
         )}
       </div>
       <div className="form-row cols-1">
-        <div className="form-group">
-          <label className="form-label">Comentario</label>
-          <textarea {...register('frm_revision_mora_comentario')} className="form-control form-textarea" rows={3} />
-        </div>
+        <ZdsTextarea control={form.control} name="frm_revision_mora_comentario" label="Comentario" />
       </div>
     </FormSection>
   );
@@ -666,14 +663,12 @@ export default function SolicitudCotizacionCuw() {
           <img src={zurichLogo} alt="Zurich" className="header-logo" />
         </div>
         <div className="screen-sent-wrapper">
-          <div className="screen-sent">
-            <div className="screen-sent-icon">✓</div>
-            <div className="screen-sent-title">Solicitud enviada</div>
-            <div className="screen-sent-sub">
+          <ResultCard variant="success" title="Solicitud enviada">
+            <p>
               La solicitud fue enviada correctamente a ProcessMaker.<br />
               El proceso continuará al siguiente nodo automáticamente.
-            </div>
-          </div>
+            </p>
+          </ResultCard>
         </div>
       </div>
     );
@@ -730,14 +725,14 @@ export default function SolicitudCotizacionCuw() {
         <PlanPago form={form} />
         <RevisionMora form={form} />
 
-        <div className="todo-note">
-          ⚙️ <strong>Documentos de solicitud</strong> — Pendiente de implementar (requiere carga de archivos).
-        </div>
+        <ZrAlert config="alert" {...({ 'hide-close': true } as object)}>
+          <strong>Documentos de solicitud</strong> — Pendiente de implementar (requiere carga de archivos).
+        </ZrAlert>
 
         <div className="submit-bar">
-          <button type="submit" className="btn-enviar" disabled={submitting}>
-            {submitting ? 'Enviando...' : '✈ ENVIAR'}
-          </button>
+          <ZrButton config="positive:l" onClick={() => { form.handleSubmit(onSubmit)(); }} loading={submitting} disabled={submitting}>
+            ENVIAR
+          </ZrButton>
         </div>
       </form>
     </div>

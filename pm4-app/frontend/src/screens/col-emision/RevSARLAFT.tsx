@@ -3,6 +3,8 @@ import { useTask } from '../../core/useTask';
 import { useRequestFiles, resolveFileId } from '../../core/useRequestFiles';
 import PdfViewer from '../../components/PdfViewer';
 import { ZrButton, ZrModal, ZrAlert } from '../../components/fields/ZdsFields';
+import ResultCard from '../../components/ResultCard';
+import FormSection from '../../components/FormSection';
 import {
   type DocSarlaftData,
   type SarlaftPerfil,
@@ -10,7 +12,6 @@ import {
   DIRECTRICES,
 } from './variables';
 import zurichLogo from '../../resources/zurich/ZurichLogo_Horz_White_CMYK_no_R.png';
-import './styles.css';
 
 // ──────────────────────────────────────────────────────────────
 // Types
@@ -75,18 +76,16 @@ function DocRow({
 
       {/* Ver documento */}
       <div className="doc-preview-trigger">
-        <button
-          type="button"
-          className={`btn-preview${!cargado ? ' btn-preview--disabled' : ''}`}
+        <ZrButton
+          config="secondary:s"
+          icon="visibility-on:line"
           disabled={!cargado}
-          title={cargado ? 'Ver documento' : 'No hay documento cargado'}
           onClick={() => {
             if (fileId) onPreview({ fileId, descripcion, fileName });
           }}
         >
-          <span>👁</span>
-          <span className="btn-preview-label">Ver</span>
-        </button>
+          Ver
+        </ZrButton>
       </div>
     </div>
   );
@@ -183,14 +182,12 @@ export default function RevSARLAFT() {
           <img src={zurichLogo} alt="Zurich" className="header-logo" />
         </div>
         <div className="screen-sent-wrapper">
-          <div className="screen-sent">
-            <div className="screen-sent-icon">✓</div>
-            <div className="screen-sent-title">Verificación confirmada</div>
-            <div className="screen-sent-sub">
+          <ResultCard variant="success" title="Verificación confirmada">
+            <p>
               La información SARLAFT fue verificada correctamente.<br />
               El proceso continuará al siguiente nodo automáticamente.
-            </div>
-          </div>
+            </p>
+          </ResultCard>
         </div>
       </div>
     );
@@ -244,55 +241,51 @@ export default function RevSARLAFT() {
       <div className="screen-content">
         <div className="verdoc-layout">
 
-          <div className="nc-section">
-            <div className="nc-section-header">
-              <span>Documentos SARLAFT Cargados</span>
-              <button type="button" className="btn-info-help" onClick={() => setInfoOpen(true)} title="Ver directrices">i</button>
-            </div>
-            <div className="nc-section-body">
-
-              {!perfil && (
-                <ZrAlert config="info" {...({ 'hide-close': true } as object)}>
-                  No se detectó perfil SARLAFT en la tarea. Se muestran todos los documentos posibles.
-                </ZrAlert>
-              )}
-
-              <div className="sarlaft-doc-list">
-                {docs.map((doc, i) => {
-                  const { fileId, fileName } = resolveDoc(doc.key, i);
-                  return (
-                    <DocRow
-                      key={doc.key}
-                      index={i + 1}
-                      descripcion={doc.descripcion}
-                      vigencia={doc.vigencia}
-                      fileId={fileId}
-                      fileName={fileName}
-                      onPreview={setPreview}
-                    />
-                  );
-                })}
+          <FormSection
+            title="Documentos SARLAFT Cargados"
+            action={<ZrButton config="secondary:xs" icon="info:line" onClick={() => setInfoOpen(true)} />}
+            footer={
+              <div className="submit-bar">
+                <ZrButton
+                  config="primary:l"
+                  disabled={submitting || files.length === 0}
+                  loading={submitting}
+                  onClick={handleVerificado}
+                >
+                  {submitting ? 'Confirmando…' : 'INFORMACIÓN SARLAFT VERIFICADA'}
+                </ZrButton>
               </div>
+            }
+          >
+            {!perfil && (
+              <ZrAlert config="info" {...({ 'hide-close': true } as object)}>
+                No se detectó perfil SARLAFT en la tarea. Se muestran todos los documentos posibles.
+              </ZrAlert>
+            )}
 
-              {files.length === 0 && (
-                <div className="rev-no-docs">
-                  <span>📂</span>
-                  No se encontraron documentos cargados para este caso.
-                </div>
-              )}
+            <div className="sarlaft-doc-list">
+              {docs.map((doc, i) => {
+                const { fileId, fileName } = resolveDoc(doc.key, i);
+                return (
+                  <DocRow
+                    key={doc.key}
+                    index={i + 1}
+                    descripcion={doc.descripcion}
+                    vigencia={doc.vigencia}
+                    fileId={fileId}
+                    fileName={fileName}
+                    onPreview={setPreview}
+                  />
+                );
+              })}
             </div>
 
-            <div className="submit-bar">
-              <ZrButton
-                config="primary:l"
-                disabled={submitting || files.length === 0}
-                loading={submitting}
-                onClick={handleVerificado}
-              >
-                {submitting ? 'Confirmando…' : 'INFORMACIÓN SARLAFT VERIFICADA'}
-              </ZrButton>
-            </div>
-          </div>
+            {files.length === 0 && (
+              <ZrAlert config="info" {...({ 'hide-close': true } as object)}>
+                No se encontraron documentos cargados para este caso.
+              </ZrAlert>
+            )}
+          </FormSection>
 
         </div>
       </div>

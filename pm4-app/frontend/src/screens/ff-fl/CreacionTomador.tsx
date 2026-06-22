@@ -52,7 +52,7 @@ export default function CreacionTomador({ form }: { form: Form }) {
         }}
       >
         {open ? '▾' : '▸'} Creación de tomador — Persona Jurídica
-        <span style={{ fontWeight: 400, font: 'var(--zf-capt-12)', marginLeft: 'var(--zs-50)' }}>(completar si TIA no encontró el tomador)</span>
+        <span style={{ font: 'var(--zf-capt-12)', marginLeft: 'var(--zs-50)' }}>(completar si TIA no encontró el tomador)</span>
       </ZrButton>
 
       {open && (

@@ -1,5 +1,7 @@
 import { Controller } from 'react-hook-form';
 import type { Control, RegisterOptions, FieldPath, FieldValues } from 'react-hook-form';
+import { useEffect, type ComponentProps } from 'react';
+import { ZrModal as ZrModalRaw } from '@zurich/web-components/react/modal';
 import { ZrTextInput }        from '@zurich/web-components/react/text-input';
 import { ZrCheckbox }         from '@zurich/web-components/react/checkbox';
 import { ZrSelect }           from '@zurich/web-components/react/select';
@@ -17,10 +19,20 @@ export { ZrDateInput };
 export { ZrRadioSelect };
 export { ZrSegmentedControl };
 export { ZrButton }      from '@zurich/web-components/react/button';
-export { ZrModal }       from '@zurich/web-components/react/modal';
+
+// ZrModal: el componente ZDS bloquea el scroll del body al abrir
+// (document.body.style.overflow = 'hidden') y SOLO lo restaura en un render con
+// model=false. Si se desmonta estando abierto (patrón `cond && <ZrModal>`), ese
+// render nunca ocurre y el body queda con overflow:hidden → la página no
+// scrollea. Restauramos el overflow al desmontar para cubrir todos los modales.
+export function ZrModal(props: ComponentProps<typeof ZrModalRaw>) {
+  useEffect(() => () => { document.body.style.removeProperty('overflow'); }, []);
+  return <ZrModalRaw {...props} />;
+}
 export { ZrForm }        from '@zurich/web-components/react/form';
 export { ZrCard }        from '@zurich/web-components/react/card';
 export { ZrTabs }        from '@zurich/web-components/react/tabs';
+export { ZrTable }       from '@zurich/web-components/react/table';
 export { ZrProgressBar } from '@zurich/web-components/react/progress-bar';
 export { ZrAlert }       from '@zurich/web-components/react/alert';
 export { ZrBadge }       from '@zurich/web-components/react/badge';

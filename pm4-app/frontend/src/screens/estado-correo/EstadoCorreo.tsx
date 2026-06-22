@@ -1,9 +1,9 @@
 import { useState } from 'react';
 import { useTask } from '../../core/useTask';
 import { ZrButton, ZrModal } from '../../components/fields/ZdsFields';
+import ResultCard from '../../components/ResultCard';
 import zurichLogo from '../../resources/zurich/ZurichLogo_Horz_White_CMYK_no_R.png';
 import { type EstadoCorreoData } from './variables';
-import './styles.css';
 
 type TaskData = EstadoCorreoData & Record<string, unknown>;
 
@@ -54,11 +54,9 @@ export default function EstadoCorreo() {
       <div className="screen-wrapper">
         <Header data={data} />
         <div className="ec-content">
-          <div className="ec-card ec-card--success">
-            <div className="ec-icon ec-icon--check" />
-            <h2 className="ec-title">Proceso avanzado</h2>
-            <p className="ec-desc">El proceso continuará automáticamente al siguiente nodo.</p>
-          </div>
+          <ResultCard variant="success" title="Proceso avanzado">
+            <p>El proceso continuará automáticamente al siguiente nodo.</p>
+          </ResultCard>
         </div>
       </div>
     );
@@ -77,49 +75,45 @@ export default function EstadoCorreo() {
 
       <div className="ec-content">
         {esExito ? (
-          <div className="ec-card ec-card--success">
-            <div className="ec-icon ec-icon--check" />
-            <h2 className="ec-title">Envío de correo completado</h2>
-            <p className="ec-desc">
+          <ResultCard variant="success" title="Envío de correo completado">
+            <p>
               La <strong>notificación por correo electrónico</strong> de{' '}
               <strong>{data.email_titulo_envio || '—'}</strong> se ha enviado correctamente.
             </p>
             {data.email_correos_exitosos && (
               <>
-                <p className="ec-desc"><strong>Correos enviados a:</strong></p>
+                <p><strong>Correos enviados a:</strong></p>
                 <div className="ec-badge">{data.email_correos_exitosos}</div>
               </>
             )}
-            <p className="ec-desc ec-desc--note">
+            <p className="ec-desc--note">
               El proceso se ejecutó sin inconvenientes. Puede avanzar haciendo clic en{' '}
               <strong>«Continuar»</strong>.
             </p>
-          </div>
+          </ResultCard>
         ) : (
-          <div className="ec-card ec-card--error">
-            <div className="ec-icon ec-icon--error" />
-            <h2 className="ec-title">No fue posible completar el envío</h2>
-            <p className="ec-desc">
+          <ResultCard variant="error" title="No fue posible completar el envío">
+            <p>
               Se produjo un <strong>error</strong> al intentar enviar las notificaciones
               por correo electrónico de{' '}
               <strong>{data.email_titulo_envio || '—'}</strong>.
             </p>
             {data.email_correos_fallidos && (
               <>
-                <p className="ec-desc"><strong>Correos con error:</strong></p>
+                <p><strong>Correos con error:</strong></p>
                 <div className="ec-badge ec-badge--error">{data.email_correos_fallidos}</div>
               </>
             )}
             {data.email_correos_exitosos && (
               <>
-                <p className="ec-desc"><strong>Enviados correctamente:</strong></p>
+                <p><strong>Enviados correctamente:</strong></p>
                 <div className="ec-badge">{data.email_correos_exitosos}</div>
               </>
             )}
-            <p className="ec-desc ec-desc--note">
+            <p className="ec-desc--note">
               Puede continuar de todas formas o contactar al soporte técnico.
             </p>
-          </div>
+          </ResultCard>
         )}
 
         <div className="ec-actions">

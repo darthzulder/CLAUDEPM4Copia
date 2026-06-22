@@ -15,7 +15,7 @@ export default function SeccionDetalleError({ form }: Props) {
   return (
     <>
       {/* Sección 1: Detalle del Error */}
-      <FormSection title="Detalle del Error de Integración" color="#B44444">
+      <FormSection title="Detalle del Error de Integración" color="var(--z-red)">
         <div className="form-row cols-3">
           <ZdsInput name="et_numeroCaso" control={control} label="Número de Caso (ID BPM)" readOnly />
           <ZdsInput name="et_fechaHoraError" control={control} label="Fecha y Hora del Error" readOnly />
@@ -45,8 +45,8 @@ export default function SeccionDetalleError({ form }: Props) {
             control={control}
             label="Mensaje del Error (log del sistema)"
             readOnly
+            helpText="Campo de solo lectura — generado automáticamente por el sistema"
           />
-          <span className="form-helper">Campo de solo lectura — generado automáticamente por el sistema</span>
         </div>
       </FormSection>
 

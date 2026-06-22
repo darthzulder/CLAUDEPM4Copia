@@ -1,9 +1,9 @@
 import { useState } from 'react';
 import { useTask } from '../../core/useTask';
 import { ZrButton, ZrModal } from '../../components/fields/ZdsFields';
+import ResultCard from '../../components/ResultCard';
 import { RESPUESTA_VALUES, type RespuestaCotizacionData } from './variables';
 import zurichLogo from '../../resources/zurich/ZurichLogo_Horz_White_CMYK_no_R.png';
-import './styles.css';
 
 // ---------------------------------------------------------------------------
 // Helpers
@@ -133,14 +133,12 @@ export default function RespuestaCotizacion() {
           <img src={zurichLogo} alt="Zurich" className="header-logo" />
         </div>
         <div className="screen-sent-wrapper">
-          <div className="screen-sent">
-            <div className="screen-sent-icon">✓</div>
-            <div className="screen-sent-title">Tarea finalizada</div>
-            <div className="screen-sent-sub">
+          <ResultCard variant="success" title="Tarea finalizada">
+            <p>
               La cotización fue finalizada correctamente.<br />
               El proceso continuará al siguiente nodo automáticamente.
-            </div>
-          </div>
+            </p>
+          </ResultCard>
         </div>
       </div>
     );
@@ -173,25 +171,16 @@ export default function RespuestaCotizacion() {
       {/* Content */}
       <div className="result-content">
         {block ? (
-          <div className="result-card">
-            <div className={`result-card-header ${block.variant === 'on-hold' ? 'on-hold' : block.variant === 'error' ? 'error' : ''}`}>
-              <div className="result-icon">{block.icon}</div>
-              <h2>{block.title}</h2>
-            </div>
-            <div className="result-card-body">
-              <p>{block.message}</p>
-            </div>
-          </div>
+          <ResultCard
+            variant={block.variant === 'on-hold' ? 'warning' : block.variant === 'error' ? 'error' : 'info'}
+            title={block.title}
+          >
+            <p>{block.message}</p>
+          </ResultCard>
         ) : (
-          <div className="result-card">
-            <div className="result-card-header">
-              <div className="result-icon">ℹ️</div>
-              <h2>Resultado de cotización</h2>
-            </div>
-            <div className="result-card-body">
-              <p>La cotización ha sido procesada.</p>
-            </div>
-          </div>
+          <ResultCard variant="info" title="Resultado de cotización">
+            <p>La cotización ha sido procesada.</p>
+          </ResultCard>
         )}
 
         <div className="result-actions">

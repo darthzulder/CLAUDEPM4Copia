@@ -1,11 +1,12 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, Fragment } from 'react';
 import { useForm, Controller } from 'react-hook-form';
-import { ZrButton, ZrForm, ZdsInput, ZdsSelect, ZdsTextarea, ZrAlert, ZrTabs, ZrSegmentedControl, ZrFileInput } from '../../components/fields/ZdsFields';
+import { ZrButton, ZrForm, ZdsInput, ZdsSelect, ZdsTextarea, ZrAlert, ZrTabs, ZrSegmentedControl, ZrFileInput, ZrTable } from '../../components/fields/ZdsFields';
+import ResultCard from '../../components/ResultCard';
+import FormSection from '../../components/FormSection';
 import { useTask } from '../../core/useTask';
 import { useRequestFiles, resolveFileId } from '../../core/useRequestFiles';
 import PdfViewer from '../../components/PdfViewer';
 import zurichLogo from '../../resources/zurich/ZurichLogo_Horz_White_CMYK_no_R.png';
-import './styles.css';
 
 // ─── Tipos ────────────────────────────────────────────────────────────────────
 
@@ -65,11 +66,13 @@ function OpcionRadio({ form, name, value }: { form: Form; name: keyof CotizFfFlF
       name={name}
       control={form.control}
       render={({ field }) => (
-        <button
-          type="button"
-          className={`co-radio${field.value === value ? ' co-radio--active' : ''}`}
-          onClick={() => field.onChange(value)}
-          title={`Seleccionar opción ${value}`}
+        <input
+          type="radio"
+          name={field.name}
+          value={value}
+          checked={field.value === value}
+          onChange={() => field.onChange(value)}
+          aria-label={`Seleccionar opción ${value}`}
         />
       )}
     />
@@ -112,113 +115,130 @@ function CardFooter({ form, ncField }: { form: Form; ncField: keyof CotizFfFlFor
 
 // ─── Tarjeta D&O ──────────────────────────────────────────────────────────────
 
-const DYO_COLS = '32px 1fr 190px 150px 120px 150px 56px';
-
 function TarjetaDyO({ form, data, mostrarAnexo }: { form: Form; data: Record<string, unknown>; mostrarAnexo: boolean }) {
   const w = form.watch();
-  const COL = { gridTemplateColumns: DYO_COLS } as React.CSSProperties;
 
   return (
-    <div className="co-product-card">
-      <div className="co-product-header">Seguro de Directores y Administradores</div>
-      <div className="co-card-body">
-        <div className="co-table">
-          <div className="co-table-head" style={COL}>
-            <span>#</span><span>Límite asegurado</span><span>Modalidad</span>
-            <span>Cobertura</span><span>Deducible</span><span>Prima bruta anual</span><span>Sel.</span>
-          </div>
-          {(['1','2','3'] as const).map((n) => (
-            <div key={n} className="co-table-option-group">
-              <div className="co-table-row" style={COL}>
-                <span className="co-cell-num">{n}</span>
-                <span className="co-cell-val">{cop(td(data, `frm_dyo_prop_0${n}_limite`))}</span>
-                <span className="co-cell-muted">Todo y cada reclamo en el agregado anual</span>
-                <span className="co-cell-cob">Cobertura 1.1 "A"</span>
-                <span className="co-cell-val">{cop(td(data, `cot_dyo_opt${n}_deducible`))}</span>
-                <span className="co-cell-val">{cop(td(data, `cot_dyo_opt${n}_prima_a`))}</span>
-                <div className="co-cell-radio"><OpcionRadio form={form} name="cot_dyo_opcion" value={n} /></div>
-              </div>
-              <div className="co-table-row co-table-row--sub" style={COL}>
-                <span /><span /><span />
-                <span className="co-cell-cob">Cobertura 1.2 "B"</span>
-                <span />
-                <span className="co-cell-val">{cop(td(data, `cot_dyo_opt${n}_prima_b`))}</span>
-                <span />
-              </div>
-            </div>
-          ))}
-        </div>
+    <FormSection
+      title="Seguro de Directores y Administradores"
+      footer={<CardFooter form={form} ncField="cot_dyo_enviar_nc" />}
+    >
+        <ZrTable>
+          <table>
+            <thead>
+              <tr>
+                <th style={{ width: 40 }} {...({ config: 'center' } as object)}>#</th>
+                <th>Límite asegurado</th>
+                <th>Modalidad</th>
+                <th>Cobertura</th>
+                <th>Deducible</th>
+                <th>Prima bruta anual</th>
+                <th style={{ width: 56 }} {...({ config: 'center' } as object)}>Sel.</th>
+              </tr>
+            </thead>
+            <tbody>
+              {(['1','2','3'] as const).map((n) => (
+                <Fragment key={n}>
+                  <tr>
+                    <td rowSpan={2} {...({ config: 'center' } as object)}>{n}</td>
+                    <td rowSpan={2}>{cop(td(data, `frm_dyo_prop_0${n}_limite`))}</td>
+                    <td rowSpan={2}>Todo y cada reclamo en el agregado anual</td>
+                    <td>Cobertura 1.1 "A"</td>
+                    <td rowSpan={2}>{cop(td(data, `cot_dyo_opt${n}_deducible`))}</td>
+                    <td>{cop(td(data, `cot_dyo_opt${n}_prima_a`))}</td>
+                    <td rowSpan={2} {...({ config: 'center' } as object)}><OpcionRadio form={form} name="cot_dyo_opcion" value={n} /></td>
+                  </tr>
+                  <tr>
+                    <td>Cobertura 1.2 "B"</td>
+                    <td>{cop(td(data, `cot_dyo_opt${n}_prima_b`))}</td>
+                  </tr>
+                </Fragment>
+              ))}
+            </tbody>
+          </table>
+        </ZrTable>
 
         {mostrarAnexo && (
           <div style={{ marginTop: 'var(--zs-100)' }}>
             <div className="co-subsection-title">Anexo de cobertura a la entidad</div>
-            <p className="dyo-intro-text" style={{ fontSize: 12, marginTop: 0 }}>
+            <p className="dyo-intro-text" style={{ font: 'var(--zf-capt-12)', marginTop: 0 }}>
               La selección de la opción es automática según la cobertura principal seleccionada.
             </p>
-            <div className="co-table">
-              <div className="co-table-head" style={{ gridTemplateColumns: '32px 1fr 190px 120px 56px' }}>
-                <span>#</span><span>Límite asegurado</span><span>Modalidad</span><span>Deducible</span><span>Sel.</span>
-              </div>
-              {(['1','2','3'] as const).map((n) => {
-                const isAuto = w.cot_dyo_opcion === n;
-                return (
-                  <div key={n} className={`co-table-row${isAuto ? ' co-table-row--selected' : ''}`}
-                    style={{ gridTemplateColumns: '32px 1fr 190px 120px 56px' }}>
-                    <span className="co-cell-num">{n}</span>
-                    <span className="co-cell-val">{cop(td(data, `cot_dyo_ent${n}_limite`))}</span>
-                    <span className="co-cell-muted">Todo y cada reclamo en el agregado anual</span>
-                    <span className="co-cell-val">{cop(td(data, `cot_dyo_ent${n}_deducible`))}</span>
-                    <div className="co-cell-radio">
-                      {isAuto && <span className="co-radio co-radio--active" style={{ cursor: 'default' }} />}
-                    </div>
-                  </div>
-                );
-              })}
-            </div>
+            <ZrTable>
+              <table>
+                <thead>
+                  <tr>
+                    <th style={{ width: 40 }} {...({ config: 'center' } as object)}>#</th>
+                    <th>Límite asegurado</th>
+                    <th>Modalidad</th>
+                    <th>Deducible</th>
+                    <th style={{ width: 56 }} {...({ config: 'center' } as object)}>Sel.</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {(['1','2','3'] as const).map((n) => {
+                    const isAuto = w.cot_dyo_opcion === n;
+                    return (
+                      <tr key={n} style={isAuto ? { background: 'var(--zc-blue-sky-10)' } : undefined}>
+                        <td {...({ config: 'center' } as object)}>{n}</td>
+                        <td>{cop(td(data, `cot_dyo_ent${n}_limite`))}</td>
+                        <td>Todo y cada reclamo en el agregado anual</td>
+                        <td>{cop(td(data, `cot_dyo_ent${n}_deducible`))}</td>
+                        <td {...({ config: 'center' } as object)}>
+                          <input type="radio" checked={isAuto} disabled readOnly aria-label="Opción seleccionada automáticamente" />
+                        </td>
+                      </tr>
+                    );
+                  })}
+                </tbody>
+              </table>
+            </ZrTable>
           </div>
         )}
 
-        <CardFooter form={form} ncField="cot_dyo_enviar_nc" />
-      </div>
-    </div>
+    </FormSection>
   );
 }
 
 // ─── Tarjeta CC ───────────────────────────────────────────────────────────────
 
-const CC_COLS = '32px 1fr 1fr 120px 150px 56px';
-
 function TarjetaCC({ form, data }: { form: Form; data: Record<string, unknown> }) {
-  const COL = { gridTemplateColumns: CC_COLS } as React.CSSProperties;
   return (
-    <div className="co-product-card">
-      <div className="co-product-header">Seguro de Crimen Comercial</div>
-      <div className="co-card-body">
-        <div className="co-table">
-          <div className="co-table-head" style={COL}>
-            <span>#</span><span>Límite por evento</span><span>Límite por agregado</span>
-            <span>Deducible</span><span>Prima bruta anual</span><span>Sel.</span>
-          </div>
-          {(['1','2','3'] as const).map((n) => (
-            <div key={n} className="co-table-row" style={COL}>
-              <span className="co-cell-num">{n}</span>
-              <span className="co-cell-val">{cop(td(data, `cot_cc_opt${n}_lim_evt`))}</span>
-              <span className="co-cell-val">{cop(td(data, `cot_cc_opt${n}_lim_agr`))}</span>
-              <span className="co-cell-val">{cop(td(data, `cot_cc_opt${n}_deducible`))}</span>
-              <span className="co-cell-val">{cop(td(data, `cot_cc_opt${n}_prima`))}</span>
-              <div className="co-cell-radio"><OpcionRadio form={form} name="cot_cc_opcion" value={n} /></div>
-            </div>
-          ))}
-        </div>
-        <CardFooter form={form} ncField="cot_cc_enviar_nc" />
-      </div>
-    </div>
+    <FormSection
+      title="Seguro de Crimen Comercial"
+      footer={<CardFooter form={form} ncField="cot_cc_enviar_nc" />}
+    >
+        <ZrTable>
+          <table>
+            <thead>
+              <tr>
+                <th style={{ width: 40 }} {...({ config: 'center' } as object)}>#</th>
+                <th>Límite por evento</th>
+                <th>Límite por agregado</th>
+                <th>Deducible</th>
+                <th>Prima bruta anual</th>
+                <th style={{ width: 56 }} {...({ config: 'center' } as object)}>Sel.</th>
+              </tr>
+            </thead>
+            <tbody>
+              {(['1','2','3'] as const).map((n) => (
+                <tr key={n}>
+                  <td {...({ config: 'center' } as object)}>{n}</td>
+                  <td>{cop(td(data, `cot_cc_opt${n}_lim_evt`))}</td>
+                  <td>{cop(td(data, `cot_cc_opt${n}_lim_agr`))}</td>
+                  <td>{cop(td(data, `cot_cc_opt${n}_deducible`))}</td>
+                  <td>{cop(td(data, `cot_cc_opt${n}_prima`))}</td>
+                  <td {...({ config: 'center' } as object)}><OpcionRadio form={form} name="cot_cc_opcion" value={n} /></td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </ZrTable>
+    </FormSection>
   );
 }
 
 // ─── Tarjeta genérica (PDySI / PI) ────────────────────────────────────────────
-
-const GEN_COLS = '32px 1fr 190px 120px 150px 56px';
 
 function TarjetaGenerica({
   form, data, titulo, prefix, opcionField, ncField,
@@ -230,30 +250,38 @@ function TarjetaGenerica({
   opcionField: keyof CotizFfFlFormData;
   ncField: keyof CotizFfFlFormData;
 }) {
-  const COL = { gridTemplateColumns: GEN_COLS } as React.CSSProperties;
   return (
-    <div className="co-product-card">
-      <div className="co-product-header">{titulo}</div>
-      <div className="co-card-body">
-        <div className="co-table">
-          <div className="co-table-head" style={COL}>
-            <span>#</span><span>Límite asegurado</span><span>Modalidad</span>
-            <span>Deducible</span><span>Prima bruta anual</span><span>Sel.</span>
-          </div>
-          {(['1','2','3'] as const).map((n) => (
-            <div key={n} className="co-table-row" style={COL}>
-              <span className="co-cell-num">{n}</span>
-              <span className="co-cell-val">{cop(td(data, `frm_${prefix}_prop_0${n}_limite`))}</span>
-              <span className="co-cell-muted">Todo y cada reclamo en el agregado anual</span>
-              <span className="co-cell-val">{cop(td(data, `cot_${prefix}_opt${n}_deducible`))}</span>
-              <span className="co-cell-val">{cop(td(data, `cot_${prefix}_opt${n}_prima`))}</span>
-              <div className="co-cell-radio"><OpcionRadio form={form} name={opcionField} value={n} /></div>
-            </div>
-          ))}
-        </div>
-        <CardFooter form={form} ncField={ncField} />
-      </div>
-    </div>
+    <FormSection
+      title={titulo}
+      footer={<CardFooter form={form} ncField={ncField} />}
+    >
+        <ZrTable>
+          <table>
+            <thead>
+              <tr>
+                <th style={{ width: 40 }} {...({ config: 'center' } as object)}>#</th>
+                <th>Límite asegurado</th>
+                <th>Modalidad</th>
+                <th>Deducible</th>
+                <th>Prima bruta anual</th>
+                <th style={{ width: 56 }} {...({ config: 'center' } as object)}>Sel.</th>
+              </tr>
+            </thead>
+            <tbody>
+              {(['1','2','3'] as const).map((n) => (
+                <tr key={n}>
+                  <td {...({ config: 'center' } as object)}>{n}</td>
+                  <td>{cop(td(data, `frm_${prefix}_prop_0${n}_limite`))}</td>
+                  <td>Todo y cada reclamo en el agregado anual</td>
+                  <td>{cop(td(data, `cot_${prefix}_opt${n}_deducible`))}</td>
+                  <td>{cop(td(data, `cot_${prefix}_opt${n}_prima`))}</td>
+                  <td {...({ config: 'center' } as object)}><OpcionRadio form={form} name={opcionField} value={n} /></td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </ZrTable>
+    </FormSection>
   );
 }
 
@@ -272,9 +300,27 @@ function SeccionDecision({
   const decision = w.cot_decision;
 
   return (
-    <div className="co-decision-card">
-      <div className="co-product-header">Decisión</div>
-      <div className="co-card-body">
+    <FormSection
+      title="Decisión"
+      footer={
+        <>
+          {submitError && (
+            <ZrAlert config="negative" style={{ marginTop: 'var(--zs-100)' }} {...({ 'hide-close': true } as object)}>{submitError}</ZrAlert>
+          )}
+          <div className="submit-bar">
+            <ZrButton
+              config="primary:l"
+              icon="arrow-long-right:line"
+              disabled={submitting || !decision}
+              loading={submitting}
+              onClick={onEnviar}
+            >
+              {submitting ? 'Enviando...' : decision === 'PERSONALIZACION' ? 'CONFIRMAR' : 'ENVIAR'}
+            </ZrButton>
+          </div>
+        </>
+      }
+    >
         <ZrForm style={{ ['--z-form--gap' as any]: 'var(--zs-150)' }}>
           <>
           <div className="form-row cols-2">
@@ -372,24 +418,7 @@ function SeccionDecision({
           )}
           </>
         </ZrForm>
-
-        {submitError && (
-          <ZrAlert config="negative" style={{ marginTop: 'var(--zs-100)' }} {...({ 'hide-close': true } as object)}>{submitError}</ZrAlert>
-        )}
-
-        <div className="submit-bar">
-          <ZrButton
-            config="primary:l"
-            icon="arrow-long-right:line"
-            disabled={submitting || !decision}
-            loading={submitting}
-            onClick={onEnviar}
-          >
-            {submitting ? 'Enviando...' : decision === 'PERSONALIZACION' ? 'CONFIRMAR' : 'ENVIAR'}
-          </ZrButton>
-        </div>
-      </div>
-    </div>
+    </FormSection>
   );
 }
 
@@ -511,14 +540,12 @@ export default function CotizacionFfFl() {
       <div className="screen-wrapper">
         <Header taskData={taskData} />
         <div className="screen-content">
-          <div className="screen-sent">
-            <div className="screen-sent-icon" style={{ background: 'var(--zc-lemon-aa)', fontSize: 28 }}>!</div>
-            <div className="screen-sent-title">Requiere Personalización / Excepción</div>
-            <div className="screen-sent-sub">
+          <ResultCard variant="warning" title="Requiere Personalización / Excepción">
+            <p>
               Hasta contar con el Case Underwriting Process en el BPM, por favor genere la solicitud en JIRA.<br />
               <br />El proceso ha finalizado.
-            </div>
-          </div>
+            </p>
+          </ResultCard>
         </div>
       </div>
     );
@@ -531,21 +558,22 @@ export default function CotizacionFfFl() {
       <div className="screen-wrapper">
         <Header taskData={taskData} />
         <div className="screen-content">
-          <div className="screen-sent">
-            <div className="screen-sent-icon">✓</div>
-            <div className="screen-sent-title">
-              {dec === 'NUEVA_VERSION' ? 'Generando nueva versión…' :
-               dec === 'RECHAZADA'     ? 'Cotización rechazada' :
-               'Cotización procesada'}
-            </div>
-            <div className="screen-sent-sub">
+          <ResultCard
+            variant="success"
+            title={
+              dec === 'NUEVA_VERSION' ? 'Generando nueva versión…' :
+              dec === 'RECHAZADA'     ? 'Cotización rechazada' :
+              'Cotización procesada'
+            }
+          >
+            <p>
               {dec === 'NUEVA_VERSION'
                 ? 'La cotización volverá al Cotizador FF para ser modificada.'
                 : dec === 'RECHAZADA'
                 ? 'Se ha registrado el rechazo. El proceso continúa automáticamente.'
                 : 'Las notas de cobertura serán enviadas al intermediario. Un momento…'}
-            </div>
-          </div>
+            </p>
+          </ResultCard>
         </div>
       </div>
     );
@@ -581,9 +609,7 @@ export default function CotizacionFfFl() {
 
         {/* Slip de Cotización */}
         <div className="co-section-title">Slip de Cotización</div>
-        <div className="co-product-card">
-          <div className="co-product-header">Slip de Cotización</div>
-          <div className="co-card-body">
+        <FormSection title="Slip de Cotización">
             {slipLineas.length > 1 && (
               <div className="co-slip-tabs">
                 <ZrTabs
@@ -605,8 +631,7 @@ export default function CotizacionFfFl() {
                 <span>El slip de cotización no está disponible aún.</span>
               </div>
             )}
-          </div>
-        </div>
+        </FormSection>
 
         <div className="co-section-title">Resumen de Cotizaciones</div>
 

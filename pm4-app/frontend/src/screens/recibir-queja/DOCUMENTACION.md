@@ -240,7 +240,7 @@ Los siguientes puntos requieren acción antes de pasar a producción:
 ```
 frontend/src/screens/recibir-queja/
 ├── variables.ts           ← Opciones estáticas, catálogos geográficos, tipo TS RecibirQuejaFormData
-├── styles.css             ← Estilos Zurich base + estilos específicos SCR-001
+├── shared.css (global)    ← Estilos centralizados de manera DRY (sin styles.css local)
 ├── SeccionConsumidor.tsx  ← FLD-004 a FLD-011 (Datos del Consumidor Financiero)
 ├── SeccionClasificacion.tsx ← FLD-012 a FLD-020 (Clasificación y Datos de la Queja)
 ├── RecibirQueja.tsx       ← Componente principal: encabezado, adjuntos, acciones

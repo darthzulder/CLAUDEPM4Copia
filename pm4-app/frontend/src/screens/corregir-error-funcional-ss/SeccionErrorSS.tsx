@@ -22,7 +22,7 @@ export default function SeccionErrorSS({ form }: Props) {
   const intento = watch('ss_intentoNumero');
 
   return (
-    <FormSection title="Error Funcional Devuelto por SmartSupervision" color="#B44444">
+    <FormSection title="Error Funcional Devuelto por SmartSupervision" color="var(--z-red)">
       <ZrAlert config="negative" {...({ 'hide-close': true } as object)}>
         SmartSupervision <strong>rechazó la radicación</strong> con un error funcional.
         Revise el detalle, corrija los campos indicados y reenvíe.

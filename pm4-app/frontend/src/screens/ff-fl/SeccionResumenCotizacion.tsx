@@ -1,4 +1,5 @@
 import FormSection from '../../components/FormSection';
+import { ZrTable } from '../../components/fields/ZdsFields';
 import { CotizadorResult, CotizadorInputs } from '../../core/useCotizador';
 
 // ─── Helpers ─────────────────────────────────────────────────────────────────
@@ -40,22 +41,28 @@ function TablaDyO({ result, inputs }: { result: CotizadorResult; inputs: Cotizad
   return (
     <div className="cot-res-product">
       <div className="cot-res-product-header">Seguro de Directores y Administradores (D&amp;O)</div>
-      <div className="cot-res-table">
-        <div className="cot-res-header">
-          <span>#</span>
-          <span>Límite asegurado</span>
-          <span>Modalidad</span>
-          <span>Prima bruta anual</span>
-        </div>
-        {([d.opt1, d.opt2, d.opt3] as typeof d.opt1[]).map((o, i) => (
-          <div key={i} className="cot-res-row">
-            <span className="cot-res-label">{i + 1}</span>
-            <span className="cot-res-cell">{cop(Number(lims[i] ?? 0))}</span>
-            <span className="cot-res-cell cot-res-cell--muted">Todo y cada reclamo en el agregado anual</span>
-            <span className="cot-res-cell">{cop(o.prima_a)}</span>
-          </div>
-        ))}
-      </div>
+      <ZrTable>
+        <table>
+          <thead>
+            <tr>
+              <th>#</th>
+              <th>Límite asegurado</th>
+              <th>Modalidad</th>
+              <th>Prima bruta anual</th>
+            </tr>
+          </thead>
+          <tbody>
+            {([d.opt1, d.opt2, d.opt3] as typeof d.opt1[]).map((o, i) => (
+              <tr key={i}>
+                <td className="cot-res-label">{i + 1}</td>
+                <td className="cot-res-cell">{cop(Number(lims[i] ?? 0))}</td>
+                <td className="cot-res-cell cot-res-cell--muted">Todo y cada reclamo en el agregado anual</td>
+                <td className="cot-res-cell">{cop(o.prima_a)}</td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </ZrTable>
     </div>
   );
 }
@@ -68,24 +75,30 @@ function TablaCC({ result, inputs }: { result: CotizadorResult; inputs: Cotizado
   return (
     <div className="cot-res-product">
       <div className="cot-res-product-header">Seguro de Crimen Comercial</div>
-      <div className="cot-res-table">
-        <div className="cot-res-header" style={{ gridTemplateColumns: '40px repeat(4, 1fr)' }}>
-          <span>#</span>
-          <span>Lím. por evento</span>
-          <span>Lím. por agregado</span>
-          <span>Deducible</span>
-          <span>Prima bruta anual</span>
-        </div>
-        {([d.opt1, d.opt2, d.opt3] as typeof d.opt1[]).map((o, i) => (
-          <div key={i} className="cot-res-row" style={{ gridTemplateColumns: '40px repeat(4, 1fr)' }}>
-            <span className="cot-res-label">{i + 1}</span>
-            <span className="cot-res-cell">{cop(Number(evts[i] ?? 0))}</span>
-            <span className="cot-res-cell">{cop(Number(agrs[i] ?? 0))}</span>
-            <span className="cot-res-cell">{cop(o.deducible)}</span>
-            <span className="cot-res-cell">{cop(o.prima)}</span>
-          </div>
-        ))}
-      </div>
+      <ZrTable>
+        <table>
+          <thead>
+            <tr>
+              <th>#</th>
+              <th>Lím. por evento</th>
+              <th>Lím. por agregado</th>
+              <th>Deducible</th>
+              <th>Prima bruta anual</th>
+            </tr>
+          </thead>
+          <tbody>
+            {([d.opt1, d.opt2, d.opt3] as typeof d.opt1[]).map((o, i) => (
+              <tr key={i}>
+                <td className="cot-res-label">{i + 1}</td>
+                <td className="cot-res-cell">{cop(Number(evts[i] ?? 0))}</td>
+                <td className="cot-res-cell">{cop(Number(agrs[i] ?? 0))}</td>
+                <td className="cot-res-cell">{cop(o.deducible)}</td>
+                <td className="cot-res-cell">{cop(o.prima)}</td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </ZrTable>
     </div>
   );
 }
@@ -97,22 +110,28 @@ function TablaPdysi({ result, inputs }: { result: CotizadorResult; inputs: Cotiz
   return (
     <div className="cot-res-product">
       <div className="cot-res-product-header">Seguro de Protección de Datos y Seguridad Informática</div>
-      <div className="cot-res-table">
-        <div className="cot-res-header">
-          <span>#</span>
-          <span>Límite asegurado</span>
-          <span>Modalidad</span>
-          <span>Prima bruta anual</span>
-        </div>
-        {([d.opt1, d.opt2, d.opt3] as typeof d.opt1[]).map((o, i) => (
-          <div key={i} className="cot-res-row">
-            <span className="cot-res-label">{i + 1}</span>
-            <span className="cot-res-cell">{cop(Number(lims[i] ?? 0))}</span>
-            <span className="cot-res-cell cot-res-cell--muted">Por reclamación (claims made)</span>
-            <span className="cot-res-cell">{cop(o.prima)}</span>
-          </div>
-        ))}
-      </div>
+      <ZrTable>
+        <table>
+          <thead>
+            <tr>
+              <th>#</th>
+              <th>Límite asegurado</th>
+              <th>Modalidad</th>
+              <th>Prima bruta anual</th>
+            </tr>
+          </thead>
+          <tbody>
+            {([d.opt1, d.opt2, d.opt3] as typeof d.opt1[]).map((o, i) => (
+              <tr key={i}>
+                <td className="cot-res-label">{i + 1}</td>
+                <td className="cot-res-cell">{cop(Number(lims[i] ?? 0))}</td>
+                <td className="cot-res-cell cot-res-cell--muted">Por reclamación (claims made)</td>
+                <td className="cot-res-cell">{cop(o.prima)}</td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </ZrTable>
     </div>
   );
 }
@@ -123,24 +142,30 @@ function TablaPi({ result }: { result: CotizadorResult }) {
   return (
     <div className="cot-res-product">
       <div className="cot-res-product-header">Seguro de Responsabilidad Civil Profesional</div>
-      <div className="cot-res-table">
-        <div className="cot-res-header">
-          <span>#</span>
-          <span>Límite asegurado</span>
-          <span>Modalidad</span>
-          <span>Prima bruta anual</span>
-        </div>
-        {([d.opt1, d.opt2, d.opt3] as typeof d.opt1[]).map((o, i) => (
-          o.limite ? (
-            <div key={i} className="cot-res-row">
-              <span className="cot-res-label">{i + 1}</span>
-              <span className="cot-res-cell">{cop(o.limite)}</span>
-              <span className="cot-res-cell cot-res-cell--muted">Por reclamación (claims made)</span>
-              <span className="cot-res-cell">{cop(o.prima)}</span>
-            </div>
-          ) : null
-        ))}
-      </div>
+      <ZrTable>
+        <table>
+          <thead>
+            <tr>
+              <th>#</th>
+              <th>Límite asegurado</th>
+              <th>Modalidad</th>
+              <th>Prima bruta anual</th>
+            </tr>
+          </thead>
+          <tbody>
+            {([d.opt1, d.opt2, d.opt3] as typeof d.opt1[]).map((o, i) => (
+              o.limite ? (
+                <tr key={i}>
+                  <td className="cot-res-label">{i + 1}</td>
+                  <td className="cot-res-cell">{cop(o.limite)}</td>
+                  <td className="cot-res-cell cot-res-cell--muted">Por reclamación (claims made)</td>
+                  <td className="cot-res-cell">{cop(o.prima)}</td>
+                </tr>
+              ) : null
+            ))}
+          </tbody>
+        </table>
+      </ZrTable>
     </div>
   );
 }
@@ -172,7 +197,7 @@ export default function SeccionResumenCotizacion({
   if (!hasAny) return null;
 
   return (
-    <FormSection title="Resumen de Cotizaciones" color="#2167AE">
+    <FormSection title="Resumen de Cotizaciones">
       <div className="form-section-body cot-res-body">
 
         <Estado loading={loading} warmingUp={warmingUp} error={error} />

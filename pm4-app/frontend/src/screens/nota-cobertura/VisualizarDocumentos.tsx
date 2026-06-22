@@ -2,10 +2,11 @@ import { useState } from 'react';
 import { useTask } from '../../core/useTask';
 import { useRequestFiles, type Pm4File } from '../../core/useRequestFiles';
 import PdfViewer from '../../components/PdfViewer';
-import { ZrButton } from '../../components/fields/ZdsFields';
+import { ZrButton, ZrAlert } from '../../components/fields/ZdsFields';
+import ResultCard from '../../components/ResultCard';
+import FormSection from '../../components/FormSection';
 import { type NotaCoberturaData } from './variables';
 import zurichLogo from '../../resources/zurich/ZurichLogo_Horz_White_CMYK_no_R.png';
-import './styles.css';
 
 // ──────────────────────────────────────────────────────────────
 // Helpers
@@ -43,13 +44,13 @@ function DocumentCard({ file }: { file: Pm4File }) {
           </div>
         </div>
         <div className="doc-actions">
-          <button
-            type="button"
-            className={`btn-ver${open ? ' active' : ''}`}
+          <ZrButton
+            config="secondary:s"
+            icon={open ? 'visibility-off:line' : 'visibility-on:line'}
             onClick={() => setOpen((v) => !v)}
           >
             {open ? 'Ocultar' : 'Ver PDF'}
-          </button>
+          </ZrButton>
         </div>
       </div>
 
@@ -95,14 +96,12 @@ export default function VisualizarDocumentos() {
           <img src={zurichLogo} alt="Zurich" className="header-logo" />
         </div>
         <div className="screen-sent-wrapper">
-          <div className="screen-sent">
-            <div className="screen-sent-icon">✓</div>
-            <div className="screen-sent-title">Tarea derivada</div>
-            <div className="screen-sent-sub">
+          <ResultCard variant="success" title="Tarea derivada">
+            <p>
               Los documentos fueron confirmados correctamente.<br />
               El proceso continuará al siguiente nodo automáticamente.
-            </div>
-          </div>
+            </p>
+          </ResultCard>
         </div>
       </div>
     );
@@ -153,55 +152,48 @@ export default function VisualizarDocumentos() {
 
       {/* Contenido */}
       <div className="screen-content">
-        <div className="nc-section">
-          <div className="nc-section-header">
-            <span>Notas de Cobertura Generadas</span>
-          </div>
-          <div className="nc-section-body">
+        <FormSection
+          title="Notas de Cobertura Generadas"
+          footer={
+            <div className="submit-bar">
+              <ZrButton
+                config="primary:l"
+                disabled={submitting}
+                loading={submitting}
+                onClick={handleContinuar}
+              >
+                {submitting ? 'Enviando…' : 'CONTINUAR'}
+              </ZrButton>
+            </div>
+          }
+        >
+          {filesLoading && (
+            <div className="no-docs-card">
+              <div className="pdf-spinner" />
+              <p>Buscando documentos del caso…</p>
+            </div>
+          )}
 
-            {filesLoading && (
-              <div className="no-docs-card">
-                <div className="pdf-spinner" />
-                <p>Buscando documentos del caso…</p>
-              </div>
-            )}
+          {filesError && !filesLoading && (
+            <ZrAlert config="negative" {...({ 'hide-close': true } as object)}>
+              No se pudieron cargar los documentos: {filesError}
+            </ZrAlert>
+          )}
 
-            {filesError && !filesLoading && (
-              <div className="no-docs-card">
-                <div className="no-docs-icon">⚠️</div>
-                <p>No se pudieron cargar los documentos: {filesError}</p>
-              </div>
-            )}
+          {!filesLoading && !filesError && files.length === 0 && (
+            <ZrAlert config="info" {...({ 'hide-close': true } as object)}>
+              No hay documentos disponibles para este caso.
+            </ZrAlert>
+          )}
 
-            {!filesLoading && !filesError && files.length === 0 && (
-              <div className="no-docs-card">
-                <div className="no-docs-icon">📂</div>
-                <p>No hay documentos disponibles para este caso.</p>
-              </div>
-            )}
-
-            {!filesLoading && files.length > 0 && (
-              <div className="doc-list">
-                {files.map((file) => (
-                  <DocumentCard key={file.id} file={file} />
-                ))}
-              </div>
-            )}
-
-          </div>
-
-          {/* Barra de acción */}
-          <div className="submit-bar">
-            <ZrButton
-              config="primary:l"
-              disabled={submitting}
-              loading={submitting}
-              onClick={handleContinuar}
-            >
-              {submitting ? 'Enviando…' : 'CONTINUAR'}
-            </ZrButton>
-          </div>
-        </div>
+          {!filesLoading && files.length > 0 && (
+            <div className="doc-list">
+              {files.map((file) => (
+                <DocumentCard key={file.id} file={file} />
+              ))}
+            </div>
+          )}
+        </FormSection>
       </div>
     </div>
   );

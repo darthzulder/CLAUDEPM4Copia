@@ -1,10 +1,10 @@
 import { useEffect, useState } from 'react';
 import { useForm, FieldError } from 'react-hook-form';
-import './styles.css';
 import { useTask } from '../../core/useTask';
 import { useCollection } from '../../core/useCollection';
 import FormSection from '../../components/FormSection';
-import { ZdsInput, ZdsSelect, ZdsRadio, ZdsDate } from '../../components/fields/ZdsFields';
+import { ZdsInput, ZdsSelect, ZdsRadio, ZdsDate, ZrButton } from '../../components/fields/ZdsFields';
+import ResultCard from '../../components/ResultCard';
 import pm4 from '../../api/pm4Client';
 import { OPTIONS, COLLECTION_DEFS, CotizadorFormData, CONSULTAR_CLIENTE_SCRIPT_ID, parseClienteTia } from './variables';
 import zurichLogo from '../../resources/zurich/ZurichLogo_Horz_White_CMYK_no_R.png';
@@ -182,9 +182,9 @@ function InfoTomador({
             error={fe('frm_tomador_numDoc')}
           />
           <div className="form-group consultar-wrapper">
-            <button type="button" className="btn-consultar" onClick={onConsultarCliente} disabled={consultarLoading}>
-              {consultarLoading ? '⏳ Consultando…' : '🔍 Consultar Cliente'}
-            </button>
+            <ZrButton config="secondary" icon="search:line" onClick={onConsultarCliente} loading={consultarLoading} disabled={consultarLoading}>
+              Consultar Cliente
+            </ZrButton>
           </div>
         </div>
 
@@ -385,7 +385,7 @@ function DatosCotizacion({ form }: { form: ReturnType<typeof useForm<CotizadorFo
 // Sección: Propuesta económica
 // ---------------------------------------------------------------------------
 function PropuestaEconomica({ form }: { form: ReturnType<typeof useForm<CotizadorFormData>> }) {
-  const { register, formState: { errors, isSubmitted }, watch } = form;
+  const { control, formState: { errors, isSubmitted }, watch } = form;
   const w = watch();
 
   const fe = (name: keyof CotizadorFormData) =>
@@ -394,51 +394,24 @@ function PropuestaEconomica({ form }: { form: ReturnType<typeof useForm<Cotizado
   return (
     <FormSection title="Propuesta Económica">
       <div className="form-row cols-2">
-        <div>
-          <div className="propuesta-opcion">
-            <div className="propuesta-opcion-label">Valor asegurado — Opción 1</div>
-            <div className="currency-field">
-              <input
-                {...register('frm_valor_asegurado_opcion1', {
-                  min: { value: 0, message: 'Debe ser 0 o mayor' },
-                })}
-                step="0.01"
-                className={`form-control${fe('frm_valor_asegurado_opcion1') ? ' is-invalid' : ''}`}
-                defaultValue={0}
-              />
-              <span className="currency-label">COP</span>
-            </div>
-            {fe('frm_valor_asegurado_opcion1') && (
-              <div className="error-note">{fe('frm_valor_asegurado_opcion1')}</div>
-            )}
-            <small className="form-helper">
-              Para continuar, debe ingresar al menos una opción de{' '}
-              <strong>valor asegurado</strong>
-            </small>
-          </div>
-        </div>
+        <ZdsInput
+          control={control}
+          name="frm_valor_asegurado_opcion1"
+          label="Valor asegurado — Opción 1 (COP)"
+          helpText="Para continuar, debe ingresar al menos una opción de valor asegurado"
+          rules={{ min: { value: 0, message: 'Debe ser 0 o mayor' } }}
+          error={fe('frm_valor_asegurado_opcion1')}
+        />
 
-        <div>
-          <div className="deducible-section-label">
-            <span className="required-star">* </span>Deducible
-          </div>
-          {OPTIONS.deducible.map((opt) => (
-            <label key={opt.value} className="deducible-option">
-              <input
-                {...register('frm_modal_propuesta_deducible', {
-                  required: 'Debe seleccionar una opción de deducible',
-                })}
-                type="radio"
-                value={opt.value}
-                className="form-check-input"
-              />
-              <span className="deducible-option-text">{opt.label}</span>
-            </label>
-          ))}
-          {fe('frm_modal_propuesta_deducible') && (
-            <div className="error-note">{fe('frm_modal_propuesta_deducible')}</div>
-          )}
-        </div>
+        <ZdsRadio
+          control={control}
+          name="frm_modal_propuesta_deducible"
+          label="Deducible"
+          options={OPTIONS.deducible}
+          rules={{ required: 'Debe seleccionar una opción de deducible' }}
+          required
+          error={fe('frm_modal_propuesta_deducible')}
+        />
       </div>
     </FormSection>
   );
@@ -597,14 +570,12 @@ export default function CotizadorFastFlow() {
           <img src={zurichLogo} alt="Zurich" className="header-logo" />
         </div>
         <div className="screen-sent-wrapper">
-          <div className="screen-sent">
-            <div className="screen-sent-icon">✓</div>
-            <div className="screen-sent-title">Solicitud enviada</div>
-            <div className="screen-sent-sub">
+          <ResultCard variant="success" title="Solicitud enviada">
+            <p>
               El formulario fue enviado correctamente a ProcessMaker.<br />
               El proceso continuará al siguiente nodo automáticamente.
-            </div>
-          </div>
+            </p>
+          </ResultCard>
         </div>
       </div>
     );
@@ -634,9 +605,9 @@ export default function CotizadorFastFlow() {
         <PlanPago form={form} />
 
         <div className="submit-bar">
-          <button type="submit" className="btn-enviar" disabled={submitting}>
-            {submitting ? 'Enviando...' : '✈ ENVIAR'}
-          </button>
+          <ZrButton config="primary:l" onClick={() => { form.handleSubmit(onSubmit)(); }} loading={submitting} disabled={submitting}>
+            ENVIAR
+          </ZrButton>
         </div>
       </form>
     </div>

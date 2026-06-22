@@ -1,7 +1,6 @@
 import { useEffect, useState } from 'react';
-import { createPortal } from 'react-dom';
 import { useForm } from 'react-hook-form';
-import { ZdsInput, ZdsSelect } from '../../components/fields/ZdsFields';
+import { ZdsInput, ZdsSelect, ZrModal, ZrButton, ZrTable } from '../../components/fields/ZdsFields';
 import { useCollection } from '../../core/useCollection';
 import type { CollectionDef } from '../../core/useCollection';
 
@@ -81,15 +80,10 @@ function ExportacionModal({ initial, onClose, onAccept }: ModalProps) {
     });
   }
 
-  return createPortal(
-    <div className="modal-overlay" onClick={(e) => { if (e.target === e.currentTarget) onClose(); }}>
-      <div className="modal-dialog">
-        <div className="modal-header">
-          <h3>{isEdit ? 'Editar exportación' : 'Agregar exportación'}</h3>
-          <button className="modal-close" type="button" onClick={onClose} aria-label="Cerrar">&times;</button>
-        </div>
-        <form onSubmit={handleSubmit(onSubmit)} noValidate>
-          <div className="modal-body">
+  return (
+    <ZrModal model={true} onChange={(open: boolean) => { if (!open) onClose(); }}>
+      <h3 style={{ margin: '0 0 var(--zs-100)', font: 'var(--zf-h-20)', color: 'var(--z-text)' }}>{isEdit ? 'Editar exportación' : 'Agregar exportación'}</h3>
+      <div>
             <ZdsSelect<ExportacionRow>
               label="País"
               name="frm_exportacion_pais"
@@ -133,15 +127,12 @@ function ExportacionModal({ initial, onClose, onAccept }: ModalProps) {
               }}
               error={errors.frm_exportacion_porcentaje?.message}
             />
-          </div>
-          <div className="modal-footer">
-            <button type="button" className="btn-cancelar" onClick={onClose}>CANCELAR</button>
-            <button type="submit" className="btn-aceptar">ACEPTAR</button>
-          </div>
-        </form>
       </div>
-    </div>,
-    document.body
+      <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 'var(--zs-75)', marginTop: 'var(--zs-150)' }}>
+        <ZrButton config="secondary" onClick={onClose}>CANCELAR</ZrButton>
+        <ZrButton config="primary:l" onClick={() => { handleSubmit(onSubmit)(); }}>ACEPTAR</ZrButton>
+      </div>
+    </ZrModal>
   );
 }
 
@@ -167,12 +158,11 @@ export default function DetalleExportaciones({ value, onChange }: Props) {
   return (
     <div>
       <div className="record-table-header">
-        <button type="button" className="btn-agregar" onClick={() => { setEditIndex(null); setModalOpen(true); }}>
-          + AGREGAR
-        </button>
+        <ZrButton config="secondary:s" icon="plus:line" onClick={() => { setEditIndex(null); setModalOpen(true); }}>AGREGAR</ZrButton>
       </div>
 
-      <table className="record-table">
+      <ZrTable zebra>
+      <table>
         <thead>
           <tr>
             <th>País</th>
@@ -193,16 +183,17 @@ export default function DetalleExportaciones({ value, onChange }: Props) {
                 <td>{row.frm_exportacion_ventas_formateado}</td>
                 <td>{row.frm_exportacion_porcentaje_formateado}</td>
                 <td>
-                  <button type="button" className="btn-icon" title="Editar" onClick={() => { setEditIndex(i); setModalOpen(true); }}>✏️</button>
-                  <button type="button" className="btn-icon" title="Eliminar" onClick={() => onChange(value.filter((_, j) => j !== i))}>🗑</button>
+                  <ZrButton config="secondary:s" icon="edit:line" onClick={() => { setEditIndex(i); setModalOpen(true); }}>Editar</ZrButton>
+                  <ZrButton config="secondary:s" icon="trash:line" onClick={() => onChange(value.filter((_, j) => j !== i))}>Eliminar</ZrButton>
                 </td>
               </tr>
             ))
           )}
         </tbody>
       </table>
+      </ZrTable>
 
-      <div style={{ textAlign: 'right', fontSize: 13, color: '#374151', marginTop: 8 }}>
+      <div style={{ textAlign: 'right', font: 'var(--zf-capt-14)', color: 'var(--z-text)', marginTop: 8 }}>
         <span style={{ marginRight: 24 }}>Sumatoria de ventas: {totalVentas.toLocaleString('es-CO')}</span>
         <span>Sumatoria del porcentaje de ventas: {totalPct} %</span>
       </div>

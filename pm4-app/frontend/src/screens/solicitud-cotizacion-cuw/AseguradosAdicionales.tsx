@@ -1,7 +1,6 @@
 import { useEffect, useState } from 'react';
-import { createPortal } from 'react-dom';
 import { useForm } from 'react-hook-form';
-import { ZdsInput, ZdsSelect } from '../../components/fields/ZdsFields';
+import { ZdsInput, ZdsSelect, ZrModal, ZrButton, ZrTable } from '../../components/fields/ZdsFields';
 import { useCollection } from '../../core/useCollection';
 import type { CollectionDef } from '../../core/useCollection';
 
@@ -87,15 +86,10 @@ function AseguradoModal({ initial, onClose, onAccept }: ModalProps) {
     onAccept(data);
   }
 
-  return createPortal(
-    <div className="modal-overlay" onClick={(e) => { if (e.target === e.currentTarget) onClose(); }}>
-      <div className="modal-dialog">
-        <div className="modal-header">
-          <h3>{isEdit ? 'Editar asegurado' : 'Agregar'}</h3>
-          <button className="modal-close" type="button" onClick={onClose} aria-label="Cerrar">&times;</button>
-        </div>
-        <form onSubmit={handleSubmit(onSubmit)} noValidate>
-          <div className="modal-body">
+  return (
+    <ZrModal model={true} onChange={(open: boolean) => { if (!open) onClose(); }}>
+      <h3 style={{ margin: '0 0 var(--zs-100)', font: 'var(--zf-h-20)', color: 'var(--z-text)' }}>{isEdit ? 'Editar asegurado' : 'Agregar'}</h3>
+      <div>
             {/* 1. Nombre */}
             <ZdsInput
               label="Nombre del asegurado"
@@ -165,15 +159,12 @@ function AseguradoModal({ initial, onClose, onAccept }: ModalProps) {
               }}
               error={errors.frm_aseg_adic_ingresos_operacionales?.message}
             />
-          </div>
-          <div className="modal-footer">
-            <button type="button" className="btn-cancelar" onClick={onClose}>CANCELAR</button>
-            <button type="submit" className="btn-aceptar">ACEPTAR</button>
-          </div>
-        </form>
       </div>
-    </div>,
-    document.body
+      <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 'var(--zs-75)', marginTop: 'var(--zs-150)' }}>
+        <ZrButton config="secondary" onClick={onClose}>CANCELAR</ZrButton>
+        <ZrButton config="primary:l" onClick={() => { handleSubmit(onSubmit)(); }}>ACEPTAR</ZrButton>
+      </div>
+    </ZrModal>
   );
 }
 
@@ -212,12 +203,11 @@ export default function AseguradosAdicionales({ value, onChange }: Props) {
   return (
     <div>
       <div className="record-table-header">
-        <button type="button" className="btn-agregar" onClick={handleAdd}>
-          + AGREGAR
-        </button>
+        <ZrButton config="secondary:s" icon="plus:line" onClick={handleAdd}>AGREGAR</ZrButton>
       </div>
 
-      <table className="record-table">
+      <ZrTable zebra>
+      <table>
         <thead>
           <tr>
             <th>Nombre</th>
@@ -244,28 +234,15 @@ export default function AseguradosAdicionales({ value, onChange }: Props) {
                 <td>{row.frm_aseg_adic_actividad_asegurada}</td>
                 <td>{row.frm_aseg_adic_ingresos_operacionales}</td>
                 <td>
-                  <button
-                    type="button"
-                    className="btn-icon"
-                    title="Editar"
-                    onClick={() => handleEdit(i)}
-                  >
-                    ✏️
-                  </button>
-                  <button
-                    type="button"
-                    className="btn-icon"
-                    title="Eliminar"
-                    onClick={() => handleDelete(i)}
-                  >
-                    🗑
-                  </button>
+                  <ZrButton config="secondary:s" icon="edit:line" onClick={() => handleEdit(i)}>Editar</ZrButton>
+                  <ZrButton config="secondary:s" icon="trash:line" onClick={() => handleDelete(i)}>Eliminar</ZrButton>
                 </td>
               </tr>
             ))
           )}
         </tbody>
       </table>
+      </ZrTable>
 
       {modalOpen && (
         <AseguradoModal

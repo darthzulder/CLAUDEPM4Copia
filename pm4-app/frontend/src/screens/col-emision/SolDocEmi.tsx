@@ -1,6 +1,8 @@
 import { useState, useRef, useCallback } from 'react';
 import { useTask } from '../../core/useTask';
 import { ZrButton, ZrModal, ZrAlert } from '../../components/fields/ZdsFields';
+import ResultCard from '../../components/ResultCard';
+import FormSection from '../../components/FormSection';
 import pm4 from '../../api/pm4Client';
 import {
   type SolDocEmiData,
@@ -8,7 +10,6 @@ import {
   PRODUCTO_DOC_DEFS,
 } from './variables';
 import zurichLogo from '../../resources/zurich/ZurichLogo_Horz_White_CMYK_no_R.png';
-import './styles.css';
 
 // ──────────────────────────────────────────────────────────────
 // Types
@@ -73,14 +74,14 @@ function DocRow({
             e.target.value = '';
           }}
         />
-        <button
-          type="button"
-          className="btn-upload"
+        <ZrButton
+          config="secondary:s"
+          icon="document-upload:line"
+          wide
           onClick={() => inputRef.current?.click()}
         >
-          <span className="btn-upload-icon">⬆</span>
           {cargado ? 'Cambiar' : 'Seleccionar archivo'}
-        </button>
+        </ZrButton>
         {cargado && (
           <span className="file-name-chip">
             <span className="file-chip-icon">📄</span>
@@ -90,16 +91,14 @@ function DocRow({
       </div>
 
       <div className="doc-preview-trigger">
-        <button
-          type="button"
-          className={`btn-preview${!cargado ? ' btn-preview--disabled' : ''}`}
+        <ZrButton
+          config="secondary:s"
+          icon="visibility-on:line"
           disabled={!cargado}
-          title={cargado ? 'Ver vista previa' : 'Cargue un archivo primero'}
           onClick={() => onPreview(docKey)}
         >
-          <span>👁</span>
-          <span className="btn-preview-label">Vista previa</span>
-        </button>
+          Vista previa
+        </ZrButton>
       </div>
     </div>
   );
@@ -227,14 +226,12 @@ export default function SolDocEmi() {
           <img src={zurichLogo} alt="Zurich" className="header-logo" />
         </div>
         <div className="screen-sent-wrapper">
-          <div className="screen-sent">
-            <div className="screen-sent-icon">✓</div>
-            <div className="screen-sent-title">Documentos enviados</div>
-            <div className="screen-sent-sub">
+          <ResultCard variant="success" title="Documentos enviados">
+            <p>
               Las notas de cobertura fueron cargadas correctamente.<br />
               El proceso continuará con la verificación de documentos de emisión.
-            </div>
-          </div>
+            </p>
+          </ResultCard>
         </div>
       </div>
     );
@@ -290,51 +287,48 @@ export default function SolDocEmi() {
       <div className="screen-content">
         <div className="verdoc-layout">
 
-          <div className="nc-section">
-            <div className="nc-section-header">
-              <span>Notas de Cobertura Requeridas</span>
-              <button type="button" className="btn-info-help" onClick={() => setInfoOpen(true)} title="Ver documentos por producto">i</button>
-            </div>
-            <div className="nc-section-body">
-
-              {docsActivos.length === 0 && (
-                <ZrAlert config="info" {...({ 'hide-close': true } as object)}>
-                  No se detectaron productos activos en la tarea. Se muestran todos los documentos posibles.
-                </ZrAlert>
-              )}
-
-              <div className="sarlaft-doc-list">
-                {docs.map((doc, i) => (
-                  <DocRow
-                    key={doc.key}
-                    index={i + 1}
-                    descripcion={doc.descripcion}
-                    docKey={doc.key}
-                    state={rowStates[doc.key] ?? { file: null, blobUrl: null }}
-                    onFileChange={handleFileChange}
-                    onPreview={handlePreview}
-                  />
-                ))}
+          <FormSection
+            title="Notas de Cobertura Requeridas"
+            action={<ZrButton config="secondary:xs" icon="info:line" onClick={() => setInfoOpen(true)} />}
+            footer={
+              <div className="submit-bar">
+                <ZrButton
+                  config="primary:l"
+                  disabled={submitting}
+                  loading={submitting}
+                  onClick={handleEnviar}
+                >
+                  {submitting ? 'Enviando…' : 'ENVIAR'}
+                </ZrButton>
               </div>
+            }
+          >
+            {docsActivos.length === 0 && (
+              <ZrAlert config="info" {...({ 'hide-close': true } as object)}>
+                No se detectaron productos activos en la tarea. Se muestran todos los documentos posibles.
+              </ZrAlert>
+            )}
 
-              {validationError && (
-                <div className="validation-error">
-                  ⚠ {validationError}
-                </div>
-              )}
+            <div className="sarlaft-doc-list">
+              {docs.map((doc, i) => (
+                <DocRow
+                  key={doc.key}
+                  index={i + 1}
+                  descripcion={doc.descripcion}
+                  docKey={doc.key}
+                  state={rowStates[doc.key] ?? { file: null, blobUrl: null }}
+                  onFileChange={handleFileChange}
+                  onPreview={handlePreview}
+                />
+              ))}
             </div>
 
-            <div className="submit-bar">
-              <ZrButton
-                config="primary:l"
-                disabled={submitting}
-                loading={submitting}
-                onClick={handleEnviar}
-              >
-                {submitting ? 'Enviando…' : 'ENVIAR'}
-              </ZrButton>
-            </div>
-          </div>
+            {validationError && (
+              <ZrAlert config="negative" {...({ 'hide-close': true } as object)}>
+                {validationError}
+              </ZrAlert>
+            )}
+          </FormSection>
 
         </div>
       </div>
