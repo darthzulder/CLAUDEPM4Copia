@@ -2,10 +2,10 @@ import { useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import { useTask } from '../../core/useTask';
 import FormSection from '../../components/FormSection';
+import ScreenHeader from '../../components/ScreenHeader';
 import { ZdsInput, ZdsSelect, ZdsTextarea, ZdsRadio, ZrButton, ZrAlert } from '../../components/fields/ZdsFields';
 import { OPTIONS, RevisarQuejaAsignarFormData } from './variables';
 import SeccionResumenQueja from './SeccionResumenQueja';
-import zurichLogo from '../../resources/zurich/ZurichLogo_Horz_White_CMYK_no_R.png';
 
 export default function RevisarQuejaAsignar() {
   const { task, loading, error, submitting, completeTask } = useTask();
@@ -66,19 +66,17 @@ export default function RevisarQuejaAsignar() {
   return (
     <div className="screen-wrapper">
       {/* Encabezado */}
-      <div className="screen-header">
-        <div className="title-block">
-          <h1>Revisar Queja Radicada y Asignar Responsable</h1>
-          <div className="subtitle">
-            <span>SP2-T01</span>
-            <span>Gestión de Quejas Directas</span>
-            <span>Rol: Supervisor / Coordinador de Quejas</span>
-          </div>
-        </div>
-        <img src={zurichLogo} alt="Zurich" className="header-logo" />
-      </div>
+      <ScreenHeader
+        title="Revisar Queja Radicada y Asignar Responsable"
+        subtitle={[
+          'SP2-T01',
+          'Gestión de Quejas Directas',
+          'Rol: Supervisor / Coordinador de Quejas',
+        ]}
+      />
 
-      <form onSubmit={handleSubmit(onSubmit)} noValidate style={{ maxWidth: 960, margin: '0 auto', padding: '24px 24px 0' }}>
+      <div className="screen-content">
+        <form onSubmit={handleSubmit(onSubmit)} noValidate>
 
         {/* Secciones 1-3: Resumen de la queja radicada (solo lectura) */}
         <SeccionResumenQueja form={form} />
@@ -196,7 +194,8 @@ export default function RevisarQuejaAsignar() {
           </ZrButton>
           <ZrButton config="positive:s" onClick={() => { handleSubmit(onSubmit)(); }} loading={submitting} disabled={submitting}>{submitLabel}</ZrButton>
         </div>
-      </form>
+        </form>
+      </div>
     </div>
   );
 }

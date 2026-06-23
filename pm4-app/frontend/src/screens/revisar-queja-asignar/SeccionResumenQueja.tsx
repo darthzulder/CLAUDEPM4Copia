@@ -54,7 +54,7 @@ export default function SeccionResumenQueja({ form }: Props) {
       {/* Sección 2: Consumidor Financiero */}
       <FormSection title="Consumidor Financiero">
         <div className="form-row cols-3">
-          <div style={{ gridColumn: 'span 2' }}>
+          <div className="col-span-2">
             <ReadField label="Nombre del Consumidor" value={w.qd_nombreConsumidor} />
           </div>
           <ReadField label="Correo Electrónico" value={w.qd_correoElectronico} />

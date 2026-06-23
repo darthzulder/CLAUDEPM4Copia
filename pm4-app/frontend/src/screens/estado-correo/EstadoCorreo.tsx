@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { useTask } from '../../core/useTask';
 import { ZrButton, ZrModal } from '../../components/fields/ZdsFields';
 import ResultCard from '../../components/ResultCard';
-import zurichLogo from '../../resources/zurich/ZurichLogo_Horz_White_CMYK_no_R.png';
+import ScreenHeader from '../../components/ScreenHeader';
 import { type EstadoCorreoData } from './variables';
 
 type TaskData = EstadoCorreoData & Record<string, unknown>;
@@ -52,7 +52,13 @@ export default function EstadoCorreo() {
   if (sent) {
     return (
       <div className="screen-wrapper">
-        <Header data={data} />
+        <ScreenHeader
+          title="Estado de correo electrónico"
+          subtitle={[
+            data.frm_gen_num_cotizacion && `Cotización # ${data.frm_gen_num_cotizacion}`,
+            data.frm_caso && `Caso # ${data.frm_caso}`
+          ]}
+        />
         <div className="ec-content">
           <ResultCard variant="success" title="Proceso avanzado">
             <p>El proceso continuará automáticamente al siguiente nodo.</p>
@@ -71,7 +77,13 @@ export default function EstadoCorreo() {
         </div>
       )}
 
-      <Header data={data} />
+      <ScreenHeader
+        title="Estado de correo electrónico"
+        subtitle={[
+          data.frm_gen_num_cotizacion && `Cotización # ${data.frm_gen_num_cotizacion}`,
+          data.frm_caso && `Caso # ${data.frm_caso}`
+        ]}
+      />
 
       <div className="ec-content">
         {esExito ? (
@@ -147,21 +159,6 @@ export default function EstadoCorreo() {
           </div>
         </ZrModal>
       )}
-    </div>
-  );
-}
-
-function Header({ data }: { data: TaskData }) {
-  return (
-    <div className="screen-header">
-      <div className="title-block">
-        <h1>Estado de correo electrónico</h1>
-        <div className="subtitle">
-          {data.frm_gen_num_cotizacion && <span>Cotización # {data.frm_gen_num_cotizacion}</span>}
-          {data.frm_caso && <span>Caso # {data.frm_caso}</span>}
-        </div>
-      </div>
-      <img src={zurichLogo} alt="Zurich" className="header-logo" />
     </div>
   );
 }

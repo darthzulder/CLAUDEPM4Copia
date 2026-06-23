@@ -64,7 +64,7 @@ function ValorDeducibleModal({ initial, onClose, onSave }: ModalProps) {
   return (
     <ZrModal model={true} onChange={(open: boolean) => { if (!open) onClose(); }}>
       <h3 style={{ margin: '0 0 var(--zs-100)', font: 'var(--zf-h-20)', color: 'var(--z-text)' }}>Editar registro</h3>
-      <div>
+      <div className="modal-form-body">
             {/* Row 1: Límite asegurado | Deducible % */}
             <div className="form-row cols-2">
               <ZdsInput

@@ -5,8 +5,8 @@ import PdfViewer from '../../components/PdfViewer';
 import { ZrButton, ZrAlert } from '../../components/fields/ZdsFields';
 import ResultCard from '../../components/ResultCard';
 import FormSection from '../../components/FormSection';
+import ScreenHeader from '../../components/ScreenHeader';
 import { type NotaCoberturaData } from './variables';
-import zurichLogo from '../../resources/zurich/ZurichLogo_Horz_White_CMYK_no_R.png';
 
 // ──────────────────────────────────────────────────────────────
 // Helpers
@@ -89,13 +89,8 @@ export default function VisualizarDocumentos() {
   if (sent) {
     return (
       <div className="screen-wrapper">
-        <div className="screen-header">
-          <div className="title-block">
-            <h1>{data.frm_titulo || 'VISUALIZAR DOCUMENTOS DE SALIDA'}</h1>
-          </div>
-          <img src={zurichLogo} alt="Zurich" className="header-logo" />
-        </div>
-        <div className="screen-sent-wrapper">
+        <ScreenHeader title={data.frm_titulo || 'VISUALIZAR DOCUMENTOS DE SALIDA'} />
+        <div className="screen-content">
           <ResultCard variant="success" title="Tarea derivada">
             <p>
               Los documentos fueron confirmados correctamente.<br />
@@ -139,16 +134,13 @@ export default function VisualizarDocumentos() {
       )}
 
       {/* Header */}
-      <div className="screen-header">
-        <div className="title-block">
-          <h1>{titulo}</h1>
-          <div className="subtitle">
-            {numCot  && <span>Cotización # {numCot}</span>}
-            {numCaso && <span>Caso # {numCaso}</span>}
-          </div>
-        </div>
-        <img src={zurichLogo} alt="Zurich" className="header-logo" />
-      </div>
+      <ScreenHeader
+        title={titulo}
+        subtitle={[
+          numCot ? `Cotización # ${numCot}` : null,
+          numCaso ? `Caso # ${numCaso}` : null,
+        ]}
+      />
 
       {/* Contenido */}
       <div className="screen-content">

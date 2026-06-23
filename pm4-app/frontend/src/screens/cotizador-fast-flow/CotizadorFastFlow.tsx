@@ -3,11 +3,11 @@ import { useForm, FieldError } from 'react-hook-form';
 import { useTask } from '../../core/useTask';
 import { useCollection } from '../../core/useCollection';
 import FormSection from '../../components/FormSection';
+import ScreenHeader from '../../components/ScreenHeader';
 import { ZdsInput, ZdsSelect, ZdsRadio, ZdsDate, ZrButton } from '../../components/fields/ZdsFields';
 import ResultCard from '../../components/ResultCard';
 import pm4 from '../../api/pm4Client';
 import { OPTIONS, COLLECTION_DEFS, CotizadorFormData, CONSULTAR_CLIENTE_SCRIPT_ID, parseClienteTia } from './variables';
-import zurichLogo from '../../resources/zurich/ZurichLogo_Horz_White_CMYK_no_R.png';
 
 // ---------------------------------------------------------------------------
 // Helper: muestra el error solo si el campo tiene valor O el form fue enviado.
@@ -565,11 +565,8 @@ export default function CotizadorFastFlow() {
   if (sent) {
     return (
       <div className="screen-wrapper">
-        <div className="screen-header">
-          <div className="title-block"><h1>Cotizador Fast Flow</h1></div>
-          <img src={zurichLogo} alt="Zurich" className="header-logo" />
-        </div>
-        <div className="screen-sent-wrapper">
+        <ScreenHeader title="Cotizador Fast Flow" />
+        <div className="screen-content">
           <ResultCard variant="success" title="Solicitud enviada">
             <p>
               El formulario fue enviado correctamente a ProcessMaker.<br />
@@ -586,30 +583,26 @@ export default function CotizadorFastFlow() {
 
   return (
     <div className="screen-wrapper">
-      <div className="screen-header">
-        <div className="title-block">
-          <h1>Cotizador Fast Flow</h1>
-          <div className="subtitle">
-            <span>Cotización # {cotizacion}</span>
-            <span>Caso # {caseNumber}</span>
+      <ScreenHeader
+        title="Cotizador Fast Flow"
+        subtitle={[`Cotización # ${cotizacion}`, `Caso # ${caseNumber}`]}
+      />
+
+      <div className="screen-content">
+        <form onSubmit={form.handleSubmit(onSubmit)} noValidate>
+          <InfoGeneral form={form} />
+          <InfoTomador form={form} onConsultarCliente={handleConsultarCliente} consultarLoading={consultarLoading} tiaFilledFields={tiaFilledFields} />
+          <DatosCotizacion form={form} />
+          <PropuestaEconomica form={form} />
+          <PlanPago form={form} />
+
+          <div className="submit-bar">
+            <ZrButton config="primary:l" onClick={() => { form.handleSubmit(onSubmit)(); }} loading={submitting} disabled={submitting}>
+              ENVIAR
+            </ZrButton>
           </div>
-        </div>
-        <img src={zurichLogo} alt="Zurich" className="header-logo" />
+        </form>
       </div>
-
-      <form onSubmit={form.handleSubmit(onSubmit)} noValidate>
-        <InfoGeneral form={form} />
-        <InfoTomador form={form} onConsultarCliente={handleConsultarCliente} consultarLoading={consultarLoading} tiaFilledFields={tiaFilledFields} />
-        <DatosCotizacion form={form} />
-        <PropuestaEconomica form={form} />
-        <PlanPago form={form} />
-
-        <div className="submit-bar">
-          <ZrButton config="primary:l" onClick={() => { form.handleSubmit(onSubmit)(); }} loading={submitting} disabled={submitting}>
-            ENVIAR
-          </ZrButton>
-        </div>
-      </form>
     </div>
   );
 }

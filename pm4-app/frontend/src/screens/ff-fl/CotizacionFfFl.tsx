@@ -3,10 +3,11 @@ import { useForm, Controller } from 'react-hook-form';
 import { ZrButton, ZrForm, ZdsInput, ZdsSelect, ZdsTextarea, ZrAlert, ZrTabs, ZrSegmentedControl, ZrFileInput, ZrTable } from '../../components/fields/ZdsFields';
 import ResultCard from '../../components/ResultCard';
 import FormSection from '../../components/FormSection';
+import ScreenHeader from '../../components/ScreenHeader';
+import InfoBar from '../../components/InfoBar';
 import { useTask } from '../../core/useTask';
 import { useRequestFiles, resolveFileId } from '../../core/useRequestFiles';
 import PdfViewer from '../../components/PdfViewer';
-import zurichLogo from '../../resources/zurich/ZurichLogo_Horz_White_CMYK_no_R.png';
 
 // ─── Tipos ────────────────────────────────────────────────────────────────────
 
@@ -430,7 +431,7 @@ export default function CotizacionFfFl() {
   const [sent, setSent] = useState(false);
   const [personalizacionConfirmada, setPersonalizacionConfirmada] = useState(false);
 
-  const taskData = (task?.data ?? {}) as Record<string, unknown>;
+  const taskData = (task?.data ?? {}) as Record<string, any>;
 
   const [slipTab, setSlipTab] = useState('');
 
@@ -538,7 +539,7 @@ export default function CotizacionFfFl() {
   if (personalizacionConfirmada) {
     return (
       <div className="screen-wrapper">
-        <Header taskData={taskData} />
+        <ScreenHeader title="Cotizador Fast Flow — Líneas Financieras" subtitle={[`Cotización # ${String(taskData.frm_gen_num_cotizacion ?? '—')}`]} />
         <div className="screen-content">
           <ResultCard variant="warning" title="Requiere Personalización / Excepción">
             <p>
@@ -556,7 +557,7 @@ export default function CotizacionFfFl() {
     const dec = w.cot_decision;
     return (
       <div className="screen-wrapper">
-        <Header taskData={taskData} />
+        <ScreenHeader title="Cotizador Fast Flow — Líneas Financieras" subtitle={[`Cotización # ${String(taskData.frm_gen_num_cotizacion ?? '—')}`]} />
         <div className="screen-content">
           <ResultCard
             variant="success"
@@ -582,30 +583,26 @@ export default function CotizacionFfFl() {
   // ── Pantalla principal ──────────────────────────────────────────────────────
   return (
     <div className="screen-wrapper">
-      <Header taskData={taskData} />
+      <ScreenHeader
+        title="Cotizador Fast Flow — Líneas Financieras"
+        subtitle={[`Cotización # ${String(taskData.frm_gen_num_cotizacion ?? '—')}`]}
+      />
       <div className="screen-content">
 
         {/* Barra de info del tomador */}
-        <div className="co-info-bar">
-          <div className="co-info-item">
-            <span className="co-info-label">Tomador</span>
-            <span className="co-info-value">{String(taskData.frm_tom_tomador ?? '—')}</span>
-          </div>
-          <div className="co-info-item">
-            <span className="co-info-label">NIT</span>
-            <span className="co-info-value">{String(taskData.frm_tom_nit ?? '—')}</span>
-          </div>
-          <div className="co-info-item">
-            <span className="co-info-label">Intermediario</span>
-            <span className="co-info-value">{String(taskData.frm_gen_intermediario ?? '—')}</span>
-          </div>
-          <div className="co-info-item">
-            <span className="co-info-label">Vigencia</span>
-            <span className="co-info-value">
-              {String(taskData.frm_cot_inicio_vigencia ?? '—')} — {String(taskData.frm_cot_fin_vigencia ?? '—')}
-            </span>
-          </div>
-        </div>
+        <InfoBar
+          items={[
+            { label: 'Tomador', value: taskData.frm_tom_tomador },
+            { label: 'NIT', value: taskData.frm_tom_nit },
+            { label: 'Intermediario', value: taskData.frm_gen_intermediario },
+            {
+              label: 'Vigencia',
+              value: taskData.frm_cot_inicio_vigencia || taskData.frm_cot_fin_vigencia
+                ? `${taskData.frm_cot_inicio_vigencia ?? '—'} — ${taskData.frm_cot_fin_vigencia ?? '—'}`
+                : null
+            }
+          ]}
+        />
 
         {/* Slip de Cotización */}
         <div className="co-section-title">Slip de Cotización</div>
@@ -613,8 +610,8 @@ export default function CotizacionFfFl() {
             {slipLineas.length > 1 && (
               <div className="co-slip-tabs">
                 <ZrTabs
-                  model={Math.max(0, slipLineas.findIndex((l) => l.key === slipTab))}
-                  onChange={(idx: number) => setSlipTab(slipLineas[idx].key)}
+                  model={Math.max(1, slipLineas.findIndex((l) => l.key === slipTab) + 1)}
+                  onChange={(idx: number) => { const l = slipLineas[idx - 1]; if (l) setSlipTab(l.key); }}
                   {...({ tabs: slipLineas.map((l) => ({ name: l.label })) } as Record<string, unknown>)}
                 />
               </div>
@@ -663,22 +660,6 @@ export default function CotizacionFfFl() {
           submitting={submitting}
         />
       </div>
-    </div>
-  );
-}
-
-// ─── Header reutilizable ──────────────────────────────────────────────────────
-
-function Header({ taskData }: { taskData: Record<string, unknown> }) {
-  return (
-    <div className="screen-header">
-      <div className="title-block">
-        <h1>Cotizador Fast Flow — Líneas Financieras</h1>
-        <div className="subtitle">
-          <span>Cotización # {String(taskData.frm_gen_num_cotizacion ?? '—')}</span>
-        </div>
-      </div>
-      <img src={zurichLogo} alt="Zurich" className="header-logo" />
     </div>
   );
 }

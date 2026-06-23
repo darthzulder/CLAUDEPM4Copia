@@ -2,10 +2,10 @@ import { useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import { useTask } from '../../core/useTask';
 import FormSection from '../../components/FormSection';
+import ScreenHeader from '../../components/ScreenHeader';
 import { ZdsInput, ZdsSelect, ZdsTextarea, ZdsRadio, ZrButton, ZrAlert } from '../../components/fields/ZdsFields';
 import { OPTIONS, CorregirDatosFormData } from './variables';
 import SeccionErroresValidacion from './SeccionErroresValidacion';
-import zurichLogo from '../../resources/zurich/ZurichLogo_Horz_White_CMYK_no_R.png';
 
 export default function CorregirDatosFormulario() {
   const { task, loading, error, submitting, completeTask } = useTask();
@@ -64,19 +64,13 @@ export default function CorregirDatosFormulario() {
   return (
     <div className="screen-wrapper">
       {/* ── Encabezado ── */}
-      <div className="screen-header">
-        <div className="title-block">
-          <h1>Corregir Datos del Formulario</h1>
-          <div className="subtitle">
-            <span>P01-T07</span>
-            <span>Gestión de Quejas Directas</span>
-            <span>Rol: Gestor de Experiencia</span>
-          </div>
-        </div>
-        <img src={zurichLogo} alt="Zurich" className="header-logo" />
-      </div>
+      <ScreenHeader
+        title="Corregir Datos del Formulario"
+        subtitle={["P01-T07", "Gestión de Quejas Directas", "Rol: Gestor de Experiencia"]}
+      />
 
-      <form onSubmit={handleSubmit(onSubmit)} noValidate style={{ maxWidth: 960, margin: '0 auto', padding: '24px 24px 0' }}>
+      <div className="screen-content">
+        <form onSubmit={handleSubmit(onSubmit)} noValidate>
 
         {/* ── Sección 1: Errores detectados ── */}
         <SeccionErroresValidacion form={form} />
@@ -88,7 +82,7 @@ export default function CorregirDatosFormulario() {
           </ZrAlert>
 
           <div className="form-row cols-3">
-            <div className="form-group" style={{ gridColumn: 'span 2' }}>
+            <div className="form-group col-span-2">
               <ZdsInput
                 name="qd_nombreConsumidor"
                 control={control}
@@ -305,7 +299,8 @@ export default function CorregirDatosFormulario() {
           </ZrButton>
           <ZrButton config="positive:s" onClick={() => { handleSubmit(onSubmit)(); }} loading={submitting} disabled={submitting}>{submitLabel}</ZrButton>
         </div>
-      </form>
+        </form>
+      </div>
     </div>
   );
 }

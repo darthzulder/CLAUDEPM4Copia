@@ -83,7 +83,7 @@ function ExportacionModal({ initial, onClose, onAccept }: ModalProps) {
   return (
     <ZrModal model={true} onChange={(open: boolean) => { if (!open) onClose(); }}>
       <h3 style={{ margin: '0 0 var(--zs-100)', font: 'var(--zf-h-20)', color: 'var(--z-text)' }}>{isEdit ? 'Editar exportación' : 'Agregar exportación'}</h3>
-      <div>
+      <div className="modal-form-body">
             <ZdsSelect<ExportacionRow>
               label="País"
               name="frm_exportacion_pais"

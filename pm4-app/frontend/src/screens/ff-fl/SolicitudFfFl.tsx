@@ -4,11 +4,11 @@ import { useTask } from '../../core/useTask';
 import pm4 from '../../api/pm4Client';
 import { useCollection } from '../../core/useCollection';
 import FormSection from '../../components/FormSection';
+import ScreenHeader from '../../components/ScreenHeader';
 import CreacionTomador from './CreacionTomador';
 import SeccionProductos from './SeccionProductos';
 import SeccionResumenCotizacion from './SeccionResumenCotizacion';
 import { useCotizador, cotizadorResultToPayload, type CotizadorInputs } from '../../core/useCotizador';
-import zurichLogo from '../../resources/zurich/ZurichLogo_Horz_White_CMYK_no_R.png';
 import { ZdsInput, ZdsDate, ZdsCheckboxField, ZdsSelect, ZrButton, ZrAlert, ZrTable } from '../../components/fields/ZdsFields';
 import ResultCard from '../../components/ResultCard';
 import {
@@ -824,10 +824,7 @@ export default function SolicitudFfFl() {
   if (sent) {
     return (
       <div className="screen-wrapper">
-        <div className="screen-header">
-          <div className="title-block"><h1>Cotizador Fast Flow — Líneas Financieras</h1></div>
-          <img src={zurichLogo} alt="Zurich" className="header-logo" />
-        </div>
+        <ScreenHeader title="Cotizador Fast Flow — Líneas Financieras" />
         <div className="screen-content">
           <ResultCard variant="success" title="Solicitud enviada">
             <p>
@@ -843,15 +840,10 @@ export default function SolicitudFfFl() {
 
   return (
     <div className="screen-wrapper">
-      <div className="screen-header">
-        <div className="title-block">
-          <h1>Cotizador Fast Flow — Líneas Financieras</h1>
-          <div className="subtitle">
-            <span>Cotización # {form.watch('frm_gen_num_cotizacion') || '—'}</span>
-          </div>
-        </div>
-        <img src={zurichLogo} alt="Zurich" className="header-logo" />
-      </div>
+      <ScreenHeader
+        title="Cotizador Fast Flow — Líneas Financieras"
+        subtitle={`Cotización # ${form.watch('frm_gen_num_cotizacion') || '—'}`}
+      />
 
       <div className="screen-content">
         <div>

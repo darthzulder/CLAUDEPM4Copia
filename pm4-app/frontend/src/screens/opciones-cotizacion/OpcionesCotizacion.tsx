@@ -6,13 +6,13 @@ import PdfViewer from '../../components/PdfViewer';
 import { ZrButton, ZdsSelect, ZdsTextarea, ZrTabs, ZrAlert } from '../../components/fields/ZdsFields';
 import ResultCard from '../../components/ResultCard';
 import FormSection from '../../components/FormSection';
+import ScreenHeader from '../../components/ScreenHeader';
 import {
   DECISION_OPTIONS,
   LINEAS_CONFIG,
   type OpcionesCotizacionData,
   type DecisionValue,
 } from './variables';
-import zurichLogo from '../../resources/zurich/ZurichLogo_Horz_White_CMYK_no_R.png';
 
 // ---------------------------------------------------------------------------
 // Types
@@ -100,13 +100,8 @@ export default function OpcionesCotizacion() {
   if (sent) {
     return (
       <div className="screen-wrapper">
-        <div className="screen-header">
-          <div className="title-block">
-            <h1>{data.frm_titulo || 'VISUALIZAR SLIP Y OPCIONES DE COTIZACIÓN'}</h1>
-          </div>
-          <img src={zurichLogo} alt="Zurich" className="header-logo" />
-        </div>
-        <div className="screen-sent-wrapper">
+        <ScreenHeader title={data.frm_titulo || 'VISUALIZAR SLIP Y OPCIONES DE COTIZACIÓN'} />
+        <div className="screen-content">
           <ResultCard variant="success" title="Decisión enviada">
             <p>
               La decisión fue enviada correctamente a ProcessMaker.<br />
@@ -150,16 +145,13 @@ export default function OpcionesCotizacion() {
       )}
 
       {/* Header */}
-      <div className="screen-header">
-        <div className="title-block">
-          <h1>{titulo}</h1>
-          <div className="subtitle">
-            {numCot  && <span>Cotización # {numCot}</span>}
-            {numCaso && <span>Caso # {numCaso}</span>}
-          </div>
-        </div>
-        <img src={zurichLogo} alt="Zurich" className="header-logo" />
-      </div>
+      <ScreenHeader
+        title={titulo}
+        subtitle={[
+          numCot ? `Cotización # ${numCot}` : null,
+          numCaso ? `Caso # ${numCaso}` : null,
+        ]}
+      />
 
       {/* Body: PDF (izquierda) + Panel decisión (derecha) */}
       <div className="screen-body">
@@ -168,8 +160,8 @@ export default function OpcionesCotizacion() {
         <div className="slip-area">
           {activeLineas.length > 1 && (
             <ZrTabs
-              model={Math.max(0, activeLineas.findIndex((l) => l.key === activeTab))}
-              onChange={(idx: number) => setActiveTab(activeLineas[idx].key)}
+              model={Math.max(1, activeLineas.findIndex((l) => l.key === activeTab) + 1)}
+              onChange={(idx: number) => { const l = activeLineas[idx - 1]; if (l) setActiveTab(l.key); }}
               {...({ tabs: activeLineas.map((l) => ({ name: l.label })) } as Record<string, unknown>)}
             />
           )}

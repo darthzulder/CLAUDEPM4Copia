@@ -3,6 +3,7 @@ import { useForm, FieldError } from 'react-hook-form';
 import { useTask } from '../../core/useTask';
 import { useCollection } from '../../core/useCollection';
 import FormSection from '../../components/FormSection';
+import ScreenHeader from '../../components/ScreenHeader';
 import { ZdsInput, ZdsSelect, ZdsDate, ZdsTextarea, ZrButton, ZrAlert } from '../../components/fields/ZdsFields';
 import ResultCard from '../../components/ResultCard';
 import { OPTIONS, COLLECTION_DEFS, SolicitudCotizacionFormData } from './variables';
@@ -10,7 +11,6 @@ import pm4 from '../../api/pm4Client';
 import AseguradosAdicionales, { AseguradoAdicional } from './AseguradosAdicionales';
 import ValoresDeducibles, { ValorDeducible, INITIAL_VALORES } from './ValoresDeducibles';
 import DetalleExportaciones, { ExportacionRow } from './DetalleExportaciones';
-import zurichLogo from '../../resources/zurich/ZurichLogo_Horz_White_CMYK_no_R.png';
 
 // ---------------------------------------------------------------------------
 // Tipos
@@ -658,11 +658,8 @@ export default function SolicitudCotizacionCuw() {
   if (sent) {
     return (
       <div className="screen-wrapper">
-        <div className="screen-header">
-          <div className="title-block"><h1>Solicitud de Cotización CUW</h1></div>
-          <img src={zurichLogo} alt="Zurich" className="header-logo" />
-        </div>
-        <div className="screen-sent-wrapper">
+        <ScreenHeader title="Solicitud de Cotización CUW" />
+        <div className="screen-content">
           <ResultCard variant="success" title="Solicitud enviada">
             <p>
               La solicitud fue enviada correctamente a ProcessMaker.<br />
@@ -680,61 +677,60 @@ export default function SolicitudCotizacionCuw() {
 
   return (
     <div className="screen-wrapper">
-      <div className="screen-header">
-        <div className="title-block">
-          <h1>Solicitud de Cotización CUW</h1>
-          <div className="subtitle">
-            <span>Cotización # {cotizacion}</span>
-            <span>Caso # {caso}</span>
-          </div>
-        </div>
-        <img src={zurichLogo} alt="Zurich" className="header-logo" />
-      </div>
+      <ScreenHeader
+        title="Solicitud de Cotización CUW"
+        subtitle={[
+          cotizacion ? `Cotización # ${cotizacion}` : null,
+          caso ? `Caso # ${caso}` : null,
+        ]}
+      />
 
-      <form onSubmit={form.handleSubmit(onSubmit)} noValidate>
-        <InfoGeneral form={form} />
+      <div className="screen-content">
+        <form onSubmit={form.handleSubmit(onSubmit)} noValidate>
+          <InfoGeneral form={form} />
 
-        <InfoTomador
-          form={form}
-          tiaStatus={tomadorTia}
-          onConsultar={() => handleConsultar('frm_tom', setTomadorTia)}
-          onCrearCliente={() => setTomadorTia('createNew')}
-        />
-
-        <SubInfoAsegurado form={form} exportaciones={exportaciones} onExportacionesChange={setExportaciones} />
-
-        {tomadorEsAsegurado !== 'SI' && (
-          <InfoAsegurado
+          <InfoTomador
             form={form}
-            tiaStatus={aseguradoTia}
-            onConsultar={() => handleConsultar('frm_aseg', setAseguradoTia)}
-            onCrearCliente={() => setAseguradoTia('createNew')}
+            tiaStatus={tomadorTia}
+            onConsultar={() => handleConsultar('frm_tom', setTomadorTia)}
+            onCrearCliente={() => setTomadorTia('createNew')}
           />
-        )}
 
-        <FormSection title="Asegurados Adicionales">
-          <AseguradosAdicionales value={aseguradosAdicionales} onChange={setAseguradosAdicionales} />
-        </FormSection>
+          <SubInfoAsegurado form={form} exportaciones={exportaciones} onExportacionesChange={setExportaciones} />
 
-        <DatosCotizacion form={form} />
+          {tomadorEsAsegurado !== 'SI' && (
+            <InfoAsegurado
+              form={form}
+              tiaStatus={aseguradoTia}
+              onConsultar={() => handleConsultar('frm_aseg', setAseguradoTia)}
+              onCrearCliente={() => setAseguradoTia('createNew')}
+            />
+          )}
 
-        <FormSection title="Valores Asegurados y Deducibles">
-          <ValoresDeducibles value={valoresDeducibles} onChange={setValoresDeducibles} />
-        </FormSection>
+          <FormSection title="Asegurados Adicionales">
+            <AseguradosAdicionales value={aseguradosAdicionales} onChange={setAseguradosAdicionales} />
+          </FormSection>
 
-        <PlanPago form={form} />
-        <RevisionMora form={form} />
+          <DatosCotizacion form={form} />
 
-        <ZrAlert config="alert" {...({ 'hide-close': true } as object)}>
-          <strong>Documentos de solicitud</strong> — Pendiente de implementar (requiere carga de archivos).
-        </ZrAlert>
+          <FormSection title="Valores Asegurados y Deducibles">
+            <ValoresDeducibles value={valoresDeducibles} onChange={setValoresDeducibles} />
+          </FormSection>
 
-        <div className="submit-bar">
-          <ZrButton config="positive:l" onClick={() => { form.handleSubmit(onSubmit)(); }} loading={submitting} disabled={submitting}>
-            ENVIAR
-          </ZrButton>
-        </div>
-      </form>
+          <PlanPago form={form} />
+          <RevisionMora form={form} />
+
+          <ZrAlert config="alert" {...({ 'hide-close': true } as object)}>
+            <strong>Documentos de solicitud</strong> — Pendiente de implementar (requiere carga de archivos).
+          </ZrAlert>
+
+          <div className="submit-bar">
+            <ZrButton config="positive:l" onClick={() => { form.handleSubmit(onSubmit)(); }} loading={submitting} disabled={submitting}>
+              ENVIAR
+            </ZrButton>
+          </div>
+        </form>
+      </div>
     </div>
   );
 }

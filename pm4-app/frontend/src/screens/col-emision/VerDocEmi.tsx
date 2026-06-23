@@ -1,17 +1,20 @@
 import { useState, useMemo } from 'react';
 import { useTask } from '../../core/useTask';
 import { useRequestFiles, resolveFileId } from '../../core/useRequestFiles';
-import PdfViewer from '../../components/PdfViewer';
-import { ZrButton, ZrModal, ZrForm, ZrSelect, ZrTextarea, ZrAlert } from '../../components/fields/ZdsFields';
+import { ZrButton, ZrModal, ZrForm, ZrTextarea, ZrAlert } from '../../components/fields/ZdsFields';
 import ResultCard from '../../components/ResultCard';
 import FormSection from '../../components/FormSection';
+import ScreenHeader from '../../components/ScreenHeader';
+import HelpModal from '../../components/HelpModal';
+import PreviewModal from '../../components/PreviewModal';
+import DocList from '../../components/DocList';
+import DocItem from '../../components/DocItem';
 import {
   type SolDocEmiData,
   type ValidacionDoc,
   type DecisionEmi,
   PRODUCTO_DOC_DEFS,
 } from './variables';
-import zurichLogo from '../../resources/zurich/ZurichLogo_Horz_White_CMYK_no_R.png';
 
 // ──────────────────────────────────────────────────────────────
 // Types
@@ -28,73 +31,6 @@ const VAL_OPCIONES: Array<{ value: ValidacionDoc; label: string }> = [
   { value: 'RECHAZADA',   label: 'Rechazada'   },
 ];
 
-// ──────────────────────────────────────────────────────────────
-// Fila de documento — solo lectura + select de validación
-// ──────────────────────────────────────────────────────────────
-function DocRow({
-  index,
-  descripcion,
-  fileId,
-  fileName,
-  validacion,
-  onValidacion,
-  onPreview,
-}: {
-  index: number;
-  descripcion: string;
-  fileId: number | null;
-  fileName: string;
-  validacion: ValidacionDoc;
-  onValidacion: (v: ValidacionDoc) => void;
-  onPreview: () => void;
-}) {
-  const cargado = fileId !== null;
-
-  return (
-    <div className={`sarlaft-doc-row verdoc-row${cargado ? ' is-loaded' : ''}`}>
-      {/* Badge coloreado por estado de validación */}
-      <div className={`doc-num-badge doc-num-badge--${validacion.toLowerCase().replace('_', '-')}`}>
-        {index}
-      </div>
-
-      {/* Descripción */}
-      <div className="doc-body">
-        <span className="doc-desc">{descripcion}</span>
-      </div>
-
-      {/* Archivo + botón ver */}
-      <div className="verdoc-file-area">
-        {cargado ? (
-          <span className="file-name-chip">
-            <span className="file-chip-icon">📄</span>
-            {fileName}
-          </span>
-        ) : (
-          <span className="file-name-empty">Sin documento</span>
-        )}
-        <ZrButton
-          config="secondary:s"
-          icon="visibility-on:line"
-          disabled={!cargado}
-          onClick={onPreview}
-        >
-          Ver
-        </ZrButton>
-      </div>
-
-      {/* Select de validación — ZrSelect ZDS */}
-      <div className="val-zrselect-wrap">
-        <ZrSelect
-          config="line"
-          label=""
-          model={validacion}
-          options={VAL_OPCIONES.map((o) => ({ value: o.value, text: o.label }))}
-          onChange={(v: string | null) => onValidacion((v ?? '') as ValidacionDoc)}
-        />
-      </div>
-    </div>
-  );
-}
 
 // ──────────────────────────────────────────────────────────────
 // Banner de decisión derivada
@@ -121,57 +57,6 @@ function DecisionBanner({ decision }: { decision: DecisionEmi | null }) {
   );
 }
 
-// ──────────────────────────────────────────────────────────────
-// Panel informativo derecho
-// ──────────────────────────────────────────────────────────────
-function AyudaModalContent() {
-  return (
-    <div className="ayuda-modal">
-      <div className="ayuda-modal-header">
-        <div className="ayuda-modal-icon-circle">i</div>
-        <div>
-          <div className="ayuda-modal-title">Criterios de Verificación</div>
-          <div className="ayuda-modal-subtitle">Guía para validar documentos de emisión</div>
-        </div>
-      </div>
-      <div className="ayuda-modal-body">
-
-        <div>
-          <p className="ayuda-section-label">Estados de validación</p>
-          <div className="ayuda-estados-grid">
-            <span className="val-chip val-chip--aprobada">Aprobada</span>
-            <span className="ayuda-desc">El documento es correcto y cumple todos los requisitos de emisión.</span>
-            <span className="val-chip val-chip--en-revision">En revisión</span>
-            <span className="ayuda-desc">Estado inicial — debe cambiarse a Aprobada o Rechazada antes de continuar.</span>
-            <span className="val-chip val-chip--rechazada">Rechazada</span>
-            <span className="ayuda-desc">El documento no cumple los requisitos, está incorrecto o incompleto.</span>
-          </div>
-        </div>
-
-        <div className="ayuda-divider" />
-
-        <div>
-          <p className="ayuda-section-label">Decisión automática</p>
-          <div className="ayuda-decision-rows">
-            <div className="ayuda-decision-row ayuda-decision-row--completo">
-              <span className="ayuda-decision-tag ayuda-decision-tag--completo">Todos aprobados</span>
-              <span className="ayuda-desc">Se procederá a emitir la póliza.</span>
-            </div>
-            <div className="ayuda-decision-row ayuda-decision-row--incompleto">
-              <span className="ayuda-decision-tag ayuda-decision-tag--incompleto">Alguno rechazado</span>
-              <span className="ayuda-desc">Se solicitarán nuevos documentos al Sales Support.</span>
-            </div>
-          </div>
-        </div>
-
-        <div className="ayuda-nota">
-          ⚠ No es posible continuar si algún documento permanece en estado <strong>En revisión</strong>.
-        </div>
-
-      </div>
-    </div>
-  );
-}
 
 // ──────────────────────────────────────────────────────────────
 // Pantalla principal
@@ -252,13 +137,8 @@ export default function VerDocEmi() {
   if (sent) {
     return (
       <div className="screen-wrapper">
-        <div className="screen-header">
-          <div className="title-block">
-            <h1>VERIFICACIÓN DOCUMENTOS EMISIÓN</h1>
-          </div>
-          <img src={zurichLogo} alt="Zurich" className="header-logo" />
-        </div>
-        <div className="screen-sent-wrapper">
+        <ScreenHeader title="VERIFICACIÓN DOCUMENTOS EMISIÓN" />
+        <div className="screen-content">
           <ResultCard variant="success" title="Verificación completada">
             <p>
               La decisión fue registrada correctamente.<br />
@@ -302,19 +182,14 @@ export default function VerDocEmi() {
       )}
 
       {/* Header */}
-      <div className="screen-header">
-        <div className="title-block">
-          <h1>VERIFICACIÓN DOCUMENTOS EMISIÓN</h1>
-          <div className="subtitle">
-            {numCot  && <span>Cotización # {numCot}</span>}
-            {numCaso && <span>Caso # {numCaso}</span>}
-            {docsActivos.length > 0 && (
-              <span>{docsActivos.length} producto{docsActivos.length > 1 ? 's' : ''}</span>
-            )}
-          </div>
-        </div>
-        <img src={zurichLogo} alt="Zurich" className="header-logo" />
-      </div>
+      <ScreenHeader
+        title="VERIFICACIÓN DOCUMENTOS EMISIÓN"
+        subtitle={[
+          numCot && `Cotización # ${numCot}`,
+          numCaso && `Caso # ${numCaso}`,
+          docsActivos.length > 0 && `${docsActivos.length} producto${docsActivos.length > 1 ? 's' : ''}`
+        ]}
+      />
 
       {/* Contenido */}
       <div className="screen-content">
@@ -373,19 +248,13 @@ export default function VerDocEmi() {
               </>
             }
           >
-            {/* Cabecera de columnas */}
-            <div className="verdoc-table-header">
-              <span style={{ flex: 1 }}>Documento</span>
-              <span style={{ width: 200 }}>Archivo</span>
-              <span style={{ width: 180 }}>Validación</span>
-            </div>
-
-            <div className="sarlaft-doc-list">
+            <DocList mode="validation">
               {docs.map((doc, i) => {
                 const { fileId, fileName } = resolveDoc(doc.key, i);
                 return (
-                  <DocRow
+                  <DocItem
                     key={doc.key}
+                    mode="validation"
                     index={i + 1}
                     descripcion={doc.descripcion}
                     fileId={fileId}
@@ -398,10 +267,11 @@ export default function VerDocEmi() {
                     onPreview={() => {
                       if (fileId) setPreview({ fileId, descripcion: doc.descripcion, fileName });
                     }}
+                    valOpciones={VAL_OPCIONES}
                   />
                 );
               })}
-            </div>
+            </DocList>
           </FormSection>
 
         </div>
@@ -413,33 +283,47 @@ export default function VerDocEmi() {
         onChange={(v: boolean) => setInfoOpen(v)}
         style={{ ['--z-modal--backdrop' as any]: 'rgba(11,27,60,.45)' }}
       >
-        <AyudaModalContent />
-      </ZrModal>
+        <HelpModal title="Criterios de Verificación" subtitle="Guía para validar documentos de emisión">
+          <div>
+            <p className="ayuda-section-label">Estados de validación</p>
+            <div className="ayuda-estados-grid">
+              <span className="val-chip val-chip--aprobada">Aprobada</span>
+              <span className="ayuda-desc">El documento es correcto y cumple todos los requisitos de emisión.</span>
+              <span className="val-chip val-chip--en-revision">En revisión</span>
+              <span className="ayuda-desc">Estado inicial — debe cambiarse a Aprobada o Rechazada antes de continuar.</span>
+              <span className="val-chip val-chip--rechazada">Rechazada</span>
+              <span className="ayuda-desc">El documento no cumple los requisitos, está incorrecto o incompleto.</span>
+            </div>
+          </div>
 
-      {/* Modal de vista previa */}
-      <ZrModal
-        model={!!preview}
-        onChange={(v: boolean) => { if (!v) setPreview(null); }}
-        style={{ ['--z-modal--padding' as any]: '0', ['--z-modal--backdrop' as any]: 'rgba(11,27,60,.55)' }}
-      >
-        <div className="preview-modal">
-          <div className="preview-modal-header">
-            <div className="preview-modal-title">
-              <span className="preview-modal-icon">📄</span>
-              <div>
-                <div className="preview-modal-doc-name">{preview?.fileName}</div>
-                <div className="preview-modal-doc-desc">{preview?.descripcion}</div>
+          <div className="ayuda-divider" />
+
+          <div>
+            <p className="ayuda-section-label">Decisión automática</p>
+            <div className="ayuda-decision-rows">
+              <div className="ayuda-decision-row ayuda-decision-row--completo">
+                <span className="ayuda-decision-tag ayuda-decision-tag--completo">Todos aprobados</span>
+                <span className="ayuda-desc">Se procederá a emitir la póliza.</span>
+              </div>
+              <div className="ayuda-decision-row ayuda-decision-row--incompleto">
+                <span className="ayuda-decision-tag ayuda-decision-tag--incompleto">Alguno rechazado</span>
+                <span className="ayuda-desc">Se solicitarán nuevos documentos al Sales Support.</span>
               </div>
             </div>
           </div>
-          <div>
-            <PdfViewer
-              fileId={preview?.fileId ?? null}
-              height={Math.min(window.innerHeight * 0.70, 680)}
-            />
+
+          <div className="ayuda-nota">
+            ⚠ No es posible continuar si algún documento permanece en estado <strong>En revisión</strong>.
           </div>
-        </div>
+        </HelpModal>
       </ZrModal>
+
+      {/* Modal de vista previa */}
+      <PreviewModal
+        isOpen={!!preview}
+        onClose={() => setPreview(null)}
+        previewDoc={preview}
+      />
     </div>
   );
 }
