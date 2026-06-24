@@ -9,6 +9,8 @@
 
 ## 0. How to Use This Folder (READ FIRST — AI INSTRUCTIONS)
 
+> **Orden de decisión del proyecto (PM4 app):** antes de construir UI sigue la **Jerarquía de decisión de UI** de `pm4-app/CLAUDE.md` (reusar componentes propios → componentes DS vía la fachada `ZdsFields` → **consultar al usuario antes de documentar un elemento DS nuevo** aquí → CSS custom como último recurso; el layout se hace con `z-flex`/`z-align`/`z-grid`, nunca `display:flex` a mano). Este índice es la base de conocimiento del DS de la que se alimenta ese paso (escalones A.2/A.3 y B.1).
+
 When a user asks you to build something with the **Zurich Design System**:
 
 1. **Always start here** (`zurich-index.md`) to find the relevant component file.
@@ -43,6 +45,7 @@ outputs/
     │       └── zurich-brand-icons.md     ← social/third-party brand icons (Color & :mono)
     ├── atoms/                            ← Category: action / interactive primitives
     │   ├── zurich-button.md
+    │   ├── zurich-icon.md
     │   ├── zurich-tooltip.md
     │   └── zurich-progressbar.md
     ├── input/                            ← Category: form-control inputs
@@ -93,6 +96,7 @@ outputs/
 | Component       | File                                                                              | Status         | Purpose                                                         |
 |-----------------|-----------------------------------------------------------------------------------|----------------|-----------------------------------------------------------------|
 | `ZrButton`      | [`react/atoms/zurich-button.md`](./react/atoms/zurich-button.md)                  | ⚠️ Experimental | Action button: types, sizes, round, icon, link, submit, popover.|
+| `ZrIcon`        | [`react/atoms/zurich-icon.md`](./react/atoms/zurich-icon.md)                      | ⚠️ Experimental | Standalone icon: `icon="name:line"` + `config="size:color"`.    |
 | `ZrTooltip`     | [`react/atoms/zurich-tooltip.md`](./react/atoms/zurich-tooltip.md)                | ⚠️ Experimental | Hover hint with side+size config and theme tokens.              |
 | `ZrProgressBar` | [`react/atoms/zurich-progressbar.md`](./react/atoms/zurich-progressbar.md)        | ⚠️ Experimental | Linear / round progress indicator with title, %, highlight.     |
 

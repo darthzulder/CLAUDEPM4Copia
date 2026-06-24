@@ -211,7 +211,7 @@ await completeTask(payload);
    - `COLLECTIONS` — IDs de colecciones PM4 que usan los selects dinámicos
    - `WATCHERS` — definición de watchers (campo que observan, script ID, run_onload)
    - Interface TypeScript de los datos del formulario
-3. **No crear `styles.css` local.** Los diseños deben ser DRY y utilizar únicamente elementos y componentes de ZurichDS. Si son necesarios estilos CSS específicos e inevitables para la pantalla, agrégalos de forma centralizada al final de `frontend/src/shared.css` utilizando un prefijo de clase adecuado (ej. `.screen-<slug>--<elemento>`).
+3. **No crear `styles.css` local.** Sigue la **Jerarquía de decisión de UI** (sección abajo): reusar componentes/elementos del DS antes de crear, y CSS custom solo como último recurso. Todo estilo nuevo va **al final de `shared.css`**, DRY y **con tokens** (`--zs-*`, `--zf-*`, `--z-*`/`--zc-*`/`--zg-*`), nunca px/hex crudos. `shared.css` es la única hoja de estilos global permitida.
 4. Crear `NombrePantalla.tsx` — componente React (<300 líneas por archivo)
 5. Registrar en `App.tsx` en el objeto `SCREENS`
 
@@ -219,6 +219,61 @@ await completeTask(payload);
 - Screenshot del formulario en PM4
 - El archivo JSON exportado del paquete (o el título exacto de la screen en PM4)
 - Si tiene watchers, cuáles campos disparan qué scripts
+
+---
+
+## Jerarquía de decisión de UI (OBLIGATORIO)
+
+Al construir UI hay **dos ejes** con escaleras distintas. Recorre cada una **de arriba abajo** y baja un escalón solo si el anterior no aplica. Antes de construir, lee `outputs/zurich-index.md`.
+
+### Eje A — Elemento *(qué es la cosa: campo, botón, pill, modal, card…)*
+1. **Componente propio existente** (ver inventario abajo) o wrapper de `ZdsFields` (`ZdsInput`, `ZdsSelect`, `ActionBar`, `ZdsStatusBadge`, `FormSection`…).
+2. **Componente Zurich DS documentado** en `outputs/` → consúmelo vía la fachada `ZdsFields`. **Nunca** importes `@zurich/...` en un screen.
+3. **Componente Zurich DS que existe pero NO está documentado** en `outputs/` → **DETENTE y consulta al usuario**: pídele pegar la doc oficial de ZDS, crea el `.md` en `outputs/react/<categoría>/` (plantilla §6.2 del index), y recién entonces úsalo (envuelto en `ZdsFields` si es un control). No inventes props/componentes de memoria.
+4. **Nada en el DS** → evalúa crear un **componente propio** (ver criterios).
+5. **Último recurso** → CSS custom tokenizado en `shared.css`.
+
+### Eje B — Layout *(cómo se acomoda: stack, fila, grid, alineación)*
+1. **Primitivos DS por atributo:** `z-flex` / `z-align` (flex), `z-grid="main"` + `column` (grilla de página). Es lo idiomático; **no escribas `display:flex` a mano** en el markup.
+2. **Clase/componente de layout existente:** `form-row.cols-*` (grilla de campos), `FormSection`, `ActionBar`.
+3. **Patrón nuevo reutilizable** → clase en `shared.css` **o** componente (ver bifurcación).
+4. **Último recurso** → CSS custom tokenizado.
+
+### Regla transversal (SIEMPRE, sin importar el escalón)
+- **Solo tokens:** `--zs-*` (espaciado), `--zf-*` (tipografía), `--z-*`/`--zc-*`/`--zg-*` (color). **Nunca** px/hex crudos (excepto `1px` de borde, radios, `line-height`, anchos puntuales).
+- **Nombra clases por componente/primitivo, nunca por pantalla.**
+- **CSS nuevo va al final de `shared.css`, DRY.**
+
+### ¿Clase o componente nuevo? *(bifurcación del escalón "crear")*
+- Concepto de UI reutilizable **con markup/comportamiento** → **componente** semántico (`ActionBar`, `FormRow`).
+- Patrón de **solo estilo** sin markup → **clase** en `shared.css`.
+- **NO** crear componentes genéricos de layout (`<Flex>`, `<Row>`, `<Col>`) → reinventa los primitivos DS.
+- **NO** envolver lo que ya es componente. Umbral de reúso **≥3** (o que encapsule comportamiento real).
+
+### Hechos de `z-flex`/`z-align` (verificados contra el CSS compilado)
+- Gaps válidos: `50 / 75 / 100 / 150 / 200 / 300` (= `--zs-*`). **No existe gap `25`** (4px) → ese caso queda como clase CSS.
+- `z-flex` por defecto es `align-items: stretch` (la doc local dice "center" y es **falso**).
+- **No** pongas `z-flex` sobre `ZrCard`/`ZrForm`/`ZrModal` (tienen su propio layout interno).
+- Sintaxis: `z-flex="col:150"` = columna gap 150; fila centrada a la derecha = `z-flex="75" z-align="right:center"`.
+
+## Componentes propios del proyecto (reusar antes de crear)
+
+| Componente | Import | Para qué |
+|---|---|---|
+| `FormSection` | `components/FormSection` | Card con header azul + body + footer opcional |
+| `ActionBar` | `components/ActionBar` | Barra de botones de submit al pie del form |
+| `ZdsStatusBadge` | `components/fields/ZdsFields` | Píldora de estado (`success`/`danger`/`info`/`neutral`) sobre `ZrBadge` |
+| `ScreenHeader` | `components/ScreenHeader` | Cabecera azul con título/subtítulo + logo Zurich |
+| `InfoBar` | `components/InfoBar` | Barra de pares label/valor |
+| `HelpModal` | `components/HelpModal` | Contenido de modal de ayuda (se monta dentro de `ZrModal`) |
+| `PreviewModal` | `components/PreviewModal` | Modal de vista previa de documento |
+| `PdfViewer` | `components/PdfViewer` | Visor de PDF/archivo PM4 vía blob |
+| `ResultCard` | `components/ResultCard` | Card centrado de resultado/confirmación (variantes) |
+| `DocList` / `DocItem` | `components/DocList`, `components/DocItem` | Lista/fila de documentos (modo upload o validación) |
+| `DocSupportUploader` | `components/DocSupportUploader` | Bloque de carga de documentos de soporte |
+| Wrappers de campo | `components/fields/ZdsFields` | `ZdsInput/Select/Radio/Date/Textarea/CheckboxField/Segmented` |
+
+> Mantén esta tabla actualizada al crear/eliminar un componente propio.
 
 ---
 
@@ -230,8 +285,8 @@ Todos los campos de formulario y componentes Zurich DS se importan **exclusivame
 
 ```tsx
 import { ZdsInput, ZdsSelect, ZdsRadio, ZdsDate, ZdsTextarea,
-         ZdsCheckboxField, ZdsSuggest,
-         ZrButton, ZrModal, ZrForm, ZrCard } from '../../components/fields/ZdsFields';
+         ZdsCheckboxField, ZdsSegmented, ZdsStatusBadge,
+         ZrButton, ZrIcon, ZrModal, ZrForm, ZrCard, ZrTable, ZrAlert } from '../../components/fields/ZdsFields';
 ```
 
 **Nunca importar directamente de `@zurich/web-components/react/...` en los screens.**
@@ -239,15 +294,14 @@ import { ZdsInput, ZdsSelect, ZdsRadio, ZdsDate, ZdsTextarea,
 | Wrapper | Componente Zurich | Cuándo usar |
 |---|---|---|
 | `ZdsInput` | `ZrTextInput` + Controller | Texto, email, tel — editable o readOnly |
-| `ZdsSelect` | `ZrSelect` + Controller | Dropdown con opciones |
+| `ZdsSelect` | `ZrSelect` + Controller | Dropdown con opciones (con/sin búsqueda) |
 | `ZdsRadio` | `ZrRadioSelect` + Controller | Grupo de radio buttons |
 | `ZdsDate` | `ZrDateInput` + Controller | Selector de fecha |
 | `ZdsTextarea` | `ZrTextarea` + Controller | Texto multilínea |
 | `ZdsCheckboxField` | `ZrCheckbox` + Controller | Checkbox booleano |
-| `ZdsSuggest` | `ZrTextInput` + dropdown | Typeahead con lista filtrada |
-| `ZrButton` | re-export directo | Botones de acción |
-| `ZrModal` | re-export directo | Diálogos modales |
-| `ZrForm` | re-export directo | Contenedor de formulario Zurich |
+| `ZdsSegmented` | `ZrSegmentedControl` + Controller | Toggle segmentado (SÍ/NO, etc.) |
+| `ZdsStatusBadge` | `ZrBadge` | Píldora de estado por variante (`success`/`danger`/`info`/`neutral`) |
+| Re-exports directos | — | `ZrButton`, `ZrIcon`, `ZrModal`, `ZrForm`, `ZrCard`, `ZrTabs`, `ZrTable`, `ZrAlert`, `ZrBadge`, `ZrChip`, `ZrTag`, `ZrProgressBar`, `ZrFileInput`, `ZrSegmentedControl` — componentes DS que no requieren Controller |
 
 ### Patrón de formulario (react-hook-form + ZdsFields)
 
@@ -273,7 +327,7 @@ const { control, handleSubmit, reset, formState: { errors } } = useForm<MiFormDa
 
 - `FormSection` para las secciones con header azul
 - `useTask()` maneja loading / error / submitting — siempre mostrar estos estados
-- Diseños DRY y ZurichDS: Utilizar únicamente componentes de ZurichDS de forma limpia. No se permiten archivos `styles.css` locales por pantalla. Cualquier estilo específico y justificado debe centralizarse en `frontend/src/shared.css` de forma DRY.
+- Diseños DRY y ZurichDS: seguir la **Jerarquía de decisión de UI** (arriba). El **layout** se hace con primitivos DS (`z-flex`/`z-align`/`z-grid`), no con `display:flex` a mano; los **elementos** con componentes propios o del DS vía `ZdsFields`. No se permiten `styles.css` locales ni estilos en línea *ad-hoc*. [shared.css](file:///g:/DockerProys/CLAUDEPM4Copia/pm4-app/frontend/src/shared.css) es la única hoja de estilos global y queda reservada a: tablas editables, cards/secciones con estilo de dominio, tipografías (`Capt-12`, `Capt-14`) y grids de campos (`form-row.cols-*`) — siempre con tokens. Las píldoras de estado usan `ZdsStatusBadge` (no clases `.chip`).
 - `OPTIONS` en `variables.ts` usan `as const` → pasarlos directamente a los campos (aceptan `readonly`)
 - Componente principal < 300 líneas; secciones grandes van como funciones locales en el mismo archivo o archivos separados en la misma carpeta
 
