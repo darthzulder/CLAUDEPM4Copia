@@ -257,7 +257,7 @@ function InfoTomador({
   return (
     <FormSection title="Información del Tomador">
 
-      <div className="form-row cols-3 row-align-bottom">
+      <div className="form-row cols-3">
         <ZdsInput
           control={control}
           name="frm_tom_nit"
@@ -273,7 +273,7 @@ function InfoTomador({
           helpText="9 dígitos + dígito verificador"
         />
         <ZdsInput control={control} name="frm_tom_tomador" label="Tomador" readOnly={fromTia('frm_tom_tomador')} helpText={fromTia('frm_tom_tomador') ? 'Dato de TIA' : undefined} />
-        <div style={{ paddingBottom: 'var(--zs-12)' }}>
+        <div className="zds-field-wrap">
           <ZrButton
             config="secondary"
             icon="search:line"

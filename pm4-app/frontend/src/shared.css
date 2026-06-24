@@ -334,8 +334,12 @@ z-table th,
 }
 
 /* Wrappers de campos ZDS */
-.zds-field-wrap {
+/* Base común: cada campo reserva la misma caja (pill + línea de ayuda),
+   así los pills alinean en la fila exista o no helpText, sea input o select. */
+.zds-field-wrap,
+.zds-select-wrap {
   width: 100%;
+  min-height: 68px;
 }
 
 .zds-select-wrap {
