@@ -56,7 +56,7 @@ export default function CreacionTomador({ form }: { form: Form }) {
       </ZrButton>
 
       {open && (
-        <div className="creacion-tomador-body">
+        <div className="policyholder-create-body">
           <div className="form-row cols-3">
             <ZdsInput
               control={control}

@@ -1,6 +1,7 @@
 import { useState, useEffect, Fragment } from 'react';
+import { ActionBar } from '../../components/ActionBar';
 import { useForm, Controller } from 'react-hook-form';
-import { ZrButton, ZrForm, ZdsInput, ZdsSelect, ZdsTextarea, ZrAlert, ZrTabs, ZrSegmentedControl, ZrFileInput, ZrTable } from '../../components/fields/ZdsFields';
+import { ZrButton, ZrForm, ZdsInput, ZdsSelect, ZdsTextarea, ZrAlert, ZrTabs, ZrSegmentedControl, ZrFileInput, ZrTable, ZrIcon } from '../../components/fields/ZdsFields';
 import ResultCard from '../../components/ResultCard';
 import FormSection from '../../components/FormSection';
 import ScreenHeader from '../../components/ScreenHeader';
@@ -105,9 +106,9 @@ function NcToggle({ form, name }: { form: Form; name: keyof CotizFfFlFormData })
 
 function CardFooter({ form, ncField }: { form: Form; ncField: keyof CotizFfFlFormData }) {
   return (
-    <div className="co-card-footer">
-      <div className="co-nc-toggle">
-        <span className="co-nc-label">¿Enviar nota de cobertura?</span>
+    <div className="card-footer">
+      <div className="cover-note-toggle">
+        <span className="cover-note-label">¿Enviar nota de cobertura?</span>
         <NcToggle form={form} name={ncField} />
       </div>
     </div>
@@ -161,8 +162,8 @@ function TarjetaDyO({ form, data, mostrarAnexo }: { form: Form; data: Record<str
 
         {mostrarAnexo && (
           <div style={{ marginTop: 'var(--zs-100)' }}>
-            <div className="co-subsection-title">Anexo de cobertura a la entidad</div>
-            <p className="dyo-intro-text" style={{ font: 'var(--zf-capt-12)', marginTop: 0 }}>
+            <div className="subsection-title">Anexo de cobertura a la entidad</div>
+            <p className="subsection-intro" style={{ font: 'var(--zf-capt-12)', marginTop: 0 }}>
               La selección de la opción es automática según la cobertura principal seleccionada.
             </p>
             <ZrTable>
@@ -308,7 +309,7 @@ function SeccionDecision({
           {submitError && (
             <ZrAlert config="negative" style={{ marginTop: 'var(--zs-100)' }} {...({ 'hide-close': true } as object)}>{submitError}</ZrAlert>
           )}
-          <div className="submit-bar">
+          <ActionBar>
             <ZrButton
               config="primary:l"
               icon="arrow-long-right:line"
@@ -318,7 +319,7 @@ function SeccionDecision({
             >
               {submitting ? 'Enviando...' : decision === 'PERSONALIZACION' ? 'CONFIRMAR' : 'ENVIAR'}
             </ZrButton>
-          </div>
+          </ActionBar>
         </>
       }
     >
@@ -389,8 +390,8 @@ function SeccionDecision({
                   required
                 />
               </div>
-              <div className="co-field-wrap">
-                <label className="form-label">Orden en firme * <span className="co-field-hint">(PDF o correo)</span></label>
+              <div className="field-wrap">
+                <label className="form-label">Orden en firme * <span className="field-hint">(PDF o correo)</span></label>
                 <ZrFileInput
                   label=""
                   model={w.cot_orden_firme_nombre || null}
@@ -605,10 +606,10 @@ export default function CotizacionFfFl() {
         />
 
         {/* Slip de Cotización */}
-        <div className="co-section-title">Slip de Cotización</div>
+        <div className="section-title">Slip de Cotización</div>
         <FormSection title="Slip de Cotización">
             {slipLineas.length > 1 && (
-              <div className="co-slip-tabs">
+              <div className="slip-tabs">
                 <ZrTabs
                   model={Math.max(1, slipLineas.findIndex((l) => l.key === slipTab) + 1)}
                   onChange={(idx: number) => { const l = slipLineas[idx - 1]; if (l) setSlipTab(l.key); }}
@@ -623,14 +624,14 @@ export default function CotizacionFfFl() {
                 height={700}
               />
             ) : (
-              <div className="co-no-slip">
-                <span>📄</span>
+              <div className="no-slip">
+                <ZrIcon icon="file-blank:line" config="l" />
                 <span>El slip de cotización no está disponible aún.</span>
               </div>
             )}
         </FormSection>
 
-        <div className="co-section-title">Resumen de Cotizaciones</div>
+        <div className="section-title">Resumen de Cotizaciones</div>
 
         {hasDyo   && <TarjetaDyO form={form} data={taskData} mostrarAnexo={mostrarAnexo} />}
         {hasCc    && <TarjetaCC  form={form} data={taskData} />}

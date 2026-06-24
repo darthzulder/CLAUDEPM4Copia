@@ -59,7 +59,7 @@ export default function SeccionErrorSS({ form }: Props) {
         <div className="form-group">
           <label className="form-label">Campos Afectados (según SS)</label>
           {campos.length > 0 ? (
-            <div className="campos-afectados-list">
+            <div className="affected-fields-list">
               {campos.map((c, i) => <ZrTag key={i} fill="peach">{c}</ZrTag>)}
             </div>
           ) : (

@@ -1,4 +1,5 @@
 import { useEffect } from 'react';
+import { ActionBar } from '../../components/ActionBar';
 import { useForm } from 'react-hook-form';
 import { useTask } from '../../core/useTask';
 import FormSection from '../../components/FormSection';
@@ -58,10 +59,10 @@ export default function RevisarQuejaAsignar() {
   }
 
   const submitLabel = w.ra_decision === 'ASIGNAR'
-    ? 'Asignar Responsable ▶'
+    ? 'ASIGNAR RESPONSABLE'
     : w.ra_decision === 'DEVOLVER'
-      ? 'Devolver para Corrección ▶'
-      : 'Escalar a Supervisor Senior ▶';
+      ? 'DEVOLVER PARA CORRECCIÓN'
+      : 'ESCALAR A SUPERVISOR SENIOR';
 
   return (
     <div className="screen-wrapper">
@@ -183,17 +184,25 @@ export default function RevisarQuejaAsignar() {
         </FormSection>
 
         {/* Barra de acciones */}
-        <div className="actions-bar">
-          <ZrButton config="secondary:s" onClick={() => window.history.back()}>Cancelar</ZrButton>
+        <ActionBar>
+          <ZrButton config="secondary:l" onClick={() => window.history.back()}>CANCELAR</ZrButton>
           <ZrButton
-            config="secondary:s"
+            config="secondary:l"
             disabled={submitting}
             onClick={() => completeTask({ ...w, _draft: true } as Record<string, unknown>)}
           >
-            Guardar Borrador
+            GUARDAR BORRADOR
           </ZrButton>
-          <ZrButton config="positive:s" onClick={() => { handleSubmit(onSubmit)(); }} loading={submitting} disabled={submitting}>{submitLabel}</ZrButton>
-        </div>
+          <ZrButton
+            config="positive:l"
+            icon="arrow-long-right:line"
+            onClick={() => { handleSubmit(onSubmit)(); }}
+            loading={submitting}
+            disabled={submitting}
+          >
+            {submitting ? 'ENVIANDO...' : submitLabel}
+          </ZrButton>
+        </ActionBar>
         </form>
       </div>
     </div>

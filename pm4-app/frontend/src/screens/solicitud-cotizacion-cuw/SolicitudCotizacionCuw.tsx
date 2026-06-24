@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import { ActionBar } from '../../components/ActionBar';
 import { useForm, FieldError } from 'react-hook-form';
 import { useTask } from '../../core/useTask';
 import { useCollection } from '../../core/useCollection';
@@ -277,7 +278,7 @@ function InfoTomador({
       <div className="form-row cols-3 row-align-bottom">
         <ZdsSelect label="Tipo de documento" name="frm_tom_tipo_documento" control={control} rules={{ required: 'Campo requerido' }} options={OPTIONS.tipoDocumento} required error={fe('frm_tom_tipo_documento')} />
         <ZdsInput label="Nro. de documento" name="frm_tom_num_documento" control={control} rules={{ required: 'Campo requerido', minLength: { value: 5, message: 'Mínimo 5 caracteres' } }} required error={fe('frm_tom_num_documento')} />
-        <div className="form-group consultar-wrapper">
+        <div className="form-group lookup-wrapper">
           <ZrButton config="secondary" icon="search:line" onClick={onConsultar} loading={tiaStatus === 'loading'} disabled={tiaStatus === 'loading'}>
             Consultar Cliente
           </ZrButton>
@@ -343,7 +344,7 @@ function SubInfoAsegurado({
       </div>
 
       {w.frm_aseg_realiza_exportaciones_flag === 'SI' && (
-        <div className="form-subsection form-subsection--exportaciones">
+        <div className="form-subsection">
           <div className="form-subsection-title">Detalle de exportaciones</div>
           <DetalleExportaciones value={exportaciones} onChange={onExportacionesChange} />
         </div>
@@ -385,7 +386,7 @@ function InfoAsegurado({
       <div className="form-row cols-3 row-align-bottom">
         <ZdsSelect label="Tipo de documento" name="frm_aseg_tipo_documento" control={control} rules={{ required: 'Campo requerido' }} options={OPTIONS.tipoDocumento} required error={fe('frm_aseg_tipo_documento')} />
         <ZdsInput label="Nro. de documento" name="frm_aseg_num_documento" control={control} rules={{ required: 'Campo requerido', minLength: { value: 5, message: 'Mínimo 5 caracteres' } }} required error={fe('frm_aseg_num_documento')} />
-        <div className="form-group consultar-wrapper">
+        <div className="form-group lookup-wrapper">
           <ZrButton config="secondary" icon="search:line" onClick={onConsultar} loading={tiaStatus === 'loading'} disabled={tiaStatus === 'loading'}>
             Consultar Cliente
           </ZrButton>
@@ -724,11 +725,11 @@ export default function SolicitudCotizacionCuw() {
             <strong>Documentos de solicitud</strong> — Pendiente de implementar (requiere carga de archivos).
           </ZrAlert>
 
-          <div className="submit-bar">
+          <ActionBar>
             <ZrButton config="positive:l" onClick={() => { form.handleSubmit(onSubmit)(); }} loading={submitting} disabled={submitting}>
               ENVIAR
             </ZrButton>
-          </div>
+          </ActionBar>
         </form>
       </div>
     </div>

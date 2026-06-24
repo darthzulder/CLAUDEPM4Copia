@@ -1,7 +1,8 @@
 import { useState, useMemo } from 'react';
+import { ActionBar } from '../../components/ActionBar';
 import { useTask } from '../../core/useTask';
 import { useRequestFiles, resolveFileId } from '../../core/useRequestFiles';
-import { ZrButton, ZrModal, ZrForm, ZrTextarea, ZrAlert } from '../../components/fields/ZdsFields';
+import { ZrButton, ZrModal, ZrForm, ZrTextarea, ZrAlert, ZdsStatusBadge } from '../../components/fields/ZdsFields';
 import ResultCard from '../../components/ResultCard';
 import FormSection from '../../components/FormSection';
 import ScreenHeader from '../../components/ScreenHeader';
@@ -193,7 +194,7 @@ export default function VerDocEmi() {
 
       {/* Contenido */}
       <div className="screen-content">
-        <div className="verdoc-layout">
+        <div z-flex="col:150">
 
           <FormSection
             title="Documentos de Emisión"
@@ -201,9 +202,9 @@ export default function VerDocEmi() {
             footer={
               <>
                 {/* Sección de Decisión */}
-                <div className="verdoc-decision-section">
-                  <div className="verdoc-decision-title">
-                    <span className="verdoc-decision-acento" />
+                <div className="decision-section">
+                  <div className="decision-title">
+                    <span className="decision-accent" />
                     Decisión
                   </div>
 
@@ -235,7 +236,7 @@ export default function VerDocEmi() {
                   )}
                 </div>
 
-                <div className="submit-bar">
+                <ActionBar>
                   <ZrButton
                     config="primary:l"
                     disabled={submitting || derivedDecision === null}
@@ -244,7 +245,7 @@ export default function VerDocEmi() {
                   >
                     {submitting ? 'Guardando…' : 'CONTINUAR'}
                   </ZrButton>
-                </div>
+                </ActionBar>
               </>
             }
           >
@@ -285,34 +286,34 @@ export default function VerDocEmi() {
       >
         <HelpModal title="Criterios de Verificación" subtitle="Guía para validar documentos de emisión">
           <div>
-            <p className="ayuda-section-label">Estados de validación</p>
-            <div className="ayuda-estados-grid">
-              <span className="val-chip val-chip--aprobada">Aprobada</span>
-              <span className="ayuda-desc">El documento es correcto y cumple todos los requisitos de emisión.</span>
-              <span className="val-chip val-chip--en-revision">En revisión</span>
-              <span className="ayuda-desc">Estado inicial — debe cambiarse a Aprobada o Rechazada antes de continuar.</span>
-              <span className="val-chip val-chip--rechazada">Rechazada</span>
-              <span className="ayuda-desc">El documento no cumple los requisitos, está incorrecto o incompleto.</span>
+            <p className="help-section-label">Estados de validación</p>
+            <div className="help-status-grid">
+              <ZdsStatusBadge variant="success">Aprobada</ZdsStatusBadge>
+              <span className="help-desc">El documento es correcto y cumple todos los requisitos de emisión.</span>
+              <ZdsStatusBadge variant="info">En revisión</ZdsStatusBadge>
+              <span className="help-desc">Estado inicial — debe cambiarse a Aprobada o Rechazada antes de continuar.</span>
+              <ZdsStatusBadge variant="danger">Rechazada</ZdsStatusBadge>
+              <span className="help-desc">El documento no cumple los requisitos, está incorrecto o incompleto.</span>
             </div>
           </div>
 
-          <div className="ayuda-divider" />
+          <div className="help-divider" />
 
           <div>
-            <p className="ayuda-section-label">Decisión automática</p>
-            <div className="ayuda-decision-rows">
-              <div className="ayuda-decision-row ayuda-decision-row--completo">
-                <span className="ayuda-decision-tag ayuda-decision-tag--completo">Todos aprobados</span>
-                <span className="ayuda-desc">Se procederá a emitir la póliza.</span>
+            <p className="help-section-label">Decisión automática</p>
+            <div z-flex="col:50">
+              <div className="help-decision-row help-decision-row--completo">
+                <ZdsStatusBadge variant="success">Todos aprobados</ZdsStatusBadge>
+                <span className="help-desc">Se procederá a emitir la póliza.</span>
               </div>
-              <div className="ayuda-decision-row ayuda-decision-row--incompleto">
-                <span className="ayuda-decision-tag ayuda-decision-tag--incompleto">Alguno rechazado</span>
-                <span className="ayuda-desc">Se solicitarán nuevos documentos al Sales Support.</span>
+              <div className="help-decision-row help-decision-row--incompleto">
+                <ZdsStatusBadge variant="danger">Alguno rechazado</ZdsStatusBadge>
+                <span className="help-desc">Se solicitarán nuevos documentos al Sales Support.</span>
               </div>
             </div>
           </div>
 
-          <div className="ayuda-nota">
+          <div className="help-note">
             ⚠ No es posible continuar si algún documento permanece en estado <strong>En revisión</strong>.
           </div>
         </HelpModal>

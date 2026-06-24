@@ -10,11 +10,11 @@ interface InfoBarProps {
 
 export default function InfoBar({ items }: InfoBarProps) {
   return (
-    <div className="co-info-bar">
+    <div className="info-bar">
       {items.map((item, idx) => (
-        <div className="co-info-item" key={idx}>
-          <span className="co-info-label">{item.label}</span>
-          <span className="co-info-value">{String(item.value ?? '—')}</span>
+        <div className="info-bar-item" key={idx}>
+          <span className="info-bar-label">{item.label}</span>
+          <span className="info-bar-value">{String(item.value ?? '—')}</span>
         </div>
       ))}
     </div>

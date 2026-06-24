@@ -1,4 +1,4 @@
-import { ZrModal } from './fields/ZdsFields';
+import { ZrModal, ZrIcon } from './fields/ZdsFields';
 import PdfViewer from './PdfViewer';
 
 interface PreviewDoc {
@@ -26,7 +26,7 @@ export default function PreviewModal({ isOpen, onClose, previewDoc }: PreviewMod
       <div className="preview-modal">
         <div className="preview-modal-header">
           <div className="preview-modal-title">
-            <span className="preview-modal-icon">📄</span>
+            <ZrIcon icon="file-blank:line" config="l" />
             <div>
               <div className="preview-modal-doc-name">{previewDoc?.fileName || 'Vista previa'}</div>
               {previewDoc?.descripcion && (

@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import { ActionBar } from '../../components/ActionBar';
 import { useForm, FieldError } from 'react-hook-form';
 import { useTask } from '../../core/useTask';
 import { useCollection } from '../../core/useCollection';
@@ -106,7 +107,7 @@ function InfoGeneral({ form }: { form: ReturnType<typeof useForm<CotizadorFormDa
           error={fe('frm_gen_intermediario_principal_correo_test')}
         />
         <ZdsRadio
-          label="¿Incluye co-corretaje?"
+          label="¿Incluye brokerage-row?"
           name="frm_gen_incluye_cocorretaje_flag"
           control={control}
           rules={{ required: 'Campo requerido' }}
@@ -181,7 +182,7 @@ function InfoTomador({
             required
             error={fe('frm_tomador_numDoc')}
           />
-          <div className="form-group consultar-wrapper">
+          <div className="form-group lookup-wrapper">
             <ZrButton config="secondary" icon="search:line" onClick={onConsultarCliente} loading={consultarLoading} disabled={consultarLoading}>
               Consultar Cliente
             </ZrButton>
@@ -596,11 +597,11 @@ export default function CotizadorFastFlow() {
           <PropuestaEconomica form={form} />
           <PlanPago form={form} />
 
-          <div className="submit-bar">
+          <ActionBar>
             <ZrButton config="primary:l" onClick={() => { form.handleSubmit(onSubmit)(); }} loading={submitting} disabled={submitting}>
               ENVIAR
             </ZrButton>
-          </div>
+          </ActionBar>
         </form>
       </div>
     </div>

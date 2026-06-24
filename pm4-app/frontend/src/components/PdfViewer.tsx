@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef } from 'react';
 import pm4 from '../api/pm4Client';
+import { ZrButton } from './fields/ZdsFields';
 
 interface Props {
   /** ID del archivo en PM4 */
@@ -59,6 +60,16 @@ export default function PdfViewer({ fileId, label, height = 640, className = '' 
     return () => { if (prevUrl.current) URL.revokeObjectURL(prevUrl.current); };
   }, []);
 
+  const handleDownload = () => {
+    if (!blobUrl) return;
+    const a = document.createElement('a');
+    a.href = blobUrl;
+    a.download = label ?? 'documento.pdf';
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+  };
+
   if (!fileId) return null;
 
   return (
@@ -86,9 +97,9 @@ export default function PdfViewer({ fileId, label, height = 640, className = '' 
             style={{ width: '100%', height, border: 'none', borderRadius: 4 }}
           />
           <div className="pdf-viewer-actions">
-            <a href={blobUrl} download={label ?? 'documento.pdf'} className="btn-download">
+            <ZrButton config="secondary:s" icon="download:line" onClick={handleDownload}>
               Descargar
-            </a>
+            </ZrButton>
           </div>
         </>
       )}

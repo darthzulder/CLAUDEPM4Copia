@@ -1,6 +1,6 @@
 import { Controller } from 'react-hook-form';
 import type { Control, RegisterOptions, FieldPath, FieldValues } from 'react-hook-form';
-import { useEffect, type ComponentProps } from 'react';
+import { useEffect, type ComponentProps, type ReactNode } from 'react';
 import { ZrModal as ZrModalRaw } from '@zurich/web-components/react/modal';
 import { ZrTextInput }        from '@zurich/web-components/react/text-input';
 import { ZrCheckbox }         from '@zurich/web-components/react/checkbox';
@@ -19,6 +19,7 @@ export { ZrDateInput };
 export { ZrRadioSelect };
 export { ZrSegmentedControl };
 export { ZrButton }      from '@zurich/web-components/react/button';
+export { ZrIcon }        from '@zurich/web-components/react/icon';
 
 // ZrModal: el componente ZDS bloquea el scroll del body al abrir
 // (document.body.style.overflow = 'hidden') y SOLO lo restaura en un render con
@@ -35,10 +36,40 @@ export { ZrTabs }        from '@zurich/web-components/react/tabs';
 export { ZrTable }       from '@zurich/web-components/react/table';
 export { ZrProgressBar } from '@zurich/web-components/react/progress-bar';
 export { ZrAlert }       from '@zurich/web-components/react/alert';
-export { ZrBadge }       from '@zurich/web-components/react/badge';
+import { ZrBadge }        from '@zurich/web-components/react/badge';
+export { ZrBadge };
 export { ZrChip }        from '@zurich/web-components/react/chip';
 export { ZrTag }         from '@zurich/web-components/react/tag';
 export { ZrFileInput }   from '@zurich/web-components/react/file-input';
+
+// ─── Píldora de estado: wrapper sobre ZrBadge (DS) con semántica por variante ──
+// Sustituye al antiguo componente Chip custom. El <span.status-badge> envolvente
+// es el grid-item real (garantiza justify-self sin depender de className en el
+// host del web-component).
+export type StatusVariant = 'success' | 'danger' | 'info' | 'neutral';
+
+const STATUS_FILL = {
+  success: 'moss',
+  danger: 'peach',
+  info: 'blue-sky',
+  neutral: 'dove',
+} as const;
+
+export function ZdsStatusBadge({
+  variant = 'neutral',
+  children,
+  className = '',
+}: {
+  variant?: StatusVariant;
+  children: ReactNode;
+  className?: string;
+}) {
+  return (
+    <span className={`status-badge${className ? ` ${className}` : ''}`}>
+      <ZrBadge config="text" text={String(children)} fill={STATUS_FILL[variant]} />
+    </span>
+  );
+}
 
 // ─── kp: construye props kebab-case (JSX no admite guiones en nombres de prop) ─
 function kp(error?: string, helpText?: string, inputType?: string, icon?: string): Record<string, unknown> {

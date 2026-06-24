@@ -1,5 +1,5 @@
 import { useRef } from 'react';
-import { ZrButton, ZrSelect } from './fields/ZdsFields';
+import { ZrButton, ZrSelect, ZrIcon, ZdsStatusBadge } from './fields/ZdsFields';
 
 export interface DocItemState {
   file: File | null;
@@ -45,22 +45,22 @@ export default function DocItem({
     const cargado = fileId !== null;
     const validationClass = validacion ? validacion.toLowerCase().replace('_', '-') : 'en-revision';
     return (
-      <div className={`sarlaft-doc-row verdoc-row${cargado ? ' is-loaded' : ''}`}>
+      <div className={`doc-item doc-item--validation${cargado ? ' is-loaded' : ''}`}>
         {/* Badge coloreado por estado de validación */}
         <div className={`doc-num-badge doc-num-badge--${validationClass}`}>
           {index}
         </div>
 
         {/* Descripción */}
-        <div className="doc-body verdoc-table-col-desc">
+        <div className="doc-body doc-table-col-desc">
           <span className="doc-desc">{descripcion}</span>
         </div>
 
         {/* Archivo + botón ver */}
-        <div className="verdoc-file-area verdoc-table-col-file">
+        <div className="doc-file-area--validation doc-table-col-file">
           {cargado ? (
             <span className="file-name-chip">
-              <span className="file-chip-icon">📄</span>
+              <ZrIcon icon="file-blank:line" config="xs" />
               {fileName}
             </span>
           ) : (
@@ -77,7 +77,7 @@ export default function DocItem({
         </div>
 
         {/* Select de validación — ZrSelect ZDS */}
-        <div className="val-zrselect-wrap verdoc-table-col-val">
+        <div className="validation-select-wrap doc-table-col-val">
           {onValidacion && (
             <ZrSelect
               config="line"
@@ -95,10 +95,9 @@ export default function DocItem({
   // mode === 'upload'
   const cargado = !!state?.file || (fileId !== null && fileId !== undefined);
   const pendingLabel = onFileChange ? 'Pendiente' : 'Sin documento';
-  const pendingClass = onFileChange ? 'estado-pendiente' : 'estado-sin-doc';
 
   return (
-    <div className={`sarlaft-doc-row${cargado ? ' is-loaded' : ''}`}>
+    <div className={`doc-item${cargado ? ' is-loaded' : ''}`}>
       {/* Índice */}
       <div className={`doc-num-badge${cargado ? ' doc-num-badge--loaded' : ''}`}>
         {cargado ? '✓' : index}
@@ -107,14 +106,14 @@ export default function DocItem({
       {/* Descripción */}
       <div className="doc-body">
         <span className="doc-desc">{descripcion}</span>
-        {vigencia && <span className="doc-vigencia">{vigencia}</span>}
+        {vigencia && <span className="doc-validity">{vigencia}</span>}
       </div>
 
       {/* Estado */}
-      <div className="doc-estado-wrap">
-        <span className={`estado-badge${cargado ? ' estado-cargado' : ` ${pendingClass}`}`}>
+      <div className="doc-status-wrap">
+        <ZdsStatusBadge variant={cargado ? 'success' : onFileChange ? 'danger' : 'neutral'}>
           {cargado ? 'Cargado' : pendingLabel}
-        </span>
+        </ZdsStatusBadge>
       </div>
 
       {/* Acciones / Nombre del archivo */}
@@ -144,7 +143,7 @@ export default function DocItem({
         )}
         {cargado && (state?.file || fileName) && (
           <span className="file-name-chip">
-            <span className="file-chip-icon">📄</span>
+            <ZrIcon icon="file-blank:line" config="xs" />
             {state?.file?.name || fileName}
           </span>
         )}

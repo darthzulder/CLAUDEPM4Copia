@@ -1,8 +1,9 @@
-import { useState } from 'react';
+import type React from 'react';
 import { useForm } from 'react-hook-form';
-import { ZrButton, ZdsSelect, ZrAlert, ZrFileInput, ZrTable } from '../../components/fields/ZdsFields';
+import { ZdsSelect, ZrTable } from '../../components/fields/ZdsFields';
+import DocSupportUploader from '../../components/DocSupportUploader';
 import { OPTIONS, FfFlSolicitudFormData } from './variables';
-import { SiNoField, SiNoSelectAll } from './SiNoGroup';
+import { SiNoQuestionTable } from './SiNoGroup';
 
 type Form = ReturnType<typeof useForm<FfFlSolicitudFormData>>;
 
@@ -42,19 +43,8 @@ const REQUISITOS = [
 const MSG_BLOQUEO = 'La cotización no puede continuar por este canal y deberá gestionarse con la ayuda del asesor comercial (Case Underwriting).';
 
 export default function SeccionCC({ form, fileRegistry }: { form: Form; fileRegistry: React.MutableRefObject<Map<string, File>> }) {
-  const { control, watch, setValue, register } = form;
+  const { control, watch } = form;
   const w = watch();
-  const [numDocs, setNumDocs] = useState(1);
-
-  const perfBloqueado = SECTORES.some((_, i) => {
-    const key = `frm_cc_perf_${String(i + 1).padStart(2, '0')}` as keyof FfFlSolicitudFormData;
-    return w[key] === 'SI';
-  });
-
-  const reqBloqueado = REQUISITOS.some((_, i) => {
-    const key = `frm_cc_req_${String(i + 1).padStart(2, '0')}` as keyof FfFlSolicitudFormData;
-    return w[key] === 'NO';
-  });
 
   const docKeys = [
     'frm_cc_doc_01_nombre', 'frm_cc_doc_02_nombre', 'frm_cc_doc_03_nombre',
@@ -71,122 +61,39 @@ export default function SeccionCC({ form, fileRegistry }: { form: Form; fileRegi
     <div>
 
       {/* ── PERFIL DE CLIENTE ── */}
-      <div className="form-subsection dyo-subsection">
-        <div className="form-subsection-title">Perfil de cliente</div>
-        <p className="dyo-intro-text">
-          ¿La compañía opera en alguno de los siguientes sectores?
-        </p>
-        <SiNoSelectAll form={form} prefix="frm_cc_perf_" count={SECTORES.length} />
-        <ZrTable>
-          <table>
-            <thead>
-              <tr>
-                <th style={{ width: 40 }} {...({ config: 'center' } as object)}>#</th>
-                <th>Sector</th>
-                <th style={{ width: 120 }} {...({ config: 'center' } as object)}>SÍ / NO</th>
-              </tr>
-            </thead>
-            <tbody>
-              {SECTORES.map((sector, i) => {
-                const name = `frm_cc_perf_${String(i + 1).padStart(2, '0')}` as keyof FfFlSolicitudFormData;
-                return (
-                  <tr key={name}>
-                    <td {...({ config: 'center' } as object)}>{i + 1}</td>
-                    <td>{sector}</td>
-                    <td {...({ config: 'center' } as object)}><SiNoField form={form} name={name} /></td>
-                  </tr>
-                );
-              })}
-            </tbody>
-          </table>
-        </ZrTable>
-        {perfBloqueado && <ZrAlert config="alert" {...({ 'hide-close': true } as object)}>{MSG_BLOQUEO}</ZrAlert>}
-      </div>
+      <SiNoQuestionTable
+        form={form}
+        title="Perfil de cliente"
+        intro="¿La compañía opera en alguno de los siguientes sectores?"
+        prefix="frm_cc_perf_"
+        items={SECTORES}
+        colHeader="Sector"
+        blockOn="SI"
+        blockMsg={MSG_BLOQUEO}
+      />
 
       {/* ── REQUISITOS ── */}
-      <div className="form-subsection dyo-subsection">
-        <div className="form-subsection-title">Requisitos</div>
-        <p className="dyo-intro-text">
-          La compañía solicitante debe cumplir todos los requisitos siguientes para acceder a la
+      <SiNoQuestionTable
+        form={form}
+        title="Requisitos"
+        intro={
+          <>La compañía solicitante debe cumplir todos los requisitos siguientes para acceder a la
           cobertura de seguro propuesta.<br />
-          Si contesta NO a cualquiera de las siguientes preguntas, la cotización no puede continuar.
-        </p>
-        <SiNoSelectAll form={form} prefix="frm_cc_req_" count={REQUISITOS.length} />
-        <ZrTable>
-          <table>
-            <thead>
-              <tr>
-                <th style={{ width: 40 }} {...({ config: 'center' } as object)}>#</th>
-                <th>La sociedad y sus filiales (si aplica) afirman que:</th>
-                <th style={{ width: 120 }} {...({ config: 'center' } as object)}>SÍ / NO</th>
-              </tr>
-            </thead>
-            <tbody>
-              {REQUISITOS.map((pregunta, i) => {
-                const name = `frm_cc_req_${String(i + 1).padStart(2, '0')}` as keyof FfFlSolicitudFormData;
-                return (
-                  <tr key={name}>
-                    <td {...({ config: 'center' } as object)}>{i + 1}</td>
-                    <td>{pregunta}</td>
-                    <td {...({ config: 'center' } as object)}><SiNoField form={form} name={name} /></td>
-                  </tr>
-                );
-              })}
-            </tbody>
-          </table>
-        </ZrTable>
-        {reqBloqueado && <ZrAlert config="alert" {...({ 'hide-close': true } as object)}>{MSG_BLOQUEO}</ZrAlert>}
-      </div>
+          Si contesta NO a cualquiera de las siguientes preguntas, la cotización no puede continuar.</>
+        }
+        prefix="frm_cc_req_"
+        items={REQUISITOS}
+        blockOn="NO"
+        blockMsg={MSG_BLOQUEO}
+      />
 
       {/* ── DOCUMENTO DE SOPORTE ── */}
-      <div className="form-subsection dyo-subsection">
-        <div className="form-subsection-title">Documento de soporte de las confirmaciones</div>
-        <p className="dyo-intro-text">
-          Por favor cargue aquí el documento de respaldo proporcionado por el intermediario.
-          Se pueden agregar hasta 3 documentos.
-        </p>
-        <div className="dyo-docs-list">
-          {docKeys.slice(0, numDocs).map((docKey, i) => {
-            const fileName = w[docKey] as string | undefined;
-            return (
-              <div key={docKey} className="dyo-doc-row">
-                <span className="dyo-doc-label">Documento {i + 1}</span>
-                <ZrFileInput
-                  label=""
-                  model={fileName || null}
-                  droppable
-                  onChange={(file: File | string | null) => {
-                    if (file && typeof file !== 'string') {
-                      setValue(docKey, file.name as never);
-                      fileRegistry.current.set(docKey, file);
-                    } else if (!file) {
-                      setValue(docKey, '' as never);
-                      fileRegistry.current.delete(docKey);
-                    }
-                  }}
-                  {...({ accept: ['.pdf', '.doc', '.docx', '.jpg', '.jpeg', '.png'] } as Record<string, unknown>)}
-                />
-                <input type="hidden" {...register(docKey)} />
-              </div>
-            );
-          })}
-        </div>
-        {numDocs < 3 && (
-          <ZrButton
-            config="secondary"
-            onClick={() => setNumDocs((n) => n + 1)}
-            style={{ marginTop: 'var(--zs-75)' }}
-            icon="plus:line"
-          >
-            Agregar documento
-          </ZrButton>
-        )}
-      </div>
+      <DocSupportUploader form={form} fileRegistry={fileRegistry} docKeys={docKeys} />
 
       {/* ── PROPUESTA ECONÓMICA ── */}
-      <div className="form-subsection dyo-subsection">
+      <div className="form-subsection form-subsection--stack">
         <div className="form-subsection-title">Propuesta económica</div>
-        <p className="dyo-intro-text">Todo y cada reclamo en el agregado anual</p>
+        <p className="subsection-intro">Todo y cada reclamo en el agregado anual</p>
         <ZrTable>
           <table>
             <thead>
@@ -227,7 +134,7 @@ export default function SeccionCC({ form, fileRegistry }: { form: Form; fileRegi
             </tbody>
           </table>
         </ZrTable>
-        <p className="dyo-nota">
+        <p className="subsection-note">
           Nota: el sistema debe controlar que se ingrese al menos un valor asegurado. El deducible es automático.
         </p>
       </div>

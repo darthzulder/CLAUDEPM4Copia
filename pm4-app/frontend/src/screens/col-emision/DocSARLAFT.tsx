@@ -1,4 +1,5 @@
 import { useState, useCallback } from 'react';
+import { ActionBar } from '../../components/ActionBar';
 import { useTask } from '../../core/useTask';
 import { ZrButton, ZrModal, ZrAlert } from '../../components/fields/ZdsFields';
 import ResultCard from '../../components/ResultCard';
@@ -167,13 +168,13 @@ export default function DocSARLAFT() {
 
       {/* Contenido */}
       <div className="screen-content">
-        <div className="verdoc-layout">
+        <div z-flex="col:150">
 
           <FormSection
             title="Documentos Requeridos"
             action={<ZrButton config="secondary:xs" icon="info:line" onClick={() => setInfoOpen(true)} />}
             footer={
-              <div className="submit-bar">
+              <ActionBar>
                 <ZrButton
                   config="primary:l"
                   disabled={submitting}
@@ -182,7 +183,7 @@ export default function DocSARLAFT() {
                 >
                   {submitting ? 'Enviando…' : 'ENVIAR'}
                 </ZrButton>
-              </div>
+              </ActionBar>
             }
           >
             {!perfil && (
@@ -222,13 +223,13 @@ export default function DocSARLAFT() {
           {DIRECTRICES.map(({ perfil: p, label, docs: dList }) => (
             <div
               key={p}
-              className={`ayuda-perfil-block${perfil === p ? ' ayuda-perfil-activo' : ''}`}
+              className={`help-profile-block${perfil === p ? ' help-profile-active' : ''}`}
             >
-              <div className="ayuda-perfil-header">
-                <span className="ayuda-perfil-label">{label}</span>
-                {perfil === p && <span className="ayuda-badge-activo">Activo</span>}
+              <div className="help-profile-header">
+                <span className="help-profile-label">{label}</span>
+                {perfil === p && <span className="badge-active">Activo</span>}
               </div>
-              <ol className="ayuda-doc-list">
+              <ol className="help-doc-list">
                 {dList.map((doc, i) => <li key={i}>{doc}</li>)}
               </ol>
             </div>

@@ -157,7 +157,7 @@ export default function OpcionesCotizacion() {
       <div className="screen-body">
 
         {/* Área de slips con tabs por línea */}
-        <div className="slip-area">
+        <div z-flex="col:75">
           {activeLineas.length > 1 && (
             <ZrTabs
               model={Math.max(1, activeLineas.findIndex((l) => l.key === activeTab) + 1)}

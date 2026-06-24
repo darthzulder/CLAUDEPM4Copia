@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { ActionBar } from '../../components/ActionBar';
 import { useTask } from '../../core/useTask';
 import { useRequestFiles, resolveFileId } from '../../core/useRequestFiles';
 import { ZrButton, ZrModal, ZrAlert } from '../../components/fields/ZdsFields';
@@ -133,13 +134,13 @@ export default function RevSARLAFT() {
 
       {/* Contenido */}
       <div className="screen-content">
-        <div className="verdoc-layout">
+        <div z-flex="col:150">
 
           <FormSection
             title="Documentos SARLAFT Cargados"
             action={<ZrButton config="secondary:xs" icon="info:line" onClick={() => setInfoOpen(true)} />}
             footer={
-              <div className="submit-bar">
+              <ActionBar>
                 <ZrButton
                   config="primary:l"
                   disabled={submitting || files.length === 0}
@@ -148,7 +149,7 @@ export default function RevSARLAFT() {
                 >
                   {submitting ? 'Confirmando…' : 'INFORMACIÓN SARLAFT VERIFICADA'}
                 </ZrButton>
-              </div>
+              </ActionBar>
             }
           >
             {!perfil && (
@@ -193,13 +194,13 @@ export default function RevSARLAFT() {
           {DIRECTRICES.map(({ perfil: p, label, docs: dList }) => (
             <div
               key={p}
-              className={`ayuda-perfil-block${perfil === p ? ' ayuda-perfil-activo' : ''}`}
+              className={`help-profile-block${perfil === p ? ' help-profile-active' : ''}`}
             >
-              <div className="ayuda-perfil-header">
-                <span className="ayuda-perfil-label">{label}</span>
-                {perfil === p && <span className="ayuda-badge-activo">Activo</span>}
+              <div className="help-profile-header">
+                <span className="help-profile-label">{label}</span>
+                {perfil === p && <span className="badge-active">Activo</span>}
               </div>
-              <ol className="ayuda-doc-list">
+              <ol className="help-doc-list">
                 {dList.map((doc, i) => <li key={i}>{doc}</li>)}
               </ol>
             </div>

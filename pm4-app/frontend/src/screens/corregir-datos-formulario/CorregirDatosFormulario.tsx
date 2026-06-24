@@ -1,4 +1,5 @@
 import { useEffect } from 'react';
+import { ActionBar } from '../../components/ActionBar';
 import { useForm } from 'react-hook-form';
 import { useTask } from '../../core/useTask';
 import FormSection from '../../components/FormSection';
@@ -288,7 +289,7 @@ export default function CorregirDatosFormulario() {
         </FormSection>
 
         {/* ── Barra de acciones ── */}
-        <div className="actions-bar">
+        <ActionBar>
           <ZrButton config="secondary:s" onClick={() => window.history.back()}>Cancelar</ZrButton>
           <ZrButton
             config="secondary:s"
@@ -298,7 +299,7 @@ export default function CorregirDatosFormulario() {
             Guardar Borrador
           </ZrButton>
           <ZrButton config="positive:s" onClick={() => { handleSubmit(onSubmit)(); }} loading={submitting} disabled={submitting}>{submitLabel}</ZrButton>
-        </div>
+        </ActionBar>
         </form>
       </div>
     </div>

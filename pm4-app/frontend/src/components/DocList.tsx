@@ -8,14 +8,14 @@ interface DocListProps {
 export default function DocList({ mode, children }: DocListProps) {
   if (mode === 'validation') {
     return (
-      <div className="verdoc-table-layout">
-        <div className="verdoc-table-header">
+      <div>
+        <div className="doc-table-header">
           <span>Doc</span>
-          <span className="verdoc-table-col-desc">Descripción</span>
-          <span className="verdoc-table-col-file">Archivo</span>
-          <span className="verdoc-table-col-val">Validación</span>
+          <span className="doc-table-col-desc">Descripción</span>
+          <span className="doc-table-col-file">Archivo</span>
+          <span className="doc-table-col-val">Validación</span>
         </div>
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--zs-75)' }}>
+        <div z-flex="col:75">
           {children}
         </div>
       </div>
@@ -23,7 +23,7 @@ export default function DocList({ mode, children }: DocListProps) {
   }
 
   return (
-    <div className="sarlaft-doc-list">
+    <div z-flex="col:75">
       {children}
     </div>
   );

@@ -1,6 +1,7 @@
 import { useState, useCallback } from 'react';
+import { ActionBar } from '../../components/ActionBar';
 import { useTask } from '../../core/useTask';
-import { ZrButton, ZrModal, ZrAlert } from '../../components/fields/ZdsFields';
+import { ZrButton, ZrModal, ZrAlert, ZrIcon } from '../../components/fields/ZdsFields';
 import ResultCard from '../../components/ResultCard';
 import FormSection from '../../components/FormSection';
 import ScreenHeader from '../../components/ScreenHeader';
@@ -161,13 +162,13 @@ export default function SolDocEmi() {
 
       {/* Contenido */}
       <div className="screen-content">
-        <div className="verdoc-layout">
+        <div z-flex="col:150">
 
           <FormSection
             title="Notas de Cobertura Requeridas"
             action={<ZrButton config="secondary:xs" icon="info:line" onClick={() => setInfoOpen(true)} />}
             footer={
-              <div className="submit-bar">
+              <ActionBar>
                 <ZrButton
                   config="primary:l"
                   disabled={submitting}
@@ -176,7 +177,7 @@ export default function SolDocEmi() {
                 >
                   {submitting ? 'Enviando…' : 'ENVIAR'}
                 </ZrButton>
-              </div>
+              </ActionBar>
             }
           >
             {docsActivos.length === 0 && (
@@ -212,23 +213,23 @@ export default function SolDocEmi() {
       {/* Modal de ayuda */}
       <ZrModal model={infoOpen} onChange={(v: boolean) => setInfoOpen(v)} style={{ ['--z-modal--backdrop' as any]: 'rgba(11,27,60,.45)' }}>
         <HelpModal title="Documentos de Emisión" subtitle="Una nota de cobertura por producto seleccionado en la cotización">
-          <p className="ayuda-section-label">Productos y documentos requeridos</p>
-          <div className="ayuda-productos-list">
+          <p className="help-section-label">Productos y documentos requeridos</p>
+          <div z-flex="col:50">
             {PRODUCTO_DOC_DEFS.map((def) => {
               const activo = docsActivos.some((d) => d.key === def.key);
               return (
-                <div key={def.key} className={`ayuda-producto-row${activo ? ' ayuda-producto-activo' : ''}`}>
-                  <div className="ayuda-producto-nombre">
+                <div key={def.key} className={`help-product-row${activo ? ' help-product-active' : ''}`}>
+                  <div className="help-product-name">
                     {def.producto}
-                    {activo && <span className="ayuda-badge-activo">Requerido</span>}
+                    {activo && <span className="badge-active">Requerido</span>}
                   </div>
-                  <div className="ayuda-producto-doc">📄 {def.descripcion}</div>
+                  <div className="help-product-doc"><ZrIcon icon="file-blank:line" config="xs" /> {def.descripcion}</div>
                 </div>
               );
             })}
           </div>
           {docsActivos.length === 0 && (
-            <div className="ayuda-nota">
+            <div className="help-note">
               ℹ No se detectaron productos activos. Se muestran todos los posibles.
             </div>
           )}

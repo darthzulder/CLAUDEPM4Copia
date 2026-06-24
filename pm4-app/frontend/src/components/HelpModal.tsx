@@ -8,15 +8,15 @@ interface HelpModalProps {
 
 export default function HelpModal({ title, subtitle, children }: HelpModalProps) {
   return (
-    <div className="ayuda-modal">
-      <div className="ayuda-modal-header">
-        <div className="ayuda-modal-icon-circle">i</div>
+    <div className="help-modal">
+      <div className="help-modal-header">
+        <div className="help-modal-icon">i</div>
         <div>
-          <div className="ayuda-modal-title">{title}</div>
-          {subtitle && <div className="ayuda-modal-subtitle">{subtitle}</div>}
+          <div className="help-modal-title">{title}</div>
+          {subtitle && <div className="help-modal-subtitle">{subtitle}</div>}
         </div>
       </div>
-      <div className="ayuda-modal-body">
+      <div className="help-modal-body">
         {children}
       </div>
     </div>
