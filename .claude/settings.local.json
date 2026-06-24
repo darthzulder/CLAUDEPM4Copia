@@ -21,7 +21,8 @@
       "mcp__Claude_in_Chrome__navigate",
       "mcp__Claude_in_Chrome__read_console_messages",
       "mcp__visualize__read_me",
-      "mcp__visualize__show_widget"
+      "mcp__visualize__show_widget",
+      "Bash(npm run *)"
     ]
   }
 }

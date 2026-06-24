@@ -16,6 +16,7 @@ import RevisarErrorTecnico from './screens/revisar-error-tecnico/RevisarErrorTec
 import CorregirDatosFormulario from './screens/corregir-datos-formulario/CorregirDatosFormulario';
 import CorregirErrorFuncionalSS from './screens/corregir-error-funcional-ss/CorregirErrorFuncionalSS';
 import RevisarQuejaAsignar from './screens/revisar-queja-asignar/RevisarQuejaAsignar';
+import CierreM3 from './screens/COL_QD_cierre-m3/CierreM3';
 
 class ErrorBoundary extends Component<{ children: ReactNode }, { error: Error | null }> {
   state = { error: null };
@@ -53,6 +54,7 @@ const SCREENS: Record<string, React.ComponentType> = {
   'corregir-datos-formulario': CorregirDatosFormulario,
   'corregir-error-funcional-ss': CorregirErrorFuncionalSS,
   'revisar-queja-asignar': RevisarQuejaAsignar,
+  'COL_QD_cierre-m3': CierreM3,
 };
 
 const DEBUG_BANNER_STYLE: React.CSSProperties = {
