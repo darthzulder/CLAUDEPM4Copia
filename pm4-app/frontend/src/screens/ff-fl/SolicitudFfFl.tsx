@@ -1,14 +1,15 @@
 import { useEffect, useState, useMemo, useRef } from 'react';
+import { ActionBar } from '../../components/ActionBar';
 import { useForm, FieldError } from 'react-hook-form';
 import { useTask } from '../../core/useTask';
 import pm4 from '../../api/pm4Client';
 import { useCollection } from '../../core/useCollection';
 import FormSection from '../../components/FormSection';
+import ScreenHeader from '../../components/ScreenHeader';
 import CreacionTomador from './CreacionTomador';
 import SeccionProductos from './SeccionProductos';
 import SeccionResumenCotizacion from './SeccionResumenCotizacion';
 import { useCotizador, cotizadorResultToPayload, type CotizadorInputs } from '../../core/useCotizador';
-import zurichLogo from '../../resources/zurich/ZurichLogo_Horz_White_CMYK_no_R.png';
 import { ZdsInput, ZdsDate, ZdsCheckboxField, ZdsSelect, ZrButton, ZrAlert, ZrTable } from '../../components/fields/ZdsFields';
 import ResultCard from '../../components/ResultCard';
 import {
@@ -164,8 +165,8 @@ function InfoGeneral({
         />
       </div>
 
-      <div className="correos-adicionales">
-        <div className="correos-adicionales-header">Correos adicionales (máximo 3)</div>
+      <div className="additional-emails">
+        <div className="additional-emails-header">Correos adicionales (máximo 3)</div>
         <div className="form-row cols-3">
           {(['frm_gen_correo_adicional_1', 'frm_gen_correo_adicional_2', 'frm_gen_correo_adicional_3'] as const).map((name, i) => (
             <ZdsInput
@@ -256,7 +257,7 @@ function InfoTomador({
   return (
     <FormSection title="Información del Tomador">
 
-      <div className="form-row cols-3 row-align-bottom">
+      <div className="form-row cols-3">
         <ZdsInput
           control={control}
           name="frm_tom_nit"
@@ -272,7 +273,7 @@ function InfoTomador({
           helpText="9 dígitos + dígito verificador"
         />
         <ZdsInput control={control} name="frm_tom_tomador" label="Tomador" readOnly={fromTia('frm_tom_tomador')} helpText={fromTia('frm_tom_tomador') ? 'Dato de TIA' : undefined} />
-        <div style={{ paddingBottom: 'var(--zs-12)' }}>
+        <div className="zds-field-wrap">
           <ZrButton
             config="secondary"
             icon="search:line"
@@ -343,7 +344,7 @@ function InfoTomador({
       </div>
 
       {actRows.length > 0 && (
-        <div className="form-subsection form-subsection--activities">
+        <div className="form-subsection">
           <div className="form-subsection-title">Actividades aseguradas</div>
           <ZrTable>
             <table>
@@ -357,7 +358,7 @@ function InfoTomador({
               <tbody>
                 {actRows.map(({ prod, actField, ciuField, naicField, options, loading }) => (
                   <tr key={prod}>
-                    <td className="actividades-prod-label">{prod}</td>
+                    <td className="activities-product-label">{prod}</td>
                     <td>
                       <ZdsSelect
                         label=""
@@ -488,30 +489,30 @@ function DatosCotizacion({ form }: { form: ReturnType<typeof useForm<FfFlSolicit
       )}
 
       {hayProductos && (
-        <div className="form-group form-group--facturacion">
+        <div className="form-group form-group--billing">
           <div className="form-label"><span className="required-star">* </span>Facturación total anual (COP)</div>
-          <div className="facturacion-grid">
+          <div className="billing-grid">
             {w.frm_gen_prod_dyo && (
-              <div className="facturacion-block">
-                <div className="facturacion-block-label">Directores y Administradores</div>
+              <div className="billing-block">
+                <div className="billing-block-label">Directores y Administradores</div>
                 <ZdsSelect label="" name="frm_cot_fact_anual_dyo" control={control} rules={{ required: 'Campo requerido' }} options={OPTIONS.facturacionDyO} error={fe('frm_cot_fact_anual_dyo')} />
               </div>
             )}
             {w.frm_gen_prod_cc && (
-              <div className="facturacion-block">
-                <div className="facturacion-block-label">Crimen Comercial</div>
+              <div className="billing-block">
+                <div className="billing-block-label">Crimen Comercial</div>
                 <ZdsSelect label="" name="frm_cot_fact_anual_cc" control={control} rules={{ required: 'Campo requerido' }} options={OPTIONS.facturacionCC} error={fe('frm_cot_fact_anual_cc')} />
               </div>
             )}
             {w.frm_gen_prod_pdysi && (
-              <div className="facturacion-block">
-                <div className="facturacion-block-label">Protección de Datos y SI</div>
+              <div className="billing-block">
+                <div className="billing-block-label">Protección de Datos y SI</div>
                 <ZdsSelect label="" name="frm_cot_fact_anual_pdysi" control={control} rules={{ required: 'Campo requerido' }} options={OPTIONS.facturacionPDySI} error={fe('frm_cot_fact_anual_pdysi')} />
               </div>
             )}
             {w.frm_gen_prod_pi && (
-              <div className="facturacion-block">
-                <div className="facturacion-block-label">Seguro Profesional</div>
+              <div className="billing-block">
+                <div className="billing-block-label">Seguro Profesional</div>
                 <ZdsSelect label="" name="frm_cot_fact_anual_pi" control={control} rules={{ required: 'Campo requerido' }} options={OPTIONS.facturacionPI} error={fe('frm_cot_fact_anual_pi')} />
               </div>
             )}
@@ -824,10 +825,7 @@ export default function SolicitudFfFl() {
   if (sent) {
     return (
       <div className="screen-wrapper">
-        <div className="screen-header">
-          <div className="title-block"><h1>Cotizador Fast Flow — Líneas Financieras</h1></div>
-          <img src={zurichLogo} alt="Zurich" className="header-logo" />
-        </div>
+        <ScreenHeader title="Cotizador Fast Flow — Líneas Financieras" />
         <div className="screen-content">
           <ResultCard variant="success" title="Solicitud enviada">
             <p>
@@ -843,15 +841,10 @@ export default function SolicitudFfFl() {
 
   return (
     <div className="screen-wrapper">
-      <div className="screen-header">
-        <div className="title-block">
-          <h1>Cotizador Fast Flow — Líneas Financieras</h1>
-          <div className="subtitle">
-            <span>Cotización # {form.watch('frm_gen_num_cotizacion') || '—'}</span>
-          </div>
-        </div>
-        <img src={zurichLogo} alt="Zurich" className="header-logo" />
-      </div>
+      <ScreenHeader
+        title="Cotizador Fast Flow — Líneas Financieras"
+        subtitle={`Cotización # ${form.watch('frm_gen_num_cotizacion') || '—'}`}
+      />
 
       <div className="screen-content">
         <div>
@@ -884,7 +877,7 @@ export default function SolicitudFfFl() {
 
           {submitError && <ZrAlert config="negative" {...({ 'hide-close': true } as object)}>{submitError}</ZrAlert>}
 
-          <div className="submit-bar">
+          <ActionBar>
             <ZrButton
               config="primary:l"
               icon="arrow-long-right:line"
@@ -894,7 +887,7 @@ export default function SolicitudFfFl() {
             >
               {submitting ? 'Enviando...' : 'CONTINUAR'}
             </ZrButton>
-          </div>
+          </ActionBar>
         </div>
       </div>
     </div>

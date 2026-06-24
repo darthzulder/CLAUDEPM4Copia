@@ -40,7 +40,7 @@ export default function SeccionErroresValidacion({ form }: Props) {
       </ZrAlert>
 
       {errores.length > 0 && (
-        <div className="error-list">
+        <div className="error-list" z-flex="col:50">
           {errores.map((e, i) => (
             <div key={i} className="error-list-item">
               <span className="error-list-label">{e.label || e.campo}</span>

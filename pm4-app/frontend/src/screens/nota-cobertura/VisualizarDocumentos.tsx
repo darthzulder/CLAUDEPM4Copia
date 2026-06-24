@@ -1,12 +1,13 @@
 import { useState } from 'react';
+import { ActionBar } from '../../components/ActionBar';
 import { useTask } from '../../core/useTask';
 import { useRequestFiles, type Pm4File } from '../../core/useRequestFiles';
 import PdfViewer from '../../components/PdfViewer';
-import { ZrButton, ZrAlert } from '../../components/fields/ZdsFields';
+import { ZrButton, ZrAlert, ZrIcon } from '../../components/fields/ZdsFields';
 import ResultCard from '../../components/ResultCard';
 import FormSection from '../../components/FormSection';
+import ScreenHeader from '../../components/ScreenHeader';
 import { type NotaCoberturaData } from './variables';
-import zurichLogo from '../../resources/zurich/ZurichLogo_Horz_White_CMYK_no_R.png';
 
 // ──────────────────────────────────────────────────────────────
 // Helpers
@@ -36,7 +37,7 @@ function DocumentCard({ file }: { file: Pm4File }) {
   return (
     <div className={`doc-card${open ? ' is-open' : ''}`}>
       <div className="doc-card-header">
-        <span className="doc-icon">📄</span>
+        <ZrIcon icon="file-blank:line" config="l" />
         <div className="doc-info">
           <div className="doc-name">{file.file_name}</div>
           <div className="doc-meta">
@@ -89,13 +90,8 @@ export default function VisualizarDocumentos() {
   if (sent) {
     return (
       <div className="screen-wrapper">
-        <div className="screen-header">
-          <div className="title-block">
-            <h1>{data.frm_titulo || 'VISUALIZAR DOCUMENTOS DE SALIDA'}</h1>
-          </div>
-          <img src={zurichLogo} alt="Zurich" className="header-logo" />
-        </div>
-        <div className="screen-sent-wrapper">
+        <ScreenHeader title={data.frm_titulo || 'VISUALIZAR DOCUMENTOS DE SALIDA'} />
+        <div className="screen-content">
           <ResultCard variant="success" title="Tarea derivada">
             <p>
               Los documentos fueron confirmados correctamente.<br />
@@ -139,23 +135,20 @@ export default function VisualizarDocumentos() {
       )}
 
       {/* Header */}
-      <div className="screen-header">
-        <div className="title-block">
-          <h1>{titulo}</h1>
-          <div className="subtitle">
-            {numCot  && <span>Cotización # {numCot}</span>}
-            {numCaso && <span>Caso # {numCaso}</span>}
-          </div>
-        </div>
-        <img src={zurichLogo} alt="Zurich" className="header-logo" />
-      </div>
+      <ScreenHeader
+        title={titulo}
+        subtitle={[
+          numCot ? `Cotización # ${numCot}` : null,
+          numCaso ? `Caso # ${numCaso}` : null,
+        ]}
+      />
 
       {/* Contenido */}
       <div className="screen-content">
         <FormSection
           title="Notas de Cobertura Generadas"
           footer={
-            <div className="submit-bar">
+            <ActionBar>
               <ZrButton
                 config="primary:l"
                 disabled={submitting}
@@ -164,7 +157,7 @@ export default function VisualizarDocumentos() {
               >
                 {submitting ? 'Enviando…' : 'CONTINUAR'}
               </ZrButton>
-            </div>
+            </ActionBar>
           }
         >
           {filesLoading && (
@@ -187,7 +180,7 @@ export default function VisualizarDocumentos() {
           )}
 
           {!filesLoading && files.length > 0 && (
-            <div className="doc-list">
+            <div z-flex="col:75">
               {files.map((file) => (
                 <DocumentCard key={file.id} file={file} />
               ))}

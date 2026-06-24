@@ -1,15 +1,19 @@
-import { useState, useRef, useCallback } from 'react';
+import { useState, useCallback } from 'react';
+import { ActionBar } from '../../components/ActionBar';
 import { useTask } from '../../core/useTask';
-import { ZrButton, ZrModal, ZrAlert } from '../../components/fields/ZdsFields';
+import { ZrButton, ZrModal, ZrAlert, ZrIcon } from '../../components/fields/ZdsFields';
 import ResultCard from '../../components/ResultCard';
 import FormSection from '../../components/FormSection';
+import ScreenHeader from '../../components/ScreenHeader';
+import HelpModal from '../../components/HelpModal';
+import PreviewModal from '../../components/PreviewModal';
+import DocList from '../../components/DocList';
+import DocItem from '../../components/DocItem';
 import pm4 from '../../api/pm4Client';
 import {
   type SolDocEmiData,
-  type ProductoDocDef,
   PRODUCTO_DOC_DEFS,
 } from './variables';
-import zurichLogo from '../../resources/zurich/ZurichLogo_Horz_White_CMYK_no_R.png';
 
 // ──────────────────────────────────────────────────────────────
 // Types
@@ -25,123 +29,6 @@ interface PreviewDoc {
   blobUrl: string;
 }
 
-// ──────────────────────────────────────────────────────────────
-// Fila de documento con upload
-// ──────────────────────────────────────────────────────────────
-function DocRow({
-  index,
-  descripcion,
-  docKey,
-  state,
-  onFileChange,
-  onPreview,
-}: {
-  index: number;
-  descripcion: string;
-  docKey: string;
-  state: RowState;
-  onFileChange: (key: string, file: File) => void;
-  onPreview: (key: string) => void;
-}) {
-  const inputRef = useRef<HTMLInputElement>(null);
-  const cargado  = !!state.file;
-
-  return (
-    <div className={`sarlaft-doc-row${cargado ? ' is-loaded' : ''}`}>
-      <div className={`doc-num-badge${cargado ? ' doc-num-badge--loaded' : ''}`}>
-        {cargado ? '✓' : index}
-      </div>
-
-      <div className="doc-body">
-        <span className="doc-desc">{descripcion}</span>
-      </div>
-
-      <div className="doc-estado-wrap">
-        <span className={`estado-badge${cargado ? ' estado-cargado' : ' estado-pendiente'}`}>
-          {cargado ? 'Cargado' : 'Pendiente'}
-        </span>
-      </div>
-
-      <div className="doc-file-area">
-        <input
-          ref={inputRef}
-          type="file"
-          accept=".pdf,.png,.jpg,.jpeg"
-          style={{ display: 'none' }}
-          onChange={(e) => {
-            const f = e.target.files?.[0];
-            if (f) onFileChange(docKey, f);
-            e.target.value = '';
-          }}
-        />
-        <ZrButton
-          config="secondary:s"
-          icon="document-upload:line"
-          wide
-          onClick={() => inputRef.current?.click()}
-        >
-          {cargado ? 'Cambiar' : 'Seleccionar archivo'}
-        </ZrButton>
-        {cargado && (
-          <span className="file-name-chip">
-            <span className="file-chip-icon">📄</span>
-            {state.file!.name}
-          </span>
-        )}
-      </div>
-
-      <div className="doc-preview-trigger">
-        <ZrButton
-          config="secondary:s"
-          icon="visibility-on:line"
-          disabled={!cargado}
-          onClick={() => onPreview(docKey)}
-        >
-          Vista previa
-        </ZrButton>
-      </div>
-    </div>
-  );
-}
-
-// ──────────────────────────────────────────────────────────────
-// Modal de ayuda — documentos por producto
-// ──────────────────────────────────────────────────────────────
-function AyudaModalContent({ docsActivos }: { docsActivos: ProductoDocDef[] }) {
-  return (
-    <div className="ayuda-modal">
-      <div className="ayuda-modal-header">
-        <div className="ayuda-modal-icon-circle">i</div>
-        <div>
-          <div className="ayuda-modal-title">Documentos de Emisión</div>
-          <div className="ayuda-modal-subtitle">Una nota de cobertura por producto seleccionado en la cotización</div>
-        </div>
-      </div>
-      <div className="ayuda-modal-body">
-        <p className="ayuda-section-label">Productos y documentos requeridos</p>
-        <div className="ayuda-productos-list">
-          {PRODUCTO_DOC_DEFS.map((def) => {
-            const activo = docsActivos.some((d) => d.key === def.key);
-            return (
-              <div key={def.key} className={`ayuda-producto-row${activo ? ' ayuda-producto-activo' : ''}`}>
-                <div className="ayuda-producto-nombre">
-                  {def.producto}
-                  {activo && <span className="ayuda-badge-activo">Requerido</span>}
-                </div>
-                <div className="ayuda-producto-doc">📄 {def.descripcion}</div>
-              </div>
-            );
-          })}
-        </div>
-        {docsActivos.length === 0 && (
-          <div className="ayuda-nota">
-            ℹ No se detectaron productos activos. Se muestran todos los posibles.
-          </div>
-        )}
-      </div>
-    </div>
-  );
-}
 
 // ──────────────────────────────────────────────────────────────
 // Pantalla principal
@@ -219,13 +106,8 @@ export default function SolDocEmi() {
   if (sent) {
     return (
       <div className="screen-wrapper">
-        <div className="screen-header">
-          <div className="title-block">
-            <h1>SOLICITUD DE DOCUMENTOS EMISIÓN</h1>
-          </div>
-          <img src={zurichLogo} alt="Zurich" className="header-logo" />
-        </div>
-        <div className="screen-sent-wrapper">
+        <ScreenHeader title="SOLICITUD DE DOCUMENTOS EMISIÓN" />
+        <div className="screen-content">
           <ResultCard variant="success" title="Documentos enviados">
             <p>
               Las notas de cobertura fueron cargadas correctamente.<br />
@@ -269,29 +151,24 @@ export default function SolDocEmi() {
       )}
 
       {/* Header */}
-      <div className="screen-header">
-        <div className="title-block">
-          <h1>SOLICITUD DE DOCUMENTOS EMISIÓN</h1>
-          <div className="subtitle">
-            {numCot  && <span>Cotización # {numCot}</span>}
-            {numCaso && <span>Caso # {numCaso}</span>}
-            {docsActivos.length > 0 && (
-              <span>{docsActivos.length} producto{docsActivos.length > 1 ? 's' : ''} seleccionado{docsActivos.length > 1 ? 's' : ''}</span>
-            )}
-          </div>
-        </div>
-        <img src={zurichLogo} alt="Zurich" className="header-logo" />
-      </div>
+      <ScreenHeader
+        title="SOLICITUD DE DOCUMENTOS EMISIÓN"
+        subtitle={[
+          numCot && `Cotización # ${numCot}`,
+          numCaso && `Caso # ${numCaso}`,
+          docsActivos.length > 0 && `${docsActivos.length} producto${docsActivos.length > 1 ? 's' : ''} seleccionado${docsActivos.length > 1 ? 's' : ''}`
+        ]}
+      />
 
       {/* Contenido */}
       <div className="screen-content">
-        <div className="verdoc-layout">
+        <div z-flex="col:150">
 
           <FormSection
             title="Notas de Cobertura Requeridas"
             action={<ZrButton config="secondary:xs" icon="info:line" onClick={() => setInfoOpen(true)} />}
             footer={
-              <div className="submit-bar">
+              <ActionBar>
                 <ZrButton
                   config="primary:l"
                   disabled={submitting}
@@ -300,7 +177,7 @@ export default function SolDocEmi() {
                 >
                   {submitting ? 'Enviando…' : 'ENVIAR'}
                 </ZrButton>
-              </div>
+              </ActionBar>
             }
           >
             {docsActivos.length === 0 && (
@@ -309,19 +186,19 @@ export default function SolDocEmi() {
               </ZrAlert>
             )}
 
-            <div className="sarlaft-doc-list">
+            <DocList mode="upload">
               {docs.map((doc, i) => (
-                <DocRow
+                <DocItem
                   key={doc.key}
+                  mode="upload"
                   index={i + 1}
                   descripcion={doc.descripcion}
-                  docKey={doc.key}
                   state={rowStates[doc.key] ?? { file: null, blobUrl: null }}
-                  onFileChange={handleFileChange}
-                  onPreview={handlePreview}
+                  onFileChange={(f) => handleFileChange(doc.key, f)}
+                  onPreview={() => handlePreview(doc.key)}
                 />
               ))}
-            </div>
+            </DocList>
 
             {validationError && (
               <ZrAlert config="negative" {...({ 'hide-close': true } as object)}>
@@ -335,34 +212,36 @@ export default function SolDocEmi() {
 
       {/* Modal de ayuda */}
       <ZrModal model={infoOpen} onChange={(v: boolean) => setInfoOpen(v)} style={{ ['--z-modal--backdrop' as any]: 'rgba(11,27,60,.45)' }}>
-        <AyudaModalContent docsActivos={docsActivos} />
+        <HelpModal title="Documentos de Emisión" subtitle="Una nota de cobertura por producto seleccionado en la cotización">
+          <p className="help-section-label">Productos y documentos requeridos</p>
+          <div z-flex="col:50">
+            {PRODUCTO_DOC_DEFS.map((def) => {
+              const activo = docsActivos.some((d) => d.key === def.key);
+              return (
+                <div key={def.key} className={`help-product-row${activo ? ' help-product-active' : ''}`}>
+                  <div className="help-product-name">
+                    {def.producto}
+                    {activo && <span className="badge-active">Requerido</span>}
+                  </div>
+                  <div className="help-product-doc"><ZrIcon icon="file-blank:line" config="xs" /> {def.descripcion}</div>
+                </div>
+              );
+            })}
+          </div>
+          {docsActivos.length === 0 && (
+            <div className="help-note">
+              ℹ No se detectaron productos activos. Se muestran todos los posibles.
+            </div>
+          )}
+        </HelpModal>
       </ZrModal>
 
       {/* Modal de vista previa — ZrModal (ZDS) */}
-      <ZrModal
-        model={!!previewDoc}
-        onChange={(v: boolean) => { if (!v) setPreviewDoc(null); }}
-        style={{ ['--z-modal--padding' as any]: '0', ['--z-modal--backdrop' as any]: 'rgba(11,27,60,.55)' }}
-      >
-        <div className="preview-modal">
-          <div className="preview-modal-header">
-            <div className="preview-modal-title">
-              <span className="preview-modal-icon">📄</span>
-              <div>
-                <div className="preview-modal-doc-name">{previewDoc?.fileName}</div>
-                <div className="preview-modal-doc-desc">{previewDoc?.descripcion}</div>
-              </div>
-            </div>
-          </div>
-          {previewDoc?.blobUrl && (
-            <iframe
-              src={previewDoc.blobUrl}
-              title={previewDoc.fileName}
-              className="preview-modal-iframe"
-            />
-          )}
-        </div>
-      </ZrModal>
+      <PreviewModal
+        isOpen={!!previewDoc}
+        onClose={() => setPreviewDoc(null)}
+        previewDoc={previewDoc}
+      />
     </div>
   );
 }

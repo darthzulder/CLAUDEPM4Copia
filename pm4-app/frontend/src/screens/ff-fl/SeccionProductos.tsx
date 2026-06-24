@@ -35,8 +35,8 @@ export default function SeccionProductos({ form, fileRegistry }: { form: Form; f
   return (
     <div className="products-card">
       <ZrTabs
-        model={Math.max(0, activeTabs.findIndex((t) => t.key === activeTab))}
-        onChange={(idx: number) => setActiveTab(activeTabs[idx].key)}
+        model={Math.max(1, activeTabs.findIndex((t) => t.key === activeTab) + 1)}
+        onChange={(idx: number) => { const t = activeTabs[idx - 1]; if (t) setActiveTab(t.key); }}
         {...({ tabs: activeTabs.map((t) => ({ name: t.label })) } as Record<string, unknown>)}
       />
 

@@ -1,8 +1,9 @@
-import { useState } from 'react';
+import type React from 'react';
 import { useForm } from 'react-hook-form';
-import { ZrButton, ZdsSelect, ZrAlert, ZrFileInput, ZrTable } from '../../components/fields/ZdsFields';
+import DocSupportUploader from '../../components/DocSupportUploader';
 import { OPTIONS, FfFlSolicitudFormData } from './variables';
-import { SiNoField, SiNoSelectAll } from './SiNoGroup';
+import { SiNoQuestionTable } from './SiNoGroup';
+import { PropuestaEconomicaTable } from './PropuestaEconomicaTable';
 
 type Form = ReturnType<typeof useForm<FfFlSolicitudFormData>>;
 
@@ -70,30 +71,6 @@ const CONTROLES_ADICIONALES = [
 const MSG_BLOQUEO = 'La cotización no puede continuar por este canal y deberá gestionarse con la ayuda del asesor comercial (Case Underwriting).';
 
 export default function SeccionPDySI({ form, fileRegistry }: { form: Form; fileRegistry: React.MutableRefObject<Map<string, File>> }) {
-  const { control, watch, setValue, register } = form;
-  const w = watch();
-  const [numDocs, setNumDocs] = useState(1);
-
-  const perfBloqueado = SECTORES.some((_, i) => {
-    const key = `frm_pdysi_perf_${String(i + 1).padStart(2, '0')}` as keyof FfFlSolicitudFormData;
-    return w[key] === 'SI';
-  });
-
-  const reqBloqueado = REQUISITOS.some((_, i) => {
-    const key = `frm_pdysi_req_${String(i + 1).padStart(2, '0')}` as keyof FfFlSolicitudFormData;
-    return w[key] === 'NO';
-  });
-
-  const ctrl1Bloqueado = CONTROLES_1.some((_, i) => {
-    const key = `frm_pdysi_ctrl1_${String(i + 1).padStart(2, '0')}` as keyof FfFlSolicitudFormData;
-    return w[key] === 'NO';
-  });
-
-  const ctrl2Bloqueado = CONTROLES_2.some((_, i) => {
-    const key = `frm_pdysi_ctrl2_${String(i + 1).padStart(2, '0')}` as keyof FfFlSolicitudFormData;
-    return w[key] === 'NO';
-  });
-
   const docKeys = [
     'frm_pdysi_doc_01_nombre', 'frm_pdysi_doc_02_nombre', 'frm_pdysi_doc_03_nombre',
   ] as const;
@@ -102,255 +79,73 @@ export default function SeccionPDySI({ form, fileRegistry }: { form: Form; fileR
     <div>
 
       {/* ── PERFIL DE CLIENTE ── */}
-      <div className="form-subsection dyo-subsection">
-        <div className="form-subsection-title">Perfil de cliente</div>
-        <p className="dyo-intro-text">
-          ¿La compañía opera en alguno de los siguientes sectores?
-        </p>
-        <SiNoSelectAll form={form} prefix="frm_pdysi_perf_" count={SECTORES.length} />
-        <ZrTable>
-          <table>
-            <thead>
-              <tr>
-                <th style={{ width: 40 }} {...({ config: 'center' } as object)}>#</th>
-                <th>Sector</th>
-                <th style={{ width: 120 }} {...({ config: 'center' } as object)}>SÍ / NO</th>
-              </tr>
-            </thead>
-            <tbody>
-              {SECTORES.map((sector, i) => {
-                const name = `frm_pdysi_perf_${String(i + 1).padStart(2, '0')}` as keyof FfFlSolicitudFormData;
-                return (
-                  <tr key={name}>
-                    <td {...({ config: 'center' } as object)}>{i + 1}</td>
-                    <td>{sector}</td>
-                    <td {...({ config: 'center' } as object)}><SiNoField form={form} name={name} /></td>
-                  </tr>
-                );
-              })}
-            </tbody>
-          </table>
-        </ZrTable>
-        {perfBloqueado && <ZrAlert config="alert" {...({ 'hide-close': true } as object)}>{MSG_BLOQUEO}</ZrAlert>}
-      </div>
+      <SiNoQuestionTable
+        form={form}
+        title="Perfil de cliente"
+        intro="¿La compañía opera en alguno de los siguientes sectores?"
+        prefix="frm_pdysi_perf_"
+        items={SECTORES}
+        colHeader="Sector"
+        blockOn="SI"
+        blockMsg={MSG_BLOQUEO}
+      />
 
       {/* ── REQUISITOS ── */}
-      <div className="form-subsection dyo-subsection">
-        <div className="form-subsection-title">Requisitos</div>
-        <p className="dyo-intro-text">
-          Por favor diligenciar el siguiente cuestionario con la información proporcionada.
+      <SiNoQuestionTable
+        form={form}
+        title="Requisitos"
+        intro={
+          <>Por favor diligenciar el siguiente cuestionario con la información proporcionada.
           Si contesta NO a cualquiera de las siguientes preguntas, la cotización no puede continuar
-          por este canal y deberá comunicarse con su director comercial.
-        </p>
-        <SiNoSelectAll form={form} prefix="frm_pdysi_req_" count={REQUISITOS.length} />
-        <ZrTable>
-          <table>
-            <thead>
-              <tr>
-                <th style={{ width: 40 }} {...({ config: 'center' } as object)}>#</th>
-                <th>La sociedad y sus filiales (si aplica) afirman que:</th>
-                <th style={{ width: 120 }} {...({ config: 'center' } as object)}>SÍ / NO</th>
-              </tr>
-            </thead>
-            <tbody>
-              {REQUISITOS.map((pregunta, i) => {
-                const name = `frm_pdysi_req_${String(i + 1).padStart(2, '0')}` as keyof FfFlSolicitudFormData;
-                return (
-                  <tr key={name}>
-                    <td {...({ config: 'center' } as object)}>{i + 1}</td>
-                    <td>{pregunta}</td>
-                    <td {...({ config: 'center' } as object)}><SiNoField form={form} name={name} /></td>
-                  </tr>
-                );
-              })}
-            </tbody>
-          </table>
-        </ZrTable>
-        {reqBloqueado && <ZrAlert config="alert" {...({ 'hide-close': true } as object)}>{MSG_BLOQUEO}</ZrAlert>}
-      </div>
+          por este canal y deberá comunicarse con su director comercial.</>
+        }
+        prefix="frm_pdysi_req_"
+        items={REQUISITOS}
+        blockOn="NO"
+        blockMsg={MSG_BLOQUEO}
+      />
 
       {/* ── CONTROLES EN LA GESTIÓN DEL RIESGO - PARTE 1 ── */}
-      <div className="form-subsection dyo-subsection">
-        <div className="form-subsection-title">Controles en la Gestión del Riesgo - Parte 1</div>
-        <p className="dyo-intro-text">
-          Por favor confirme con la información proporcionada que el tomador y sus filiales (si aplica) afirma que:
-        </p>
-        <SiNoSelectAll form={form} prefix="frm_pdysi_ctrl1_" count={CONTROLES_1.length} />
-        <ZrTable>
-          <table>
-            <thead>
-              <tr>
-                <th style={{ width: 40 }} {...({ config: 'center' } as object)}>#</th>
-                <th>La sociedad y sus filiales (si aplica) afirman que:</th>
-                <th style={{ width: 120 }} {...({ config: 'center' } as object)}>SÍ / NO</th>
-              </tr>
-            </thead>
-            <tbody>
-              {CONTROLES_1.map((pregunta, i) => {
-                const name = `frm_pdysi_ctrl1_${String(i + 1).padStart(2, '0')}` as keyof FfFlSolicitudFormData;
-                return (
-                  <tr key={name}>
-                    <td {...({ config: 'center' } as object)}>{i + 1}</td>
-                    <td>{pregunta}</td>
-                    <td {...({ config: 'center' } as object)}><SiNoField form={form} name={name} /></td>
-                  </tr>
-                );
-              })}
-            </tbody>
-          </table>
-        </ZrTable>
-        {ctrl1Bloqueado && <ZrAlert config="alert" {...({ 'hide-close': true } as object)}>{MSG_BLOQUEO}</ZrAlert>}
-      </div>
+      <SiNoQuestionTable
+        form={form}
+        title="Controles en la Gestión del Riesgo - Parte 1"
+        intro="Por favor confirme con la información proporcionada que el tomador y sus filiales (si aplica) afirma que:"
+        prefix="frm_pdysi_ctrl1_"
+        items={CONTROLES_1}
+        blockOn="NO"
+        blockMsg={MSG_BLOQUEO}
+      />
 
       {/* ── CONTROLES EN LA GESTIÓN DEL RIESGO - PARTE 2 ── */}
-      <div className="form-subsection dyo-subsection">
-        <div className="form-subsection-title">Controles en la Gestión del Riesgo - Parte 2</div>
-        <p className="dyo-intro-text">
-          Por favor confirme con la información proporcionada que el tomador y sus filiales (si aplica) afirma que:
-        </p>
-        <SiNoSelectAll form={form} prefix="frm_pdysi_ctrl2_" count={CONTROLES_2.length} />
-        <ZrTable>
-          <table>
-            <thead>
-              <tr>
-                <th style={{ width: 40 }} {...({ config: 'center' } as object)}>#</th>
-                <th>La sociedad y sus filiales (si aplica) afirman que:</th>
-                <th style={{ width: 120 }} {...({ config: 'center' } as object)}>SÍ / NO</th>
-              </tr>
-            </thead>
-            <tbody>
-              {CONTROLES_2.map((pregunta, i) => {
-                const name = `frm_pdysi_ctrl2_${String(i + 1).padStart(2, '0')}` as keyof FfFlSolicitudFormData;
-                return (
-                  <tr key={name}>
-                    <td {...({ config: 'center' } as object)}>{i + 1}</td>
-                    <td>{pregunta}</td>
-                    <td {...({ config: 'center' } as object)}><SiNoField form={form} name={name} /></td>
-                  </tr>
-                );
-              })}
-            </tbody>
-          </table>
-        </ZrTable>
-        {ctrl2Bloqueado && <ZrAlert config="alert" {...({ 'hide-close': true } as object)}>{MSG_BLOQUEO}</ZrAlert>}
-      </div>
+      <SiNoQuestionTable
+        form={form}
+        title="Controles en la Gestión del Riesgo - Parte 2"
+        intro="Por favor confirme con la información proporcionada que el tomador y sus filiales (si aplica) afirma que:"
+        prefix="frm_pdysi_ctrl2_"
+        items={CONTROLES_2}
+        blockOn="NO"
+        blockMsg={MSG_BLOQUEO}
+      />
 
       {/* ── CONTROLES ADICIONALES ── */}
-      <div className="form-subsection dyo-subsection">
-        <div className="form-subsection-title">Controles Adicionales</div>
-        <p className="dyo-intro-text">
-          Por favor confirme con la información proporcionada que el tomador y sus filiales (si aplica) afirma que:
-        </p>
-        <SiNoSelectAll form={form} prefix="frm_pdysi_ctrlad_" count={CONTROLES_ADICIONALES.length} />
-        <ZrTable>
-          <table>
-            <thead>
-              <tr>
-                <th style={{ width: 40 }} {...({ config: 'center' } as object)}>#</th>
-                <th>La sociedad y sus filiales (si aplica) afirman que:</th>
-                <th style={{ width: 120 }} {...({ config: 'center' } as object)}>SÍ / NO</th>
-              </tr>
-            </thead>
-            <tbody>
-              {CONTROLES_ADICIONALES.map((pregunta, i) => {
-                const name = `frm_pdysi_ctrlad_${String(i + 1).padStart(2, '0')}` as keyof FfFlSolicitudFormData;
-                return (
-                  <tr key={name}>
-                    <td {...({ config: 'center' } as object)}>{i + 1}</td>
-                    <td>{pregunta}</td>
-                    <td {...({ config: 'center' } as object)}><SiNoField form={form} name={name} /></td>
-                  </tr>
-                );
-              })}
-            </tbody>
-          </table>
-        </ZrTable>
-      </div>
+      <SiNoQuestionTable
+        form={form}
+        title="Controles Adicionales"
+        intro="Por favor confirme con la información proporcionada que el tomador y sus filiales (si aplica) afirma que:"
+        prefix="frm_pdysi_ctrlad_"
+        items={CONTROLES_ADICIONALES}
+      />
 
       {/* ── DOCUMENTO DE SOPORTE ── */}
-      <div className="form-subsection dyo-subsection">
-        <div className="form-subsection-title">Documento de soporte de las confirmaciones</div>
-        <p className="dyo-intro-text">
-          Por favor cargue aquí el documento de respaldo proporcionado por el intermediario.
-          Se pueden agregar hasta 3 documentos.
-        </p>
-        <div className="dyo-docs-list">
-          {docKeys.slice(0, numDocs).map((docKey, i) => {
-            const fileName = w[docKey] as string | undefined;
-            return (
-              <div key={docKey} className="dyo-doc-row">
-                <span className="dyo-doc-label">Documento {i + 1}</span>
-                <ZrFileInput
-                  label=""
-                  model={fileName || null}
-                  droppable
-                  onChange={(file: File | string | null) => {
-                    if (file && typeof file !== 'string') {
-                      setValue(docKey, file.name as never);
-                      fileRegistry.current.set(docKey, file);
-                    } else if (!file) {
-                      setValue(docKey, '' as never);
-                      fileRegistry.current.delete(docKey);
-                    }
-                  }}
-                  {...({ accept: ['.pdf', '.doc', '.docx', '.jpg', '.jpeg', '.png'] } as Record<string, unknown>)}
-                />
-                <input type="hidden" {...register(docKey)} />
-              </div>
-            );
-          })}
-        </div>
-        {numDocs < 3 && (
-          <ZrButton
-            config="secondary"
-            onClick={() => setNumDocs((n) => n + 1)}
-            style={{ marginTop: 'var(--zs-75)' }}
-            icon="plus:line"
-          >
-            Agregar documento
-          </ZrButton>
-        )}
-      </div>
+      <DocSupportUploader form={form} fileRegistry={fileRegistry} docKeys={docKeys} />
 
       {/* ── PROPUESTA ECONÓMICA ── */}
-      <div className="form-subsection dyo-subsection">
-        <div className="form-subsection-title">Propuesta económica</div>
-        <ZrTable>
-          <table>
-            <thead>
-              <tr>
-                <th style={{ width: 40 }} {...({ config: 'center' } as object)}>#</th>
-                <th>Límite asegurado</th>
-                <th>Modalidad de cobertura</th>
-              </tr>
-            </thead>
-            <tbody>
-              {([
-                ['frm_pdysi_prop_01_limite', 1],
-                ['frm_pdysi_prop_02_limite', 2],
-                ['frm_pdysi_prop_03_limite', 3],
-              ] as const).map(([field, n]) => (
-                <tr key={field}>
-                  <td {...({ config: 'center' } as object)}>{n}</td>
-                  <td>
-                    <ZdsSelect
-                      label=""
-                      name={field}
-                      control={control}
-                      options={OPTIONS.limitePdySI}
-                      placeholder="Seleccione un límite"
-                    />
-                  </td>
-                  <td>Todo y cada reclamo en el agregado anual</td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </ZrTable>
-        <p className="dyo-nota">
-          Nota: el sistema debe controlar que se ingrese al menos un valor asegurado.
-        </p>
-      </div>
+      <PropuestaEconomicaTable
+        form={form}
+        fields={['frm_pdysi_prop_01_limite', 'frm_pdysi_prop_02_limite', 'frm_pdysi_prop_03_limite']}
+        options={OPTIONS.limitePdySI}
+        note="Nota: el sistema debe controlar que se ingrese al menos un valor asegurado."
+      />
 
     </div>
   );

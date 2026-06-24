@@ -24,12 +24,12 @@ export default function ResultCard({
   children?: ReactNode;
 }) {
   return (
-    <div className={`rc-card rc-card--${variant}`}>
-      <div className="rc-icon" style={{ fontStyle: variant === 'info' ? 'italic' : 'normal' }}>
+    <div className={`result-card result-card--${variant}`}>
+      <div className="result-card-icon" style={{ fontStyle: variant === 'info' ? 'italic' : 'normal' }}>
         {ICON[variant]}
       </div>
-      <div className="rc-title">{title}</div>
-      {children && <div className="rc-body">{children}</div>}
+      <div className="result-card-title">{title}</div>
+      {children && <div className="result-card-body">{children}</div>}
     </div>
   );
 }

@@ -1,25 +1,21 @@
 /* ==========================================================================
-   SHARED — estilos comunes a todas las pantallas PM4
-   Importado UNA SOLA VEZ en main.tsx. No duplicar en styles.css de screens.
+   SHARED — ESTILOS COMUNES DE LAS PANTALLAS DE PM4
+   Importado una sola vez en main.tsx.
    ========================================================================== */
 
-/* ── Aliases que mapean tokens Zurich ──────────────────────────────────────
-   En @zurich/css-components el gris está INVERTIDO:
-   --zg-1 = casi negro (#0D1115),  --zg-9 = gris más claro (#C9D0D2)
-   Para fondos claros: --zg-white (#fff) o --zg-white-zurich (#ECEEEF)
-   Para bordes sutiles: --zg-9                                              */
+/* ── 1. TOKENS & ALIASES ZURICH ────────────────────────────────────────── */
 :root {
-  --z-blue:        var(--zc-blue-zurich);
-  --z-blue-dark:   var(--zc-blue-dark);
-  --z-blue-light:  var(--zc-blue-sky-10);
-  --z-green:       var(--zc-moss-aa);
-  --z-red:         var(--zc-peach-aa);
-  --z-orange:      var(--zc-lemon-aa);
-  --z-bg:          var(--zg-white-zurich);
-  --z-border:      var(--zg-9);
-  --z-text:        var(--zc-blue-dark);
-  --z-muted:       var(--zg-5);
-  --z-card-shadow: 0 1px 3px rgba(0,0,0,.07), 0 6px 18px rgba(0,0,0,.06);
+  --z-blue: var(--zc-blue-zurich);
+  --z-blue-dark: var(--zc-blue-dark);
+  --z-blue-light: var(--zc-blue-sky-10);
+  --z-green: var(--zc-moss-aa);
+  --z-red: var(--zc-peach-aa);
+  --z-orange: var(--zc-lemon-aa);
+  --z-bg: var(--zg-white-zurich);
+  --z-border: var(--zg-9);
+  --z-text: var(--zc-blue-dark);
+  --z-muted: var(--zg-5);
+  --z-card-shadow: 0 1px 3px rgba(0, 0, 0, .07), 0 6px 18px rgba(0, 0, 0, .06);
 }
 
 @font-face {
@@ -30,43 +26,479 @@
   font-display: swap;
 }
 
-/* Fuente base = stack ZDS (igual que los tokens --zf-*). Antes usaba var(--zf-sans) que NO existe → caía a Times. */
-* { font-family: ZurichSans, Arial, Helvetica, sans-serif; box-sizing: border-box; }
+* {
+  font-family: ZurichSans, Arial, Helvetica, sans-serif;
+  box-sizing: border-box;
+}
 
-/* ── Layout principal ──────────────────────────────────────────────────── */
+/* ── 1b. TYPOGRAPHY AND THEMING CONSOLIDATION ──────────────────────────── */
+/* Caption 12 — muted */
+.help-modal-subtitle,
+.help-product-doc,
+.preview-modal-doc-desc,
+.doc-validity,
+.file-name-empty,
+.file-name-chip,
+.field-hint,
+.doc-meta,
+.quote-summary-cell--muted,
+.subsection-note {
+  font: var(--zf-capt-12);
+  color: var(--z-muted);
+}
+
+/* Caption 12 — bold label */
+.help-section-label,
+.info-bar-label,
+.section-title,
+.doc-num-badge,
+.doc-table-header,
+.pdf-viewer-label,
+.additional-emails-header,
+.cover-note-label,
+.doc-row-label,
+.activities-product-label,
+.billing-block-label,
+.form-label,
+.checkbox-group-label {
+  font: var(--zf-capt-12--700);
+}
+
+.help-section-label,
+.info-bar-label,
+.section-title,
+.doc-num-badge,
+.doc-table-header,
+.pdf-viewer-label,
+.additional-emails-header,
+.cover-note-label,
+.form-label,
+.checkbox-group-label {
+  color: var(--z-muted);
+}
+
+.doc-row-label,
+.activities-product-label,
+.billing-block-label {
+  color: var(--z-blue);
+}
+
+/* Caption 14 — regular */
+.screen-loading,
+.screen-error,
+.help-desc,
+.help-doc-list li,
+.doc-desc,
+.pdf-viewer-state,
+.subsection-intro,
+.no-docs-card p {
+  font: var(--zf-capt-14);
+}
+
+/* Caption 14 — bold (incluye info-bar-value, antes 600) */
+.help-profile-label,
+.help-product-name,
+.preview-modal-doc-name,
+.info-bar-value,
+.doc-name {
+  font: var(--zf-capt-14--700);
+  color: var(--z-text);
+}
+
+.form-subsection-title,
+.decision-title,
+.subsection-title {
+  font: var(--zf-capt-14--700);
+  color: var(--z-blue);
+  display: flex;
+  align-items: center;
+  gap: var(--zs-50);
+}
+
+/* Body 14 — regular sobre texto base */
+z-table td,
+.service-item,
+.quote-summary-cell {
+  font: var(--zf-body-14);
+  color: var(--z-text);
+}
+
+/* Body 14 — bold sobre texto base */
+z-table th,
+.quote-summary-label {
+  font: var(--zf-body-14--700);
+  color: var(--z-text);
+}
+
+/* Body 14 — muted */
+.email-status-note,
+.quote-summary-status {
+  font: var(--zf-body-14);
+  color: var(--z-muted);
+}
+
+/* Uppercase micro-labels (letter-spacing .3px) */
+.info-bar-label,
+.pdf-viewer-label,
+.additional-emails-header,
+.doc-table-header,
+.cover-note-label,
+.form-label,
+.checkbox-group-label,
+.billing-block-label,
+.badge-active,
+.error-list-label {
+  text-transform: uppercase;
+  letter-spacing: .3px;
+}
+
+/* Uppercase section headers (letter-spacing .55px) */
+.help-section-label,
+.section-title,
+.form-section-header span,
+.quote-summary-product-header,
+.screen-header .title-block h1 {
+  text-transform: uppercase;
+  letter-spacing: .55px;
+}
+
+/* Píldora de estado: ZrBadge del DS envuelto en .status-badge (ver ZdsStatusBadge).
+   El span wrapper es el grid-item; justify-self evita que se estire en grids. */
+.status-badge {
+  justify-self: start;
+}
+
+/* ── 1c. STATUS AND BACKGROUND CONSOLIDATION ──────────────────────────── */
+.doc-num-badge--aprobada {
+  background: var(--zc-moss-20, #c8edd4);
+  color: var(--zc-moss-aa, #0ca442);
+}
+
+.result-card--error .result-card-icon,
+.doc-num-badge--rechazada {
+  background: var(--zc-peach-10, #fdf1ef);
+  color: var(--z-red);
+}
+
+.help-note,
+.policyholder-create-body,
+.tia-confirm-create {
+  background: var(--zc-lemon-20);
+}
+
+/* ── 2. ESTRUCTURA Y BASE ──────────────────────────────────────────────── */
 .screen-wrapper {
   min-height: 100vh;
   background: var(--z-bg);
 }
 
 .screen-content {
-  padding: var(--zs-150) var(--zs-200) var(--zs-400);
+  max-width: 960px;
+  margin: 0 auto;
+  padding: var(--zs-150) var(--zs-150) var(--zs-400);
 }
 
-/* ── Header institucional ──────────────────────────────────────────────── */
+/* ── 3. ESTADOS DE CARGA Y ERROR globales ────────────────────────────── */
+.screen-loading {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 60vh;
+  gap: var(--zs-100);
+  color: var(--z-muted);
+}
+
+.screen-error {
+  margin: var(--zs-250) auto;
+  max-width: 480px;
+  background: var(--zg-white);
+  border: 1px solid var(--zc-peach-40);
+  border-left: 4px solid var(--z-red);
+  border-radius: 10px;
+  padding: var(--zs-150);
+  color: var(--z-red);
+  box-shadow: var(--z-card-shadow);
+}
+
+.spinner {
+  width: 44px;
+  height: 44px;
+  border: 4px solid var(--zg-9);
+  border-top-color: var(--z-blue);
+}
+
+@keyframes spin {
+  to {
+    rotate: 360deg;
+  }
+}
+
+.spinner,
+.pdf-spinner,
+.spinner-sm {
+  border-radius: 50%;
+  animation: spin .9s linear infinite;
+}
+
+.loading-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(255, 255, 255, .7);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+}
+
+/* ── 4. LAYOUT DE FORMULARIOS Y GRID ───────────────────────────────────── */
+
+.form-row {
+  display: grid;
+  gap: var(--zs-150);
+  margin-bottom: 0;
+  overflow: visible;
+}
+
+.form-row.cols-1 {
+  grid-template-columns: 1fr;
+}
+
+.form-row.cols-2 {
+  grid-template-columns: 1fr 1fr;
+}
+
+.form-row.cols-3 {
+  grid-template-columns: 1fr 1fr 1fr;
+}
+
+.form-row.cols-4 {
+  grid-template-columns: 1fr 1fr 1fr 1fr;
+}
+
+@media (max-width: 900px) {
+
+  .form-row.cols-3,
+  .form-row.cols-4 {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+
+@media (max-width: 600px) {
+
+  .form-row.cols-2,
+  .form-row.cols-3,
+  .form-row.cols-4 {
+    grid-template-columns: 1fr;
+  }
+}
+
+.form-row.row-align-bottom {
+  align-items: flex-end;
+}
+
+.section-spacer {
+  height: var(--zs-100);
+}
+
+
+
+/* Clases de spans de columnas */
+.col-span-2 {
+  grid-column: span 2;
+}
+
+.col-span-3 {
+  grid-column: span 3;
+}
+
+.col-span-4 {
+  grid-column: span 4;
+}
+
+@media (max-width: 900px) {
+
+  .col-span-3,
+  .col-span-4 {
+    grid-column: span 2;
+  }
+}
+
+@media (max-width: 600px) {
+
+  .col-span-2,
+  .col-span-3,
+  .col-span-4 {
+    grid-column: span 1;
+  }
+}
+
+/* Wrappers de campos ZDS */
+/* Base común: cada campo reserva la misma caja (pill + línea de ayuda),
+   así los pills alinean en la fila exista o no helpText, sea input o select. */
+.zds-field-wrap,
+.zds-select-wrap {
+  width: 100%;
+  min-height: 68px;
+}
+
+.zds-select-wrap {
+  position: relative;
+  height: 68px;
+  overflow: visible;
+  z-index: 0;
+}
+
+.zds-select-wrap:focus-within {
+  z-index: 200;
+}
+
+.zds-select-wrap>* {
+  position: absolute;
+  width: 100%;
+  top: 0;
+}
+
+/* Campos de entrada editable y readonly */
+zr-text-input,
+zr-date-input {
+  border-radius: 28px;
+}
+
+zr-text-input:not([readonly]),
+zr-date-input:not([readonly]) {
+  background: var(--zg-white);
+}
+
+zr-text-input[readonly],
+zr-date-input[readonly],
+[data-zds-readonly] zr-text-input,
+[data-zds-readonly] zr-date-input {
+  background: var(--zg-white-zurich);
+}
+
+/* Sub-secciones básicas */
+.form-subsection {
+  border: 1px solid var(--z-border);
+  border-radius: 8px;
+  padding: var(--zs-100) var(--zs-150) var(--zs-75);
+  background: var(--zg-white);
+  display: flex;
+  flex-direction: column;
+  gap: var(--zs-150);
+}
+
+/* El z-table global es overflow-x:auto y recorta los dropdowns ZDS; dentro de
+   una subsección siempre queremos dejarlos desplegar. */
+.form-subsection z-table {
+  overflow: visible;
+}
+
+.form-subsection-title {
+  margin-bottom: var(--zs-100);
+}
+
+.form-subsection-title--spaced {
+  margin-top: var(--zs-75);
+}
+
+/* Barras de acento verticales (3px) */
+.form-subsection-title::before,
+.subsection-title::before,
+.decision-accent,
+.form-section-header::before,
+.quote-summary-product-header::before {
+  content: '';
+  display: inline-block;
+  width: 3px;
+  height: 14px;
+  border-radius: 2px;
+  flex-shrink: 0;
+}
+
+.form-subsection-title::before,
+.subsection-title::before,
+.decision-accent {
+  background: var(--z-blue);
+}
+
+.form-section-header::before,
+.quote-summary-product-header::before {
+  background: rgba(255, 255, 255, .45);
+}
+
+/* Tabla z-table celda overrides */
+z-table {
+  --z-table--cell-padding: var(--zs-75) var(--zs-100);
+  display: block;
+  width: 100%;
+  overflow-x: auto;
+}
+
+z-table table {
+  width: 100%;
+  border-collapse: collapse;
+  border-spacing: 0;
+  border-top: 1px solid var(--z-border);
+  border-bottom: 1px solid var(--z-border);
+  margin: var(--zs-100) auto;
+}
+
+z-table th,
+z-table td {
+  padding: var(--z-table--cell-padding, var(--zs-75) var(--zs-100));
+  border-bottom: 1px solid var(--z-border);
+  vertical-align: middle;
+  text-align: left;
+}
+
+z-table th {
+  letter-spacing: .4px;
+}
+
+z-table :is(th, td)[config*="center"] {
+  text-align: center;
+}
+
+z-table :is(th, td)[config*="right"] {
+  text-align: right;
+}
+
+/* Barra de acciones al pie del form (ver componente ActionBar). El layout flex
+   lo aportan z-flex/z-align; aquí solo borde/margen/padding (tokens, sin
+   equivalente en el DS). */
+.action-bar {
+  border-top: 1px solid var(--z-border);
+  margin-top: var(--zs-150);
+  padding: var(--zs-150) var(--zs-200) var(--zs-50);
+}
+
+/* ── 5. ESTILOS DE COMPONENTES REUTILIZABLES ───────────────────────────── */
+
+/* Component: ScreenHeader */
 .screen-header {
   background: var(--z-blue);
   padding: var(--zs-150) var(--zs-200);
   display: flex;
   align-items: center;
   justify-content: space-between;
-  box-shadow: 0 4px 12px rgba(33,103,174,.35);
+  box-shadow: 0 4px 12px rgba(33, 103, 174, .35);
 }
 
-.screen-header .title-block { color: var(--zg-white-zurich); }
+.screen-header .title-block {
+  color: var(--zg-white-zurich);
+}
 
 .screen-header .title-block h1 {
   font: var(--zf-body-16--700);
   margin: 0 0 var(--zs-25);
-  text-transform: uppercase;
-  letter-spacing: .6px;
 }
 
 .screen-header .subtitle {
   display: flex;
   gap: var(--zs-100);
   font: var(--zf-capt-12);
-  color: rgba(255,255,255,.80);
+  color: rgba(255, 255, 255, .80);
 }
 
 .screen-header .subtitle span {
@@ -81,81 +513,29 @@
   width: 5px;
   height: 5px;
   border-radius: 50%;
-  background: rgba(255,255,255,.55);
+  background: rgba(255, 255, 255, .55);
 }
 
-.screen-header .subtitle span:first-child::before { display: none; }
-
-/* Logo Zurich en la esquina superior derecha (todas las pantallas) */
-.header-logo { height: 44px; width: auto; object-fit: contain; flex-shrink: 0; }
-
-/* ── Estados de carga y error ──────────────────────────────────────────── */
-.screen-loading {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  min-height: 60vh;
-  gap: var(--zs-100);
-  color: var(--z-muted);
-  font: var(--zf-capt-14);
+.screen-header .subtitle span:first-child::before {
+  display: none;
 }
 
-.screen-error {
-  margin: var(--zs-250) auto;
-  max-width: 480px;
+.header-logo {
+  height: 44px;
+  width: auto;
+  object-fit: contain;
+  flex-shrink: 0;
+}
+
+/* Component: FormSection */
+.form-section-card {
+  margin-bottom: var(--zs-250);
   background: var(--zg-white);
-  border: 1px solid var(--zc-peach-40);
-  border-left: 4px solid var(--z-red);
-  border-radius: 10px;
-  padding: var(--zs-150);
-  color: var(--z-red);
-  font: var(--zf-capt-14);
+  border: 1px solid rgba(221, 227, 236, .7);
+  border-radius: 12px;
   box-shadow: var(--z-card-shadow);
 }
 
-.spinner {
-  width: 44px;
-  height: 44px;
-  border: 4px solid var(--zg-9);
-  border-top-color: var(--z-blue);
-  border-radius: 50%;
-  animation: spin .9s linear infinite;
-}
-
-@keyframes spin { to { rotate: 360deg; } }
-
-.loading-overlay {
-  position: fixed;
-  inset: 0;
-  background: rgba(255,255,255,.7);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  z-index: 1000;
-}
-
-/* ── Grid de columnas para campos de formulario ────────────────────────── */
-.form-row { display: grid; gap: var(--zs-150); margin-bottom: 0; overflow: visible; }
-.form-row.cols-1 { grid-template-columns: 1fr; }
-.form-row.cols-2 { grid-template-columns: 1fr 1fr; }
-.form-row.cols-3 { grid-template-columns: 1fr 1fr 1fr; }
-.form-row.cols-4 { grid-template-columns: 1fr 1fr 1fr 1fr; }
-
-@media (max-width: 900px) {
-  .form-row.cols-3,
-  .form-row.cols-4 { grid-template-columns: 1fr 1fr; }
-}
-@media (max-width: 600px) {
-  .form-row.cols-2,
-  .form-row.cols-3,
-  .form-row.cols-4 { grid-template-columns: 1fr; }
-}
-
-.form-row.row-align-bottom { align-items: flex-end; }
-.section-spacer { height: var(--zs-100); }
-
-/* ── FormSection — header y body (usado por FormSection.tsx) ──────────── */
 .form-section-header {
   padding: var(--zs-100) var(--zs-200);
   display: flex;
@@ -167,19 +547,8 @@
 .form-section-header span {
   color: var(--zg-white-zurich);
   font: var(--zf-capt-12--700);
-  letter-spacing: .55px;
-  text-transform: uppercase;
 }
 
-.form-section-header::before {
-  content: '';
-  display: inline-block;
-  width: 3px;
-  height: 16px;
-  background: rgba(255,255,255,.45);
-  border-radius: 2px;
-  flex-shrink: 0;
-}
 
 .form-section-body {
   padding: var(--zs-200) var(--zs-300) var(--zs-200);
@@ -189,16 +558,8 @@
   overflow: visible;
 }
 
-/* ── Pantalla de éxito post-submit ─────────────────────────────────────── */
-.screen-sent-wrapper {
-  max-width: 960px;
-  margin: 0 auto;
-  padding: var(--zs-200) var(--zs-150) var(--zs-400);
-}
-
-/* ── ResultCard — tarjeta de resultado/confirmación unificada (centrada, A/C) ──
-   Reemplaza .screen-sent, .ec-card y .result-card. Variantes: success/error/info/warning. */
-.rc-card {
+/* Component: ResultCard */
+.result-card {
   max-width: 480px;
   margin: 0 auto;
   background: var(--zg-white);
@@ -213,7 +574,7 @@
   align-items: center;
 }
 
-.rc-icon {
+.result-card-icon {
   width: 72px;
   height: 72px;
   border-radius: 50%;
@@ -224,988 +585,64 @@
   margin-bottom: var(--zs-100);
 }
 
-.rc-title {
+.result-card-title {
   font: var(--zf-body-20--700);
   color: var(--z-text);
   margin-bottom: var(--zs-50);
 }
 
-.rc-body {
+.result-card-body {
   font: var(--zf-body-16);
   color: var(--z-text);
   line-height: 1.6;
   max-width: 400px;
 }
 
-.rc-body p { margin: 0 0 var(--zs-75); }
-.rc-body p:last-child { margin-bottom: 0; }
-
-.rc-card--success { border-top-color: var(--z-green); }
-.rc-card--success .rc-icon { background: var(--zc-moss-10, #e8f7ed); color: var(--z-green); }
-.rc-card--error { border-top-color: var(--z-red); }
-.rc-card--error .rc-icon { background: var(--zc-peach-10, #fdf1ef); color: var(--z-red); }
-.rc-card--info { border-top-color: var(--z-blue); }
-.rc-card--info .rc-icon { background: var(--zc-blue-sky-10); color: var(--z-blue); }
-.rc-card--warning { border-top-color: var(--z-orange); }
-/* lemon-aa (#FFC828) es demasiado claro como glifo sobre lemon-20 → ámbar oscuro para contraste legible */
-.rc-card--warning .rc-icon { background: var(--zc-lemon-20, #fef9e7); color: #b8860b; }
-
-/* ── Campos Zurich — editable vs readonly (global, todas las pantallas) ── */
-zr-text-input:not([readonly]),
-zr-date-input:not([readonly]) {
-  background: var(--zg-white);
-  border-radius: 28px;
-}
-
-zr-text-input[readonly],
-zr-date-input[readonly] {
-  background: var(--zg-white-zurich);
-  border-radius: 28px;
-}
-
-[data-zds-readonly] zr-text-input,
-[data-zds-readonly] zr-date-input {
-  background: var(--zg-white-zurich);
-  border-radius: 28px;
-}
-
-/* ── Sub-secciones (caja con borde + título, reutilizable; el DS no la cubre) ── */
-.form-subsection {
-  border: 1px solid var(--z-border);
-  border-radius: 8px;
-  padding: var(--zs-100) var(--zs-150) var(--zs-75);
-  background: var(--zg-white);
-}
-
-.form-subsection-title {
-  font: var(--zf-capt-14--600);
-  color: var(--z-blue);
-  margin-bottom: var(--zs-100);
-  display: flex;
-  align-items: center;
-  gap: var(--zs-50);
-}
-
-.form-subsection-title--spaced { margin-top: var(--zs-75); }
-.form-subsection-title::before {
-  content: '';
-  display: inline-block;
-  width: 3px;
-  height: 13px;
-  background: var(--z-blue);
-  border-radius: 2px;
-}
-
-/* ── Visor PDF (componente PdfViewer, compartido) ──────────────────────── */
-.pdf-viewer { width: 100%; }
-
-.pdf-viewer-label {
-  font: var(--zf-capt-12--700);
-  color: var(--z-muted);
-  text-transform: uppercase;
-  letter-spacing: .4px;
-  margin-bottom: var(--zs-50);
-}
-
-.pdf-viewer-state {
-  display: flex;
-  align-items: center;
-  gap: var(--zs-75);
-  padding: var(--zs-150);
-  background: var(--zg-white-zurich);
-  border: 1px solid var(--z-border);
-  border-radius: 8px;
-  color: var(--z-muted);
-  font: var(--zf-capt-14);
-}
-
-.pdf-viewer-error { color: var(--z-red); }
-
-.pdf-viewer-actions {
-  display: flex;
-  justify-content: flex-end;
-  padding-top: var(--zs-50);
-}
-
-.pdf-spinner {
-  width: 20px;
-  height: 20px;
-  border: 3px solid var(--z-border);
-  border-top-color: var(--z-blue);
-  border-radius: 50%;
-  animation: spin .9s linear infinite;
-  flex-shrink: 0;
-}
-
-
-/* ── Tipografía + alineación de celdas ZrTable (modo embedded) → tokens ZDS
-   Las reglas de ZDS viven en su shadow DOM (`:host table …`) y NO alcanzan la
-   tabla <table> light-DOM que embebemos dentro de <z-table>. Por eso aquí
-   replicamos el comportamiento del componente: alineación izquierda por
-   defecto (como la referencia oficial) y soporte del atributo `config` para
-   override por columna (config="center" / config="right"). ─────────────── */
-z-table { --z-table--cell-padding: var(--zs-75) var(--zs-100); }
-z-table td { font: var(--zf-body-14); color: var(--z-text); text-align: left; }
-z-table th { font: var(--zf-capt-12--700); color: var(--z-muted); text-transform: uppercase; letter-spacing: .4px; text-align: left; }
-z-table :is(th, td)[config*="center"] { text-align: center; }
-z-table :is(th, td)[config*="right"]  { text-align: right; }
-
-
-/* ── Wrappers de campos ZDS ────────────────────────────────────────────── */
-.zds-field-wrap { width: 100%; }
-
-.zds-select-wrap {
-  position: relative;
-  height: 68px;
-  overflow: visible;
-  z-index: 0;
-}
-
-.zds-select-wrap:focus-within { z-index: 200; }
-
-.zds-select-wrap > * {
-  position: absolute;
-  width: 100%;
-  top: 0;
-}
-
-/* ── Barra de submit (al pie del formulario, no sticky) ─────────────────── */
-.submit-bar {
-  display: flex;
-  justify-content: flex-end;
-  align-items: center;
-  gap: var(--zs-75);
-  padding: var(--zs-150) var(--zs-200) var(--zs-50);
-  border-top: 1px solid var(--z-border);
-  margin-top: var(--zs-150);
-}
-
-/* ── Barra de acciones — botones (estática, igual que .submit-bar) ─────── */
-.actions-bar {
-  display: flex;
-  justify-content: flex-end;
-  align-items: center;
-  gap: var(--zs-75);
-  padding: var(--zs-150) var(--zs-200);
-  border-top: 1px solid var(--z-border);
-  margin-top: var(--zs-150);
-}
-
-
-/* ====================================================================== */
-/* CSS DE PANTALLAS — centralizado (movido desde los styles.css por pantalla) */
-/* Orden = orden de import del bundle, para preservar la cascada.          */
-/* ====================================================================== */
-
-/* ========== cotizador-fast-flow ========== */
-/* =====================================================
-   COTIZADOR FAST FLOW — Estilos de pantalla
-   Fuente: FF - Subform estilos y funciones - Zurich Regional
-           + CIMMR - Subform estilos - Genérico
-           + ajustes específicos de pantalla
-   ===================================================== */
-
-
-
-
-
-/* ---- Alineación inferior en fila de tomador ---- */
-.consultar-wrapper { display: flex; align-items: flex-end; }
-
-
-
-/* ========== solicitud-cotizacion-cuw ========== */
-/* =====================================================
-   SOLICITUD COTIZACIÓN CUW LIAB — Estilos de pantalla
-   ===================================================== */
-
-
-
-/* Sección condicional (asegurado distinto al tomador) */
-
-
-
-.form-subsection--exportaciones { margin-top: 16px; }
-
-
-/* =====================================================
-   Record list tables
-   ===================================================== */
-.record-table-header { display: flex; justify-content: flex-end; margin-bottom: 8px; }
-
-
-.record-empty { text-align: center; color: var(--z-muted); padding: var(--zs-150); }
-
-
-.record-validation-msg {
-  text-align: right; font-size: 12px; color: var(--z-red); margin-top: 8px;
-}
-.record-validation-msg strong { font-weight: 700; }
-
-
-
-/* ========== ff-fl ========== */
-/* =====================================================
-   FF FL — SOLICITUD
-   ===================================================== */
-
-/* Modificadores específicos de ff-fl: */
-.form-subsection--activities { margin-top: 8px; }
-.form-group--facturacion { margin-top: 4px; }
-
-
-/* ── Etiquetas y wrappers de campo (canónico, usado por todas las pantallas) ── */
-.form-group { margin-bottom: var(--zs-100); }
-
-.form-label {
-  display: block;
-  font: var(--zf-capt-12--600);
-  color: var(--z-muted);
-  margin-bottom: var(--zs-25);
-  text-transform: uppercase;
-  letter-spacing: .3px;
-}
-
-.required-star { color: var(--z-red); margin-right: var(--zs-12); }
-
-/* ──────────────────────────────────────
-   CHECKBOXES DE PRODUCTOS
-────────────────────────────────────── */
-.checkbox-group-label {
-  font: var(--zf-capt-12--600);
-  color: var(--z-muted);
-  margin-bottom: var(--zs-75);
-  text-transform: uppercase;
-  letter-spacing: .3px;
-}
-
-.checkbox-grid {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: var(--zs-75);
-}
-
-@media (max-width: 700px) { .checkbox-grid { grid-template-columns: 1fr; } }
-
-
-
-.actividades-prod-label {
-  font: var(--zf-capt-12--700);
-  color: var(--z-blue);
-  line-height: 1.3;
-}
-
-/* ──────────────────────────────────────
-   FACTURACIÓN POR PRODUCTO
-────────────────────────────────────── */
-.facturacion-grid {
-  display: grid;
-  gap: var(--zs-100);
-  grid-template-columns: repeat(auto-fill, minmax(210px, 1fr));
-  margin-top: var(--zs-25);
-}
-
-.facturacion-block {
-  background: var(--zg-white-zurich);
-  border: 1px solid var(--z-border);
-  border-radius: 8px;
-  padding: var(--zs-75) var(--zs-100);
-}
-
-.facturacion-block-label {
-  font: var(--zf-capt-12--700);
-  color: var(--z-blue);
-  margin-bottom: var(--zs-50);
-  text-transform: uppercase;
-  letter-spacing: .3px;
-}
-
-
-/* ──────────────────────────────────────
-   CORREOS ADICIONALES
-────────────────────────────────────── */
-.correos-adicionales-header {
-  font: var(--zf-capt-12--700);
-  color: var(--z-muted);
-  text-transform: uppercase;
-  letter-spacing: .4px;
-  margin-bottom: var(--zs-75);
-  padding-top: var(--zs-75);
-  border-top: 1px dashed var(--z-border);
-  display: flex;
-  align-items: center;
-  gap: var(--zs-50);
-}
-
-/* ──────────────────────────────────────
-   CREACIÓN DE TOMADOR (COLAPSABLE)
-────────────────────────────────────── */
-.creacion-tomador-body {
-  border: 1.5px solid var(--zc-lemon-aa);
-  border-radius: 8px;
-  padding: var(--zs-150) var(--zs-150) var(--zs-75);
-  margin-bottom: var(--zs-25);
-  background: var(--zc-lemon-20);
-}
-
-/* ──────────────────────────────────────
-   BARRA DE SUBMIT
-────────────────────────────────────── */
-
-/* ──────────────────────────────────────
-   ERROR DE ENVÍO (inline)
-────────────────────────────────────── */
-
-
-/* ──────────────────────────────────────
-   SECCIÓN POR PRODUCTO — CARD CON TABS
-────────────────────────────────────── */
-.products-card {
-  background: var(--zg-white);
-  border-radius: 10px;
-  box-shadow: var(--z-card-shadow);
-  margin-bottom: var(--zs-150);
-  overflow: visible;
-  border: 1px solid rgba(221,227,236,.7);
-}
-
-
-.products-tab-body {
-  padding: var(--zs-150) var(--zs-200) var(--zs-100);
-}
-
-
-/* ──────────────────────────────────────
-   TIA — CONFIRMACIÓN CREACIÓN DE TOMADOR
-────────────────────────────────────── */
-.tia-confirm-create {
-  background: var(--zc-lemon-20);
-  border: 1px solid var(--zc-lemon-80);
-  border-left: 4px solid var(--z-orange);
-  border-radius: 8px;
-  padding: var(--zs-100) var(--zs-150);
-  margin-top: var(--zs-75);
-}
-
-.tia-confirm-text {
-  font: var(--zf-capt-14--500);
-  color: var(--zc-lemon-aa);
-  margin-bottom: var(--zs-75);
-  line-height: 1.5;
-}
-
-.tia-confirm-actions {
-  display: flex;
-  gap: var(--zs-75);
-  flex-wrap: wrap;
-}
-
-/* ──────────────────────────────────────
-   D&O — SECCIÓN GENERAL
-────────────────────────────────────── */
-.dyo-subsection { margin-bottom: var(--zs-150); }
-.dyo-subsection:last-child { margin-bottom: 0; }
-
-.dyo-intro-text {
-  font: var(--zf-capt-14);
-  color: var(--z-text);
-  margin: 0 0 var(--zs-100);
-  line-height: 1.5;
-}
-
-
-.dyo-nota {
-  font: var(--zf-capt-12);
-  color: var(--z-muted);
-  margin: var(--zs-75) 0 0;
-  font-style: italic;
-}
-
-
-/* ──────────────────────────────────────
-   D&O — BOTONES SI / NO
-────────────────────────────────────── */
-.si-no-select-all {
-  display: flex;
-  gap: var(--zs-50);
-  justify-content: flex-end;
-  margin-bottom: var(--zs-50);
-}
-
-/* ──────────────────────────────────────
-   D&O — DOCUMENTOS DE SOPORTE
-────────────────────────────────────── */
-.dyo-docs-list {
-  display: flex;
-  flex-direction: column;
-  gap: var(--zs-75);
-}
-
-.dyo-doc-row {
-  display: flex;
-  align-items: center;
-  gap: var(--zs-75);
-  padding: var(--zs-50) var(--zs-75);
-  border: 1px solid var(--z-border);
-  border-radius: 8px;
-  background: var(--zg-white);
-}
-
-.dyo-doc-label {
-  font: var(--zf-capt-12--700);
-  color: var(--z-blue);
-  min-width: 96px;
-  flex-shrink: 0;
-}
-
-
-/* ──────────────────────────────────────
-   D&O — PROPUESTA ECONÓMICA
-────────────────────────────────────── */
-
-.dyo-servicios-list {
-  margin: var(--zs-25) 0 0 0;
-  padding-left: var(--zs-100);
-}
-.dyo-servicios-item {
-  font: var(--zf-body-14);
-  color: var(--z-text);
-  padding: var(--zs-12) 0;
-  line-height: 1.5;
-}
-
-
-
-
-
-/* ──────────────────────────────────────
-   COTIZACIONES (CO) — INFO BAR
-────────────────────────────────────── */
-.co-info-bar {
-  display: flex;
-  flex-wrap: wrap;
-  gap: var(--zs-150);
-  background: var(--zg-white);
-  border: 1px solid var(--z-border);
-  border-radius: 10px;
-  padding: var(--zs-100) var(--zs-150);
-  margin-bottom: var(--zs-150);
-  box-shadow: var(--z-card-shadow);
-}
-
-.co-info-item {
-  display: flex;
-  flex-direction: column;
-  gap: var(--zs-12);
-}
-
-.co-info-label {
-  font: var(--zf-capt-12--700);
-  color: var(--z-muted);
-  text-transform: uppercase;
-  letter-spacing: .4px;
-}
-
-.co-info-value {
-  font: var(--zf-capt-14--600);
-  color: var(--z-text);
-}
-
-.co-section-title {
-  font: var(--zf-capt-12--700);
-  color: var(--z-muted);
-  text-transform: uppercase;
-  letter-spacing: .55px;
-  margin-bottom: var(--zs-75);
-  padding-left: var(--zs-25);
-}
-
-/* ──────────────────────────────────────
-   COTIZACIONES (CO) — TARJETAS
-────────────────────────────────────── */
-
-.co-subsection-title {
-  font: var(--zf-capt-14--600);
-  color: var(--z-blue);
-  margin-bottom: var(--zs-50);
-  display: flex;
-  align-items: center;
-  gap: var(--zs-50);
-}
-
-.co-subsection-title::before {
-  content: '';
-  display: inline-block;
-  width: 3px;
-  height: 13px;
-  background: var(--z-blue);
-  border-radius: 2px;
-}
-
-
-/* ──────────────────────────────────────
-   COTIZACIONES (CO) — SIN SLIP
-────────────────────────────────────── */
-.co-slip-tabs { margin-bottom: var(--zs-100); }
-
-.co-no-slip {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  padding: var(--zs-300) var(--zs-150);
-  gap: var(--zs-50);
-  color: var(--z-muted);
-  font: var(--zf-capt-14);
-  text-align: center;
-}
-
-.co-no-slip span:first-child { font-size: 36px; opacity: .5; }
-
-/* ──────────────────────────────────────
-   COTIZACIONES (CO) — FOOTER DE TARJETA
-────────────────────────────────────── */
-.co-card-footer {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  flex-wrap: wrap;
-  gap: var(--zs-75);
-  padding-top: var(--zs-75);
-  border-top: 1px dashed var(--z-border);
-  margin-top: var(--zs-75);
-}
-
-.co-nc-toggle {
-  display: flex;
-  align-items: center;
-  gap: var(--zs-75);
-}
-
-.co-nc-label {
-  font: var(--zf-capt-12--700);
-  color: var(--z-muted);
-  text-transform: uppercase;
-  letter-spacing: .3px;
-}
-
-/* ──────────────────────────────────────
-   COTIZACIONES (CO) — DECISIÓN
-────────────────────────────────────── */
-.co-field-wrap { display: flex; flex-direction: column; gap: var(--zs-25); }
-
-.co-field-hint {
-  font: var(--zf-capt-12);
-  color: var(--z-muted);
-  font-weight: 400;
-  margin-left: var(--zs-25);
-}
-
-
-/* ──────────────────────────────────────
-   RESUMEN DE COTIZACIONES (ff-fl preview)
-────────────────────────────────────── */
-.cot-res-body {
-  padding: var(--zs-150) var(--zs-200);
-  display: flex;
-  flex-direction: column;
-  gap: var(--zs-100);
-}
-
-.cot-res-product {
-  border: 1px solid var(--zg-9);
-  border-radius: 8px;
-  overflow: hidden;
-}
-
-.cot-res-product-header {
-  background: var(--zc-blue-zurich);
-  color: var(--zg-white-zurich);
-  font: var(--zf-capt-12--700);
-  padding: var(--zs-75) var(--zs-150);
-  text-transform: uppercase;
-  letter-spacing: .55px;
-  display: flex;
-  align-items: center;
-  gap: var(--zs-50);
-}
-
-.cot-res-product-header::before {
-  content: '';
-  display: inline-block;
-  width: 3px;
-  height: 14px;
-  background: rgba(255,255,255,.45);
-  border-radius: 2px;
-  flex-shrink: 0;
-}
-
-
-.cot-res-label {
-  font: var(--zf-body-14--700);
-  color: var(--zc-blue-dark);
-}
-
-.cot-res-cell {
-  font: var(--zf-body-14);
-  color: var(--zc-blue-dark);
-}
-
-.cot-res-cell--muted {
-  font: var(--zf-body-12);
-  color: var(--zg-5);
-}
-
-
-
-.cot-res-estado {
-  display: flex;
-  align-items: center;
-  gap: var(--zs-75);
-  padding: var(--zs-100) var(--zs-200);
-  font: var(--zf-body-14);
-  color: var(--zg-5);
-}
-
-.cot-res-estado--error { color: var(--zc-peach-aa); }
-.cot-res-estado--hint  { font-style: italic; }
-
-.cot-spinner {
-  width: 18px; height: 18px;
-  border: 2px solid var(--zg-9);
-  border-top-color: var(--zc-blue-zurich);
-  border-radius: 50%;
-  animation: spin 0.7s linear infinite;
-  flex-shrink: 0;
-}
-
-@media (max-width: 900px) {
-  .co-info-bar { flex-direction: column; gap: var(--zs-75); }
-}
-
-/* ========== respuesta-cotizacion ========== */
-/* =====================================================
-   RESPUESTA COTIZACIÓN — Estilos de pantalla
-   ===================================================== */
-
-/* ── Content ─────────────────────────────────────── */
-.result-content {
-  max-width: 640px;
-  margin: 0 auto;
-  padding: var(--zs-200) var(--zs-150) var(--zs-400);
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-}
-
-
-/* ── Action row ───────────────────────────────────── */
-.result-actions {
-  margin-top: var(--zs-200);
-  display: flex;
-  justify-content: center;
-}
-
-
-/* ========== opciones-cotizacion ========== */
-/* =====================================================
-   OPCIONES DE COTIZACIÓN — Estilos de pantalla
-   ===================================================== */
-
-
-/* ── Screen body layout ───────────────────────────── */
-.screen-body {
-  padding: var(--zs-150) var(--zs-200);
-  display: grid;
-  grid-template-columns: 1fr 380px;
-  gap: var(--zs-150);
-  align-items: start;
-}
-
-@media (max-width: 1024px) {
-  .screen-body { grid-template-columns: 1fr; }
-}
-
-/* ── Slip area con tabs ──────────────────────────── */
-.slip-area {
-  display: flex;
-  flex-direction: column;
-  gap: var(--zs-75);
-}
-
-
-
-
-
-/* ── Decision actions ────────────────────────────── */
-.decision-actions {
-  padding: var(--zs-100) var(--zs-150) var(--zs-150);
-  display: flex;
-  justify-content: flex-end;
-  border-top: 1px solid var(--z-border);
-}
-
-
-@media (max-width: 600px) {
-  .screen-body  { padding: var(--zs-100) var(--zs-150); }
-}
-
-/* ========== nota-cobertura ========== */
-/* =====================================================
-   NOTA COBERTURA — VISUALIZAR DOCUMENTOS DE SALIDA
-   ===================================================== */
-
-
-/* ── Lista de documentos ─────────────────────────── */
-.doc-list {
-  display: flex;
-  flex-direction: column;
-  gap: var(--zs-75);
-}
-
-.doc-card {
-  border: 1px solid var(--z-border);
-  border-radius: 8px;
-  overflow: hidden;
-  background: var(--zg-white-zurich);
-}
-
-.doc-card-header {
-  display: flex;
-  align-items: center;
-  gap: var(--zs-75);
-  padding: var(--zs-75) var(--zs-100);
-  background: var(--zg-white);
-  border-bottom: 1px solid transparent;
-  transition: background .1s;
-}
-
-.doc-card-header:hover { background: var(--zg-white-zurich); }
-
-.doc-card.is-open .doc-card-header {
-  border-bottom-color: var(--z-border);
-  background: var(--z-blue-light);
-}
-
-.doc-icon { font-size: 22px; flex-shrink: 0; line-height: 1; }
-
-.doc-info { flex: 1; min-width: 0; }
-
-.doc-name {
-  font: var(--zf-capt-14--600);
-  color: var(--z-text);
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
-
-.doc-meta {
-  font: var(--zf-capt-12);
-  color: var(--z-muted);
-  margin-top: 2px;
+.result-card-body p {
+  margin: 0 0 var(--zs-75);
 }
-
-.doc-actions { display: flex; gap: var(--zs-50); flex-shrink: 0; }
-
-
-.doc-viewer { padding: var(--zs-100); background: var(--zg-white-zurich); }
-
-
-/* ── Sin documentos (estado vacío propio de esta pantalla) ──────────────── */
-.no-docs-card {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  padding: var(--zs-300) var(--zs-200);
-  gap: var(--zs-75);
-  color: var(--z-muted);
-  text-align: center;
-}
-
-.no-docs-card p { font: var(--zf-capt-14); margin: 0; }
-
-/* ── Submit bar ──────────────────────────────────── */
-
-
-/* ========== col-emision ========== */
-/* =====================================================
-   COL-EMISION — ESTILOS COMPARTIDOS
-   Inspirado en ff-fl, 100 % tokens ZDS
-   ===================================================== */
-
-/* .sarlaft-layout → layout 2 columnas no usado en TSX, eliminado */
-
-
-
-/* ──────────────────────────────────────
-   LISTA DE DOCUMENTOS
-────────────────────────────────────── */
-.sarlaft-doc-list {
-  display: flex;
-  flex-direction: column;
-  gap: var(--zs-75);
-}
-
-.sarlaft-doc-row {
-  display: flex;
-  align-items: center;
-  gap: var(--zs-100);
-  padding: var(--zs-100) var(--zs-150);
-  border: 1px solid var(--z-border);
-  border-radius: 10px;
-  background: var(--zg-white-zurich);
-  transition: border-color .15s, background .15s, box-shadow .15s;
-}
-
-.sarlaft-doc-row:hover {
-  border-color: var(--z-blue);
-  background: var(--zg-white);
-  box-shadow: 0 2px 8px rgba(33,103,174,.08);
-}
-
-.sarlaft-doc-row.is-loaded {
-  border-color: var(--zc-moss-aa, #0ca442);
-  background: var(--zg-white);
-  box-shadow: 0 2px 8px rgba(12,164,66,.07);
-}
-
-/* ── Número / check badge ── */
-.doc-num-badge {
-  width: 32px;
-  height: 32px;
-  border-radius: 50%;
-  flex-shrink: 0;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font: var(--zf-capt-12--700);
-  background: var(--zg-9);
-  color: var(--z-muted);
-  transition: background .2s, color .2s;
-}
-
-.doc-num-badge--loaded {
-  background: var(--zc-moss-aa, #0ca442);
-  color: var(--zg-white-zurich);
-}
-
-/* ── Cuerpo (descripción + vigencia) ── */
-.doc-body {
-  flex: 1;
-  min-width: 0;
-  display: flex;
-  flex-direction: column;
-  gap: 3px;
-}
-
-.doc-desc {
-  font: var(--zf-capt-14);
-  color: var(--z-text);
-  line-height: 1.4;
-}
-
-.doc-vigencia {
-  display: inline-flex;
-  align-items: center;
-  gap: var(--zs-25);
-  font: var(--zf-capt-12);
-  color: var(--z-muted);
-  background: var(--zg-9);
-  border-radius: 4px;
-  padding: 1px 7px;
-  align-self: flex-start;
-}
-
-/* ── Estado ── */
-.doc-estado-wrap { flex-shrink: 0; width: 88px; display: flex; justify-content: center; }
 
-.estado-badge {
-  display: inline-block;
-  padding: 3px 10px;
-  border-radius: 20px;
-  font: var(--zf-capt-12--700);
-  letter-spacing: .3px;
-  text-transform: uppercase;
-  white-space: nowrap;
+.result-card-body p:last-child {
+  margin-bottom: 0;
 }
 
-.estado-pendiente {
-  background: var(--zc-peach-10, #fdf1ef);
-  color: var(--z-red);
-  border: 1px solid var(--zc-peach-30, #f8c2bb);
+.result-card--success {
+  border-top-color: var(--z-green);
 }
 
-.estado-cargado {
+.result-card--success .result-card-icon {
   background: var(--zc-moss-10, #e8f7ed);
   color: var(--z-green);
-  border: 1px solid var(--zc-moss-30, #b2dfc0);
 }
 
-.estado-sin-doc {
-  background: var(--zg-9);
-  color: var(--z-muted);
-  border: 1px solid var(--z-border);
+.result-card--error {
+  border-top-color: var(--z-red);
 }
 
-.file-name-empty {
-  font: var(--zf-capt-12);
-  color: var(--z-muted);
-  padding: 2px 4px;
+.result-card--info {
+  border-top-color: var(--z-blue);
 }
 
-
-/* ── Área de archivo ── */
-.doc-file-area {
-  display: flex;
-  flex-direction: column;
-  align-items: flex-start;
-  gap: 5px;
-  flex-shrink: 0;
-  flex-grow: 0;
-  width: 210px;
+.result-card--info .result-card-icon {
+  background: var(--zc-blue-sky-10);
+  color: var(--z-blue);
 }
 
-
-.file-name-chip {
-  display: inline-flex;
-  align-items: center;
-  gap: 4px;
-  width: 100%;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-  font: var(--zf-capt-12);
-  color: var(--z-muted);
-  background: var(--zg-9);
-  border-radius: 4px;
-  padding: 2px 7px;
+.result-card--warning {
+  border-top-color: var(--z-orange);
 }
 
-.file-chip-icon { font-size: 11px; }
-
-/* ── Vista previa trigger ── */
-.doc-preview-trigger { flex-shrink: 0; }
-
-
-/* ──────────────────────────────────────
-   VERDOCEMI — LAYOUT COLUMNA ÚNICA
-────────────────────────────────────── */
-.verdoc-layout {
-  display: flex;
-  flex-direction: column;
-  gap: var(--zs-150);
+.result-card--warning .result-card-icon {
+  background: var(--zc-lemon-20, #fef9e7);
+  color: #b8860b;
 }
 
+/* Component: HelpModal */
+.help-modal {
+  width: min(500px, 88vw);
+}
 
-/* ─────────────────────────────────────────────
-   MODAL DE AYUDA — estructura compartida
-   (DocSARLAFT · RevSARLAFT · SolDocEmi · VerDocEmi)
-───────────────────────────────────────────── */
-.ayuda-modal { width: min(500px, 88vw); }
-
-/* Header con ícono + título */
-.ayuda-modal-header {
+.help-modal-header {
   display: flex;
   align-items: center;
   gap: var(--zs-150);
@@ -1214,7 +651,7 @@ z-table :is(th, td)[config*="right"]  { text-align: right; }
   border-bottom: 1px solid var(--z-border);
 }
 
-.ayuda-modal-icon-circle {
+.help-modal-icon {
   width: 40px;
   height: 40px;
   border-radius: 50%;
@@ -1228,71 +665,49 @@ z-table :is(th, td)[config*="right"]  { text-align: right; }
   flex-shrink: 0;
 }
 
-.ayuda-modal-title {
+.help-modal-title {
   font: var(--zf-body-16--700);
   color: var(--z-text);
 }
 
-.ayuda-modal-subtitle {
-  font: var(--zf-capt-12);
-  color: var(--z-muted);
+.help-modal-subtitle {
   margin-top: 2px;
   line-height: 1.4;
 }
 
-/* Body */
-.ayuda-modal-body {
+.help-modal-body {
   padding: var(--zs-200);
   display: flex;
   flex-direction: column;
   gap: var(--zs-150);
 }
 
-/* Etiqueta de sección */
-.ayuda-section-label {
-  font: var(--zf-capt-12--700);
-  color: var(--z-muted);
-  text-transform: uppercase;
-  letter-spacing: .55px;
+.help-section-label {
   margin: 0 0 var(--zs-75);
   padding-bottom: var(--zs-25);
   border-bottom: 1px solid var(--z-border);
 }
 
-/* Separador */
-.ayuda-divider {
+.help-divider {
   height: 1px;
   background: var(--z-border);
   margin: 0;
 }
 
-/* ── Grid chip + descripción alineados (VerDocEmi) ── */
-.ayuda-estados-grid {
+.help-status-grid {
   display: grid;
   grid-template-columns: auto 1fr;
   gap: var(--zs-75) var(--zs-100);
   align-items: center;
 }
 
-.ayuda-estados-grid .val-chip {
-  justify-self: start;
-  white-space: nowrap;
-}
 
-.ayuda-desc {
-  font: var(--zf-capt-14);
+.help-desc {
   color: var(--z-text);
   line-height: 1.4;
 }
 
-/* ── Filas de decisión alineadas (VerDocEmi) ── */
-.ayuda-decision-rows {
-  display: flex;
-  flex-direction: column;
-  gap: var(--zs-50);
-}
-
-.ayuda-decision-row {
+.help-decision-row {
   display: grid;
   grid-template-columns: auto 1fr;
   gap: var(--zs-100);
@@ -1302,40 +717,21 @@ z-table :is(th, td)[config*="right"]  { text-align: right; }
   border: 1px solid;
 }
 
-.ayuda-decision-row--completo {
+.help-decision-row--completo {
   background: var(--zc-moss-10, #e8f7ed);
   border-color: var(--zc-moss-30, #b2dfc0);
 }
 
-.ayuda-decision-row--incompleto {
+.help-decision-row--incompleto {
   background: var(--zc-peach-10, #fdf1ef);
   border-color: var(--zc-peach-30, #f8c2bb);
 }
 
-.ayuda-decision-tag {
-  display: inline-block;
-  padding: 3px 10px;
-  border-radius: 20px;
-  font: var(--zf-capt-12--700);
-  text-transform: uppercase;
-  letter-spacing: .3px;
-  white-space: nowrap;
-  text-align: center;
-  justify-self: start;
-}
 
-.ayuda-decision-tag--completo {
-  background: var(--zc-moss-20, #c8edd4);
-  color: var(--zc-moss-aa, #0ca442);
-}
 
-.ayuda-decision-tag--incompleto {
-  background: var(--zc-peach-20, #fde4e0);
-  color: var(--z-red);
-}
 
-/* ── Perfiles SARLAFT (DocSARLAFT · RevSARLAFT) ── */
-.ayuda-perfil-block {
+.help-profile-block,
+.help-product-row {
   border: 1px solid var(--z-border);
   border-radius: 8px;
   padding: var(--zs-75) var(--zs-100);
@@ -1343,87 +739,60 @@ z-table :is(th, td)[config*="right"]  { text-align: right; }
   transition: border-color .15s, background .15s;
 }
 
-.ayuda-perfil-activo {
-  border-color: var(--z-blue);
-  background: var(--z-blue-light);
-}
-
-.ayuda-perfil-header {
+.help-profile-header {
   display: flex;
   align-items: center;
   gap: var(--zs-75);
   margin-bottom: var(--zs-50);
 }
 
-.ayuda-perfil-label {
-  font: var(--zf-capt-14--700);
-  color: var(--z-text);
-}
-
-.ayuda-badge-activo {
+.badge-active {
   font: var(--zf-capt-10--700);
   background: var(--z-blue);
   color: var(--zg-white-zurich);
   border-radius: 10px;
   padding: 1px 7px;
-  text-transform: uppercase;
-  letter-spacing: .3px;
 }
 
-.ayuda-doc-list {
+.help-doc-list {
   margin: 0;
   padding-left: 18px;
 }
 
-.ayuda-doc-list li {
-  font: var(--zf-capt-14);
+.help-doc-list li {
   color: var(--z-text);
   line-height: 1.6;
   margin-bottom: 1px;
 }
 
-/* ── Productos SolDocEmi ── */
-.ayuda-productos-list {
-  display: flex;
-  flex-direction: column;
-  gap: var(--zs-50);
-}
-
-.ayuda-producto-row {
-  border: 1px solid var(--z-border);
+.help-product-row {
   border-left: 3px solid var(--z-border);
-  border-radius: 8px;
-  padding: var(--zs-75) var(--zs-100);
-  background: var(--zg-white-zurich);
-  transition: border-color .15s, background .15s;
 }
 
-.ayuda-producto-activo {
+.help-profile-active,
+.help-product-active {
   border-color: var(--z-blue);
-  border-left-color: var(--z-blue);
   background: var(--z-blue-light);
 }
 
-.ayuda-producto-nombre {
-  font: var(--zf-capt-14--700);
-  color: var(--z-text);
+.help-product-active {
+  border-left-color: var(--z-blue);
+}
+
+.help-product-name {
   display: flex;
   align-items: center;
   gap: var(--zs-75);
   margin-bottom: 3px;
 }
 
-.ayuda-producto-doc {
-  font: var(--zf-capt-12);
-  color: var(--z-muted);
+.help-product-doc {
   line-height: 1.4;
 }
 
-/* ── Nota de advertencia (compartida) ── */
-.ayuda-nota {
+.help-note {
   margin: 0;
   padding: var(--zs-75) var(--zs-100);
-  background: var(--zc-lemon-20, #fef9e7);
   border: 1px solid var(--zc-lemon-80, #f0cc70);
   border-left: 3px solid var(--zc-lemon-aa, #b8860b);
   border-radius: 6px;
@@ -1432,125 +801,7 @@ z-table :is(th, td)[config*="right"]  { text-align: right; }
   line-height: 1.5;
 }
 
-/* ──────────────────────────────────────
-   VERDOCEMI — FILA AMPLIADA
-────────────────────────────────────── */
-
-/* Header de columnas encima de la lista */
-.verdoc-table-header {
-  display: flex;
-  align-items: center;
-  gap: var(--zs-100);
-  padding: var(--zs-50) var(--zs-150) var(--zs-50) calc(32px + var(--zs-100) + var(--zs-100));
-  font: var(--zf-capt-12--700);
-  color: var(--z-muted);
-  text-transform: uppercase;
-  letter-spacing: .45px;
-  border-bottom: 1px solid var(--z-border);
-  margin-bottom: var(--zs-75);
-}
-
-/* Fila VerDocEmi reusa .sarlaft-doc-row pero sin el bloque de estado y con la zona de archivo más estrecha */
-.verdoc-row { gap: var(--zs-75); }
-
-/* Zona archivo + ver (combinada, ancho fijo) */
-.verdoc-file-area {
-  flex-shrink: 0;
-  flex-grow: 0;
-  width: 200px;
-  display: flex;
-  flex-direction: column;
-  align-items: flex-start;
-  gap: 5px;
-}
-
-/* Badge numérico coloreado por validación */
-.doc-num-badge--en-revision {
-  background: var(--zc-blue-sky-20, rgba(33,103,174,.15));
-  color: var(--z-blue);
-}
-
-.doc-num-badge--aprobada {
-  background: var(--zc-moss-20, #c8edd4);
-  color: var(--zc-moss-aa, #0ca442);
-}
-
-.doc-num-badge--rechazada {
-  background: var(--zc-peach-10, #fdf1ef);
-  color: var(--z-red);
-}
-
-/* ── ZrSelect de validación por fila ── */
-.val-zrselect-wrap {
-  flex-shrink: 0;
-  width: 180px;
-  position: relative;
-  z-index: 0;
-}
-
-/* Eleva el z-index del select activo para que su dropdown
-   aparezca sobre las filas vecinas */
-.val-zrselect-wrap:focus-within { z-index: 50; }
-
-/* ── Sección de decisión ── */
-.verdoc-decision-section {
-  padding: var(--zs-150) var(--zs-200) var(--zs-100);
-  border-top: 2px dashed var(--z-border);
-  margin-top: var(--zs-50);
-}
-
-.verdoc-decision-title {
-  display: flex;
-  align-items: center;
-  gap: var(--zs-50);
-  font: var(--zf-capt-14--600);
-  color: var(--z-blue);
-  margin-bottom: var(--zs-150);
-}
-
-.verdoc-decision-acento {
-  display: inline-block;
-  width: 3px;
-  height: 14px;
-  background: var(--z-blue);
-  border-radius: 2px;
-  flex-shrink: 0;
-}
-
-
-/* ── Chips de validación (val-chip, usados en el modal de ayuda de VerDocEmi) ── */
-.val-chip {
-  flex-shrink: 0;
-  padding: 2px 10px;
-  border-radius: 20px;
-  font: var(--zf-capt-12--700);
-  letter-spacing: .3px;
-  text-transform: uppercase;
-  white-space: nowrap;
-}
-
-.val-chip--aprobada {
-  background: var(--zc-moss-20, #c8edd4);
-  color: var(--zc-moss-aa, #0ca442);
-  border: 1px solid var(--zc-moss-30, #b2dfc0);
-}
-
-.val-chip--en-revision {
-  background: var(--zc-blue-sky-10);
-  color: var(--z-blue);
-  border: 1px solid var(--zc-blue-sky-30, rgba(33,103,174,.2));
-}
-
-.val-chip--rechazada {
-  background: var(--zc-peach-10, #fdf1ef);
-  color: var(--z-red);
-  border: 1px solid var(--zc-peach-30, #f8c2bb);
-}
-
-
-/* ──────────────────────────────────────
-   MODAL DE VISTA PREVIA (ZrModal)
-────────────────────────────────────── */
+/* Component: PreviewModal */
 .preview-modal {
   width: min(840px, 88vw);
   display: flex;
@@ -1569,17 +820,11 @@ z-table :is(th, td)[config*="right"]  { text-align: right; }
   gap: var(--zs-75);
 }
 
-.preview-modal-icon { font-size: 24px; flex-shrink: 0; line-height: 1.1; }
-
 .preview-modal-doc-name {
-  font: var(--zf-capt-14--600);
-  color: var(--z-text);
   word-break: break-word;
 }
 
 .preview-modal-doc-desc {
-  font: var(--zf-capt-12);
-  color: var(--z-muted);
   margin-top: 2px;
   line-height: 1.4;
 }
@@ -1591,22 +836,618 @@ z-table :is(th, td)[config*="right"]  { text-align: right; }
   display: block;
 }
 
+/* Component: InfoBar */
+.info-bar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--zs-150);
+  background: var(--zg-white);
+  border: 1px solid var(--z-border);
+  border-radius: 10px;
+  padding: var(--zs-100) var(--zs-150);
+  margin-bottom: var(--zs-150);
+  box-shadow: var(--z-card-shadow);
+}
 
-/* ──────────────────────────────────────
-   BARRA DE SUBMIT
-────────────────────────────────────── */
+.info-bar-item {
+  display: flex;
+  flex-direction: column;
+  gap: var(--zs-12);
+}
 
-/* .directrices-* / .directriz-* → panel de directrices no usado en TSX, eliminado */
+.section-title {
+  margin-bottom: var(--zs-75);
+  padding-left: var(--zs-25);
+}
+
+@media (max-width: 900px) {
+  .info-bar {
+    flex-direction: column;
+    gap: var(--zs-75);
+  }
+}
+
+.doc-item {
+  display: flex;
+  align-items: center;
+  gap: var(--zs-100);
+  padding: var(--zs-100) var(--zs-150);
+  border: 1px solid var(--z-border);
+  border-radius: 10px;
+  background: var(--zg-white-zurich);
+  transition: border-color .15s, background .15s, box-shadow .15s;
+}
+
+.doc-item:hover {
+  border-color: var(--z-blue);
+  background: var(--zg-white);
+  box-shadow: 0 2px 8px rgba(33, 103, 174, .08);
+}
+
+.doc-item.is-loaded {
+  border-color: var(--zc-moss-aa, #0ca442);
+  background: var(--zg-white);
+  box-shadow: 0 2px 8px rgba(12, 164, 66, .07);
+}
+
+.doc-num-badge {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--zg-9);
+  transition: background .2s, color .2s;
+}
+
+.doc-num-badge--loaded {
+  background: var(--zc-moss-aa, #0ca442);
+  color: var(--zg-white-zurich);
+}
+
+.doc-body {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+
+.doc-desc {
+  color: var(--z-text);
+  line-height: 1.4;
+}
+
+.doc-validity {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--zs-25);
+  background: var(--zg-9);
+  border-radius: 4px;
+  padding: 1px 7px;
+  align-self: flex-start;
+}
+
+.doc-status-wrap {
+  flex-shrink: 0;
+  width: 88px;
+  display: flex;
+  justify-content: center;
+}
+
+.file-name-empty {
+  padding: 2px 4px;
+}
+
+.doc-file-area,
+.doc-file-area--validation {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 5px;
+  flex-shrink: 0;
+  flex-grow: 0;
+}
+
+.doc-file-area {
+  width: 210px;
+}
+
+.file-name-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  background: var(--zg-9);
+  border-radius: 4px;
+  padding: 2px 7px;
+}
+
+.doc-preview-trigger {
+  flex-shrink: 0;
+}
+
+.doc-table-header {
+  display: flex;
+  align-items: center;
+  gap: var(--zs-100);
+  padding: var(--zs-50) var(--zs-150) var(--zs-50) calc(32px + var(--zs-100) + var(--zs-100));
+  border-bottom: 1px solid var(--z-border);
+  margin-bottom: var(--zs-75);
+}
+
+.doc-table-col-desc {
+  flex: 1;
+}
+
+.doc-table-col-file {
+  width: 200px;
+}
+
+.doc-table-col-val {
+  width: 180px;
+}
+
+.doc-item--validation {
+  gap: var(--zs-75);
+}
+
+.doc-file-area--validation {
+  width: 200px;
+}
+
+.doc-num-badge--en-revision {
+  background: var(--zc-blue-sky-20, rgba(33, 103, 174, .15));
+  color: var(--z-blue);
+}
 
 
-/* ========== estado-correo ========== */
-/* =====================================================
-   ESTADO DE CORREO ELECTRÓNICO — Estilos de pantalla
-   ===================================================== */
+.validation-select-wrap {
+  flex-shrink: 0;
+  width: 180px;
+  position: relative;
+  z-index: 0;
+}
+
+.validation-select-wrap:focus-within {
+  z-index: 50;
+}
+
+.decision-section {
+  padding: var(--zs-150) var(--zs-200) var(--zs-100);
+  border-top: 2px dashed var(--z-border);
+  margin-top: var(--zs-50);
+}
+
+.decision-title {
+  margin-bottom: var(--zs-150);
+}
 
 
-/* ── Content ─────────────────────────────────────── */
-.ec-content {
+
+/* Component: PdfViewer */
+.pdf-viewer {
+  width: 100%;
+}
+
+.pdf-viewer-label {
+  margin-bottom: var(--zs-50);
+}
+
+.pdf-viewer-state {
+  display: flex;
+  align-items: center;
+  gap: var(--zs-75);
+  padding: var(--zs-150);
+  background: var(--zg-white-zurich);
+  border: 1px solid var(--z-border);
+  border-radius: 8px;
+  color: var(--z-muted);
+}
+
+.pdf-viewer-error {
+  color: var(--z-red);
+}
+
+.pdf-viewer-actions {
+  display: flex;
+  justify-content: flex-end;
+  padding-top: var(--zs-50);
+}
+
+.pdf-spinner {
+  width: 20px;
+  height: 20px;
+  border: 3px solid var(--z-border);
+  border-top-color: var(--z-blue);
+  flex-shrink: 0;
+}
+
+/* ── 6. DISEÑOS ESPECÍFICOS DE LAS PANTALLAS (Keep DRY) ──────────────────── */
+
+/* ---- Cotizador y tomador ---- */
+.lookup-wrapper {
+  display: flex;
+  align-items: flex-end;
+}
+
+.form-group--billing {
+  margin-top: var(--zs-25);
+}
+
+/* Labels y requireds */
+.form-group {
+  margin-bottom: var(--zs-100);
+}
+
+.form-label {
+  display: block;
+  margin-bottom: var(--zs-25);
+}
+
+.required-star {
+  color: var(--z-red);
+  margin-right: var(--zs-12);
+}
+
+/* Checkboxes y facturación */
+.checkbox-group-label {
+  margin-bottom: var(--zs-75);
+}
+
+.checkbox-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--zs-75);
+}
+
+@media (max-width: 700px) {
+  .checkbox-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+.activities-product-label {
+  line-height: 1.3;
+}
+
+.billing-grid {
+  display: grid;
+  gap: var(--zs-100);
+  grid-template-columns: repeat(auto-fill, minmax(210px, 1fr));
+  margin-top: var(--zs-25);
+}
+
+.billing-block {
+  background: var(--zg-white-zurich);
+  border: 1px solid var(--z-border);
+  border-radius: 8px;
+  padding: var(--zs-75) var(--zs-100);
+}
+
+.billing-block-label {
+  margin-bottom: var(--zs-50);
+}
+
+.additional-emails-header {
+  margin-bottom: var(--zs-75);
+  padding-top: var(--zs-75);
+  border-top: 1px dashed var(--z-border);
+  display: flex;
+  align-items: center;
+  gap: var(--zs-50);
+}
+
+/* Colapsable de tomador */
+.policyholder-create-body {
+  border: 1.5px solid var(--zc-lemon-aa);
+  border-radius: 8px;
+  padding: var(--zs-150) var(--zs-150) var(--zs-75);
+  margin-bottom: var(--zs-25);
+}
+
+/* Confirmación TIA */
+.tia-confirm-create {
+  border: 1px solid var(--zc-lemon-80);
+  border-left: 4px solid var(--z-orange);
+  border-radius: 8px;
+  padding: var(--zs-100) var(--zs-150);
+  margin-top: var(--zs-75);
+}
+
+.tia-confirm-text {
+  font: var(--zf-capt-14);
+  color: var(--zc-lemon-aa);
+  margin-bottom: var(--zs-75);
+  line-height: 1.5;
+}
+
+.tia-confirm-actions {
+  display: flex;
+  gap: var(--zs-75);
+  flex-wrap: wrap;
+}
+
+/* Products card */
+.products-card {
+  background: var(--zg-white);
+  border-radius: 10px;
+  box-shadow: var(--z-card-shadow);
+  margin-bottom: var(--zs-150);
+  overflow: visible;
+  border: 1px solid rgba(221, 227, 236, .7);
+}
+
+.products-tab-body {
+  padding: var(--zs-150) var(--zs-200) var(--zs-100);
+}
+
+/* Subsecciones apiladas, intro/nota, fila de documento y listas (genérico) */
+.form-subsection--stack {
+  margin-bottom: var(--zs-150);
+}
+
+.form-subsection--stack:last-child {
+  margin-bottom: 0;
+}
+
+.subsection-intro {
+  color: var(--z-text);
+  margin: 0 0 var(--zs-100);
+  line-height: 1.5;
+}
+
+.subsection-note {
+  margin: var(--zs-75) 0 0;
+  font-style: italic;
+}
+
+.si-no-select-all {
+  display: flex;
+  gap: var(--zs-50);
+  justify-content: flex-end;
+  margin-bottom: var(--zs-50);
+}
+
+.doc-row {
+  display: flex;
+  align-items: center;
+  gap: var(--zs-75);
+  padding: var(--zs-50) var(--zs-75);
+  border: 1px solid var(--z-border);
+  border-radius: 8px;
+  background: var(--zg-white);
+}
+
+.doc-row-label {
+  min-width: 96px;
+  flex-shrink: 0;
+}
+
+.service-list {
+  margin: var(--zs-25) 0 0 0;
+  padding-left: var(--zs-100);
+}
+
+.service-item {
+  padding: var(--zs-12) 0;
+  line-height: 1.5;
+}
+
+/* Tables / Records */
+.record-table-header {
+  display: flex;
+  justify-content: flex-end;
+  margin-bottom: var(--zs-50);
+}
+
+.record-empty {
+  text-align: center;
+  color: var(--z-muted);
+  padding: var(--zs-150);
+}
+
+.record-validation-msg {
+  text-align: right;
+  font-size: 12px;
+  color: var(--z-red);
+  margin-top: var(--zs-50);
+}
+
+.record-validation-msg strong {
+  font-weight: 700;
+}
+
+/* Info bars and section titles */
+.subsection-title {
+  margin-bottom: var(--zs-50);
+}
+
+.cover-note-toggle {
+  display: flex;
+  align-items: center;
+  gap: var(--zs-75);
+}
+
+/* Stack de label + control con gap 4px: --zs-25 no existe como gap de z-flex
+   (cuyo mínimo es 50 = 8px), por eso se mantiene como clase. */
+.field-wrap {
+  display: flex;
+  flex-direction: column;
+  gap: var(--zs-25);
+}
+
+.field-hint {
+  font-weight: 400;
+  margin-left: var(--zs-25);
+}
+
+/* Resumen de cotizaciones (preview) */
+.quote-summary-body {
+  padding: var(--zs-150) var(--zs-200);
+  display: flex;
+  flex-direction: column;
+  gap: var(--zs-100);
+}
+
+.quote-summary-product {
+  border: 1px solid var(--zg-9);
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+.quote-summary-product-header {
+  background: var(--zc-blue-zurich);
+  color: var(--zg-white-zurich);
+  font: var(--zf-capt-12--700);
+  padding: var(--zs-75) var(--zs-150);
+  display: flex;
+  align-items: center;
+  gap: var(--zs-50);
+}
+
+.quote-summary-status {
+  display: flex;
+  align-items: center;
+  gap: var(--zs-75);
+  padding: var(--zs-100) var(--zs-200);
+}
+
+.quote-summary-status--error {
+  color: var(--zc-peach-aa);
+}
+
+.quote-summary-status--hint {
+  font-style: italic;
+}
+
+.spinner-sm {
+  width: 18px;
+  height: 18px;
+  border: 2px solid var(--zg-9);
+  border-top-color: var(--z-blue);
+  flex-shrink: 0;
+}
+
+/* Respuesta cotización screen */
+.result-content {
+  max-width: 640px;
+  margin: 0 auto;
+  padding: var(--zs-200) var(--zs-150) var(--zs-400);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.result-actions {
+  margin-top: var(--zs-200);
+  display: flex;
+  justify-content: center;
+}
+
+/* Opciones cotización screen */
+.screen-body {
+  padding: var(--zs-150) var(--zs-200);
+  display: grid;
+  grid-template-columns: 1fr 380px;
+  gap: var(--zs-150);
+  align-items: start;
+}
+
+@media (max-width: 1024px) {
+  .screen-body {
+    grid-template-columns: 1fr;
+  }
+}
+
+.decision-actions {
+  padding: var(--zs-100) var(--zs-150) var(--zs-150);
+  display: flex;
+  justify-content: flex-end;
+  border-top: 1px solid var(--z-border);
+}
+
+@media (max-width: 600px) {
+  .screen-body {
+    padding: var(--zs-100) var(--zs-150);
+  }
+}
+
+/* Nota Cobertura screen */
+.doc-card {
+  border: 1px solid var(--z-border);
+  border-radius: 8px;
+  overflow: hidden;
+  background: var(--zg-white-zurich);
+}
+
+.doc-card-header {
+  display: flex;
+  align-items: center;
+  gap: var(--zs-75);
+  padding: var(--zs-75) var(--zs-100);
+  background: var(--zg-white);
+  border-bottom: 1px solid transparent;
+  transition: background .1s;
+}
+
+.doc-card-header:hover {
+  background: var(--zg-white-zurich);
+}
+
+.doc-card.is-open .doc-card-header {
+  border-bottom-color: var(--z-border);
+  background: var(--z-blue-light);
+}
+
+.doc-info {
+  flex: 1;
+  min-width: 0;
+}
+
+.doc-name {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.doc-meta {
+  margin-top: 2px;
+}
+
+.doc-actions {
+  display: flex;
+  gap: var(--zs-50);
+  flex-shrink: 0;
+}
+
+.doc-viewer {
+  padding: var(--zs-100);
+  background: var(--zg-white-zurich);
+}
+
+.no-docs-card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: var(--zs-300) var(--zs-200);
+  gap: var(--zs-75);
+  color: var(--z-muted);
+  text-align: center;
+}
+
+.no-docs-card p {
+  margin: 0;
+}
+
+/* Estado Correo screen */
+.email-status-content {
   flex: 1;
   display: flex;
   flex-direction: column;
@@ -1616,18 +1457,13 @@ z-table :is(th, td)[config*="right"]  { text-align: right; }
   gap: var(--zs-200);
 }
 
-
-/* ── Nota al pie del mensaje (dentro de ResultCard) ── */
-.ec-desc--note {
+.email-status-note {
   margin-top: var(--zs-150);
-  font: var(--zf-body-14);
-  color: var(--zg-5);
   border-top: 1px dashed var(--zg-9);
   padding-top: var(--zs-100);
 }
 
-/* ── Badge (correos) ─────────────────────────────── */
-.ec-badge {
+.email-status-badge {
   display: inline-block;
   margin: var(--zs-75) 0;
   padding: var(--zs-75) var(--zs-150);
@@ -1640,23 +1476,21 @@ z-table :is(th, td)[config*="right"]  { text-align: right; }
   max-width: 100%;
 }
 
-.ec-badge--error {
+.email-status-badge--error {
   background: color-mix(in srgb, var(--zc-peach-aa) 8%, transparent);
   border-color: var(--zc-peach-aa);
   color: var(--zc-peach-aa);
 }
 
-/* ── Actions ─────────────────────────────────────── */
-.ec-actions {
+.email-status-actions {
   display: flex;
   justify-content: center;
 }
 
-/* ── Loading overlay ─────────────────────────────── */
-.ec-overlay {
+.email-status-overlay {
   position: fixed;
   inset: 0;
-  background: rgba(255,255,255,0.75);
+  background: rgba(255, 255, 255, 0.75);
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -1667,47 +1501,11 @@ z-table :is(th, td)[config*="right"]  { text-align: right; }
   color: var(--zc-blue-zurich);
 }
 
-
-/* ========== recibir-queja ========== */
-/* =====================================================
-   RECIBIR QUEJA — SCR-001 TO-BE v2.0
-   Proceso: P01-T01 | Quejas Directas | Zurich Colombia
-   ===================================================== */
-
-/* ──────────────────────────────────────
-   CAMPOS DE FORMULARIO
-────────────────────────────────────── */
-
-
-/* ========== revisar-error-tecnico ========== */
-/* =====================================================
-   REVISAR ERROR TÉCNICO — SCR-SP1-T06
-   Proceso: SP1-T06 | Quejas Directas | Zurich Colombia
-   ===================================================== */
-
-/* ──────────────────────────────────────
-   CAMPOS DE FORMULARIO
-────────────────────────────────────── */
-
-/* ========== corregir-datos-formulario ========== */
-/* =====================================================
-   CORREGIR DATOS FORMULARIO — P01-T07
-   Proceso: P01-T07 | Quejas Directas | Zurich Colombia
-   ===================================================== */
-
-/* ──────────────────────────────────────
-   CAMPOS DE FORMULARIO
-────────────────────────────────────── */
-
-/* ──────────────────────────────────────
-   LISTA DE ERRORES DE VALIDACIÓN
-────────────────────────────────────── */
+/* Error logs & validation lists */
 .error-list {
-  display: flex;
-  flex-direction: column;
-  gap: var(--zs-50);
   margin-bottom: var(--zs-100);
 }
+
 .error-list-item {
   display: grid;
   grid-template-columns: 220px 1fr;
@@ -1719,33 +1517,24 @@ z-table :is(th, td)[config*="right"]  { text-align: right; }
   border-radius: 0 4px 4px 0;
   font: var(--zf-capt-12);
 }
+
 .error-list-label {
   font: var(--zf-capt-12--700);
   color: var(--zc-peach-aa);
-  text-transform: uppercase;
-  letter-spacing: .3px;
 }
+
 .error-list-msg {
   color: var(--z-text);
   line-height: 1.4;
 }
 
 @media (max-width: 600px) {
-  .error-list-item { grid-template-columns: 1fr; }
+  .error-list-item {
+    grid-template-columns: 1fr;
+  }
 }
 
-
-
-/* ========== corregir-error-funcional-ss ========== */
-/* =====================================================
-   CORREGIR ERROR FUNCIONAL SS — SP1-T05
-   Proceso: SP1-T05 | Quejas Directas | Zurich Colombia
-   ===================================================== */
-
-/* ── Campos ── */
-
-/* ── Tags de campos afectados ── */
-.campos-afectados-list {
+.affected-fields-list {
   display: flex;
   flex-wrap: wrap;
   gap: var(--zs-50);

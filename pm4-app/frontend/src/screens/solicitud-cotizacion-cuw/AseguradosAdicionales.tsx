@@ -89,7 +89,7 @@ function AseguradoModal({ initial, onClose, onAccept }: ModalProps) {
   return (
     <ZrModal model={true} onChange={(open: boolean) => { if (!open) onClose(); }}>
       <h3 style={{ margin: '0 0 var(--zs-100)', font: 'var(--zf-h-20)', color: 'var(--z-text)' }}>{isEdit ? 'Editar asegurado' : 'Agregar'}</h3>
-      <div>
+      <div z-flex="col:150">
             {/* 1. Nombre */}
             <ZdsInput
               label="Nombre del asegurado"

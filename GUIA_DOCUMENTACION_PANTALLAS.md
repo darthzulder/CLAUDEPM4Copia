@@ -76,7 +76,7 @@ Todos los insumos están en `pm4-app/insumos/`. Para Quejas Directas son:
 
    > **Cómo leer los `.xlsx`:** usar Python con `openpyxl` (`load_workbook(path, data_only=True, read_only=True)`). En Windows la consola puede fallar con UTF-8; **volcar la salida a un archivo `.txt` con `io.open(..., encoding="utf-8")`** y leer ese archivo. Borrar los `.txt` temporales al terminar.
 
-3. **Leer la implementación.** Revisar todos los archivos de la carpeta de la pantalla (`*.tsx`, `variables.ts`) y los posibles estilos añadidos en `shared.css` para saber qué se implementó realmente: campos, `rules` de validación, `pattern`/`maxLength`, render condicional, `defaultValues`, dependencias (`useEffect`), botones y acciones. *Nota: No se deben crear archivos `styles.css` locales; toda personalización necesaria debe residir en `shared.css` de manera DRY.*
+3. **Leer la implementación.** Revisar todos los archivos de la carpeta de la pantalla (`*.tsx`, `variables.ts`) y los posibles estilos añadidos en `shared.css` para saber qué se implementó realmente: campos, `rules` de validación, `pattern`/`maxLength`, render condicional, `defaultValues`, dependencias (`useEffect`), botones y acciones. *Nota: No se deben crear archivos `styles.css` locales ni estilos en línea. Toda la visualización, alineación, tablas, formularios, tipografías y tags de estado se rigen únicamente por shared.css y los componentes de ZurichDS para garantizar consistencia absoluta en el diseño global.*
 
 4. **Cruzar implementación ↔ insumos.** Para cada elemento implementado, encontrar su origen exacto y anotar la referencia: `Archivo > Hoja > ID/fila`. Para cada elemento del insumo que **no** se implementó, documentarlo igualmente como no implementado/pendiente con su fuente.
 

@@ -1,17 +1,21 @@
 import { useState } from 'react';
+import { ActionBar } from '../../components/ActionBar';
 import { useTask } from '../../core/useTask';
 import { useRequestFiles, resolveFileId } from '../../core/useRequestFiles';
-import PdfViewer from '../../components/PdfViewer';
 import { ZrButton, ZrModal, ZrAlert } from '../../components/fields/ZdsFields';
 import ResultCard from '../../components/ResultCard';
 import FormSection from '../../components/FormSection';
+import ScreenHeader from '../../components/ScreenHeader';
+import HelpModal from '../../components/HelpModal';
+import PreviewModal from '../../components/PreviewModal';
+import DocList from '../../components/DocList';
+import DocItem from '../../components/DocItem';
 import {
   type DocSarlaftData,
   type SarlaftPerfil,
   DOCS_POR_PERFIL,
   DIRECTRICES,
 } from './variables';
-import zurichLogo from '../../resources/zurich/ZurichLogo_Horz_White_CMYK_no_R.png';
 
 // ──────────────────────────────────────────────────────────────
 // Types
@@ -22,107 +26,6 @@ interface PreviewState {
   fileName: string;
 }
 
-// ──────────────────────────────────────────────────────────────
-// Fila de documento (solo lectura)
-// ──────────────────────────────────────────────────────────────
-function DocRow({
-  index,
-  descripcion,
-  vigencia,
-  fileId,
-  fileName,
-  onPreview,
-}: {
-  index: number;
-  descripcion: string;
-  vigencia?: string;
-  fileId: number | null;
-  fileName: string;
-  onPreview: (state: PreviewState) => void;
-}) {
-  const cargado = fileId !== null;
-
-  return (
-    <div className={`sarlaft-doc-row${cargado ? ' is-loaded' : ''}`}>
-      {/* Índice */}
-      <div className={`doc-num-badge${cargado ? ' doc-num-badge--loaded' : ''}`}>
-        {cargado ? '✓' : index}
-      </div>
-
-      {/* Descripción */}
-      <div className="doc-body">
-        <span className="doc-desc">{descripcion}</span>
-        {vigencia && <span className="doc-vigencia">{vigencia}</span>}
-      </div>
-
-      {/* Estado */}
-      <div className="doc-estado-wrap">
-        <span className={`estado-badge${cargado ? ' estado-cargado' : ' estado-sin-doc'}`}>
-          {cargado ? 'Cargado' : 'Sin documento'}
-        </span>
-      </div>
-
-      {/* Nombre del archivo */}
-      <div className="doc-file-area">
-        {cargado ? (
-          <span className="file-name-chip">
-            <span className="file-chip-icon">📄</span>
-            {fileName}
-          </span>
-        ) : (
-          <span className="file-name-empty">—</span>
-        )}
-      </div>
-
-      {/* Ver documento */}
-      <div className="doc-preview-trigger">
-        <ZrButton
-          config="secondary:s"
-          icon="visibility-on:line"
-          disabled={!cargado}
-          onClick={() => {
-            if (fileId) onPreview({ fileId, descripcion, fileName });
-          }}
-        >
-          Ver
-        </ZrButton>
-      </div>
-    </div>
-  );
-}
-
-// ──────────────────────────────────────────────────────────────
-// Modal de ayuda — directrices SARLAFT
-// ──────────────────────────────────────────────────────────────
-function AyudaModalContent({ perfilActivo }: { perfilActivo: SarlaftPerfil | null }) {
-  return (
-    <div className="ayuda-modal">
-      <div className="ayuda-modal-header">
-        <div className="ayuda-modal-icon-circle">i</div>
-        <div>
-          <div className="ayuda-modal-title">Directrices SARLAFT</div>
-          <div className="ayuda-modal-subtitle">Documentos requeridos según el perfil del tomador</div>
-        </div>
-      </div>
-      <div className="ayuda-modal-body">
-        {DIRECTRICES.map(({ perfil, label, docs }) => (
-          <div
-            key={perfil}
-            className={`ayuda-perfil-block${perfilActivo === perfil ? ' ayuda-perfil-activo' : ''}`}
-          >
-            <div className="ayuda-perfil-header">
-              <span className="ayuda-perfil-label">{label}</span>
-              {perfilActivo === perfil && <span className="ayuda-badge-activo">Activo</span>}
-            </div>
-            <ol className="ayuda-doc-list">
-              {docs.map((doc, i) => <li key={i}>{doc}</li>)}
-            </ol>
-          </div>
-        ))}
-      </div>
-    </div>
-  );
-}
 
 // ──────────────────────────────────────────────────────────────
 // Pantalla principal
@@ -175,13 +78,8 @@ export default function RevSARLAFT() {
   if (sent) {
     return (
       <div className="screen-wrapper">
-        <div className="screen-header">
-          <div className="title-block">
-            <h1>VERIFICAR DOCUMENTOS SARLAFT</h1>
-          </div>
-          <img src={zurichLogo} alt="Zurich" className="header-logo" />
-        </div>
-        <div className="screen-sent-wrapper">
+        <ScreenHeader title="VERIFICAR DOCUMENTOS SARLAFT" />
+        <div className="screen-content">
           <ResultCard variant="success" title="Verificación confirmada">
             <p>
               La información SARLAFT fue verificada correctamente.<br />
@@ -225,27 +123,24 @@ export default function RevSARLAFT() {
       )}
 
       {/* Header */}
-      <div className="screen-header">
-        <div className="title-block">
-          <h1>VERIFICAR DOCUMENTOS SARLAFT</h1>
-          <div className="subtitle">
-            {numCot  && <span>Cotización # {numCot}</span>}
-            {numCaso && <span>Caso # {numCaso}</span>}
-            {perfil  && <span>Perfil: {perfil.charAt(0) + perfil.slice(1).toLowerCase()}</span>}
-          </div>
-        </div>
-        <img src={zurichLogo} alt="Zurich" className="header-logo" />
-      </div>
+      <ScreenHeader
+        title="VERIFICAR DOCUMENTOS SARLAFT"
+        subtitle={[
+          numCot && `Cotización # ${numCot}`,
+          numCaso && `Caso # ${numCaso}`,
+          perfil && `Perfil: ${perfil.charAt(0) + perfil.slice(1).toLowerCase()}`
+        ]}
+      />
 
       {/* Contenido */}
       <div className="screen-content">
-        <div className="verdoc-layout">
+        <div z-flex="col:150">
 
           <FormSection
             title="Documentos SARLAFT Cargados"
             action={<ZrButton config="secondary:xs" icon="info:line" onClick={() => setInfoOpen(true)} />}
             footer={
-              <div className="submit-bar">
+              <ActionBar>
                 <ZrButton
                   config="primary:l"
                   disabled={submitting || files.length === 0}
@@ -254,7 +149,7 @@ export default function RevSARLAFT() {
                 >
                   {submitting ? 'Confirmando…' : 'INFORMACIÓN SARLAFT VERIFICADA'}
                 </ZrButton>
-              </div>
+              </ActionBar>
             }
           >
             {!perfil && (
@@ -263,22 +158,25 @@ export default function RevSARLAFT() {
               </ZrAlert>
             )}
 
-            <div className="sarlaft-doc-list">
+            <DocList mode="upload">
               {docs.map((doc, i) => {
                 const { fileId, fileName } = resolveDoc(doc.key, i);
                 return (
-                  <DocRow
+                  <DocItem
                     key={doc.key}
+                    mode="upload"
                     index={i + 1}
                     descripcion={doc.descripcion}
                     vigencia={doc.vigencia}
                     fileId={fileId}
                     fileName={fileName}
-                    onPreview={setPreview}
+                    onPreview={() => {
+                      if (fileId) setPreview({ fileId, descripcion: doc.descripcion, fileName });
+                    }}
                   />
                 );
               })}
-            </div>
+            </DocList>
 
             {files.length === 0 && (
               <ZrAlert config="info" {...({ 'hide-close': true } as object)}>
@@ -292,33 +190,30 @@ export default function RevSARLAFT() {
 
       {/* Modal de ayuda */}
       <ZrModal model={infoOpen} onChange={(v: boolean) => setInfoOpen(v)} style={{ ['--z-modal--backdrop' as any]: 'rgba(11,27,60,.45)' }}>
-        <AyudaModalContent perfilActivo={perfil} />
+        <HelpModal title="Directrices SARLAFT" subtitle="Documentos requeridos según el perfil del tomador">
+          {DIRECTRICES.map(({ perfil: p, label, docs: dList }) => (
+            <div
+              key={p}
+              className={`help-profile-block${perfil === p ? ' help-profile-active' : ''}`}
+            >
+              <div className="help-profile-header">
+                <span className="help-profile-label">{label}</span>
+                {perfil === p && <span className="badge-active">Activo</span>}
+              </div>
+              <ol className="help-doc-list">
+                {dList.map((doc, i) => <li key={i}>{doc}</li>)}
+              </ol>
+            </div>
+          ))}
+        </HelpModal>
       </ZrModal>
 
       {/* Modal de vista previa — ZrModal (ZDS) + PdfViewer */}
-      <ZrModal
-        model={!!preview}
-        onChange={(v: boolean) => { if (!v) setPreview(null); }}
-        style={{ ['--z-modal--padding' as any]: '0', ['--z-modal--backdrop' as any]: 'rgba(11,27,60,.55)' }}
-      >
-        <div className="preview-modal">
-          <div className="preview-modal-header">
-            <div className="preview-modal-title">
-              <span className="preview-modal-icon">📄</span>
-              <div>
-                <div className="preview-modal-doc-name">{preview?.fileName}</div>
-                <div className="preview-modal-doc-desc">{preview?.descripcion}</div>
-              </div>
-            </div>
-          </div>
-          <div style={{ padding: '0' }}>
-            <PdfViewer
-              fileId={preview?.fileId ?? null}
-              height={Math.min(window.innerHeight * 0.70, 680)}
-            />
-          </div>
-        </div>
-      </ZrModal>
+      <PreviewModal
+        isOpen={!!preview}
+        onClose={() => setPreview(null)}
+        previewDoc={preview}
+      />
     </div>
   );
 }

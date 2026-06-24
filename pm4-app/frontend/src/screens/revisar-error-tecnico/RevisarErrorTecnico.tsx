@@ -1,11 +1,12 @@
 import { useEffect } from 'react';
+import { ActionBar } from '../../components/ActionBar';
 import { useForm } from 'react-hook-form';
 import { useTask } from '../../core/useTask';
 import FormSection from '../../components/FormSection';
+import ScreenHeader from '../../components/ScreenHeader';
 import { ZdsInput, ZdsSelect, ZdsTextarea, ZdsRadio, ZrButton, ZrAlert } from '../../components/fields/ZdsFields';
 import { OPTIONS, RevisarErrorTecnicoFormData } from './variables';
 import SeccionDetalleError from './SeccionDetalleError';
-import zurichLogo from '../../resources/zurich/ZurichLogo_Horz_White_CMYK_no_R.png';
 
 export default function RevisarErrorTecnico() {
   const { task, loading, error, submitting, completeTask } = useTask();
@@ -65,19 +66,17 @@ export default function RevisarErrorTecnico() {
   return (
     <div className="screen-wrapper">
       {/* Encabezado */}
-      <div className="screen-header">
-        <div className="title-block">
-          <h1>Revisar y Corregir Error Técnico</h1>
-          <div className="subtitle">
-            <span>SCR-SP1-T06 · SP1-T06</span>
-            <span>Gestión de Quejas Directas</span>
-            <span>Rol: Técnico de Integración</span>
-          </div>
-        </div>
-        <img src={zurichLogo} alt="Zurich" className="header-logo" />
-      </div>
+      <ScreenHeader
+        title="Revisar y Corregir Error Técnico"
+        subtitle={[
+          'SCR-SP1-T06 · SP1-T06',
+          'Gestión de Quejas Directas',
+          'Rol: Técnico de Integración',
+        ]}
+      />
 
-      <form onSubmit={handleSubmit(onSubmit)} noValidate style={{ maxWidth: 960, margin: '0 auto', padding: '24px 24px 0' }}>
+      <div className="screen-content">
+        <form onSubmit={handleSubmit(onSubmit)} noValidate>
 
         {/* Secciones 1 y 2: Error + Queja afectada */}
         <SeccionDetalleError form={form} />
@@ -176,7 +175,7 @@ export default function RevisarErrorTecnico() {
         </FormSection>
 
         {/* Barra de acciones */}
-        <div className="actions-bar">
+        <ActionBar>
           <ZrButton config="secondary:s" onClick={() => window.history.back()}>Cancelar</ZrButton>
           <ZrButton
             config="secondary:s"
@@ -186,8 +185,9 @@ export default function RevisarErrorTecnico() {
             Guardar Borrador
           </ZrButton>
           <ZrButton config="positive:s" onClick={() => { handleSubmit(onSubmit)(); }} loading={submitting} disabled={submitting}>{submitLabel}</ZrButton>
-        </div>
-      </form>
+        </ActionBar>
+        </form>
+      </div>
     </div>
   );
 }

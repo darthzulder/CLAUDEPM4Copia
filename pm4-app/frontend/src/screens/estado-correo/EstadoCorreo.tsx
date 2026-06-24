@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { useTask } from '../../core/useTask';
 import { ZrButton, ZrModal } from '../../components/fields/ZdsFields';
 import ResultCard from '../../components/ResultCard';
-import zurichLogo from '../../resources/zurich/ZurichLogo_Horz_White_CMYK_no_R.png';
+import ScreenHeader from '../../components/ScreenHeader';
 import { type EstadoCorreoData } from './variables';
 
 type TaskData = EstadoCorreoData & Record<string, unknown>;
@@ -52,8 +52,14 @@ export default function EstadoCorreo() {
   if (sent) {
     return (
       <div className="screen-wrapper">
-        <Header data={data} />
-        <div className="ec-content">
+        <ScreenHeader
+          title="Estado de correo electrónico"
+          subtitle={[
+            data.frm_gen_num_cotizacion && `Cotización # ${data.frm_gen_num_cotizacion}`,
+            data.frm_caso && `Caso # ${data.frm_caso}`
+          ]}
+        />
+        <div className="email-status-content">
           <ResultCard variant="success" title="Proceso avanzado">
             <p>El proceso continuará automáticamente al siguiente nodo.</p>
           </ResultCard>
@@ -65,15 +71,21 @@ export default function EstadoCorreo() {
   return (
     <div className="screen-wrapper">
       {submitting && (
-        <div className="ec-overlay">
+        <div className="email-status-overlay">
           <div className="spinner" />
           <span>Procesando…</span>
         </div>
       )}
 
-      <Header data={data} />
+      <ScreenHeader
+        title="Estado de correo electrónico"
+        subtitle={[
+          data.frm_gen_num_cotizacion && `Cotización # ${data.frm_gen_num_cotizacion}`,
+          data.frm_caso && `Caso # ${data.frm_caso}`
+        ]}
+      />
 
-      <div className="ec-content">
+      <div className="email-status-content">
         {esExito ? (
           <ResultCard variant="success" title="Envío de correo completado">
             <p>
@@ -83,10 +95,10 @@ export default function EstadoCorreo() {
             {data.email_correos_exitosos && (
               <>
                 <p><strong>Correos enviados a:</strong></p>
-                <div className="ec-badge">{data.email_correos_exitosos}</div>
+                <div className="email-status-badge">{data.email_correos_exitosos}</div>
               </>
             )}
-            <p className="ec-desc--note">
+            <p className="email-status-note">
               El proceso se ejecutó sin inconvenientes. Puede avanzar haciendo clic en{' '}
               <strong>«Continuar»</strong>.
             </p>
@@ -101,22 +113,22 @@ export default function EstadoCorreo() {
             {data.email_correos_fallidos && (
               <>
                 <p><strong>Correos con error:</strong></p>
-                <div className="ec-badge ec-badge--error">{data.email_correos_fallidos}</div>
+                <div className="email-status-badge email-status-badge--error">{data.email_correos_fallidos}</div>
               </>
             )}
             {data.email_correos_exitosos && (
               <>
                 <p><strong>Enviados correctamente:</strong></p>
-                <div className="ec-badge">{data.email_correos_exitosos}</div>
+                <div className="email-status-badge">{data.email_correos_exitosos}</div>
               </>
             )}
-            <p className="ec-desc--note">
+            <p className="email-status-note">
               Puede continuar de todas formas o contactar al soporte técnico.
             </p>
           </ResultCard>
         )}
 
-        <div className="ec-actions">
+        <div className="email-status-actions">
           <ZrButton
             config="primary:l"
             icon="arrow-long-right:line"
@@ -147,21 +159,6 @@ export default function EstadoCorreo() {
           </div>
         </ZrModal>
       )}
-    </div>
-  );
-}
-
-function Header({ data }: { data: TaskData }) {
-  return (
-    <div className="screen-header">
-      <div className="title-block">
-        <h1>Estado de correo electrónico</h1>
-        <div className="subtitle">
-          {data.frm_gen_num_cotizacion && <span>Cotización # {data.frm_gen_num_cotizacion}</span>}
-          {data.frm_caso && <span>Caso # {data.frm_caso}</span>}
-        </div>
-      </div>
-      <img src={zurichLogo} alt="Zurich" className="header-logo" />
     </div>
   );
 }

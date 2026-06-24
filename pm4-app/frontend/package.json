@@ -4,7 +4,8 @@
   "scripts": {
     "dev": "vite",
     "build": "tsc && vite build",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "lint": "eslint src"
   },
   "dependencies": {
     "axios": "^1.7.2",
@@ -15,9 +16,12 @@
   "devDependencies": {
     "@types/react": "^18.3.3",
     "@types/react-dom": "^18.3.0",
+    "@typescript-eslint/parser": "^8.62.0",
     "@vitejs/plugin-react": "^4.3.1",
     "@zurich/css-components": "^0.8.1",
     "@zurich/web-components": "^0.8.1",
+    "eslint": "^10.5.0",
+    "eslint-plugin-react-hooks": "^7.1.1",
     "typescript": "^5.5.3",
     "vite": "^5.3.3"
   }

@@ -2,8 +2,8 @@ import { useState } from 'react';
 import { useTask } from '../../core/useTask';
 import { ZrButton, ZrModal } from '../../components/fields/ZdsFields';
 import ResultCard from '../../components/ResultCard';
+import ScreenHeader from '../../components/ScreenHeader';
 import { RESPUESTA_VALUES, type RespuestaCotizacionData } from './variables';
-import zurichLogo from '../../resources/zurich/ZurichLogo_Horz_White_CMYK_no_R.png';
 
 // ---------------------------------------------------------------------------
 // Helpers
@@ -128,11 +128,8 @@ export default function RespuestaCotizacion() {
   if (sent) {
     return (
       <div className="screen-wrapper">
-        <div className="screen-header">
-          <div className="title-block"><h1>{data.frm_titulo || 'RESULTADO DE LA COTIZACIÓN'}</h1></div>
-          <img src={zurichLogo} alt="Zurich" className="header-logo" />
-        </div>
-        <div className="screen-sent-wrapper">
+        <ScreenHeader title={data.frm_titulo || 'RESULTADO DE LA COTIZACIÓN'} />
+        <div className="screen-content">
           <ResultCard variant="success" title="Tarea finalizada">
             <p>
               La cotización fue finalizada correctamente.<br />
@@ -157,16 +154,13 @@ export default function RespuestaCotizacion() {
       )}
 
       {/* Header */}
-      <div className="screen-header">
-        <div className="title-block">
-          <h1>{titulo}</h1>
-          <div className="subtitle">
-            {numCot && <span>Cotización # {numCot}</span>}
-            {numCaso && <span>Caso # {numCaso}</span>}
-          </div>
-        </div>
-        <img src={zurichLogo} alt="Zurich" className="header-logo" />
-      </div>
+      <ScreenHeader
+        title={titulo}
+        subtitle={[
+          numCot ? `Cotización # ${numCot}` : null,
+          numCaso ? `Caso # ${numCaso}` : null,
+        ]}
+      />
 
       {/* Content */}
       <div className="result-content">
