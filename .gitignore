@@ -1,5 +1,7 @@
-#LocalFiles
-#LocalFiles/
+# LocalFiles
+.claude/settings.local.json
+LocalFiles/
+.LocalFiles/
 
 # Graphify outputs
 #graphify-out/
