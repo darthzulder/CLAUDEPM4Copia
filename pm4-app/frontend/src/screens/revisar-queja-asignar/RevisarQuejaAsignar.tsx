@@ -4,7 +4,7 @@ import { useForm } from 'react-hook-form';
 import { useTask } from '../../core/useTask';
 import FormSection from '../../components/FormSection';
 import ScreenHeader from '../../components/ScreenHeader';
-import { ZdsInput, ZdsSelect, ZdsTextarea, ZdsRadio, ZrButton, ZrAlert } from '../../components/fields/ZdsFields';
+import { ZdsInput, ZdsSelect, ZdsTextarea, ZdsRadio, ZrButton, ZrAlert, ZrLoader } from '../../components/fields/ZdsFields';
 import { OPTIONS, RevisarQuejaAsignarFormData } from './variables';
 import SeccionResumenQueja from './SeccionResumenQueja';
 
@@ -45,7 +45,7 @@ export default function RevisarQuejaAsignar() {
   if (loading) {
     return (
       <div className="screen-wrapper">
-        <div className="screen-loading"><div className="spinner" /></div>
+        <div className="screen-loading"><ZrLoader /></div>
       </div>
     );
   }
@@ -53,7 +53,7 @@ export default function RevisarQuejaAsignar() {
   if (error) {
     return (
       <div className="screen-wrapper">
-        <div className="screen-error">Error al cargar el formulario: {error}</div>
+        <ZrAlert config="negative" {...({ 'hide-close': true } as object)}>Error al cargar el formulario: {error}</ZrAlert>
       </div>
     );
   }

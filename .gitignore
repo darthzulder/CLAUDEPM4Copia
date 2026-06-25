@@ -1,15 +1,17 @@
-#LocalFiles
+# LocalFiles
+.claude/settings.local.json
 LocalFiles/
+.LocalFiles/
 
 # Claude Code — configuración local personal
 .claude/settings.local.json
 
 # Graphify outputs
-graphify-out/
-graph.json
-graph.html
-GRAPH_REPORT.md
-.graphify/
+#graphify-out/
+#graph.json
+#graph.html
+#GRAPH_REPORT.md
+#.graphify/
 
 # Node/JavaScript/TypeScript
 node_modules/

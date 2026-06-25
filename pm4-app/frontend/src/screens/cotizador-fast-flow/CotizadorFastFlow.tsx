@@ -5,7 +5,7 @@ import { useTask } from '../../core/useTask';
 import { useCollection } from '../../core/useCollection';
 import FormSection from '../../components/FormSection';
 import ScreenHeader from '../../components/ScreenHeader';
-import { ZdsInput, ZdsSelect, ZdsRadio, ZdsDate, ZrButton } from '../../components/fields/ZdsFields';
+import { ZdsInput, ZdsSelect, ZdsRadio, ZdsDate, ZrButton, ZrAlert, ZrLoader } from '../../components/fields/ZdsFields';
 import ResultCard from '../../components/ResultCard';
 import pm4 from '../../api/pm4Client';
 import { OPTIONS, COLLECTION_DEFS, CotizadorFormData, CONSULTAR_CLIENTE_SCRIPT_ID, parseClienteTia } from './variables';
@@ -554,13 +554,13 @@ export default function CotizadorFastFlow() {
   if (loading) {
     return (
       <div className="screen-loading">
-        <div className="spinner" />
+        <ZrLoader />
       </div>
     );
   }
 
   if (error) {
-    return <div className="screen-error">⚠️ Error cargando la tarea: {error}</div>;
+    return <ZrAlert config="negative" {...({ 'hide-close': true } as object)}>Error cargando la tarea: {error}</ZrAlert>;
   }
 
   if (sent) {

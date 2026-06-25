@@ -4,7 +4,7 @@ import { useForm } from 'react-hook-form';
 import { useTask } from '../../core/useTask';
 import FormSection from '../../components/FormSection';
 import ScreenHeader from '../../components/ScreenHeader';
-import { ZdsInput, ZdsSelect, ZdsRadio, ZrButton, ZrAlert, ZrFileInput } from '../../components/fields/ZdsFields';
+import { ZdsInput, ZdsSelect, ZdsRadio, ZrButton, ZrAlert, ZrFileInput, ZrLoader } from '../../components/fields/ZdsFields';
 import pm4 from '../../api/pm4Client';
 import { OPTIONS, RecibirQuejaFormData } from './variables';
 import SeccionConsumidor from './SeccionConsumidor';
@@ -56,7 +56,7 @@ export default function RecibirQueja() {
   if (loading) {
     return (
       <div className="screen-wrapper">
-        <div className="screen-loading"><div className="spinner" /></div>
+        <div className="screen-loading"><ZrLoader /></div>
       </div>
     );
   }
@@ -64,7 +64,7 @@ export default function RecibirQueja() {
   if (error) {
     return (
       <div className="screen-wrapper">
-        <div className="screen-error">Error al cargar el formulario: {error}</div>
+        <ZrAlert config="negative" {...({ 'hide-close': true } as object)}>Error al cargar el formulario: {error}</ZrAlert>
       </div>
     );
   }

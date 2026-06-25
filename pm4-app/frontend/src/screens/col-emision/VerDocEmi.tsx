@@ -2,7 +2,7 @@ import { useState, useMemo } from 'react';
 import { ActionBar } from '../../components/ActionBar';
 import { useTask } from '../../core/useTask';
 import { useRequestFiles, resolveFileId } from '../../core/useRequestFiles';
-import { ZrButton, ZrModal, ZrForm, ZrTextarea, ZrAlert, ZdsStatusBadge } from '../../components/fields/ZdsFields';
+import { ZrButton, ZrModal, ZrForm, ZrTextarea, ZrAlert, ZdsStatusBadge, ZrLoader } from '../../components/fields/ZdsFields';
 import ResultCard from '../../components/ResultCard';
 import FormSection from '../../components/FormSection';
 import ScreenHeader from '../../components/ScreenHeader';
@@ -156,7 +156,7 @@ export default function VerDocEmi() {
     return (
       <div className="screen-wrapper">
         <div className="screen-loading">
-          <div className="spinner" />
+          <ZrLoader />
           <span>Cargando documentos…</span>
         </div>
       </div>
@@ -166,7 +166,7 @@ export default function VerDocEmi() {
   if (error) {
     return (
       <div className="screen-wrapper">
-        <div className="screen-error">⚠ Error cargando la tarea: {error}</div>
+        <ZrAlert config="negative" {...({ 'hide-close': true } as object)}>Error cargando la tarea: {error}</ZrAlert>
       </div>
     );
   }
@@ -178,7 +178,7 @@ export default function VerDocEmi() {
     <div className="screen-wrapper">
       {submitting && (
         <div className="loading-overlay">
-          <div className="spinner" />
+          <ZrLoader />
         </div>
       )}
 
@@ -282,39 +282,43 @@ export default function VerDocEmi() {
       <ZrModal
         model={infoOpen}
         onChange={(v: boolean) => setInfoOpen(v)}
-        style={{ ['--z-modal--backdrop' as any]: 'rgba(11,27,60,.45)' }}
+        style={{ ['--z-modal--backdrop' as any]: 'color-mix(in srgb, var(--z-modal-backdrop) 45%, transparent)' }}
       >
         <HelpModal title="Criterios de Verificación" subtitle="Guía para validar documentos de emisión">
-          <div>
-            <p className="help-section-label">Estados de validación</p>
-            <div className="help-status-grid">
-              <ZdsStatusBadge variant="success">Aprobada</ZdsStatusBadge>
-              <span className="help-desc">El documento es correcto y cumple todos los requisitos de emisión.</span>
-              <ZdsStatusBadge variant="info">En revisión</ZdsStatusBadge>
-              <span className="help-desc">Estado inicial — debe cambiarse a Aprobada o Rechazada antes de continuar.</span>
-              <ZdsStatusBadge variant="danger">Rechazada</ZdsStatusBadge>
-              <span className="help-desc">El documento no cumple los requisitos, está incorrecto o incompleto.</span>
-            </div>
-          </div>
-
-          <div className="help-divider" />
-
-          <div>
-            <p className="help-section-label">Decisión automática</p>
+          <div z-flex="col:100">
             <div z-flex="col:50">
-              <div className="help-decision-row help-decision-row--completo">
-                <ZdsStatusBadge variant="success">Todos aprobados</ZdsStatusBadge>
-                <span className="help-desc">Se procederá a emitir la póliza.</span>
-              </div>
-              <div className="help-decision-row help-decision-row--incompleto">
-                <ZdsStatusBadge variant="danger">Alguno rechazado</ZdsStatusBadge>
-                <span className="help-desc">Se solicitarán nuevos documentos al Sales Support.</span>
+              <strong>Estados de validación</strong>
+              <div z-flex="col:50">
+                <div z-flex="100" z-align="left:center">
+                  <ZdsStatusBadge variant="success">Aprobada</ZdsStatusBadge>
+                  <span>El documento es correcto y cumple todos los requisitos de emisión.</span>
+                </div>
+                <div z-flex="100" z-align="left:center">
+                  <ZdsStatusBadge variant="info">En revisión</ZdsStatusBadge>
+                  <span>Estado inicial — debe cambiarse a Aprobada o Rechazada antes de continuar.</span>
+                </div>
+                <div z-flex="100" z-align="left:center">
+                  <ZdsStatusBadge variant="danger">Rechazada</ZdsStatusBadge>
+                  <span>El documento no cumple los requisitos, está incorrecto o incompleto.</span>
+                </div>
               </div>
             </div>
-          </div>
 
-          <div className="help-note">
-            ⚠ No es posible continuar si algún documento permanece en estado <strong>En revisión</strong>.
+            <div z-flex="col:50">
+              <strong>Decisión automática</strong>
+              <div z-flex="col:50">
+                <ZrAlert config="positive" {...({ 'hide-close': true } as object)}>
+                  <strong>Todos aprobados:</strong> Se procederá a emitir la póliza.
+                </ZrAlert>
+                <ZrAlert config="negative" {...({ 'hide-close': true } as object)}>
+                  <strong>Alguno rechazado:</strong> Se solicitarán nuevos documentos al Sales Support.
+                </ZrAlert>
+              </div>
+            </div>
+
+            <ZrAlert config="alert" {...({ 'hide-close': true } as object)}>
+              No es posible continuar si algún documento permanece en estado <strong>En revisión</strong>.
+            </ZrAlert>
           </div>
         </HelpModal>
       </ZrModal>

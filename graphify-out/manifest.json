@@ -1,0 +1,582 @@
+{
+  "G:\\DockerProys\\CLAUDEPM4Copia\\pm4-app\\backend\\src\\server.ts": {
+    "mtime": 1781193419.8678932,
+    "hash": "365bb525cb5d7680814275fc281ad4e9"
+  },
+  "G:\\DockerProys\\CLAUDEPM4Copia\\pm4-app\\backend\\src\\routes\\pm4.routes.ts": {
+    "mtime": 1781899521.0654173,
+    "hash": "fc19cd0bad9f496592d52dcda703e94e"
+  },
+  "G:\\DockerProys\\CLAUDEPM4Copia\\pm4-app\\cotizador-service\\app.py": {
+    "mtime": 1781193419.8678932,
+    "hash": "13191b14632f668cd36901c3d185724f"
+  },
+  "G:\\DockerProys\\CLAUDEPM4Copia\\pm4-app\\cotizador-service\\export_tables.py": {
+    "mtime": 1781193419.8693984,
+    "hash": "9c88511240eaa7b0c98528dd3bb789f1"
+  },
+  "G:\\DockerProys\\CLAUDEPM4Copia\\pm4-app\\frontend\\eslint.config.mjs": {
+    "mtime": 1782325772.7709482,
+    "hash": "42197777c3292d8037369d02fc2cad38"
+  },
+  "G:\\DockerProys\\CLAUDEPM4Copia\\pm4-app\\frontend\\vite.config.ts": {
+    "mtime": 1781827255.2407157,
+    "hash": "8ed3a2ec9a38291aaf02db0002f4118b"
+  },
+  "G:\\DockerProys\\CLAUDEPM4Copia\\pm4-app\\frontend\\src\\App.tsx": {
+    "mtime": 1782358552.9371934,
+    "hash": "7c475918d314ac56f6ed2f72d513b972"
+  },
+  "G:\\DockerProys\\CLAUDEPM4Copia\\pm4-app\\frontend\\src\\main.tsx": {
+    "mtime": 1782325755.1621861,
+    "hash": "8568f3e5290d4069717b57590a643181"
+  },
+  "G:\\DockerProys\\CLAUDEPM4Copia\\pm4-app\\frontend\\src\\vite-env.d.ts": {
+    "mtime": 1781193419.890798,
+    "hash": "8f68c27c3fc38817b2726b20e2d4f1ee"
+  },
+  "G:\\DockerProys\\CLAUDEPM4Copia\\pm4-app\\frontend\\src\\zds-layout.d.ts": {
+    "mtime": 1782264699.0909588,
+    "hash": "f6897832ae0a8698ec9deccdeb511056"
+  },
+  "G:\\DockerProys\\CLAUDEPM4Copia\\pm4-app\\frontend\\src\\zds-setup.ts": {
+    "mtime": 1782325750.255423,
+    "hash": "7b92e21c8ab25ef1f3598b8b4dafaf23"
+  },
+  "G:\\DockerProys\\CLAUDEPM4Copia\\pm4-app\\frontend\\src\\api\\pm4Client.ts": {
+    "mtime": 1781193419.8699472,
+    "hash": "0e3a25acf04cb115945bd20e2d7c8f28"
+  },
+  "G:\\DockerProys\\CLAUDEPM4Copia\\pm4-app\\frontend\\src\\components\\ActionBar.tsx": {
+    "mtime": 1782354348.41595,
+    "hash": "e1e387d11b15363365ac177f40629869"
+  },
+  "G:\\DockerProys\\CLAUDEPM4Copia\\pm4-app\\frontend\\src\\components\\DocItem.tsx": {
+    "mtime": 1782350244.037592,
+    "hash": "18bd560cb2c29af93323ecfc9a927aba"
+  },
+  "G:\\DockerProys\\CLAUDEPM4Copia\\pm4-app\\frontend\\src\\components\\DocList.tsx": {
+    "mtime": 1782264699.0729215,
+    "hash": "b5f6efea22962bf3ff6785981f481d72"
+  },
+  "G:\\DockerProys\\CLAUDEPM4Copia\\pm4-app\\frontend\\src\\components\\DocSupportUploader.tsx": {
+    "mtime": 1782264699.0734437,
+    "hash": "b0b7a9c51b76574da46b3302431ce205"
+  },
+  "G:\\DockerProys\\CLAUDEPM4Copia\\pm4-app\\frontend\\src\\components\\FormSection.tsx": {
+    "mtime": 1782354302.683782,
+    "hash": "0244b8503e5978114511371d92683453"
+  },
+  "G:\\DockerProys\\CLAUDEPM4Copia\\pm4-app\\frontend\\src\\components\\HelpModal.tsx": {
+    "mtime": 1782350240.2626166,
+    "hash": "ebb95179ef5997e6dff7d5733b543fb0"
+  },
+  "G:\\DockerProys\\CLAUDEPM4Copia\\pm4-app\\frontend\\src\\components\\InfoBar.tsx": {
+    "mtime": 1782354317.5277927,
+    "hash": "fbf70d24d3b5c8ae9978e71b2e55fbf6"
+  },
+  "G:\\DockerProys\\CLAUDEPM4Copia\\pm4-app\\frontend\\src\\components\\PdfViewer.tsx": {
+    "mtime": 1782355238.4912398,
+    "hash": "36156034ded7d8be4829e53c7d2eec83"
+  },
+  "G:\\DockerProys\\CLAUDEPM4Copia\\pm4-app\\frontend\\src\\components\\PreviewModal.tsx": {
+    "mtime": 1782324200.591277,
+    "hash": "16e1b903b7db30d174b2354f83374ae4"
+  },
+  "G:\\DockerProys\\CLAUDEPM4Copia\\pm4-app\\frontend\\src\\components\\ResultCard.tsx": {
+    "mtime": 1782340064.8486643,
+    "hash": "c2b7b050466abc8a336a59a65c21be1b"
+  },
+  "G:\\DockerProys\\CLAUDEPM4Copia\\pm4-app\\frontend\\src\\components\\ScreenHeader.tsx": {
+    "mtime": 1782354337.442283,
+    "hash": "71353f68debd09934245440240206206"
+  },
+  "G:\\DockerProys\\CLAUDEPM4Copia\\pm4-app\\frontend\\src\\components\\fields\\ZdsFields.tsx": {
+    "mtime": 1782356303.7094457,
+    "hash": "26efdc1ef729c8290ecd6b3f80c6256c"
+  },
+  "G:\\DockerProys\\CLAUDEPM4Copia\\pm4-app\\frontend\\src\\core\\useCollection.ts": {
+    "mtime": 1781193419.8719525,
+    "hash": "56fc4e5588e8a01a7f0a2cebb7e5a053"
+  },
+  "G:\\DockerProys\\CLAUDEPM4Copia\\pm4-app\\frontend\\src\\core\\useCotizador.ts": {
+    "mtime": 1781193419.8719525,
+    "hash": "14727897f104f45d1492c875cc6b2e87"
+  },
+  "G:\\DockerProys\\CLAUDEPM4Copia\\pm4-app\\frontend\\src\\core\\useFormDraft.ts": {
+    "mtime": 1781193419.8719525,
+    "hash": "204908a7ec114daf645b2908703de6f1"
+  },
+  "G:\\DockerProys\\CLAUDEPM4Copia\\pm4-app\\frontend\\src\\core\\useRequestFiles.ts": {
+    "mtime": 1781815350.5041432,
+    "hash": "f23d5e88b7c97c2eb34965bc930e98f4"
+  },
+  "G:\\DockerProys\\CLAUDEPM4Copia\\pm4-app\\frontend\\src\\core\\useTask.ts": {
+    "mtime": 1781193419.8719525,
+    "hash": "3d948189d0e5aa649983758c370edd86"
+  },
+  "G:\\DockerProys\\CLAUDEPM4Copia\\pm4-app\\frontend\\src\\core\\useToken.ts": {
+    "mtime": 1781193419.8719525,
+    "hash": "faded97e9ed1846ceab31d3adcabda5f"
+  },
+  "G:\\DockerProys\\CLAUDEPM4Copia\\pm4-app\\frontend\\src\\screens\\col-emision\\DocSARLAFT.tsx": {
+    "mtime": 1782355238.5102384,
+    "hash": "beef2f9c2b87860e4853a8844497ecf0"
+  },
+  "G:\\DockerProys\\CLAUDEPM4Copia\\pm4-app\\frontend\\src\\screens\\col-emision\\RevSARLAFT.tsx": {
+    "mtime": 1782355238.5267751,
+    "hash": "3985289e33a74a78799681072ed73c98"
+  },
+  "G:\\DockerProys\\CLAUDEPM4Copia\\pm4-app\\frontend\\src\\screens\\col-emision\\SolDocEmi.tsx": {
+    "mtime": 1782355238.5427804,
+    "hash": "e319ebd985f2d83057240d11e54b16b2"
+  },
+  "G:\\DockerProys\\CLAUDEPM4Copia\\pm4-app\\frontend\\src\\screens\\col-emision\\variables.ts": {
+    "mtime": 1781193419.8796122,
+    "hash": "c9b7a53fb1a8f4f0e017591134da7425"
+  },
+  "G:\\DockerProys\\CLAUDEPM4Copia\\pm4-app\\frontend\\src\\screens\\col-emision\\VerDocEmi.tsx": {
+    "mtime": 1782355238.5612924,
+    "hash": "f6aacc9d2cf28f3d1ad37701de0d42ec"
+  },
+  "G:\\DockerProys\\CLAUDEPM4Copia\\pm4-app\\frontend\\src\\screens\\COL_QD-corregir-datos-formulario\\CorregirDatosFormulario.tsx": {
+    "mtime": 1782355238.5787494,
+    "hash": "dfd73af1cff33cb3362e3a463c998c38"
+  },
+  "G:\\DockerProys\\CLAUDEPM4Copia\\pm4-app\\frontend\\src\\screens\\COL_QD-corregir-datos-formulario\\SeccionErroresValidacion.tsx": {
+    "mtime": 1782326814.0109913,
+    "hash": "8c42be2c46ddd930d6bea52da2bb8083"
+  },
+  "G:\\DockerProys\\CLAUDEPM4Copia\\pm4-app\\frontend\\src\\screens\\COL_QD-corregir-datos-formulario\\variables.ts": {
+    "mtime": 1782320040.136589,
+    "hash": "e364a764939d05172cd5dae95721395e"
+  },
+  "G:\\DockerProys\\CLAUDEPM4Copia\\pm4-app\\frontend\\src\\screens\\COL_QD_CrearRecibirQueja\\CrearRecibirQueja.tsx": {
+    "mtime": 1782358616.7539108,
+    "hash": "956a833d54cb1c78747fb2fd1d33d6b3"
+  },
+  "G:\\DockerProys\\CLAUDEPM4Copia\\pm4-app\\frontend\\src\\screens\\COL_QD_CrearRecibirQueja\\errorHelper.ts": {
+    "mtime": 1782358439.7101903,
+    "hash": "021c6d591040dcbddb409444464eace4"
+  },
+  "G:\\DockerProys\\CLAUDEPM4Copia\\pm4-app\\frontend\\src\\screens\\COL_QD_CrearRecibirQueja\\SeccionConsumidor.tsx": {
+    "mtime": 1782358467.6137884,
+    "hash": "74ea20dac135fc3ff04f03f827aeb0e9"
+  },
+  "G:\\DockerProys\\CLAUDEPM4Copia\\pm4-app\\frontend\\src\\screens\\COL_QD_CrearRecibirQueja\\SeccionDetalleQueja.tsx": {
+    "mtime": 1782358495.749235,
+    "hash": "8d1c61ab1f2141853a39396fde924d66"
+  },
+  "G:\\DockerProys\\CLAUDEPM4Copia\\pm4-app\\frontend\\src\\screens\\COL_QD_CrearRecibirQueja\\variables.ts": {
+    "mtime": 1782358431.2239518,
+    "hash": "5ad95c36b55f78f14bed8bbe3832c84b"
+  },
+  "G:\\DockerProys\\CLAUDEPM4Copia\\pm4-app\\frontend\\src\\screens\\corregir-error-funcional-ss\\CorregirErrorFuncionalSS.tsx": {
+    "mtime": 1782355238.5957546,
+    "hash": "0c9a9c7dd432cbefd3e7fd546435d4f2"
+  },
+  "G:\\DockerProys\\CLAUDEPM4Copia\\pm4-app\\frontend\\src\\screens\\corregir-error-funcional-ss\\SeccionErrorSS.tsx": {
+    "mtime": 1782264699.0792592,
+    "hash": "ac3e99b44469f505553854687860dcf2"
+  },
+  "G:\\DockerProys\\CLAUDEPM4Copia\\pm4-app\\frontend\\src\\screens\\corregir-error-funcional-ss\\variables.ts": {
+    "mtime": 1781821292.6108232,
+    "hash": "91abf8e8720d9eff53848050b1c6fba5"
+  },
+  "G:\\DockerProys\\CLAUDEPM4Copia\\pm4-app\\frontend\\src\\screens\\cotizador-fast-flow\\CotizadorFastFlow.tsx": {
+    "mtime": 1782355238.6128066,
+    "hash": "963c699789c5ab2f5f71e51559188dd3"
+  },
+  "G:\\DockerProys\\CLAUDEPM4Copia\\pm4-app\\frontend\\src\\screens\\cotizador-fast-flow\\variables.ts": {
+    "mtime": 1781815350.5057464,
+    "hash": "929fee8d50f17d1715c1bc97d989ff39"
+  },
+  "G:\\DockerProys\\CLAUDEPM4Copia\\pm4-app\\frontend\\src\\screens\\ds-catalog\\DsCatalog.tsx": {
+    "mtime": 1782356582.103708,
+    "hash": "c8c2a3778c4717f3cc2ba0a1f3081522"
+  },
+  "G:\\DockerProys\\CLAUDEPM4Copia\\pm4-app\\frontend\\src\\screens\\estado-correo\\EstadoCorreo.tsx": {
+    "mtime": 1782355238.6278567,
+    "hash": "3f362386da779b8bdca40f2a92493b79"
+  },
+  "G:\\DockerProys\\CLAUDEPM4Copia\\pm4-app\\frontend\\src\\screens\\estado-correo\\variables.ts": {
+    "mtime": 1781193419.8811805,
+    "hash": "94bcb71f25454d962a2e2541138b03a4"
+  },
+  "G:\\DockerProys\\CLAUDEPM4Copia\\pm4-app\\frontend\\src\\screens\\ff-fl\\CotizacionFfFl.tsx": {
+    "mtime": 1782355238.6444452,
+    "hash": "772523052095a951c3662c67c34ef48a"
+  },
+  "G:\\DockerProys\\CLAUDEPM4Copia\\pm4-app\\frontend\\src\\screens\\ff-fl\\CreacionTomador.tsx": {
+    "mtime": 1782264699.0808432,
+    "hash": "2320490d463f144b837ce7c4854f2b4e"
+  },
+  "G:\\DockerProys\\CLAUDEPM4Copia\\pm4-app\\frontend\\src\\screens\\ff-fl\\PropuestaEconomicaTable.tsx": {
+    "mtime": 1782264699.0808432,
+    "hash": "a81d520e4880c4d8400a2566522ec807"
+  },
+  "G:\\DockerProys\\CLAUDEPM4Copia\\pm4-app\\frontend\\src\\screens\\ff-fl\\SeccionCC.tsx": {
+    "mtime": 1782264699.0813692,
+    "hash": "72bf0a31319e3a781bfc8e4ce7542406"
+  },
+  "G:\\DockerProys\\CLAUDEPM4Copia\\pm4-app\\frontend\\src\\screens\\ff-fl\\SeccionDyO.tsx": {
+    "mtime": 1782264699.0818927,
+    "hash": "1c891b24711f1c630dfd804b7ef23b5d"
+  },
+  "G:\\DockerProys\\CLAUDEPM4Copia\\pm4-app\\frontend\\src\\screens\\ff-fl\\SeccionPDySI.tsx": {
+    "mtime": 1782264699.0818927,
+    "hash": "459b6586a526da02dda9a69204e791c3"
+  },
+  "G:\\DockerProys\\CLAUDEPM4Copia\\pm4-app\\frontend\\src\\screens\\ff-fl\\SeccionPI.tsx": {
+    "mtime": 1782264699.0824242,
+    "hash": "8b9eded507480b78f98222a15971ecd5"
+  },
+  "G:\\DockerProys\\CLAUDEPM4Copia\\pm4-app\\frontend\\src\\screens\\ff-fl\\SeccionProductos.tsx": {
+    "mtime": 1782264699.0829453,
+    "hash": "987ee7393f18b52fc44edadba7aee6e5"
+  },
+  "G:\\DockerProys\\CLAUDEPM4Copia\\pm4-app\\frontend\\src\\screens\\ff-fl\\SeccionResumenCotizacion.tsx": {
+    "mtime": 1782355238.662755,
+    "hash": "5defec9d76df219f2dc580770f8a7fd8"
+  },
+  "G:\\DockerProys\\CLAUDEPM4Copia\\pm4-app\\frontend\\src\\screens\\ff-fl\\SiNoGroup.tsx": {
+    "mtime": 1782264699.0829453,
+    "hash": "318f6d1b321fdc92d88169ae1a867970"
+  },
+  "G:\\DockerProys\\CLAUDEPM4Copia\\pm4-app\\frontend\\src\\screens\\ff-fl\\SolicitudFfFl.tsx": {
+    "mtime": 1782355238.679755,
+    "hash": "63ef1ca86b418837835b698cd968538d"
+  },
+  "G:\\DockerProys\\CLAUDEPM4Copia\\pm4-app\\frontend\\src\\screens\\ff-fl\\variables.ts": {
+    "mtime": 1781815350.5089667,
+    "hash": "ddbfbdf0a33c13d4556c0fd92ec12261"
+  },
+  "G:\\DockerProys\\CLAUDEPM4Copia\\pm4-app\\frontend\\src\\screens\\nota-cobertura\\variables.ts": {
+    "mtime": 1781193419.8857732,
+    "hash": "33098b4a81a6a04935a3072bd9a03d6f"
+  },
+  "G:\\DockerProys\\CLAUDEPM4Copia\\pm4-app\\frontend\\src\\screens\\nota-cobertura\\VisualizarDocumentos.tsx": {
+    "mtime": 1782355238.700758,
+    "hash": "02d15e5915d2913031abf742968c86f1"
+  },
+  "G:\\DockerProys\\CLAUDEPM4Copia\\pm4-app\\frontend\\src\\screens\\opciones-cotizacion\\OpcionesCotizacion.tsx": {
+    "mtime": 1782355238.7177577,
+    "hash": "549a34f6b17448698e8a4ef3b4028e3c"
+  },
+  "G:\\DockerProys\\CLAUDEPM4Copia\\pm4-app\\frontend\\src\\screens\\opciones-cotizacion\\variables.ts": {
+    "mtime": 1781193419.8872795,
+    "hash": "8e54af7d037d6bba37e0e7aed7827242"
+  },
+  "G:\\DockerProys\\CLAUDEPM4Copia\\pm4-app\\frontend\\src\\screens\\recibir-queja\\RecibirQueja.tsx": {
+    "mtime": 1782355238.736759,
+    "hash": "e2819429dbe38fdf5377f0313caec255"
+  },
+  "G:\\DockerProys\\CLAUDEPM4Copia\\pm4-app\\frontend\\src\\screens\\recibir-queja\\SeccionClasificacion.tsx": {
+    "mtime": 1782231497.7955327,
+    "hash": "1fca134b8f8b8767334ad3e03ab0795f"
+  },
+  "G:\\DockerProys\\CLAUDEPM4Copia\\pm4-app\\frontend\\src\\screens\\recibir-queja\\SeccionConsumidor.tsx": {
+    "mtime": 1782231497.8105292,
+    "hash": "a7ced9b9aa474135266db5cce596b48e"
+  },
+  "G:\\DockerProys\\CLAUDEPM4Copia\\pm4-app\\frontend\\src\\screens\\recibir-queja\\variables.ts": {
+    "mtime": 1781815350.5116198,
+    "hash": "5f29297c80b220b450a6fbe246775a7c"
+  },
+  "G:\\DockerProys\\CLAUDEPM4Copia\\pm4-app\\frontend\\src\\screens\\respuesta-cotizacion\\RespuestaCotizacion.tsx": {
+    "mtime": 1782355238.7522666,
+    "hash": "2f271e3460e2ab82f2e791cb3785f168"
+  },
+  "G:\\DockerProys\\CLAUDEPM4Copia\\pm4-app\\frontend\\src\\screens\\respuesta-cotizacion\\variables.ts": {
+    "mtime": 1781193419.888286,
+    "hash": "2e2b8f2bf69a5f4350f928e0c03776bb"
+  },
+  "G:\\DockerProys\\CLAUDEPM4Copia\\pm4-app\\frontend\\src\\screens\\revisar-error-tecnico\\RevisarErrorTecnico.tsx": {
+    "mtime": 1782355238.7642658,
+    "hash": "8c9352b2c8140883144c18f814cb4dba"
+  },
+  "G:\\DockerProys\\CLAUDEPM4Copia\\pm4-app\\frontend\\src\\screens\\revisar-error-tecnico\\SeccionDetalleError.tsx": {
+    "mtime": 1782264699.086952,
+    "hash": "d4f7b3ba8cc1beaa1a2a99cef606d979"
+  },
+  "G:\\DockerProys\\CLAUDEPM4Copia\\pm4-app\\frontend\\src\\screens\\revisar-error-tecnico\\variables.ts": {
+    "mtime": 1781815350.5128095,
+    "hash": "4a0c45695fe765ea0c4365e4d57535d9"
+  },
+  "G:\\DockerProys\\CLAUDEPM4Copia\\pm4-app\\frontend\\src\\screens\\revisar-queja-asignar\\RevisarQuejaAsignar.tsx": {
+    "mtime": 1782355238.7772655,
+    "hash": "c315ecb4e891f62782e538bd170e0817"
+  },
+  "G:\\DockerProys\\CLAUDEPM4Copia\\pm4-app\\frontend\\src\\screens\\revisar-queja-asignar\\SeccionResumenQueja.tsx": {
+    "mtime": 1782340127.8731987,
+    "hash": "4b7c7b641cf6cbbc561a2de6337e17ba"
+  },
+  "G:\\DockerProys\\CLAUDEPM4Copia\\pm4-app\\frontend\\src\\screens\\revisar-queja-asignar\\variables.ts": {
+    "mtime": 1781883193.069864,
+    "hash": "f336fcfc9f40c89aad4aa50e1f2431b6"
+  },
+  "G:\\DockerProys\\CLAUDEPM4Copia\\pm4-app\\frontend\\src\\screens\\solicitud-cotizacion-cuw\\AseguradosAdicionales.tsx": {
+    "mtime": 1782264699.0879514,
+    "hash": "5f5789db403aa9fe310850c38a154b78"
+  },
+  "G:\\DockerProys\\CLAUDEPM4Copia\\pm4-app\\frontend\\src\\screens\\solicitud-cotizacion-cuw\\DetalleExportaciones.tsx": {
+    "mtime": 1782264699.0889528,
+    "hash": "c3e9a31e1848fae46136937d44c8e2b3"
+  },
+  "G:\\DockerProys\\CLAUDEPM4Copia\\pm4-app\\frontend\\src\\screens\\solicitud-cotizacion-cuw\\SolicitudCotizacionCuw.tsx": {
+    "mtime": 1782355238.7922676,
+    "hash": "3b6f6d44f4dd6754d8fb06117553ce70"
+  },
+  "G:\\DockerProys\\CLAUDEPM4Copia\\pm4-app\\frontend\\src\\screens\\solicitud-cotizacion-cuw\\ValoresDeducibles.tsx": {
+    "mtime": 1782264699.08996,
+    "hash": "6a1cef245836566859c9cc9b07692cc2"
+  },
+  "G:\\DockerProys\\CLAUDEPM4Copia\\pm4-app\\frontend\\src\\screens\\solicitud-cotizacion-cuw\\variables.ts": {
+    "mtime": 1781193419.890798,
+    "hash": "95fce5c11ce64c080ef6798b2a9f4f68"
+  },
+  "G:\\DockerProys\\CLAUDEPM4Copia\\CLAUDE.md": {
+    "mtime": 1782392351.554468,
+    "hash": "747e73a5e1af4b72c0d65c9169c23199"
+  },
+  "G:\\DockerProys\\CLAUDEPM4Copia\\docker-compose.yml": {
+    "mtime": 1781217441.2470477,
+    "hash": "0b8355592bd3a2b05475bc02c48b7f13"
+  },
+  "G:\\DockerProys\\CLAUDEPM4Copia\\GUIA_DOCUMENTACION_PANTALLAS.md": {
+    "mtime": 1782361264.9201744,
+    "hash": "9ca0cb1d66c0b3f5ecfa53a53edcb045"
+  },
+  "G:\\DockerProys\\CLAUDEPM4Copia\\INSTRUCCIONES_CLAUDE_CODE.md": {
+    "mtime": 1781193419.655491,
+    "hash": "eef290c9b663957d9c107e12a5abcadf"
+  },
+  "G:\\DockerProys\\CLAUDEPM4Copia\\MIGRACION_PANTALLAS.md": {
+    "mtime": 1781193419.6564975,
+    "hash": "bbd76e2d660da3f72a50e7fba9796296"
+  },
+  "G:\\DockerProys\\CLAUDEPM4Copia\\pm4-app\\CLAUDE.md": {
+    "mtime": 1782360920.0321631,
+    "hash": "4e0acb6b8e5af07d4d4f82ff518f984b"
+  },
+  "G:\\DockerProys\\CLAUDEPM4Copia\\pm4-app\\Diagrama.md": {
+    "mtime": 1781193419.8678932,
+    "hash": "fab918f05255069b37a1171bcf11adf6"
+  },
+  "G:\\DockerProys\\CLAUDEPM4Copia\\pm4-app\\render.yaml": {
+    "mtime": 1781815350.520119,
+    "hash": "390b96428d30c61087e304c5d48d88e3"
+  },
+  "G:\\DockerProys\\CLAUDEPM4Copia\\pm4-app\\cotizador-service\\requirements.txt": {
+    "mtime": 1781193419.8693984,
+    "hash": "510b0113808da9723374eee625d9b5e2"
+  },
+  "G:\\DockerProys\\CLAUDEPM4Copia\\pm4-app\\frontend\\index.html": {
+    "mtime": 1781193419.8699472,
+    "hash": "1baa1af98cb3579a316e007ac6a10e1d"
+  },
+  "G:\\DockerProys\\CLAUDEPM4Copia\\graphify-out\\converted\\cotizador_5ce2c3bc.md": {
+    "mtime": 1782393424.1250758,
+    "hash": "93370cfb5c09e63856588f207bd431d0"
+  },
+  "G:\\DockerProys\\CLAUDEPM4Copia\\graphify-out\\converted\\cotizador2_a33715a4.md": {
+    "mtime": 1782393424.2059164,
+    "hash": "ffc8822703a10038535c2d0b45dd92e4"
+  },
+  "G:\\DockerProys\\CLAUDEPM4Copia\\pm4-app\\frontend\\src\\screens\\COL_QD-corregir-datos-formulario\\DOCUMENTACION_COL_QD-corregir-datos-formulario.md": {
+    "mtime": 1782320180.372248,
+    "hash": "184b0d2f77fa83add3330827332f0b20"
+  },
+  "G:\\DockerProys\\CLAUDEPM4Copia\\pm4-app\\frontend\\src\\screens\\recibir-queja\\DOCUMENTACION.md": {
+    "mtime": 1782264699.0849538,
+    "hash": "73d26f0da09d353781a204cd8a71ad34"
+  },
+  "G:\\DockerProys\\CLAUDEPM4Copia\\graphify-out\\converted\\Anexo02_Mockups_TOBE_QuejaDirectas_v3_0_80ae34ff.md": {
+    "mtime": 1782393424.3599937,
+    "hash": "27411bf52b4048fd079c8110fe9bee9c"
+  },
+  "G:\\DockerProys\\CLAUDEPM4Copia\\graphify-out\\converted\\Anexo03_EspecTecnica_TareasAutomatizadas_TOBE_v1_0_6ba51669.md": {
+    "mtime": 1782393424.3999019,
+    "hash": "9f08f819f090bd137f696933c2e5835b"
+  },
+  "G:\\DockerProys\\CLAUDEPM4Copia\\graphify-out\\converted\\Matrices_Maduracion_TO-BE_QuejaDirectas_v2.0_73e387c2.md": {
+    "mtime": 1782393424.4356565,
+    "hash": "b5e1c40d704829755eb14f831d58acf6"
+  },
+  "G:\\DockerProys\\CLAUDEPM4Copia\\pm4-app\\outputs\\shared-css-catalog.md": {
+    "mtime": 1782360992.0182898,
+    "hash": "b808aa5886e125102e5206084bf3d973"
+  },
+  "G:\\DockerProys\\CLAUDEPM4Copia\\pm4-app\\outputs\\zds-cheatsheet.md": {
+    "mtime": 1782360952.3754475,
+    "hash": "91ed3615efd264bfeaecb799344bfe37"
+  },
+  "G:\\DockerProys\\CLAUDEPM4Copia\\pm4-app\\outputs\\zurich-index.md": {
+    "mtime": 1782264699.0919583,
+    "hash": "2e9ec6177f939a3bdb402d7e1e29540c"
+  },
+  "G:\\DockerProys\\CLAUDEPM4Copia\\pm4-app\\outputs\\react\\atoms\\zurich-button.md": {
+    "mtime": 1781193419.8943098,
+    "hash": "bacfe05a790e883f51a78e52fbd859d8"
+  },
+  "G:\\DockerProys\\CLAUDEPM4Copia\\pm4-app\\outputs\\react\\atoms\\zurich-icon.md": {
+    "mtime": 1782264699.0909588,
+    "hash": "9677b0d45a08277158be080ea01b3195"
+  },
+  "G:\\DockerProys\\CLAUDEPM4Copia\\pm4-app\\outputs\\react\\atoms\\zurich-progressbar.md": {
+    "mtime": 1781193419.8943098,
+    "hash": "26a1d60f583fede58a3d80814e429478"
+  },
+  "G:\\DockerProys\\CLAUDEPM4Copia\\pm4-app\\outputs\\react\\atoms\\zurich-tooltip.md": {
+    "mtime": 1781193419.8943098,
+    "hash": "e2fd2372540313b32a956be87cb6ffb9"
+  },
+  "G:\\DockerProys\\CLAUDEPM4Copia\\pm4-app\\outputs\\react\\foundations\\zurich-colors-palettes.md": {
+    "mtime": 1781193419.8958166,
+    "hash": "c5ceec372fc2adf406ab549676fb96c9"
+  },
+  "G:\\DockerProys\\CLAUDEPM4Copia\\pm4-app\\outputs\\react\\foundations\\zurich-colors.md": {
+    "mtime": 1781193419.8968236,
+    "hash": "8aa0af75cbd677ecd6b49fd7bce04e73"
+  },
+  "G:\\DockerProys\\CLAUDEPM4Copia\\pm4-app\\outputs\\react\\foundations\\zurich-layouts-flex.md": {
+    "mtime": 1781193419.8968236,
+    "hash": "d82dee20671778014160e95b88432659"
+  },
+  "G:\\DockerProys\\CLAUDEPM4Copia\\pm4-app\\outputs\\react\\foundations\\zurich-layouts-grid.md": {
+    "mtime": 1781193419.8968236,
+    "hash": "b3b64ea1465aa530504c8d8e84657b5c"
+  },
+  "G:\\DockerProys\\CLAUDEPM4Copia\\pm4-app\\outputs\\react\\foundations\\zurich-spacers.md": {
+    "mtime": 1781193419.8978226,
+    "hash": "64784b047d6f1da4478d56594fd8c9ba"
+  },
+  "G:\\DockerProys\\CLAUDEPM4Copia\\pm4-app\\outputs\\react\\foundations\\zurich-typography-styles.md": {
+    "mtime": 1781193419.8978226,
+    "hash": "ac456ae39d0d570d7bcd9654fc465e87"
+  },
+  "G:\\DockerProys\\CLAUDEPM4Copia\\pm4-app\\outputs\\react\\foundations\\zurich-typography.md": {
+    "mtime": 1781193419.8978226,
+    "hash": "89d6062fcc54ca017fdc06c8417895e5"
+  },
+  "G:\\DockerProys\\CLAUDEPM4Copia\\pm4-app\\outputs\\react\\foundations\\assets\\zurich-brand-icons.md": {
+    "mtime": 1781193419.8943098,
+    "hash": "eca6afb0135bf57ea1d75b62a9b62970"
+  },
+  "G:\\DockerProys\\CLAUDEPM4Copia\\pm4-app\\outputs\\react\\foundations\\assets\\zurich-icons.md": {
+    "mtime": 1781193419.8958166,
+    "hash": "cb4f19f8bec878b025ac55fef467b009"
+  },
+  "G:\\DockerProys\\CLAUDEPM4Copia\\pm4-app\\outputs\\react\\input\\zurich-calendar.md": {
+    "mtime": 1781193419.899171,
+    "hash": "e6995d5d48a7d9b8085bcc7559f2ddcb"
+  },
+  "G:\\DockerProys\\CLAUDEPM4Copia\\pm4-app\\outputs\\react\\input\\zurich-checkbox.md": {
+    "mtime": 1781193419.899171,
+    "hash": "87ba193bbda5259a8130fd347a364089"
+  },
+  "G:\\DockerProys\\CLAUDEPM4Copia\\pm4-app\\outputs\\react\\input\\zurich-dateinput.md": {
+    "mtime": 1781193419.8996751,
+    "hash": "9f33eecfeb1f0020fea0d73421d022aa"
+  },
+  "G:\\DockerProys\\CLAUDEPM4Copia\\pm4-app\\outputs\\react\\input\\zurich-radioselect.md": {
+    "mtime": 1781193419.8996751,
+    "hash": "c85e7e52b97b3ff5aa7eebd0f549d352"
+  },
+  "G:\\DockerProys\\CLAUDEPM4Copia\\pm4-app\\outputs\\react\\input\\zurich-rangedateinput.md": {
+    "mtime": 1781193419.9006803,
+    "hash": "34150b362274b513a579cb55a2a9ced2"
+  },
+  "G:\\DockerProys\\CLAUDEPM4Copia\\pm4-app\\outputs\\react\\input\\zurich-select.md": {
+    "mtime": 1781193419.9006803,
+    "hash": "780418b349afcee18a0b05092a0804bf"
+  },
+  "G:\\DockerProys\\CLAUDEPM4Copia\\pm4-app\\outputs\\react\\input\\zurich-stepper.md": {
+    "mtime": 1781193419.9006803,
+    "hash": "b45d1ce8d172773c3d7a531eef3f3b35"
+  },
+  "G:\\DockerProys\\CLAUDEPM4Copia\\pm4-app\\outputs\\react\\input\\zurich-textarea.md": {
+    "mtime": 1781193419.9016817,
+    "hash": "844ece4f3c53bef016dc6c085ed120c8"
+  },
+  "G:\\DockerProys\\CLAUDEPM4Copia\\pm4-app\\outputs\\react\\input\\zurich-textinput.md": {
+    "mtime": 1781193419.9016817,
+    "hash": "a5fe67cfffa8d00a4653824b2ba327b3"
+  },
+  "G:\\DockerProys\\CLAUDEPM4Copia\\pm4-app\\outputs\\react\\layout\\zurich-card.md": {
+    "mtime": 1781193419.9016817,
+    "hash": "2deb7d9bef5df27d3ce8b58d87159a15"
+  },
+  "G:\\DockerProys\\CLAUDEPM4Copia\\pm4-app\\outputs\\react\\layout\\zurich-form.md": {
+    "mtime": 1781193419.9016817,
+    "hash": "d301cc657b02c463eb664a68a1c18cc8"
+  },
+  "G:\\DockerProys\\CLAUDEPM4Copia\\pm4-app\\outputs\\react\\layout\\zurich-inputgroup.md": {
+    "mtime": 1781193419.9031892,
+    "hash": "cf9ab41d45d57a857397260bdfabe0c6"
+  },
+  "G:\\DockerProys\\CLAUDEPM4Copia\\pm4-app\\outputs\\react\\layout\\zurich-modal.md": {
+    "mtime": 1781193419.9031892,
+    "hash": "b97e1f52f02bc7311e23b9d7d9efdfa4"
+  },
+  "G:\\DockerProys\\CLAUDEPM4Copia\\pm4-app\\outputs\\react\\layout\\zurich-sidebar.md": {
+    "mtime": 1781193419.9031892,
+    "hash": "7194f7083bc4dd4f7a7a210a217cbef6"
+  },
+  "G:\\DockerProys\\CLAUDEPM4Copia\\pm4-app\\outputs\\react\\layout\\zurich-table.md": {
+    "mtime": 1781193419.9041948,
+    "hash": "bbf60c06555687805f0459e902705ea0"
+  },
+  "G:\\DockerProys\\CLAUDEPM4Copia\\pm4-app\\outputs\\react\\layout\\zurich-tabs.md": {
+    "mtime": 1781193419.9041948,
+    "hash": "50db50865fad6f481254b809bdcd711e"
+  },
+  "G:\\DockerProys\\CLAUDEPM4Copia\\pm4-app\\outputs\\react\\molecules\\zurich-tile.md": {
+    "mtime": 1781193419.9041948,
+    "hash": "bdf36f245e127eb411638e1d35faaa00"
+  },
+  "G:\\DockerProys\\CLAUDEPM4Copia\\pm4_architecture.png": {
+    "mtime": 1781193419.9142747,
+    "hash": "30ecdf4334a309494a6165b54da610f0"
+  },
+  "G:\\DockerProys\\CLAUDEPM4Copia\\pm4-app\\pm4_render_integration.svg": {
+    "mtime": 1781193419.9097457,
+    "hash": "b0905d36b885005050f5c86aa5b76407"
+  },
+  "G:\\DockerProys\\CLAUDEPM4Copia\\pm4-app\\frontend\\src\\resources\\zurich\\ZurichLogo_Horz_Black_CMYK_no_R.jpeg": {
+    "mtime": 1781193419.8760996,
+    "hash": "c02982a798b9837324d57f4fd71beebb"
+  },
+  "G:\\DockerProys\\CLAUDEPM4Copia\\pm4-app\\frontend\\src\\resources\\zurich\\ZurichLogo_Horz_Blue_CMYK_no_R.jpeg": {
+    "mtime": 1781193419.8760996,
+    "hash": "8d92813d3faada8fd113c82a9edd1d2c"
+  },
+  "G:\\DockerProys\\CLAUDEPM4Copia\\pm4-app\\frontend\\src\\resources\\zurich\\ZurichLogo_Horz_White_CMYK_no_R.png": {
+    "mtime": 1781193419.8760996,
+    "hash": "28d7a4a12eff6c453653726d30b3c2c0"
+  },
+  "G:\\DockerProys\\CLAUDEPM4Copia\\pm4-app\\frontend\\src\\resources\\zurich\\ZurichLogo_Ribbon_Black_CMYK_no_R.jpeg": {
+    "mtime": 1781193419.877107,
+    "hash": "a0a82026f64d1cb114aaed6607ebe804"
+  },
+  "G:\\DockerProys\\CLAUDEPM4Copia\\pm4-app\\frontend\\src\\resources\\zurich\\ZurichLogo_Ribbon_Blue_CMYK_no_R.jpeg": {
+    "mtime": 1781193419.877107,
+    "hash": "24bb66f9157ccc074c0881f552d6b028"
+  },
+  "G:\\DockerProys\\CLAUDEPM4Copia\\pm4-app\\frontend\\src\\resources\\zurich\\ZurichLogo_Ribbon_White_CMYK_no_R.png": {
+    "mtime": 1781193419.8781059,
+    "hash": "696f2e2df866d99fa542cde4b43b84fb"
+  },
+  "G:\\DockerProys\\CLAUDEPM4Copia\\pm4-app\\frontend\\src\\resources\\zurich\\ZurichLogo_Vert_Black_CMYK_no_R.jpeg": {
+    "mtime": 1781193419.8781059,
+    "hash": "5cfb5b860020008789079441a7fc989b"
+  },
+  "G:\\DockerProys\\CLAUDEPM4Copia\\pm4-app\\frontend\\src\\resources\\zurich\\ZurichLogo_Vert_White_CMYK_no_R.png": {
+    "mtime": 1781193419.8781059,
+    "hash": "f88a324a93abde30e1d6303ad362f04c"
+  },
+  "G:\\DockerProys\\CLAUDEPM4Copia\\pm4-app\\frontend\\src\\resources\\zurich\\Zurich_Logo_Vert_Blue_CMYK_no_R.jpeg": {
+    "mtime": 1781193419.8781059,
+    "hash": "4284b3c7f3c18fc5b53b0ad8139a541b"
+  }
+}

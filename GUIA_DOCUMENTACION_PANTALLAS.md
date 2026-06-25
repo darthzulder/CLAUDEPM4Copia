@@ -26,7 +26,7 @@ Todos los insumos están en `pm4-app/insumos/`. Para Quejas Directas son:
 
 | Archivo | Para qué sirve |
 |---|---|
-| `Anexo02_Mockups_TOBE_QuejaDirectas_v2_0.xlsx` | **Fuente principal.** Campos, secciones, acciones, reglas, mensajes, catálogos y permisos por pantalla. |
+| `Anexo02_Mockups_TOBE_QuejaDirectas_v3_0.xlsx` | **Fuente principal.** Campos, secciones, acciones, reglas, mensajes, catálogos y permisos por pantalla. (Usar siempre la versión más reciente presente en `insumos/`.) |
 | `Matrices_Maduracion_TO-BE_QuejaDirectas_v2.0.xlsx` | Tareas BPMN, **directrices y reglas de negocio**, roles, documentos de entrada/salida. |
 | `Anexo03_EspecTecnica_TareasAutomatizadas_TOBE_v1_0.xlsx` | Variables de entrada/salida de las tareas automatizadas (nombres canónicos de variable, obligatoriedad). |
 
@@ -102,8 +102,8 @@ El archivo `DOCUMENTACION_<slug>.md` debe contener, en este orden:
 10. **Suposiciones Realizadas** — toda decisión NO definida explícitamente en los insumos (ver reglas abajo).
 11. **Cobertura de Trazabilidad** — % estimado por categoría + lista de elementos inferidos.
 
-> Referencia de un documento ya elaborado con esta estructura:
-> `frontend/src/screens/recibir-queja/DOCUMENTACION_recibir-queja.md`.
+> Aún no hay ningún `DOCUMENTACION_<slug>.md` generado en el proyecto; el primero que se
+> cree con esta estructura queda como referencia para los siguientes.
 
 ---
 

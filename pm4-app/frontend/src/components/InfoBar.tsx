@@ -14,7 +14,7 @@ export default function InfoBar({ items }: InfoBarProps) {
       {items.map((item, idx) => (
         <div className="info-bar-item" key={idx}>
           <span className="info-bar-label">{item.label}</span>
-          <span className="info-bar-value">{String(item.value ?? '—')}</span>
+          <span className="info-bar-value">{String(item.value ?? 'â€”')}</span>
         </div>
       ))}
     </div>

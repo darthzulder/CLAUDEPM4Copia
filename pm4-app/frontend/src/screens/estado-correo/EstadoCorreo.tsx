@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useTask } from '../../core/useTask';
-import { ZrButton, ZrModal } from '../../components/fields/ZdsFields';
+import { ZrButton, ZrModal, ZrAlert, ZrLoader } from '../../components/fields/ZdsFields';
 import ResultCard from '../../components/ResultCard';
 import ScreenHeader from '../../components/ScreenHeader';
 import { type EstadoCorreoData } from './variables';
@@ -35,7 +35,7 @@ export default function EstadoCorreo() {
   if (loading) {
     return (
       <div className="screen-wrapper">
-        <div className="screen-loading"><div className="spinner" /></div>
+        <div className="screen-loading"><ZrLoader /></div>
       </div>
     );
   }
@@ -43,7 +43,7 @@ export default function EstadoCorreo() {
   if (error) {
     return (
       <div className="screen-wrapper">
-        <div className="screen-error">⚠ Error al cargar la tarea: {error}</div>
+        <ZrAlert config="negative" {...({ 'hide-close': true } as object)}>Error al cargar la tarea: {error}</ZrAlert>
       </div>
     );
   }
@@ -72,7 +72,7 @@ export default function EstadoCorreo() {
     <div className="screen-wrapper">
       {submitting && (
         <div className="email-status-overlay">
-          <div className="spinner" />
+          <ZrLoader />
           <span>Procesando…</span>
         </div>
       )}

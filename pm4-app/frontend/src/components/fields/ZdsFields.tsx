@@ -9,6 +9,8 @@ import { ZrDateInput }        from '@zurich/web-components/react/date-input';
 import { ZrTextarea }         from '@zurich/web-components/react/textarea';
 import { ZrRadioSelect }      from '@zurich/web-components/react/radio-select';
 import { ZrSegmentedControl } from '@zurich/web-components/react/segmented-control';
+import { ZrStepper }         from '@zurich/web-components/react/stepper';
+import { ZrCalendar }        from '@zurich/web-components/react/calendar';
 
 // ─── Re-exports: raw Zurich DS components (facade única para toda la app) ───
 export { ZrTextInput };
@@ -18,6 +20,8 @@ export { ZrCheckbox };
 export { ZrDateInput };
 export { ZrRadioSelect };
 export { ZrSegmentedControl };
+export { ZrStepper };
+export { ZrCalendar };
 export { ZrButton }      from '@zurich/web-components/react/button';
 export { ZrIcon }        from '@zurich/web-components/react/icon';
 
@@ -39,35 +43,42 @@ export { ZrAlert }       from '@zurich/web-components/react/alert';
 import { ZrBadge }        from '@zurich/web-components/react/badge';
 export { ZrBadge };
 export { ZrChip }        from '@zurich/web-components/react/chip';
-export { ZrTag }         from '@zurich/web-components/react/tag';
+import { ZrTag }          from '@zurich/web-components/react/tag';
+export { ZrTag };
 export { ZrFileInput }   from '@zurich/web-components/react/file-input';
+export { ZrSidebar }     from '@zurich/web-components/react/sidebar';
+export { ZrTile }        from '@zurich/web-components/react/tile';
+export { ZrTooltip }     from '@zurich/web-components/react/tooltip';
+export { ZrInputGroup }  from '@zurich/web-components/react/input-group';
+export { ZrFieldset }    from '@zurich/web-components/react/fieldset';
+export { ZrLoader }      from '@zurich/web-components/react/loader';
 
-// ─── Píldora de estado: wrapper sobre ZrBadge (DS) con semántica por variante ──
-// Sustituye al antiguo componente Chip custom. El <span.status-badge> envolvente
-// es el grid-item real (garantiza justify-self sin depender de className en el
-// host del web-component).
+// ─── Píldora de estado: ZrTag del DS (pill en-flujo) con semántica por variante ─
+// El DS no tiene "status pill" dedicada; ZrTag es la pill en-flujo. Mapeamos la
+// variante a su fill DS (neutral = sin fill → default del DS). ZrBadge NO sirve:
+// es notificación overlay (position:absolute → se superpone si hay varias en fila).
 export type StatusVariant = 'success' | 'danger' | 'info' | 'neutral';
 
-const STATUS_FILL = {
+const STATUS_FILL: Record<StatusVariant, 'moss' | 'peach' | 'teal' | undefined> = {
   success: 'moss',
-  danger: 'peach',
-  info: 'blue-sky',
-  neutral: 'dove',
-} as const;
+  danger:  'peach',
+  info:    'teal',
+  neutral: undefined,
+};
 
 export function ZdsStatusBadge({
   variant = 'neutral',
   children,
-  className = '',
+  className,
 }: {
   variant?: StatusVariant;
   children: ReactNode;
   className?: string;
 }) {
   return (
-    <span className={`status-badge${className ? ` ${className}` : ''}`}>
-      <ZrBadge config="text" text={String(children)} fill={STATUS_FILL[variant]} />
-    </span>
+    <ZrTag {...({ fill: STATUS_FILL[variant], className } as Record<string, unknown>)}>
+      {String(children)}
+    </ZrTag>
   );
 }
 
@@ -100,7 +111,7 @@ export function ZdsInput<TFV extends FieldValues>({
 }: InputProps<TFV>) {
   const effectiveIcon = icon ?? (inputType === 'email' ? 'mail-closed:line' : undefined);
   return (
-    <div data-zds-readonly={readOnly ? '' : undefined} className="zds-field-wrap">
+    <div className="zds-field-wrap">
       <Controller
         name={name}
         control={control}
@@ -128,7 +139,7 @@ export function ZdsDate<TFV extends FieldValues>({
   control, name, label, required, readOnly, helpText, error, rules, min,
 }: Omit<InputProps<TFV>, 'inputType' | 'icon'> & { min?: string }) {
   return (
-    <div data-zds-readonly={readOnly ? '' : undefined} className="zds-field-wrap">
+    <div className="zds-field-wrap">
       <Controller
         name={name}
         control={control}
@@ -366,6 +377,73 @@ export function ZdsSegmented<TFV extends FieldValues>({
           onChange={(val: string | null) => field.onChange(val ?? '')}
           onBlur={field.onBlur}
           {...({ options: zdsOptions } as Record<string, unknown>)}
+        />
+      )}
+    />
+  );
+}
+
+// ─── ZdsStepper — ZrStepper + Controller (contador 1-based en [1, steps]) ─────
+export function ZdsStepper<TFV extends FieldValues>({
+  control, name, label, steps = 10, disabled, center, rules,
+}: {
+  control: Control<TFV>;
+  name: FieldPath<TFV>;
+  label?: string;
+  steps?: number;
+  disabled?: boolean;
+  center?: boolean;
+  rules?: RegisterOptions<TFV, FieldPath<TFV>>;
+}) {
+  return (
+    <Controller
+      name={name}
+      control={control}
+      rules={rules as RegisterOptions<TFV, typeof name>}
+      render={({ field }) => (
+        <ZrStepper
+          model={Number(field.value) || 1}
+          disabled={disabled}
+          onChange={(val: number) => field.onChange(val)}
+          {...({
+            steps,
+            ...(label ? { label } : {}),
+            ...(center ? { config: 'center' } : {}),
+          } as Record<string, unknown>)}
+        />
+      )}
+    />
+  );
+}
+
+// ─── ZdsCalendar — ZrCalendar + Controller (fecha inline, modelo ISO YYYY-MM-DD) ─
+// A diferencia de ZdsDate (campo de texto), es la grilla de mes siempre visible.
+export function ZdsCalendar<TFV extends FieldValues>({
+  control, name, rules, min, max, wide, disabled,
+}: {
+  control: Control<TFV>;
+  name: FieldPath<TFV>;
+  rules?: RegisterOptions<TFV, FieldPath<TFV>>;
+  min?: string;
+  max?: string;
+  wide?: boolean;
+  disabled?: boolean;
+}) {
+  return (
+    <Controller
+      name={name}
+      control={control}
+      rules={rules as RegisterOptions<TFV, typeof name>}
+      render={({ field }) => (
+        <ZrCalendar
+          model={String(field.value ?? '')}
+          disabled={disabled}
+          wide={wide}
+          onChange={(val: string | null) => field.onChange(val ?? '')}
+          {...({
+            ...(min ? { min } : {}),
+            ...(max ? { max } : {}),
+          } as Record<string, unknown>)}
         />
       )}
     />

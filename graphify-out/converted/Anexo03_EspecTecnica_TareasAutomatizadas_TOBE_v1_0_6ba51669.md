@@ -1,0 +1,561 @@
+<!-- converted from Anexo03_EspecTecnica_TareasAutomatizadas_TOBE_v1_0.xlsx -->
+
+## Sheet: 00_Instrucciones
+|  | ESPECIFICACIÓN TÉCNICA — TAREAS AUTOMATIZADAS TO-BE | Zurich Seguros Colombia |  |  |  |  |  |  |  |  |  |
+| --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
+|  | Proceso: Gestión de Quejas Directas | ACZ-QD-001  |  Versión: 1.0 TO-BE | Mayo 2026 |  |  |  |  |  |  |  |  |  |
+|  | Servicio: Atención al Consumidor Financiero — Zurich Seguros Colombia  |  Plataforma: ProcessMaker 4 BPMS  |  Ley 1328/2009 · CE 039/2011 · CE 019/2024 |  |  |  |  |  |  |  |  |  |
+|  | IDENTIFICACIÓN |  |  |  |  |  |  |  |  |  |
+|  | Archivo | Anexo03_EspecTecnica_TareasAutomatizadas_TOBE_v1_0 |  |  |  |  |  |  |  |  |
+|  | Proceso | Gestión de Quejas Directas con SmartSupervision SFC | ACZ-QD-001 |  |  |  |  |  |  |  |  |
+|  | Versión | 1.0 TO-BE | Mayo 2026 |  |  |  |  |  |  |  |  |
+|  | Elaborado por | BeePM — Beesmartec para Zurich Seguros Colombia |  |  |  |  |  |  |  |  |
+|  | Fuente | Matrices_Maduracion_TOBE_QuejaDirectas_v2_0.xlsx — Hoja 1. Tareas |  |  |  |  |  |  |  |  |
+|  | ALCANCE |  |  |  |  |  |  |  |  |  |
+|  | Scripts (scriptTask) | 14 tareas ejecutadas dentro del motor BPM de ProcessMaker 4. No consumen APIs externas. |  |  |  |  |  |  |  |  |
+|  | Servicios (serviceTask) | 4 tareas que consumen la API intermediaria de SmartSupervision (REST HTTP). |  |  |  |  |  |  |  |  |
+|  | Envíos (sendTask) | 3 tareas de envío automático de correos (motor de correo del BPM). |  |  |  |  |  |  |  |  |
+|  | Eventos-Mensaje | 3 eventos de mensaje intermediario (throw) del flujo BPMN. |  |  |  |  |  |  |  |  |
+|  | EXCLUIDAS | Las 12 tareas de usuario (pantallas PAN-01 a PAN-12) están documentadas en Anexo02_Mockups_TOBE. |  |  |  |  |  |  |  |  |
+|  | EXCLUIDAS | La tarea P01-T10 (Gestionar vencimiento SLA) es de tipo Manual — fuera del alcance de este anexo. |  |  |  |  |  |  |  |  |
+|  | HOJAS DEL ARCHIVO |  |  |  |  |  |  |  |  |  |
+|  | 00_Instrucciones | Convenciones, alcance y notas críticas. |  |  |  |  |  |  |  |  |
+|  | 01_Inventario | Inventario maestro con tipo, proceso y descripción de las 24 tareas automatizadas. |  |  |  |  |  |  |  |  |
+|  | 02_Scripts | Especificación técnica de 14 scriptTasks: lógica, variables, criterios de aceptación. |  |  |  |  |  |  |  |  |
+|  | 03_Servicios | Especificación técnica de 4 serviceTasks: endpoint, payload, respuestas, manejo de errores. |  |  |  |  |  |  |  |  |
+|  | 04_Envios_Eventos | Especificación técnica de 3 sendTasks y 3 eventos de mensaje. |  |  |  |  |  |  |  |  |
+|  | 05_Variables_Entrada | Diccionario consolidado de todas las variables de entrada por tarea. |  |  |  |  |  |  |  |  |
+|  | 06_Variables_Salida | Diccionario consolidado de todas las variables de salida por tarea. |  |  |  |  |  |  |  |  |
+|  | 07_CA_Exitosos | Criterios de aceptación — camino exitoso por tarea. |  |  |  |  |  |  |  |  |
+|  | 08_CA_Errores | Criterios de aceptación — manejo de errores por tarea. |  |  |  |  |  |  |  |  |
+|  | CONVENCIONES DE TIPOS |  |  |  |  |  |  |  |  |  |
+|  | Script | Código embebido en ProcessMaker 4. Sin consumo de APIs externas. Lane: BPM/Sistema. |  |  |  |  |  |  |  |  |
+|  | Servicio | Consumo de API intermediaria SmartSupervision via HTTP REST. Lane: BPM/Sistema. |  |  |  |  |  |  |  |  |
+|  | Envío | sendTask de ProcessMaker 4. Usa el motor de correo configurado en el BPM. |  |  |  |  |  |  |  |  |
+|  | Evento-Mensaje | Intermediate Message Throw Event de BPMN 2.0. Dispara notificación o tarea. |  |  |  |  |  |  |  |  |
+|  | COLORES |  |  |  |  |  |  |  |  |  |
+|  | Verde (GN) | Script — código embebido BPM |  |  |  |  |  |  |  |  |
+|  | Azul (AZ) | Servicio — consumo API externa |  |  |  |  |  |  |  |  |
+|  | Naranja (OR) | Envío — sendTask |  |  |  |  |  |  |  |  |
+|  | Lila (LIL) | Evento-Mensaje — intermediate throw |  |  |  |  |  |  |  |  |
+|  | ⚠ NOTAS CRÍTICAS |  |  |  |  |  |  |  |  |  |
+|  | RUL-010-04 | P01-T08 solo es alcanzable DESPUÉS de SP3-T06 con HTTP 200. Restricción de arquitectura. |  |  |  |  |  |  |  |  |
+|  | SP1-T04/SP3-T07 | LogTransmisiones es INMUTABLE. Solo inserts. No se modifica una vez registrado. |  |  |  |  |  |  |  |  |
+|  | SP3-T02 | Causa #1 de rechazo M3 en AS-IS. Validación de fechas en tiempo real es crítica. |  |  |  |  |  |  |  |  |
+|  | SP2-T06 | La función de normalización de nombre para nomenclatura PDF debe ser compartida con SP3-T03. |  |  |  |  |  |  |  |  |
+|  | SP1-T01 | La tabla de homologación Zurich↔SFC debe ser parametrizable sin redeploy. |  |  |  |  |  |  |  |  |
+## Sheet: 01_Inventario
+|  | INVENTARIO MAESTRO DE TAREAS AUTOMATIZADAS TO-BE |  |  |  |  |  |  |  |
+| --- | --- | --- | --- | --- | --- | --- | --- | --- |
+|  | Proceso: Gestión de Quejas Directas | ACZ-QD-001  |  Versión: 1.0 TO-BE | Mayo 2026 |  |  |  |  |  |  |  |
+|  | Servicio: Atención al Consumidor Financiero — Zurich Seguros Colombia  |  Plataforma: ProcessMaker 4 BPMS  |  Ley 1328/2009 · CE 039/2011 · CE 019/2024 |  |  |  |  |  |  |  |
+|  | Código Tarea | Nombre de la Tarea | Tipo | Proceso BPMN | Subproceso / Actividad | Lane / Carril | Historia de Usuario (Como) | Descripción Funcional |
+|  | P01-T02 | Registrar queja | Servicio | P01 | P01 — Gestión de Quejas Directas | BPM / Sistema | BPM / Sistema (ProcessMaker) | El sistema recibe la señal de entrada (canal SFC/Web o canal alterno) y crea automáticamente el registro de la queja en el BPM asignando ID único, canal de entrada, fecha/hora de creación y datos iniciales del consumidor. Incluye clasificación y tipificación del caso según catálogos internos. |
+|  | P01-T03 | Verificar quejas similares del cliente | Script | P01 | P01 — Gestión de Quejas Directas | BPM / Sistema | BPM / Sistema (ProcessMaker — scriptTask) | Script que consulta en la base de datos del BPM si el cliente tiene quejas activas o históricas con el mismo tipo, subtipo y producto. Retorna indicador booleano de recurrencia y número de casos similares para alimentar la compuerta de priorización. |
+|  | P01-T04 | Priorizar caso y recalcular SLA | Script | P01 | P01 — Gestión de Quejas Directas | BPM / Sistema | BPM / Sistema (ProcessMaker — scriptTask) | Script ejecutado cuando existe recurrencia. Marca el caso como prioritario en el registro, aplica el factor de SLA diferencial definido en la tabla de parámetros (ej. 70% del plazo estándar) y calcula la nueva fecha límite de respuesta en días hábiles Colombia. |
+|  | P01-T05 | Calcular SLA | Script | P01 | P01 — Gestión de Quejas Directas | BPM / Sistema | BPM / Sistema (ProcessMaker — scriptTask) | Script que calcula la fecha límite de respuesta a partir de la fecha de radicación sumando el número de días hábiles configurado por tipo y clasificación de queja. Excluye festivos Colombia. Escribe las variables de fecha límite, indicador de estado SLA y umbrales de alerta en el caso. |
+|  | P01-T06 | Validar datos del formulario | Script | P01 | P01 — Gestión de Quejas Directas | BPM / Sistema | BPM / Sistema (ProcessMaker — scriptTask) | Script de validación preventiva ejecutado antes del envío a SmartSupervision. Verifica: campos obligatorios, formatos (correo, identificación, fechas), longitudes máximas, valores dentro de catálogos SFC homologados y coherencia entre campos dependientes (Departamento → Municipio). Retorna lista de errores con campo y mensaje específico. |
+|  | Ev-Msg | Notificación de registro | Evento-Mensaje | P01 | P01 — Gestión de Quejas Directas | BPM / Sistema | BPM / Sistema (ProcessMaker — intermediate message throw event) | Evento de mensaje intermediario (throw) disparado tras el cálculo de SLA. Envía al cliente la notificación automática con el número de radicado asignado, la fecha límite de respuesta y los canales de seguimiento habilitados. |
+|  | Ev-Msg2 | Notificación de priorización | Evento-Mensaje | P01 | P01 — Gestión de Quejas Directas | BPM / Sistema | BPM / Sistema (ProcessMaker — intermediate message throw event) | Evento de mensaje intermediario (throw) disparado cuando el caso es priorizado. Notifica al analista SAC y al supervisor que el caso tiene tratamiento prioritario y el nuevo plazo de respuesta calculado. |
+|  | Ev-Msg3 | Notificación de correcciones | Evento-Mensaje | P01 | P01 — Gestión de Quejas Directas | BPM / Sistema | BPM / Sistema (ProcessMaker — intermediate message throw event) | Evento de mensaje (throw) que notifica al Gestor de Experiencia los campos con error detectados por la validación. Muestra campo específico, valor rechazado y formato esperado. Bloquea el avance hasta que los errores sean corregidos. |
+|  | P01-T08 | Enviar respuesta final al cliente | Envío | P01 | P01 — Gestión de Quejas Directas | BPM / Sistema | BPM / Sistema (ProcessMaker — sendTask) | Tarea de envío automático ejecutada EXCLUSIVAMENTE después de la confirmación HTTP 200 de SmartSupervision. El BPM envía al correo del cliente: carta de respuesta en PDF, texto de la respuesta y enlace de encuesta de satisfacción. No se ejecuta en ningún otro momento del flujo. |
+|  | P01-T09 | Enviar encuesta de satisfacción al cliente | Envío | P01 | P01 — Gestión de Quejas Directas | BPM / Sistema | BPM / Sistema (ProcessMaker — sendTask) | Envío automático del enlace parametrizado de encuesta de satisfacción al cliente como parte del cierre del caso. Se ejecuta inmediatamente después de la notificación de respuesta final. |
+|  | SP1-T01 | Homologar catálogos internos con catálogos SFC | Script | SP1 | SP1 — Validar y Radicar ante SmartSupervision | BPM / Sistema | BPM / Sistema (ProcessMaker — scriptTask) | Script que transforma automáticamente los valores internos de Zurich (Producto, Motivo, Canal, Instancia de Recepción, Punto de Recepción, Admisión, Ente de Control) a sus códigos equivalentes en los catálogos regulatorios vigentes de SmartSupervision, usando la tabla de equivalencias parametrizada en el BPM. |
+|  | SP1-T02 | Enviar payload de creación a API (M1)/(M2) | Servicio | SP1 | SP1 — Validar y Radicar ante SmartSupervision | BPM / Sistema | BPM / Sistema (ProcessMaker — serviceTask) | Tarea de servicio que invoca la API intermediaria de SmartSupervision. Construye el payload JSON con todos los campos requeridos por SFC para el Momento 1 (creación) o Momento 2 (reenvío). Registra en el log: timestamp, número de intento, payload enviado, código HTTP y respuesta recibida. |
+|  | SP1-T03 | Registrar código radicado SFC | Script | SP1 | SP1 — Validar y Radicar ante SmartSupervision | BPM / Sistema | BPM / Sistema (ProcessMaker — scriptTask) | Script ejecutado tras HTTP 201 exitoso. Extrae el código de radicado (iniciando con 1391) de la respuesta de la API y lo persiste en el campo correspondiente del caso. Actualiza el estado a 'Radicado ante SFC', registra la fecha/hora de radicación y libera el flujo hacia SP2. |
+|  | SP1-T04 | Registrar error en log de trazabilidad | Script | SP1 | SP1 — Validar y Radicar ante SmartSupervision | BPM / Sistema | BPM / Sistema (ProcessMaker — scriptTask) | Script ejecutado cuando SmartSupervision devuelve error (HTTP 400, 401, 5xx o timeout). Registra en el log estructurado: código de respuesta, mensaje de error, campo(s) afectados (si la API los retorna), número de intento, timestamp y usuario responsable. Clasifica el error como funcional o técnico para enrutar la corrección. |
+|  | SP2-T06 | Generar PDF de respuesta final | Script | SP2 | SP2 — Gestionar Respuesta Interna y Revisión SAC | BPM / Sistema | BPM / Sistema (ProcessMaker — scriptTask) | Script que genera automáticamente el PDF de la carta de respuesta final aplicando la plantilla corporativa de Zurich. Valida automáticamente la nomenclatura obligatoria del archivo: NombreCliente_NumeroIdentificacion_RESP_FINAL_SFC_N. Verifica que el archivo sea PDF válido y que el tamaño esté dentro del límite permitido. |
+|  | SP3-T02 | Validar coherencia Fecha Actualización = Fecha Cierre | Script | SP3 | SP3 — Cerrar Queja ante SmartSupervision | BPM / Sistema | BPM / Sistema (ProcessMaker — scriptTask) | Script de validación crítica que compara en tiempo real la Fecha de Actualización y la Fecha de Cierre del formulario de cierre. Si no coinciden, bloquea el botón de envío y muestra mensaje. Resuelve la causa #1 de rechazo en M3. |
+|  | SP3-T03 | Validar nomenclatura y tipo PDF | Script | SP3 | SP3 — Cerrar Queja ante SmartSupervision | BPM / Sistema | BPM / Sistema (ProcessMaker — scriptTask) | Script que valida el archivo adjunto de respuesta final: (1) extensión .pdf válida, (2) nombre cumple el patrón NombreCliente_NumeroIdentificacion_RESP_FINAL_SFC_N, (3) tamaño dentro del límite permitido por SFC. Bloquea el envío si el archivo no cumple los requisitos. |
+|  | SP3-T05 | Enviar payload de cierre a API (M3) | Servicio | SP3 | SP3 — Cerrar Queja ante SmartSupervision | BPM / Sistema | BPM / Sistema (ProcessMaker — serviceTask) | Tarea de servicio que construye el payload completo de cierre (30+ campos regulatorios + PDF adjunto codificado) e invoca la API intermediaria para el Momento 3. Registra la transacción completa en el log: campos enviados, timestamp, número de intento y código HTTP recibido. |
+|  | SP3-T06 | Registrar confirmación cierre aceptado | Script | SP3 | SP3 — Cerrar Queja ante SmartSupervision | BPM / Sistema | BPM / Sistema (ProcessMaker — scriptTask) | Script ejecutado tras HTTP 200 de SmartSupervision. Registra en el log la confirmación de cierre regulatorio. Actualiza el estado del caso a 'Cierre aceptado por SFC'. Registra fecha y hora exacta de cierre. Habilita el evento de notificación final al cliente en el proceso principal. |
+|  | SP3-T07 | Registrar rechazo en log (M3) | Script | SP3 | SP3 — Cerrar Queja ante SmartSupervision | BPM / Sistema | BPM / Sistema (ProcessMaker — scriptTask) | Script ejecutado cuando SmartSupervision devuelve HTTP 400 en el Momento 3. Registra en el log estructurado: código de error, campo(s) rechazados, número de intento, timestamp y payload enviado. Determina si el error es funcional o técnico para enrutar hacia SP3-T08 o SP3-T09 sin generar comunicaciones al cliente. |
+|  | SP4-T01 | Enviar payload de prórroga a API (M2-Prórroga) | Servicio | SP4 | SP4 — Gestionar Prórroga Regulatoria | BPM / Sistema | BPM / Sistema (ProcessMaker — serviceTask) | Tarea de servicio que construye el payload de solicitud de prórroga con los campos requeridos por SmartSupervision (número de caso SFC, motivo, nueva fecha límite, contador de prórroga) e invoca la API intermediaria. Registra la transacción en el log con timestamp, número de intento y código HTTP recibido. |
+|  | SP4-T02 | Registrar rechazo en log (Prórroga) | Script | SP4 | SP4 — Gestionar Prórroga Regulatoria | BPM / Sistema | BPM / Sistema (ProcessMaker — scriptTask) | Script ejecutado cuando SmartSupervision rechaza la solicitud de prórroga. Registra en el log: código de error, campo(s) afectados, número de intento y timestamp. Clasifica el error como funcional o técnico para enrutar la corrección hacia SP4-T05 o SP4-T06 según corresponda. |
+|  | SP4-T03 | Notificar prórroga al cliente | Envío | SP4 | SP4 — Gestionar Prórroga Regulatoria | BPM / Sistema | BPM / Sistema (ProcessMaker — sendTask) | Envío automático al cliente de la comunicación de prórroga: informa la ampliación del plazo de respuesta, la nueva fecha límite y el motivo de la prórroga. Requisito obligatorio de transparencia con el consumidor financiero según Ley 1328/2009. Debe enviarse antes del vencimiento del plazo inicial. |
+|  | SP4-T04 | Actualizar SLA con nueva fecha | Script | SP4 | SP4 — Gestionar Prórroga Regulatoria | BPM / Sistema | BPM / Sistema (ProcessMaker — scriptTask) | Script que actualiza el temporizador de SLA del caso con la nueva fecha límite aprobada por SmartSupervision. Recalcula los umbrales de alerta (días restantes para alertas de aviso y crítica). Actualiza la semaforización del caso en el tablero operativo e incrementa el contador de prórroga. |
+## Sheet: 02_Scripts
+|  | ESPECIFICACIÓN TÉCNICA — SCRIPTS (scriptTask) | ProcessMaker 4 |  |  |  |  |  |  |  |  |  |  |  |
+| --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
+|  | Proceso: Gestión de Quejas Directas | ACZ-QD-001  |  Versión: 1.0 TO-BE | Mayo 2026 |  |  |  |  |  |  |  |  |  |  |  |
+|  | Servicio: Atención al Consumidor Financiero — Zurich Seguros Colombia  |  Plataforma: ProcessMaker 4 BPMS  |  Ley 1328/2009 · CE 039/2011 · CE 019/2024 |  |  |  |  |  |  |  |  |  |  |  |
+|  | Identificación |  |  | Historia de Sistema |  | Historia de Usuario |  |  | Criterio de Aceptación |  |  |  |
+|  | Código | Nombre Tarea | Tipo | Proceso | Descripción Funcional | Como (Sistema — actor técnico) | Quiero (funcionalidad técnica) | Para (beneficio/objetivo) | Dado que (precondición) | Cuando (trigger/evento) | Entonces (resultado esperado) | Lógica / Pasos de ejecución |
+|  | P01-T03 | Verificar quejas similares del cliente | Script | P01 | Script que consulta en la base de datos del BPM si el cliente tiene quejas activas o históricas con el mismo tipo, subtipo y producto. Retorna indicador booleano de recurrencia y número de casos similares para alimentar la compuerta de priorización. | Como: BPM / Sistema (ProcessMaker — scriptTask) | Quiero: consultar automáticamente si el consumidor financiero tiene quejas activas o cerradas recientes con la misma clasificación (tipo, subtipo y producto) para determinar si el caso debe priorizarse | Para: aplicar un tratamiento diferencial a los casos recurrentes y garantizar mayor atención a consumidores con problemas repetidos, cumpliendo el criterio regulatorio de atención prioritaria | Dado que: el registro del caso fue creado exitosamente (P01-T02) y existe el idCasoBPM, productoSFC, motivoSFC y numeroIdentificacion disponibles en el contexto del proceso | Cuando: el BPM ejecuta automáticamente el script después de la creación del registro | Entonces: el script retorna: esRecurrente = true/false, numeroCasosSimilares = N (entero), idsCasosSimilares = [lista de IDs]. Si esRecurrente = true, el flujo se dirige a P01-T04 (priorización). Si false, continúa directamente a P01-T05 (calcular SLA). | 1. Construir consulta SQL/BPM: SELECT COUNT(*) FROM Casos WHERE numeroIdentificacion = @id AND motivoSFC = @motivo AND productoSFC = @producto AND estadoCaso != 'Cerrado' UNION históricas en los últimos 90 días.
+2. Ejecutar la consulta en la base de datos del BPM.
+3. Si COUNT > 0: esRecurrente = true, numeroCasosSimilares = COUNT, idsCasosSimilares = lista de IDs.
+4. Si COUNT = 0: esRecurrente = false, numeroCasosSimilares = 0.
+5. Escribir variables en el contexto del proceso.
+6. El motor BPMN evalúa la compuerta '¿Es recurrente?' con el valor retornado. |
+|  | P01-T04 | Priorizar caso y recalcular SLA | Script | P01 | Script ejecutado cuando existe recurrencia. Marca el caso como prioritario en el registro, aplica el factor de SLA diferencial definido en la tabla de parámetros (ej. 70% del plazo estándar) y calcula la nueva fecha límite de respuesta en días hábiles Colombia. | Como: BPM / Sistema (ProcessMaker — scriptTask) | Quiero: marcar automáticamente el caso como prioritario y calcular un SLA reducido cuando el consumidor tiene quejas recurrentes con la misma clasificación | Para: garantizar una atención más rápida a consumidores con problemas persistentes, diferenciando el tratamiento según la política de priorización de Zurich Seguros Colombia | Dado que: P01-T03 retornó esRecurrente = true y el caso tiene idCasoBPM, fechaCreacion y los parámetros de SLA disponibles en la tabla de configuración del BPM | Cuando: el BPM ejecuta el script de priorización en el camino de excepción de la compuerta '¿Es recurrente?' | Entonces: el caso queda marcado como prioritario (esPrioritario = true), con el SLA recalculado según el factor parametrizado (ej. 70% del SLA estándar), y la nueva fechaLimiteSLA es calculada en días hábiles Colombia excluyendo festivos. El evento Ev-Msg2 notifica al SAC. | 1. Leer el SLA estándar en días hábiles desde la tabla de parámetros (tipología + producto).
+2. Leer el factorPriorizacionSLA desde la tabla de parámetros (por defecto: 0.70).
+3. Calcular diasHabilesSLA_prioritario = FLOOR(diasHabilesEstandar * factorPriorizacionSLA).
+4. Calcular fechaLimiteSLA sumando diasHabilesSLA_prioritario días hábiles Colombia desde fechaCreacion.
+5. Excluir festivos nacionales de Colombia usando el calendario parametrizado en el BPM.
+6. Actualizar en la entidad Casos: esPrioritario = true, diasHabilesSLA = N_prioritario, fechaLimiteSLA = fecha calculada.
+7. Calcular umbrales de alerta: fechaAlertaAmarilla (5 días antes), fechaAlertaRoja (2 días antes).
+8. Escribir todas las variables en el contexto del proceso. |
+|  | P01-T05 | Calcular SLA | Script | P01 | Script que calcula la fecha límite de respuesta a partir de la fecha de radicación sumando el número de días hábiles configurado por tipo y clasificación de queja. Excluye festivos Colombia. Escribe las variables de fecha límite, indicador de estado SLA y umbrales de alerta en el caso. | Como: BPM / Sistema (ProcessMaker — scriptTask) | Quiero: calcular automáticamente la fecha límite de respuesta regulatoria en días hábiles Colombia para todos los casos NO prioritarios, registrando también las fechas de alerta de SLA | Para: cumplir el plazo legal de 15 días hábiles establecido por CE 039/2011 para quejas directas, y habilitar el control automático de SLA con alertas preventivas | Dado que: el caso fue creado (P01-T02) y no fue clasificado como prioritario (esRecurrente = false o priorización ya ejecutada), y existe la fechaCreacion disponible en el contexto del proceso | Cuando: el BPM ejecuta el script de cálculo SLA en el camino principal después de la compuerta de priorización | Entonces: el caso queda con fechaLimiteSLA calculada sumando 15 días hábiles Colombia (sin festivos) desde fechaCreacion. Se registran los umbrales de alerta: amarillo (5 días antes) y rojo (2 días antes). estadoSLA = 'Vigente'. El evento Ev-Msg notifica al cliente con el radicado y fecha límite. | 1. Verificar si esPrioritario = true. Si es así, omitir el cálculo (ya fue realizado por P01-T04) y retornar sin modificar las variables.
+2. Leer el parámetro diasHabilesSLA desde la tabla de configuración según tipoSolicitudInterno (por defecto: 15 para quejas directas).
+3. Calcular fechaLimiteSLA sumando diasHabilesSLA días hábiles Colombia desde fechaCreacion.
+4. Excluir sábados, domingos y festivos nacionales de Colombia (calendario parametrizado).
+5. Calcular fechaAlertaAmarilla = fechaLimiteSLA - 5 días hábiles.
+6. Calcular fechaAlertaRoja = fechaLimiteSLA - 2 días hábiles.
+7. Establecer estadoSLA = 'Vigente'.
+8. Actualizar el registro del caso en la BD con todas las variables calculadas.
+9. Programar los temporizadores de alerta en el motor de eventos del BPM. |
+|  | P01-T06 | Validar datos del formulario | Script | P01 | Script de validación preventiva ejecutado antes del envío a SmartSupervision. Verifica: campos obligatorios, formatos (correo, identificación, fechas), longitudes máximas, valores dentro de catálogos SFC homologados y coherencia entre campos dependientes (Departamento → Municipio). Retorna lista de errores con campo y mensaje específico. | Como: BPM / Sistema (ProcessMaker — scriptTask) | Quiero: validar preventivamente todos los campos del formulario antes de intentar radicar ante SmartSupervision, identificando con precisión qué campo tiene error, cuál es el valor rechazado y cuál es el formato correcto esperado | Para: prevenir rechazos HTTP 400 de SmartSupervision por datos inválidos, eliminar la dependencia de validaciones manuales y garantizar que los datos transmitidos cumplan 100% los requisitos regulatorios de la SFC | Dado que: el caso fue creado y el usuario navegó hacia la radicación, o el usuario corrigió campos en PAN-02 y presionó 'Guardar correcciones' | Cuando: el BPM ejecuta el script de validación preventiva antes de invocar SP1 | Entonces: si hay errores: esValido = false, listaErrores contiene cada error con {campo, valorRechazado, mensajeError, formatoEsperado}, el flujo va a P01-T07 (PAN-02). Si no hay errores: esValido = true, el flujo continúa hacia SP1 para radicación. La validación debe ejecutarse en < 500 ms. | 1. Verificar obligatoriedad: cada campo marcado como obligatorio SFC debe tener valor no nulo ni vacío.
+2. Validar formato correo electrónico: expresión regular RFC 5321.
+3. Validar formato número identificación: solo dígitos, longitud 6-15.
+4. Validar longitudes máximas: resumen ≤ 500 char, textoQueja ≤ 4000 char, nombre ≤ 200 char.
+5. Validar caracteres no permitidos por SmartSupervision en campos de texto libre.
+6. Validar coherencia Departamento → Municipio: el municipio debe pertenecer al departamento seleccionado.
+7. Validar que cada valor de catálogo (canal, producto, motivo, etc.) exista en la tabla de homologación SFC activa.
+8. Para cada error encontrado: registrar {campo: 'nombreCampo', valorRechazado: 'valor', mensajeError: 'descripción', formatoEsperado: 'formato'}.
+9. Si listaErrores.length > 0: esValido = false. Si = 0: esValido = true.
+10. Disparar Ev-Msg3 con la lista de errores cuando esValido = false. |
+|  | SP1-T01 | Homologar catálogos internos con catálogos SFC | Script | SP1 | Script que transforma automáticamente los valores internos de Zurich (Producto, Motivo, Canal, Instancia de Recepción, Punto de Recepción, Admisión, Ente de Control) a sus códigos equivalentes en los catálogos regulatorios vigentes de SmartSupervision, usando la tabla de equivalencias parametrizada en el BPM. | Como: BPM / Sistema (ProcessMaker — scriptTask) | Quiero: transformar automáticamente los valores internos de Zurich a los códigos regulatorios exactos requeridos por SmartSupervision usando la tabla de equivalencias parametrizada, sin intervención manual | Para: eliminar el riesgo de rechazo HTTP 400 por diferencias entre el lenguaje interno de Zurich y los catálogos regulatorios de la SFC, resolviendo el problema identificado PM-012 del AS-IS | Dado que: el caso tiene datos validados (esValido = true de P01-T06) y la tabla de homologación Zurich ↔ SFC está parametrizada y activa en el BPM | Cuando: el BPM ejecuta el script al inicio de SP1, antes de construir el payload para la API | Entonces: el script transforma cada valor interno al código SFC correspondiente usando la tabla de equivalencias. Si algún valor no tiene equivalente: homologacionExitosa = false, el script registra alerta al administrador y bloquea el envío. Si todos tienen equivalente: homologacionExitosa = true y el flujo continúa a SP1-T02. | 1. Para cada campo regulatorio, buscar el valor interno en la tabla de homologación.
+2. Si se encuentra: extraer el código SFC equivalente y guardarlo en la variable de salida.
+3. Si NO se encuentra: registrar {campo: 'nombreCampo', valorInterno: 'X', error: 'Sin equivalente SFC'} en erroresHomologacion.
+4. Si erroresHomologacion.length > 0: homologacionExitosa = false. Alertar al administrador del sistema.
+5. Si erroresHomologacion.length = 0: homologacionExitosa = true. Continuar.
+6. Registrar el resultado de la homologación en el log de trazabilidad del caso. |
+|  | SP1-T03 | Registrar código radicado SFC | Script | SP1 | Script ejecutado tras HTTP 201 exitoso. Extrae el código de radicado (iniciando con 1391) de la respuesta de la API y lo persiste en el campo correspondiente del caso. Actualiza el estado a 'Radicado ante SFC', registra la fecha/hora de radicación y libera el flujo hacia SP2. | Como: BPM / Sistema (ProcessMaker — scriptTask) | Quiero: extraer el código de radicado SFC del cuerpo de la respuesta HTTP 201, persistirlo en el registro del caso y actualizar el estado a 'Radicado ante SFC' para continuar con la gestión interna | Para: garantizar que el código oficial de SmartSupervision quede registrado de forma permanente en el expediente del caso, habilitando todos los momentos de integración subsiguientes (M2 y M3) que requieren este identificador | Dado que: SP1-T02 recibió HTTP 201 y cuerpoRespuesta_M1M2 contiene el código radicado SFC en el campo definido por la API intermediaria | Cuando: el BPM ejecuta el script después de recibir HTTP 201 de SmartSupervision | Entonces: el código de radicado SFC (iniciando con '1391') queda persistido en el campo codigoSFC del caso. estadoCaso = 'Radicado ante SFC'. fechaRadicacionSFC = timestamp actual. El flujo continúa hacia SP2. | 1. Parsear el cuerpoRespuesta_M1M2 para extraer el código radicado SFC.
+2. Validar que el código extraído inicie con '1391' (verificación de integridad).
+3. Persistir codigoSFC en el registro del caso en la BD.
+4. Actualizar estadoCaso = 'Radicado ante SFC'.
+5. Registrar fechaRadicacionSFC = timestamp UTC actual.
+6. Registrar en el log: {idCasoBPM, codigoSFC, fechaRadicacionSFC, numeroIntento, tipo='HTTP 201'}.
+7. Liberar el flujo del proceso hacia SP2. |
+|  | SP1-T04 | Registrar error en log de trazabilidad | Script | SP1 | Script ejecutado cuando SmartSupervision devuelve error (HTTP 400, 401, 5xx o timeout). Registra en el log estructurado: código de respuesta, mensaje de error, campo(s) afectados (si la API los retorna), número de intento, timestamp y usuario responsable. Clasifica el error como funcional o técnico para enrutar la corrección. | Como: BPM / Sistema (ProcessMaker — scriptTask) | Quiero: registrar estructuradamente cada error de SmartSupervision en el log de trazabilidad del caso y clasificarlo correctamente como funcional o técnico para enrutar al corrector adecuado (Gestor CX o Analista Técnico) | Para: garantizar la trazabilidad completa de cada intento fallido para auditoría regulatoria, y asegurar que el error llegue al actor correcto para la corrección más eficiente | Dado que: SP1-T02 recibió una respuesta HTTP != 201 (puede ser 400, 401, 403, 500, 503 o timeout) | Cuando: el BPM ejecuta el script en el camino de excepción de la compuerta '¿SmartSupervision aceptó?' | Entonces: el error queda registrado en la tabla de log de transmisiones con todos los campos requeridos. tipoError = 'funcional' si HTTP 400 (datos incorrectos), 'tecnico' si HTTP 401/403/5xx/timeout. La compuerta '¿Tipo de error?' usa tipoError para enrutar: funcional → PAN-03; técnico → PAN-04. | 1. Clasificar el tipo de error: HTTP 400 = 'funcional' (datos incorrectos); HTTP 401/403 = 'tecnico_autenticacion'; HTTP 5xx = 'tecnico_servidor'; timeout = 'tecnico_red'.
+2. Extraer campos afectados del cuerpo de la respuesta (si la API los retorna en HTTP 400).
+3. Insertar registro en tabla LogTransmisiones: {idCasoBPM, momento, numeroIntento, codigoHTTP, mensajeError, camposAfectados, payloadEnviado, timestamp, tipoError}.
+4. Actualizar estadoCaso = 'Rechazado por SmartSupervision'.
+5. Si numeroIntento >= 3 y tipoError contiene 'tecnico': activar flag escalarATecnico = true.
+6. Escribir tipoError en el contexto del proceso para la compuerta de enrutamiento. |
+|  | SP2-T06 | Generar PDF de respuesta final | Script | SP2 | Script que genera automáticamente el PDF de la carta de respuesta final aplicando la plantilla corporativa de Zurich. Valida automáticamente la nomenclatura obligatoria del archivo: NombreCliente_NumeroIdentificacion_RESP_FINAL_SFC_N. Verifica que el archivo sea PDF válido y que el tamaño esté dentro del límite permitido. | Como: BPM / Sistema (ProcessMaker — scriptTask) | Quiero: generar automáticamente el PDF de la carta de respuesta final aplicando la plantilla corporativa de Zurich y validar que cumple la nomenclatura obligatoria de SmartSupervision sin depender de criterio manual | Para: eliminar el error PM-006 del AS-IS (dependencia manual de nomenclatura del PDF) y garantizar que el archivo esté listo para ser enviado a SmartSupervision en M3 sin riesgo de rechazo por nomenclatura o formato | Dado que: SP2-T04 aprobó la respuesta borrador (respuestaAprobada = true) y están disponibles: nombreConsumidor, numeroIdentificacion, textoRespuestaCliente, plantillaCorporativaZurich | Cuando: el BPM ejecuta el script automáticamente después de la aprobación de la respuesta por SAC | Entonces: el script genera el PDF con la plantilla corporativa, lo nombra según NombreCliente_NumeroIdentificacion_RESP_FINAL_SFC_N, valida nomenclatura, tipo y tamaño. El PDF queda disponible como adjunto del caso. pdfGenerado = true y pdfNomenclaturaValida = true. | 1. Construir el nombre del archivo: {NombreConsumidor}_{NumeroIdentificacion}_RESP_FINAL_SFC_{N}.pdf (reemplazando espacios por guiones bajos, eliminando caracteres especiales).
+2. Cargar la plantilla corporativa de Zurich desde el repositorio de plantillas.
+3. Insertar el contenido: textoRespuestaCliente, idCasoBPM, codigoSFC, fechas.
+4. Convertir a PDF usando el motor de generación de PDF del BPM.
+5. Validar nomenclatura: verificar que el nombre generado cumple el patrón regex ^[A-Za-z0-9_]+_[0-9]+_RESP_FINAL_SFC_[0-9]+\.pdf$.
+6. Validar tipo: verificar magic bytes del archivo (PDF debe iniciar con %PDF-).
+7. Validar tamaño: archivo.sizeKb <= limiteKbPDF.
+8. Si todas las validaciones pasan: adjuntar al caso, registrar en log.
+9. Si falla alguna validación: pdfGenerado = false, registrar error específico. |
+|  | SP3-T02 | Validar coherencia Fecha Actualización = Fecha Cierre | Script | SP3 | Script de validación crítica que compara en tiempo real la Fecha de Actualización y la Fecha de Cierre del formulario de cierre. Si no coinciden, bloquea el botón de envío y muestra mensaje. Resuelve la causa #1 de rechazo en M3. | Como: BPM / Sistema (ProcessMaker — scriptTask) | Quiero: comparar automáticamente la Fecha de Actualización y la Fecha de Cierre en tiempo real mientras el Analista SAC completa PAN-10, bloqueando el botón de envío si no coinciden | Para: prevenir el rechazo más frecuente de SmartSupervision en el Momento 3 (causa #1 de rechazo según el AS-IS) eliminando la dependencia del criterio manual del usuario | Dado que: el Analista SAC está diligenciando PAN-10 y ha ingresado valores en los campos fechaActualizacion y/o fechaCierre | Cuando: el BPM ejecuta el script de validación en tiempo real al cambiar cualquiera de los dos campos de fecha (evento onChange del formulario) | Entonces: si fechaActualizacion = fechaCierre: el script retorna fechasCoinciden = true y el botón 'Enviar a SmartSupervision' se habilita. Si no coinciden: fechasCoinciden = false, el botón queda deshabilitado y se muestra MSG-010-01. | 1. Comparar fechaActualizacion con fechaCierre (comparación exacta de fecha, no de timestamp completo — pendiente confirmar si SFC exige hora también).
+2. Si son iguales: fechasCoinciden = true.
+3. Si son diferentes: fechasCoinciden = false.
+4. Actualizar el estado del botón de envío en el formulario PAN-10 según fechasCoinciden.
+5. Si fechasCoinciden = false: mostrar MSG-010-01 en el área de validación de PAN-10.
+6. Si fechasCoinciden = true: ocultar MSG-010-01. |
+|  | SP3-T03 | Validar nomenclatura y tipo PDF | Script | SP3 | Script que valida el archivo adjunto de respuesta final: (1) extensión .pdf válida, (2) nombre cumple el patrón NombreCliente_NumeroIdentificacion_RESP_FINAL_SFC_N, (3) tamaño dentro del límite permitido por SFC. Bloquea el envío si el archivo no cumple los requisitos. | Como: BPM / Sistema (ProcessMaker — scriptTask) | Quiero: validar automáticamente el archivo PDF adjunto en PAN-10 contra los tres requisitos de SmartSupervision: tipo de archivo, nomenclatura obligatoria y tamaño máximo, bloqueando el envío si falla cualquier validación | Para: prevenir rechazos HTTP 400 de SmartSupervision por archivo inválido (causa identificada en el AS-IS como PM-006) y eliminar la dependencia del criterio manual del usuario para la nomenclatura | Dado que: el Analista SAC adjuntó un archivo en el campo pdfRespuestaFinal de PAN-10 | Cuando: el BPM ejecuta el script de validación al adjuntar el archivo (evento onFileUpload del formulario) | Entonces: el script valida los tres criterios. Si todos pasan: pdfValido = true, se muestra indicador verde '✓ Nomenclatura correcta · ✓ Formato PDF válido · ✓ Tamaño OK'. Si falla alguno: pdfValido = false, mensaje específico con el criterio fallido y botón de envío bloqueado. | 1. VALIDACIÓN TIPO: verificar que archivoAdjunto.extension = '.pdf' (case-insensitive). Verificar magic bytes del archivo (debe iniciar con %PDF-).
+2. VALIDACIÓN NOMENCLATURA: construir el nombre esperado: {nombreConsumidor_normalizado}_{numeroIdentificacion}_RESP_FINAL_SFC_{N}.pdf. Comparar con el nombre real del archivo adjunto. La comparación debe ser case-insensitive.
+3. VALIDACIÓN TAMAÑO: verificar archivoAdjunto.sizeKb <= limiteKbPDF.
+4. Construir resultado: {tipoValido: bool, nomenclaturaValida: bool, tamanoValido: bool, mensajeEspecifico: string}.
+5. pdfValido = tipoValido AND nomenclaturaValida AND tamanoValido.
+6. Actualizar el indicador visual en PAN-10 con el resultado de cada validación.
+7. Habilitar/deshabilitar el botón de envío según pdfValido. |
+|  | SP3-T06 | Registrar confirmación cierre aceptado | Script | SP3 | Script ejecutado tras HTTP 200 de SmartSupervision. Registra en el log la confirmación de cierre regulatorio. Actualiza el estado del caso a 'Cierre aceptado por SFC'. Registra fecha y hora exacta de cierre. Habilita el evento de notificación final al cliente en el proceso principal. | Como: BPM / Sistema (ProcessMaker — scriptTask) | Quiero: registrar de forma permanente e inmutable la confirmación de cierre regulatorio recibida de SmartSupervision (HTTP 200) y habilitar la notificación al cliente como consecuencia directa y exclusiva de este evento | Para: cumplir la restricción regulatoria crítica RUL-010-04 garantizando que la notificación al cliente sea el resultado directo y verificable de la aceptación por SmartSupervision, con evidencia en el log para auditoría | Dado que: SP3-T05 recibió HTTP 200 de SmartSupervision como respuesta al payload de cierre M3 | Cuando: el BPM ejecuta el script en el camino exitoso de la compuerta '¿SmartSupervision aceptó cierre?' | Entonces: el script persiste la confirmación de cierre en el log con el timestamp exacto. estadoCaso = 'Cierre aceptado por SFC'. La señal de habilitación de P01-T08 (notificación cliente) es emitida. El caso queda marcado como regulatoriamente cerrado. | 1. Insertar registro en LogTransmisiones: {idCasoBPM, momento='M3', tipo='HTTP 200 - Cierre aceptado', timestamp, numeroIntento_M3, codigoSFC}.
+2. Actualizar estadoCaso = 'Cierre aceptado por SFC'.
+3. Registrar fechaCierreRegulatorio = timestamp UTC actual.
+4. Emitir la señal/evento que habilita P01-T08 en el proceso principal P01.
+5. Registrar en log: 'Cierre regulatorio confirmado. Habilitando notificación al cliente.' |
+|  | SP3-T07 | Registrar rechazo en log (M3) | Script | SP3 | Script ejecutado cuando SmartSupervision devuelve HTTP 400 en el Momento 3. Registra en el log estructurado: código de error, campo(s) rechazados, número de intento, timestamp y payload enviado. Determina si el error es funcional o técnico para enrutar hacia SP3-T08 o SP3-T09 sin generar comunicaciones al cliente. | Como: BPM / Sistema (ProcessMaker — scriptTask) | Quiero: registrar estructuradamente cada rechazo de SmartSupervision en el Momento 3 y clasificarlo correctamente para enrutar la corrección sin generar comunicaciones al cliente | Para: garantizar la trazabilidad de cada intento fallido de cierre M3 para auditoría regulatoria, y asegurar que durante los ciclos de corrección NUNCA se generen comunicaciones al consumidor financiero | Dado que: SP3-T05 recibió una respuesta HTTP != 200 del payload de cierre M3 | Cuando: el BPM ejecuta el script en el camino de rechazo de la compuerta '¿SmartSupervision aceptó cierre?' | Entonces: el error queda registrado en LogTransmisiones. tipoError_M3 = 'funcional' (HTTP 400) o 'tecnico' (otros). La compuerta enruta: funcional → PAN-10 (corrección funcional SP3-T08); técnico → PAN-10/SP3-T09. NINGUNA comunicación al cliente durante este ciclo. | 1. Clasificar tipoError_M3: HTTP 400 = 'funcional'; HTTP 401/403 = 'tecnico_autenticacion'; HTTP 5xx = 'tecnico_servidor'; timeout = 'tecnico_red'.
+2. Extraer camposAfectados_M3 del cuerpo de la respuesta (si HTTP 400 los retorna).
+3. Insertar en LogTransmisiones: {idCasoBPM, momento='M3', tipo='Error', codigoHTTP_M3, camposAfectados_M3, numeroIntento_M3, payloadEnviado_M3, timestamp}.
+4. Verificar RESTRICCIÓN: NO generar ninguna comunicación al cliente (email, SMS, notificación).
+5. Actualizar estadoCaso = 'Cierre rechazado por SmartSupervision'.
+6. Escribir tipoError_M3 para la compuerta de enrutamiento. |
+|  | SP4-T02 | Registrar rechazo en log (Prórroga) | Script | SP4 | Script ejecutado cuando SmartSupervision rechaza la solicitud de prórroga. Registra en el log: código de error, campo(s) afectados, número de intento y timestamp. Clasifica el error como funcional o técnico para enrutar la corrección hacia SP4-T05 o SP4-T06 según corresponda. | Como: BPM / Sistema (ProcessMaker — scriptTask) | Quiero: registrar estructuradamente el rechazo de SmartSupervision a la solicitud de prórroga y clasificarlo para enrutar la corrección al actor correcto | Para: garantizar la trazabilidad del intento fallido de prórroga y enrutar eficientemente la corrección: Analista Técnico para errores técnicos, Analista SAC/Área para errores funcionales | Dado que: SP4-T01 recibió una respuesta HTTP != 200 del payload de prórroga | Cuando: el BPM ejecuta el script en el camino de error de la compuerta '¿SmartSupervision aceptó prórroga?' | Entonces: el error queda registrado en LogTransmisiones. tipoError_Prorroga clasificado. Flujo enruta: funcional → PAN-12 (SP4-T06); técnico → PAN-11 (SP4-T05). | 1. Clasificar: HTTP 400 = 'funcional'; HTTP 401/403 = 'tecnico'; HTTP 5xx/timeout = 'tecnico'.
+2. Extraer campos afectados si HTTP 400.
+3. Insertar en LogTransmisiones: {idCasoBPM, momento='M2-Prorroga', tipo='Error', codigoHTTP, camposAfectados, numeroIntento, timestamp}.
+4. Escribir tipoError_Prorroga para compuerta de enrutamiento. |
+|  | SP4-T04 | Actualizar SLA con nueva fecha | Script | SP4 | Script que actualiza el temporizador de SLA del caso con la nueva fecha límite aprobada por SmartSupervision. Recalcula los umbrales de alerta (días restantes para alertas de aviso y crítica). Actualiza la semaforización del caso en el tablero operativo e incrementa el contador de prórroga. | Como: BPM / Sistema (ProcessMaker — scriptTask) | Quiero: actualizar automáticamente el temporizador de SLA del caso con la nueva fecha límite aprobada y recalcular los umbrales de alerta para que el tablero operativo refleje el nuevo plazo | Para: garantizar que el equipo SAC trabaje con fechas actualizadas después de una prórroga aprobada, evitando falsas alarmas de vencimiento y asegurando que el control de SLA sea siempre preciso | Dado que: SP4-T01 recibió HTTP 200 y SP4-T03 notificó al cliente, con nuevaFechaLimite disponible en el contexto del proceso | Cuando: el BPM ejecuta el script después de SP4-T03 como parte del cierre exitoso del flujo de prórroga | Entonces: el SLA del caso queda actualizado con nuevaFechaLimite. Los temporizadores del BPM son reprogramados. Las fechas de alerta amarilla y roja son recalculadas. contadorProrroga se incrementa. El tablero operativo muestra la semaforización actualizada. | 1. Actualizar fechaLimiteSLA = nuevaFechaLimite en el registro del caso.
+2. Recalcular fechaAlertaAmarilla = nuevaFechaLimite - 5 días hábiles Colombia.
+3. Recalcular fechaAlertaRoja = nuevaFechaLimite - 2 días hábiles Colombia.
+4. Reprogramar los temporizadores del motor de BPM con las nuevas fechas.
+5. Incrementar contadorProrroga = contadorProrroga_actual + 1.
+6. Actualizar indicador de semaforización en el caso (recalcular días restantes).
+7. Registrar en log: {idCasoBPM, nuevaFechaLimite, contadorProrroga, timestamp}. |
+## Sheet: 03_Servicios
+|  | ESPECIFICACIÓN TÉCNICA — SERVICIOS (serviceTask) | API SmartSupervision |  |  |  |  |  |  |  |  |  |  |  |
+| --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
+|  | Proceso: Gestión de Quejas Directas | ACZ-QD-001  |  Versión: 1.0 TO-BE | Mayo 2026 |  |  |  |  |  |  |  |  |  |  |  |
+|  | Servicio: Atención al Consumidor Financiero — Zurich Seguros Colombia  |  Plataforma: ProcessMaker 4 BPMS  |  Ley 1328/2009 · CE 039/2011 · CE 019/2024 |  |  |  |  |  |  |  |  |  |  |  |
+|  | Identificación |  |  | Historia de Sistema |  | Historia de Usuario |  |  | Criterio de Aceptación |  |  |  |
+|  | Código | Nombre Tarea | Tipo | Proceso | Descripción Funcional | Como (Sistema — actor técnico) | Quiero (funcionalidad técnica) | Para (beneficio/objetivo) | Dado que (precondición) | Cuando (trigger/evento) | Entonces (resultado esperado) | Lógica / Pasos de ejecución |
+|  | P01-T02 | Registrar queja | Servicio | P01 | El sistema recibe la señal de entrada (canal SFC/Web o canal alterno) y crea automáticamente el registro de la queja en el BPM asignando ID único, canal de entrada, fecha/hora de creación y datos iniciales del consumidor. Incluye clasificación y tipificación del caso según catálogos internos. | Como: BPM / Sistema (ProcessMaker) | Quiero: crear automáticamente el registro del caso en la base de datos del BPM con ID único, canal, timestamp y datos del consumidor recibidos del formulario PAN-01 | Para: garantizar que todo caso tenga un registro trazable desde su origen con todos los metadatos necesarios para la gestión y el reporte regulatorio | Dado que: el Gestor de Experiencia completó exitosamente el formulario PAN-01 (P01-T01) y presionó 'Crear Queja', y la validación preventiva P01-T06 no detectó errores | Cuando: el BPM recibe el evento de creación con el payload del formulario validado | Entonces: el sistema persiste el registro en la base de datos con: ID único (formato CASE-YYYY-NNNNN), canal de entrada, fecha/hora de creación (UTC), datos del consumidor, clasificación interna y estado inicial 'Pendiente'. Retorna el ID del caso creado al flujo para continuar con P01-T03. | 1. Recibir payload validado del evento de creación.
+2. Generar ID único de caso en formato CASE-YYYY-NNNNN usando secuencia del BPM.
+3. Asignar timestamp UTC de creación (fechaCreacion).
+4. Persistir todos los campos del payload en la tabla/entidad 'Casos' del BPM.
+5. Establecer estadoCaso = 'Pendiente' (valor inicial).
+6. Registrar en log de auditoría: ID caso, timestamp, canal, usuario creador.
+7. Retornar idCasoBPM al flujo del proceso para continuar con P01-T03. |
+|  | SP1-T02 | Enviar payload de creación a API (M1)/(M2) | Servicio | SP1 | Tarea de servicio que invoca la API intermediaria de SmartSupervision. Construye el payload JSON con todos los campos requeridos por SFC para el Momento 1 (creación) o Momento 2 (reenvío). Registra en el log: timestamp, número de intento, payload enviado, código HTTP y respuesta recibida. | Como: BPM / Sistema (ProcessMaker — serviceTask) | Quiero: construir el payload JSON completo con todos los campos regulatorios de SmartSupervision, invocarlo contra la API intermediaria y registrar cada intento de transmisión con su resultado completo | Para: cumplir la obligación regulatoria de radicación ante SmartSupervision (Momento 1 o reenvío Momento 2) con trazabilidad total de cada intento, código de respuesta y campos afectados | Dado que: SP1-T01 completó la homologación exitosamente (homologacionExitosa = true) y todos los campos regulatorios están disponibles en el contexto del proceso con sus códigos SFC | Cuando: el BPM invoca el serviceTask SP1-T02 como parte del flujo de SP1, en el primer intento (M1) o en reenvío tras corrección (M2) | Entonces: el servicio construye el payload JSON, lo envía a la API intermediaria vía HTTP POST, y según la respuesta: si HTTP 201 → registra código radicado y continúa a SP1-T03; si HTTP 400 → registra error y va a SP1-T04; si HTTP 401/5xx/timeout → va a SP1-T04 como error técnico. | 1. Obtener el número de intento actual (incrementar en 1 desde el valor en contexto).
+2. Construir el payload JSON con todos los campos regulatorios en el formato requerido por la API intermediaria.
+3. Incluir el token de autenticación en el header Authorization.
+4. Registrar en el log: {idCaso, momento, numeroIntento, timestamp_envio, payloadEnviado}.
+5. Invocar POST {endpointAPI}/queja/crear con timeout configurado (por defecto: 30 segundos).
+6. Capturar la respuesta HTTP.
+7. Registrar en el log: {codigoHTTP, cuerpoRespuesta, timestamp_respuesta, duracionMs}.
+8. Según codigoHTTP: HTTP 201 → continuar a SP1-T03; HTTP 400 → ir a SP1-T04 (funcional); HTTP 401 → SP1-T04 (autenticación); HTTP 5xx/timeout → SP1-T04 (técnico).
+9. Si numeroIntento >= 3 y hay error: clasificar como 'escalar a Analista Técnico'. |
+|  | SP3-T05 | Enviar payload de cierre a API (M3) | Servicio | SP3 | Tarea de servicio que construye el payload completo de cierre (30+ campos regulatorios + PDF adjunto codificado) e invoca la API intermediaria para el Momento 3. Registra la transacción completa en el log: campos enviados, timestamp, número de intento y código HTTP recibido. | Como: BPM / Sistema (ProcessMaker — serviceTask) | Quiero: construir el payload completo de cierre M3 con todos los campos regulatorios del formulario Superintendencia más el PDF adjunto codificado en base64, e invocarlo contra la API intermediaria con registro completo de cada intento | Para: completar el Momento 3 de integración con SmartSupervision (cierre regulatorio) de forma trazable, permitiendo la auditoría de cada intento y garantizando que el cierre solo se confirme cuando SmartSupervision retorne HTTP 200 | Dado que: SP3-T02 y SP3-T03 validaron exitosamente las fechas y el PDF, todos los campos obligatorios del formulario Superintendencia (PAN-09) están completos, y el Analista SAC presionó 'Enviar a SmartSupervision' en PAN-10 | Cuando: el BPM invoca el serviceTask SP3-T05 como parte del flujo de SP3 | Entonces: el servicio construye el payload con 30+ campos más el PDF base64, lo envía a la API intermediaria vía HTTP POST/PUT, y según la respuesta: HTTP 200 → SP3-T06 (cierre exitoso); HTTP 400 → SP3-T07 (rechazo funcional/técnico); HTTP 5xx/timeout → SP3-T07. | 1. Construir el payload JSON de cierre M3 con todos los campos del formulario Superintendencia + fechas + PDF adjunto.
+2. Verificar PRECONDICIÓN: fechaActualizacion = fechaCierre. Si no coinciden: BLOQUEAR y lanzar error.
+3. Incrementar numeroIntento_M3.
+4. Registrar en LogTransmisiones: {idCasoBPM, momento='M3', numeroIntento_M3, timestamp_envio, payloadEnviado}.
+5. Invocar POST/PUT {endpointAPI_M3}/queja/cerrar con timeout configurado.
+6. Capturar la respuesta HTTP.
+7. Registrar en log: {codigoHTTP, cuerpoRespuesta, timestamp_respuesta, duracionMs}.
+8. HTTP 200 → SP3-T06; HTTP 400 → SP3-T07; HTTP 401/5xx/timeout → SP3-T07. |
+|  | SP4-T01 | Enviar payload de prórroga a API (M2-Prórroga) | Servicio | SP4 | Tarea de servicio que construye el payload de solicitud de prórroga con los campos requeridos por SmartSupervision (número de caso SFC, motivo, nueva fecha límite, contador de prórroga) e invoca la API intermediaria. Registra la transacción en el log con timestamp, número de intento y código HTTP recibido. | Como: BPM / Sistema (ProcessMaker — serviceTask) | Quiero: construir el payload de solicitud de prórroga con los campos requeridos por SmartSupervision e invocarlo contra la API intermediaria, registrando cada intento con su resultado | Para: cumplir el requisito regulatorio de transparencia (Ley 1328/2009) de notificar formalmente a SmartSupervision cuando Zurich necesita ampliar el plazo de respuesta antes del vencimiento del SLA | Dado que: el Analista SAC o Área Responsable completó los campos de prórroga (motivo, nueva fecha límite, contador) y los datos son válidos | Cuando: el BPM invoca el serviceTask SP4-T01 como parte del flujo de SP4 | Entonces: el servicio construye el payload de prórroga, lo envía a la API intermediaria y según la respuesta: HTTP 200 → SP4-T03 (notificar al cliente) + SP4-T04 (actualizar SLA); HTTP 400 → SP4-T02 (registrar rechazo). | 1. Construir payload JSON de prórroga: {codigoSFC, motivo, nuevaFechaLimite, contador}.
+2. Incrementar numeroIntento_Prorroga.
+3. Registrar en LogTransmisiones: {idCasoBPM, momento='M2-Prorroga', numeroIntento, timestamp_envio, payloadEnviado}.
+4. Invocar POST {endpointAPI_Prorroga}/queja/prorroga con timeout configurado.
+5. Registrar respuesta en log.
+6. HTTP 200 → SP4-T03 + SP4-T04; HTTP 400 → SP4-T02; HTTP 401/5xx/timeout → SP4-T02. |
+## Sheet: 04_Envios_Eventos
+|  | ESPECIFICACIÓN TÉCNICA — ENVÍOS (sendTask) y EVENTOS-MENSAJE |  |  |  |  |  |  |  |  |  |  |  |
+| --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
+|  | Proceso: Gestión de Quejas Directas | ACZ-QD-001  |  Versión: 1.0 TO-BE | Mayo 2026 |  |  |  |  |  |  |  |  |  |  |  |
+|  | Servicio: Atención al Consumidor Financiero — Zurich Seguros Colombia  |  Plataforma: ProcessMaker 4 BPMS  |  Ley 1328/2009 · CE 039/2011 · CE 019/2024 |  |  |  |  |  |  |  |  |  |  |  |
+|  | Identificación |  |  | Historia de Sistema |  | Criterio de Aceptación |  |  | Especificación Técnica |  |  |  |
+|  | Código | Nombre Tarea | Tipo | Proceso | Descripción Funcional | Como (Sistema — actor técnico) | Quiero (funcionalidad técnica) | Para (beneficio/objetivo) | Dado que (precondición) | Cuando (trigger/evento) | Entonces (resultado esperado) | Lógica / Pasos de ejecución |
+|  | Ev-Msg | Notificación de registro | Evento-Mensaje | P01 | Evento de mensaje intermediario (throw) disparado tras el cálculo de SLA. Envía al cliente la notificación automática con el número de radicado asignado, la fecha límite de respuesta y los canales de seguimiento habilitados. | Como: BPM / Sistema (ProcessMaker — intermediate message throw event) | Quiero: enviar automáticamente al consumidor financiero una notificación de confirmación de recepción de su queja con el número de radicado interno, la fecha límite de respuesta y los canales de seguimiento | Para: cumplir la obligación regulatoria de confirmación de recepción y transparencia con el consumidor financiero según la Ley 1328/2009, y gestionar sus expectativas sobre el plazo de respuesta | Dado que: el script P01-T05 calculó exitosamente el SLA y existe fechaLimiteSLA, idCasoBPM y correoElectronico en el contexto del proceso | Cuando: el motor BPMN dispara el evento de mensaje intermediario (throw) después de P01-T05 | Entonces: el sistema envía un correo electrónico al correoElectronico del consumidor con: asunto 'Zurich Seguros Colombia — Confirmación de recepción de su queja [ID]', cuerpo con número de radicado interno, fecha límite de respuesta y canales de seguimiento. El envío queda registrado en el log de comunicaciones del caso. | 1. Cargar la plantilla de correo 'notificacion_registro' desde el gestor de plantillas del BPM.
+2. Sustituir variables: {{idCasoBPM}}, {{nombreConsumidor}}, {{fechaLimiteSLA}}, {{canalesSeguimiento}}.
+3. Invocar el servicio de correo del BPM (configurado en ProcessMaker) con los datos completados.
+4. Registrar en el log de comunicaciones del caso: tipo='Notificación registro', destinatario, timestamp, resultado del envío.
+5. Si el envío falla: registrar en log técnico y activar reintento automático (máx. 3 intentos). |
+|  | Ev-Msg2 | Notificación de priorización | Evento-Mensaje | P01 | Evento de mensaje intermediario (throw) disparado cuando el caso es priorizado. Notifica al analista SAC y al supervisor que el caso tiene tratamiento prioritario y el nuevo plazo de respuesta calculado. | Como: BPM / Sistema (ProcessMaker — intermediate message throw event) | Quiero: notificar automáticamente al Analista SAC y al Líder SAC cuando un caso se clasifica como prioritario, indicando el número de casos similares detectados y el SLA reducido aplicado | Para: garantizar que los responsables del equipo SAC conozcan inmediatamente qué casos requieren atención especial y cuál es el plazo reducido, evitando que un caso prioritario sea tratado con el flujo estándar | Dado que: P01-T04 ejecutó la priorización y marcó esPrioritario = true con la nueva fechaLimiteSLA calculada | Cuando: el motor BPMN dispara el evento de mensaje intermediario (throw) después de P01-T04 | Entonces: el sistema envía notificación interna (bandeja BPM + correo opcional) al Analista SAC asignado y al Líder SAC con: número de caso, número de casos similares, SLA reducido y nueva fecha límite. El log registra la notificación. | 1. Identificar los destinatarios: analista SAC asignado (si existe) + grupo supervisor SAC.
+2. Cargar plantilla 'notificacion_priorizacion' del gestor de plantillas.
+3. Sustituir variables en la plantilla.
+4. Crear tarea de notificación en la bandeja del BPM para el analista SAC.
+5. Enviar correo de alerta al grupo supervisor SAC.
+6. Registrar en log de comunicaciones del caso. |
+|  | Ev-Msg3 | Notificación de correcciones | Evento-Mensaje | P01 | Evento de mensaje (throw) que notifica al Gestor de Experiencia los campos con error detectados por la validación. Muestra campo específico, valor rechazado y formato esperado. Bloquea el avance hasta que los errores sean corregidos. | Como: BPM / Sistema (ProcessMaker — intermediate message throw event) | Quiero: mostrar al Gestor de Experiencia exactamente qué campo tiene error, cuál es el valor rechazado y cuál es el formato correcto esperado, sin mensajes técnicos genéricos | Para: permitir la corrección rápida y precisa de los datos inválidos sin necesidad de interpretar errores técnicos, resolviendo el problema crítico PM-022 del AS-IS | Dado que: P01-T06 retornó esValido = false con listaErrores no vacía | Cuando: el motor BPMN dispara el evento de mensaje intermediario (throw) tras detectar errores en P01-T06 | Entonces: el sistema abre la tarea PAN-02 en la bandeja del Gestor de Experiencia con los campos erróneos resaltados en rojo, cada uno con el mensaje específico. El botón 'Guardar' queda deshabilitado hasta que contadorErrores = 0. | 1. Recibir la listaErrores de P01-T06.
+2. Crear la tarea userTask PAN-02 en la bandeja del Gestor de Experiencia.
+3. Pasar la listaErrores al contexto de PAN-02 para que el formulario resalte los campos.
+4. Registrar en el log del caso: timestamp del evento, campos con error.
+5. El flujo queda en espera de la corrección por parte del Gestor de Experiencia (P01-T07). |
+|  | P01-T08 | Enviar respuesta final al cliente | Envío | P01 | Tarea de envío automático ejecutada EXCLUSIVAMENTE después de la confirmación HTTP 200 de SmartSupervision. El BPM envía al correo del cliente: carta de respuesta en PDF, texto de la respuesta y enlace de encuesta de satisfacción. No se ejecuta en ningún otro momento del flujo. | Como: BPM / Sistema (ProcessMaker — sendTask) | Quiero: enviar automáticamente al consumidor financiero la carta de respuesta final en PDF, el texto de la respuesta y el enlace de la encuesta de satisfacción, ÚNICAMENTE después de recibir confirmación HTTP 200 de SmartSupervision | Para: garantizar el cumplimiento de la restricción regulatoria crítica RUL-010-04: el cliente no recibe comunicación antes del cierre regulatorio aceptado, evitando duplicados y respuestas inconsistentes | Dado que: SP3-T06 registró confirmación de cierre aceptado (HTTP 200 de SmartSupervision) y existe el PDF de respuesta final con nomenclatura correcta, el correo del cliente y el texto de respuesta aprobado por SAC | Cuando: el flujo del proceso principal recibe la señal de cierre regulatorio exitoso desde SP3 y avanza a P01-T08 | Entonces: el BPM envía UN ÚNICO correo al correoElectronico del consumidor con: asunto 'Respuesta a su queja — Zurich Seguros Colombia [ID]', PDF adjunto NombreCliente_NumId_RESP_FINAL_SFC_1.pdf, texto de respuesta en el cuerpo y enlace de encuesta de satisfacción. El envío queda registrado en el log de comunicaciones. | 1. VERIFICAR: confirmar que en el log de transmisiones existe un registro HTTP 200 de SmartSupervision para el Momento 3 del caso. Si no existe: BLOQUEAR y notificar error crítico.
+2. Verificar que no exista un correo de respuesta final previo para este caso (evitar duplicados).
+3. Cargar la plantilla de correo 'respuesta_final_cliente' del gestor de plantillas.
+4. Adjuntar el PDF de respuesta final (decodificar base64).
+5. Sustituir variables en la plantilla: nombre, ID caso, código SFC, texto respuesta, enlace encuesta.
+6. Invocar el servicio de correo del BPM.
+7. Registrar en log de comunicaciones: tipo='Respuesta final', timestamp, resultado.
+8. Actualizar estadoCaso = 'Cliente notificado'.
+9. Continuar flujo hacia P01-T09 (encuesta de satisfacción). |
+|  | P01-T09 | Enviar encuesta de satisfacción al cliente | Envío | P01 | Envío automático del enlace parametrizado de encuesta de satisfacción al cliente como parte del cierre del caso. Se ejecuta inmediatamente después de la notificación de respuesta final. | Como: BPM / Sistema (ProcessMaker — sendTask) | Quiero: enviar automáticamente el enlace de encuesta de satisfacción al consumidor financiero inmediatamente después del envío de la respuesta final | Para: medir la experiencia del consumidor financiero con la gestión de su queja, cumplir el requisito de seguimiento de experiencia D-020 y generar indicadores de calidad del servicio | Dado que: P01-T08 envió exitosamente la respuesta final (respuestaFinalEnviada = true) y existe el correoElectronico y el enlaceEncuestaSatisfaccion en el contexto | Cuando: el flujo continúa automáticamente desde P01-T08 hacia P01-T09 | Entonces: el BPM envía un segundo correo (separado de la respuesta final) con el enlace de la encuesta de satisfacción parametrizada. El envío queda registrado. El caso avanza al estado 'Cerrado'. | 1. Construir la URL de la encuesta con el idCasoBPM como parámetro de trazabilidad.
+2. Cargar plantilla de correo 'encuesta_satisfaccion' del gestor de plantillas.
+3. Sustituir variables en la plantilla.
+4. Invocar el servicio de correo del BPM.
+5. Registrar en log de comunicaciones.
+6. Actualizar estadoCaso = '3. Cerrado' después del envío. |
+|  | SP4-T03 | Notificar prórroga al cliente | Envío | SP4 | Envío automático al cliente de la comunicación de prórroga: informa la ampliación del plazo de respuesta, la nueva fecha límite y el motivo de la prórroga. Requisito obligatorio de transparencia con el consumidor financiero según Ley 1328/2009. Debe enviarse antes del vencimiento del plazo inicial. | Como: BPM / Sistema (ProcessMaker — sendTask) | Quiero: enviar automáticamente al consumidor financiero la comunicación obligatoria de prórroga del plazo de respuesta, con la nueva fecha límite y el motivo, inmediatamente después de que SmartSupervision acepte la prórroga | Para: cumplir la obligación regulatoria de transparencia con el consumidor financiero establecida en la Ley 1328/2009, garantizando que el cliente sea informado del nuevo plazo antes del vencimiento del plazo original | Dado que: SP4-T01 recibió HTTP 200 (prórroga aceptada por SmartSupervision) y existen correoElectronico, nuevaFechaLimite y motivoProrroga en el contexto del proceso | Cuando: el BPM ejecuta el sendTask automáticamente después de SP4-T01 con HTTP 200 | Entonces: el sistema envía un correo al consumidor financiero informando la prórroga: asunto 'Zurich Seguros Colombia — Actualización plazo de respuesta [ID caso]', cuerpo con nueva fecha límite y motivo regulatorio. El envío queda registrado. | 1. Cargar plantilla 'notificacion_prorroga' del gestor de plantillas.
+2. Sustituir variables en la plantilla.
+3. Invocar servicio de correo del BPM.
+4. Registrar en log de comunicaciones del caso. |
+## Sheet: 05_Variables_Entrada
+|  | DICCIONARIO DE VARIABLES DE ENTRADA POR TAREA |  |  |  |  |  |  |
+| --- | --- | --- | --- | --- | --- | --- | --- |
+|  | Proceso: Gestión de Quejas Directas | ACZ-QD-001  |  Versión: 1.0 TO-BE | Mayo 2026 |  |  |  |  |  |  |
+|  | Servicio: Atención al Consumidor Financiero — Zurich Seguros Colombia  |  Plataforma: ProcessMaker 4 BPMS  |  Ley 1328/2009 · CE 039/2011 · CE 019/2024 |  |  |  |  |  |  |
+|  | Código Tarea | Nombre Tarea | Tipo Tarea | Nombre Variable | Tipo Dato | Obligatoria | Descripción |
+|  | P01-T02 | Registrar queja | Servicio | canalRecepcion | String | Sí | Canal de recepción desde el formulario (CAT-CANAL) |
+|  |  |  |  | nombreConsumidor | String | Sí | Nombre o razón social del consumidor |
+|  |  |  |  | tipoIdentificacion | String | Sí | Código tipo ID (CAT-TIPO-ID) |
+|  |  |  |  | numeroIdentificacion | String | Sí | Número de documento del consumidor |
+|  |  |  |  | correoElectronico | String | Sí | Correo electrónico del consumidor |
+|  |  |  |  | tipoPersona | String | Sí | Natural o Jurídica (CAT-TIPO-PERSONA) |
+|  |  |  |  | codigoPais | String | Sí | Código país (CAT-PAIS) |
+|  |  |  |  | departamento | String | Sí | Código departamento (CAT-DPTO) |
+|  |  |  |  | municipio | String | Sí | Código municipio (CAT-MPIO) |
+|  |  |  |  | resumen | String | Sí | Asunto / resumen de la queja |
+|  |  |  |  | textoQueja | String | Sí | Descripción detallada de la queja |
+|  |  |  |  | productoSFC | String | Sí | Código producto SFC (CAT-PRODUCTO-SFC) |
+|  |  |  |  | motivoSFC | String | Sí | Código motivo SFC (CAT-MOTIVO-SFC) |
+|  |  |  |  | tipoSolicitudInterno | String | Sí | Clasificación interna Zurich |
+|  |  |  |  | instanciaRecepcion | String | Sí | Instancia recepción (CAT-INSTANCIA) |
+|  |  |  |  | puntoRecepcion | String | Sí | Punto recepción (CAT-PUNTO) |
+|  |  |  |  | admision | String | Sí | Admisión (CAT-ADMISION) |
+|  |  |  |  | enteControl | String | Sí | Ente de control (CAT-ENTE) |
+|  |  |  |  | incluyeAnexos | Boolean | Sí | Indicador de adjuntos |
+|  |  |  |  | adjuntosQueja | Array<File> | Sí | Archivos adjuntos (si aplica) |
+|  | P01-T03 | Verificar quejas similares del cliente | Script | idCasoBPM | String | Sí | ID del caso actual — excluido de la consulta |
+|  |  |  |  | numeroIdentificacion | String | Sí | ID del consumidor — clave de búsqueda |
+|  |  |  |  | tipoSolicitudInterno | String | Sí | Tipo de solicitud interno Zurich |
+|  |  |  |  | motivoSFC | String | Sí | Código motivo SFC |
+|  |  |  |  | productoSFC | String | Sí | Código producto SFC |
+|  | P01-T04 | Priorizar caso y recalcular SLA | Script | idCasoBPM | String | Sí | ID del caso a priorizar |
+|  |  |  |  | fechaCreacion | DateTime | Sí | Timestamp de creación del caso |
+|  |  |  |  | tipoSolicitudInterno | String | Sí | Tipo para buscar parámetro SLA |
+|  |  |  |  | productoSFC | String | Sí | Producto para buscar parámetro SLA |
+|  |  |  |  | numeroCasosSimilares | Integer | Sí | Cantidad de casos similares — puede afectar factor |
+|  |  |  |  | factorPriorizacionSLA | Decimal | Sí | Factor de reducción SLA (ej: 0.70) — desde tabla de parámetros |
+|  | P01-T05 | Calcular SLA | Script | idCasoBPM | String | Sí | ID del caso |
+|  |  |  |  | fechaCreacion | DateTime | Sí | Timestamp de creación — punto de inicio del SLA |
+|  |  |  |  | tipoSolicitudInterno | String | Sí | Tipo de solicitud para buscar SLA en tabla de parámetros |
+|  |  |  |  | esPrioritario | Boolean | Sí | Si true, el SLA ya fue calculado por P01-T04 — evitar recálculo |
+|  |  |  |  | diasHabilesSLA_parametro | Integer | Sí | Parámetro de tabla: por defecto 15 para quejas directas CE 039/2011 |
+|  | P01-T06 | Validar datos del formulario | Script | idCasoBPM | String | Sí | ID del caso a validar |
+|  |  |  |  | todosLosCamposFormulario | Object | Sí | Todos los campos capturados en PAN-01 o PAN-02 |
+|  |  |  |  | tablaHomologacionCatalogos | Map | Sí | Tabla de equivalencias Zurich ↔ SFC parametrizada en el BPM |
+|  | Ev-Msg | Notificación de registro | Evento-Mensaje | idCasoBPM | String | Sí | ID del caso — aparece en el asunto del correo |
+|  |  |  |  | correoElectronico | String | Sí | Destino del correo |
+|  |  |  |  | nombreConsumidor | String | Sí | Para personalizar el saludo |
+|  |  |  |  | fechaLimiteSLA | Date | Sí | Fecha límite de respuesta a informar al cliente |
+|  |  |  |  | plantillaNotificacionRegistro | String | Sí | ID de plantilla de correo parametrizada en el BPM |
+|  | Ev-Msg2 | Notificación de priorización | Evento-Mensaje | idCasoBPM | String | Sí | ID del caso prioritario |
+|  |  |  |  | numeroCasosSimilares | Integer | Sí | Número de casos similares detectados |
+|  |  |  |  | fechaLimiteSLA | Date | Sí | Nueva fecha límite (SLA reducido) |
+|  |  |  |  | diasHabilesSLA | Integer | Sí | Días hábiles del SLA prioritario |
+|  |  |  |  | destinatarioSAC | String | Sí | Usuario SAC responsable (si ya fue asignado) |
+|  | Ev-Msg3 | Notificación de correcciones | Evento-Mensaje | idCasoBPM | String | Sí | ID del caso |
+|  |  |  |  | listaErrores | Array<Object> | Sí | Lista de {campo, valorRechazado, mensajeError, formatoEsperado} |
+|  |  |  |  | contadorErrores | Integer | Sí | Total de errores a corregir |
+|  | P01-T08 | Enviar respuesta final al cliente | Envío | idCasoBPM | String | Sí | ID del caso |
+|  |  |  |  | correoElectronico | String | Sí | Destino del correo |
+|  |  |  |  | nombreConsumidor | String | Sí | Para personalizar saludo |
+|  |  |  |  | pdfRespuestaFinalBase64 | String | Sí | PDF codificado en base64 para adjunto |
+|  |  |  |  | nombreArchivoRespuesta | String | Sí | Nomenclatura: NombreCliente_NumId_RESP_FINAL_SFC_N |
+|  |  |  |  | textoRespuestaCliente | String | Sí | Texto de la respuesta aprobada por SAC |
+|  |  |  |  | enlaceEncuestaSatisfaccion | String | Sí | URL parametrizada de la encuesta |
+|  |  |  |  | codigoSFC | String | Sí | Código radicado SFC para referencia en el correo |
+|  | P01-T09 | Enviar encuesta de satisfacción al cliente | Envío | idCasoBPM | String | Sí | ID del caso — parámetro de la URL de la encuesta |
+|  |  |  |  | correoElectronico | String | Sí | Destino del correo |
+|  |  |  |  | nombreConsumidor | String | Sí | Para personalizar saludo |
+|  |  |  |  | enlaceEncuestaSatisfaccion | String | Sí | URL con idCasoBPM como parámetro para trazabilidad |
+|  |  |  |  | codigoSFC | String | Sí | Código SFC para referencia |
+|  | SP1-T01 | Homologar catálogos internos con catálogos SFC | Script | productoSFC_interno | String | Sí | Código producto Zurich interno |
+|  |  |  |  | motivoSFC_interno | String | Sí | Código motivo Zurich interno |
+|  |  |  |  | canal_interno | String | Sí | Código canal Zurich interno |
+|  |  |  |  | instanciaRecepcion_interno | String | Sí | Código instancia Zurich interno |
+|  |  |  |  | puntoRecepcion_interno | String | Sí | Código punto Zurich interno |
+|  |  |  |  | admision_interno | String | Sí | Código admisión Zurich interno |
+|  |  |  |  | enteControl_interno | String | Sí | Código ente control Zurich interno |
+|  |  |  |  | tablaHomologacion | Map<String,String> | Sí | Tabla de equivalencias parametrizada en el BPM |
+|  | SP1-T02 | Enviar payload de creación a API (M1)/(M2) | Servicio | idCasoBPM | String | Sí | ID interno del caso |
+|  |  |  |  | momento | String | Sí | 'M1' (primer intento) o 'M2' (reenvío) |
+|  |  |  |  | numeroIntento | Integer | Sí | Contador de intentos acumulado |
+|  |  |  |  | endpointAPI | String | Sí | URL del endpoint de la API intermediaria (parametrizable) |
+|  |  |  |  | tokenAutenticacion | String | Sí | JWT token para autenticación con la API |
+|  |  |  |  | todosLosCamposRegulatoriosSFC | Object | Sí | Todos los campos requeridos por SmartSupervision con códigos SFC |
+|  | SP1-T03 | Registrar código radicado SFC | Script | cuerpoRespuesta_M1M2 | Object | Sí | Respuesta JSON de la API con el código radicado |
+|  |  |  |  | idCasoBPM | String | Sí | ID del caso a actualizar |
+|  |  |  |  | numeroIntento | Integer | Sí | Número del intento que fue exitoso |
+|  | SP1-T04 | Registrar error en log de trazabilidad | Script | idCasoBPM | String | Sí | ID del caso |
+|  |  |  |  | momento | String | Sí | 'M1' o 'M2' |
+|  |  |  |  | numeroIntento | Integer | Sí | Número del intento fallido |
+|  |  |  |  | codigoHTTP_M1M2 | Integer | Sí | Código HTTP de la respuesta |
+|  |  |  |  | cuerpoRespuesta_M1M2 | Object | Sí | Cuerpo completo de la respuesta de error |
+|  |  |  |  | payloadEnviado | Object | Sí | Payload que fue enviado y rechazado |
+|  |  |  |  | duracionTransmisionMs | Integer | Sí | Duración de la transmisión |
+|  | SP2-T06 | Generar PDF de respuesta final | Script | nombreConsumidor | String | Sí | Para construir el nombre del archivo |
+|  |  |  |  | numeroIdentificacion | String | Sí | Para construir el nombre del archivo |
+|  |  |  |  | textoRespuestaCliente | String | Sí | Contenido de la respuesta a insertar en la plantilla |
+|  |  |  |  | idCasoBPM | String | Sí | ID del caso para referencia en el documento |
+|  |  |  |  | codigoSFC | String | Sí | Código SFC para referencia en el documento |
+|  |  |  |  | numeroPDF | Integer | Sí | Contador N para la nomenclatura (primera versión = 1) |
+|  |  |  |  | plantillaCorporativaZurich | Template | Sí | Plantilla Word/HTML corporativa parametrizada |
+|  |  |  |  | limiteKbPDF | Integer | Sí | Tamaño máximo permitido por SFC en KB (parametrizable) |
+|  | SP3-T02 | Validar coherencia Fecha Actualización = Fecha Cierre | Script | fechaActualizacion | Date | Sí | Fecha de actualización ingresada en PAN-10 |
+|  |  |  |  | fechaCierre | Date | Sí | Fecha de cierre ingresada en PAN-10 |
+|  | SP3-T03 | Validar nomenclatura y tipo PDF | Script | archivoAdjunto | File | Sí | Archivo subido por el usuario en PAN-10 |
+|  |  |  |  | nombreConsumidor_normalizado | String | Sí | Nombre del consumidor sin caracteres especiales |
+|  |  |  |  | numeroIdentificacion | String | Sí | Número de identificación del consumidor |
+|  |  |  |  | numeroPDF | Integer | Sí | Número de versión esperado del PDF |
+|  |  |  |  | limiteKbPDF | Integer | Sí | Límite de tamaño en KB (parametrizable) |
+|  | SP3-T05 | Enviar payload de cierre a API (M3) | Servicio | codigoSFC | String | Sí | Código radicado SFC 1391... |
+|  |  |  |  | todosLosCamposFormularioSuperintendencia | Object | Sí | Todos los campos de PAN-09 completados |
+|  |  |  |  | fechaActualizacion | Date | Sí | Fecha de actualización (= fechaCierre) |
+|  |  |  |  | fechaCierre | Date | Sí | Fecha de cierre (= fechaActualizacion) |
+|  |  |  |  | pdfBase64 | String | Sí | PDF de respuesta final codificado en base64 |
+|  |  |  |  | nombreArchivoPDF | String | Sí | Nombre del PDF con nomenclatura correcta |
+|  |  |  |  | numeroIntento_M3 | Integer | Sí | Contador de intentos de cierre M3 |
+|  |  |  |  | endpointAPI_M3 | String | Sí | URL del endpoint de cierre de la API intermediaria |
+|  |  |  |  | tokenAutenticacion | String | Sí | JWT token de autenticación |
+|  | SP3-T06 | Registrar confirmación cierre aceptado | Script | idCasoBPM | String | Sí | ID del caso |
+|  |  |  |  | cuerpoRespuesta_M3 | Object | Sí | Respuesta HTTP 200 de SmartSupervision |
+|  |  |  |  | codigoSFC | String | Sí | Código radicado SFC |
+|  |  |  |  | numeroIntento_M3 | Integer | Sí | Número del intento que fue exitoso |
+|  | SP3-T07 | Registrar rechazo en log (M3) | Script | idCasoBPM | String | Sí | ID del caso |
+|  |  |  |  | codigoHTTP_M3 | Integer | Sí | Código HTTP de la respuesta |
+|  |  |  |  | cuerpoRespuesta_M3 | Object | Sí | Cuerpo de la respuesta de error |
+|  |  |  |  | payloadEnviado_M3 | Object | Sí | Payload enviado en el intento fallido |
+|  |  |  |  | numeroIntento_M3 | Integer | Sí | Número del intento fallido |
+|  | SP4-T01 | Enviar payload de prórroga a API (M2-Prórroga) | Servicio | codigoSFC | String | Sí | Código radicado SFC 1391... |
+|  |  |  |  | motivoProrroga | String | Sí | Código motivo de prórroga (CAT-MOTIVO-PRORR) |
+|  |  |  |  | nuevaFechaLimite | Date | Sí | Nueva fecha límite de respuesta |
+|  |  |  |  | contadorProrroga | Integer | Sí | Número de prórroga (1, 2...) |
+|  |  |  |  | numeroIntento_Prorroga | Integer | Sí | Contador de intentos de este payload |
+|  |  |  |  | endpointAPI_Prorroga | String | Sí | URL del endpoint de prórroga de la API intermediaria |
+|  | SP4-T02 | Registrar rechazo en log (Prórroga) | Script | idCasoBPM | String | Sí | ID del caso |
+|  |  |  |  | codigoHTTP_Prorroga | Integer | Sí | Código HTTP de la respuesta |
+|  |  |  |  | cuerpoRespuesta_Prorroga | Object | Sí | Cuerpo de la respuesta de error |
+|  |  |  |  | numeroIntento_Prorroga | Integer | Sí | Número del intento fallido |
+|  | SP4-T03 | Notificar prórroga al cliente | Envío | idCasoBPM | String | Sí | ID del caso |
+|  |  |  |  | correoElectronico | String | Sí | Destino del correo |
+|  |  |  |  | nombreConsumidor | String | Sí | Para personalizar el saludo |
+|  |  |  |  | nuevaFechaLimite | Date | Sí | Nueva fecha límite comunicada al cliente |
+|  |  |  |  | motivoProrroga_descripcion | String | Sí | Descripción del motivo de prórroga para el cliente (en lenguaje ciudadano, no código SFC) |
+|  | SP4-T04 | Actualizar SLA con nueva fecha | Script | idCasoBPM | String | Sí | ID del caso |
+|  |  |  |  | nuevaFechaLimite | Date | Sí | Nueva fecha límite aprobada por SmartSupervision |
+|  |  |  |  | contadorProrroga_actual | Integer | Sí | Contador actual de prórrogas |
+## Sheet: 06_Variables_Salida
+|  | DICCIONARIO DE VARIABLES DE SALIDA POR TAREA |  |  |  |  |  |  |
+| --- | --- | --- | --- | --- | --- | --- | --- |
+|  | Proceso: Gestión de Quejas Directas | ACZ-QD-001  |  Versión: 1.0 TO-BE | Mayo 2026 |  |  |  |  |  |  |
+|  | Servicio: Atención al Consumidor Financiero — Zurich Seguros Colombia  |  Plataforma: ProcessMaker 4 BPMS  |  Ley 1328/2009 · CE 039/2011 · CE 019/2024 |  |  |  |  |  |  |
+|  | Código Tarea | Nombre Tarea | Tipo Tarea | Nombre Variable | Tipo Dato | Persiste en BD | Descripción |
+|  | P01-T02 | Registrar queja | Servicio | idCasoBPM | String | Sí | ID único del caso creado en ProcessMaker |
+|  |  |  |  | fechaCreacion | DateTime | Sí | Timestamp UTC de creación del registro |
+|  |  |  |  | estadoCaso | String | Contexto | Estado inicial = 'Pendiente' |
+|  | P01-T03 | Verificar quejas similares del cliente | Script | esRecurrente | Boolean | Sí | true si existen casos similares en últimos 90 días |
+|  |  |  |  | numeroCasosSimilares | Integer | Sí | Cantidad de casos similares encontrados |
+|  |  |  |  | idsCasosSimilares | Array<String> | Sí | Lista de IDs de casos similares encontrados |
+|  | P01-T04 | Priorizar caso y recalcular SLA | Script | esPrioritario | Boolean | Sí | true — el caso queda marcado como prioritario |
+|  |  |  |  | diasHabilesSLA | Integer | Contexto | Días hábiles reducidos para el SLA prioritario |
+|  |  |  |  | fechaLimiteSLA | Date | Contexto | Fecha límite calculada en días hábiles Colombia |
+|  |  |  |  | fechaAlertaAmarilla | Date | Contexto | Fecha de alerta amarilla (5 días antes del vencimiento) |
+|  |  |  |  | fechaAlertaRoja | Date | Contexto | Fecha de alerta roja (2 días antes del vencimiento) |
+|  |  |  |  | estadoSLA | String | Contexto | Estado inicial: 'Vigente' |
+|  | P01-T05 | Calcular SLA | Script | diasHabilesSLA | Integer | Contexto | Días hábiles del SLA (15 para quejas directas) |
+|  |  |  |  | fechaLimiteSLA | Date | Contexto | Fecha límite en días hábiles Colombia sin festivos |
+|  |  |  |  | fechaAlertaAmarilla | Date | Contexto | Alerta amarilla: 5 días antes del vencimiento |
+|  |  |  |  | fechaAlertaRoja | Date | Contexto | Alerta roja: 2 días antes del vencimiento |
+|  |  |  |  | estadoSLA | String | Contexto | 'Vigente' — estado inicial del SLA |
+|  | P01-T06 | Validar datos del formulario | Script | esValido | Boolean | Contexto | true = todos los campos son válidos; false = hay errores |
+|  |  |  |  | listaErrores | Array<Object> | Contexto | Lista de {campo, valorRechazado, mensajeError, formatoEsperado} |
+|  |  |  |  | contadorErrores | Integer | Contexto | Número de errores detectados |
+|  | Ev-Msg | Notificación de registro | Evento-Mensaje | notificacionRegistroEnviada | Boolean | Contexto | true si el correo fue enviado exitosamente |
+|  |  |  |  | timestampNotificacionRegistro | DateTime | Contexto | Timestamp del envío exitoso |
+|  | Ev-Msg2 | Notificación de priorización | Evento-Mensaje | notificacionPriorizacionEnviada | Boolean | Contexto | true si la notificación fue procesada |
+|  | Ev-Msg3 | Notificación de correcciones | Evento-Mensaje | tareaCorrectionCreada | Boolean | Contexto | true si la tarea PAN-02 fue creada en la bandeja |
+|  | P01-T08 | Enviar respuesta final al cliente | Envío | respuestaFinalEnviada | Boolean | Contexto | true si el correo fue enviado exitosamente |
+|  |  |  |  | timestampRespuestaFinal | DateTime | Contexto | Timestamp del envío exitoso |
+|  |  |  |  | estadoCaso | String | Contexto | 'Cliente notificado' |
+|  | P01-T09 | Enviar encuesta de satisfacción al cliente | Envío | encuestaEnviada | Boolean | Contexto | true si el correo de encuesta fue enviado |
+|  |  |  |  | estadoCaso | String | Contexto | '3. Cerrado' |
+|  | SP1-T01 | Homologar catálogos internos con catálogos SFC | Script | productoSFC_cod | String | Sí | Código SFC del producto homologado |
+|  |  |  |  | motivoSFC_cod | String | Sí | Código SFC del motivo homologado |
+|  |  |  |  | canal_cod | String | Sí | Código SFC del canal homologado |
+|  |  |  |  | instanciaRecepcion_cod | String | Sí | Código SFC de instancia homologado |
+|  |  |  |  | puntoRecepcion_cod | String | Sí | Código SFC de punto recepción homologado |
+|  |  |  |  | admision_cod | String | Sí | Código SFC de admisión homologado |
+|  |  |  |  | enteControl_cod | String | Sí | Código SFC de ente de control homologado |
+|  |  |  |  | homologacionExitosa | Boolean | Sí | true = todos los campos fueron homologados |
+|  |  |  |  | erroresHomologacion | Array<Object> | Contexto | Lista de campos sin equivalente SFC |
+|  | SP1-T02 | Enviar payload de creación a API (M1)/(M2) | Servicio | codigoHTTP_M1M2 | Integer | Contexto | Código HTTP de la respuesta de la API |
+|  |  |  |  | cuerpoRespuesta_M1M2 | Object | Contexto | Cuerpo completo de la respuesta JSON |
+|  |  |  |  | codigoRadicadoSFC | String | Contexto | Código 1391... si HTTP = 201 |
+|  |  |  |  | mensajeErrorAPI | String | Contexto | Mensaje de error si HTTP != 201 |
+|  |  |  |  | camposAfectados | Array<String> | Contexto | Campos rechazados por SFC (si HTTP 400) |
+|  |  |  |  | tipoError_M1M2 | String | Contexto | 'funcional' o 'tecnico' |
+|  |  |  |  | numeroIntento | Integer | Sí | Número de intento actualizado |
+|  |  |  |  | duracionTransmisionMs | Integer | Contexto | Duración de la transmisión en milisegundos |
+|  | SP1-T03 | Registrar código radicado SFC | Script | codigoSFC | String | Sí | Código de radicado SFC (1391...) persistido en el caso |
+|  |  |  |  | estadoCaso | String | Contexto | 'Radicado ante SFC' |
+|  |  |  |  | fechaRadicacionSFC | DateTime | Contexto | Timestamp UTC de la radicación exitosa |
+|  | SP1-T04 | Registrar error en log de trazabilidad | Script | tipoError_M1M2 | String | Contexto | 'funcional', 'tecnico_autenticacion', 'tecnico_servidor' o 'tecnico_red' |
+|  |  |  |  | estadoCaso | String | Contexto | 'Rechazado por SmartSupervision' |
+|  |  |  |  | camposAfectados | Array<String> | Contexto | Campos rechazados (si HTTP 400 los retorna) |
+|  |  |  |  | escalarATecnico | Boolean | Contexto | true si se superaron 3 intentos fallidos |
+|  |  |  |  | idLogTransmision | String | Sí | ID del registro insertado en LogTransmisiones |
+|  | SP2-T06 | Generar PDF de respuesta final | Script | nombreArchivoPDF | String | Contexto | Nombre del PDF generado con nomenclatura correcta |
+|  |  |  |  | pdfBase64 | String | Contexto | PDF codificado en base64 para transmisión |
+|  |  |  |  | pdfGenerado | Boolean | Contexto | true si el PDF fue generado y validado exitosamente |
+|  |  |  |  | pdfNomenclaturaValida | Boolean | Contexto | true si el nombre cumple el patrón requerido |
+|  |  |  |  | pdfTipoValido | Boolean | Contexto | true si el archivo es un PDF válido |
+|  |  |  |  | pdfTamanoKb | Integer | Contexto | Tamaño del archivo en KB |
+|  | SP3-T02 | Validar coherencia Fecha Actualización = Fecha Cierre | Script | fechasCoinciden | Boolean | Contexto | true = las fechas son iguales y el envío puede proceder |
+|  | SP3-T03 | Validar nomenclatura y tipo PDF | Script | pdfValido | Boolean | Contexto | true = el archivo cumple todos los criterios |
+|  |  |  |  | tipoValido | Boolean | Contexto | true = es un PDF válido |
+|  |  |  |  | nomenclaturaValida | Boolean | Contexto | true = el nombre cumple el patrón SFC |
+|  |  |  |  | tamanoValido | Boolean | Contexto | true = el tamaño está dentro del límite |
+|  |  |  |  | mensajeValidacionPDF | String | Contexto | Mensaje específico del resultado de la validación |
+|  | SP3-T05 | Enviar payload de cierre a API (M3) | Servicio | codigoHTTP_M3 | Integer | Contexto | Código HTTP de la respuesta |
+|  |  |  |  | cuerpoRespuesta_M3 | Object | Contexto | Cuerpo completo de la respuesta |
+|  |  |  |  | tipoError_M3 | String | Contexto | 'funcional' o 'tecnico' si hay error |
+|  |  |  |  | camposAfectados_M3 | Array<String> | Contexto | Campos rechazados si HTTP 400 |
+|  |  |  |  | numeroIntento_M3 | Integer | Sí | Número de intento actualizado |
+|  | SP3-T06 | Registrar confirmación cierre aceptado | Script | estadoCaso | String | Contexto | 'Cierre aceptado por SFC' |
+|  |  |  |  | fechaCierreRegulatorio | DateTime | Contexto | Timestamp exacto del HTTP 200 de SmartSupervision |
+|  |  |  |  | cierreRegulatorioPersistido | Boolean | Contexto | true = confirmación registrada correctamente |
+|  | SP3-T07 | Registrar rechazo en log (M3) | Script | tipoError_M3 | String | Contexto | 'funcional' o 'tecnico' |
+|  |  |  |  | estadoCaso | String | Contexto | 'Cierre rechazado por SmartSupervision' |
+|  |  |  |  | camposAfectados_M3 | Array<String> | Contexto | Campos rechazados por SmartSupervision |
+|  | SP4-T01 | Enviar payload de prórroga a API (M2-Prórroga) | Servicio | codigoHTTP_Prorroga | Integer | Contexto | Código HTTP de la respuesta |
+|  |  |  |  | cuerpoRespuesta_Prorroga | Object | Contexto | Cuerpo de la respuesta |
+|  |  |  |  | tipoError_Prorroga | String | Contexto | 'funcional' o 'tecnico' si hay error |
+|  |  |  |  | camposAfectados_Prorroga | Array<String> | Contexto | Campos rechazados si HTTP 400 |
+|  |  |  |  | numeroIntento_Prorroga | Integer | Sí | Número de intento actualizado |
+|  | SP4-T02 | Registrar rechazo en log (Prórroga) | Script | tipoError_Prorroga | String | Contexto | 'funcional' o 'tecnico' |
+|  |  |  |  | camposAfectados_Prorroga | Array<String> | Contexto | Campos rechazados si HTTP 400 |
+|  | SP4-T03 | Notificar prórroga al cliente | Envío | notificacionProrrogaEnviada | Boolean | Contexto | true si el correo fue enviado |
+|  |  |  |  | timestampNotificacionProrroga | DateTime | Contexto | Timestamp del envío |
+|  | SP4-T04 | Actualizar SLA con nueva fecha | Script | fechaLimiteSLA | Date | Sí | Nueva fecha límite de SLA actualizada |
+|  |  |  |  | fechaAlertaAmarilla | Date | Contexto | Nueva alerta amarilla |
+|  |  |  |  | fechaAlertaRoja | Date | Contexto | Nueva alerta roja |
+|  |  |  |  | contadorProrroga | Integer | Sí | Número de prórroga actualizado |
+|  |  |  |  | estadoSLA | String | Contexto | Recalculado según días restantes |
+## Sheet: 07_CA_Exitosos
+|  | CRITERIOS DE ACEPTACIÓN — CAMINO EXITOSO POR TAREA |  |  |  |  |  |
+| --- | --- | --- | --- | --- | --- | --- |
+|  | Proceso: Gestión de Quejas Directas | ACZ-QD-001  |  Versión: 1.0 TO-BE | Mayo 2026 |  |  |  |  |  |
+|  | Servicio: Atención al Consumidor Financiero — Zurich Seguros Colombia  |  Plataforma: ProcessMaker 4 BPMS  |  Ley 1328/2009 · CE 039/2011 · CE 019/2024 |  |  |  |  |  |
+|  | Código | Nombre Tarea | Tipo | Criterio de Aceptación — Camino Exitoso | Directrices Asociadas | Observaciones |
+|  | P01-T02 | Registrar queja | Servicio | El registro se crea con ID único no duplicado. Todos los campos del formulario quedan persistidos. El estado es 'Pendiente'. El log registra la transacción. El flujo continúa hacia P01-T03. | D-004 (Canal habilitado), D-005 (Formulario completo) | Esta tarea es de tipo serviceTask aunque es interna del BPM porque invoca el motor de persistencia. No consume API externa. |
+|  | P01-T03 | Verificar quejas similares del cliente | Script | El script se ejecuta en < 2 segundos. Si hay casos similares: esRecurrente = true y el flujo va a P01-T04. Si no: esRecurrente = false y el flujo va a P01-T05. Las variables quedan disponibles en el contexto del proceso. | D-006 (Formulario completo antes de verificar), D-007 (Priorización por recurrencia) | El periodo de 90 días y el criterio de queja activa deben parametrizarse en la tabla de configuración del BPM. No usar valores hardcoded. |
+|  | P01-T04 | Priorizar caso y recalcular SLA | Script | El SLA prioritario es menor al estándar. fechaLimiteSLA es correcta en días hábiles Colombia (sin festivos). esPrioritario = true en el registro del caso. Las alertas quedan programadas. El evento Ev-Msg2 notifica al SAC. | D-008 (Priorización por recurrencia 90 días), D-009 (SLA diferencial), D-011 (Festivos Colombia) | El factor de priorización (0.70 por defecto) debe ser parametrizable desde la tabla de configuración del BPM. El mínimo de días hábiles tras la reducción debe ser 5 días hábiles (pendiente confirmación Zurich). |
+|  | P01-T05 | Calcular SLA | Script | La fechaLimiteSLA es exactamente 15 días hábiles Colombia (excl. festivos) después de fechaCreacion. Los umbrales de alerta están correctamente calculados. El motor de BPM tiene programados los temporizadores. El evento Ev-Msg se dispara con el radicado y la fecha. | D-010 (Registrar SLA automáticamente), D-011 (15 días hábiles CE 039/2011), D-022 (Alertas por umbrales) | El parámetro de 15 días hábiles (CE 039/2011) debe ser configurable desde la tabla de parámetros del BPM. El calendario de festivos Colombia debe actualizarse anualmente. |
+|  | P01-T06 | Validar datos del formulario | Script | Cuando todos los campos son válidos: esValido = true, listaErrores = [], flujo continúa a SP1. Tiempo de ejecución < 500 ms. El script detecta errores individuales sin detener en el primero (retorna lista completa). | D-012 (Bloqueo por campos inválidos), D-013 (Validación Dpto-Municipio), D-014 (Solo envío con datos correctos), D-015 (Mensaje específico por campo) | CRÍTICO para reducir rechazos M1. Resolver el PM-004 y PM-005 del AS-IS. Los patrones de validación deben ser parametrizables para adaptarse a cambios en la proforma SFC sin necesidad de redeploy. |
+|  | Ev-Msg | Notificación de registro | Evento-Mensaje | El consumidor recibe el correo con el número de radicado, fecha límite y canales de seguimiento en < 5 minutos. El log del caso registra el envío con timestamp. Solo se envía un correo por evento (no duplicados). | — | Esta notificación es de recepción interna (radicado BPM), no de radicación SFC. El código SFC (1391...) se notifica cuando SmartSupervision confirma con HTTP 201. |
+|  | Ev-Msg2 | Notificación de priorización | Evento-Mensaje | El analista SAC y el supervisor reciben la notificación en < 1 minuto. La bandeja BPM muestra el caso marcado como prioritario. El log registra el evento. | D-007 (Priorización diferencial), D-008 (Criterio de recurrencia) | La notificación puede ser solo en bandeja BPM o también por correo, según la configuración del administrador del sistema. |
+|  | Ev-Msg3 | Notificación de correcciones | Evento-Mensaje | La tarea PAN-02 aparece en la bandeja del Gestor de Experiencia con todos los campos erróneos resaltados en rojo. El formulario muestra el mensaje específico por campo. El flujo no avanza a SmartSupervision hasta resolver todos los errores. | D-015 (Mensaje específico por campo), D-016 (Uso de catálogos para minimizar errores) | Este evento es el punto clave de prevención de rechazos. La especificidad del mensaje (campo + valor + formato esperado) es crítica para la eficiencia del Gestor CX. |
+|  | P01-T08 | Enviar respuesta final al cliente | Envío | El consumidor recibe el correo con el PDF adjunto y el enlace de encuesta. Solo se envía UN correo por caso. El log registra el envío con referencia al HTTP 200 previo. El estado del caso pasa a 'Cliente notificado'. | D-017 (No envío antes de HTTP 200), D-018 (Correo único por caso), D-019 (Un solo envío — RUL-010-04) | RESTRICCIÓN ARQUITECTURAL CRÍTICA: La compuerta del proceso debe garantizar a nivel de diseño BPMN que este sendTask SOLO es alcanzable después de SP3-T06. El bloqueo debe existir tanto en la lógica del script como en el diseño del flujo. |
+|  | P01-T09 | Enviar encuesta de satisfacción al cliente | Envío | El consumidor recibe el enlace de la encuesta en un correo separado de la respuesta final. El enlace contiene el idCasoBPM como parámetro. El caso queda en estado 'Cerrado' en el BPM. | D-020 (Encuesta obligatoria para seguimiento CF) | El sistema de encuestas debe ser externo y parametrizable. La URL debe contener el ID del caso para vincular la respuesta de la encuesta con el caso específico en los reportes de calidad. |
+|  | SP1-T01 | Homologar catálogos internos con catálogos SFC | Script | Todos los campos internos tienen equivalente SFC. homologacionExitosa = true. Los códigos SFC están disponibles en el contexto del proceso para construir el payload en SP1-T02. | D-024 (Tabla homologación actualizada), D-025 (Rechazo sin equivalente SFC) | La tabla de equivalencias debe estar en una tabla de parámetros del BPM, no en el código del script. Debe ser actualizable por el administrador sin redeploy. |
+|  | SP1-T02 | Enviar payload de creación a API (M1)/(M2) | Servicio | HTTP 201 recibido. codigoRadicadoSFC = '1391...'. Log completo con payload, respuesta y timestamp. Flujo continúa a SP1-T03. El número de intento queda registrado. | D-026 (Log completo de cada intento), D-027 (Envío inmediato tras validación), D-028 (Escalamiento por 3 intentos fallidos) | El endpoint de la API y el timeout deben ser parametrizables. El token JWT debe ser renovado automáticamente por el BPM antes de que expire. |
+|  | SP1-T03 | Registrar código radicado SFC | Script | codigoSFC queda persistido con formato '1391...'. estadoCaso = 'Radicado ante SFC'. El log registra la radicación exitosa. El flujo continúa a SP2. | D-029 (Registro de radicado SFC) | La estructura del campo que contiene el radicado en la respuesta de la API intermediaria debe estar documentada en el contrato de la API y ser parametrizable. |
+|  | SP1-T04 | Registrar error en log de trazabilidad | Script | El error queda registrado en LogTransmisiones con todos los campos. tipoError está correctamente clasificado. El flujo se enruta correctamente: funcional → PAN-03, técnico → PAN-04. | D-026 (Log completo), D-028 (Escalamiento 3 intentos) | La tabla LogTransmisiones es el insumo principal para la auditoría regulatoria. Debe ser inmutable (solo inserts, no updates). |
+|  | SP2-T06 | Generar PDF de respuesta final | Script | El PDF se genera con la plantilla corporativa, nomenclatura correcta (NombreCliente_NumId_RESP_FINAL_SFC_1.pdf), tipo PDF válido y tamaño dentro del límite. pdfGenerado = true. El archivo está disponible como adjunto del caso. | D-041 (Nomenclatura obligatoria NombreCliente_NumId_RESP_FINAL_SFC_N) | El motor de generación de PDF debe soportar plantillas Word o HTML. La nomenclatura es CRÍTICA para SmartSupervision. El patrón de naming debe ser parametrizable para adaptarse a cambios futuros de la proforma SFC. |
+|  | SP3-T02 | Validar coherencia Fecha Actualización = Fecha Cierre | Script | Cuando fechaActualizacion = fechaCierre: el botón de envío se habilita visualmente. El script responde en tiempo real (< 100 ms) al cambio de cualquiera de los campos. No se disparan rechazos de SmartSupervision por esta causa. | RUL-010-01 (Fechas iguales obligatorio) | CRÍTICO — Es la causa #1 de rechazo en M3 según el AS-IS. Pendiente confirmar con SmartSupervision si la comparación es solo por fecha o incluye hora. Documentar el resultado en las matrices como pendiente de confirmación. |
+|  | SP3-T03 | Validar nomenclatura y tipo PDF | Script | Cuando el archivo cumple los 3 criterios: pdfValido = true, indicador verde en PAN-10, botón de envío habilitado (junto con otras validaciones). El usuario recibe confirmación visual inmediata. | RUL-010-02 (Nomenclatura obligatoria), D-041 (Nombre y tipo PDF) | La normalización del nombre del cliente (eliminar tildes, ñ, espacios → guiones bajos) debe ser consistente entre el script que genera el PDF (SP2-T06) y el que valida en SP3-T03. Definir una función utilitaria reutilizable. |
+|  | SP3-T05 | Enviar payload de cierre a API (M3) | Servicio | HTTP 200 recibido. Log completo con payload, respuesta y timestamp. Flujo continúa a SP3-T06. El número de intento queda registrado. | D-047 (No cierre sin HTTP 200), D-048 (No notificación cliente sin HTTP 200 — RUL-010-04) | CRÍTICO: Este es el único punto del proceso donde se habilita P01-T08. El diseño BPMN debe garantizar que P01-T08 sea INALCANZABLE sin pasar por SP3-T06 con HTTP 200. |
+|  | SP3-T06 | Registrar confirmación cierre aceptado | Script | El log muestra el registro del HTTP 200 con timestamp exacto. estadoCaso = 'Cierre aceptado por SFC'. La señal para P01-T08 es emitida. El caso no puede volver a un estado anterior. | RUL-010-04 (Habilitar notificación solo tras HTTP 200) | El registro en el log es INMUTABLE. Una vez registrado el cierre, el caso no puede retroceder a estados anteriores en el flujo. |
+|  | SP3-T07 | Registrar rechazo en log (M3) | Script | El error queda registrado en LogTransmisiones. tipoError_M3 clasificado correctamente. El flujo retorna a PAN-10 para corrección. NO se genera ninguna comunicación al cliente durante este ciclo. | D-050 (No comunicaciones al cliente durante corrección M3 — RUL-010-04), D-026 (Log completo) | La restricción de NO comunicar al cliente durante correcciones M3 es arquitectural. Debe verificarse en el código del script que no existan llamadas a servicios de correo o notificación. |
+|  | SP4-T01 | Enviar payload de prórroga a API (M2-Prórroga) | Servicio | HTTP 200 recibido. Log completo del intento. Flujo continúa a SP4-T03 (notificar cliente) y SP4-T04 (actualizar SLA). | D-042 (Prórroga antes de vencimiento SLA), D-026 (Log completo) | La prórroga debe enviarse ANTES del vencimiento del SLA para ser válida regulatoriamente. |
+|  | SP4-T02 | Registrar rechazo en log (Prórroga) | Script | Registro en LogTransmisiones completo. Enrutamiento correcto: funcional → PAN-12; técnico → PAN-11. | D-026 (Log completo) | Similar a SP1-T04 y SP3-T07 pero específico para el payload de prórroga. |
+|  | SP4-T03 | Notificar prórroga al cliente | Envío | El consumidor recibe el correo con la nueva fecha límite antes del vencimiento del plazo original. El log registra el envío. | D-042 (Transparencia con CF — Ley 1328/2009) | El motivo debe comunicarse al cliente en lenguaje ciudadano, no con el código regulatorio del catálogo SFC. |
+|  | SP4-T04 | Actualizar SLA con nueva fecha | Script | fechaLimiteSLA actualizada en el registro del caso. Temporizadores del BPM reprogramados. contadorProrroga incrementado. El tablero muestra el nuevo plazo con semaforización actualizada. | D-011 (SLA en días hábiles Colombia), D-022 (Alertas por umbrales) | El recálculo de alertas debe respetar el calendario de días hábiles Colombia. La semaforización del tablero operativo debe actualizarse en tiempo real. |
+## Sheet: 08_CA_Errores
+|  | CRITERIOS DE ACEPTACIÓN — MANEJO DE ERRORES POR TAREA |  |  |  |  |
+| --- | --- | --- | --- | --- | --- |
+|  | Proceso: Gestión de Quejas Directas | ACZ-QD-001  |  Versión: 1.0 TO-BE | Mayo 2026 |  |  |  |  |
+|  | Servicio: Atención al Consumidor Financiero — Zurich Seguros Colombia  |  Plataforma: ProcessMaker 4 BPMS  |  Ley 1328/2009 · CE 039/2011 · CE 019/2024 |  |  |  |  |
+|  | Código | Nombre Tarea | Tipo | Criterio de Aceptación — Manejo de Error / Excepción | Comportamiento Seguro (Fallback) |
+|  | P01-T02 | Registrar queja | Servicio | Si falla la escritura en BD: el BPM registra el error en el log de incidencias técnicas, notifica al administrador del sistema y retiene el payload para reintento. No se pierde la solicitud del cliente. | No bloquear el flujo. Registrar en log y notificar al administrador. |
+|  | P01-T03 | Verificar quejas similares del cliente | Script | Si falla la consulta a la BD: registrar error en log técnico, asumir esRecurrente = false (comportamiento seguro) y continuar hacia P01-T05 para no bloquear el proceso. Alertar al administrador. | No bloquear el flujo. Registrar en log y notificar al administrador. |
+|  | P01-T04 | Priorizar caso y recalcular SLA | Script | Si falla la lectura de parámetros: usar el SLA estándar como fallback (comportamiento seguro). Registrar el error en el log técnico. No bloquear el flujo. | No bloquear el flujo. Registrar en log y notificar al administrador. |
+|  | P01-T05 | Calcular SLA | Script | Si falla la lectura del calendario de festivos: registrar en log, usar cálculo simple de días calendario como fallback con alerta al administrador. Si falla la programación de temporizadores: notificar al administrador para programación manual. | No bloquear el flujo. Registrar en log y notificar al administrador. |
+|  | P01-T06 | Validar datos del formulario | Script | Si falla la carga de la tabla de homologación: registrar en log, bloquear el envío a SmartSupervision (comportamiento seguro), notificar al administrador para actualización de catálogos. No proceder con datos sin validar. | BLOQUEAR el envío a SmartSupervision. Comportamiento seguro — no enviar datos sin validar. |
+|  | Ev-Msg | Notificación de registro | Evento-Mensaje | Si falla el envío por 3 intentos: registrar en log de incidencias, notificar al analista SAC para envío manual alternativo. No bloquear el flujo del proceso. | No bloquear el flujo. Registrar en log y notificar al administrador. |
+|  | Ev-Msg2 | Notificación de priorización | Evento-Mensaje | Si no hay analista SAC asignado aún: enviar solo al grupo supervisor SAC. Registrar en log. | No bloquear el flujo. Registrar en log y notificar al administrador. |
+|  | Ev-Msg3 | Notificación de correcciones | Evento-Mensaje | Si falla la creación de la tarea de corrección: notificar al administrador SAC para asignación manual. Registrar en log técnico. | No bloquear el flujo. Registrar en log y notificar al administrador. |
+|  | P01-T08 | Enviar respuesta final al cliente | Envío | Si no existe HTTP 200 previo: BLOQUEAR absolutamente el envío y notificar error crítico al administrador SAC. Si falla el envío de correo: reintento automático (máx. 3 intentos). Si persiste el error: notificar al SAC para envío alternativo documentado. NUNCA enviar sin confirmación HTTP 200. | ⚠ CRÍTICO: No tiene fallback que omita la validación. El bloqueo es intencional por RUL-010-04. |
+|  | P01-T09 | Enviar encuesta de satisfacción al cliente | Envío | Si falla el envío de la encuesta: registrar en log. No bloquear el cierre del caso — la encuesta es deseable pero no es requisito regulatorio para el cierre. El caso puede cerrarse sin encuesta confirmada. | No bloquear el flujo. Registrar en log y notificar al administrador. |
+|  | SP1-T01 | Homologar catálogos internos con catálogos SFC | Script | Si algún campo no tiene equivalente: homologacionExitosa = false. Bloquear envío a API. Notificar al administrador del BPM para actualizar la tabla de homologación. No enviar datos sin homologar. | BLOQUEAR el envío a SmartSupervision. Comportamiento seguro — no enviar datos sin validar. |
+|  | SP1-T02 | Enviar payload de creación a API (M1)/(M2) | Servicio | HTTP 400: listaErrores con campos afectados → SP1-T04 → PAN-03 (corrección funcional). HTTP 401: tipo = 'autenticación' → SP1-T04 → PAN-04 (corrección técnica). HTTP 5xx/timeout: tipo = 'servidor/red' → SP1-T04 → PAN-04. Si 3+ intentos fallidos: escalar a Analista Técnico con notificación. | No bloquear el flujo. Registrar en log y notificar al administrador. |
+|  | SP1-T03 | Registrar código radicado SFC | Script | Si el código extraído no inicia con '1391': registrar error de integridad, notificar al administrador y escalar para revisión manual. No persistir un código inválido. | No bloquear el flujo. Registrar en log y notificar al administrador. |
+|  | SP1-T04 | Registrar error en log de trazabilidad | Script | Si falla la escritura en el log: registrar en log alternativo y notificar al administrador. El flujo no debe bloquearse por un fallo del registro de log. | No bloquear el flujo. Registrar en log y notificar al administrador. |
+|  | SP2-T06 | Generar PDF de respuesta final | Script | Si falla la generación: registrar error específico en log, notificar al Analista SAC para generación y carga manual del PDF. Si la nomenclatura no cumple: pdfNomenclaturaValida = false, bloquear envío a SmartSupervision hasta corrección. | No bloquear el flujo. Registrar en log y notificar al administrador. |
+|  | SP3-T02 | Validar coherencia Fecha Actualización = Fecha Cierre | Script | Si falla la ejecución del script: asumir fechasCoinciden = false (comportamiento seguro — no permitir el envío). Notificar error técnico al administrador. | No bloquear el flujo. Registrar en log y notificar al administrador. |
+|  | SP3-T03 | Validar nomenclatura y tipo PDF | Script | Si el archivo no cumple algún criterio: pdfValido = false, mensaje específico indicando cuál criterio falló, botón de envío deshabilitado. El usuario debe reemplazar el archivo o corregir el nombre. | No bloquear el flujo. Registrar en log y notificar al administrador. |
+|  | SP3-T05 | Enviar payload de cierre a API (M3) | Servicio | HTTP 400: tipo = 'funcional' o 'técnico' → SP3-T07 → PAN-10 (corrección). HTTP 5xx/timeout: tipo = 'técnico' → SP3-T07 → PAN-10. NUNCA notificar al cliente si no se recibe HTTP 200. | ⚠ CRÍTICO: No tiene fallback que omita la validación. El bloqueo es intencional por RUL-010-04. |
+|  | SP3-T06 | Registrar confirmación cierre aceptado | Script | Si falla la escritura en el log: reintentar 3 veces. Si persiste: notificar al administrador como incidencia crítica — el cierre ocurrió en SmartSupervision pero no quedó registrado en el BPM. | ⚠ CRÍTICO: No tiene fallback que omita la validación. El bloqueo es intencional por RUL-010-04. |
+|  | SP3-T07 | Registrar rechazo en log (M3) | Script | Si falla la escritura en log: registrar en log alternativo. No bloquear el flujo de corrección. Nunca generar comunicación al cliente por error en el log. | No bloquear el flujo. Registrar en log y notificar al administrador. |
+|  | SP4-T01 | Enviar payload de prórroga a API (M2-Prórroga) | Servicio | HTTP 400: tipo='funcional' → SP4-T02 → PAN-12. HTTP 401/5xx/timeout: tipo='técnico' → SP4-T02 → PAN-11. | No bloquear el flujo. Registrar en log y notificar al administrador. |
+|  | SP4-T02 | Registrar rechazo en log (Prórroga) | Script | Si falla el log: registrar en log alternativo y continuar con el enrutamiento. | No bloquear el flujo. Registrar en log y notificar al administrador. |
+|  | SP4-T03 | Notificar prórroga al cliente | Envío | Si falla el envío: reintento automático 3 veces. Si persiste: notificar al SAC para envío manual. Registrar en log de incidencias. | No bloquear el flujo. Registrar en log y notificar al administrador. |
+|  | SP4-T04 | Actualizar SLA con nueva fecha | Script | Si falla la reprogramación de temporizadores: notificar al administrador del BPM para reprogramación manual. El caso continúa con la fechaLimiteSLA actualizada en la BD aunque el temporizador automático falle. | No bloquear el flujo. Registrar en log y notificar al administrador. |

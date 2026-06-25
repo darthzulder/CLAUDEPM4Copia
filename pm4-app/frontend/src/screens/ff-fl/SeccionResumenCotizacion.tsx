@@ -1,5 +1,5 @@
 import FormSection from '../../components/FormSection';
-import { ZrTable } from '../../components/fields/ZdsFields';
+import { ZrTable, ZrAlert, ZrLoader } from '../../components/fields/ZdsFields';
 import { CotizadorResult, CotizadorInputs } from '../../core/useCotizador';
 
 // ─── Helpers ─────────────────────────────────────────────────────────────────
@@ -14,20 +14,18 @@ function cop(v: number | null | undefined): string {
 function Estado({ loading, warmingUp, error }: { loading: boolean; warmingUp: boolean; error: string | null }) {
   if (warmingUp) return (
     <div className="quote-summary-status">
-      <div className="spinner-sm" />
+      <ZrLoader style={{ ['--z-loader--size' as never]: '18px' }} />
       <span>Inicializando servicio de cotización… (puede tardar ~30 segundos)</span>
     </div>
   );
   if (loading) return (
     <div className="quote-summary-status">
-      <div className="spinner-sm" />
+      <ZrLoader style={{ ['--z-loader--size' as never]: '18px' }} />
       <span>Calculando cotización…</span>
     </div>
   );
   if (error) return (
-    <div className="quote-summary-status quote-summary-status--error">
-      ⚠ Error al calcular: {error}
-    </div>
+    <ZrAlert config="negative" {...({ 'hide-close': true } as object)}>Error al calcular: {error}</ZrAlert>
   );
   return null;
 }

@@ -5,7 +5,7 @@ import { useTask } from '../../core/useTask';
 import { useCollection } from '../../core/useCollection';
 import FormSection from '../../components/FormSection';
 import ScreenHeader from '../../components/ScreenHeader';
-import { ZdsInput, ZdsSelect, ZdsDate, ZdsTextarea, ZrButton, ZrAlert } from '../../components/fields/ZdsFields';
+import { ZdsInput, ZdsSelect, ZdsDate, ZdsTextarea, ZrButton, ZrAlert, ZrLoader } from '../../components/fields/ZdsFields';
 import ResultCard from '../../components/ResultCard';
 import { OPTIONS, COLLECTION_DEFS, SolicitudCotizacionFormData } from './variables';
 import pm4 from '../../api/pm4Client';
@@ -653,8 +653,8 @@ export default function SolicitudCotizacionCuw() {
     }
   };
 
-  if (loading) return <div className="screen-loading"><div className="spinner" /></div>;
-  if (error) return <div className="screen-error">⚠️ Error cargando la tarea: {error}</div>;
+  if (loading) return <div className="screen-loading"><ZrLoader /></div>;
+  if (error) return <ZrAlert config="negative" {...({ 'hide-close': true } as object)}>Error cargando la tarea: {error}</ZrAlert>;
 
   if (sent) {
     return (

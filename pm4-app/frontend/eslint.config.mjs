@@ -1,9 +1,11 @@
 // ESLint (flat config) — guardrail de arquitectura del proyecto.
 //
-// Objetivo único y deliberado: que los componentes del Zurich DS se consuman
-// SIEMPRE desde la fachada `components/fields/ZdsFields`, nunca importando
-// `@zurich/web-components` directamente en screens/componentes. Esa fachada es
-// la única fuente de verdad del DS en la app.
+// Objetivo único y deliberado: que el Zurich DS se consuma SIEMPRE desde dos
+// únicos puntos autorizados, nunca importando `@zurich/*` directo en
+// screens/componentes:
+//   - `components/fields/ZdsFields`  → componentes (web-components + wrappers)
+//   - `zds-setup`                    → assets globales (base.css + javascript.js)
+// Fuera de ahí, cualquier import de @zurich/* es un error de arquitectura.
 //
 // NO se intenta prohibir `display:flex`/`style=` inline vía lint: hay usos
 // legítimos (estilos dinámicos, tokens `--z-*` inline) y un ban produciría
@@ -31,16 +33,21 @@ export default [
     rules: {
       'no-restricted-imports': ['error', {
         patterns: [{
-          group: ['@zurich/web-components', '@zurich/web-components/*'],
+          group: [
+            '@zurich/web-components', '@zurich/web-components/*',
+            '@zurich/css-components', '@zurich/css-components/*',
+          ],
           message:
-            'Importa los componentes Zurich DS desde la fachada (components/fields/ZdsFields), no directamente desde @zurich/web-components.',
+            'No importes @zurich/* directo. Componentes → fachada components/fields/ZdsFields; assets globales (base.css/javascript.js) → zds-setup.',
         }],
       }],
     },
   },
   {
-    // La fachada es el ÚNICO lugar autorizado a importar @zurich/* directo.
-    files: ['src/components/fields/ZdsFields.tsx'],
+    // Únicos puntos autorizados a importar @zurich/* directo:
+    //  - ZdsFields → componentes (web-components + wrappers React)
+    //  - zds-setup → assets globales (base.css + javascript.js)
+    files: ['src/components/fields/ZdsFields.tsx', 'src/zds-setup.ts'],
     rules: { 'no-restricted-imports': 'off' },
   },
 ];

@@ -1,7 +1,7 @@
 import { useState, useEffect, Fragment } from 'react';
 import { ActionBar } from '../../components/ActionBar';
 import { useForm, Controller } from 'react-hook-form';
-import { ZrButton, ZrForm, ZdsInput, ZdsSelect, ZdsTextarea, ZrAlert, ZrTabs, ZrSegmentedControl, ZrFileInput, ZrTable, ZrIcon } from '../../components/fields/ZdsFields';
+import { ZrButton, ZrForm, ZdsInput, ZdsSelect, ZdsTextarea, ZrAlert, ZrTabs, ZrSegmentedControl, ZrFileInput, ZrTable, ZrIcon, ZrLoader } from '../../components/fields/ZdsFields';
 import ResultCard from '../../components/ResultCard';
 import FormSection from '../../components/FormSection';
 import ScreenHeader from '../../components/ScreenHeader';
@@ -533,8 +533,8 @@ export default function CotizacionFfFl() {
   };
 
   // ── Pantalla: cargando / error ──────────────────────────────────────────────
-  if (loading) return <div className="screen-loading"><div className="spinner" /></div>;
-  if (error)   return <div className="screen-error">⚠ Error cargando la tarea: {error}</div>;
+  if (loading) return <div className="screen-loading"><ZrLoader /></div>;
+  if (error)   return <ZrAlert config="negative" {...({ 'hide-close': true } as object)}>Error cargando la tarea: {error}</ZrAlert>;
 
   // ── Pantalla: Personalización confirmada ────────────────────────────────────
   if (personalizacionConfirmada) {
