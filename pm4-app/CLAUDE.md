@@ -35,10 +35,16 @@ http://localhost:5173/?screen=cotizador-fast-flow&task_id=123&token=eyJ...
 Siempre ejecutar el build completo antes de lanzar a git para garantizar que el deploy funcione correctamente:
 
 ```bash
-npm run build --workspace=frontend && npm run build --workspace=backend
+npm run build --workspace=frontend   # tsc + vite
+npm run build --workspace=backend    # tsc
+npm run lint  --workspace=frontend   # eslint
 ```
 
-Si alguno de los dos falla con errores de TypeScript o de empaquetado, **corregir antes de commitear**. No commitear con builds rotos.
+Si alguno falla con errores de TypeScript, lint o empaquetado, **corregir antes de commitear**. No commitear con builds rotos.
+
+> Según el entorno de cada dev, `npm` corre en local o dentro del contenedor. Si usas
+> Docker, antepón `docker exec -w /app pm4-app-container ` a cada comando y, como no hay
+> HMR en el mount, `docker restart pm4-app-container` para validar el cambio visual.
 
 ---
 
@@ -224,7 +230,7 @@ await completeTask(payload);
 
 ## Jerarquía de decisión de UI (OBLIGATORIO)
 
-Al construir UI hay **dos ejes** con escaleras distintas. Recorre cada una **de arriba abajo** y baja un escalón solo si el anterior no aplica. Antes de construir, lee `outputs/zurich-index.md`.
+Al construir UI hay **dos ejes** con escaleras distintas. Recorre cada una **de arriba abajo** y baja un escalón solo si el anterior no aplica. Antes de construir, lee `outputs/zds-cheatsheet.md` y `outputs/shared-css-catalog.md` (no el índice).
 
 ### Eje A — Elemento *(qué es la cosa: campo, botón, pill, modal, card…)*
 1. **Componente propio existente** (ver inventario abajo) o wrapper de `ZdsFields` (`ZdsInput`, `ZdsSelect`, `ActionBar`, `ZdsStatusBadge`, `FormSection`…).
@@ -396,16 +402,23 @@ Solo leer esos archivos si el usuario lo pide — no asumir cuál usar.
 
 ## Referencia de componentes Zurich — OBLIGATORIO
 
-Antes de generar cualquier componente o pantalla nueva, **siempre leer**:
+Antes de generar cualquier pantalla nueva, leer **estas dos referencias de consumo**
+(son la fuente de verdad rápida; reemplazan la lectura del índice para construir):
 
 ```
-outputs/zurich-index.md   (relativo a pm4-app/)
+outputs/zds-cheatsheet.md       ← qué componentes/props EXISTEN (función→componente, enums, kebab, patrones)
+outputs/shared-css-catalog.md   ← qué clases CSS ya existen (estructura, grid, tipografía) antes de escribir CSS
 ```
 
-Este archivo contiene las bases de diseño, componentes disponibles y convenciones visuales de la aplicación.
-No crear componentes sin haberlo leído primero en la conversación actual.
+**`outputs/zurich-index.md` NO es lectura obligatoria.** Es el meta-índice para
+*documentar* componentes DS nuevos (convertir copy-paste de la web a fichas
+`outputs/react/...`). **Léelo solo cuando realmente lo necesites:** vas a incorporar un
+componente DS que aún no está en la fachada `ZdsFields` ni en el cheat-sheet — y en ese
+caso, primero DETENTE y consulta al usuario antes de documentarlo.
 
-**Referencia visual viva:** `?screen=ds-catalog` (componente `screens/ds-catalog/DsCatalog.tsx`) renderiza cada componente de la fachada con sus variantes — úsalo para ver el aspecto real y detectar regresiones.
+**Referencia visual viva:** `?screen=ds-catalog` (componente `screens/ds-catalog/DsCatalog.tsx`)
+renderiza cada componente de la fachada con sus variantes — úsalo como **molde de uso**
+cuando no exista una pantalla análoga que clonar, y para detectar regresiones.
 
 ---
 

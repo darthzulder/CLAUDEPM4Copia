@@ -1,0 +1,215 @@
+import { useEffect } from 'react';
+import type { UseFormReturn } from 'react-hook-form';
+import FormSection from '../../components/FormSection';
+import { ZdsInput, ZdsSelect } from '../../components/fields/ZdsFields';
+import { OPTIONS, DEPARTAMENTOS, MUNICIPIOS_POR_DPTO, CrearRecibirQuejaFormData } from './variables';
+import { fieldError } from './errorHelper';
+
+interface Props {
+  form: UseFormReturn<CrearRecibirQuejaFormData>;
+}
+
+export default function SeccionConsumidor({ form }: Props) {
+  const { control, watch, setValue, formState: { errors, isSubmitted } } = form;
+  const w = watch();
+
+  // RUL-000-02 / RUL-000-03 — el tipo de documento define el tipo de persona.
+  const esJuridica = w.qd_tipoIdentificacion === 'NIT';
+
+  // FLD-315 — tipo de persona computado (back). Se refleja en el readonly.
+  useEffect(() => {
+    if (!w.qd_tipoIdentificacion) return;
+    setValue('qd_tipoPersona', esJuridica ? 'Jurídica' : 'Natural');
+  }, [w.qd_tipoIdentificacion, esJuridica, setValue]);
+
+  // RUL-000-09 — al cambiar el departamento se limpia y deshabilita la ciudad.
+  useEffect(() => {
+    setValue('qd_ciudad', '');
+  }, [w.qd_departamento, setValue]);
+
+  const municipios = MUNICIPIOS_POR_DPTO[w.qd_departamento] ?? [];
+  const err = (name: keyof CrearRecibirQuejaFormData) => fieldError(errors, name, w[name], isSubmitted);
+
+  return (
+    <FormSection title="Datos del Consumidor Financiero">
+      <div className="form-row cols-2">
+        <ZdsSelect
+          name="qd_tipoIdentificacion"
+          control={control}
+          label="Selecciona tu tipo de identificación"
+          options={OPTIONS.tipoIdentificacion}
+          rules={{ required: 'Campo requerido' }}
+          required
+          withSearch
+          error={err('qd_tipoIdentificacion')}
+        />
+        <ZdsInput
+          name="qd_numeroIdentificacion"
+          control={control}
+          label="Número de identificación"
+          rules={{
+            required: 'Campo requerido',
+            pattern: { value: /^[A-Za-z0-9]{5,15}$/, message: 'Verifica el formato según el tipo de documento (MSG-000-07)' },
+          }}
+          required
+          error={err('qd_numeroIdentificacion')}
+        />
+      </div>
+
+      {/* Persona natural (RUL-000-03) */}
+      {!esJuridica && (
+        <div className="form-row cols-2">
+          <ZdsInput
+            name="qd_nombres"
+            control={control}
+            label="¿Cuáles son tus nombres?"
+            rules={{ required: 'Campo requerido', pattern: { value: /^[A-Za-zÀ-ÿ\s]+$/, message: 'Solo letras' } }}
+            required
+            error={err('qd_nombres')}
+          />
+          <ZdsInput
+            name="qd_apellidos"
+            control={control}
+            label="¿Cuáles son tus apellidos?"
+            rules={{ required: 'Campo requerido', pattern: { value: /^[A-Za-zÀ-ÿ\s]+$/, message: 'Solo letras' } }}
+            required
+            error={err('qd_apellidos')}
+          />
+        </div>
+      )}
+
+      {/* Persona jurídica (RUL-000-02) */}
+      {esJuridica && (
+        <>
+          <div className="form-row cols-1">
+            <ZdsInput
+              name="qd_razonSocial"
+              control={control}
+              label="Razón social"
+              rules={{ required: 'Campo requerido' }}
+              required
+              error={err('qd_razonSocial')}
+            />
+          </div>
+          <div className="form-row cols-2">
+            <ZdsInput
+              name="qd_contactoNombres"
+              control={control}
+              label="Nombres de la persona de contacto"
+              rules={{ required: 'Campo requerido', pattern: { value: /^[A-Za-zÀ-ÿ\s]+$/, message: 'Solo letras' } }}
+              required
+              error={err('qd_contactoNombres')}
+            />
+            <ZdsInput
+              name="qd_contactoApellidos"
+              control={control}
+              label="Apellidos de la persona de contacto"
+              rules={{ required: 'Campo requerido', pattern: { value: /^[A-Za-zÀ-ÿ\s]+$/, message: 'Solo letras' } }}
+              required
+              error={err('qd_contactoApellidos')}
+            />
+          </div>
+        </>
+      )}
+
+      <div className="form-row cols-3">
+        <ZdsInput
+          name="qd_celular"
+          control={control}
+          label="Celular"
+          inputType="tel"
+          rules={{ required: 'Campo requerido', pattern: { value: /^\d{10}$/, message: 'Debe contener exactamente 10 dígitos (MSG-000-01)' } }}
+          required
+          error={err('qd_celular')}
+        />
+        <ZdsInput
+          name="qd_correoElectronico"
+          control={control}
+          label="Correo electrónico"
+          inputType="email"
+          rules={{ required: 'Campo requerido', pattern: { value: /^[^\s@]+@[^\s@]+\.[^\s@]+$/, message: 'Formato esperado: usuario@dominio.com (MSG-000-02)' } }}
+          required
+          error={err('qd_correoElectronico')}
+        />
+        <ZdsInput
+          name="qd_tipoPersona"
+          control={control}
+          label="Tipo de persona"
+          readOnly
+          helpText="Asignado automáticamente según el tipo de documento."
+        />
+      </div>
+
+      <div className="form-row cols-3">
+        <ZdsSelect
+          name="qd_pais"
+          control={control}
+          label="País"
+          options={OPTIONS.pais}
+          rules={{ required: 'Campo requerido' }}
+          required
+          error={err('qd_pais')}
+        />
+        <ZdsSelect
+          name="qd_departamento"
+          control={control}
+          label="Departamento"
+          options={DEPARTAMENTOS}
+          rules={{ required: 'Campo requerido' }}
+          required
+          withSearch
+          error={err('qd_departamento')}
+        />
+        <ZdsSelect
+          name="qd_ciudad"
+          control={control}
+          label="Ciudad"
+          options={municipios}
+          rules={{ required: 'Campo requerido' }}
+          required
+          disabled={!w.qd_departamento}
+          withSearch
+          placeholder={w.qd_departamento ? 'Seleccione ciudad...' : 'Seleccione primero el departamento'}
+          error={err('qd_ciudad')}
+        />
+      </div>
+
+      <div className="form-row cols-3">
+        <ZdsInput
+          name="qd_direccion"
+          control={control}
+          label="Dirección"
+          readOnly
+          helpText="Asignada por el sistema (pendiente API SFC)."
+        />
+        <ZdsInput
+          name="qd_sexo"
+          control={control}
+          label="Sexo"
+          readOnly
+          helpText="Asignado por el sistema (pendiente API SFC)."
+        />
+        <ZdsInput
+          name="qd_lgbtiq"
+          control={control}
+          label="LGBTIQ+"
+          readOnly
+          helpText="Catálogo pendiente de confirmar con TI."
+        />
+      </div>
+
+      <div className="form-row cols-2">
+        <ZdsSelect
+          name="qd_condicionEspecial"
+          control={control}
+          label="Condición especial"
+          options={OPTIONS.condicionEspecial}
+          rules={{ required: 'Campo requerido' }}
+          required
+          error={err('qd_condicionEspecial')}
+        />
+        <div />
+      </div>
+    </FormSection>
+  );
+}

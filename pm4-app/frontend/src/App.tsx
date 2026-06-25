@@ -16,6 +16,7 @@ import RevisarErrorTecnico from './screens/revisar-error-tecnico/RevisarErrorTec
 import CorregirErrorFuncionalSS from './screens/corregir-error-funcional-ss/CorregirErrorFuncionalSS';
 import RevisarQuejaAsignar from './screens/revisar-queja-asignar/RevisarQuejaAsignar';
 import CorregirDatosFormulario from './screens/COL_QD-corregir-datos-formulario/CorregirDatosFormulario';
+import CrearRecibirQueja from './screens/COL_QD_CrearRecibirQueja/CrearRecibirQueja';
 import DsCatalog from './screens/ds-catalog/DsCatalog';
 
 class ErrorBoundary extends Component<{ children: ReactNode }, { error: Error | null }> {
@@ -54,6 +55,7 @@ const SCREENS: Record<string, React.ComponentType> = {
   'corregir-error-funcional-ss': CorregirErrorFuncionalSS,
   'revisar-queja-asignar': RevisarQuejaAsignar,
   'COL_QD-corregir-datos-formulario': CorregirDatosFormulario,
+  'COL_QD_CrearRecibirQueja': CrearRecibirQueja,
   'ds-catalog': DsCatalog,
 };
 
