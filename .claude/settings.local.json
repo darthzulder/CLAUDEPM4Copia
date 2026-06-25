@@ -1,4 +1,19 @@
 {
+  "hooks": {
+    "UserPromptSubmit": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "powershell -NoProfile -NonInteractive -File \"D:\\Beesmart\\ProcessMaker Zurich\\CLAUDEPM4Copia\\.claude\\read-graph.ps1\"",
+            "shell": "powershell",
+            "timeout": 10,
+            "statusMessage": "Consultando grafo del proyecto..."
+          }
+        ]
+      }
+    ]
+  },
   "permissions": {
     "allow": [
       "Bash(python -c \"import openpyxl; print\\('openpyxl ok'\\)\")",
@@ -22,7 +37,12 @@
       "mcp__Claude_in_Chrome__read_console_messages",
       "mcp__visualize__read_me",
       "mcp__visualize__show_widget",
-      "Bash(npm run *)"
+      "Bash(npm run *)",
+      "Skill(run)",
+      "Skill(run:*)",
+      "Skill(update-config)",
+      "Skill(update-config:*)",
+      "PowerShell(powershell -NoProfile -NonInteractive -File *read-graph.ps1*)"
     ]
   }
 }

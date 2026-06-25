@@ -12,5 +12,8 @@
   },
   "devDependencies": {
     "concurrently": "^8.2.2"
+  },
+  "dependencies": {
+    "graphify": "^1.0.0"
   }
 }
