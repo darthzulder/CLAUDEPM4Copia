@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { ActionBar } from '../../components/ActionBar';
 import { useTask } from '../../core/useTask';
 import { useRequestFiles, resolveFileId } from '../../core/useRequestFiles';
-import { ZrButton, ZrModal, ZrAlert } from '../../components/fields/ZdsFields';
+import { ZrButton, ZrModal, ZrAlert, ZrLoader, ZdsStatusBadge, ZrCard } from '../../components/fields/ZdsFields';
 import ResultCard from '../../components/ResultCard';
 import FormSection from '../../components/FormSection';
 import ScreenHeader from '../../components/ScreenHeader';
@@ -96,7 +96,7 @@ export default function RevSARLAFT() {
     return (
       <div className="screen-wrapper">
         <div className="screen-loading">
-          <div className="spinner" />
+          <ZrLoader />
           <span>Cargando documentos…</span>
         </div>
       </div>
@@ -106,7 +106,7 @@ export default function RevSARLAFT() {
   if (error) {
     return (
       <div className="screen-wrapper">
-        <div className="screen-error">⚠ Error cargando la tarea: {error}</div>
+        <ZrAlert config="negative" {...({ 'hide-close': true } as object)}>Error cargando la tarea: {error}</ZrAlert>
       </div>
     );
   }
@@ -118,7 +118,7 @@ export default function RevSARLAFT() {
     <div className="screen-wrapper">
       {submitting && (
         <div className="loading-overlay">
-          <div className="spinner" />
+          <ZrLoader />
         </div>
       )}
 
@@ -189,21 +189,18 @@ export default function RevSARLAFT() {
       </div>
 
       {/* Modal de ayuda */}
-      <ZrModal model={infoOpen} onChange={(v: boolean) => setInfoOpen(v)} style={{ ['--z-modal--backdrop' as any]: 'rgba(11,27,60,.45)' }}>
+      <ZrModal model={infoOpen} onChange={(v: boolean) => setInfoOpen(v)} style={{ ['--z-modal--backdrop' as any]: 'color-mix(in srgb, var(--z-modal-backdrop) 45%, transparent)' }}>
         <HelpModal title="Directrices SARLAFT" subtitle="Documentos requeridos según el perfil del tomador">
           {DIRECTRICES.map(({ perfil: p, label, docs: dList }) => (
-            <div
-              key={p}
-              className={`help-profile-block${perfil === p ? ' help-profile-active' : ''}`}
-            >
-              <div className="help-profile-header">
-                <span className="help-profile-label">{label}</span>
-                {perfil === p && <span className="badge-active">Activo</span>}
+            <ZrCard key={p} {...({ config: 'grid' } as object)}>
+              <div z-flex="75" z-align="left:center">
+                <strong>{label}</strong>
+                {perfil === p && <ZdsStatusBadge variant="info">Activo</ZdsStatusBadge>}
               </div>
-              <ol className="help-doc-list">
+              <ol>
                 {dList.map((doc, i) => <li key={i}>{doc}</li>)}
               </ol>
-            </div>
+            </ZrCard>
           ))}
         </HelpModal>
       </ZrModal>

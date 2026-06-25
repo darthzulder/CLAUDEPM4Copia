@@ -21,7 +21,7 @@ const TIPO_ID: Record<string, string> = {
 function ReadField({ label, value }: { label: string; value?: string }) {
   // Mismo wrapper que ZdsInput readOnly → render y ancho idénticos al resto de pantallas
   return (
-    <div data-zds-readonly="" className="zds-field-wrap">
+    <div className="zds-field-wrap">
       <ZrTextInput label={label} model={value ?? '—'} readonly />
     </div>
   );

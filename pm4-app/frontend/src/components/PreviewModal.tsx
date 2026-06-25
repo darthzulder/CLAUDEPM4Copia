@@ -21,7 +21,7 @@ export default function PreviewModal({ isOpen, onClose, previewDoc }: PreviewMod
     <ZrModal
       model={isOpen}
       onChange={(v: boolean) => { if (!v) onClose(); }}
-      style={{ ['--z-modal--padding' as any]: '0', ['--z-modal--backdrop' as any]: 'rgba(11,27,60,.55)' }}
+      style={{ ['--z-modal--padding' as any]: '0', ['--z-modal--backdrop' as any]: 'color-mix(in srgb, var(--z-modal-backdrop) 55%, transparent)' }}
     >
       <div className="preview-modal">
         <div className="preview-modal-header">

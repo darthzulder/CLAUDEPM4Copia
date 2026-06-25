@@ -291,6 +291,15 @@ import { ZdsInput, ZdsSelect, ZdsRadio, ZdsDate, ZdsTextarea,
 
 **Nunca importar directamente de `@zurich/web-components/react/...` en los screens.**
 
+#### Bootstrap y registro de ZDS (dos únicos puntos autorizados)
+
+Todo `@zurich/*` se consume desde dos módulos, enforced por ESLint (`no-restricted-imports`); cualquier otro import directo es error:
+
+- **`zds-setup.ts`** — assets globales del DS: `base.css` (tokens) + `javascript.js` (comportamientos CSS-components). Se importa una vez en `main.tsx`, antes de `shared.css`.
+- **`components/fields/ZdsFields.tsx`** — componentes. Importar un wrapper React **auto-registra** su web-component (`z-*`) de forma idempotente (`registerComponent` guarda con `customElements.get()`): el registro ocurre una sola vez, al primer render, y nunca lanza "already defined".
+
+Para habilitar un `z-*` nuevo: re-exportar su wrapper en `ZdsFields` (queda registrado al importarlo). No hay registro manual ni `customElements.define` propio.
+
 | Wrapper | Componente Zurich | Cuándo usar |
 |---|---|---|
 | `ZdsInput` | `ZrTextInput` + Controller | Texto, email, tel — editable o readOnly |
@@ -300,8 +309,10 @@ import { ZdsInput, ZdsSelect, ZdsRadio, ZdsDate, ZdsTextarea,
 | `ZdsTextarea` | `ZrTextarea` + Controller | Texto multilínea |
 | `ZdsCheckboxField` | `ZrCheckbox` + Controller | Checkbox booleano |
 | `ZdsSegmented` | `ZrSegmentedControl` + Controller | Toggle segmentado (SÍ/NO, etc.) |
+| `ZdsStepper` | `ZrStepper` + Controller | Contador de pasos 1-based en `[1, steps]` (wizard/paginador) |
+| `ZdsCalendar` | `ZrCalendar` + Controller | Calendario inline (grilla de mes), modelo ISO `YYYY-MM-DD` |
 | `ZdsStatusBadge` | `ZrBadge` | Píldora de estado por variante (`success`/`danger`/`info`/`neutral`) |
-| Re-exports directos | — | `ZrButton`, `ZrIcon`, `ZrModal`, `ZrForm`, `ZrCard`, `ZrTabs`, `ZrTable`, `ZrAlert`, `ZrBadge`, `ZrChip`, `ZrTag`, `ZrProgressBar`, `ZrFileInput`, `ZrSegmentedControl` — componentes DS que no requieren Controller |
+| Re-exports directos | — | `ZrButton`, `ZrIcon`, `ZrModal`, `ZrForm`, `ZrCard`, `ZrTabs`, `ZrTable`, `ZrAlert`, `ZrBadge`, `ZrChip`, `ZrTag`, `ZrProgressBar`, `ZrFileInput`, `ZrSegmentedControl`, `ZrSidebar`, `ZrTile`, `ZrTooltip`, `ZrInputGroup`, `ZrFieldset`, `ZrStepper`, `ZrCalendar`, `ZrLoader` — componentes DS que no requieren Controller |
 
 ### Patrón de formulario (react-hook-form + ZdsFields)
 
@@ -326,6 +337,7 @@ const { control, handleSubmit, reset, formState: { errors } } = useForm<MiFormDa
 ### Otras convenciones
 
 - `FormSection` para las secciones con header azul
+- Indicadores de carga: usar `ZrLoader` del DS (dimensionable con `--z-loader--size`). No crear spinners CSS custom. El posicionamiento (overlay full-screen) sí es layout propio (`.loading-overlay`).
 - `useTask()` maneja loading / error / submitting — siempre mostrar estos estados
 - Diseños DRY y ZurichDS: seguir la **Jerarquía de decisión de UI** (arriba). El **layout** se hace con primitivos DS (`z-flex`/`z-align`/`z-grid`), no con `display:flex` a mano; los **elementos** con componentes propios o del DS vía `ZdsFields`. No se permiten `styles.css` locales ni estilos en línea *ad-hoc*. [shared.css](file:///g:/DockerProys/CLAUDEPM4Copia/pm4-app/frontend/src/shared.css) es la única hoja de estilos global y queda reservada a: tablas editables, cards/secciones con estilo de dominio, tipografías (`Capt-12`, `Capt-14`) y grids de campos (`form-row.cols-*`) — siempre con tokens. Las píldoras de estado usan `ZdsStatusBadge` (no clases `.chip`).
 - `OPTIONS` en `variables.ts` usan `as const` → pasarlos directamente a los campos (aceptan `readonly`)
@@ -360,15 +372,15 @@ Componentes PM4 que existen: `FormInput`, `FormMultiColumn`, `FormHtmlViewer`, `
 
 ---
 
-## CSS Zurich — Variables de color
+## CSS Zurich — Color y tokens (FUENTE DE VERDAD)
 
-```css
---zurich-blue:   #2167AE
---zurich-green:  #0CA442
---zurich-red:    #EC5962
---zurich-bg:     #f7f9fc
---zurich-border: #e5e7eb
-```
+**Todos los colores provienen de los tokens de `@zurich/css-components`** (importado en `main.tsx` vía `base.css`). **Prohibido hex/rgba crudo** en CSS o en estilos inline `.tsx` — usar siempre `var(--...)`.
+
+- **Tokens del DS** (no redefinir): `--zc-*` (color), `--zg-*` (grises, incl. `--zg-white` #FFF, `--zg-black` #000, `--zg-white-zurich` #ECEEEF), `--zs-*` (espaciado), `--zf-*` (tipografía).
+- **Alias semánticos del proyecto** (en `shared.css :root`, todos apuntan a tokens DS): `--z-blue`, `--z-blue-dark`, `--z-blue-light`, `--z-green`, `--z-red`, `--z-orange`, `--z-bg`, `--z-border`, `--z-text`, `--z-muted`, `--z-card-shadow`.
+- **Transparencias** → `color-mix(in srgb, var(--token) N%, transparent)`, nunca `rgba()` con números.
+- **Escala real del DS:** las familias `--zc-{moss,peach,lemon}-*` usan pasos `20/40/60/80/aa/aaa` (NO existen `-10`/`-30`); `--zc-blue-sky-*` usa `10/25/40/80/aa`. Referenciar un paso inexistente rompe el color (cae a `unset`).
+- **Excepciones documentadas** (únicos colores sin token DS, centralizados en `shared.css :root`): `--z-card-border` (#DDE3EC), `--z-warning-deep` (#B8860B), `--z-modal-backdrop` (#0B1B3C).
 
 Fuente corporativa: `ZurichSans-Regular.ttf` desde `https://bpm.beesmart.ec/fonts/zurich/`
 
@@ -392,6 +404,8 @@ outputs/zurich-index.md   (relativo a pm4-app/)
 
 Este archivo contiene las bases de diseño, componentes disponibles y convenciones visuales de la aplicación.
 No crear componentes sin haberlo leído primero en la conversación actual.
+
+**Referencia visual viva:** `?screen=ds-catalog` (componente `screens/ds-catalog/DsCatalog.tsx`) renderiza cada componente de la fachada con sus variantes — úsalo para ver el aspecto real y detectar regresiones.
 
 ---
 

@@ -10,7 +10,7 @@ import CreacionTomador from './CreacionTomador';
 import SeccionProductos from './SeccionProductos';
 import SeccionResumenCotizacion from './SeccionResumenCotizacion';
 import { useCotizador, cotizadorResultToPayload, type CotizadorInputs } from '../../core/useCotizador';
-import { ZdsInput, ZdsDate, ZdsCheckboxField, ZdsSelect, ZrButton, ZrAlert, ZrTable } from '../../components/fields/ZdsFields';
+import { ZdsInput, ZdsDate, ZdsCheckboxField, ZdsSelect, ZrButton, ZrAlert, ZrTable, ZrFieldset, ZrLoader } from '../../components/fields/ZdsFields';
 import ResultCard from '../../components/ResultCard';
 import {
   OPTIONS, COLLECTION_DEFS, DEPARTAMENTOS, CIUDADES_POR_DEPTO,
@@ -95,22 +95,22 @@ function InfoGeneral({
       </div>
 
       {/* Productos a cotizar */}
-      <div className="form-group">
-        <div className="checkbox-group-label">
-          <span className="required-star">* </span>Producto(s) a cotizar
+      <ZrFieldset>
+        <span slot="legend"><span className="required-star">* </span>Producto(s) a cotizar</span>
+        <div>
+          <div className="checkbox-grid">
+            {PRODUCTOS.map(([name, label]) => (
+              <ZdsCheckboxField key={name} control={control} name={name} label={label} />
+            ))}
+          </div>
+          {productError && <ZrAlert config="negative" {...({ 'hide-close': true } as object)}>{productError}</ZrAlert>}
+          {soloCC && !productError && (
+            <ZrAlert config="alert" {...({ 'hide-close': true } as object)}>
+              El seguro de Crimen Comercial solo puede cotizarse junto con otro producto. Si solo requiere este producto, la cotización no puede continuar por este canal y deberá gestionarse con la ayuda del asesor comercial.
+            </ZrAlert>
+          )}
         </div>
-        <div className="checkbox-grid">
-          {PRODUCTOS.map(([name, label]) => (
-            <ZdsCheckboxField key={name} control={control} name={name} label={label} />
-          ))}
-        </div>
-        {productError && <ZrAlert config="negative" {...({ 'hide-close': true } as object)}>{productError}</ZrAlert>}
-        {soloCC && !productError && (
-          <ZrAlert config="alert" {...({ 'hide-close': true } as object)}>
-            El seguro de Crimen Comercial solo puede cotizarse junto con otro producto. Si solo requiere este producto, la cotización no puede continuar por este canal y deberá gestionarse con la ayuda del asesor comercial.
-          </ZrAlert>
-        )}
-      </div>
+      </ZrFieldset>
 
       <div className="form-row cols-3">
         <ZdsInput control={control} name="frm_gen_tipo_negocio" label="Tipo de negocio" readOnly />
@@ -384,11 +384,9 @@ function InfoTomador({
       )}
 
       {nitConfirmCreate && (
-        <div className="tia-confirm-create">
-          <div className="tia-confirm-text">
-            El NIT ingresado no fue encontrado en TIA. ¿Desea crear un nuevo cliente con los datos que va a ingresar?
-          </div>
-          <div className="tia-confirm-actions">
+        <ZrAlert config="alert" {...({ 'hide-close': true } as object)}>
+          El NIT ingresado no fue encontrado en TIA. ¿Desea crear un nuevo cliente con los datos que va a ingresar?
+          <div {...({ 'z-flex': '75' } as object)} style={{ flexWrap: 'wrap', marginTop: 'var(--zs-75)' }}>
             <ZrButton config="primary" icon="check:line" onClick={onConfirmCreate}>
               Sí, crear nuevo cliente
             </ZrButton>
@@ -396,7 +394,7 @@ function InfoTomador({
               Cancelar
             </ZrButton>
           </div>
-        </div>
+        </ZrAlert>
       )}
 
       {nitNotFound && (
@@ -819,8 +817,8 @@ export default function SolicitudFfFl() {
     }
   };
 
-  if (loading) return <div className="screen-loading"><div className="spinner" /></div>;
-  if (error) return <div className="screen-error">⚠ Error cargando la tarea: {error}</div>;
+  if (loading) return <div className="screen-loading"><ZrLoader /></div>;
+  if (error) return <ZrAlert config="negative" {...({ 'hide-close': true } as object)}>Error cargando la tarea: {error}</ZrAlert>;
 
   if (sent) {
     return (

@@ -1,7 +1,7 @@
 import { useState, useCallback } from 'react';
 import { ActionBar } from '../../components/ActionBar';
 import { useTask } from '../../core/useTask';
-import { ZrButton, ZrModal, ZrAlert, ZrIcon } from '../../components/fields/ZdsFields';
+import { ZrButton, ZrModal, ZrAlert, ZrIcon, ZrLoader, ZdsStatusBadge, ZrCard } from '../../components/fields/ZdsFields';
 import ResultCard from '../../components/ResultCard';
 import FormSection from '../../components/FormSection';
 import ScreenHeader from '../../components/ScreenHeader';
@@ -124,7 +124,7 @@ export default function SolDocEmi() {
     return (
       <div className="screen-wrapper">
         <div className="screen-loading">
-          <div className="spinner" />
+          <ZrLoader />
           <span>Cargando…</span>
         </div>
       </div>
@@ -134,7 +134,7 @@ export default function SolDocEmi() {
   if (error) {
     return (
       <div className="screen-wrapper">
-        <div className="screen-error">⚠ Error cargando la tarea: {error}</div>
+        <ZrAlert config="negative" {...({ 'hide-close': true } as object)}>Error cargando la tarea: {error}</ZrAlert>
       </div>
     );
   }
@@ -146,7 +146,7 @@ export default function SolDocEmi() {
     <div className="screen-wrapper">
       {submitting && (
         <div className="loading-overlay">
-          <div className="spinner" />
+          <ZrLoader />
         </div>
       )}
 
@@ -211,27 +211,27 @@ export default function SolDocEmi() {
       </div>
 
       {/* Modal de ayuda */}
-      <ZrModal model={infoOpen} onChange={(v: boolean) => setInfoOpen(v)} style={{ ['--z-modal--backdrop' as any]: 'rgba(11,27,60,.45)' }}>
+      <ZrModal model={infoOpen} onChange={(v: boolean) => setInfoOpen(v)} style={{ ['--z-modal--backdrop' as any]: 'color-mix(in srgb, var(--z-modal-backdrop) 45%, transparent)' }}>
         <HelpModal title="Documentos de Emisión" subtitle="Una nota de cobertura por producto seleccionado en la cotización">
-          <p className="help-section-label">Productos y documentos requeridos</p>
+          <strong>Productos y documentos requeridos</strong>
           <div z-flex="col:50">
             {PRODUCTO_DOC_DEFS.map((def) => {
               const activo = docsActivos.some((d) => d.key === def.key);
               return (
-                <div key={def.key} className={`help-product-row${activo ? ' help-product-active' : ''}`}>
-                  <div className="help-product-name">
-                    {def.producto}
-                    {activo && <span className="badge-active">Requerido</span>}
+                <ZrCard key={def.key} {...({ config: 'grid' } as object)}>
+                  <div z-flex="75" z-align="left:center">
+                    <strong>{def.producto}</strong>
+                    {activo && <ZdsStatusBadge variant="info">Requerido</ZdsStatusBadge>}
                   </div>
-                  <div className="help-product-doc"><ZrIcon icon="file-blank:line" config="xs" /> {def.descripcion}</div>
-                </div>
+                  <div z-flex="50" z-align="left:center"><ZrIcon icon="file-blank:line" config="xs" /> {def.descripcion}</div>
+                </ZrCard>
               );
             })}
           </div>
           {docsActivos.length === 0 && (
-            <div className="help-note">
-              ℹ No se detectaron productos activos. Se muestran todos los posibles.
-            </div>
+            <ZrAlert config="info" {...({ 'hide-close': true } as object)}>
+              No se detectaron productos activos. Se muestran todos los posibles.
+            </ZrAlert>
           )}
         </HelpModal>
       </ZrModal>

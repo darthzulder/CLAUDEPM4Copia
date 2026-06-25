@@ -3,7 +3,7 @@ import { ActionBar } from '../../components/ActionBar';
 import { useTask } from '../../core/useTask';
 import { useRequestFiles, type Pm4File } from '../../core/useRequestFiles';
 import PdfViewer from '../../components/PdfViewer';
-import { ZrButton, ZrAlert, ZrIcon } from '../../components/fields/ZdsFields';
+import { ZrButton, ZrAlert, ZrIcon, ZrLoader } from '../../components/fields/ZdsFields';
 import ResultCard from '../../components/ResultCard';
 import FormSection from '../../components/FormSection';
 import ScreenHeader from '../../components/ScreenHeader';
@@ -107,7 +107,7 @@ export default function VisualizarDocumentos() {
     return (
       <div className="screen-wrapper">
         <div className="screen-loading">
-          <div className="spinner" />
+          <ZrLoader />
           <span>Cargando documentos…</span>
         </div>
       </div>
@@ -117,7 +117,7 @@ export default function VisualizarDocumentos() {
   if (error) {
     return (
       <div className="screen-wrapper">
-        <div className="screen-error">⚠ Error cargando la tarea: {error}</div>
+        <ZrAlert config="negative" {...({ 'hide-close': true } as object)}>Error cargando la tarea: {error}</ZrAlert>
       </div>
     );
   }
@@ -130,7 +130,7 @@ export default function VisualizarDocumentos() {
     <div className="screen-wrapper">
       {submitting && (
         <div className="loading-overlay">
-          <div className="spinner" />
+          <ZrLoader />
         </div>
       )}
 
@@ -162,7 +162,7 @@ export default function VisualizarDocumentos() {
         >
           {filesLoading && (
             <div className="no-docs-card">
-              <div className="pdf-spinner" />
+              <ZrLoader style={{ ['--z-loader--size' as never]: '20px' }} />
               <p>Buscando documentos del caso…</p>
             </div>
           )}

@@ -6,19 +6,19 @@ interface HelpModalProps {
   children: React.ReactNode;
 }
 
+/**
+ * Contenedor de contenido de ayuda dentro de un ZrModal.
+ * CSS-free: solo primitivos de layout DS (z-flex) + un divisor tokenizado
+ * (ZDS no tiene componente divider). La tipografía es la base del DS.
+ */
 export default function HelpModal({ title, subtitle, children }: HelpModalProps) {
   return (
-    <div className="help-modal">
-      <div className="help-modal-header">
-        <div className="help-modal-icon">i</div>
-        <div>
-          <div className="help-modal-title">{title}</div>
-          {subtitle && <div className="help-modal-subtitle">{subtitle}</div>}
-        </div>
+    <div z-flex="col:150">
+      <div z-flex="col:50">
+        <strong>{title}</strong>
+        {subtitle && <span>{subtitle}</span>}
       </div>
-      <div className="help-modal-body">
-        {children}
-      </div>
+      {children}
     </div>
   );
 }

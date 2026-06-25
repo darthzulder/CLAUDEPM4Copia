@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useTask } from '../../core/useTask';
-import { ZrButton, ZrModal } from '../../components/fields/ZdsFields';
+import { ZrButton, ZrModal, ZrAlert, ZrLoader } from '../../components/fields/ZdsFields';
 import ResultCard from '../../components/ResultCard';
 import ScreenHeader from '../../components/ScreenHeader';
 import { RESPUESTA_VALUES, type RespuestaCotizacionData } from './variables';
@@ -110,7 +110,7 @@ export default function RespuestaCotizacion() {
     return (
       <div className="screen-wrapper">
         <div className="screen-loading">
-          <div className="spinner" />
+          <ZrLoader />
           <span>Cargando resultado…</span>
         </div>
       </div>
@@ -120,7 +120,7 @@ export default function RespuestaCotizacion() {
   if (error) {
     return (
       <div className="screen-wrapper">
-        <div className="screen-error">⚠ Error al cargar el resultado: {error}</div>
+        <ZrAlert config="negative" {...({ 'hide-close': true } as object)}>Error al cargar el resultado: {error}</ZrAlert>
       </div>
     );
   }
@@ -149,7 +149,7 @@ export default function RespuestaCotizacion() {
     <div className="screen-wrapper">
       {submitting && (
         <div className="loading-overlay">
-          <div className="spinner" />
+          <ZrLoader />
         </div>
       )}
 

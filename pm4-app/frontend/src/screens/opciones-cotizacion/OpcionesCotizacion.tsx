@@ -3,7 +3,7 @@ import { useForm } from 'react-hook-form';
 import { useTask } from '../../core/useTask';
 import { resolveFileId } from '../../core/useRequestFiles';
 import PdfViewer from '../../components/PdfViewer';
-import { ZrButton, ZdsSelect, ZdsTextarea, ZrTabs, ZrAlert } from '../../components/fields/ZdsFields';
+import { ZrButton, ZdsSelect, ZdsTextarea, ZrTabs, ZrAlert, ZrLoader } from '../../components/fields/ZdsFields';
 import ResultCard from '../../components/ResultCard';
 import FormSection from '../../components/FormSection';
 import ScreenHeader from '../../components/ScreenHeader';
@@ -117,7 +117,7 @@ export default function OpcionesCotizacion() {
     return (
       <div className="screen-wrapper">
         <div className="screen-loading">
-          <div className="spinner" />
+          <ZrLoader />
           <span>Cargando cotización…</span>
         </div>
       </div>
@@ -127,7 +127,7 @@ export default function OpcionesCotizacion() {
   if (error) {
     return (
       <div className="screen-wrapper">
-        <div className="screen-error">Error al cargar la tarea: {error}</div>
+        <ZrAlert config="negative" {...({ 'hide-close': true } as object)}>Error al cargar la tarea: {error}</ZrAlert>
       </div>
     );
   }
@@ -140,7 +140,7 @@ export default function OpcionesCotizacion() {
     <div className="screen-wrapper">
       {submitting && (
         <div className="loading-overlay">
-          <div className="spinner" />
+          <ZrLoader />
         </div>
       )}
 

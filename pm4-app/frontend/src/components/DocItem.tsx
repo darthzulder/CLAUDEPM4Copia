@@ -106,7 +106,7 @@ export default function DocItem({
       {/* Descripción */}
       <div className="doc-body">
         <span className="doc-desc">{descripcion}</span>
-        {vigencia && <span className="doc-validity">{vigencia}</span>}
+        {vigencia && <span className="doc-meta">{vigencia}</span>}
       </div>
 
       {/* Estado */}

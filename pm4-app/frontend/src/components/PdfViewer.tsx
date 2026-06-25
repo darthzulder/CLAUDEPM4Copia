@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from 'react';
 import pm4 from '../api/pm4Client';
-import { ZrButton } from './fields/ZdsFields';
+import { ZrButton, ZrLoader } from './fields/ZdsFields';
 
 interface Props {
   /** ID del archivo en PM4 */
@@ -78,7 +78,7 @@ export default function PdfViewer({ fileId, label, height = 640, className = '' 
 
       {loading && (
         <div className="pdf-viewer-state">
-          <div className="pdf-spinner" />
+          <ZrLoader style={{ ['--z-loader--size' as never]: '20px' }} />
           <span>Cargando documento…</span>
         </div>
       )}
