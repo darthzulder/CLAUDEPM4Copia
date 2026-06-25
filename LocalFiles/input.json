@@ -1,0 +1,374 @@
+{
+    "_user": {
+        "id": 4,
+        "uuid": "a1e37af0-bfa7-410e-b6c8-f7d2cefcc699",
+        "email": "nelson.bravo.caballero@gmail.com",
+        "firstname": "Nelson",
+        "lastname": "Bravo",
+        "username": "dev.nelson.bravo",
+        "status": "ACTIVE",
+        "address": null,
+        "city": null,
+        "state": null,
+        "postal": null,
+        "country": null,
+        "phone": null,
+        "fax": null,
+        "cell": null,
+        "title": null,
+        "birthdate": null,
+        "timezone": "UTC",
+        "datetime_format": "m/d/Y H:i",
+        "language": "en",
+        "meta": {
+            "pinnedControls": [
+                {
+                    "id": "nodeType_372",
+                    "icon": "https://cozurich.dev.cloud.processmaker.net/js/img/start-event.27ee6b1c.svg",
+                    "rank": 10,
+                    "type": "processmaker-modeler-start-event",
+                    "items": [
+                        {
+                            "id": "processmaker-modeler-start-event",
+                            "icon": "https://cozurich.dev.cloud.processmaker.net/js/img/start-event.27ee6b1c.svg",
+                            "rank": 10,
+                            "type": "processmaker-modeler-start-event",
+                            "label": "Start Event",
+                            "control": true,
+                            "bpmnType": "bpmn:StartEvent"
+                        },
+                        {
+                            "id": "processmaker-modeler-message-start-event",
+                            "icon": "https://cozurich.dev.cloud.processmaker.net/js/img/message-start-event.e2d5addf.svg",
+                            "rank": 11,
+                            "type": "processmaker-modeler-message-start-event",
+                            "label": "Message Start Event",
+                            "control": true,
+                            "bpmnType": "bpmn:StartEvent"
+                        },
+                        {
+                            "id": "processmaker-modeler-conditional-start-event",
+                            "icon": "https://cozurich.dev.cloud.processmaker.net/js/img/conditional-start-event.485aa22f.svg",
+                            "rank": 12,
+                            "type": "processmaker-modeler-conditional-start-event",
+                            "label": "Conditional Start Event",
+                            "control": true,
+                            "bpmnType": "bpmn:StartEvent"
+                        },
+                        {
+                            "id": "processmaker-modeler-signal-start-event",
+                            "icon": "https://cozurich.dev.cloud.processmaker.net/js/img/signal-start-event.4239bcab.svg",
+                            "rank": 13,
+                            "type": "processmaker-modeler-signal-start-event",
+                            "label": "Signal Start Event",
+                            "control": true,
+                            "bpmnType": "bpmn:StartEvent"
+                        },
+                        {
+                            "id": "processmaker-modeler-start-timer-event",
+                            "icon": "https://cozurich.dev.cloud.processmaker.net/js/img/timer-start-event.c354a032.svg",
+                            "rank": 14,
+                            "type": "processmaker-modeler-start-timer-event",
+                            "label": "Start Timer Event",
+                            "control": true,
+                            "bpmnType": "bpmn:StartEvent"
+                        },
+                        {
+                            "id": "processmaker-modeler-email-start-event",
+                            "icon": "/vendor/processmaker/packages/package-email-start-event/assets/email-start-event-control.svg",
+                            "rank": 15,
+                            "type": "processmaker-modeler-email-start-event",
+                            "label": "Email Start Event",
+                            "control": true,
+                            "bpmnType": "bpmn:StartEvent",
+                            "dataTest": "processmaker-modeler-email-start-event"
+                        }
+                    ],
+                    "label": "Start Event",
+                    "bpmnType": "bpmn:StartEvent"
+                },
+                {
+                    "id": "nodeType_371",
+                    "icon": "https://cozurich.dev.cloud.processmaker.net/js/img/generic-intermediate-event.96b0ece1.svg",
+                    "rank": 20,
+                    "type": "processmaker-modeler-intermediate-catch-timer-event",
+                    "items": [
+                        {
+                            "id": "processmaker-modeler-intermediate-catch-timer-event",
+                            "icon": "https://cozurich.dev.cloud.processmaker.net/js/img/intermediate-timer-event.e880bbcc.svg",
+                            "rank": 21,
+                            "type": "processmaker-modeler-intermediate-catch-timer-event",
+                            "label": "Intermediate Timer Event",
+                            "control": true
+                        },
+                        {
+                            "id": "processmaker-modeler-intermediate-signal-catch-event",
+                            "icon": "https://cozurich.dev.cloud.processmaker.net/js/img/intermediate-signal-catch-event.ce6fe9b6.svg",
+                            "rank": 22,
+                            "type": "processmaker-modeler-intermediate-signal-catch-event",
+                            "label": "Intermediate Signal Catch Event",
+                            "control": true
+                        },
+                        {
+                            "id": "processmaker-modeler-intermediate-signal-throw-event",
+                            "icon": "https://cozurich.dev.cloud.processmaker.net/js/img/intermediate-signal-throw-event.2f50ec9d.svg",
+                            "rank": 23,
+                            "type": "processmaker-modeler-intermediate-signal-throw-event",
+                            "label": "Intermediate Signal Throw Event",
+                            "control": true
+                        },
+                        {
+                            "id": "processmaker-modeler-intermediate-message-catch-event",
+                            "icon": "https://cozurich.dev.cloud.processmaker.net/js/img/intermediate-message-catch-event.6c9df16a.svg",
+                            "rank": 24,
+                            "type": "processmaker-modeler-intermediate-message-catch-event",
+                            "label": "Intermediate Message Catch Event",
+                            "control": true
+                        },
+                        {
+                            "id": "processmaker-modeler-intermediate-message-throw-event",
+                            "icon": "https://cozurich.dev.cloud.processmaker.net/js/img/intermediate-message-throw-event.43b59c5e.svg",
+                            "rank": 25,
+                            "type": "processmaker-modeler-intermediate-message-throw-event",
+                            "label": "Intermediate Message Throw Event",
+                            "control": true
+                        },
+                        {
+                            "id": "processmaker-modeler-intermediate-conditional-catch-event",
+                            "icon": "https://cozurich.dev.cloud.processmaker.net/js/img/intermediate-conditional-catch-event.638dee5a.svg",
+                            "rank": 26,
+                            "type": "processmaker-modeler-intermediate-conditional-catch-event",
+                            "label": "Intermediate Conditional Catch Event",
+                            "control": true
+                        }
+                    ],
+                    "label": "Intermediate Event",
+                    "bpmnType": "bpmn:IntermediateCatchEvent"
+                },
+                {
+                    "id": "nodeType_375",
+                    "icon": "https://cozurich.dev.cloud.processmaker.net/js/img/end-event.484eed9c.svg",
+                    "rank": 30,
+                    "type": "processmaker-modeler-end-event",
+                    "items": [
+                        {
+                            "id": "processmaker-modeler-end-event",
+                            "icon": "https://cozurich.dev.cloud.processmaker.net/js/img/end-event.484eed9c.svg",
+                            "rank": 31,
+                            "type": "processmaker-modeler-end-event",
+                            "label": "End Event",
+                            "control": true
+                        },
+                        {
+                            "id": "processmaker-modeler-message-end-event",
+                            "icon": "https://cozurich.dev.cloud.processmaker.net/js/img/message-end-event.6b25bec9.svg",
+                            "rank": 32,
+                            "type": "processmaker-modeler-message-end-event",
+                            "label": "Message End Event",
+                            "control": true
+                        },
+                        {
+                            "id": "processmaker-modeler-error-end-event",
+                            "icon": "https://cozurich.dev.cloud.processmaker.net/js/img/error-end-event.be1352e7.svg",
+                            "rank": 33,
+                            "type": "processmaker-modeler-error-end-event",
+                            "label": "Error End Event",
+                            "control": true
+                        },
+                        {
+                            "id": "processmaker-modeler-signal-end-event",
+                            "icon": "https://cozurich.dev.cloud.processmaker.net/js/img/signal-end-event.e6feb2d5.svg",
+                            "rank": 34,
+                            "type": "processmaker-modeler-signal-end-event",
+                            "label": "Signal End Event",
+                            "control": true
+                        },
+                        {
+                            "id": "processmaker-modeler-terminate-end-event",
+                            "icon": "https://cozurich.dev.cloud.processmaker.net/js/img/terminate-end-event.53b2871d.svg",
+                            "rank": 35,
+                            "type": "processmaker-modeler-terminate-end-event",
+                            "label": "Terminate End Event",
+                            "control": true
+                        }
+                    ],
+                    "label": "End Event",
+                    "bpmnType": "bpmn:EndEvent"
+                },
+                {
+                    "id": "nodeType_376",
+                    "icon": "https://cozurich.dev.cloud.processmaker.net/js/img/task.9eaeba47.svg",
+                    "rank": 40,
+                    "type": "processmaker-modeler-task",
+                    "items": [
+                        {
+                            "id": "processmaker-modeler-task",
+                            "icon": "https://cozurich.dev.cloud.processmaker.net/js/img/task.9eaeba47.svg",
+                            "rank": 41,
+                            "type": "processmaker-modeler-task",
+                            "label": "Form Task",
+                            "control": true
+                        },
+                        {
+                            "id": "processmaker-modeler-manual-task",
+                            "icon": "https://cozurich.dev.cloud.processmaker.net/js/img/manual-task.166f9f35.svg",
+                            "rank": 42,
+                            "type": "processmaker-modeler-manual-task",
+                            "label": "Manual Task",
+                            "control": true
+                        },
+                        {
+                            "id": "processmaker-modeler-script-task",
+                            "icon": "https://cozurich.dev.cloud.processmaker.net/js/img/script-task.8d648d88.svg",
+                            "rank": 43,
+                            "type": "processmaker-modeler-script-task",
+                            "label": "Script Task",
+                            "control": true
+                        },
+                        {
+                            "id": "processmaker-modeler-call-activity",
+                            "icon": "https://cozurich.dev.cloud.processmaker.net/js/img/sub-task.255eb842.svg",
+                            "rank": 44,
+                            "type": "processmaker-modeler-call-activity",
+                            "label": "Sub Process",
+                            "control": true
+                        }
+                    ],
+                    "label": "Task",
+                    "bpmnType": [
+                        "bpmn:Task",
+                        "bpmn:UserTask",
+                        "bpmn:GlobalTask",
+                        "bpmn:SubProcess"
+                    ]
+                },
+                {
+                    "id": "nodeType_377",
+                    "icon": "https://cozurich.dev.cloud.processmaker.net/js/img/generic-gateway.94311044.svg",
+                    "rank": 50,
+                    "type": "processmaker-modeler-exclusive-gateway",
+                    "items": [
+                        {
+                            "id": "processmaker-modeler-exclusive-gateway",
+                            "icon": "https://cozurich.dev.cloud.processmaker.net/js/img/exclusive-gateway.2d93a745.svg",
+                            "rank": 51,
+                            "type": "processmaker-modeler-exclusive-gateway",
+                            "label": "Exclusive Gateway",
+                            "control": true
+                        },
+                        {
+                            "id": "processmaker-modeler-inclusive-gateway",
+                            "icon": "https://cozurich.dev.cloud.processmaker.net/js/img/inclusive-gateway.d73cfd85.svg",
+                            "rank": 52,
+                            "type": "processmaker-modeler-inclusive-gateway",
+                            "label": "Inclusive Gateway",
+                            "control": true
+                        },
+                        {
+                            "id": "processmaker-modeler-parallel-gateway",
+                            "icon": "https://cozurich.dev.cloud.processmaker.net/js/img/parallel-gateway.7b6e28ab.svg",
+                            "rank": 53,
+                            "type": "processmaker-modeler-parallel-gateway",
+                            "label": "Parallel Gateway",
+                            "control": true
+                        },
+                        {
+                            "id": "processmaker-modeler-event-based-gateway",
+                            "icon": "https://cozurich.dev.cloud.processmaker.net/js/img/event-based-gateway.b7344f6f.svg",
+                            "rank": 54,
+                            "type": "processmaker-modeler-event-based-gateway",
+                            "label": "Event Based Gateway",
+                            "control": true
+                        }
+                    ],
+                    "label": "Gateway",
+                    "bpmnType": "bpmn:ExclusiveGateway"
+                },
+                {
+                    "id": "nodeType_378",
+                    "icon": "https://cozurich.dev.cloud.processmaker.net/js/img/pool.d79eba80.svg",
+                    "rank": 60,
+                    "type": "processmaker-modeler-pool",
+                    "label": "Pool",
+                    "bpmnType": "bpmn:Participant"
+                }
+            ]
+        },
+        "connected_accounts": null,
+        "is_administrator": true,
+        "is_system": 0,
+        "expires_at": null,
+        "loggedin_at": "2026-06-18T17:19:55+00:00",
+        "active_at": "2026-06-18T18:40:05+00:00",
+        "created_at": "2026-05-28T15:58:42+00:00",
+        "updated_at": "2026-05-30T18:38:15+00:00",
+        "deleted_at": null,
+        "delegation_user_id": null,
+        "manager_id": null,
+        "schedule": null,
+        "force_change_password": 0,
+        "avatar": null,
+        "password_changed_at": "2026-05-28 15:58:42",
+        "preferences_2fa": null,
+        "email_task_notification": 1,
+        "fullname": "Nelson Bravo"
+    },
+    "_request": {
+        "id": 32219,
+        "uuid": "a20c12d2-532d-4e54-ae67-f32cb61d6742",
+        "process_id": 25,
+        "process_collaboration_id": null,
+        "collaboration_uuid": null,
+        "user_id": 4,
+        "parent_request_id": null,
+        "participant_id": null,
+        "callable_id": "ProcessId",
+        "status": "ACTIVE",
+        "name": "Fast Flow - Financial Lines",
+        "do_not_sanitize": [
+            "errorMessage",
+            "iframe_url",
+            "_request.id",
+            "user_token_encrypted"
+        ],
+        "errors": null,
+        "completed_at": null,
+        "initiated_at": "2026-06-17T20:16:30+00:00",
+        "created_at": "2026-06-17T20:16:30+00:00",
+        "updated_at": "2026-06-17T20:16:39+00:00",
+        "process_version_id": 450,
+        "signal_events": [],
+        "case_title": "COL -  -  - LRCG-BPM-971",
+        "case_number": 49,
+        "case_title_formatted": "COL - <b></b> - <b></b> - <b>LRCG-BPM-971</b>",
+        "last_stage_id": null,
+        "last_stage_name": null,
+        "progress": 0,
+        "startEventId": "nodo_inicio_web",
+        "startEventName": "Inicio",
+        "alternative": "A"
+    },
+    "frm_pais": "Colombia",
+    "debug_flag": "true",
+    "iframe_url": "https://pm4-app-tp3j.onrender.com/",
+    "frm_comision": "17",
+    "frm_clearance": "SI",
+    "frm_fast_flow": "FAST FLOW",
+    "ramoSapFinance": "67",
+    "ramoDescripcion": "Responsabilidad Civil General",
+    "tri_flujo_inicio": "FAST FLOW",
+    "frm_sales_support": "Nelson Bravo",
+    "respuesta_Servicio": null,
+    "frm_caseUnderwriting": "NO",
+    "frm_fecha_cotizacion": "2026-06-17",
+    "frm_respCot_decision": "EN PROGRESO",
+    "frm_ambito_geografico": "COLOMBIA",
+    "tri_estado_cotizacion": "COTIZANDO",
+    "tri_numero_cotizacion": 971,
+    "frm_canal_distribucion": "CO009 Other Broker",
+    "frm_gen_num_cotizacion": "LRCG-BPM-971",
+    "frm_segmento_cotizacion": "C. Seguro comercial",
+    "frm_sancionesComerciales": "NO",
+    "Solicitud_areaResponsable": "No definida",
+    "frm_tipo_negocio_cotización": "(Co_mm Mercado Medio)"
+}
