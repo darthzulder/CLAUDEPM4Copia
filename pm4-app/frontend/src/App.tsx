@@ -18,6 +18,7 @@ import RevisarQuejaAsignar from './screens/revisar-queja-asignar/RevisarQuejaAsi
 import CorregirDatosFormulario from './screens/COL_QD-corregir-datos-formulario/CorregirDatosFormulario';
 import CrearRecibirQueja from './screens/COL_QD_CrearRecibirQueja/CrearRecibirQueja';
 import DsCatalog from './screens/ds-catalog/DsCatalog';
+import CierreM3 from './screens/COL_QD_cierre-m3/CierreM3';
 
 class ErrorBoundary extends Component<{ children: ReactNode }, { error: Error | null }> {
   state = { error: null };
@@ -57,6 +58,7 @@ const SCREENS: Record<string, React.ComponentType> = {
   'COL_QD-corregir-datos-formulario': CorregirDatosFormulario,
   'COL_QD_CrearRecibirQueja': CrearRecibirQueja,
   'ds-catalog': DsCatalog,
+  'COL_QD_cierre-m3': CierreM3,
 };
 
 const DEBUG_BANNER_STYLE: React.CSSProperties = {

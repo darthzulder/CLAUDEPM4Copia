@@ -1154,3 +1154,85 @@ z-table :is(th, td)[config*="right"] {
   min-height: 38px;
   align-items: center;
 }
+
+
+/* ========== revisar-queja-asignar ========== */
+/* =====================================================
+   REVISAR QUEJA Y ASIGNAR RESPONSABLE — SP2-T01
+   Proceso: SP2-T01 | Quejas Directas | Zurich Colombia
+   ===================================================== */
+
+/* ──────────────────────────────────────
+   BADGE DE PRIORIDAD
+────────────────────────────────────── */
+
+/* .sla-* → indicador SLA no usado en TSX, eliminado */
+
+
+/* ========== COL_QD_cierre-m3 ========== */
+/* =====================================================
+   CIERRE REGULATORIO MOMENTO 3 — SP3-T01/T04/T08
+   Proceso: Quejas Directas | Zurich Colombia
+   ===================================================== */
+
+/* ── Grid de estado (Sección 1) ── */
+.estado-cierre-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--zs-100) var(--zs-150);
+  padding: var(--zs-100) 0 var(--zs-50);
+}
+
+@media (max-width: 600px) {
+  .estado-cierre-grid { grid-template-columns: 1fr; }
+}
+
+/* ── Contador de intentos ── */
+.intentos-valor {
+  font: var(--zf-body-16--700);
+  color: var(--z-blue);
+  line-height: 1;
+  padding-top: 4px;
+}
+
+/* ── Panel de último error ── */
+.ultimo-error-panel {
+  background: var(--zc-peach-20);
+  border-left: 3px solid var(--zc-peach-aa);
+  border-radius: 0 4px 4px 0;
+  padding: var(--zs-75) var(--zs-100);
+  margin-top: 4px;
+}
+
+.ultimo-error-texto {
+  font: var(--zf-capt-12);
+  color: var(--zc-peach-aa);
+  word-break: break-word;
+}
+
+/* ── Helper de validación PDF ── */
+.cierre-m3--form-helper {
+  font: var(--zf-capt-12);
+  margin-top: 4px;
+}
+
+.cierre-m3--validacion-ok  { color: var(--z-green); }
+.cierre-m3--validacion-error { color: var(--z-red); }
+
+/* ── Input nativo de archivo ── */
+.cierre-m3--file-input {
+  display: block;
+  width: 100%;
+  font: var(--zf-body-14);
+  color: var(--z-text);
+  border: 1px solid var(--z-border);
+  border-radius: 4px;
+  padding: var(--zs-75) var(--zs-100);
+  background: #fff;
+  cursor: pointer;
+}
+
+.cierre-m3--file-input:focus {
+  outline: 2px solid var(--z-blue);
+  outline-offset: 1px;
+}
