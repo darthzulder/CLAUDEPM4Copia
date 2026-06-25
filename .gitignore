@@ -1,6 +1,9 @@
 #LocalFiles
 LocalFiles/
 
+# Claude Code — configuración local personal
+.claude/settings.local.json
+
 # Graphify outputs
 graphify-out/
 graph.json
