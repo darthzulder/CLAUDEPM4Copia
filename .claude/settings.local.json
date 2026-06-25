@@ -27,7 +27,13 @@
       "Skill(run:*)",
       "Skill(update-config)",
       "Skill(update-config:*)",
-      "PowerShell(cd \"D:\\\\Beesmart\\\\ProcessMaker Zurich\\\\CLAUDEPM4Copia\"; powershell -NoProfile -NonInteractive -File \".claude\\\\read-graph.ps1\" | Select-String -Pattern \"hookEventName|additionalContext\" | Select-Object -First 3)"
+      "PowerShell(cd \"D:\\\\Beesmart\\\\ProcessMaker Zurich\\\\CLAUDEPM4Copia\"; powershell -NoProfile -NonInteractive -File \".claude\\\\read-graph.ps1\" | Select-String -Pattern \"hookEventName|additionalContext\" | Select-Object -First 3)",
+      "Bash(PYTHONIOENCODING=utf-8 python -c ' *)",
+      "Bash(cat .claude/launch.json)",
+      "Bash(tail -5 /tmp/pm4-dev.log)",
+      "Bash(cat /tmp/pm4-dev.log 2>/dev/null | head -40)",
+      "mcp__Claude_Preview__preview_start",
+      "Bash(graphify update *)"
     ]
   }
 }

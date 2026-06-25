@@ -12,7 +12,7 @@ import SolDocEmi from './screens/col-emision/SolDocEmi';
 import VerDocEmi from './screens/col-emision/VerDocEmi';
 import EstadoCorreo from './screens/estado-correo/EstadoCorreo';
 import RecibirQueja from './screens/recibir-queja/RecibirQueja';
-import RevisarErrorTecnico from './screens/revisar-error-tecnico/RevisarErrorTecnico';
+import RevisionErrorTecnicoApi from './screens/COL_QD_Revision_Error_Tecnico_API/RevisionErrorTecnicoApi';
 import CorregirErrorFuncionalSS from './screens/corregir-error-funcional-ss/CorregirErrorFuncionalSS';
 import RevisarQuejaAsignar from './screens/revisar-queja-asignar/RevisarQuejaAsignar';
 import CorregirDatosFormulario from './screens/COL_QD-corregir-datos-formulario/CorregirDatosFormulario';
@@ -52,7 +52,7 @@ const SCREENS: Record<string, React.ComponentType> = {
   'ver-doc-emi': VerDocEmi,
   'estado-correo': EstadoCorreo,
   'recibir-queja': RecibirQueja,
-  'revisar-error-tecnico': RevisarErrorTecnico,
+  'COL_QD_Revision_Error_Tecnico_API': RevisionErrorTecnicoApi,
   'corregir-error-funcional-ss': CorregirErrorFuncionalSS,
   'revisar-queja-asignar': RevisarQuejaAsignar,
   'COL_QD-corregir-datos-formulario': CorregirDatosFormulario,
