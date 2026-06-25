@@ -26,7 +26,8 @@
       "Skill(run)",
       "Skill(run:*)",
       "Skill(update-config)",
-      "Skill(update-config:*)"
+      "Skill(update-config:*)",
+      "PowerShell(cd \"D:\\\\Beesmart\\\\ProcessMaker Zurich\\\\CLAUDEPM4Copia\"; powershell -NoProfile -NonInteractive -File \".claude\\\\read-graph.ps1\" | Select-String -Pattern \"hookEventName|additionalContext\" | Select-Object -First 3)"
     ]
   }
 }
