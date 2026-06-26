@@ -9,7 +9,7 @@ import {
   ZdsStatusBadge, ZrButton, ZrAlert, ZrLoader,
 } from '../../components/fields/ZdsFields';
 import pm4 from '../../api/pm4Client';
-import { OPTIONS, DEFAULTS, ADJUNTO_KEYS, CrearRecibirQuejaFormData } from './variables';
+import { OPTIONS, DEFAULTS, ADJUNTO_KEYS, CrearRecibirQuejaFormData, WEB_ENTRY_PROCESS_ID, WEB_ENTRY_EVENT_ID } from './variables';
 import { fieldError } from './errorHelper';
 import SeccionConsumidor from './SeccionConsumidor';
 import SeccionDetalleQueja from './SeccionDetalleQueja';
@@ -24,7 +24,7 @@ function estadoVariant(estado: string): 'success' | 'danger' | 'info' | 'neutral
 }
 
 export default function CrearRecibirQueja() {
-  const { task, loading, error, submitting, completeTask, startProcess, isWebEntry } = useTask();
+  const { task, loading, error, submitting, completeTask, isWebEntry } = useTask();
   const fileRegistry = useRef(new Map<string, File>());
   const [sent, setSent] = useState(false);
 
@@ -54,8 +54,12 @@ export default function CrearRecibirQueja() {
   const onSubmit = async (data: CrearRecibirQuejaFormData) => {
     try {
       if (isWebEntry) {
-        const result = await startProcess(data as unknown as Record<string, unknown>);
-        const newRequestId = (result?.request_id ?? result?.id) as number | undefined;
+        const result = await pm4.post<Record<string, unknown>>(
+          `/process_events/${WEB_ENTRY_PROCESS_ID}`,
+          data,
+          { params: { event: WEB_ENTRY_EVENT_ID } },
+        );
+        const newRequestId = (result.data?.request_id ?? result.data?.id) as number | undefined;
         if (newRequestId && fileRegistry.current.size > 0) {
           await uploadFiles(newRequestId);
         }
