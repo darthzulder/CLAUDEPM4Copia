@@ -60,9 +60,14 @@ const DEBUG_BANNER_STYLE: React.CSSProperties = {
   letterSpacing: '.4px', pointerEvents: 'none',
 };
 
+declare const __COMMIT_HASH__: string;
+
 function ScreenIndex() {
   return (
-    <div style={{ minHeight: '100vh', background: 'var(--zg-white-zurich)', fontFamily: 'sans-serif', padding: '40px 32px' }}>
+    <div style={{ minHeight: '100vh', background: 'var(--zg-white-zurich)', fontFamily: 'sans-serif', padding: '40px 32px', position: 'relative' }}>
+      <div style={{ position: 'absolute', top: 16, right: 24, fontSize: 12, color: 'var(--zg-7)', fontFamily: 'monospace' }}>
+        {__COMMIT_HASH__}
+      </div>
       <div style={{ maxWidth: 800, margin: '0 auto' }}>
         <div style={{ marginBottom: 32 }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 8 }}>
