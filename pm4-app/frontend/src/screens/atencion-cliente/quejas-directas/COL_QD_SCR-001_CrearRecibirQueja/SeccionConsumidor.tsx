@@ -1,7 +1,7 @@
 import { useEffect } from 'react';
 import type { UseFormReturn } from 'react-hook-form';
-import FormSection from '../../components/FormSection';
-import { ZdsInput, ZdsSelect } from '../../components/fields/ZdsFields';
+import FormSection from '../../../../components/FormSection';
+import { ZdsInput, ZdsSelect } from '../../../../components/fields/ZdsFields';
 import { OPTIONS, DEPARTAMENTOS, MUNICIPIOS_POR_DPTO, CrearRecibirQuejaFormData } from './variables';
 import { fieldError } from './errorHelper';
 

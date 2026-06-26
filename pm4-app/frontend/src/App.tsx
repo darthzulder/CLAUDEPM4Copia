@@ -11,14 +11,10 @@ import RevSARLAFT from './screens/FAST-FLOW/col-emision/RevSARLAFT';
 import SolDocEmi from './screens/FAST-FLOW/col-emision/SolDocEmi';
 import VerDocEmi from './screens/FAST-FLOW/col-emision/VerDocEmi';
 import EstadoCorreo from './screens/FAST-FLOW/estado-correo/EstadoCorreo';
-import RecibirQueja from './screens/recibir-queja/RecibirQueja';
-import RevisarErrorTecnico from './screens/revisar-error-tecnico/RevisarErrorTecnico';
-import CorregirErrorFuncionalSS from './screens/corregir-error-funcional-ss/CorregirErrorFuncionalSS';
-import RevisarQuejaAsignar from './screens/revisar-queja-asignar/RevisarQuejaAsignar';
-import CorregirDatosFormulario from './screens/COL_QD-corregir-datos-formulario/CorregirDatosFormulario';
-import CrearRecibirQueja from './screens/COL_QD_CrearRecibirQueja/CrearRecibirQueja';
+import CorregirDatosFormulario from './screens/atencion-cliente/quejas-directas/COL_QD_SCR-002_corregir-datos-formulario/CorregirDatosFormulario';
+import CrearRecibirQueja from './screens/atencion-cliente/quejas-directas/COL_QD_SCR-001_CrearRecibirQueja/CrearRecibirQueja';
 import DsCatalog from './screens/ds-catalog/DsCatalog';
-import CierreM3 from './screens/COL_QD_cierre-m3/CierreM3';
+import CierreM3 from './screens/atencion-cliente/quejas-directas/COL_QD_SCR-010_cierre-m3/CierreM3';
 
 class ErrorBoundary extends Component<{ children: ReactNode }, { error: Error | null }> {
   state = { error: null };
@@ -51,14 +47,10 @@ const SCREENS: Record<string, React.ComponentType> = {
   'sol-doc-emi': SolDocEmi,
   'ver-doc-emi': VerDocEmi,
   'estado-correo': EstadoCorreo,
-  'recibir-queja': RecibirQueja,
-  'revisar-error-tecnico': RevisarErrorTecnico,
-  'corregir-error-funcional-ss': CorregirErrorFuncionalSS,
-  'revisar-queja-asignar': RevisarQuejaAsignar,
-  'COL_QD-corregir-datos-formulario': CorregirDatosFormulario,
-  'COL_QD_CrearRecibirQueja': CrearRecibirQueja,
+  'COL_QD_SCR-002_corregir-datos-formulario': CorregirDatosFormulario,
+  'COL_QD_SCR-001_CrearRecibirQueja': CrearRecibirQueja,
+  'COL_QD_SCR-010_cierre-m3': CierreM3,
   'ds-catalog': DsCatalog,
-  'COL_QD_cierre-m3': CierreM3,
 };
 
 const DEBUG_BANNER_STYLE: React.CSSProperties = {

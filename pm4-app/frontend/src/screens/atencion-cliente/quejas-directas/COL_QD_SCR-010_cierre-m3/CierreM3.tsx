@@ -1,12 +1,12 @@
 import { useEffect, useRef } from 'react';
 import { useForm } from 'react-hook-form';
-import { useTask } from '../../core/useTask';
-import FormSection from '../../components/FormSection';
-import { ZdsInput, ZdsSelect, ZdsDate, ZdsRadio, ZrButton, ZrAlert } from '../../components/fields/ZdsFields';
+import { useTask } from '../../../../core/useTask';
+import FormSection from '../../../../components/FormSection';
+import { ZdsInput, ZdsSelect, ZdsDate, ZdsRadio, ZrButton, ZrAlert } from '../../../../components/fields/ZdsFields';
 import { OPTIONS, REGEX_NOMENCLATURA_PDF, CierreM3FormData } from './variables';
 import SeccionEstadoCierre from './SeccionEstadoCierre';
-import zurichLogo from '../../resources/zurich/ZurichLogo_Horz_White_CMYK_no_R.png';
-import pm4 from '../../api/pm4Client';
+import zurichLogo from '../../../../resources/zurich/ZurichLogo_Horz_White_CMYK_no_R.png';
+import pm4 from '../../../../api/pm4Client';
 
 export default function CierreM3() {
   const { task, loading, error, submitting, completeTask } = useTask();

@@ -1,7 +1,7 @@
 import { useEffect } from 'react';
 import type { UseFormReturn } from 'react-hook-form';
-import { ZdsInput, ZdsSelect, ZrAlert } from '../../components/fields/ZdsFields';
-import FormSection from '../../components/FormSection';
+import { ZdsInput, ZdsSelect, ZrAlert } from '../../../../components/fields/ZdsFields';
+import FormSection from '../../../../components/FormSection';
 import type { CampoConError, CorregirDatosFormData } from './variables';
 import { DEPARTAMENTOS, MUNICIPIOS_POR_DPTO } from './variables';
 

@@ -1,11 +1,11 @@
 import { useEffect, useMemo, useState } from 'react';
 import { useForm } from 'react-hook-form';
-import { ActionBar } from '../../components/ActionBar';
-import FormSection from '../../components/FormSection';
-import InfoBar from '../../components/InfoBar';
-import ScreenHeader from '../../components/ScreenHeader';
-import { ZdsInput, ZrAlert, ZrButton, ZrLoader } from '../../components/fields/ZdsFields';
-import { useTask } from '../../core/useTask';
+import { ActionBar } from '../../../../components/ActionBar';
+import FormSection from '../../../../components/FormSection';
+import InfoBar from '../../../../components/InfoBar';
+import ScreenHeader from '../../../../components/ScreenHeader';
+import { ZdsInput, ZrAlert, ZrButton, ZrLoader } from '../../../../components/fields/ZdsFields';
+import { useTask } from '../../../../core/useTask';
 import { ERRORES_EJEMPLO, type CampoConError, type CorregirDatosFormData } from './variables';
 import SeccionErroresValidacion from './SeccionErroresValidacion';
 

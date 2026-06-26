@@ -1,14 +1,14 @@
 import { useEffect, useRef } from 'react';
 import { useForm } from 'react-hook-form';
-import { useTask } from '../../core/useTask';
-import ScreenHeader from '../../components/ScreenHeader';
-import FormSection from '../../components/FormSection';
-import { ActionBar } from '../../components/ActionBar';
+import { useTask } from '../../../../core/useTask';
+import ScreenHeader from '../../../../components/ScreenHeader';
+import FormSection from '../../../../components/FormSection';
+import { ActionBar } from '../../../../components/ActionBar';
 import {
   ZdsInput, ZdsSelect, ZdsCheckboxField,
   ZdsStatusBadge, ZrButton, ZrAlert, ZrLoader,
-} from '../../components/fields/ZdsFields';
-import pm4 from '../../api/pm4Client';
+} from '../../../../components/fields/ZdsFields';
+import pm4 from '../../../../api/pm4Client';
 import { OPTIONS, DEFAULTS, ADJUNTO_KEYS, CrearRecibirQuejaFormData } from './variables';
 import { fieldError } from './errorHelper';
 import SeccionConsumidor from './SeccionConsumidor';

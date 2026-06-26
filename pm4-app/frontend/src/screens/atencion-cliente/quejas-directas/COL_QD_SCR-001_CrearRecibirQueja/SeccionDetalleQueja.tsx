@@ -1,9 +1,9 @@
 import { useEffect } from 'react';
 import type { MutableRefObject } from 'react';
 import type { UseFormReturn } from 'react-hook-form';
-import FormSection from '../../components/FormSection';
-import DocSupportUploader from '../../components/DocSupportUploader';
-import { ZdsInput, ZdsSelect, ZdsRadio, ZdsTextarea } from '../../components/fields/ZdsFields';
+import FormSection from '../../../../components/FormSection';
+import DocSupportUploader from '../../../../components/DocSupportUploader';
+import { ZdsInput, ZdsSelect, ZdsRadio, ZdsTextarea } from '../../../../components/fields/ZdsFields';
 import { OPTIONS, ADJUNTO_KEYS, CrearRecibirQuejaFormData } from './variables';
 import { fieldError } from './errorHelper';
 
