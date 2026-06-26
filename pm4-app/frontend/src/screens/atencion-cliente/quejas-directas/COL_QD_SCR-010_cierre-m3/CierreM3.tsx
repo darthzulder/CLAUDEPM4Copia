@@ -304,16 +304,16 @@ export default function CierreM3() {
 
         {/* Barra de acciones */}
         <div className="actions-bar">
-          <ZrButton config="secondary:s" onClick={() => window.history.back()}>Cancelar</ZrButton>
+          <ZrButton config="secondary" onClick={() => window.history.back()}>Cancelar</ZrButton>
           <ZrButton
-            config="secondary:s"
+            config="secondary"
             disabled={submitting}
             onClick={() => completeTask({ ...w, _draft: true } as Record<string, unknown>)}
           >
             Guardar Borrador
           </ZrButton>
           <ZrButton
-            config="positive:s"
+            config="positive"
             onClick={() => { handleSubmit(onSubmit)(); }}
             loading={submitting}
             disabled={submitting || !puedeEnviar}

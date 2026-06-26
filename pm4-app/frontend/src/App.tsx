@@ -15,6 +15,7 @@ import CorregirDatosFormulario from './screens/atencion-cliente/quejas-directas/
 import CrearRecibirQueja from './screens/atencion-cliente/quejas-directas/COL_QD_SCR-001_CrearRecibirQueja/CrearRecibirQueja';
 import DsCatalog from './screens/ds-catalog/DsCatalog';
 import CierreM3 from './screens/atencion-cliente/quejas-directas/COL_QD_SCR-010_cierre-m3/CierreM3';
+import RevisionErrorTecnicoApi from './screens/atencion-cliente/quejas-directas/COL_QD_SCR-004_Revision_Error_Tecnico_API/RevisionErrorTecnicoApi';
 
 class ErrorBoundary extends Component<{ children: ReactNode }, { error: Error | null }> {
   state = { error: null };
@@ -50,6 +51,7 @@ const SCREENS: Record<string, React.ComponentType> = {
   'COL_QD_SCR-002_corregir-datos-formulario': CorregirDatosFormulario,
   'COL_QD_SCR-001_CrearRecibirQueja': CrearRecibirQueja,
   'COL_QD_SCR-010_cierre-m3': CierreM3,
+  'COL_QD_SCR-004_Revision_Error_Tecnico_API': RevisionErrorTecnicoApi,
   'ds-catalog': DsCatalog,
 };
 

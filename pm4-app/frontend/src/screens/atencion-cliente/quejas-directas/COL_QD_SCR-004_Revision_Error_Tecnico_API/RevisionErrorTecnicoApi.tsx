@@ -1,13 +1,13 @@
 import { useEffect, useState } from 'react';
 import { useForm } from 'react-hook-form';
-import { useTask } from '../../core/useTask';
-import ScreenHeader from '../../components/ScreenHeader';
-import FormSection from '../../components/FormSection';
-import { ActionBar } from '../../components/ActionBar';
+import { useTask } from '../../../../core/useTask';
+import ScreenHeader from '../../../../components/ScreenHeader';
+import FormSection from '../../../../components/FormSection';
+import { ActionBar } from '../../../../components/ActionBar';
 import {
   ZdsInput, ZdsTextarea, ZdsRadio,
   ZrButton, ZrAlert, ZrModal, ZrLoader,
-} from '../../components/fields/ZdsFields';
+} from '../../../../components/fields/ZdsFields';
 import { OPTIONS, DEFAULTS, RevisionErrorTecnicoApiFormData, AccionErrorTecnico } from './variables';
 
 export default function RevisionErrorTecnicoApi() {
@@ -177,7 +177,7 @@ export default function RevisionErrorTecnicoApi() {
           {/* ── Acciones (ACT-004-01 / ACT-004-02) ── */}
           <ActionBar>
             <ZrButton
-              config="secondary:s"
+              config="secondary"
               loading={submitting}
               disabled={submitting}
               onClick={() => enviar('ESCALAR_PROVEEDOR')}
@@ -185,7 +185,7 @@ export default function RevisionErrorTecnicoApi() {
               Escalar a Proveedor
             </ZrButton>
             <ZrButton
-              config="positive:s"
+              config="positive"
               loading={submitting}
               disabled={submitting || !puedeAutorizar}
               onClick={() => { onAutorizar(); }}

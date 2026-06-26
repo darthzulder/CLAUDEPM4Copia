@@ -130,11 +130,11 @@ export default function CorregirDatosFormulario() {
           </ZrAlert>
 
           <ActionBar>
-            <ZrButton config="secondary:s" onClick={() => window.history.back()}>
+            <ZrButton config="secondary" onClick={() => window.history.back()}>
               Cancelar Corrección
             </ZrButton>
             <ZrButton
-              config="positive:s"
+              config="positive"
               disabled={!canSubmit}
               loading={submitting}
               onClick={() => { handleSubmit(onSubmit)(); }}
