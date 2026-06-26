@@ -1,13 +1,13 @@
 import { useEffect, useState } from 'react';
 import { useForm } from 'react-hook-form';
-import { useTask } from '../../core/useTask';
-import ScreenHeader from '../../components/ScreenHeader';
-import FormSection from '../../components/FormSection';
-import { ActionBar } from '../../components/ActionBar';
+import { useTask } from '../../../../core/useTask';
+import ScreenHeader from '../../../../components/ScreenHeader';
+import FormSection from '../../../../components/FormSection';
+import { ActionBar } from '../../../../components/ActionBar';
 import {
   ZdsInput, ZdsTextarea, ZdsRadio,
   ZrButton, ZrAlert, ZrModal, ZrLoader,
-} from '../../components/fields/ZdsFields';
+} from '../../../../components/fields/ZdsFields';
 import { OPTIONS, DEFAULTS, RevisionErrorTecnicoApiFormData, AccionErrorTecnico } from './variables';
 
 export default function RevisionErrorTecnicoApi() {
