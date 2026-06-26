@@ -10,7 +10,7 @@ import {
 } from '../../../../components/fields/ZdsFields';
 import pm4 from '../../../../api/pm4Client';
 import { useCollection } from '../../../../core/useCollection';
-import { COLLECTION_DEFS, DEFAULTS, ADJUNTO_KEYS, CrearRecibirQuejaFormData } from './variables';
+import { COLLECTION_DEFS, DEFAULTS, ADJUNTO_KEYS, CrearRecibirQuejaFormData, WEB_ENTRY_PROCESS_ID, WEB_ENTRY_EVENT_ID } from './variables';
 import { fieldError } from './errorHelper';
 import SeccionConsumidor from './SeccionConsumidor';
 import SeccionDetalleQueja from './SeccionDetalleQueja';
