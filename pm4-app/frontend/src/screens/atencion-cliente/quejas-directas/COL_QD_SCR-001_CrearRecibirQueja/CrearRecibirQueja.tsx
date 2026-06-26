@@ -29,7 +29,10 @@ export default function CrearRecibirQueja() {
   const fileRegistry = useRef(new Map<string, File>());
   const [sent, setSent] = useState(false);
 
-  const form = useForm<CrearRecibirQuejaFormData>({ defaultValues: { ...DEFAULTS } });
+  const form = useForm<CrearRecibirQuejaFormData>({
+    mode: 'onChange',
+    defaultValues: { ...DEFAULTS },
+  });
   const { control, watch, handleSubmit, reset, formState: { errors, isSubmitted } } = form;
   const w = watch();
 
@@ -225,10 +228,10 @@ export default function CrearRecibirQueja() {
 
           {/* ── Acciones ── */}
           <ActionBar>
-            <ZrButton config="secondary:s" onClick={limpiarFormulario}>Limpiar Formulario</ZrButton>
-            <ZrButton config="secondary:s" onClick={() => window.history.back()}>Cancelar</ZrButton>
+            <ZrButton config="secondary" onClick={limpiarFormulario}>Limpiar Formulario</ZrButton>
+            <ZrButton config="secondary" onClick={() => window.history.back()}>Cancelar</ZrButton>
             <ZrButton
-              config="positive:s"
+              config="positive"
               onClick={() => handleSubmit(onSubmit)()}
               loading={submitting}
               disabled={submitting || !puedeEnviar}

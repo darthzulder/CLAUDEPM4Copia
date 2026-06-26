@@ -177,7 +177,7 @@ export default function RevisionErrorTecnicoApi() {
           {/* ── Acciones (ACT-004-01 / ACT-004-02) ── */}
           <ActionBar>
             <ZrButton
-              config="secondary:s"
+              config="secondary"
               loading={submitting}
               disabled={submitting}
               onClick={() => enviar('ESCALAR_PROVEEDOR')}
@@ -185,7 +185,7 @@ export default function RevisionErrorTecnicoApi() {
               Escalar a Proveedor
             </ZrButton>
             <ZrButton
-              config="positive:s"
+              config="positive"
               loading={submitting}
               disabled={submitting || !puedeAutorizar}
               onClick={() => { onAutorizar(); }}
