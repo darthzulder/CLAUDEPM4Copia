@@ -118,8 +118,8 @@ export default function CrearRecibirQueja() {
         title="Radicación de PQRS"
         subtitle={[
           'SCR-000 · P01-T00',
-          'Gestión de Quejas Directas',
-          'Atención al Consumidor Financiero',
+          'Gestión de Quejas Directas.',
+          'Atención al Consumidor Financiero.',
         ]}
       />
 
