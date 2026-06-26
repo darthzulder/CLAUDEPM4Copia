@@ -27,10 +27,12 @@ Todos los insumos están en `pm4-app/insumos/`. Para Quejas Directas son:
 | Archivo | Para qué sirve |
 |---|---|
 | `Anexo02_Mockups_TOBE_QuejaDirectas_v3_0.xlsx` | **Fuente principal.** Campos, secciones, acciones, reglas, mensajes, catálogos y permisos por pantalla. (Usar siempre la versión más reciente presente en `insumos/`.) |
-| `Matrices_Maduracion_TO-BE_QuejaDirectas_v2.0.xlsx` | Tareas BPMN, **directrices y reglas de negocio**, roles, documentos de entrada/salida. |
-| `Anexo03_EspecTecnica_TareasAutomatizadas_TOBE_v1_0.xlsx` | Variables de entrada/salida de las tareas automatizadas (nombres canónicos de variable, obligatoriedad). |
+| `Matrices_Maduracion_TO-BE_QuejaDirectas_v3.0.xlsx` | Tareas BPMN, **directrices y reglas de negocio**, roles, documentos de entrada/salida. |
+| `Anexo03_EspecTecnica_TareasAutomatizadas_TOBE_v2_0.xlsx` | Variables de entrada/salida de las tareas automatizadas (nombres canónicos de variable, obligatoriedad). |
 
 > Si en el futuro se agregan otros `.xlsx` a `insumos/`, analizarlos también. **Nunca documentar sin haber leído los insumos.**
+
+> **Índices de insumos en Markdown (preferencia):** antes de leer un `.xlsx` directamente, verificar si existe una carpeta `insumos/<NombreAnexo>/` con un archivo `index.md`. Si existe, leer ese `index.md` primero: enlaza a los `.md` por hoja/sección y es la forma más rápida de navegar el contenido. Solo recurrir al `.xlsx` original (vía Python/openpyxl) si el índice no existe o si la información necesaria no está cubierta en los `.md`.
 
 ### Hojas clave del Anexo02 (Mockups)
 
@@ -74,7 +76,9 @@ Todos los insumos están en `pm4-app/insumos/`. Para Quejas Directas son:
 
 2. **Leer los insumos relevantes.** Extraer y leer (no asumir): la hoja `SCR-xxx`, las filas de la pantalla en `02_Secciones`, `04_Acciones`, `05_Reglas`, `06_Mensajes`, `07_Catalogs`, `08_Permisos`; las filas de su tarea en Matrices `1. Tareas`, `2. Directrices`, `5. Documentos`; y las variables en Anexo03 `05_Variables_Entrada`/`06_Variables_Salida`.
 
-   > **Cómo leer los `.xlsx`:** usar Python con `openpyxl` (`load_workbook(path, data_only=True, read_only=True)`). En Windows la consola puede fallar con UTF-8; **volcar la salida a un archivo `.txt` con `io.open(..., encoding="utf-8")`** y leer ese archivo. Borrar los `.txt` temporales al terminar.
+   > **Cómo leer los insumos — orden de preferencia:**
+   > 1. **Verificar primero si existe un índice Markdown.** Para cada `.xlsx` necesario, comprobar si hay una carpeta `insumos/<NombreAnexo>/index.md` (p. ej. `insumos/Anexo02/index.md`). Si existe, leer ese `index.md`: enlaza a los `.md` de cada hoja y es la ruta más rápida y sin dependencias de Python.
+   > 2. **Si el índice no existe o no cubre la información requerida**, leer el `.xlsx` directamente con Python: `openpyxl` (`load_workbook(path, data_only=True, read_only=True)`). En Windows la consola puede fallar con UTF-8; **volcar la salida a un archivo `.txt` con `io.open(..., encoding="utf-8")`** y leer ese archivo. Borrar los `.txt` temporales al terminar.
 
 3. **Leer la implementación.** Revisar todos los archivos de la carpeta de la pantalla (`*.tsx`, `variables.ts`) y los posibles estilos añadidos en `shared.css` para saber qué se implementó realmente: campos, `rules` de validación, `pattern`/`maxLength`, render condicional, `defaultValues`, dependencias (`useEffect`), botones y acciones. *Nota: No se deben crear archivos `styles.css` locales ni estilos en línea. Toda la visualización, alineación, tablas, formularios, tipografías y tags de estado se rigen únicamente por shared.css y los componentes de ZurichDS para garantizar consistencia absoluta en el diseño global.*
 
@@ -122,7 +126,7 @@ El archivo `DOCUMENTACION_<slug>.md` debe contener, en este orden:
 ## Checklist final
 
 - [ ] Existe `frontend/src/screens/<slug>/DOCUMENTACION_<slug>.md`.
-- [ ] Todos los insumos `.xlsx` de la carpeta `insumos/` fueron analizados.
+- [ ] Todos los insumos relevantes fueron analizados (vía índice Markdown si existe, o `.xlsx` directamente si no).
 - [ ] Todas las secciones obligatorias del documento están presentes.
 - [ ] Cada elemento implementado tiene fuente citada (`Archivo > Hoja > ID/fila`).
 - [ ] Los elementos de insumo no implementados están documentados como pendientes con su fuente.
