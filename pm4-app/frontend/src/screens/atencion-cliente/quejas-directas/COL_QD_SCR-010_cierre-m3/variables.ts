@@ -1,27 +1,15 @@
+import { GLOBAL_COLLECTIONS } from '../../../../core/collections';
+
+export const COLLECTION_DEFS = {
+  estadoQueja: GLOBAL_COLLECTIONS.qd_estadoQueja,
+  favorabilidad: GLOBAL_COLLECTIONS.qd_favorabilidad,
+  aceptacion: GLOBAL_COLLECTIONS.qd_aceptacion,
+  marcacion: GLOBAL_COLLECTIONS.qd_marcacion,
+  quejaExpres: GLOBAL_COLLECTIONS.qd_quejaExpres,
+  tipoFraude: GLOBAL_COLLECTIONS.qd_tipoFraude,
+};
+
 export const OPTIONS = {
-  estadoQueja: [
-    { value: 'CERRADA_CF',      label: 'Cerrada a favor CF' },
-    { value: 'CERRADA_ENTIDAD', label: 'Cerrada a favor entidad' },
-    { value: 'DESISTIDA',       label: 'Desistida' },
-    { value: 'RECTIFICADA',     label: 'Rectificada' },
-  ],
-  favorabilidad: [
-    { value: '1', label: '1. CF' },
-    { value: '2', label: '2. Entidad' },
-    { value: '3', label: '3. Parcial' },
-  ],
-  aceptacion: [
-    { value: '1', label: '1. Aceptada' },
-    { value: '2', label: '2. No aceptada' },
-  ],
-  marcacion: [
-    { value: '1', label: '1. Marcación A' },
-    { value: '2', label: '2. Marcación B' },
-  ],
-  quejaExpres: [
-    { value: '2', label: '2. No' },
-    { value: '1', label: '1. Sí' },
-  ],
   adjuntoRespuestaFinal: [
     { value: 'SI', label: 'Sí' },
     { value: 'NO', label: 'No' },

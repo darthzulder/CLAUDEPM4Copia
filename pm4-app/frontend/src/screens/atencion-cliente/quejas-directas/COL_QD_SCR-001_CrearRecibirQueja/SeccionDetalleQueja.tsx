@@ -4,7 +4,8 @@ import type { UseFormReturn } from 'react-hook-form';
 import FormSection from '../../../../components/FormSection';
 import DocSupportUploader from '../../../../components/DocSupportUploader';
 import { ZdsInput, ZdsSelect, ZdsRadio, ZdsTextarea } from '../../../../components/fields/ZdsFields';
-import { OPTIONS, ADJUNTO_KEYS, CrearRecibirQuejaFormData } from './variables';
+import { useCollection } from '../../../../core/useCollection';
+import { COLLECTION_DEFS, OPTIONS, ADJUNTO_KEYS, CrearRecibirQuejaFormData } from './variables';
 import { fieldError } from './errorHelper';
 
 interface Props {
@@ -12,16 +13,13 @@ interface Props {
   fileRegistry: MutableRefObject<Map<string, File>>;
 }
 
-// CAT-ADMISION (SFC) — editable solo si rol = Defensor (RUL-000-01)
-const ADMISION_OPTS = [
-  { value: '9', label: '9. No aplica' },
-  { value: '1', label: '1. Admitida' },
-  { value: '2', label: '2. No admitida' },
-];
-
 export default function SeccionDetalleQueja({ form, fileRegistry }: Props) {
   const { control, watch, setValue, formState: { errors, isSubmitted } } = form;
   const w = watch();
+
+  const { options: seguroOpts } = useCollection(COLLECTION_DEFS.seguro);
+  const { options: motivoOpts } = useCollection(COLLECTION_DEFS.motivo);
+  const { options: admisionOpts } = useCollection(COLLECTION_DEFS.admision);
 
   const esDefensor = w.qd_rol === 'DEFENSOR';
 
@@ -39,7 +37,7 @@ export default function SeccionDetalleQueja({ form, fileRegistry }: Props) {
           name="qd_seguro"
           control={control}
           label="Selecciona el seguro"
-          options={OPTIONS.seguro}
+          options={seguroOpts}
           rules={{ required: 'Campo requerido' }}
           required
           withSearch
@@ -91,7 +89,7 @@ export default function SeccionDetalleQueja({ form, fileRegistry }: Props) {
           name="qd_motivo"
           control={control}
           label="Cuéntanos el motivo"
-          options={OPTIONS.motivo}
+          options={motivoOpts}
           rules={{ required: 'Campo requerido' }}
           required
           withSearch
@@ -131,7 +129,7 @@ export default function SeccionDetalleQueja({ form, fileRegistry }: Props) {
             name="qd_admision"
             control={control}
             label="Admisión"
-            options={ADMISION_OPTS}
+            options={admisionOpts}
             rules={{ required: 'Campo requerido' }}
             required
             error={err('qd_admision')}

@@ -3,7 +3,8 @@ import { useForm } from 'react-hook-form';
 import { useTask } from '../../../../core/useTask';
 import FormSection from '../../../../components/FormSection';
 import { ZdsInput, ZdsSelect, ZdsDate, ZdsRadio, ZrButton, ZrAlert } from '../../../../components/fields/ZdsFields';
-import { OPTIONS, REGEX_NOMENCLATURA_PDF, CierreM3FormData } from './variables';
+import { useCollection } from '../../../../core/useCollection';
+import { OPTIONS, COLLECTION_DEFS, REGEX_NOMENCLATURA_PDF, CierreM3FormData } from './variables';
 import SeccionEstadoCierre from './SeccionEstadoCierre';
 import zurichLogo from '../../../../resources/zurich/ZurichLogo_Horz_White_CMYK_no_R.png';
 import pm4 from '../../../../api/pm4Client';
@@ -23,6 +24,13 @@ export default function CierreM3() {
   });
 
   const w = watch();
+
+  const { options: estadoQuejaOpts } = useCollection(COLLECTION_DEFS.estadoQueja);
+  const { options: favorabilidadOpts } = useCollection(COLLECTION_DEFS.favorabilidad);
+  const { options: aceptacionOpts } = useCollection(COLLECTION_DEFS.aceptacion);
+  const { options: marcacionOpts } = useCollection(COLLECTION_DEFS.marcacion);
+  const { options: quejaExpresOpts } = useCollection(COLLECTION_DEFS.quejaExpres);
+  const { options: tipoFraudeOpts } = useCollection(COLLECTION_DEFS.tipoFraude);
 
   useEffect(() => {
     if (task?.data) reset(task.data as Partial<CierreM3FormData>);
@@ -128,7 +136,7 @@ export default function CierreM3() {
               name="estadoQueja"
               control={control}
               label="Estado de la Queja"
-              options={OPTIONS.estadoQueja}
+              options={estadoQuejaOpts}
               rules={{ required: 'Campo requerido' }}
               required
               error={err('estadoQueja')}
@@ -165,7 +173,7 @@ export default function CierreM3() {
               name="favorabilidad"
               control={control}
               label="Favorabilidad"
-              options={OPTIONS.favorabilidad}
+              options={favorabilidadOpts}
               rules={{ required: 'Campo requerido' }}
               required
               error={err('favorabilidad')}
@@ -174,7 +182,7 @@ export default function CierreM3() {
               name="aceptacion"
               control={control}
               label="Aceptación"
-              options={OPTIONS.aceptacion}
+              options={aceptacionOpts}
               rules={{ required: 'Campo requerido' }}
               required
               error={err('aceptacion')}
@@ -186,7 +194,7 @@ export default function CierreM3() {
               name="marcacion"
               control={control}
               label="Marcación"
-              options={OPTIONS.marcacion}
+              options={marcacionOpts}
               rules={{ required: 'Campo requerido' }}
               required
               error={err('marcacion')}
@@ -195,7 +203,7 @@ export default function CierreM3() {
               name="quejaExpres"
               control={control}
               label="Queja Exprés"
-              options={OPTIONS.quejaExpres}
+              options={quejaExpresOpts}
               rules={{ required: 'Campo requerido' }}
               required
               error={err('quejaExpres')}
@@ -263,11 +271,12 @@ export default function CierreM3() {
           {w.relacionadaFraude === 'SI' && (
             <>
               <div className="form-row cols-1">
-                <ZdsInput
+                <ZdsSelect
                   name="tipoFraude"
                   control={control}
                   label="Tipo de Fraude"
-                  rules={{ required: 'Campo requerido', maxLength: { value: 200, message: 'Máximo 200 caracteres' } }}
+                  options={tipoFraudeOpts}
+                  rules={{ required: 'Campo requerido' }}
                   required
                   error={err('tipoFraude')}
                 />

@@ -5,97 +5,31 @@
 // Fuente: Anexo02_Mockups_TOBE_QuejaDirectas_v3_0.xlsx → pestaña SCR-000.
 // Catálogos: pestaña 07_Catalogs (valores de ejemplo; varios "Pendiente TI").
 
+import { GLOBAL_COLLECTIONS } from '../../../../core/collections';
+
+export const COLLECTION_DEFS = {
+  tipoSolicitud: GLOBAL_COLLECTIONS.qd_tipoSolicitud,
+  rol: GLOBAL_COLLECTIONS.qd_rol,
+  tipoIdentificacion: GLOBAL_COLLECTIONS.qd_tipoIdentificacion,
+  pais: GLOBAL_COLLECTIONS.qd_pais,
+  departamento: GLOBAL_COLLECTIONS.qd_departamento,
+  ciudad: GLOBAL_COLLECTIONS.qd_ciudad,
+  condicionEspecial: GLOBAL_COLLECTIONS.qd_condicionEspecial,
+  seguro: GLOBAL_COLLECTIONS.qd_seguro,
+  motivo: GLOBAL_COLLECTIONS.qd_motivo,
+  admision: GLOBAL_COLLECTIONS.qd_admision,
+};
+
 // ---------------------------------------------------------------------------
 // Opciones estáticas (selects / radios)
 // ---------------------------------------------------------------------------
 export const OPTIONS = {
-  // CAT-TIPO-SOLIC-PQRS — Lista #2 del formulario PQRS (Zurich)
-  tipoSolicitud: [
-    { value: 'SOLICITUD', label: 'Solicitud' },
-    { value: 'FELICITACION', label: 'Felicitación' },
-    { value: 'QUEJA', label: 'Queja' },
-    { value: 'SUGERENCIA', label: 'Sugerencia' },
-    { value: 'DERECHO_PETICION', label: 'Derecho de petición' },
-  ],
-  // CAT-ROL-RADICADOR (Zurich) — determina instancia y punto de recepción
-  rol: [
-    { value: 'CLIENTE', label: 'Cliente' },
-    { value: 'INTERMEDIARIO', label: 'Intermediario' },
-    { value: 'EMPLEADO', label: 'Empleado Zurich' },
-    { value: 'DEFENSOR', label: 'Defensor del Consumidor' },
-  ],
-  // CAT-TIPO-ID (SFC) — Lista #3. Define el tipo de persona.
-  tipoIdentificacion: [
-    { value: 'RC', label: 'RC — Registro civil' },
-    { value: 'TI', label: 'TI — Tarjeta de identidad' },
-    { value: 'CC', label: 'CC — Cédula de ciudadanía' },
-    { value: 'CE', label: 'CE — Cédula de extranjería' },
-    { value: 'PA', label: 'PA — Pasaporte' },
-    { value: 'PPT', label: 'PPT — Permiso por protección temporal' },
-    { value: 'NIT', label: 'NIT — Persona jurídica' },
-  ],
-  // CAT-COND-ESP (SFC) — pendiente confirmar lista con TI/SFC
-  condicionEspecial: [
-    { value: 'NINGUNA', label: 'Ninguna' },
-    { value: 'ADULTO_MAYOR', label: 'Adulto mayor' },
-    { value: 'DISCAPACIDAD_FISICA', label: 'Discapacidad física' },
-    { value: 'DISCAPACIDAD_COGNITIVA', label: 'Discapacidad cognitiva' },
-    { value: 'VULNERABLE', label: 'Población vulnerable' },
-  ],
-  // CAT-PRODUCTO-SFC (SFC) — homologar Front ↔ SFC
-  seguro: [
-    { value: '101', label: '101. Seguro de automóviles' },
-    { value: '102', label: '102. Seguro de vida' },
-    { value: '103', label: '103. Seguro de hogar' },
-    { value: '104', label: '104. Seguro colectivo de vida' },
-    { value: '109', label: '109. Otros seguros generales' },
-  ],
-  // CAT-MOTIVO-SFC (SFC) — campo crítico (condiciona campos de fraude en M3)
-  motivo: [
-    { value: '301', label: '301. No pago de siniestro' },
-    { value: '302', label: '302. Demora en el pago de siniestro' },
-    { value: '303', label: '303. Terminación unilateral del contrato' },
-    { value: '304', label: '304. Cobro de prima o descuento' },
-    { value: '305', label: '305. Incumplimiento en cobertura' },
-    { value: '399', label: '399. Otro motivo' },
-  ],
-  // CAT-PAIS (SFC) — por defecto 170 — Colombia
-  pais: [
-    { value: '170', label: '170 — Colombia' },
-  ],
   // Réplica SFC (FLD-325)
   replica: [
     { value: 'SI', label: 'Sí' },
     { value: 'NO', label: 'No' },
   ],
 } as const;
-
-// ---------------------------------------------------------------------------
-// Catálogos geográficos Colombia (placeholder — pendiente integración Divipola/SFC)
-// ---------------------------------------------------------------------------
-export const DEPARTAMENTOS = [
-  { value: 'ANTIOQUIA', label: 'Antioquia' },
-  { value: 'ATLANTICO', label: 'Atlántico' },
-  { value: 'BOGOTA', label: 'Bogotá D.C.' },
-  { value: 'BOLIVAR', label: 'Bolívar' },
-  { value: 'CUNDINAMARCA', label: 'Cundinamarca' },
-  { value: 'MAGDALENA', label: 'Magdalena' },
-  { value: 'RISARALDA', label: 'Risaralda' },
-  { value: 'SANTANDER', label: 'Santander' },
-  { value: 'VALLE', label: 'Valle del Cauca' },
-];
-
-export const MUNICIPIOS_POR_DPTO: Record<string, { value: string; label: string }[]> = {
-  ANTIOQUIA:    [{ value: 'MEDELLIN', label: 'Medellín' }, { value: 'BELLO', label: 'Bello' }, { value: 'ENVIGADO', label: 'Envigado' }, { value: 'ITAGUI', label: 'Itagüí' }, { value: 'RIONEGRO', label: 'Rionegro' }],
-  ATLANTICO:    [{ value: 'BARRANQUILLA', label: 'Barranquilla' }, { value: 'SOLEDAD', label: 'Soledad' }, { value: 'MALAMBO', label: 'Malambo' }],
-  BOGOTA:       [{ value: 'BOGOTA', label: 'Bogotá D.C.' }],
-  BOLIVAR:      [{ value: 'CARTAGENA', label: 'Cartagena' }, { value: 'TURBACO', label: 'Turbaco' }, { value: 'MAGANGUE', label: 'Magangué' }],
-  CUNDINAMARCA: [{ value: 'SOACHA', label: 'Soacha' }, { value: 'CHIA', label: 'Chía' }, { value: 'CAJICA', label: 'Cajicá' }, { value: 'FACATATIVA', label: 'Facatativá' }],
-  MAGDALENA:    [{ value: 'SANTA_MARTA', label: 'Santa Marta' }, { value: 'CIENAGA', label: 'Ciénaga' }, { value: 'FUNDACION', label: 'Fundación' }],
-  RISARALDA:    [{ value: 'PEREIRA', label: 'Pereira' }, { value: 'DOSQUEBRADAS', label: 'Dosquebradas' }, { value: 'SANTA_ROSA', label: 'Santa Rosa de Cabal' }],
-  SANTANDER:    [{ value: 'BUCARAMANGA', label: 'Bucaramanga' }, { value: 'FLORIDABLANCA', label: 'Floridablanca' }, { value: 'GIRON', label: 'Girón' }],
-  VALLE:        [{ value: 'CALI', label: 'Cali' }, { value: 'PALMIRA', label: 'Palmira' }, { value: 'BUENAVENTURA', label: 'Buenaventura' }, { value: 'TULUA', label: 'Tuluá' }],
-};
 
 // ---------------------------------------------------------------------------
 // Claves de adjuntos (FLD-330 — multi-archivo, máx 5)

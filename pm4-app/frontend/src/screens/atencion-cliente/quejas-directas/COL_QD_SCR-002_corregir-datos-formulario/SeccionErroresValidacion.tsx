@@ -2,8 +2,9 @@ import { useEffect } from 'react';
 import type { UseFormReturn } from 'react-hook-form';
 import { ZdsInput, ZdsSelect, ZrAlert } from '../../../../components/fields/ZdsFields';
 import FormSection from '../../../../components/FormSection';
+import { useCollection } from '../../../../core/useCollection';
 import type { CampoConError, CorregirDatosFormData } from './variables';
-import { DEPARTAMENTOS, MUNICIPIOS_POR_DPTO } from './variables';
+import { COLLECTION_DEFS } from './variables';
 
 interface Props {
   camposConError: CampoConError[];
@@ -26,15 +27,17 @@ function esCampoCorregido(
 export default function SeccionErroresValidacion({ camposConError, form, triggered }: Props) {
   const { control, watch, setValue, formState: { errors } } = form;
   const dpto = watch('qd_departamento');
-  const municipioOpciones = MUNICIPIOS_POR_DPTO[dpto] ?? [];
+
+  const { options: departamentoOpts } = useCollection(COLLECTION_DEFS.departamento);
+  const { options: municipioOpts } = useCollection(COLLECTION_DEFS.municipio, { qd_departamento: dpto });
 
   // Al cambiar departamento, limpiar municipio si ya no pertenece a la lista nueva
   useEffect(() => {
     if (!dpto) return;
     const current = form.getValues('qd_municipio');
-    if (!municipioOpciones.some(m => m.value === current)) setValue('qd_municipio', '');
+    if (!municipioOpts.some(m => m.value === current)) setValue('qd_municipio', '');
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [dpto]);
+  }, [dpto, municipioOpts]);
 
   if (camposConError.length === 0) return null;
 
@@ -98,7 +101,7 @@ export default function SeccionErroresValidacion({ camposConError, form, trigger
                       name="qd_departamento"
                       control={control}
                       label="Departamento"
-                      options={DEPARTAMENTOS}
+                      options={departamentoOpts}
                       rules={{ required: 'Campo requerido' }}
                       required
                       error={errors.qd_departamento?.message}
@@ -107,7 +110,7 @@ export default function SeccionErroresValidacion({ camposConError, form, trigger
                       name="qd_municipio"
                       control={control}
                       label={campo.etiqueta}
-                      options={municipioOpciones}
+                      options={municipioOpts}
                       rules={{ required: 'Seleccione un municipio válido para el departamento' }}
                       required
                       error={errors.qd_municipio?.message}

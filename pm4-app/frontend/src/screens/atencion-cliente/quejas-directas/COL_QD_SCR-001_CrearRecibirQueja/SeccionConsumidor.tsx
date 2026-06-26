@@ -2,7 +2,8 @@ import { useEffect } from 'react';
 import type { UseFormReturn } from 'react-hook-form';
 import FormSection from '../../../../components/FormSection';
 import { ZdsInput, ZdsSelect } from '../../../../components/fields/ZdsFields';
-import { OPTIONS, DEPARTAMENTOS, MUNICIPIOS_POR_DPTO, CrearRecibirQuejaFormData } from './variables';
+import { useCollection } from '../../../../core/useCollection';
+import { COLLECTION_DEFS, CrearRecibirQuejaFormData } from './variables';
 import { fieldError } from './errorHelper';
 
 interface Props {
@@ -12,6 +13,12 @@ interface Props {
 export default function SeccionConsumidor({ form }: Props) {
   const { control, watch, setValue, formState: { errors, isSubmitted } } = form;
   const w = watch();
+
+  const { options: tipoIdentificacionOpts } = useCollection(COLLECTION_DEFS.tipoIdentificacion);
+  const { options: paisOpts } = useCollection(COLLECTION_DEFS.pais);
+  const { options: departamentoOpts } = useCollection(COLLECTION_DEFS.departamento);
+  const { options: ciudadOpts } = useCollection(COLLECTION_DEFS.ciudad, w as unknown as Record<string, unknown>);
+  const { options: condicionEspecialOpts } = useCollection(COLLECTION_DEFS.condicionEspecial);
 
   // RUL-000-02 / RUL-000-03 — el tipo de documento define el tipo de persona.
   const esJuridica = w.qd_tipoIdentificacion === 'NIT';
@@ -27,7 +34,6 @@ export default function SeccionConsumidor({ form }: Props) {
     setValue('qd_ciudad', '');
   }, [w.qd_departamento, setValue]);
 
-  const municipios = MUNICIPIOS_POR_DPTO[w.qd_departamento] ?? [];
   const err = (name: keyof CrearRecibirQuejaFormData) => fieldError(errors, name, w[name], isSubmitted);
 
   return (
@@ -37,7 +43,7 @@ export default function SeccionConsumidor({ form }: Props) {
           name="qd_tipoIdentificacion"
           control={control}
           label="Selecciona tu tipo de identificación"
-          options={OPTIONS.tipoIdentificacion}
+          options={tipoIdentificacionOpts}
           rules={{ required: 'Campo requerido' }}
           required
           withSearch
@@ -145,7 +151,7 @@ export default function SeccionConsumidor({ form }: Props) {
           name="qd_pais"
           control={control}
           label="País"
-          options={OPTIONS.pais}
+          options={paisOpts}
           rules={{ required: 'Campo requerido' }}
           required
           error={err('qd_pais')}
@@ -154,7 +160,7 @@ export default function SeccionConsumidor({ form }: Props) {
           name="qd_departamento"
           control={control}
           label="Departamento"
-          options={DEPARTAMENTOS}
+          options={departamentoOpts}
           rules={{ required: 'Campo requerido' }}
           required
           withSearch
@@ -164,7 +170,7 @@ export default function SeccionConsumidor({ form }: Props) {
           name="qd_ciudad"
           control={control}
           label="Ciudad"
-          options={municipios}
+          options={ciudadOpts}
           rules={{ required: 'Campo requerido' }}
           required
           disabled={!w.qd_departamento}
@@ -203,7 +209,7 @@ export default function SeccionConsumidor({ form }: Props) {
           name="qd_condicionEspecial"
           control={control}
           label="Condición especial"
-          options={OPTIONS.condicionEspecial}
+          options={condicionEspecialOpts}
           rules={{ required: 'Campo requerido' }}
           required
           error={err('qd_condicionEspecial')}

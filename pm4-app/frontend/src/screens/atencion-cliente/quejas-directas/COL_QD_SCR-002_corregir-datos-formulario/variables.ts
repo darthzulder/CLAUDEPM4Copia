@@ -1,6 +1,13 @@
 // SCR-002 · PAN-02 — Corrección de Datos del Formulario
 // Proceso: P01-T07 | Rol: Gestor de Experiencia | Gestión de Quejas Directas
 
+import { GLOBAL_COLLECTIONS } from '../../../../core/collections';
+
+export const COLLECTION_DEFS = {
+  departamento: GLOBAL_COLLECTIONS.qd_departamento,
+  municipio: GLOBAL_COLLECTIONS.qd_ciudad,
+};
+
 /** Descriptor de campo con error — array inyectado por el BPM vía qd_errores_json */
 export interface CampoConError {
   campo: string;           // nombre del campo RHF (p.ej. 'qd_correoElectronico')
@@ -63,26 +70,4 @@ export const ERRORES_EJEMPLO: CampoConError[] = [
   },
 ];
 
-export const DEPARTAMENTOS = [
-  { value: 'ANTIOQUIA',    label: 'Antioquia' },
-  { value: 'ATLANTICO',   label: 'Atlántico' },
-  { value: 'BOGOTA',      label: 'Bogotá D.C.' },
-  { value: 'BOLIVAR',     label: 'Bolívar' },
-  { value: 'CUNDINAMARCA',label: 'Cundinamarca' },
-  { value: 'MAGDALENA',   label: 'Magdalena' },
-  { value: 'RISARALDA',   label: 'Risaralda' },
-  { value: 'SANTANDER',   label: 'Santander' },
-  { value: 'VALLE',       label: 'Valle del Cauca' },
-] as const;
 
-export const MUNICIPIOS_POR_DPTO: Record<string, { value: string; label: string }[]> = {
-  ANTIOQUIA:    [{ value: 'MEDELLIN', label: 'Medellín' }, { value: 'BELLO', label: 'Bello' }, { value: 'ENVIGADO', label: 'Envigado' }, { value: 'ITAGUI', label: 'Itagüí' }, { value: 'RIONEGRO', label: 'Rionegro' }],
-  ATLANTICO:    [{ value: 'BARRANQUILLA', label: 'Barranquilla' }, { value: 'SOLEDAD', label: 'Soledad' }, { value: 'MALAMBO', label: 'Malambo' }],
-  BOGOTA:       [{ value: 'BOGOTA', label: 'Bogotá D.C.' }],
-  BOLIVAR:      [{ value: 'CARTAGENA', label: 'Cartagena' }, { value: 'TURBACO', label: 'Turbaco' }, { value: 'MAGANGUE', label: 'Magangué' }],
-  CUNDINAMARCA: [{ value: 'SOACHA', label: 'Soacha' }, { value: 'CHIA', label: 'Chía' }, { value: 'CAJICA', label: 'Cajicá' }, { value: 'FACATATIVA', label: 'Facatativá' }],
-  MAGDALENA:    [{ value: 'SANTA_MARTA', label: 'Santa Marta' }, { value: 'CIENAGA', label: 'Ciénaga' }, { value: 'FUNDACION', label: 'Fundación' }],
-  RISARALDA:    [{ value: 'PEREIRA', label: 'Pereira' }, { value: 'DOSQUEBRADAS', label: 'Dosquebradas' }, { value: 'SANTA_ROSA', label: 'Santa Rosa de Cabal' }],
-  SANTANDER:    [{ value: 'BUCARAMANGA', label: 'Bucaramanga' }, { value: 'FLORIDABLANCA', label: 'Floridablanca' }, { value: 'GIRON', label: 'Girón' }],
-  VALLE:        [{ value: 'CALI', label: 'Cali' }, { value: 'PALMIRA', label: 'Palmira' }, { value: 'BUENAVENTURA', label: 'Buenaventura' }, { value: 'TULUA', label: 'Tuluá' }],
-};

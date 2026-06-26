@@ -9,7 +9,8 @@ import {
   ZdsStatusBadge, ZrButton, ZrAlert, ZrLoader,
 } from '../../../../components/fields/ZdsFields';
 import pm4 from '../../../../api/pm4Client';
-import { OPTIONS, DEFAULTS, ADJUNTO_KEYS, CrearRecibirQuejaFormData } from './variables';
+import { useCollection } from '../../../../core/useCollection';
+import { COLLECTION_DEFS, DEFAULTS, ADJUNTO_KEYS, CrearRecibirQuejaFormData } from './variables';
 import { fieldError } from './errorHelper';
 import SeccionConsumidor from './SeccionConsumidor';
 import SeccionDetalleQueja from './SeccionDetalleQueja';
@@ -30,6 +31,9 @@ export default function CrearRecibirQueja() {
   const form = useForm<CrearRecibirQuejaFormData>({ defaultValues: { ...DEFAULTS } });
   const { control, watch, handleSubmit, reset, formState: { errors, isSubmitted } } = form;
   const w = watch();
+
+  const { options: tipoSolicitudOpts } = useCollection(COLLECTION_DEFS.tipoSolicitud);
+  const { options: rolOpts } = useCollection(COLLECTION_DEFS.rol);
 
   useEffect(() => {
     if (task?.data) reset({ ...DEFAULTS, ...(task.data as Partial<CrearRecibirQuejaFormData>) });
@@ -108,10 +112,10 @@ export default function CrearRecibirQueja() {
             </div>
             <div className="form-row cols-2">
               <ZdsSelect name="qd_tipoSolicitud" control={control} label="¿A qué está asociado tu comentario?"
-                options={OPTIONS.tipoSolicitud} rules={{ required: 'Campo requerido' }} required
+                options={tipoSolicitudOpts} rules={{ required: 'Campo requerido' }} required
                 error={err('qd_tipoSolicitud')} />
               <ZdsSelect name="qd_rol" control={control} label="Selecciona tu rol"
-                options={OPTIONS.rol} rules={{ required: 'Campo requerido' }} required
+                options={rolOpts} rules={{ required: 'Campo requerido' }} required
                 error={err('qd_rol')} />
             </div>
             <div className="form-row cols-2">
