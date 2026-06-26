@@ -1,4 +1,4 @@
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { useTask } from '../../core/useTask';
 import ScreenHeader from '../../components/ScreenHeader';
@@ -24,8 +24,9 @@ function estadoVariant(estado: string): 'success' | 'danger' | 'info' | 'neutral
 }
 
 export default function CrearRecibirQueja() {
-  const { task, loading, error, submitting, completeTask } = useTask();
+  const { task, loading, error, submitting, completeTask, startProcess, isWebEntry } = useTask();
   const fileRegistry = useRef(new Map<string, File>());
+  const [sent, setSent] = useState(false);
 
   const form = useForm<CrearRecibirQuejaFormData>({ defaultValues: { ...DEFAULTS } });
   const { control, watch, handleSubmit, reset, formState: { errors, isSubmitted } } = form;
@@ -42,17 +43,31 @@ export default function CrearRecibirQueja() {
     form.setValue('qd_puntoRecepcion', '2. Virtual');
   }, [w.qd_rol, form]);
 
+  const uploadFiles = async (requestId: number) => {
+    for (const [docKey, file] of fileRegistry.current.entries()) {
+      const fd = new FormData();
+      fd.append('file', file);
+      await pm4.post(`/requests/${requestId}/files?data_name=${docKey}`, fd);
+    }
+  };
+
   const onSubmit = async (data: CrearRecibirQuejaFormData) => {
     try {
-      const requestId = task?.process_request_id;
-      if (requestId && fileRegistry.current.size > 0) {
-        for (const [docKey, file] of fileRegistry.current.entries()) {
-          const fd = new FormData();
-          fd.append('file', file);
-          await pm4.post(`/requests/${requestId}/files?data_name=${docKey}`, fd);
+      if (isWebEntry) {
+        const result = await startProcess(data as unknown as Record<string, unknown>);
+        const newRequestId = (result?.request_id ?? result?.id) as number | undefined;
+        if (newRequestId && fileRegistry.current.size > 0) {
+          await uploadFiles(newRequestId);
         }
+        setSent(true);
+      } else {
+        const requestId = task?.process_request_id;
+        if (requestId && fileRegistry.current.size > 0) {
+          await uploadFiles(requestId);
+        }
+        await completeTask(data as unknown as Record<string, unknown>);
+        setSent(true);
       }
-      await completeTask(data as unknown as Record<string, unknown>);
     } catch (err) {
       console.error('[CrearRecibirQueja] Error al enviar:', err);
     }
@@ -63,6 +78,19 @@ export default function CrearRecibirQueja() {
     fileRegistry.current.clear();
     ADJUNTO_KEYS.forEach((k) => form.setValue(k, ''));
   };
+
+  if (sent) {
+    return (
+      <div className="screen-wrapper">
+        <ScreenHeader title="Radicación de PQRS" />
+        <div className="screen-content">
+          <ZrAlert config="positive" {...({ 'hide-close': true } as object)}>
+            Tu solicitud fue radicada exitosamente. Recibirás una confirmación en el correo registrado.
+          </ZrAlert>
+        </div>
+      </div>
+    );
+  }
 
   if (loading) {
     return <div className="screen-wrapper"><div className="screen-loading"><ZrLoader /></div></div>;

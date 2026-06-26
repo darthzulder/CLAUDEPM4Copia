@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback } from 'react';
 import pm4 from '../api/pm4Client';
-import { useTaskId, useCaseId } from './useToken';
+import { useTaskId, useCaseId, useProcessId, useEventId } from './useToken';
 
 export interface TaskData {
   id: number;
@@ -10,8 +10,11 @@ export interface TaskData {
 }
 
 export function useTask() {
-  const taskId  = useTaskId();
-  const caseId  = useCaseId();
+  const taskId    = useTaskId();
+  const caseId    = useCaseId();
+  const processId = useProcessId();
+  const eventId   = useEventId();
+  const isWebEntry = !taskId && !caseId;
   const [task, setTask]           = useState<TaskData | null>(null);
   const [loading, setLoading]     = useState(true);
   const [error, setError]         = useState<string | null>(null);
@@ -67,5 +70,22 @@ export function useTask() {
     [task]
   );
 
-  return { task, loading, error, submitting, completeTask };
+  const startProcess = useCallback(
+    async (formData: Record<string, unknown>) => {
+      if (!processId) throw new Error('No hay process_id para iniciar el proceso');
+      setSubmitting(true);
+      try {
+        const params: Record<string, string> = {};
+        if (eventId) params['event'] = eventId;
+        const response = await pm4.post(`/process_events/${processId}`, formData, { params });
+        console.log('[useTask] Proceso iniciado:', response.data);
+        return response.data as Record<string, unknown>;
+      } finally {
+        setSubmitting(false);
+      }
+    },
+    [processId, eventId]
+  );
+
+  return { task, loading, error, submitting, completeTask, startProcess, isWebEntry };
 }
