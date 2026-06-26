@@ -20,3 +20,13 @@ export function useCaseId(): string {
   const params = new URLSearchParams(window.location.search);
   return params.get('case_id') ?? import.meta.env.VITE_CASE_ID ?? '';
 }
+
+export function useProcessId(): string {
+  const params = new URLSearchParams(window.location.search);
+  return params.get('process_id') ?? import.meta.env.VITE_PROCESS_ID ?? '';
+}
+
+export function useEventId(): string {
+  const params = new URLSearchParams(window.location.search);
+  return params.get('event_id') ?? import.meta.env.VITE_EVENT_ID ?? '';
+}

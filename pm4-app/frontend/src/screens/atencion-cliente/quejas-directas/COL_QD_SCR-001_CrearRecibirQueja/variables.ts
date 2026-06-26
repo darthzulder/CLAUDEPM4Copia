@@ -21,6 +21,12 @@ export const COLLECTION_DEFS = {
 };
 
 // ---------------------------------------------------------------------------
+// Web Entry — proceso e inicio del evento en PM4
+// ---------------------------------------------------------------------------
+export const WEB_ENTRY_PROCESS_ID = 31;
+export const WEB_ENTRY_EVENT_ID = 'node_661';
+
+// ---------------------------------------------------------------------------
 // Opciones estáticas (selects / radios)
 // ---------------------------------------------------------------------------
 export const OPTIONS = {

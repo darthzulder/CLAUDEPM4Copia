@@ -147,9 +147,28 @@ router.get('/cases/:case_id/task', async (req, res) => {
 
 // Processes
 router.get('/start_processes', (req, res) => pm4Request('GET', '/start_processes', req, res));
-router.post('/process_events/:process_id', (req, res) =>
-  pm4Request('POST', `/process_events/${req.params.process_id}`, req, res)
-);
+router.post('/process_events/:process_id', async (req, res) => {
+  const token = getToken(req);
+  const url = `${pm4Base()}/api/1.0/process_events/${req.params.process_id}`;
+  console.log(`[process_events] POST ${url} event=${req.query['event'] ?? '(none)'}`);
+  try {
+    const response = await axios.post(url, req.body, {
+      params: req.query,
+      headers: {
+        Authorization: `Bearer ${token}`,
+        'Content-Type': 'application/json',
+        Accept: 'application/json',
+      },
+    });
+    console.log(`[process_events] ← ${response.status}`, response.data);
+    res.json(response.data);
+  } catch (err) {
+    const e = err as AxiosError;
+    const status = e.response?.status ?? 500;
+    console.error('[process_events] ERROR:', e.response?.data ?? e.message);
+    res.status(status).json(e.response?.data ?? { message: e.message });
+  }
+});
 
 // Collections
 router.get('/collections', (req, res) => pm4Request('GET', '/collections', req, res));
