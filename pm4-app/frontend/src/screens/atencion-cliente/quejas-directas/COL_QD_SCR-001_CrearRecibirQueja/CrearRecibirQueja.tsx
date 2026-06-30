@@ -11,7 +11,6 @@ import {
 import pm4 from '../../../../api/pm4Client';
 import { useCollection } from '../../../../core/useCollection';
 import { COLLECTION_DEFS, DEFAULTS, ADJUNTO_KEYS, CrearRecibirQuejaFormData, WEB_ENTRY_PROCESS_ID, WEB_ENTRY_EVENT_ID } from './variables';
-import { fieldError } from './errorHelper';
 import SeccionConsumidor from './SeccionConsumidor';
 import SeccionDetalleQueja from './SeccionDetalleQueja';
 
@@ -30,7 +29,7 @@ export default function CrearRecibirQueja() {
   const [sent, setSent] = useState(false);
 
   const form = useForm<CrearRecibirQuejaFormData>({
-    mode: 'onChange',
+    mode: 'onTouched',
     defaultValues: { ...DEFAULTS },
   });
   const { control, watch, handleSubmit, reset, formState: { errors, isSubmitted } } = form;
@@ -114,7 +113,7 @@ export default function CrearRecibirQueja() {
     );
   }
 
-  const err = (name: keyof CrearRecibirQuejaFormData) => fieldError(errors, name, w[name], isSubmitted);
+  const err = (name: keyof CrearRecibirQuejaFormData) => errors[name]?.message;
   const puedeEnviar = !!w.qd_autorizacionDatos && !!w.qd_captcha;
   const tieneEstadoSFC = !!w.qd_estadoSmartSupervision || !!w.qd_fechaRadicacionSFC;
   const tieneResponsable = !!w.qd_rolGrupo || !!w.qd_responsable;

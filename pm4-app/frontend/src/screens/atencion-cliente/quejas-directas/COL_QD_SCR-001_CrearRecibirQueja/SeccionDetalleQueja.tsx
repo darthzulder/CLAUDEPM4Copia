@@ -6,7 +6,6 @@ import DocSupportUploader from '../../../../components/DocSupportUploader';
 import { ZdsInput, ZdsSelect, ZdsRadio, ZdsTextarea } from '../../../../components/fields/ZdsFields';
 import { useCollection } from '../../../../core/useCollection';
 import { COLLECTION_DEFS, OPTIONS, ADJUNTO_KEYS, CrearRecibirQuejaFormData } from './variables';
-import { fieldError } from './errorHelper';
 
 interface Props {
   form: UseFormReturn<CrearRecibirQuejaFormData>;
@@ -14,7 +13,7 @@ interface Props {
 }
 
 export default function SeccionDetalleQueja({ form, fileRegistry }: Props) {
-  const { control, watch, setValue, formState: { errors, isSubmitted } } = form;
+  const { control, watch, setValue, formState: { errors } } = form;
   const w = watch();
 
   const { options: seguroOpts } = useCollection(COLLECTION_DEFS.seguro);
@@ -28,7 +27,7 @@ export default function SeccionDetalleQueja({ form, fileRegistry }: Props) {
     setValue('qd_escalamientoDefensor', esDefensor ? 'Sí' : 'No');
   }, [esDefensor, setValue]);
 
-  const err = (name: keyof CrearRecibirQuejaFormData) => fieldError(errors, name, w[name], isSubmitted);
+  const err = (name: keyof CrearRecibirQuejaFormData) => errors[name]?.message;
 
   return (
     <FormSection title="Detalle de la Queja">
