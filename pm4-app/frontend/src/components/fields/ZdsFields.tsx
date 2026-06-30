@@ -1,6 +1,6 @@
 import { Controller } from 'react-hook-form';
-import type { Control, RegisterOptions, FieldPath, FieldValues } from 'react-hook-form';
-import { useEffect, type ComponentProps, type ReactNode } from 'react';
+import type { Control, RegisterOptions, FieldPath, FieldValues, UseFormSetValue, UseFormSetError, UseFormClearErrors } from 'react-hook-form';
+import { useEffect, type ComponentProps, type ReactNode, type MutableRefObject } from 'react';
 import { ZrModal as ZrModalRaw } from '@zurich/web-components/react/modal';
 import { ZrTextInput }        from '@zurich/web-components/react/text-input';
 import { ZrCheckbox }         from '@zurich/web-components/react/checkbox';
@@ -45,7 +45,8 @@ export { ZrBadge };
 export { ZrChip }        from '@zurich/web-components/react/chip';
 import { ZrTag }          from '@zurich/web-components/react/tag';
 export { ZrTag };
-export { ZrFileInput }   from '@zurich/web-components/react/file-input';
+import { ZrFileInput }   from '@zurich/web-components/react/file-input';
+export { ZrFileInput };
 export { ZrSidebar }     from '@zurich/web-components/react/sidebar';
 export { ZrTile }        from '@zurich/web-components/react/tile';
 export { ZrTooltip }     from '@zurich/web-components/react/tooltip';
@@ -447,6 +448,101 @@ export function ZdsCalendar<TFV extends FieldValues>({
         />
       )}
     />
+  );
+}
+
+// ─── ZdsFileInput — ZrFileInput + Controller + Validation ────────────────────
+interface FileInputProps<TFV extends FieldValues> {
+  control: Control<TFV>;
+  name: FieldPath<TFV>;
+  label?: string;
+  fileRegistry?: MutableRefObject<Map<string, File>>;
+  setValue: UseFormSetValue<TFV>;
+  setError: UseFormSetError<TFV>;
+  clearErrors: UseFormClearErrors<TFV>;
+  error?: string;
+  allowedExtensions?: string[];
+  maxSizeMb?: number;
+  errorMessage?: string;
+  droppable?: boolean;
+}
+
+export function ZdsFileInput<TFV extends FieldValues>({
+  control,
+  name,
+  label = '',
+  fileRegistry,
+  setValue,
+  setError,
+  clearErrors,
+  error,
+  allowedExtensions = ['pdf', 'doc', 'docx', 'jpg', 'jpeg', 'png'],
+  maxSizeMb = 5,
+  errorMessage,
+  droppable = true,
+}: FileInputProps<TFV>) {
+  const defaultError = `Solo se permiten archivos ${allowedExtensions.join(', ')}, máx ${maxSizeMb} MB`;
+  const effectiveError = errorMessage || defaultError;
+
+  return (
+    <div style={{ flexGrow: 1, display: 'flex', flexDirection: 'column' }}>
+      <Controller
+        name={name}
+        control={control}
+        render={({ field }) => (
+          <ZrFileInput
+            label={label}
+            model={(field.value as string) || null}
+            droppable={droppable}
+            onChange={(file: File | string | null, event?: any) => {
+              if (file && typeof file !== 'string') {
+                const fileName = event?.target?.fileName || file.name || '';
+                const ext = fileName.split('.').pop()?.toLowerCase() || '';
+                const maxSize = maxSizeMb * 1024 * 1024;
+
+                if (!allowedExtensions.includes(ext) || file.size > maxSize) {
+                  const target = event?.target as any;
+                  if (target) {
+                    target._fileName = null;
+                    target._fileType = null;
+                    target._blobURL = null;
+                    if (target.inputRef?.value) {
+                      target.inputRef.value.value = '';
+                    }
+                    target.requestUpdate();
+                  }
+                  setError(name, {
+                    type: 'manual',
+                    message: effectiveError,
+                  } as any);
+                  setValue(name, '' as any);
+                  if (fileRegistry) {
+                    fileRegistry.current.delete(name as string);
+                  }
+                } else {
+                  clearErrors(name);
+                  setValue(name, fileName as any);
+                  if (fileRegistry) {
+                    fileRegistry.current.set(name as string, file);
+                  }
+                }
+              } else {
+                clearErrors(name);
+                setValue(name, '' as any);
+                if (fileRegistry) {
+                  fileRegistry.current.delete(name as string);
+                }
+              }
+            }}
+            invalid={!!error}
+            {...({
+              accept: allowedExtensions,
+              'help-text': error || undefined,
+            } as Record<string, unknown>)}
+          />
+        )}
+      />
+    </div>
   );
 }
 
