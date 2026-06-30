@@ -3,7 +3,7 @@ import type { UseFormReturn } from 'react-hook-form';
 import FormSection from '../../../../components/FormSection';
 import { ZdsInput, ZdsSelect } from '../../../../components/fields/ZdsFields';
 import { useCollection } from '../../../../core/useCollection';
-import { COLLECTION_DEFS, CrearRecibirQuejaFormData } from './variables';
+import { COLLECTION_DEFS, CrearRecibirQuejaFormData, LOCK_COUNTRY, DEFAULT_COUNTRY_CODE } from './variables';
 
 interface Props {
   form: UseFormReturn<CrearRecibirQuejaFormData>;
@@ -32,6 +32,13 @@ export default function SeccionConsumidor({ form }: Props) {
   useEffect(() => {
     setValue('qd_ciudad', '');
   }, [w.qd_departamento, setValue]);
+
+  // RUL-000-10 — país por ahora en read-only y fijado en Colombia (170)
+  useEffect(() => {
+    if (LOCK_COUNTRY && w.qd_pais !== DEFAULT_COUNTRY_CODE) {
+      setValue('qd_pais', DEFAULT_COUNTRY_CODE);
+    }
+  }, [w.qd_pais, setValue]);
 
   const err = (name: keyof CrearRecibirQuejaFormData) => errors[name]?.message;
 
@@ -153,6 +160,7 @@ export default function SeccionConsumidor({ form }: Props) {
           options={paisOpts}
           rules={{ required: 'Campo requerido' }}
           required
+          disabled={LOCK_COUNTRY}
           error={err('qd_pais')}
         />
         <ZdsSelect
