@@ -21,10 +21,16 @@ export const COLLECTION_DEFS = {
 };
 
 // ---------------------------------------------------------------------------
+// Configuración de país (Feature Flags / Valores por defecto)
+// ---------------------------------------------------------------------------
+export const DEFAULT_COUNTRY_CODE = import.meta.env.VITE_DEFAULT_COUNTRY_CODE || '170';
+export const LOCK_COUNTRY = import.meta.env.VITE_LOCK_COUNTRY !== 'false';
+
+// ---------------------------------------------------------------------------
 // Web Entry — proceso e inicio del evento en PM4
 // ---------------------------------------------------------------------------
-export const WEB_ENTRY_PROCESS_ID = 31;
-export const WEB_ENTRY_EVENT_ID = 'node_661';
+export const WEB_ENTRY_PROCESS_ID = Number(import.meta.env.WEB_ENTRY_PROCESS_ID || 31);
+export const WEB_ENTRY_EVENT_ID = import.meta.env.WEB_ENTRY_EVENT_ID || 'node_661';
 
 // ---------------------------------------------------------------------------
 // Opciones estáticas (selects / radios)
@@ -48,7 +54,7 @@ export const ADJUNTO_KEYS = [
 // Valores por defecto del back / reglas de precarga
 // ---------------------------------------------------------------------------
 export const DEFAULTS = {
-  qd_pais: '170',              // RUL-000-10
+  qd_pais: DEFAULT_COUNTRY_CODE,              // RUL-000-10
   qd_replica: 'NO',
   qd_direccion: '',            // FLD-319 — Back, default vacío (pendiente API SFC)
   qd_sexo: 'No aplica',        // FLD-320 — Back, default (pendiente API SFC)

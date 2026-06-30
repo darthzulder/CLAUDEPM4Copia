@@ -1,7 +1,7 @@
 import { useState, useEffect, Fragment } from 'react';
 import { ActionBar } from '../../../components/ActionBar';
 import { useForm, Controller } from 'react-hook-form';
-import { ZrButton, ZrForm, ZdsInput, ZdsSelect, ZdsTextarea, ZrAlert, ZrTabs, ZrSegmentedControl, ZrFileInput, ZrTable, ZrIcon, ZrLoader } from '../../../components/fields/ZdsFields';
+import { ZrButton, ZrForm, ZdsInput, ZdsSelect, ZdsTextarea, ZrAlert, ZrTabs, ZrSegmentedControl, ZdsFileInput, ZrTable, ZrIcon, ZrLoader } from '../../../components/fields/ZdsFields';
 import ResultCard from '../../../components/ResultCard';
 import FormSection from '../../../components/FormSection';
 import ScreenHeader from '../../../components/ScreenHeader';
@@ -297,7 +297,7 @@ function SeccionDecision({
   submitError: string;
   submitting: boolean;
 }) {
-  const { control, watch, setValue, register } = form;
+  const { control, watch, setValue, setError, clearErrors, formState: { errors } } = form;
   const w = watch();
   const decision = w.cot_decision;
 
@@ -392,17 +392,16 @@ function SeccionDecision({
               </div>
               <div className="field-wrap">
                 <label className="form-label">Orden en firme * <span className="field-hint">(PDF o correo)</span></label>
-                <ZrFileInput
-                  label=""
-                  model={w.cot_orden_firme_nombre || null}
-                  droppable
-                  onChange={(file: File | string | null) => {
-                    if (file && typeof file !== 'string') setValue('cot_orden_firme_nombre', file.name);
-                    else if (!file) setValue('cot_orden_firme_nombre', '');
-                  }}
-                  {...({ accept: ['.pdf', '.eml', '.msg'] } as Record<string, unknown>)}
+                <ZdsFileInput
+                  control={control}
+                  name="cot_orden_firme_nombre"
+                  setValue={setValue}
+                  setError={setError}
+                  clearErrors={clearErrors}
+                  error={errors.cot_orden_firme_nombre?.message}
+                  allowedExtensions={['pdf', 'eml', 'msg']}
+                  maxSizeMb={5}
                 />
-                <input type="hidden" {...register('cot_orden_firme_nombre')} />
               </div>
               <div className="form-row cols-2">
                 <ZdsInput

@@ -139,8 +139,7 @@ Catálogos implementados como **colecciones dinámicas PM4** (no listas estátic
 | Correo de copia (opcional) con formato | `pattern` de email en `qd_correoCopia` (sin `required`) | Anexo02 > SCR-000 > FLD-337 (fila 53) |
 | Campos obligatorios restantes | `required` en selects/radios obligatorios de S1–S3 | Anexo02 > SCR-000 (columna Oblig. = Sí) |
 | Argumento de réplica máx. 2000 | `maxLength 2000` en `qd_argumentoReplica` | Anexo02 > SCR-000 > FLD-326 (fila 42) |
-
-> **Comportamiento de visualización de errores (UX):** la función `fieldError()` (`errorHelper.ts`) oculta el error `required` mientras el campo siga vacío y el formulario no se haya enviado; los errores de formato (`pattern`/`minLength`) se muestran por campo. — Decisión de diseño, ver Suposiciones.
+> **Comportamiento de visualización de errores (UX):** Se utiliza la opción `mode: 'onTouched'` de React Hook Form nativa. Esto evita marcar en rojo campos vacíos que el usuario aún no ha enfocado y desenfocado, y recién empieza a validar conforme interactúa con ellos o cuando intenta enviar el formulario.
 
 ---
 

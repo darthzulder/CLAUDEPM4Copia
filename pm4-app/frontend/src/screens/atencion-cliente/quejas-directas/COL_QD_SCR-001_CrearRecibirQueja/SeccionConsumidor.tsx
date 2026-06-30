@@ -3,15 +3,14 @@ import type { UseFormReturn } from 'react-hook-form';
 import FormSection from '../../../../components/FormSection';
 import { ZdsInput, ZdsSelect } from '../../../../components/fields/ZdsFields';
 import { useCollection } from '../../../../core/useCollection';
-import { COLLECTION_DEFS, CrearRecibirQuejaFormData } from './variables';
-import { fieldError } from './errorHelper';
+import { COLLECTION_DEFS, CrearRecibirQuejaFormData, LOCK_COUNTRY, DEFAULT_COUNTRY_CODE } from './variables';
 
 interface Props {
   form: UseFormReturn<CrearRecibirQuejaFormData>;
 }
 
 export default function SeccionConsumidor({ form }: Props) {
-  const { control, watch, setValue, formState: { errors, isSubmitted } } = form;
+  const { control, watch, setValue, formState: { errors } } = form;
   const w = watch();
 
   const { options: tipoIdentificacionOpts } = useCollection(COLLECTION_DEFS.tipoIdentificacion);
@@ -34,7 +33,14 @@ export default function SeccionConsumidor({ form }: Props) {
     setValue('qd_ciudad', '');
   }, [w.qd_departamento, setValue]);
 
-  const err = (name: keyof CrearRecibirQuejaFormData) => fieldError(errors, name, w[name], isSubmitted);
+  // RUL-000-10 — país por ahora en read-only y fijado en Colombia (170)
+  useEffect(() => {
+    if (LOCK_COUNTRY && w.qd_pais !== DEFAULT_COUNTRY_CODE) {
+      setValue('qd_pais', DEFAULT_COUNTRY_CODE);
+    }
+  }, [w.qd_pais, setValue]);
+
+  const err = (name: keyof CrearRecibirQuejaFormData) => errors[name]?.message;
 
   return (
     <FormSection title="Datos del Consumidor Financiero">
@@ -154,6 +160,7 @@ export default function SeccionConsumidor({ form }: Props) {
           options={paisOpts}
           rules={{ required: 'Campo requerido' }}
           required
+          disabled={LOCK_COUNTRY}
           error={err('qd_pais')}
         />
         <ZdsSelect

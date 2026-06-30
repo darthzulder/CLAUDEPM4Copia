@@ -13,6 +13,7 @@ if (commitHash === 'unknown') {
 
 export default defineConfig({
   plugins: [react()],
+  envPrefix: ['VITE_', 'WEB_ENTRY_'],
   define: {
     __COMMIT_HASH__: JSON.stringify(commitHash),
   },

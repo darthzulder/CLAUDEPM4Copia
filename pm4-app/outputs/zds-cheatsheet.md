@@ -22,8 +22,9 @@
 | Calendario inline (grilla de mes) | `ZdsCalendar` | `min/max/wide` |
 | Contador de pasos 1-based | `ZdsStepper` | `steps/label/center` |
 | Píldora de estado (semáforo) | `ZdsStatusBadge` | `variant` success/danger/info/neutral |
-| Carga de 1 archivo | `ZrFileInput` | ver patrón fileRegistry |
-| Carga múltiple de soportes | `DocSupportUploader` | wrapper propio sobre ZrFileInput |
+| Carga de 1 archivo (crudo) | `ZrFileInput` | ver patrón fileRegistry |
+| Carga de 1 archivo (validada/controlada) | `ZdsFileInput` | Wrapper con Controller, validaciones de tipo/tamaño y limpieza automática |
+| Carga múltiple de soportes | `DocSupportUploader` | wrapper propio sobre ZdsFileInput |
 | Card con header azul (sección) | `FormSection` | `title/action/footer` |
 | Barra de botones al pie | `ActionBar` + `ZrButton` | — |
 | Cabecera azul con logo | `ScreenHeader` | `title/subtitle[]` |
@@ -53,6 +54,7 @@ Props comunes: `control`, `name`, `label`, `rules`, `required`, `error`, `helpTe
 | `ZdsDate` | `min`, `readOnly` | modelo ISO `YYYY-MM-DD` |
 | `ZdsCalendar` | `min`, `max`, `wide`, `disabled` | inline, modelo ISO |
 | `ZdsStepper` | `steps`, `label`, `center`, `disabled` | 1-based en `[1, steps]` |
+| `ZdsFileInput` | `setValue`, `setError`, `clearErrors`, `fileRegistry?`, `allowedExtensions?`, `maxSizeMb?`, `errorMessage?`, `droppable?` | Carga de archivo controlada con Controller, valida tipo y tamaño de archivo |
 
 `error`: pásalo con el helper `fieldError` (oculta "required" hasta enviar). Patrón:
 ```ts
