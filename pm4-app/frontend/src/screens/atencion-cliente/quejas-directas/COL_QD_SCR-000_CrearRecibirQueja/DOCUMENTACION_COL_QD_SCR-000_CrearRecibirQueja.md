@@ -1,4 +1,4 @@
-# Documentación Funcional — Pantalla `COL_QD_SCR-001_CrearRecibirQueja`
+# Documentación Funcional — Pantalla `COL_QD_SCR-000_CrearRecibirQueja`
 
 **Pantalla (insumo):** SCR-000 · PAN-01.2 — Formulario de Radicación PQRS (Autoservicio)
 **Tarea BPMN:** P01-T00 — Radicar PQRS por autoservicio (portal público)
@@ -7,7 +7,7 @@
 **Versión del diseño:** TO-BE v3.0
 **Archivos de implementación:** `CrearRecibirQueja.tsx`, `SeccionConsumidor.tsx`, `SeccionDetalleQueja.tsx`, `variables.ts`, `errorHelper.ts`
 
-> ⚠️ **Nota de nomenclatura.** La carpeta se llama `COL_QD_SCR-001_CrearRecibirQueja`, pero la pantalla implementada corresponde a **SCR-000 (PQRS Autoservicio / P01-T00)** del insumo v3.0 — campos FLD-300…FLD-341, reglas RUL-000-*, mensajes MSG-000-*. **No** es la SCR-001 (Crear/Recibir Queja, P01-T01, rol Gestor de Experiencia). Ver [Suposiciones realizadas](#suposiciones-realizadas).
+> ⚠️ **Nota de nomenclatura.** La carpeta y la pantalla implementada corresponden a **SCR-000 (PQRS Autoservicio / P01-T00)** del insumo v3.0 — campos FLD-300…FLD-341, reglas RUL-000-*, mensajes MSG-000-*. **No** es la SCR-001 (Crear/Recibir Queja, P01-T01, rol Gestor de Experiencia). Ver [Suposiciones realizadas](#suposiciones-realizadas).
 
 ---
 
@@ -207,7 +207,7 @@ Catálogos implementados como **colecciones dinámicas PM4** (no listas estátic
 
 ## Suposiciones Realizadas
 
-1. **Discrepancia de nomenclatura SCR-001 vs SCR-000.** La carpeta es `COL_QD_SCR-001_CrearRecibirQueja`, pero el código y los IDs de campo (FLD-300…341) corresponden a **SCR-000 (PQRS Autoservicio, P01-T00)** del insumo v3.0. La documentación se elaboró contra SCR-000 por ser la fuente real implementada. El encabezado de subtítulo de la pantalla muestra "SCR-000 · P01-T00", confirmando la correspondencia.
+1. **Nomenclatura SCR-000.** La carpeta y los archivos se denominan `COL_QD_SCR-000_CrearRecibirQueja` dado que el código y los IDs de campo (FLD-300…341) corresponden a **SCR-000 (PQRS Autoservicio, P01-T00)** del insumo v3.0. El encabezado de subtítulo de la pantalla muestra "SCR-000 · P01-T00", confirmando la correspondencia.
 
 2. **Versión de insumo v3.0.** La carpeta `insumos/` fue actualizada a v3.0 (`Anexo02_..._v3_0`, `Matrices_..._v3.0`, `Anexo03_..._v2_0`). SCR-000 solo existe en v3.0; la doc se basa en esa versión.
 
