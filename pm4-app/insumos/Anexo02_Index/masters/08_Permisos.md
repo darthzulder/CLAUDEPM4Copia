@@ -15,3 +15,5 @@
 | SCR-011 | Revisión Error Técnico Prórroga | — | INFORMADO | — | VER + EDITAR | — | INFORMADO | Solo Analista Técnico. |
 | SCR-012 | Corrección Error Funcional Prórroga | — | VER + EDITAR | VER + EDITAR | — | VER | — | SAC y Área Responsable pueden corregir. |
 | SCR-000 | Formulario de Radicación PQRS (Autoservicio) | VER | — | — | — | — | INFORMADO | Formulario público de autoservicio. Radica el Consumidor Financiero (Cliente, Intermediario, Empleado Zurich o Defensor). El Gestor CX recibe el caso creado. |
+| SCR-0051 | Flujo Combinado — Detalle / Reasignación / Respuesta | — | VER + EDITAR | VER + EDITAR | — | VER | INFORMADO | Vista integrada PAN-05+06+07. El Analista SAC asigna/reasigna; el Área Responsable elabora la respuesta. |
+| SCR-0052 | Respuesta del Área Responsable | — | VER (lectura) | VER + EDITAR | — | VER | INFORMADO | El Área Responsable registra comentario y adjunto. |

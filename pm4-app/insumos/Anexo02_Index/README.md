@@ -49,6 +49,8 @@ A continuación se listan las pantallas del proceso, agrupadas por su rol y tare
 | [SCR-011](screens/SCR-011.md) | Revisión Error Técnico Prórroga | Pantalla de análisis técnico (prórroga) | SP4-T05 | Analista Técnico |
 | [SCR-012](screens/SCR-012.md) | Corrección Error Funcional Prórroga | Formulario de corrección (prórroga) | SP4-T06 | Analista SAC / Área Responsable |
 | [SCR-000](screens/SCR-000.md) | Formulario de Radicación PQRS (Autoservicio) | Formulario de autoservicio (radicación pública) | P01-T00 | Consumidor Financiero (Cliente / Intermediario / Empleado Zurich / Defensor del Consumidor) |
+| [SCR-0051](screens/SCR-0051.md) | Flujo Combinado — Detalle / Reasignación / Respuesta | Pantalla combinada (detalle + asignación/reasignación + elaboración de respuesta) | SP2-T01 / SP2-T02 / SP2-T03 / SP2-T05 | Analista SAC / Área Responsable |
+| [SCR-0052](screens/SCR-0052.md) | Respuesta del Área Responsable | Vista del caso asignado — registro de comentario y adjunto | SP2-T02 | Área Responsable |
 
 
 ---

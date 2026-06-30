@@ -46,3 +46,11 @@
 | MSG-000-06 | SCR-000 | Error | Archivo no permitido | Solo se permiten archivos pdf, jpg, png o docx, de máximo 5 MB cada uno. | Al validar o al ejecutar acción en SCR-000 | Bloquea |
 | MSG-000-07 | SCR-000 | Error | Identificación inválida | El número de identificación no cumple el formato requerido para el tipo de documento seleccionado. | Al validar o al ejecutar acción en SCR-000 | Bloquea |
 | MSG-000-08 | SCR-000 | Éxito | PQRS radicada | Su solicitud fue radicada exitosamente. Número de caso: [ID]. Recibirá la respuesta en el correo registrado. | Al validar o al ejecutar acción en SCR-000 | Continúa |
+| MSG-0051-01 | SCR-0051 | Advertencia | SLA crítico | ⚠ El caso tiene [N] día(s) hábil(es) restante(s). Priorice la gestión; puede solicitar prórroga regulatoria. | Al validar o al ejecutar acción en SCR-0051 | Informa |
+| MSG-0051-02 | SCR-0051 | Error | Campo obligatorio vacío | El campo Respuesta al Cliente es obligatorio para enviar. | Al validar o al ejecutar acción en SCR-0051 | Bloquea |
+| MSG-0051-03 | SCR-0051 | Error | Reasignación incompleta | El área destino, el motivo y las observaciones son obligatorios para registrar la reasignación. | Al validar o al ejecutar acción en SCR-0051 | Bloquea |
+| MSG-0051-04 | SCR-0051 | Éxito | Asignación registrada | Caso asignado a [Usuario] ([Área]). Notificación enviada al responsable. | Al validar o al ejecutar acción en SCR-0051 | Continúa |
+| MSG-0051-05 | SCR-0051 | Éxito | Enviado a SAC | Borrador de respuesta enviado al Analista SAC para revisión. Estado: En revisión SAC. | Al validar o al ejecutar acción en SCR-0051 | Continúa |
+| MSG-0052-01 | SCR-0052 | Error | Comentario obligatorio | Debe escribir un comentario antes de enviarlo. | Al validar o al ejecutar acción en SCR-0052 | Bloquea |
+| MSG-0052-02 | SCR-0052 | Éxito | Comentario enviado | Comentario y adjunto registrados en el historial del caso. | Al validar o al ejecutar acción en SCR-0052 | Continúa |
+| MSG-0051-06 | SCR-0051 | Advertencia | Límite de ayudantes alcanzado | Ha alcanzado el máximo de 4 ayudantes para este caso. No puede añadir más. | Al validar o al ejecutar acción en SCR-0051 | Informa |

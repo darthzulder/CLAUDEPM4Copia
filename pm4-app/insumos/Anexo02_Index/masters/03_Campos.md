@@ -98,8 +98,6 @@
 | FLD-122 | SCR-008 | S1 Contexto del Caso | 3 | Versión bajo revisión | versionRevision | Número | Label/Solo lectura | No | No | Sí | — | Sistema | — | — | — |
 | FLD-123 | SCR-008 | S1 Contexto del Caso | 4 | Área Responsable | areaResponsable | Texto | Label/Solo lectura | No | No | Sí | — | Caso | — | — | — |
 | FLD-124 | SCR-008 | S1 Contexto del Caso | 5 | Fecha de elaboración del borrador | fechaElaboracion | Fecha/Hora | Label/Solo lectura | No | No | Sí | — | Sistema | — | — | — |
-| FLD-125 | SCR-008 | S2 Respuesta del Área (solo lectura) | 1 | Causa Raíz | causaRaiz | Texto | Label/Solo lectura | No | No | Sí | — | Área (PAN-07) | — | — | — |
-| FLD-126 | SCR-008 | S2 Respuesta del Área (solo lectura) | 2 | Posición de Zurich | posicionZurich | Texto | Label/Solo lectura | No | No | Sí | — | Área (PAN-07) | — | — | — |
 | FLD-127 | SCR-008 | S2 Respuesta del Área (solo lectura) | 3 | Respuesta al Cliente | respuestaCliente | Texto | Label/Solo lectura | No | No | Sí | — | Área (PAN-07) | — | — | — |
 | FLD-128 | SCR-008 | S2 Respuesta del Área (solo lectura) | 4 | Acciones Tomadas | accionesTomadas | Texto | Label/Solo lectura | No | No | Sí | — | Área (PAN-07) | — | — | — |
 | FLD-129 | SCR-008 | S2 Respuesta del Área (solo lectura) | 5 | ¿Reconocimiento al cliente? | reconocimiento | Texto | Label/Solo lectura | No | No | Sí | — | Área (PAN-07) | — | — | — |
@@ -187,7 +185,7 @@
 | FLD-319 | SCR-000 | S2 Datos del Consumidor Financiero | 14 | Dirección | direccion | Alfanumérico | Label/Solo lectura | Sí | No | Sí | vacío | Sistema | — | Enviar por default "vacío" | Back. Pendiente confirmar con API SFC. |
 | FLD-320 | SCR-000 | S2 Datos del Consumidor Financiero | 15 | Sexo | sexo | Catálogo | Label/Solo lectura | Sí | No | Sí | No aplica | Catálogo SFC | CAT-SEXO | Enviar por default "No aplica" | Back. Pendiente confirmar con API SFC. |
 | FLD-321 | SCR-000 | S2 Datos del Consumidor Financiero | 16 | LGBTIQ+ | lgbtiq | Catálogo | Label/Solo lectura | Sí | No | Sí | No aplica | Catálogo SFC | CAT-LGBTIQ | Enviar por default "No aplica" | ⚠ Back. Catálogo pendiente confirmar con TI antes de implementar. |
-| FLD-322 | SCR-000 | S2 Datos del Consumidor Financiero | 17 | Condición especial | condicionEspecial | Catálogo | Lista desplegable | Sí | Sí | No | — | Catálogo SFC | CAT-COND-ESP | Valor en catálogo | Pendiente confirmar lista con TI/SFC. |
+| FLD-322 | SCR-000 | S2 Datos del Consumidor Financiero | 17 | Condición especial | condicionEspecial | Catálogo | Label/Solo lectura | Sí | No | Sí | — | Catálogo SFC | CAT-COND-ESP | Valor en catálogo | Back. Solo lectura. Pendiente confirmar lista con TI/SFC. |
 | FLD-323 | SCR-000 | S3 Detalle de la Queja | 1 | Selecciona el seguro | productoSFC | Catálogo | Lista desplegable | Sí | Sí | No | — | Catálogo SFC | CAT-PRODUCTO-SFC | Valor en catálogo SFC | Se realiza homologación entre la lista del Front y lo enviado a SFC. |
 | FLD-324 | SCR-000 | S3 Detalle de la Queja | 2 | Detalle del producto | detalleProducto | Catálogo | Label/Solo lectura | Sí | No | Sí | — | Catálogo SFC | CAT-DETALLE-PRODUCTO | Valor en catálogo | Back. Pendiente confirmar lista. |
 | FLD-325 | SCR-000 | S3 Detalle de la Queja | 3 | ¿Ya había radicado previamente la misma queja o es una reconsideración? | replica | Booleano | Radio Sí/No | Sí | Sí | No | — | Usuario | — | Sí / No | Campo Réplica SFC. |
@@ -207,3 +205,49 @@
 | FLD-339 | SCR-000 | S5 Estado ante la SFC | 2 | Fecha y hora radicación SFC | fechaRadicacionSFC | Fecha/Hora | Label/Solo lectura | No | No | Sí | [Auto] | API SFC | — | — | No es necesario mostrarla al usuario; se usa para reportes. |
 | FLD-340 | SCR-000 | S6 Responsable Asignado | 1 | Rol (Grupo) | rolResponsable | Texto | Label/Solo lectura | No | No | Sí | — | Sistema BPM | — | — | Grupo de rol al que pertenece el responsable. |
 | FLD-341 | SCR-000 | S6 Responsable Asignado | 2 | Responsable | responsable | Texto | Label/Solo lectura | No | No | Sí | — | Sistema BPM | — | — | Nombres y apellidos del responsable asignado. |
+| FLD-066 | SCR-0051 | S1 Datos del Consumidor | 1 | Nombre del Consumidor | nombreConsumidor | Texto | Label/Solo lectura | No | No | Sí | — | Caso | — | — | — |
+| FLD-067 | SCR-0051 | S1 Datos del Consumidor | 2 | Tipo y N.° de Identificación | identificacion | Texto | Label/Solo lectura | No | No | Sí | — | Caso | — | — | — |
+| FLD-068 | SCR-0051 | S1 Datos del Consumidor | 3 | Correo Electrónico | correoElectronico | Correo | Label/Solo lectura | No | No | Sí | — | Caso | — | — | Destino del correo de respuesta final. |
+| FLD-069 | SCR-0051 | S1 Datos del Consumidor | 4 | Tipo de Persona | tipoPersona | Texto | Label/Solo lectura | No | No | Sí | — | Caso | — | — | — |
+| FLD-070 | SCR-0051 | S2 Clasificación Regulatoria (precargada M1) | 1 | Canal de Recepción | canal | Texto | Label/Solo lectura | No | No | Sí | — | Caso M1 | — | — | No editable. Precargado desde Momento 1. |
+| FLD-071 | SCR-0051 | S2 Clasificación Regulatoria (precargada M1) | 2 | Producto SFC | productoSFC | Texto | Label/Solo lectura | No | No | Sí | — | Caso M1 | — | — | No editable. |
+| FLD-072 | SCR-0051 | S2 Clasificación Regulatoria (precargada M1) | 3 | Motivo SFC | motivoSFC | Texto | Label/Solo lectura | No | No | Sí | — | Caso M1 | — | — | No editable. |
+| FLD-073 | SCR-0051 | S2 Clasificación Regulatoria (precargada M1) | 4 | Instancia / Punto de Recepción | instanciaPunto | Texto | Label/Solo lectura | No | No | Sí | — | Caso M1 | — | — | No editable. |
+| FLD-074 | SCR-0051 | S2 Clasificación Regulatoria (precargada M1) | 5 | Admisión | admision | Texto | Label/Solo lectura | No | No | Sí | — | Caso M1 | — | — | No editable. |
+| FLD-075 | SCR-0051 | S2 Clasificación Regulatoria (precargada M1) | 6 | Ente de Control | enteControl | Texto | Label/Solo lectura | No | No | Sí | — | Caso M1 | — | — | No editable. |
+| FLD-076 | SCR-0051 | S3 Descripción de la Queja | 1 | Asunto de la Queja | resumen | Texto | Label/Solo lectura | No | No | Sí | — | Caso | — | — | — |
+| FLD-077 | SCR-0051 | S3 Descripción de la Queja | 2 | Descripción / Texto de la Queja | textoQueja | Texto | Label/Solo lectura | No | No | Sí | — | Caso | — | — | — |
+| FLD-079 | SCR-0051 | S4 Estado SmartSupervision | 1 | Estado SmartSupervision | estadoSS | Texto | Badge/Estado | No | No | Sí | — | Sistema | — | — | Pendiente / Radicado (201) / Rechazado (400) / Cerrado (200). |
+| FLD-080 | SCR-0051 | S4 Estado SmartSupervision | 2 | Intentos M1/M2 | intentosM1M2 | Número | Label/Solo lectura | No | No | Sí | — | Sistema | — | — | — |
+| FLD-081 | SCR-0051 | S4 Estado SmartSupervision | 3 | Fecha/Hora radicación SFC | fechaRadicacion | Fecha/Hora | Label/Solo lectura | No | No | Sí | — | Sistema | — | — | Timestamp del HTTP 201 exitoso. |
+| FLD-082 | SCR-0051 | S5 Asignación de Responsable | 1 | Área responsable | areaResponsable | Catálogo | Lista desplegable | Sí | Sí | No | — | Catálogo Zurich | CAT-AREA | Valor en catálogo | Áreas habilitadas para quejas. Solo visible la primera vez (RUL-0051-01). |
+| FLD-083 | SCR-0051 | S5 Asignación de Responsable | 2 | Usuario responsable | usuarioResponsable | Catálogo | Lista desplegable filtrada | Sí | Sí | No | — | Sistema (usuarios BPM) | CAT-USUARIOS-ROLE | Filtrado por área y rol autorizado | Solo usuarios autorizados para gestionar quejas (RUL-0051-02). |
+| FLD-084 | SCR-0051 | S5 Asignación de Responsable | 3 | Observaciones de asignación | observacionesAsignacion | Texto | Área de texto | No | Sí | No | — | Usuario | — | — | Opcional. |
+| FLD-090 | SCR-0051 | S6 Reasignación de Caso (PAN-06) | 1 | Responsable actual | responsableActual | Texto | Label/Solo lectura | No | No | Sí | — | Sistema | — | — | — |
+| FLD-091 | SCR-0051 | S6 Reasignación de Caso (PAN-06) | 2 | Área destino | areaDestino | Catálogo | Lista desplegable | Sí | Sí | No | — | Catálogo Zurich | CAT-AREA | Valor en catálogo | — |
+| FLD-092 | SCR-0051 | S6 Reasignación de Caso (PAN-06) | 3 | Responsable | nuevoResponsable | Catálogo | Label/Solo lectura (autocompletado) | Sí | No | Sí | — | Sistema (BPM) | CAT-USUARIOS-ROLE | Solo usuarios autorizados | Se asigna automáticamente según el Área Destino. ⚠ Pendiente lista de responsables por área. |
+| FLD-093 | SCR-0051 | S6 Reasignación de Caso (PAN-06) | 4 | Motivo de reasignación | motivoReasignacion | Catálogo | Lista desplegable | Sí | Sí | No | — | Catálogo Zurich | CAT-MOTIVO-REASIG | Valor en catálogo | — |
+| FLD-094 | SCR-0051 | S6 Reasignación de Caso (PAN-06) | 5 | Observaciones (justificación) | observacionesReasignacion | Texto | Área de texto | Sí | Sí | No | — | Usuario | — | Campo no vacío | Obligatorio (RUL-0051-04). Queda en historial para auditoría. |
+| FLD-095 | SCR-0051 | S7 Historial de Asignaciones | 1 | Historial de asignaciones previas | historialAsignaciones | Lista de registros | Tabla/Grid | No | No | Sí | — | Sistema | — | — | Columnas: Fecha \| De \| Para \| Motivo \| Observaciones \| Respondió \| Comentario \| Adjunto. Solo lectura. |
+| FLD-110 | SCR-0051 | S8 Elaboración de Respuesta Técnica | 3 | Respuesta al Cliente (borrador) | respuestaCliente | Texto | Área de texto | Sí | Sí | No | — | Usuario | — | Campo no vacío | Este texto irá en la carta PDF de respuesta final. |
+| FLD-111 | SCR-0051 | S8 Elaboración de Respuesta Técnica | 4 | Acciones Tomadas | accionesTomadas | Texto | Área de texto | No | Sí | No | — | Usuario | — | — | Opcional. Visible solo si 'Respuesta a favor de' = Cliente (RUL-0051-09). |
+| FLD-112 | SCR-0051 | S8 Elaboración de Respuesta Técnica | 5 | ¿Reconocimiento al cliente? | reconocimiento | Booleano | Label/Solo lectura | No | No | Sí | — | Sistema (Back) | — | — | Back. Solo lectura. Se asigna/calcula en el back. |
+| FLD-113 | SCR-0051 | S9 Soportes Internos | 1 | Adjuntos internos de soporte | adjuntosSoporte | Archivo | Archivo (multi) | No | Sí | No | — | Usuario | — | Máx 10 archivos | No van al cliente ni a la SFC. Solo uso interno. |
+| FLD-350 | SCR-0051 | S10 Configuración de Respuesta | 1 | Respuesta a favor de | respuestaFavorDe | Catálogo | Lista desplegable | Sí | Sí | No | — | Catálogo Zurich | CAT-FAVOR | Valor en catálogo | ⚠ Pendiente catálogo. Cliente / Compañía. Indica a quién favorece la resolución de la queja. |
+| FLD-351 | SCR-0052 | S4 Datos de la Asignación | 1 | Área | areaResponsable | Texto | Label/Solo lectura | No | No | Sí | — | Caso | — | — | Área responsable asignada al caso. |
+| FLD-352 | SCR-0052 | S4 Datos de la Asignación | 2 | Responsable | usuarioResponsable | Texto | Label/Solo lectura | No | No | Sí | — | Caso | — | — | Usuario asignado para gestionar este caso. |
+| FLD-353 | SCR-0052 | S4 Datos de la Asignación | 3 | Observaciones | observacionesAsignacion | Texto | Área de texto (solo lectura) | No | No | Sí | — | Caso | — | — | Observaciones registradas al momento de la asignación. |
+| FLD-354 | SCR-0052 | S5 Comentario y Adjunto | 1 | Comentario | comentarioArea | Texto | Área de texto | Sí | Sí | No | — | Usuario | — | Campo no vacío | Comentario visible en el historial del caso. |
+| FLD-355 | SCR-0052 | S5 Comentario y Adjunto | 2 | Adjuntar archivo | adjuntoArea | Archivo | Archivo | No | Sí | No | — | Usuario | — | PDF/DOCX/XLSX/JPG/PNG. Máx 10 MB | Adjunto de soporte. |
+| FLD-066 | SCR-0052 | S1 Datos del Consumidor | 1 | Nombre del Consumidor | nombreConsumidor | Texto | Label/Solo lectura | No | No | Sí | — | Caso | — | — | — |
+| FLD-067 | SCR-0052 | S1 Datos del Consumidor | 2 | Tipo y N.° de Identificación | identificacion | Texto | Label/Solo lectura | No | No | Sí | — | Caso | — | — | — |
+| FLD-068 | SCR-0052 | S1 Datos del Consumidor | 3 | Correo Electrónico | correoElectronico | Correo | Label/Solo lectura | No | No | Sí | — | Caso | — | — | Destino del correo de respuesta final. |
+| FLD-069 | SCR-0052 | S1 Datos del Consumidor | 4 | Tipo de Persona | tipoPersona | Texto | Label/Solo lectura | No | No | Sí | — | Caso | — | — | — |
+| FLD-070 | SCR-0052 | S2 Clasificación Regulatoria | 1 | Canal de Recepción | canal | Texto | Label/Solo lectura | No | No | Sí | — | Caso M1 | — | — | Precargado desde Momento 1. |
+| FLD-071 | SCR-0052 | S2 Clasificación Regulatoria | 2 | Producto SFC | productoSFC | Texto | Label/Solo lectura | No | No | Sí | — | Caso M1 | — | — | No editable. |
+| FLD-072 | SCR-0052 | S2 Clasificación Regulatoria | 3 | Motivo SFC | motivoSFC | Texto | Label/Solo lectura | No | No | Sí | — | Caso M1 | — | — | No editable. |
+| FLD-073 | SCR-0052 | S2 Clasificación Regulatoria | 4 | Instancia / Punto de Recepción | instanciaPunto | Texto | Label/Solo lectura | No | No | Sí | — | Caso M1 | — | — | No editable. |
+| FLD-074 | SCR-0052 | S2 Clasificación Regulatoria | 5 | Admisión | admision | Texto | Label/Solo lectura | No | No | Sí | — | Caso M1 | — | — | No editable. |
+| FLD-075 | SCR-0052 | S2 Clasificación Regulatoria | 6 | Ente de Control | enteControl | Texto | Label/Solo lectura | No | No | Sí | — | Caso M1 | — | — | No editable. |
+| FLD-076 | SCR-0052 | S3 Descripción de la Queja | 1 | Asunto de la Queja | resumen | Texto | Label/Solo lectura | No | No | Sí | — | Caso | — | — | — |
+| FLD-077 | SCR-0052 | S3 Descripción de la Queja | 2 | Descripción / Texto de la Queja | textoQueja | Texto | Label/Solo lectura | No | No | Sí | — | Caso | — | — | — |

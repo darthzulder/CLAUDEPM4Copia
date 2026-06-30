@@ -48,3 +48,18 @@
 | SEC-044 | SCR-000 | S4 Autorización y Envío | Sección de formulario | 4 | 2 | Sí | Siempre | Autorización de tratamiento de datos, captcha y correo de copia. |
 | SEC-045 | SCR-000 | S5 Estado ante la SFC | Sección de formulario | 5 | 2 | No | Visible tras la radicación | Estado SmartSupervision en formato semáforo — solo lectura. |
 | SEC-046 | SCR-000 | S6 Responsable Asignado | Sección de formulario | 6 | 2 | No | Visible tras la asignación | Rol y responsable del caso — solo lectura. |
+| SEC-047 | SCR-0051 | S1 Datos del Consumidor | Sección de formulario | 1 | 2 | Sí | Siempre | Datos de identificación y contacto del consumidor (solo lectura). |
+| SEC-048 | SCR-0051 | S2 Clasificación Regulatoria (precargada M1) | Sección de formulario | 2 | 2 | Sí | Siempre | Clasificación SFC precargada desde el Momento 1 (solo lectura). |
+| SEC-049 | SCR-0051 | S3 Descripción de la Queja | Sección de formulario | 3 | 2 | Sí | Siempre | Asunto y descripción de la queja (solo lectura). |
+| SEC-050 | SCR-0051 | S4 Estado SmartSupervision | Sección de formulario | 4 | 2 | Sí | Siempre | Estado de radicación ante la SFC (solo lectura). |
+| SEC-051 | SCR-0051 | S5 Asignación de Responsable | Sección de formulario | 5 | 2 | Condicional | Solo visible la primera vez (caso sin responsable asignado) | Asignación inicial del área y usuario responsable. |
+| SEC-052 | SCR-0051 | S6 Reasignación de Caso (PAN-06) | Sección de formulario | 6 | 2 | Condicional | Visible si responde 'Sí' a '¿Necesitas de otras áreas para dar respuesta completa?' | Reasignación / solicitud de ayuda a otra(s) área(s). Permite añadir hasta 4 ayudantes con motivo y observaciones. |
+| SEC-053 | SCR-0051 | S7 Historial de Asignaciones | Sección de tabla | 7 | 2 | Condicional | Visible junto con la sección de reasignación | Historial de asignaciones del caso (solo lectura). |
+| SEC-054 | SCR-0051 | S8 Elaboración de Respuesta Técnica | Sección de formulario | 8 | 2 | Sí | Siempre | Causa raíz, posición de Zurich y borrador de respuesta al cliente. |
+| SEC-055 | SCR-0051 | S9 Soportes Internos | Sección de formulario | 9 | 2 | Sí | Siempre | Adjuntos internos de análisis (no van al cliente ni a la SFC). |
+| SEC-056 | SCR-0051 | S10 Configuración de Respuesta | Sección de formulario | 10 | 2 | Sí | Siempre | Configuración del sentido de la respuesta (a favor de). |
+| SEC-057 | SCR-0052 | S4 Datos de la Asignación | Sección de formulario | 4 | 2 | Sí | Siempre | Área, responsable y observaciones de la asignación (solo lectura). |
+| SEC-058 | SCR-0052 | S5 Comentario y Adjunto | Sección de formulario | 5 | 2 | Sí | Siempre | Registro de comentario y adjunto de soporte. |
+| SEC-059 | SCR-0052 | S1 Datos del Consumidor | Sección de formulario | 1 | 2 | Sí | Siempre | Datos de identificación y contacto del consumidor (solo lectura). |
+| SEC-060 | SCR-0052 | S2 Clasificación Regulatoria | Sección de formulario | 2 | 2 | Sí | Siempre | Clasificación SFC precargada (solo lectura). |
+| SEC-061 | SCR-0052 | S3 Descripción de la Queja | Sección de formulario | 3 | 2 | Sí | Siempre | Asunto y descripción de la queja (solo lectura). |

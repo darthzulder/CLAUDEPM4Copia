@@ -46,3 +46,13 @@
 | RUL-000-11 | SCR-000 | FLD-330 | Restricción | Al adjuntar archivo | Archivo no es pdf/jpg/png/docx o supera 5 MB | Bloquear adjunto. Mostrar MSG-000-06 | Error | Sí | MSG-000-06 | Bloquea radicación |
 | RUL-000-12 | SCR-000 | FLD-325 | Control | Al cambiar Réplica | replica = "Sí" | Mostrar el campo Argumento de la réplica (FLD-326). | Control | No | — | No aplica |
 | RUL-000-13 | SCR-000 | FLD-307 | Restricción | Al guardar | numeroIdentificacion no cumple el formato según el tipo de documento | Bloquear. Mostrar MSG-000-07 | Error | Sí | MSG-000-07 | Bloquea radicación |
+| RUL-0051-01 | SCR-0051 | SEC-051 | Control | Al cargar | Caso ya tiene responsable asignado | Ocultar la sección 'Asignación de Responsable' (solo visible la primera vez) | Control | No | — | No afecta flujo directo |
+| RUL-0051-02 | SCR-0051 | FLD-082/FLD-083 | Restricción | Al cambiar área | Siempre | Cargar solo usuarios autorizados del área seleccionada | Control | No | — | Filtro de catálogo |
+| RUL-0051-03 | SCR-0051 | ACT-0051-04 | Control | Al cargar y al cambiar | slaRestante <= 2 | Habilitar botón 'Solicitar Prórroga' y mostrar banner rojo de SLA crítico | Advertencia | No | MSG-0051-01 | Habilita SP4 |
+| RUL-0051-04 | SCR-0051 | ACT-0051-03 | Restricción | Al confirmar reasignación | areaDestino, motivoReasignacion u observaciones vacíos | Bloquear. Mostrar MSG-0051-03 | Error | Sí | MSG-0051-03 | No reasigna |
+| RUL-0051-05 | SCR-0051 | ACT-0051-08 | Restricción | Al enviar | respuestaCliente vacío | Bloquear envío. Mostrar MSG-0051-02 | Error | Sí | MSG-0051-02 | No avanza a SP2-T04 |
+| RUL-0051-06 | SCR-0051 | FLD-092 | Restricción | Al confirmar reasignación | Asignación a usuario fuera del proceso | Bloquear | Error | Sí | — | No reasigna |
+| RUL-0051-07 | SCR-0051 | SEC-052 | Control | Al responder '¿Necesitas de otras áreas?' | respuesta = 'Sí' | Mostrar el bloque de Reasignación de Caso (PAN-06) y el Historial de Asignaciones | Control | No | — | No aplica |
+| RUL-0052-01 | SCR-0052 | ACT-0052-01 | Restricción | Al enviar comentario | comentario vacío | Bloquear envío. Mostrar MSG-0052-01 | Error | Sí | MSG-0052-01 | No registra comentario |
+| RUL-0051-08 | SCR-0051 | SEC-052 | Control | Al añadir ayudante | Número de ayudantes >= 4 | Ocultar el formulario 'A quién quieres solicitar ayuda' y mostrar el mensaje 'Límite de ayudantes alcanzado' | Advertencia | No | MSG-0051-06 | No afecta flujo directo |
+| RUL-0051-09 | SCR-0051 | FLD-111 | Control | Al cambiar FLD-350 | respuestaFavorDe = Cliente | Mostrar el campo 'Acciones Tomadas' (FLD-111). Si el valor es distinto de Cliente, ocultarlo | Control | No | — | No afecta flujo directo |

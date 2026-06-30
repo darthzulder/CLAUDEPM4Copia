@@ -24,6 +24,7 @@
 | ACT-008-01 | SCR-008 | Aprobar Respuesta | Primaria | Siempre | Habilita SP2-T06 (generar PDF). Estado → 'Respuesta aprobada'. | Si aprueba → SP2-T06 PDF; si devuelve → PAN-07 | — |
 | ACT-008-02 | SCR-008 | Devolver con Observaciones | Destructiva | observacionesSAC no vacío | Devuelve al área responsable. Estado → 'Ajuste en progreso'. | Si aprueba → SP2-T06 PDF; si devuelve → PAN-07 | — |
 | ACT-008-03 | SCR-008 | Reasignar Caso | Terciaria | Siempre | Abre PAN-06 para reasignación. | Si aprueba → SP2-T06 PDF; si devuelve → PAN-07 | — |
+| ACT-008-04 | SCR-008 | Vista Previa Respuesta Final | Secundaria | Siempre | Muestra la vista previa de la carta de respuesta final (formato SFC) con los textos aprobados. | — | — |
 | ACT-009-01 | SCR-009 | Guardar Formulario | Primaria | Todos los campos obligatorios SFC completos | Valida, guarda y habilita SP3. | SP3 — Cerrar Queja ante SmartSupervision | — |
 | ACT-009-02 | SCR-009 | Guardar Borrador | Secundaria | Siempre | No habilita SP3. | SP3 — Cerrar Queja ante SmartSupervision | — |
 | ACT-010-01 | SCR-010 | Enviar a SmartSupervision | Primaria | fechaActualizacion=fechaCierre AND nomenclatura PDF OK AND todos obligatorios | Habilitado SOLO cuando todas las validaciones pasan (RUL-10-01, RUL-10-02, RUL-10-03). | P01-T08 Enviar respuesta final (SOLO tras HTTP 200 | — |
@@ -36,3 +37,14 @@
 | ACT-000-01 | SCR-000 | Enviar PQRS | Primaria | Autorización de datos aceptada AND captcha válido AND todos los campos obligatorios válidos | Valida los datos, crea el caso con ID único y ejecuta P01-T01 (recibir y registrar la queja). Asigna instancia y punto de recepción según rol. | P01-T01 recepción → P01-T06 validación | RUL-000-07 |
 | ACT-000-02 | SCR-000 | Limpiar Formulario | Secundaria | Siempre | Limpia todos los campos del formulario sin crear caso. | — | — |
 | ACT-000-03 | SCR-000 | Cancelar | Destructiva | Siempre | Descarta el formulario y sale del portal de autoservicio. | — | — |
+| ACT-0051-01 | SCR-0051 | Confirmar Asignación | Primaria | usuarioResponsable seleccionado | Registra la asignación inicial y notifica al responsable. Estado → 'En análisis'. | SP2-T01 → SP2-T02 | RUL-0051-02 |
+| ACT-0051-02 | SCR-0051 | Reasignar Queja | Secundaria | Siempre | Habilita la edición de la asignación y despliega el bloque de reasignación (PAN-06). | SP2-T03 Reasignar | RUL-0051-01 |
+| ACT-0051-03 | SCR-0051 | Confirmar Reasignación | Primaria | Área destino, motivo y observaciones completos | Registra la reasignación en el historial y notifica al nuevo responsable. | SP2-T03 → SP2-T02 nueva área | RUL-0051-04 |
+| ACT-0051-04 | SCR-0051 | Solicitar Prórroga Regulatoria | Terciaria | SLA ≤ 2 días hábiles | Inicia SP4 Prórroga Regulatoria (POST /api/1.0/workflow → SP4-T01). | SP4-T01 Solicitar Prórroga | RUL-0051-03 |
+| ACT-0051-05 | SCR-0051 | Vista Previa Respuesta Final | Secundaria | Siempre | Muestra la vista previa de la carta de respuesta final (formato SFC) con los textos elaborados. | — | — |
+| ACT-0051-06 | SCR-0051 | Ver Expediente Completo | Link | Siempre | Abre el expediente completo del caso. | — | — |
+| ACT-0051-07 | SCR-0051 | Guardar Borrador | Secundaria | Siempre | Guarda el borrador de respuesta sin enviar a revisión. | — | — |
+| ACT-0051-08 | SCR-0051 | Enviar | Primaria | respuestaCliente no vacío | Guarda el borrador y notifica al Analista SAC. Estado → 'En revisión SAC'. | SP2-T04 Revisión SAC | RUL-0051-05 |
+| ACT-0052-01 | SCR-0052 | Enviar comentario | Primaria | comentario no vacío | Registra el comentario y el adjunto en el historial del caso y notifica al responsable. | SP2-T02 | RUL-0052-01 |
+| ACT-0052-02 | SCR-0052 | Guardar Borrador | Secundaria | Siempre | Guarda el comentario como borrador sin enviarlo. | — | — |
+| ACT-0052-03 | SCR-0052 | Volver | Link | Siempre | Regresa a la bandeja / pantalla anterior sin guardar. | — | — |

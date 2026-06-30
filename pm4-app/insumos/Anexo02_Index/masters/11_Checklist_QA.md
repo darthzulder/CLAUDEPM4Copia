@@ -132,3 +132,23 @@
 | SCR-000 | Formulario de Radicación PQRS (Autoservicio) | Todas las listas tienen catálogo referenciado en 07_Catalogs | Pendiente | — | Zurich/BeePM | Junio 2026 |
 | SCR-000 | Formulario de Radicación PQRS (Autoservicio) | Todo campo solo lectura tiene fuente, momento de carga y regla documentados | Pendiente | — | Zurich/BeePM | Junio 2026 |
 | SCR-000 | Formulario de Radicación PQRS (Autoservicio) | HTML de referencia refleja fielmente el Excel (fuente de verdad) | Pendiente | — | Zurich/BeePM | Junio 2026 |
+| SCR-0051 | Flujo Combinado — Detalle / Reasignación / Respuesta | ID único (SCR-###) asignado y nombre que describe la intención de negocio | Pendiente | — | Zurich/BeePM | Junio 2026 |
+| SCR-0051 | Flujo Combinado — Detalle / Reasignación / Respuesta | Tipo de pantalla definido (formulario, aprobación, corrección, cierre, etc.) | Pendiente | — | Zurich/BeePM | Junio 2026 |
+| SCR-0051 | Flujo Combinado — Detalle / Reasignación / Respuesta | Proceso BPMN y tarea/subproceso relacionado documentado en 10_Trazabilidad_BPMN | Pendiente | — | Zurich/BeePM | Junio 2026 |
+| SCR-0051 | Flujo Combinado — Detalle / Reasignación / Respuesta | Rol/carril responsable definido y consistente con matriz de roles | Pendiente | — | Zurich/BeePM | Junio 2026 |
+| SCR-0051 | Flujo Combinado — Detalle / Reasignación / Respuesta | Evento de apertura y acción de cierre documentados | Pendiente | — | Zurich/BeePM | Junio 2026 |
+| SCR-0051 | Flujo Combinado — Detalle / Reasignación / Respuesta | Todos los campos tienen etiqueta, tipo de dato y control UI definidos | Pendiente | — | Zurich/BeePM | Junio 2026 |
+| SCR-0051 | Flujo Combinado — Detalle / Reasignación / Respuesta | Todos los campos obligatorios tienen validación y mensaje de error en 06_Mensajes | Pendiente | — | Zurich/BeePM | Junio 2026 |
+| SCR-0051 | Flujo Combinado — Detalle / Reasignación / Respuesta | Todas las listas tienen catálogo referenciado en 07_Catalogs | Pendiente | — | Zurich/BeePM | Junio 2026 |
+| SCR-0051 | Flujo Combinado — Detalle / Reasignación / Respuesta | Todo campo solo lectura tiene fuente, momento de carga y regla documentados | Pendiente | — | Zurich/BeePM | Junio 2026 |
+| SCR-0051 | Flujo Combinado — Detalle / Reasignación / Respuesta | HTML de referencia refleja fielmente el Excel (fuente de verdad) | Pendiente | — | Zurich/BeePM | Junio 2026 |
+| SCR-0052 | Respuesta del Área Responsable | ID único (SCR-###) asignado y nombre que describe la intención de negocio | Pendiente | — | Zurich/BeePM | Junio 2026 |
+| SCR-0052 | Respuesta del Área Responsable | Tipo de pantalla definido (formulario, aprobación, corrección, cierre, etc.) | Pendiente | — | Zurich/BeePM | Junio 2026 |
+| SCR-0052 | Respuesta del Área Responsable | Proceso BPMN y tarea/subproceso relacionado documentado en 10_Trazabilidad_BPMN | Pendiente | — | Zurich/BeePM | Junio 2026 |
+| SCR-0052 | Respuesta del Área Responsable | Rol/carril responsable definido y consistente con matriz de roles | Pendiente | — | Zurich/BeePM | Junio 2026 |
+| SCR-0052 | Respuesta del Área Responsable | Evento de apertura y acción de cierre documentados | Pendiente | — | Zurich/BeePM | Junio 2026 |
+| SCR-0052 | Respuesta del Área Responsable | Todos los campos tienen etiqueta, tipo de dato y control UI definidos | Pendiente | — | Zurich/BeePM | Junio 2026 |
+| SCR-0052 | Respuesta del Área Responsable | Todos los campos obligatorios tienen validación y mensaje de error en 06_Mensajes | Pendiente | — | Zurich/BeePM | Junio 2026 |
+| SCR-0052 | Respuesta del Área Responsable | Todas las listas tienen catálogo referenciado en 07_Catalogs | Pendiente | — | Zurich/BeePM | Junio 2026 |
+| SCR-0052 | Respuesta del Área Responsable | Todo campo solo lectura tiene fuente, momento de carga y regla documentados | Pendiente | — | Zurich/BeePM | Junio 2026 |
+| SCR-0052 | Respuesta del Área Responsable | HTML de referencia refleja fielmente el Excel (fuente de verdad) | Pendiente | — | Zurich/BeePM | Junio 2026 |

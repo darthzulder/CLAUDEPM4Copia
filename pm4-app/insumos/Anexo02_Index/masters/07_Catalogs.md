@@ -36,3 +36,4 @@
 | CAT-ROL-RADICADOR | Rol del Radicador | Zurich | Cliente / Intermediario / Empleado Zurich / Defensor del Consumidor | Activo — Zurich | CAT-INSTANCIA | Determina la instancia y el punto de recepción SFC. |
 | CAT-TIPO-SOLIC-PQRS | Tipo de Solicitud (PQRS Front) | Zurich | Solicitud, Felicitación, Queja, Sugerencia, Derecho de petición | Activo — Zurich | — | Lista #2 del formulario PQRS. Homologar con CAT-TIPO-SOL. |
 | CAT-DETALLE-PRODUCTO | Detalle del Producto | SFC | Subnivel del producto SFC seleccionado | Pendiente TI | CAT-PRODUCTO-SFC | Pendiente confirmar lista con TI/SFC. |
+| CAT-FAVOR | Respuesta a Favor de | Zurich | Cliente / Compañía | Pendiente TI | — | ⚠ Pendiente parametrización. Indica a quién favorece la resolución (FLD-350, PAN-05.1). Homologar con CAT-FAVORAB. |
