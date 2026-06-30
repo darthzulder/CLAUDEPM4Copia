@@ -22,17 +22,22 @@ La documentación **no es opcional**: forma parte del entregable de la pantalla.
 
 ## Fuente de verdad: carpeta Insumos
 
-Todos los insumos están en `pm4-app/insumos/`. Para Quejas Directas son:
+Todos los insumos están en `pm4-app/insumos/`. **La carpeta completa es la fuente de verdad:** se deben considerar todos los archivos presentes en ella, sin importar cuántos sean ni de qué tipo. No hay una lista fija; si se agrega un nuevo archivo a `insumos/`, automáticamente pasa a ser parte de la fuente de verdad. **Nunca documentar sin haber leído todos los insumos relevantes.**
 
-| Archivo | Para qué sirve |
-|---|---|
-| `Anexo02_Mockups_TOBE_QuejaDirectas_v3_0.xlsx` | **Fuente principal.** Campos, secciones, acciones, reglas, mensajes, catálogos y permisos por pantalla. (Usar siempre la versión más reciente presente en `insumos/`.) |
-| `Matrices_Maduracion_TO-BE_QuejaDirectas_v3.0.xlsx` | Tareas BPMN, **directrices y reglas de negocio**, roles, documentos de entrada/salida. |
-| `Anexo03_EspecTecnica_TareasAutomatizadas_TOBE_v2_0.xlsx` | Variables de entrada/salida de las tareas automatizadas (nombres canónicos de variable, obligatoriedad). |
+### Regla de sustitución: `.md` tiene prioridad sobre el archivo original
 
-> Si en el futuro se agregan otros `.xlsx` a `insumos/`, analizarlos también. **Nunca documentar sin haber leído los insumos.**
+Antes de leer cualquier archivo de insumos (`.xlsx`, `.pdf`, u otro), **verificar si existe en la misma carpeta `insumos/` un archivo `.md` con el mismo nombre base** (p. ej. `Anexo02_Mockups_TOBE_QuejaDirectas_v3_0.md` junto a su `.xlsx` homónimo). Si existe ese `.md`:
 
-> **Índices de insumos en Markdown (preferencia):** antes de leer un `.xlsx` directamente, verificar si existe una carpeta `insumos/<NombreAnexo>/` con un archivo `index.md`. Si existe, leer ese `index.md` primero: enlaza a los `.md` por hoja/sección y es la forma más rápida de navegar el contenido. Solo recurrir al `.xlsx` original (vía Python/openpyxl) si el índice no existe o si la información necesaria no está cubierta en los `.md`.
+- **Usar el `.md` en lugar del archivo original.** Es la versión procesada, navegable y sin dependencias de herramientas externas.
+- Solo recurrir al archivo original si el `.md` no existe o si la información requerida no está cubierta en él.
+
+> Esta regla aplica a **cualquier archivo** de la carpeta `insumos/`, no solo a los `.xlsx`. Si mañana hay un `.pdf` con un `.md` equivalente al lado, la misma lógica aplica.
+
+### Cómo leer los insumos — orden de preferencia
+
+1. **Buscar el `.md` homónimo en `insumos/`.** Si existe `<NombreArchivo>.md`, leerlo directamente — es la ruta más rápida y sin dependencias.
+2. **Si no hay `.md` homónimo**, verificar si existe una carpeta `insumos/<NombreArchivo>/index.md` con índice por hojas/secciones. Si existe, leer ese `index.md` primero.
+3. **Si ninguna de las anteriores existe**, leer el archivo original con Python: `openpyxl` (`load_workbook(path, data_only=True, read_only=True)`). En Windows la consola puede fallar con UTF-8; **volcar la salida a un archivo `.txt` con `io.open(..., encoding="utf-8")`** y leer ese archivo. Borrar los `.txt` temporales al terminar.
 
 ### Hojas clave del Anexo02 (Mockups)
 
@@ -76,9 +81,7 @@ Todos los insumos están en `pm4-app/insumos/`. Para Quejas Directas son:
 
 2. **Leer los insumos relevantes.** Extraer y leer (no asumir): la hoja `SCR-xxx`, las filas de la pantalla en `02_Secciones`, `04_Acciones`, `05_Reglas`, `06_Mensajes`, `07_Catalogs`, `08_Permisos`; las filas de su tarea en Matrices `1. Tareas`, `2. Directrices`, `5. Documentos`; y las variables en Anexo03 `05_Variables_Entrada`/`06_Variables_Salida`.
 
-   > **Cómo leer los insumos — orden de preferencia:**
-   > 1. **Verificar primero si existe un índice Markdown.** Para cada `.xlsx` necesario, comprobar si hay una carpeta `insumos/<NombreAnexo>/index.md` (p. ej. `insumos/Anexo02/index.md`). Si existe, leer ese `index.md`: enlaza a los `.md` de cada hoja y es la ruta más rápida y sin dependencias de Python.
-   > 2. **Si el índice no existe o no cubre la información requerida**, leer el `.xlsx` directamente con Python: `openpyxl` (`load_workbook(path, data_only=True, read_only=True)`). En Windows la consola puede fallar con UTF-8; **volcar la salida a un archivo `.txt` con `io.open(..., encoding="utf-8")`** y leer ese archivo. Borrar los `.txt` temporales al terminar.
+   > Seguir el **orden de preferencia** definido en la sección "Fuente de verdad": `.md` homónimo → carpeta con `index.md` → archivo original vía Python/openpyxl.
 
 3. **Leer la implementación.** Revisar todos los archivos de la carpeta de la pantalla (`*.tsx`, `variables.ts`) y los posibles estilos añadidos en `shared.css` para saber qué se implementó realmente: campos, `rules` de validación, `pattern`/`maxLength`, render condicional, `defaultValues`, dependencias (`useEffect`), botones y acciones. *Nota: No se deben crear archivos `styles.css` locales ni estilos en línea. Toda la visualización, alineación, tablas, formularios, tipografías y tags de estado se rigen únicamente por shared.css y los componentes de ZurichDS para garantizar consistencia absoluta en el diseño global.*
 
