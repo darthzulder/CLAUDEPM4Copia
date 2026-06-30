@@ -12,7 +12,7 @@ import SolDocEmi from './screens/FAST-FLOW/col-emision/SolDocEmi';
 import VerDocEmi from './screens/FAST-FLOW/col-emision/VerDocEmi';
 import EstadoCorreo from './screens/FAST-FLOW/estado-correo/EstadoCorreo';
 import CorregirDatosFormulario from './screens/atencion-cliente/quejas-directas/COL_QD_SCR-002_corregir-datos-formulario/CorregirDatosFormulario';
-import CrearRecibirQueja from './screens/atencion-cliente/quejas-directas/COL_QD_SCR-001_CrearRecibirQueja/CrearRecibirQueja';
+import CrearRecibirQueja from './screens/atencion-cliente/quejas-directas/COL_QD_SCR-000_CrearRecibirQueja/CrearRecibirQueja';
 import DsCatalog from './screens/ds-catalog/DsCatalog';
 import CierreM3 from './screens/atencion-cliente/quejas-directas/COL_QD_SCR-010_cierre-m3/CierreM3';
 import RevisionErrorTecnicoApi from './screens/atencion-cliente/quejas-directas/COL_QD_SCR-004_Revision_Error_Tecnico_API/RevisionErrorTecnicoApi';
@@ -50,7 +50,7 @@ const SCREENS: Record<string, React.ComponentType> = {
   'ver-doc-emi': VerDocEmi,
   'estado-correo': EstadoCorreo,
   'COL_QD_SCR-002_corregir-datos-formulario': CorregirDatosFormulario,
-  'COL_QD_SCR-001_CrearRecibirQueja': CrearRecibirQueja,
+  'COL_QD_SCR-000_CrearRecibirQueja': CrearRecibirQueja,
   'COL_QD_SCR-010_cierre-m3': CierreM3,
   'COL_QD_SCR-004_Revision_Error_Tecnico_API': RevisionErrorTecnicoApi,
   'COL_QD_SCR-003_Correccion_Error_Funcional': CorreccionErrorFuncional,
