@@ -16,6 +16,7 @@ import CrearRecibirQueja from './screens/atencion-cliente/quejas-directas/COL_QD
 import DsCatalog from './screens/ds-catalog/DsCatalog';
 import CierreM3 from './screens/atencion-cliente/quejas-directas/COL_QD_SCR-010_cierre-m3/CierreM3';
 import RevisionErrorTecnicoApi from './screens/atencion-cliente/quejas-directas/COL_QD_SCR-004_Revision_Error_Tecnico_API/RevisionErrorTecnicoApi';
+import CorreccionErrorFuncional from './screens/atencion-cliente/quejas-directas/COL_QD_SCR-003_Correccion_Error_Funcional/CorreccionErrorFuncional';
 
 class ErrorBoundary extends Component<{ children: ReactNode }, { error: Error | null }> {
   state = { error: null };
@@ -52,6 +53,7 @@ const SCREENS: Record<string, React.ComponentType> = {
   'COL_QD_SCR-001_CrearRecibirQueja': CrearRecibirQueja,
   'COL_QD_SCR-010_cierre-m3': CierreM3,
   'COL_QD_SCR-004_Revision_Error_Tecnico_API': RevisionErrorTecnicoApi,
+  'COL_QD_SCR-003_Correccion_Error_Funcional': CorreccionErrorFuncional,
   'ds-catalog': DsCatalog,
 };
 
