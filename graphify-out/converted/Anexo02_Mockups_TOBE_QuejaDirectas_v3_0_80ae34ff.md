@@ -75,6 +75,10 @@ PAN-11 | Revisión Error Técnico Prórroga | Pantalla de análisis técnico (pr
 PAN-12 | Corrección Error Funcional Prórroga | Formulario de corrección (prórroga) | SP4 | SP4-T06 | Analista SAC / Área Responsable | Analista SAC / Área Responsable | corregir los campos del formulario de prórroga rechazados por SmartSupervision | resolver el rechazo funcional y obtener la aceptación de la prórroga por parte de SmartSupervision | SmartSupervision rechazó la solicitud de prórroga con error 400 funcional | corrijo los campos señalados (motivo, fechas, contador) y presiono 'Reenviar prórroga' | el sistema registra la corrección en el log y ejecuta el reenvío del payload de prórroga corregido |
 |  | SCR-000
 PAN-01.2 | Formulario de Radicación PQRS (Autoservicio) | Formulario de autoservicio (radicación pública) | P01 | P01-T00 | Consumidor Financiero (Cliente / Intermediario / Empleado Zurich / Defensor del Consumidor) | Consumidor Financiero (cliente, intermediario, empleado Zurich o defensor del consumidor) | radicar mi PQRS (petición, queja, reclamo, sugerencia o felicitación) por un único formulario de autoservicio con mis datos y el detalle de la inconformidad | presentar mi solicitud directamente, sin intermediarios, y recibir respuesta en mi correo cumpliendo el formato exigido por SmartSupervision SFC | tengo mi identificación, datos de contacto, el seguro/producto asociado y la descripción de mi solicitud | completo el formulario, acepto el tratamiento de datos, valido el captcha y presiono 'Enviar PQRS' | el sistema valida los datos, crea el caso con ID único, asigna automáticamente la instancia y el punto de recepción según mi rol, y muestra confirmación con el número de radicado |
+|  | SCR-0051
+PAN-05.1 | Flujo Combinado — Detalle / Reasignación / Respuesta | Pantalla combinada (detalle + asignación/reasignación + elaboración de respuesta) | SP2 | SP2-T01 / SP2-T02 / SP2-T03 / SP2-T05 | Analista SAC / Área Responsable | Analista SAC / Área Responsable | revisar el expediente completo de la queja radicada, asignar o reasignar el responsable cuando se requiera apoyo de otras áreas, y elaborar el borrador de respuesta técnica desde una sola pantalla integrada | agilizar la gestión del caso reduciendo la navegación entre pantallas (PAN-05, PAN-06 y PAN-07) y garantizar la trazabilidad de la asignación y de la respuesta | la queja fue radicada exitosamente ante SmartSupervision (HTTP 201) y está en mi bandeja para gestión | reviso el expediente, asigno/reasigno el responsable si requiero apoyo de otras áreas, redacto la respuesta técnica y presiono 'Enviar' | el sistema registra la asignación/reasignación en el historial, guarda el borrador de respuesta, notifica al Analista SAC y cambia el estado a 'En revisión SAC' |
+|  | SCR-0052
+PAN-05.2 | Respuesta del Área Responsable | Vista del caso asignado — registro de comentario y adjunto | SP2 | SP2-T02 | Área Responsable | Área Responsable | ver los datos de la asignación del caso y registrar un comentario con un adjunto de soporte | dejar trazabilidad de mi gestión sobre el caso y aportar soportes al expediente | el caso fue asignado a mi área y aparece en mi bandeja de gestión | reviso los datos de la asignación, escribo mi comentario, adjunto el archivo de soporte y presiono 'Enviar comentario' | el sistema registra el comentario y el adjunto en el historial del caso y notifica al responsable |
 ## Sheet: 02_Secciones
 |  | SECCIONES POR PANTALLA |  |  |  |  |  |  |  |  |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
@@ -127,6 +131,21 @@ PAN-01.2 | Formulario de Radicación PQRS (Autoservicio) | Formulario de autoser
 |  | SEC-044 | SCR-000 | S4 Autorización y Envío | Sección de formulario | 4 | 2 | Sí | Siempre | Autorización de tratamiento de datos, captcha y correo de copia. |
 |  | SEC-045 | SCR-000 | S5 Estado ante la SFC | Sección de formulario | 5 | 2 | No | Visible tras la radicación | Estado SmartSupervision en formato semáforo — solo lectura. |
 |  | SEC-046 | SCR-000 | S6 Responsable Asignado | Sección de formulario | 6 | 2 | No | Visible tras la asignación | Rol y responsable del caso — solo lectura. |
+|  | SEC-047 | SCR-0051 | S1 Datos del Consumidor | Sección de formulario | 1 | 2 | Sí | Siempre | Datos de identificación y contacto del consumidor (solo lectura). |
+|  | SEC-048 | SCR-0051 | S2 Clasificación Regulatoria (precargada M1) | Sección de formulario | 2 | 2 | Sí | Siempre | Clasificación SFC precargada desde el Momento 1 (solo lectura). |
+|  | SEC-049 | SCR-0051 | S3 Descripción de la Queja | Sección de formulario | 3 | 2 | Sí | Siempre | Asunto y descripción de la queja (solo lectura). |
+|  | SEC-050 | SCR-0051 | S4 Estado SmartSupervision | Sección de formulario | 4 | 2 | Sí | Siempre | Estado de radicación ante la SFC (solo lectura). |
+|  | SEC-051 | SCR-0051 | S5 Asignación de Responsable | Sección de formulario | 5 | 2 | Condicional | Solo visible la primera vez (caso sin responsable asignado) | Asignación inicial del área y usuario responsable. |
+|  | SEC-052 | SCR-0051 | S6 Reasignación de Caso (PAN-06) | Sección de formulario | 6 | 2 | Condicional | Visible si responde 'Sí' a '¿Necesitas de otras áreas para dar respuesta completa?' | Reasignación / solicitud de ayuda a otra(s) área(s). Permite añadir hasta 4 ayudantes con motivo y observaciones. |
+|  | SEC-053 | SCR-0051 | S7 Historial de Asignaciones | Sección de tabla | 7 | 2 | Condicional | Visible junto con la sección de reasignación | Historial de asignaciones del caso (solo lectura). |
+|  | SEC-054 | SCR-0051 | S8 Elaboración de Respuesta Técnica | Sección de formulario | 8 | 2 | Sí | Siempre | Causa raíz, posición de Zurich y borrador de respuesta al cliente. |
+|  | SEC-055 | SCR-0051 | S9 Soportes Internos | Sección de formulario | 9 | 2 | Sí | Siempre | Adjuntos internos de análisis (no van al cliente ni a la SFC). |
+|  | SEC-056 | SCR-0051 | S10 Configuración de Respuesta | Sección de formulario | 10 | 2 | Sí | Siempre | Configuración del sentido de la respuesta (a favor de). |
+|  | SEC-057 | SCR-0052 | S4 Datos de la Asignación | Sección de formulario | 4 | 2 | Sí | Siempre | Área, responsable y observaciones de la asignación (solo lectura). |
+|  | SEC-058 | SCR-0052 | S5 Comentario y Adjunto | Sección de formulario | 5 | 2 | Sí | Siempre | Registro de comentario y adjunto de soporte. |
+|  | SEC-059 | SCR-0052 | S1 Datos del Consumidor | Sección de formulario | 1 | 2 | Sí | Siempre | Datos de identificación y contacto del consumidor (solo lectura). |
+|  | SEC-060 | SCR-0052 | S2 Clasificación Regulatoria | Sección de formulario | 2 | 2 | Sí | Siempre | Clasificación SFC precargada (solo lectura). |
+|  | SEC-061 | SCR-0052 | S3 Descripción de la Queja | Sección de formulario | 3 | 2 | Sí | Siempre | Asunto y descripción de la queja (solo lectura). |
 ## Sheet: 03_Campos
 |  | DICCIONARIO DE CAMPOS — FUENTE DE VERDAD |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
@@ -229,8 +248,6 @@ PAN-01.2 | Formulario de Radicación PQRS (Autoservicio) | Formulario de autoser
 |  | FLD-122 | SCR-008 | S1 Contexto del Caso | 3 | Versión bajo revisión | versionRevision | Número | Label/Solo lectura | No | No | Sí | — | Sistema |  | — |  |
 |  | FLD-123 | SCR-008 | S1 Contexto del Caso | 4 | Área Responsable | areaResponsable | Texto | Label/Solo lectura | No | No | Sí | — | Caso |  | — |  |
 |  | FLD-124 | SCR-008 | S1 Contexto del Caso | 5 | Fecha de elaboración del borrador | fechaElaboracion | Fecha/Hora | Label/Solo lectura | No | No | Sí | — | Sistema |  | — |  |
-|  | FLD-125 | SCR-008 | S2 Respuesta del Área (solo lectura) | 1 | Causa Raíz | causaRaiz | Texto | Label/Solo lectura | No | No | Sí | — | Área (PAN-07) |  | — |  |
-|  | FLD-126 | SCR-008 | S2 Respuesta del Área (solo lectura) | 2 | Posición de Zurich | posicionZurich | Texto | Label/Solo lectura | No | No | Sí | — | Área (PAN-07) |  | — |  |
 |  | FLD-127 | SCR-008 | S2 Respuesta del Área (solo lectura) | 3 | Respuesta al Cliente | respuestaCliente | Texto | Label/Solo lectura | No | No | Sí | — | Área (PAN-07) |  | — |  |
 |  | FLD-128 | SCR-008 | S2 Respuesta del Área (solo lectura) | 4 | Acciones Tomadas | accionesTomadas | Texto | Label/Solo lectura | No | No | Sí | — | Área (PAN-07) |  | — |  |
 |  | FLD-129 | SCR-008 | S2 Respuesta del Área (solo lectura) | 5 | ¿Reconocimiento al cliente? | reconocimiento | Texto | Label/Solo lectura | No | No | Sí | — | Área (PAN-07) |  | — |  |
@@ -318,7 +335,7 @@ PAN-01.2 | Formulario de Radicación PQRS (Autoservicio) | Formulario de autoser
 |  | FLD-319 | SCR-000 | S2 Datos del Consumidor Financiero | 14 | Dirección | direccion | Alfanumérico | Label/Solo lectura | Sí | No | Sí | vacío | Sistema |  | Enviar por default "vacío" | Back. Pendiente confirmar con API SFC. |
 |  | FLD-320 | SCR-000 | S2 Datos del Consumidor Financiero | 15 | Sexo | sexo | Catálogo | Label/Solo lectura | Sí | No | Sí | No aplica | Catálogo SFC | CAT-SEXO | Enviar por default "No aplica" | Back. Pendiente confirmar con API SFC. |
 |  | FLD-321 | SCR-000 | S2 Datos del Consumidor Financiero | 16 | LGBTIQ+ | lgbtiq | Catálogo | Label/Solo lectura | Sí | No | Sí | No aplica | Catálogo SFC | CAT-LGBTIQ | Enviar por default "No aplica" | ⚠ Back. Catálogo pendiente confirmar con TI antes de implementar. |
-|  | FLD-322 | SCR-000 | S2 Datos del Consumidor Financiero | 17 | Condición especial | condicionEspecial | Catálogo | Lista desplegable | Sí | Sí | No | — | Catálogo SFC | CAT-COND-ESP | Valor en catálogo | Pendiente confirmar lista con TI/SFC. |
+|  | FLD-322 | SCR-000 | S2 Datos del Consumidor Financiero | 17 | Condición especial | condicionEspecial | Catálogo | Label/Solo lectura | Sí | No | Sí | — | Catálogo SFC | CAT-COND-ESP | Valor en catálogo | Back. Solo lectura. Pendiente confirmar lista con TI/SFC. |
 |  | FLD-323 | SCR-000 | S3 Detalle de la Queja | 1 | Selecciona el seguro | productoSFC | Catálogo | Lista desplegable | Sí | Sí | No | — | Catálogo SFC | CAT-PRODUCTO-SFC | Valor en catálogo SFC | Se realiza homologación entre la lista del Front y lo enviado a SFC. |
 |  | FLD-324 | SCR-000 | S3 Detalle de la Queja | 2 | Detalle del producto | detalleProducto | Catálogo | Label/Solo lectura | Sí | No | Sí | — | Catálogo SFC | CAT-DETALLE-PRODUCTO | Valor en catálogo | Back. Pendiente confirmar lista. |
 |  | FLD-325 | SCR-000 | S3 Detalle de la Queja | 3 | ¿Ya había radicado previamente la misma queja o es una reconsideración? | replica | Booleano | Radio Sí/No | Sí | Sí | No | — | Usuario |  | Sí / No | Campo Réplica SFC. |
@@ -338,6 +355,52 @@ PAN-01.2 | Formulario de Radicación PQRS (Autoservicio) | Formulario de autoser
 |  | FLD-339 | SCR-000 | S5 Estado ante la SFC | 2 | Fecha y hora radicación SFC | fechaRadicacionSFC | Fecha/Hora | Label/Solo lectura | No | No | Sí | [Auto] | API SFC |  | — | No es necesario mostrarla al usuario; se usa para reportes. |
 |  | FLD-340 | SCR-000 | S6 Responsable Asignado | 1 | Rol (Grupo) | rolResponsable | Texto | Label/Solo lectura | No | No | Sí | — | Sistema BPM |  | — | Grupo de rol al que pertenece el responsable. |
 |  | FLD-341 | SCR-000 | S6 Responsable Asignado | 2 | Responsable | responsable | Texto | Label/Solo lectura | No | No | Sí | — | Sistema BPM |  | — | Nombres y apellidos del responsable asignado. |
+|  | FLD-066 | SCR-0051 | S1 Datos del Consumidor | 1 | Nombre del Consumidor | nombreConsumidor | Texto | Label/Solo lectura | No | No | Sí | — | Caso |  | — | — |
+|  | FLD-067 | SCR-0051 | S1 Datos del Consumidor | 2 | Tipo y N.° de Identificación | identificacion | Texto | Label/Solo lectura | No | No | Sí | — | Caso |  | — | — |
+|  | FLD-068 | SCR-0051 | S1 Datos del Consumidor | 3 | Correo Electrónico | correoElectronico | Correo | Label/Solo lectura | No | No | Sí | — | Caso |  | — | Destino del correo de respuesta final. |
+|  | FLD-069 | SCR-0051 | S1 Datos del Consumidor | 4 | Tipo de Persona | tipoPersona | Texto | Label/Solo lectura | No | No | Sí | — | Caso |  | — | — |
+|  | FLD-070 | SCR-0051 | S2 Clasificación Regulatoria (precargada M1) | 1 | Canal de Recepción | canal | Texto | Label/Solo lectura | No | No | Sí | — | Caso M1 |  | — | No editable. Precargado desde Momento 1. |
+|  | FLD-071 | SCR-0051 | S2 Clasificación Regulatoria (precargada M1) | 2 | Producto SFC | productoSFC | Texto | Label/Solo lectura | No | No | Sí | — | Caso M1 |  | — | No editable. |
+|  | FLD-072 | SCR-0051 | S2 Clasificación Regulatoria (precargada M1) | 3 | Motivo SFC | motivoSFC | Texto | Label/Solo lectura | No | No | Sí | — | Caso M1 |  | — | No editable. |
+|  | FLD-073 | SCR-0051 | S2 Clasificación Regulatoria (precargada M1) | 4 | Instancia / Punto de Recepción | instanciaPunto | Texto | Label/Solo lectura | No | No | Sí | — | Caso M1 |  | — | No editable. |
+|  | FLD-074 | SCR-0051 | S2 Clasificación Regulatoria (precargada M1) | 5 | Admisión | admision | Texto | Label/Solo lectura | No | No | Sí | — | Caso M1 |  | — | No editable. |
+|  | FLD-075 | SCR-0051 | S2 Clasificación Regulatoria (precargada M1) | 6 | Ente de Control | enteControl | Texto | Label/Solo lectura | No | No | Sí | — | Caso M1 |  | — | No editable. |
+|  | FLD-076 | SCR-0051 | S3 Descripción de la Queja | 1 | Asunto de la Queja | resumen | Texto | Label/Solo lectura | No | No | Sí | — | Caso |  | — | — |
+|  | FLD-077 | SCR-0051 | S3 Descripción de la Queja | 2 | Descripción / Texto de la Queja | textoQueja | Texto | Label/Solo lectura | No | No | Sí | — | Caso |  | — | — |
+|  | FLD-079 | SCR-0051 | S4 Estado SmartSupervision | 1 | Estado SmartSupervision | estadoSS | Texto | Badge/Estado | No | No | Sí | — | Sistema |  | — | Pendiente / Radicado (201) / Rechazado (400) / Cerrado (200). |
+|  | FLD-080 | SCR-0051 | S4 Estado SmartSupervision | 2 | Intentos M1/M2 | intentosM1M2 | Número | Label/Solo lectura | No | No | Sí | — | Sistema |  | — | — |
+|  | FLD-081 | SCR-0051 | S4 Estado SmartSupervision | 3 | Fecha/Hora radicación SFC | fechaRadicacion | Fecha/Hora | Label/Solo lectura | No | No | Sí | — | Sistema |  | — | Timestamp del HTTP 201 exitoso. |
+|  | FLD-082 | SCR-0051 | S5 Asignación de Responsable | 1 | Área responsable | areaResponsable | Catálogo | Lista desplegable | Sí | Sí | No | — | Catálogo Zurich | CAT-AREA | Valor en catálogo | Áreas habilitadas para quejas. Solo visible la primera vez (RUL-0051-01). |
+|  | FLD-083 | SCR-0051 | S5 Asignación de Responsable | 2 | Usuario responsable | usuarioResponsable | Catálogo | Lista desplegable filtrada | Sí | Sí | No | — | Sistema (usuarios BPM) | CAT-USUARIOS-ROLE | Filtrado por área y rol autorizado | Solo usuarios autorizados para gestionar quejas (RUL-0051-02). |
+|  | FLD-084 | SCR-0051 | S5 Asignación de Responsable | 3 | Observaciones de asignación | observacionesAsignacion | Texto | Área de texto | No | Sí | No | — | Usuario |  | — | Opcional. |
+|  | FLD-090 | SCR-0051 | S6 Reasignación de Caso (PAN-06) | 1 | Responsable actual | responsableActual | Texto | Label/Solo lectura | No | No | Sí | — | Sistema |  | — | — |
+|  | FLD-091 | SCR-0051 | S6 Reasignación de Caso (PAN-06) | 2 | Área destino | areaDestino | Catálogo | Lista desplegable | Sí | Sí | No | — | Catálogo Zurich | CAT-AREA | Valor en catálogo | — |
+|  | FLD-092 | SCR-0051 | S6 Reasignación de Caso (PAN-06) | 3 | Responsable | nuevoResponsable | Catálogo | Label/Solo lectura (autocompletado) | Sí | No | Sí | — | Sistema (BPM) | CAT-USUARIOS-ROLE | Solo usuarios autorizados | Se asigna automáticamente según el Área Destino. ⚠ Pendiente lista de responsables por área. |
+|  | FLD-093 | SCR-0051 | S6 Reasignación de Caso (PAN-06) | 4 | Motivo de reasignación | motivoReasignacion | Catálogo | Lista desplegable | Sí | Sí | No | — | Catálogo Zurich | CAT-MOTIVO-REASIG | Valor en catálogo | — |
+|  | FLD-094 | SCR-0051 | S6 Reasignación de Caso (PAN-06) | 5 | Observaciones (justificación) | observacionesReasignacion | Texto | Área de texto | Sí | Sí | No | — | Usuario |  | Campo no vacío | Obligatorio (RUL-0051-04). Queda en historial para auditoría. |
+|  | FLD-095 | SCR-0051 | S7 Historial de Asignaciones | 1 | Historial de asignaciones previas | historialAsignaciones | Lista de registros | Tabla/Grid | No | No | Sí | — | Sistema |  | — | Columnas: Fecha | De | Para | Motivo | Observaciones | Respondió | Comentario | Adjunto. Solo lectura. |
+|  | FLD-110 | SCR-0051 | S8 Elaboración de Respuesta Técnica | 3 | Respuesta al Cliente (borrador) | respuestaCliente | Texto | Área de texto | Sí | Sí | No | — | Usuario |  | Campo no vacío | Este texto irá en la carta PDF de respuesta final. |
+|  | FLD-111 | SCR-0051 | S8 Elaboración de Respuesta Técnica | 4 | Acciones Tomadas | accionesTomadas | Texto | Área de texto | No | Sí | No | — | Usuario |  | — | Opcional. Visible solo si 'Respuesta a favor de' = Cliente (RUL-0051-09). |
+|  | FLD-112 | SCR-0051 | S8 Elaboración de Respuesta Técnica | 5 | ¿Reconocimiento al cliente? | reconocimiento | Booleano | Label/Solo lectura | No | No | Sí | — | Sistema (Back) |  | — | Back. Solo lectura. Se asigna/calcula en el back. |
+|  | FLD-113 | SCR-0051 | S9 Soportes Internos | 1 | Adjuntos internos de soporte | adjuntosSoporte | Archivo | Archivo (multi) | No | Sí | No | — | Usuario |  | Máx 10 archivos | No van al cliente ni a la SFC. Solo uso interno. |
+|  | FLD-350 | SCR-0051 | S10 Configuración de Respuesta | 1 | Respuesta a favor de | respuestaFavorDe | Catálogo | Lista desplegable | Sí | Sí | No | — | Catálogo Zurich | CAT-FAVOR | Valor en catálogo | ⚠ Pendiente catálogo. Cliente / Compañía. Indica a quién favorece la resolución de la queja. |
+|  | FLD-351 | SCR-0052 | S4 Datos de la Asignación | 1 | Área | areaResponsable | Texto | Label/Solo lectura | No | No | Sí | — | Caso |  | — | Área responsable asignada al caso. |
+|  | FLD-352 | SCR-0052 | S4 Datos de la Asignación | 2 | Responsable | usuarioResponsable | Texto | Label/Solo lectura | No | No | Sí | — | Caso |  | — | Usuario asignado para gestionar este caso. |
+|  | FLD-353 | SCR-0052 | S4 Datos de la Asignación | 3 | Observaciones | observacionesAsignacion | Texto | Área de texto (solo lectura) | No | No | Sí | — | Caso |  | — | Observaciones registradas al momento de la asignación. |
+|  | FLD-354 | SCR-0052 | S5 Comentario y Adjunto | 1 | Comentario | comentarioArea | Texto | Área de texto | Sí | Sí | No | — | Usuario |  | Campo no vacío | Comentario visible en el historial del caso. |
+|  | FLD-355 | SCR-0052 | S5 Comentario y Adjunto | 2 | Adjuntar archivo | adjuntoArea | Archivo | Archivo | No | Sí | No | — | Usuario |  | PDF/DOCX/XLSX/JPG/PNG. Máx 10 MB | Adjunto de soporte. |
+|  | FLD-066 | SCR-0052 | S1 Datos del Consumidor | 1 | Nombre del Consumidor | nombreConsumidor | Texto | Label/Solo lectura | No | No | Sí | — | Caso |  | — | — |
+|  | FLD-067 | SCR-0052 | S1 Datos del Consumidor | 2 | Tipo y N.° de Identificación | identificacion | Texto | Label/Solo lectura | No | No | Sí | — | Caso |  | — | — |
+|  | FLD-068 | SCR-0052 | S1 Datos del Consumidor | 3 | Correo Electrónico | correoElectronico | Correo | Label/Solo lectura | No | No | Sí | — | Caso |  | — | Destino del correo de respuesta final. |
+|  | FLD-069 | SCR-0052 | S1 Datos del Consumidor | 4 | Tipo de Persona | tipoPersona | Texto | Label/Solo lectura | No | No | Sí | — | Caso |  | — | — |
+|  | FLD-070 | SCR-0052 | S2 Clasificación Regulatoria | 1 | Canal de Recepción | canal | Texto | Label/Solo lectura | No | No | Sí | — | Caso M1 |  | — | Precargado desde Momento 1. |
+|  | FLD-071 | SCR-0052 | S2 Clasificación Regulatoria | 2 | Producto SFC | productoSFC | Texto | Label/Solo lectura | No | No | Sí | — | Caso M1 |  | — | No editable. |
+|  | FLD-072 | SCR-0052 | S2 Clasificación Regulatoria | 3 | Motivo SFC | motivoSFC | Texto | Label/Solo lectura | No | No | Sí | — | Caso M1 |  | — | No editable. |
+|  | FLD-073 | SCR-0052 | S2 Clasificación Regulatoria | 4 | Instancia / Punto de Recepción | instanciaPunto | Texto | Label/Solo lectura | No | No | Sí | — | Caso M1 |  | — | No editable. |
+|  | FLD-074 | SCR-0052 | S2 Clasificación Regulatoria | 5 | Admisión | admision | Texto | Label/Solo lectura | No | No | Sí | — | Caso M1 |  | — | No editable. |
+|  | FLD-075 | SCR-0052 | S2 Clasificación Regulatoria | 6 | Ente de Control | enteControl | Texto | Label/Solo lectura | No | No | Sí | — | Caso M1 |  | — | No editable. |
+|  | FLD-076 | SCR-0052 | S3 Descripción de la Queja | 1 | Asunto de la Queja | resumen | Texto | Label/Solo lectura | No | No | Sí | — | Caso |  | — | — |
+|  | FLD-077 | SCR-0052 | S3 Descripción de la Queja | 2 | Descripción / Texto de la Queja | textoQueja | Texto | Label/Solo lectura | No | No | Sí | — | Caso |  | — | — |
 ## Sheet: 04_Acciones
 |  | ACCIONES Y BOTONES |  |  |  |  |  |  |  |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- |
@@ -366,6 +429,7 @@ PAN-01.2 | Formulario de Radicación PQRS (Autoservicio) | Formulario de autoser
 |  | ACT-008-01 | SCR-008 | Aprobar Respuesta | Primaria | Siempre | Habilita SP2-T06 (generar PDF). Estado → 'Respuesta aprobada'. | Si aprueba → SP2-T06 PDF; si devuelve → PAN-07 | — |
 |  | ACT-008-02 | SCR-008 | Devolver con Observaciones | Destructiva | observacionesSAC no vacío | Devuelve al área responsable. Estado → 'Ajuste en progreso'. | Si aprueba → SP2-T06 PDF; si devuelve → PAN-07 | — |
 |  | ACT-008-03 | SCR-008 | Reasignar Caso | Terciaria | Siempre | Abre PAN-06 para reasignación. | Si aprueba → SP2-T06 PDF; si devuelve → PAN-07 | — |
+|  | ACT-008-04 | SCR-008 | Vista Previa Respuesta Final | Secundaria | Siempre | Muestra la vista previa de la carta de respuesta final (formato SFC) con los textos aprobados. | — | — |
 |  | ACT-009-01 | SCR-009 | Guardar Formulario | Primaria | Todos los campos obligatorios SFC completos | Valida, guarda y habilita SP3. | SP3 — Cerrar Queja ante SmartSupervision | — |
 |  | ACT-009-02 | SCR-009 | Guardar Borrador | Secundaria | Siempre | No habilita SP3. | SP3 — Cerrar Queja ante SmartSupervision | — |
 |  | ACT-010-01 | SCR-010 | Enviar a SmartSupervision | Primaria | fechaActualizacion=fechaCierre AND nomenclatura PDF OK AND todos obligatorios | Habilitado SOLO cuando todas las validaciones pasan (RUL-10-01, RUL-10-02, RUL-10-03). | P01-T08 Enviar respuesta final (SOLO tras HTTP 200 | — |
@@ -378,6 +442,17 @@ PAN-01.2 | Formulario de Radicación PQRS (Autoservicio) | Formulario de autoser
 |  | ACT-000-01 | SCR-000 | Enviar PQRS | Primaria | Autorización de datos aceptada AND captcha válido AND todos los campos obligatorios válidos | Valida los datos, crea el caso con ID único y ejecuta P01-T01 (recibir y registrar la queja). Asigna instancia y punto de recepción según rol. | P01-T01 recepción → P01-T06 validación | RUL-000-07 |
 |  | ACT-000-02 | SCR-000 | Limpiar Formulario | Secundaria | Siempre | Limpia todos los campos del formulario sin crear caso. | — | — |
 |  | ACT-000-03 | SCR-000 | Cancelar | Destructiva | Siempre | Descarta el formulario y sale del portal de autoservicio. | — | — |
+|  | ACT-0051-01 | SCR-0051 | Confirmar Asignación | Primaria | usuarioResponsable seleccionado | Registra la asignación inicial y notifica al responsable. Estado → 'En análisis'. | SP2-T01 → SP2-T02 | RUL-0051-02 |
+|  | ACT-0051-02 | SCR-0051 | Reasignar Queja | Secundaria | Siempre | Habilita la edición de la asignación y despliega el bloque de reasignación (PAN-06). | SP2-T03 Reasignar | RUL-0051-01 |
+|  | ACT-0051-03 | SCR-0051 | Confirmar Reasignación | Primaria | Área destino, motivo y observaciones completos | Registra la reasignación en el historial y notifica al nuevo responsable. | SP2-T03 → SP2-T02 nueva área | RUL-0051-04 |
+|  | ACT-0051-04 | SCR-0051 | Solicitar Prórroga Regulatoria | Terciaria | SLA ≤ 2 días hábiles | Inicia SP4 Prórroga Regulatoria (POST /api/1.0/workflow → SP4-T01). | SP4-T01 Solicitar Prórroga | RUL-0051-03 |
+|  | ACT-0051-05 | SCR-0051 | Vista Previa Respuesta Final | Secundaria | Siempre | Muestra la vista previa de la carta de respuesta final (formato SFC) con los textos elaborados. | — | — |
+|  | ACT-0051-06 | SCR-0051 | Ver Expediente Completo | Link | Siempre | Abre el expediente completo del caso. | — | — |
+|  | ACT-0051-07 | SCR-0051 | Guardar Borrador | Secundaria | Siempre | Guarda el borrador de respuesta sin enviar a revisión. | — | — |
+|  | ACT-0051-08 | SCR-0051 | Enviar | Primaria | respuestaCliente no vacío | Guarda el borrador y notifica al Analista SAC. Estado → 'En revisión SAC'. | SP2-T04 Revisión SAC | RUL-0051-05 |
+|  | ACT-0052-01 | SCR-0052 | Enviar comentario | Primaria | comentario no vacío | Registra el comentario y el adjunto en el historial del caso y notifica al responsable. | SP2-T02 | RUL-0052-01 |
+|  | ACT-0052-02 | SCR-0052 | Guardar Borrador | Secundaria | Siempre | Guarda el comentario como borrador sin enviarlo. | — | — |
+|  | ACT-0052-03 | SCR-0052 | Volver | Link | Siempre | Regresa a la bandeja / pantalla anterior sin guardar. | — | — |
 ## Sheet: 05_Reglas
 |  | REGLAS DE NEGOCIO, VALIDACIÓN Y VISIBILIDAD |  |  |  |  |  |  |  |  |  |  |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
@@ -428,6 +503,16 @@ PAN-01.2 | Formulario de Radicación PQRS (Autoservicio) | Formulario de autoser
 |  | RUL-000-11 | SCR-000 | FLD-330 | Restricción | Al adjuntar archivo | Archivo no es pdf/jpg/png/docx o supera 5 MB | Bloquear adjunto. Mostrar MSG-000-06 | Error | Sí | MSG-000-06 | Bloquea radicación |
 |  | RUL-000-12 | SCR-000 | FLD-325 | Control | Al cambiar Réplica | replica = "Sí" | Mostrar el campo Argumento de la réplica (FLD-326). | Control | No | — | No aplica |
 |  | RUL-000-13 | SCR-000 | FLD-307 | Restricción | Al guardar | numeroIdentificacion no cumple el formato según el tipo de documento | Bloquear. Mostrar MSG-000-07 | Error | Sí | MSG-000-07 | Bloquea radicación |
+|  | RUL-0051-01 | SCR-0051 | SEC-051 | Control | Al cargar | Caso ya tiene responsable asignado | Ocultar la sección 'Asignación de Responsable' (solo visible la primera vez) | Control | No | — | No afecta flujo directo |
+|  | RUL-0051-02 | SCR-0051 | FLD-082/FLD-083 | Restricción | Al cambiar área | Siempre | Cargar solo usuarios autorizados del área seleccionada | Control | No | — | Filtro de catálogo |
+|  | RUL-0051-03 | SCR-0051 | ACT-0051-04 | Control | Al cargar y al cambiar | slaRestante <= 2 | Habilitar botón 'Solicitar Prórroga' y mostrar banner rojo de SLA crítico | Advertencia | No | MSG-0051-01 | Habilita SP4 |
+|  | RUL-0051-04 | SCR-0051 | ACT-0051-03 | Restricción | Al confirmar reasignación | areaDestino, motivoReasignacion u observaciones vacíos | Bloquear. Mostrar MSG-0051-03 | Error | Sí | MSG-0051-03 | No reasigna |
+|  | RUL-0051-05 | SCR-0051 | ACT-0051-08 | Restricción | Al enviar | respuestaCliente vacío | Bloquear envío. Mostrar MSG-0051-02 | Error | Sí | MSG-0051-02 | No avanza a SP2-T04 |
+|  | RUL-0051-06 | SCR-0051 | FLD-092 | Restricción | Al confirmar reasignación | Asignación a usuario fuera del proceso | Bloquear | Error | Sí | — | No reasigna |
+|  | RUL-0051-07 | SCR-0051 | SEC-052 | Control | Al responder '¿Necesitas de otras áreas?' | respuesta = 'Sí' | Mostrar el bloque de Reasignación de Caso (PAN-06) y el Historial de Asignaciones | Control | No | — | No aplica |
+|  | RUL-0052-01 | SCR-0052 | ACT-0052-01 | Restricción | Al enviar comentario | comentario vacío | Bloquear envío. Mostrar MSG-0052-01 | Error | Sí | MSG-0052-01 | No registra comentario |
+|  | RUL-0051-08 | SCR-0051 | SEC-052 | Control | Al añadir ayudante | Número de ayudantes >= 4 | Ocultar el formulario 'A quién quieres solicitar ayuda' y mostrar el mensaje 'Límite de ayudantes alcanzado' | Advertencia | No | MSG-0051-06 | No afecta flujo directo |
+|  | RUL-0051-09 | SCR-0051 | FLD-111 | Control | Al cambiar FLD-350 | respuestaFavorDe = Cliente | Mostrar el campo 'Acciones Tomadas' (FLD-111). Si el valor es distinto de Cliente, ocultarlo | Control | No | — | No afecta flujo directo |
 ## Sheet: 06_Mensajes
 |  | MENSAJES DEL SISTEMA |  |  |  |  |  |  |
 | --- | --- | --- | --- | --- | --- | --- | --- |
@@ -478,6 +563,14 @@ PAN-01.2 | Formulario de Radicación PQRS (Autoservicio) | Formulario de autoser
 |  | MSG-000-06 | SCR-000 | Error | Archivo no permitido | Solo se permiten archivos pdf, jpg, png o docx, de máximo 5 MB cada uno. | Al validar o al ejecutar acción en SCR-000 | Bloquea |
 |  | MSG-000-07 | SCR-000 | Error | Identificación inválida | El número de identificación no cumple el formato requerido para el tipo de documento seleccionado. | Al validar o al ejecutar acción en SCR-000 | Bloquea |
 |  | MSG-000-08 | SCR-000 | Éxito | PQRS radicada | Su solicitud fue radicada exitosamente. Número de caso: [ID]. Recibirá la respuesta en el correo registrado. | Al validar o al ejecutar acción en SCR-000 | Continúa |
+|  | MSG-0051-01 | SCR-0051 | Advertencia | SLA crítico | ⚠ El caso tiene [N] día(s) hábil(es) restante(s). Priorice la gestión; puede solicitar prórroga regulatoria. | Al validar o al ejecutar acción en SCR-0051 | Informa |
+|  | MSG-0051-02 | SCR-0051 | Error | Campo obligatorio vacío | El campo Respuesta al Cliente es obligatorio para enviar. | Al validar o al ejecutar acción en SCR-0051 | Bloquea |
+|  | MSG-0051-03 | SCR-0051 | Error | Reasignación incompleta | El área destino, el motivo y las observaciones son obligatorios para registrar la reasignación. | Al validar o al ejecutar acción en SCR-0051 | Bloquea |
+|  | MSG-0051-04 | SCR-0051 | Éxito | Asignación registrada | Caso asignado a [Usuario] ([Área]). Notificación enviada al responsable. | Al validar o al ejecutar acción en SCR-0051 | Continúa |
+|  | MSG-0051-05 | SCR-0051 | Éxito | Enviado a SAC | Borrador de respuesta enviado al Analista SAC para revisión. Estado: En revisión SAC. | Al validar o al ejecutar acción en SCR-0051 | Continúa |
+|  | MSG-0052-01 | SCR-0052 | Error | Comentario obligatorio | Debe escribir un comentario antes de enviarlo. | Al validar o al ejecutar acción en SCR-0052 | Bloquea |
+|  | MSG-0052-02 | SCR-0052 | Éxito | Comentario enviado | Comentario y adjunto registrados en el historial del caso. | Al validar o al ejecutar acción en SCR-0052 | Continúa |
+|  | MSG-0051-06 | SCR-0051 | Advertencia | Límite de ayudantes alcanzado | Ha alcanzado el máximo de 4 ayudantes para este caso. No puede añadir más. | Al validar o al ejecutar acción en SCR-0051 | Informa |
 ## Sheet: 07_Catalogs
 |  | CATÁLOGOS REFERENCIADOS |  |  |  |  |  |  |
 | --- | --- | --- | --- | --- | --- | --- | --- |
@@ -518,6 +611,7 @@ PAN-01.2 | Formulario de Radicación PQRS (Autoservicio) | Formulario de autoser
 |  | CAT-ROL-RADICADOR | Rol del Radicador | Zurich | Cliente / Intermediario / Empleado Zurich / Defensor del Consumidor | Activo — Zurich | CAT-INSTANCIA | Determina la instancia y el punto de recepción SFC. |
 |  | CAT-TIPO-SOLIC-PQRS | Tipo de Solicitud (PQRS Front) | Zurich | Solicitud, Felicitación, Queja, Sugerencia, Derecho de petición | Activo — Zurich | — | Lista #2 del formulario PQRS. Homologar con CAT-TIPO-SOL. |
 |  | CAT-DETALLE-PRODUCTO | Detalle del Producto | SFC | Subnivel del producto SFC seleccionado | Pendiente TI | CAT-PRODUCTO-SFC | Pendiente confirmar lista con TI/SFC. |
+|  | CAT-FAVOR | Respuesta a Favor de | Zurich | Cliente / Compañía | Pendiente TI | — | ⚠ Pendiente parametrización. Indica a quién favorece la resolución (FLD-350, PAN-05.1). Homologar con CAT-FAVORAB. |
 ## Sheet: 08_Permisos
 |  | PERMISOS POR ROL Y PANTALLA |  |  |  |  |  |  |  |  |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
@@ -537,6 +631,8 @@ PAN-01.2 | Formulario de Radicación PQRS (Autoservicio) | Formulario de autoser
 |  | SCR-011 | Revisión Error Técnico Prórroga | — | INFORMADO | — | VER + EDITAR | — | INFORMADO | Solo Analista Técnico. |
 |  | SCR-012 | Corrección Error Funcional Prórroga | — | VER + EDITAR | VER + EDITAR | — | VER | — | SAC y Área Responsable pueden corregir. |
 |  | SCR-000 | Formulario de Radicación PQRS (Autoservicio) | VER | — | — | — | — | INFORMADO | Formulario público de autoservicio. Radica el Consumidor Financiero (Cliente, Intermediario, Empleado Zurich o Defensor). El Gestor CX recibe el caso creado. |
+|  | SCR-0051 | Flujo Combinado — Detalle / Reasignación / Respuesta | — | VER + EDITAR | VER + EDITAR | — | VER | INFORMADO | Vista integrada PAN-05+06+07. El Analista SAC asigna/reasigna; el Área Responsable elabora la respuesta. |
+|  | SCR-0052 | Respuesta del Área Responsable | — | VER (lectura) | VER + EDITAR | — | VER | INFORMADO | El Área Responsable registra comentario y adjunto. |
 ## Sheet: 10_Trazabilidad_BPMN
 |  | TRAZABILIDAD PANTALLAS → BPMN 2.0 |  |  |  |  |  |  |  |  |  |  |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
@@ -569,6 +665,10 @@ PAN-11 | Revisión Error Técnico Prórroga | SP4 | SP4-T05 Corregir error técn
 PAN-12 | Corrección Error Funcional Prórroga | SP4 | SP4-T06 Corregir error funcional de cierre prórroga | Analista SAC / Área Responsable | SmartSupervision rechaza prórroga HTTP 400 funcional | Reenviar Prórroga → SP4-T01 | ¿Error funcional prórroga corregido? | Detalle error SFC prórroga, campos afectados | Campos prórroga corregidos, log actualizado | Reenvío SP4-T01 → si OK → SP4-T03 notif. cliente |
 |  | SCR-000
 PAN-01.2 | Formulario de Radicación PQRS (Autoservicio) | P01 | P01-T00 Radicar PQRS por autoservicio (portal público) | Consumidor Financiero / Canal digital | El consumidor accede al portal público de PQRS | Enviar PQRS → ejecuta P01-T01 | ¿Autorización aceptada y captcha válido? (divergente exclusiva) | Datos del consumidor, rol, clasificación, motivo, adjuntos | Caso radicado con ID, datos del formulario | Si válido → P01-T01 (PAN-01) recepción y validación; si no → permanece en el formulario |
+|  | SCR-0051
+PAN-05.1 | Flujo Combinado — Detalle / Reasignación / Respuesta | SP2 | SP2-T01 Asignar / SP2-T03 Reasignar / SP2-T02 Analizar y elaborar respuesta | Analista SAC / Área Responsable | SP1 exitoso HTTP 201 → bandeja SAC | Enviar (o Reasignar / Solicitar Prórroga) | ¿Área correcta? / ¿Respuesta completa? (divergentes exclusivas) | Expediente completo, código SFC, SLA, historial de asignaciones | Asignación/reasignación, borrador de respuesta (texto al cliente) | Si reasigna → SP2-T03; si SLA ≤ 3 → SP4-T01; al enviar → 'En revisión SAC' → SP2-T04 (PAN-08) |
+|  | SCR-0052
+PAN-05.2 | Respuesta del Área Responsable | SP2 | SP2-T02 Analizar queja (registro de comentario) | Área Responsable | Caso asignado a la bandeja del área | Enviar comentario | ¿Comentario registrado? | Datos del consumidor, clasificación regulatoria, descripción de la queja y datos de la asignación | Comentario y adjunto en el historial del caso | Comentario registrado → continúa SP2-T02 |
 ## Sheet: 11_Checklist_QA
 |  | CHECKLIST QA — PANTALLAS TO-BE |  |  |  |  |  |  |
 | --- | --- | --- | --- | --- | --- | --- | --- |
@@ -705,6 +805,26 @@ PAN-01.2 | Formulario de Radicación PQRS (Autoservicio) | P01 | P01-T00 Radicar
 |  | SCR-000 | Formulario de Radicación PQRS (Autoservicio) | Todas las listas tienen catálogo referenciado en 07_Catalogs | Pendiente |  | Zurich/BeePM | Junio 2026 |
 |  | SCR-000 | Formulario de Radicación PQRS (Autoservicio) | Todo campo solo lectura tiene fuente, momento de carga y regla documentados | Pendiente |  | Zurich/BeePM | Junio 2026 |
 |  | SCR-000 | Formulario de Radicación PQRS (Autoservicio) | HTML de referencia refleja fielmente el Excel (fuente de verdad) | Pendiente |  | Zurich/BeePM | Junio 2026 |
+|  | SCR-0051 | Flujo Combinado — Detalle / Reasignación / Respuesta | ID único (SCR-###) asignado y nombre que describe la intención de negocio | Pendiente |  | Zurich/BeePM | Junio 2026 |
+|  | SCR-0051 | Flujo Combinado — Detalle / Reasignación / Respuesta | Tipo de pantalla definido (formulario, aprobación, corrección, cierre, etc.) | Pendiente |  | Zurich/BeePM | Junio 2026 |
+|  | SCR-0051 | Flujo Combinado — Detalle / Reasignación / Respuesta | Proceso BPMN y tarea/subproceso relacionado documentado en 10_Trazabilidad_BPMN | Pendiente |  | Zurich/BeePM | Junio 2026 |
+|  | SCR-0051 | Flujo Combinado — Detalle / Reasignación / Respuesta | Rol/carril responsable definido y consistente con matriz de roles | Pendiente |  | Zurich/BeePM | Junio 2026 |
+|  | SCR-0051 | Flujo Combinado — Detalle / Reasignación / Respuesta | Evento de apertura y acción de cierre documentados | Pendiente |  | Zurich/BeePM | Junio 2026 |
+|  | SCR-0051 | Flujo Combinado — Detalle / Reasignación / Respuesta | Todos los campos tienen etiqueta, tipo de dato y control UI definidos | Pendiente |  | Zurich/BeePM | Junio 2026 |
+|  | SCR-0051 | Flujo Combinado — Detalle / Reasignación / Respuesta | Todos los campos obligatorios tienen validación y mensaje de error en 06_Mensajes | Pendiente |  | Zurich/BeePM | Junio 2026 |
+|  | SCR-0051 | Flujo Combinado — Detalle / Reasignación / Respuesta | Todas las listas tienen catálogo referenciado en 07_Catalogs | Pendiente |  | Zurich/BeePM | Junio 2026 |
+|  | SCR-0051 | Flujo Combinado — Detalle / Reasignación / Respuesta | Todo campo solo lectura tiene fuente, momento de carga y regla documentados | Pendiente |  | Zurich/BeePM | Junio 2026 |
+|  | SCR-0051 | Flujo Combinado — Detalle / Reasignación / Respuesta | HTML de referencia refleja fielmente el Excel (fuente de verdad) | Pendiente |  | Zurich/BeePM | Junio 2026 |
+|  | SCR-0052 | Respuesta del Área Responsable | ID único (SCR-###) asignado y nombre que describe la intención de negocio | Pendiente |  | Zurich/BeePM | Junio 2026 |
+|  | SCR-0052 | Respuesta del Área Responsable | Tipo de pantalla definido (formulario, aprobación, corrección, cierre, etc.) | Pendiente |  | Zurich/BeePM | Junio 2026 |
+|  | SCR-0052 | Respuesta del Área Responsable | Proceso BPMN y tarea/subproceso relacionado documentado en 10_Trazabilidad_BPMN | Pendiente |  | Zurich/BeePM | Junio 2026 |
+|  | SCR-0052 | Respuesta del Área Responsable | Rol/carril responsable definido y consistente con matriz de roles | Pendiente |  | Zurich/BeePM | Junio 2026 |
+|  | SCR-0052 | Respuesta del Área Responsable | Evento de apertura y acción de cierre documentados | Pendiente |  | Zurich/BeePM | Junio 2026 |
+|  | SCR-0052 | Respuesta del Área Responsable | Todos los campos tienen etiqueta, tipo de dato y control UI definidos | Pendiente |  | Zurich/BeePM | Junio 2026 |
+|  | SCR-0052 | Respuesta del Área Responsable | Todos los campos obligatorios tienen validación y mensaje de error en 06_Mensajes | Pendiente |  | Zurich/BeePM | Junio 2026 |
+|  | SCR-0052 | Respuesta del Área Responsable | Todas las listas tienen catálogo referenciado en 07_Catalogs | Pendiente |  | Zurich/BeePM | Junio 2026 |
+|  | SCR-0052 | Respuesta del Área Responsable | Todo campo solo lectura tiene fuente, momento de carga y regla documentados | Pendiente |  | Zurich/BeePM | Junio 2026 |
+|  | SCR-0052 | Respuesta del Área Responsable | HTML de referencia refleja fielmente el Excel (fuente de verdad) | Pendiente |  | Zurich/BeePM | Junio 2026 |
 ## Sheet: SCR-000
 |  | SCR-000 — Formulario de Radicación PQRS (Autoservicio) |  |  |  |  |  |  |  |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- |
@@ -743,7 +863,7 @@ PAN-01.2 | Formulario de Radicación PQRS (Autoservicio) | P01 | P01-T00 Radicar
 |  | FLD-319 | S2 Datos del Consumidor Financiero | * Dirección | Sí | Label/Solo lectura | Sistema |  | Back. Enviar por default "vacío". Pendiente API SFC. |
 |  | FLD-320 | S2 Datos del Consumidor Financiero | * Sexo | Sí | Label/Solo lectura | Catálogo SFC | CAT-SEXO | Back. Default "No aplica". Pendiente API SFC. |
 |  | FLD-321 | S2 Datos del Consumidor Financiero | * LGBTIQ+ | Sí | Label/Solo lectura | Catálogo SFC | CAT-LGBTIQ | ⚠ Back. Default "No aplica". Catálogo pendiente confirmar con TI. |
-|  | FLD-322 | S2 Datos del Consumidor Financiero | * Condición especial | Sí | Lista desplegable | Catálogo SFC | CAT-COND-ESP | Pendiente confirmar lista con TI/SFC. |
+|  | FLD-322 | S2 Datos del Consumidor Financiero | * Condición especial | Sí | Label/Solo lectura | Catálogo SFC | CAT-COND-ESP | Back. Solo lectura. Pendiente confirmar lista con TI/SFC. |
 |  | FLD-323 | S3 Detalle de la Queja | * Selecciona el seguro | Sí | Lista desplegable | Catálogo SFC | CAT-PRODUCTO-SFC | Homologación entre la lista del Front y lo enviado a SFC. |
 |  | FLD-324 | S3 Detalle de la Queja | * Detalle del producto | Sí | Label/Solo lectura | Catálogo SFC | CAT-DETALLE-PRODUCTO | Back. Pendiente confirmar lista. |
 |  | FLD-325 | S3 Detalle de la Queja | * ¿Ya había radicado previamente la misma queja o es una reconsideración? | Sí | Radio Sí/No | Usuario |  | Campo Réplica SFC. |
@@ -976,6 +1096,111 @@ PAN-01.2 | Formulario de Radicación PQRS (Autoservicio) | P01 | P01-T00 Radicar
 |  | ⚠ REGLAS CRÍTICAS |  |  |  |  |  |  |  |
 |  | RUL-005-01 | Restricción | Siempre |  | Cargar solo usuarios autorizados del área seleccionada |  | info | — |
 |  | RUL-005-02 | Control | slaRestante <= 3 |  | Mostrar banner rojo de SLA crítico. MSG-005-01 |  | info | MSG-005-01 |
+## Sheet: SCR-0051
+|  | SCR-0051 — Flujo Combinado — Detalle / Reasignación / Respuesta |  |  |  |  |  |  |  |
+| --- | --- | --- | --- | --- | --- | --- | --- | --- |
+|  | Proceso: Gestión de Quejas Directas | ACZ-QD-001  |  Versión: 2.0 TO-BE | Mayo 2026 |  |  |  |  |  |  |  |
+|  | Servicio: Atención al Consumidor Financiero – Zurich Seguros Colombia  |  Plataforma: ProcessMaker 4 BPMS |  |  |  |  |  |  |  |
+|  | Proceso: SP2 — Gestionar Respuesta Interna y Revisión SAC  |  Tarea: SP2-T01 / T02 / T03 / T05  |  Rol: Analista SAC / Área Responsable  |  Estado: Radicado ante SFC / En análisis |  |  |  |  |  |  |  |
+|  | 📖 HISTORIA DE USUARIO |  |  |  |  |  |  |  |
+|  | Como (Rol) | Analista SAC / Área Responsable |  |  |  |  |  |  |
+|  | Quiero | revisar el expediente completo de la queja, asignar/reasignar o solicitar ayuda a otras áreas (hasta 4 ayudantes) y elaborar el borrador de respuesta desde una sola pantalla integrada |  |  |  |  |  |  |
+|  | Para | agilizar la gestión reduciendo la navegación entre PAN-05, PAN-06 y PAN-07 y garantizar la trazabilidad de la asignación y de la respuesta |  |  |  |  |  |  |
+|  | ✅ CRITERIO DE ACEPTACIÓN |  |  |  |  |  |  |  |
+|  | Dado que | la queja fue radicada exitosamente ante SmartSupervision (HTTP 201) y está en mi bandeja para gestión |  |  |  |  |  |  |
+|  | Cuando | reviso el expediente, asigno/reasigno o solicito ayuda si lo requiero, redacto la respuesta al cliente y presiono 'Enviar' |  |  |  |  |  |  |
+|  | Entonces | el sistema registra la asignación/reasignación en el historial, guarda el borrador, notifica al Analista SAC y cambia el estado a 'En revisión SAC' |  |  |  |  |  |  |
+|  | 📋 CAMPOS DE LA PANTALLA |  |  |  |  |  |  |  |
+|  | ID Campo | Sección | Etiqueta | Oblig. | Control UI | Fuente | Catálogo | Ayuda/Validación |
+|  | FLD-066 | S1 Datos del Consumidor | Nombre del Consumidor | No | Label/Solo lectura | Caso |  | — |
+|  | FLD-067 | S1 Datos del Consumidor | Tipo y N.° de Identificación | No | Label/Solo lectura | Caso |  | — |
+|  | FLD-068 | S1 Datos del Consumidor | Correo Electrónico | No | Label/Solo lectura | Caso |  | Destino del correo de respuesta final. |
+|  | FLD-069 | S1 Datos del Consumidor | Tipo de Persona | No | Label/Solo lectura | Caso |  | — |
+|  | FLD-070 | S2 Clasificación Regulatoria (precargada M1) | Canal de Recepción | No | Label/Solo lectura | Caso M1 |  | Precargado desde Momento 1. |
+|  | FLD-071 | S2 Clasificación Regulatoria (precargada M1) | Producto SFC | No | Label/Solo lectura | Caso M1 |  | No editable. |
+|  | FLD-072 | S2 Clasificación Regulatoria (precargada M1) | Motivo SFC | No | Label/Solo lectura | Caso M1 |  | No editable. |
+|  | FLD-073 | S2 Clasificación Regulatoria (precargada M1) | Instancia / Punto de Recepción | No | Label/Solo lectura | Caso M1 |  | No editable. |
+|  | FLD-074 | S2 Clasificación Regulatoria (precargada M1) | Admisión | No | Label/Solo lectura | Caso M1 |  | No editable. |
+|  | FLD-075 | S2 Clasificación Regulatoria (precargada M1) | Ente de Control | No | Label/Solo lectura | Caso M1 |  | No editable. |
+|  | FLD-076 | S3 Descripción de la Queja | Asunto de la Queja | No | Label/Solo lectura | Caso |  | — |
+|  | FLD-077 | S3 Descripción de la Queja | Descripción / Texto de la Queja | No | Label/Solo lectura | Caso |  | — |
+|  | FLD-079 | S4 Estado SmartSupervision | Estado SmartSupervision | No | Badge/Estado | Sistema |  | Pendiente / Radicado (201) / Rechazado (400) / Cerrado (200). |
+|  | FLD-080 | S4 Estado SmartSupervision | Intentos M1/M2 | No | Label/Solo lectura | Sistema |  | — |
+|  | FLD-081 | S4 Estado SmartSupervision | Fecha/Hora radicación SFC | No | Label/Solo lectura | Sistema |  | Timestamp del HTTP 201 exitoso. |
+|  | FLD-082 | S5 Asignación de Responsable | * Área responsable | Sí | Lista desplegable | Catálogo Zurich | CAT-AREA | Solo visible la primera vez (RUL-0051-01). |
+|  | FLD-083 | S5 Asignación de Responsable | * Usuario responsable | Sí | Lista desplegable filtrada | Sistema (usuarios BPM) | CAT-USUARIOS-ROLE | Solo usuarios autorizados (RUL-0051-02). |
+|  | FLD-084 | S5 Asignación de Responsable | Observaciones de asignación | No | Área de texto | Usuario |  | Opcional. |
+|  | FLD-090 | S6 Reasignación de Caso (PAN-06) | Responsable actual | No | Label/Solo lectura | Sistema |  | — |
+|  | FLD-091 | S6 Reasignación de Caso (PAN-06) | * Área destino | Sí | Lista desplegable | Catálogo Zurich | CAT-AREA | Máx. 4 ayudantes (RUL-0051-08). |
+|  | FLD-092 | S6 Reasignación de Caso (PAN-06) | * Responsable | Sí | Label/Solo lectura (auto) | Sistema (BPM) | CAT-USUARIOS-ROLE | Auto según Área Destino. ⚠ Pendiente lista por área. |
+|  | FLD-093 | S6 Reasignación de Caso (PAN-06) | * Motivo de reasignación | Sí | Lista desplegable | Catálogo Zurich | CAT-MOTIVO-REASIG | — |
+|  | FLD-094 | S6 Reasignación de Caso (PAN-06) | * Observaciones (justificación) | Sí | Área de texto | Usuario |  | Obligatorio (RUL-0051-04). Queda en historial. |
+|  | FLD-095 | S7 Historial de Asignaciones | Historial de asignaciones previas | No | Tabla/Grid | Sistema |  | Columnas: Fecha | De | Para | Motivo | Observaciones | Respondió | Comentario | Adjunto. |
+|  | FLD-110 | S8 Elaboración de Respuesta Técnica | * Respuesta al Cliente (borrador) | Sí | Área de texto | Usuario |  | Obligatorio (RUL-0051-05). Irá en la carta PDF de respuesta final. |
+|  | FLD-111 | S8 Elaboración de Respuesta Técnica | Acciones Tomadas | No | Área de texto | Usuario |  | Visible solo si 'Respuesta a favor de' = Cliente (RUL-0051-09). |
+|  | FLD-112 | S8 Elaboración de Respuesta Técnica | ¿Reconocimiento al cliente? | No | Label/Solo lectura (Back) | Sistema (Back) |  | Back. Solo lectura. |
+|  | FLD-113 | S9 Soportes Internos | Adjuntos internos de soporte | No | Archivo (multi) | Usuario |  | Máx 10 archivos. No van al cliente ni a SFC. |
+|  | FLD-350 | S10 Configuración de Respuesta | * Respuesta a favor de | Sí | Lista desplegable | Catálogo Zurich | CAT-FAVOR | ⚠ Pendiente catálogo. Cliente / Compañía. Si = Cliente muestra 'Acciones Tomadas'. |
+|  | 🎯 ACCIONES |  |  |  |  |  |  |  |
+|  | ID | Etiqueta | Tipo | Condición | Descripción / Resultado BPMN |  |  |  |
+|  | ACT-0051-01 | Confirmar Asignación | Primaria | usuarioResponsable seleccionado | Registra la asignación inicial y notifica al responsable. Estado → 'En análisis'. |  |  |  |
+|  | ACT-0051-02 | Reasignar Queja | Secundaria | Siempre | Habilita la edición de asignación / despliega el bloque de solicitud de ayuda (PAN-06). |  |  |  |
+|  | ACT-0051-03 | Confirmar Reasignación | Primaria | Área destino, motivo y observaciones completos | Añade el ayudante (máx. 4) al historial y notifica al nuevo responsable. |  |  |  |
+|  | ACT-0051-04 | Solicitar Prórroga Regulatoria | Terciaria | SLA ≤ 2 días hábiles | Inicia SP4 Prórroga Regulatoria (POST /api/1.0/workflow → SP4-T01). |  |  |  |
+|  | ACT-0051-05 | Vista Previa Respuesta Final | Secundaria | Siempre | Muestra la vista previa de la carta de respuesta final (formato SFC). |  |  |  |
+|  | ACT-0051-06 | Ver Expediente Completo | Link | Siempre | Abre el expediente completo del caso. |  |  |  |
+|  | ACT-0051-07 | Guardar Borrador | Secundaria | Siempre | Guarda el borrador sin enviar. |  |  |  |
+|  | ACT-0051-08 | Enviar | Primaria | respuestaCliente no vacío | Guarda y envía la respuesta; notifica al Analista SAC. Estado → 'En revisión SAC'. |  |  |  |
+|  | ⚠ REGLAS CRÍTICAS |  |  |  |  |  |  |  |
+|  | RUL-0051-01 | Control | Caso ya tiene responsable asignado |  | Ocultar la sección 'Asignación de Responsable' (solo la 1ª vez) |  | info | — |
+|  | RUL-0051-02 | Restricción | Al cambiar área |  | Cargar solo usuarios autorizados del área seleccionada |  | info | — |
+|  | RUL-0051-03 | Control | slaRestante <= 2 |  | Habilitar botón 'Solicitar Prórroga' y banner rojo SLA crítico |  | info | MSG-0051-01 |
+|  | RUL-0051-04 | Restricción | areaDestino, motivo u observaciones vacíos |  | Bloquear. Mostrar MSG-0051-03 |  | 🔴 BLOQUEA | MSG-0051-03 |
+|  | RUL-0051-05 | Restricción | respuestaCliente vacío |  | Bloquear envío. Mostrar MSG-0051-02 |  | 🔴 BLOQUEA | MSG-0051-02 |
+|  | RUL-0051-06 | Restricción | Asignación a usuario fuera del proceso |  | Bloquear reasignación |  | 🔴 BLOQUEA | — |
+|  | RUL-0051-07 | Control | '¿Necesitas otras áreas?' = Sí |  | Mostrar bloque Reasignación (PAN-06) e Historial |  | info | — |
+|  | RUL-0051-08 | Control | N.º de ayudantes >= 4 |  | Ocultar el formulario de añadir ayudante y mostrar 'Límite de ayudantes alcanzado' |  | info | MSG-0051-06 |
+|  | RUL-0051-09 | Control | respuestaFavorDe = Cliente |  | Mostrar 'Acciones Tomadas' (FLD-111); si no, ocultarlo |  | info | — |
+## Sheet: SCR-0052
+|  | SCR-0052 — Respuesta del Área Responsable |  |  |  |  |  |  |  |
+| --- | --- | --- | --- | --- | --- | --- | --- | --- |
+|  | Proceso: Gestión de Quejas Directas | ACZ-QD-001  |  Versión: 2.0 TO-BE | Mayo 2026 |  |  |  |  |  |  |  |
+|  | Servicio: Atención al Consumidor Financiero – Zurich Seguros Colombia  |  Plataforma: ProcessMaker 4 BPMS |  |  |  |  |  |  |  |
+|  | Proceso: SP2 — Gestionar Respuesta Interna y Revisión SAC  |  Tarea: SP2-T02  |  Rol: Área Responsable  |  Estado: En análisis |  |  |  |  |  |  |  |
+|  | 📖 HISTORIA DE USUARIO |  |  |  |  |  |  |  |
+|  | Como (Rol) | Área Responsable |  |  |  |  |  |  |
+|  | Quiero | ver el detalle del caso asignado (consumidor, clasificación y descripción) y registrar un comentario con un adjunto de soporte |  |  |  |  |  |  |
+|  | Para | contar con el contexto completo de la queja, dejar trazabilidad de mi gestión y aportar soportes al expediente |  |  |  |  |  |  |
+|  | ✅ CRITERIO DE ACEPTACIÓN |  |  |  |  |  |  |  |
+|  | Dado que | el caso fue asignado a mi área y aparece en mi bandeja de gestión |  |  |  |  |  |  |
+|  | Cuando | reviso el detalle del caso y la asignación, escribo mi comentario, adjunto el archivo y presiono 'Enviar comentario' |  |  |  |  |  |  |
+|  | Entonces | el sistema registra el comentario y el adjunto en el historial del caso y notifica al responsable |  |  |  |  |  |  |
+|  | 📋 CAMPOS DE LA PANTALLA |  |  |  |  |  |  |  |
+|  | ID Campo | Sección | Etiqueta | Oblig. | Control UI | Fuente | Catálogo | Ayuda/Validación |
+|  | FLD-066 | S1 Datos del Consumidor | Nombre del Consumidor | No | Label/Solo lectura | Caso |  | — |
+|  | FLD-067 | S1 Datos del Consumidor | Tipo y N.° de Identificación | No | Label/Solo lectura | Caso |  | — |
+|  | FLD-068 | S1 Datos del Consumidor | Correo Electrónico | No | Label/Solo lectura | Caso |  | Destino del correo de respuesta final. |
+|  | FLD-069 | S1 Datos del Consumidor | Tipo de Persona | No | Label/Solo lectura | Caso |  | — |
+|  | FLD-070 | S2 Clasificación Regulatoria | Canal de Recepción | No | Label/Solo lectura | Caso M1 |  | Precargado desde Momento 1. |
+|  | FLD-071 | S2 Clasificación Regulatoria | Producto SFC | No | Label/Solo lectura | Caso M1 |  | No editable. |
+|  | FLD-072 | S2 Clasificación Regulatoria | Motivo SFC | No | Label/Solo lectura | Caso M1 |  | No editable. |
+|  | FLD-073 | S2 Clasificación Regulatoria | Instancia / Punto de Recepción | No | Label/Solo lectura | Caso M1 |  | No editable. |
+|  | FLD-074 | S2 Clasificación Regulatoria | Admisión | No | Label/Solo lectura | Caso M1 |  | No editable. |
+|  | FLD-075 | S2 Clasificación Regulatoria | Ente de Control | No | Label/Solo lectura | Caso M1 |  | No editable. |
+|  | FLD-076 | S3 Descripción de la Queja | Asunto de la Queja | No | Label/Solo lectura | Caso |  | — |
+|  | FLD-077 | S3 Descripción de la Queja | Descripción / Texto de la Queja | No | Label/Solo lectura | Caso |  | — |
+|  | FLD-351 | S4 Datos de la Asignación | Área | No | Label/Solo lectura | Caso |  | Área responsable asignada al caso. |
+|  | FLD-352 | S4 Datos de la Asignación | Responsable | No | Label/Solo lectura | Caso |  | Usuario asignado para gestionar el caso. |
+|  | FLD-353 | S4 Datos de la Asignación | Observaciones | No | Área de texto (solo lectura) | Caso |  | Observaciones registradas al asignar. |
+|  | FLD-354 | S5 Comentario y Adjunto | * Comentario | Sí | Área de texto | Usuario |  | Comentario visible en el historial del caso. |
+|  | FLD-355 | S5 Comentario y Adjunto | Adjuntar archivo | No | Archivo | Usuario |  | PDF/DOCX/XLSX/JPG/PNG. Máx 10 MB. |
+|  | 🎯 ACCIONES |  |  |  |  |  |  |  |
+|  | ID | Etiqueta | Tipo | Condición | Descripción / Resultado BPMN |  |  |  |
+|  | ACT-0052-01 | Enviar comentario | Primaria | comentario no vacío | Registra el comentario y el adjunto en el historial y notifica al responsable. |  |  |  |
+|  | ACT-0052-02 | Guardar Borrador | Secundaria | Siempre | Guarda el comentario como borrador sin enviarlo. |  |  |  |
+|  | ACT-0052-03 | Volver | Link | Siempre | Regresa a la bandeja sin guardar. |  |  |  |
+|  | ⚠ REGLAS CRÍTICAS |  |  |  |  |  |  |  |
+|  | RUL-0052-01 | Restricción | comentario vacío |  | Bloquear envío. Mostrar MSG-0052-01 |  | 🔴 BLOQUEA | MSG-0052-01 |
 ## Sheet: SCR-006
 |  | SCR-006 — Reasignación de Caso |  |  |  |  |  |  |  |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- |
@@ -1066,18 +1291,17 @@ PAN-01.2 | Formulario de Radicación PQRS (Autoservicio) | P01 | P01-T00 Radicar
 |  | FLD-122 | S1 Contexto del Caso | Versión bajo revisión | No | Label/Solo lectura | Sistema |  | — |
 |  | FLD-123 | S1 Contexto del Caso | Área Responsable | No | Label/Solo lectura | Caso |  | — |
 |  | FLD-124 | S1 Contexto del Caso | Fecha de elaboración del borrador | No | Label/Solo lectura | Sistema |  | — |
-|  | FLD-125 | S2 Respuesta del Área (solo lectura) | Causa Raíz | No | Label/Solo lectura | Área (PAN-07) |  | — |
-|  | FLD-126 | S2 Respuesta del Área (solo lectura) | Posición de Zurich | No | Label/Solo lectura | Área (PAN-07) |  | — |
-|  | FLD-127 | S2 Respuesta del Área (solo lectura) | Respuesta al Cliente | No | Label/Solo lectura | Área (PAN-07) |  | — |
-|  | FLD-128 | S2 Respuesta del Área (solo lectura) | Acciones Tomadas | No | Label/Solo lectura | Área (PAN-07) |  | — |
-|  | FLD-129 | S2 Respuesta del Área (solo lectura) | ¿Reconocimiento al cliente? | No | Label/Solo lectura | Área (PAN-07) |  | — |
-|  | FLD-130 | S2 Respuesta del Área (solo lectura) | Soportes internos adjuntos | No | Lista de adjuntos | Área (PAN-07) |  | Solo visualización. |
+|  | FLD-127 | S2 Respuesta del Área (solo lectura) | Respuesta al Cliente | No | Label/Solo lectura | Área (PAN-05.1) |  | — |
+|  | FLD-128 | S2 Respuesta del Área (solo lectura) | Acciones Tomadas | No | Label/Solo lectura | Área (PAN-05.1) |  | — |
+|  | FLD-129 | S2 Respuesta del Área (solo lectura) | ¿Reconocimiento al cliente? | No | Label/Solo lectura | Área (PAN-05.1) |  | — |
+|  | FLD-130 | S2 Respuesta del Área (solo lectura) | Soportes internos adjuntos | No | Lista de adjuntos | Área (PAN-05.1) |  | Solo visualización. |
 |  | FLD-131 | S3 Decisión del Analista SAC | ◉ Observaciones SAC | Cond. | Área de texto | Analista SAC |  | Obligatorio al devolver. Opcional al aprobar. |
 |  | 🎯 ACCIONES |  |  |  |  |  |  |  |
 |  | ID | Etiqueta | Tipo | Condición | Descripción / Resultado BPMN |  |  |  |
 |  | ACT-008-01 | Aprobar Respuesta | Primaria | Siempre | Habilita SP2-T06 (generar PDF). Estado → 'Respuesta aprobada'. |  |  |  |
 |  | ACT-008-02 | Devolver con Observaciones | Destructiva | observacionesSAC no vacío | Devuelve al área responsable. Estado → 'Ajuste en progreso'. |  |  |  |
 |  | ACT-008-03 | Reasignar Caso | Terciaria | Siempre | Abre PAN-06 para reasignación. |  |  |  |
+|  | ACT-008-04 | Vista Previa Respuesta Final | Secundaria | Siempre | Muestra la vista previa de la carta de respuesta final (formato SFC) con los textos aprobados. |  |  |  |
 |  | ⚠ REGLAS CRÍTICAS |  |  |  |  |  |  |  |
 |  | RUL-008-01 | Restricción | observacionesSAC vacío y acción = devolver |  | Bloquear. Mostrar MSG-008-01 |  | 🔴 BLOQUEA | MSG-008-01 |
 |  | RUL-008-02 | Control | slaRestante <= 3 |  | Mostrar banner rojo SLA crítico |  | info | MSG-008-02 |

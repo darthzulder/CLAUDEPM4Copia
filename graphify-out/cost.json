@@ -12,8 +12,15 @@
       "output_tokens": 13967,
       "files": 5,
       "mode": "--update"
+    },
+    {
+      "date": "2026-07-01T16:09:58.849329+00:00",
+      "input_tokens": 275000,
+      "output_tokens": 31070,
+      "files": 29,
+      "mode": "--update"
     }
   ],
-  "total_input_tokens": 240000,
-  "total_output_tokens": 28967
+  "total_input_tokens": 515000,
+  "total_output_tokens": 60037
 }
