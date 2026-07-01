@@ -11,6 +11,11 @@ Las pantallas se crean aquí con ayuda de Claude (este chat), **no dentro de PM4
 **Docs OpenAPI:** `../docs (4).json` (un nivel arriba de pm4-app)
 **Paquetes JSON de pantallas originales:** `../*.json` (un nivel arriba de pm4-app)
 
+**Stack (migrado a React 19, 2026-07-01):** React 19.2.7 + TypeScript 5.9.3 + Vite 8.1.2
+(frontend) · Express 5.2.1 + Node 24 (backend/proxy) · react-hook-form 7.80.0 ·
+`@zurich/web-components`/`css-components` 0.8.1 **vendorizados** en `frontend/vendor/*.tgz`
+(ver `Bootstrap y registro de ZDS` abajo y `frontend/vendor/README.md`).
+
 ---
 
 ## Cómo se ejecuta
@@ -305,6 +310,16 @@ Todo `@zurich/*` se consume desde dos módulos, enforced por ESLint (`no-restric
 - **`components/fields/ZdsFields.tsx`** — componentes. Importar un wrapper React **auto-registra** su web-component (`z-*`) de forma idempotente (`registerComponent` guarda con `customElements.get()`): el registro ocurre una sola vez, al primer render, y nunca lanza "already defined".
 
 Para habilitar un `z-*` nuevo: re-exportar su wrapper en `ZdsFields` (queda registrado al importarlo). No hay registro manual ni `customElements.define` propio.
+
+**ZDS vendorizado (desde jul-2026):** `@zurich/web-components` y `@zurich/css-components` (0.8.1)
+ya no vienen del registro npm público — el ZDS DevKit fue decomisionado (31-dic-2025) y ambos
+paquetes están **vendorizados** como `.tgz` en `frontend/vendor/`, referenciados en
+`frontend/package.json` via `file:vendor/*.tgz`. Ambos llevan un **parche** que reemplaza su
+`dist/react/jsx-runtime.js` (ESM y CJS) por un shim que usa el jsx-runtime real de React en vez
+de una copia congelada de React 18 (necesario para React 19 — ver `frontend/vendor/README.md`
+para el detalle completo y cómo reproducir el parche). **No actualizar estos `.tgz` a mano ni
+correr `npm update` sobre `@zurich/*`** — no hay versión nueva que instalar (el paquete está
+descontinuado) y una actualización involuntaria perdería el parche.
 
 | Wrapper | Componente Zurich | Cuándo usar |
 |---|---|---|
