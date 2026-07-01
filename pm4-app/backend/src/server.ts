@@ -22,7 +22,9 @@ app.get('/health', (_req, res) => {
 if (isProd) {
   const staticPath = path.join(__dirname, '../../frontend/dist');
   app.use(express.static(staticPath));
-  app.get('*', (_req, res) => {
+  // Express 5 (path-to-regexp v8) quito el wildcard '*' suelto en rutas con metodo;
+  // fallback SPA como middleware final sin path, funciona igual en 4 y 5.
+  app.use((_req, res) => {
     res.sendFile(path.join(staticPath, 'index.html'));
   });
 }
