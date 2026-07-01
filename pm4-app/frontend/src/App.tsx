@@ -18,6 +18,11 @@ import CierreM3 from './screens/atencion-cliente/quejas-directas/COL_QD_SCR-010_
 import RevisionErrorTecnicoApi from './screens/atencion-cliente/quejas-directas/COL_QD_SCR-004_Revision_Error_Tecnico_API/RevisionErrorTecnicoApi';
 import CorreccionErrorFuncional from './screens/atencion-cliente/quejas-directas/COL_QD_SCR-003_Correccion_Error_Funcional/CorreccionErrorFuncional';
 import DetalleReasignacionRespuesta from './screens/atencion-cliente/quejas-directas/COL_QD_SCR-0051_Detalle_Reasignacion_Respuesta/DetalleReasignacionRespuesta';
+import RespuestaAreaResponsable from './screens/atencion-cliente/quejas-directas/COL_QD_SCR-0052_Respuesta_Area_Responsable/RespuestaAreaResponsable';
+import RevisionRespuestaSac from './screens/atencion-cliente/quejas-directas/COL_QD_SCR-008_Revision_Respuesta_SAC/RevisionRespuestaSac';
+import FormularioSuperintendencia from './screens/atencion-cliente/quejas-directas/COL_QD_SCR-009_Formulario_Superintendencia/FormularioSuperintendencia';
+import RevisionErrorTecnicoProrroga from './screens/atencion-cliente/quejas-directas/COL_QD_SCR-011_Revision_Error_Tecnico_Prorroga/RevisionErrorTecnicoProrroga';
+import ErrorFuncionalProrroga from './screens/atencion-cliente/quejas-directas/COL_QD_SCR-012_Revision_Error_Funcional_Prorroga/ErrorFuncionalProrroga';
 
 class ErrorBoundary extends Component<{ children: ReactNode }, { error: Error | null }> {
   state = { error: null };
@@ -56,6 +61,11 @@ const SCREENS: Record<string, React.ComponentType> = {
   'COL_QD_SCR-004_Revision_Error_Tecnico_API': RevisionErrorTecnicoApi,
   'COL_QD_SCR-003_Correccion_Error_Funcional': CorreccionErrorFuncional,
   'COL_QD_SCR-0051_Detalle_Reasignacion_Respuesta': DetalleReasignacionRespuesta,
+  'COL_QD_SCR-0052_Respuesta_Area_Responsable': RespuestaAreaResponsable,
+  'COL_QD_SCR-008_Revision_Respuesta_SAC': RevisionRespuestaSac,
+  'COL_QD_SCR-009_Formulario_Superintendencia': FormularioSuperintendencia,
+  'COL_QD_SCR-011_Revision_Error_Tecnico_Prorroga': RevisionErrorTecnicoProrroga,
+  'COL_QD_SCR-012_Revision_Error_Funcional_Prorroga': ErrorFuncionalProrroga,
   'ds-catalog': DsCatalog,
 };
 
