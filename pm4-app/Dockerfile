@@ -1,4 +1,4 @@
-FROM node:20-alpine
+FROM node:24-alpine
 
 WORKDIR /app
 
@@ -6,6 +6,9 @@ WORKDIR /app
 COPY package.json package-lock.json ./
 COPY backend/package.json ./backend/
 COPY frontend/package.json ./frontend/
+# frontend deps @zurich/* resuelven a file:vendor/*.tgz (ZDS vendorizado, ver
+# frontend/vendor/README.md) — el tarball debe existir antes de "npm ci".
+COPY frontend/vendor/ ./frontend/vendor/
 
 # Install dependencies for all workspaces
 RUN npm ci
