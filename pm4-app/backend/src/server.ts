@@ -1,4 +1,4 @@
-import express from 'express';
+import express, { NextFunction, Request, Response } from 'express';
 import cors from 'cors';
 import dotenv from 'dotenv';
 import path from 'path';
@@ -28,6 +28,16 @@ if (isProd) {
     res.sendFile(path.join(staticPath, 'index.html'));
   });
 }
+
+// Manejador de errores global — red de seguridad para excepciones no
+// capturadas antes de llegar al try/catch de una ruta (multer, JSON
+// malformado, etc.). Sin esto, Express devuelve un 500 en texto plano
+// sin cuerpo, indistinguible en el cliente de un error real de PM4.
+app.use((err: Error, _req: Request, res: Response, next: NextFunction) => {
+  if (res.headersSent) { next(err); return; }
+  console.error('[error-handler]', err);
+  res.status(500).json({ message: err.message || 'Internal server error' });
+});
 
 app.listen(PORT, () => {
   console.log(`Backend running on http://localhost:${PORT}`);

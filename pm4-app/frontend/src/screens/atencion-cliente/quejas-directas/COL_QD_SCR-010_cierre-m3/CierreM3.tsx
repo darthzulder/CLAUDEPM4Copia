@@ -2,7 +2,7 @@ import { useEffect, useRef } from 'react';
 import { useForm } from 'react-hook-form';
 import { useTask } from '../../../../core/useTask';
 import FormSection from '../../../../components/FormSection';
-import { ZdsInput, ZdsSelect, ZdsDate, ZdsRadio, ZrButton, ZrAlert } from '../../../../components/fields/ZdsFields';
+import { ZdsInput, ZdsSelect, ZdsDate, ZdsRadio, ZdsFileInput, ZrButton, ZrAlert } from '../../../../components/fields/ZdsFields';
 import { useCollection } from '../../../../core/useCollection';
 import { OPTIONS, COLLECTION_DEFS, REGEX_NOMENCLATURA_PDF, CierreM3FormData } from './variables';
 import SeccionEstadoCierre from './SeccionEstadoCierre';
@@ -13,7 +13,7 @@ export default function CierreM3() {
   const { task, loading, error, submitting, completeTask } = useTask();
   const fileRegistry = useRef(new Map<string, File>());
 
-  const { control, watch, handleSubmit, reset, register, setValue, formState: { errors, isSubmitted } } = useForm<CierreM3FormData>({
+  const { control, watch, handleSubmit, reset, setValue, setError, clearErrors, formState: { errors, isSubmitted } } = useForm<CierreM3FormData>({
     defaultValues: {
       estadoCierreM3: '', intentosCierreM3: '0', ultimoError: '',
       codigoSFC: '', estadoQueja: '', fechaActualizacion: '', fechaCierre: '',
@@ -227,31 +227,25 @@ export default function CierreM3() {
 
           {w.adjuntoRespuestaFinal === 'SI' && (
             <div className="form-row cols-1">
-              <div className="form-group">
-                <label className="form-label">
-                  PDF Respuesta Final <span className="required-star">*</span>
-                </label>
-                <input
-                  type="file"
-                  accept=".pdf"
-                  className="cierre-m3--file-input"
-                  {...register('pdfRespuestaFinal')}
-                  onChange={(e) => {
-                    const file = e.target.files?.[0];
-                    if (file) {
-                      setValue('pdfRespuestaFinal', file.name);
-                      fileRegistry.current.set('pdfRespuestaFinal', file);
-                    }
-                  }}
-                />
-                {w.pdfRespuestaFinal && (
-                  <p className={`cierre-m3--form-helper ${pdfValido ? 'cierre-m3--validacion-ok' : 'cierre-m3--validacion-error'}`}>
-                    {pdfValido
-                      ? `✓ Nomenclatura correcta: ${w.pdfRespuestaFinal}`
-                      : `✗ Nomenclatura inválida. Formato esperado: ENTIDAD_NRO_RESP_FINAL_SFC_NNNNN.pdf`}
-                  </p>
-                )}
-              </div>
+              <ZdsFileInput
+                control={control}
+                name="pdfRespuestaFinal"
+                label="PDF Respuesta Final"
+                fileRegistry={fileRegistry}
+                setValue={setValue}
+                setError={setError}
+                clearErrors={clearErrors}
+                allowedExtensions={['pdf']}
+                maxSizeMb={5}
+                errorMessage="Solo se permiten archivos PDF, máx 5 MB"
+              />
+              {w.pdfRespuestaFinal && (
+                <p className={`cierre-m3--form-helper ${pdfValido ? 'cierre-m3--validacion-ok' : 'cierre-m3--validacion-error'}`}>
+                  {pdfValido
+                    ? `✓ Nomenclatura correcta: ${w.pdfRespuestaFinal}`
+                    : `✗ Nomenclatura inválida. Formato esperado: ENTIDAD_NRO_RESP_FINAL_SFC_NNNNN.pdf`}
+                </p>
+              )}
             </div>
           )}
         </FormSection>

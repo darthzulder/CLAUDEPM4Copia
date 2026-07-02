@@ -523,7 +523,13 @@ export function ZdsFileInput<TFV extends FieldValues>({
                   clearErrors(name);
                   setValue(name, fileName as any);
                   if (fileRegistry) {
-                    fileRegistry.current.set(name as string, file);
+                    // ZrFileInput entrega un Blob genérico (sin .name) en `file`;
+                    // sin nombre real, FormData lo sube como "blob" y PM4 no
+                    // puede resolver la extensión → 500 al guardar el media.
+                    const namedFile = file.name === fileName
+                      ? file
+                      : new File([file], fileName, { type: file.type });
+                    fileRegistry.current.set(name as string, namedFile);
                   }
                 }
               } else {

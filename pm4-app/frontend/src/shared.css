@@ -1218,21 +1218,3 @@ z-table :is(th, td)[config*="right"] {
 
 .cierre-m3--validacion-ok  { color: var(--z-green); }
 .cierre-m3--validacion-error { color: var(--z-red); }
-
-/* ── Input nativo de archivo ── */
-.cierre-m3--file-input {
-  display: block;
-  width: 100%;
-  font: var(--zf-body-14);
-  color: var(--z-text);
-  border: 1px solid var(--z-border);
-  border-radius: 4px;
-  padding: var(--zs-75) var(--zs-100);
-  background: #fff;
-  cursor: pointer;
-}
-
-.cierre-m3--file-input:focus {
-  outline: 2px solid var(--z-blue);
-  outline-offset: 1px;
-}
