@@ -33,35 +33,35 @@ export default function SeccionDetalleQueja({ form, fileRegistry }: Props) {
 
   // FLD-324 — detalle del producto: primer código de CAT-DETALLE-PRODUCTO para el seguro elegido.
   useEffect(() => {
-    setValue('qd_detalleProducto', detalleProductoOpts[0]?.value ?? '');
+    setValue('qd_detalleProducto', detalleProductoOpts[0]?.label ?? '');
   }, [detalleProductoOpts, setValue]);
 
   // FLD-331 — admisión por defecto "No aplica" (rol ≠ Defensor), resuelta desde CAT-ADMISION.
   useEffect(() => {
     if (esDefensor || w.qd_admision || admisionOpts.length === 0) return;
     const noAplica = admisionOpts.find((o) => /no aplica/i.test(o.label));
-    if (noAplica) setValue('qd_admision', noAplica.value);
+    if (noAplica) setValue('qd_admision', noAplica.label);
   }, [esDefensor, w.qd_admision, admisionOpts, setValue]);
 
   // FLD-332 — ente de control por defecto "Otros", resuelto desde CAT-ENTE.
   useEffect(() => {
     if (w.qd_enteControl || enteOpts.length === 0) return;
     const otros = enteOpts.find((o) => /otros/i.test(o.label));
-    if (otros) setValue('qd_enteControl', otros.value);
+    if (otros) setValue('qd_enteControl', otros.label);
   }, [w.qd_enteControl, enteOpts, setValue]);
 
   // FLD-333 — tutela por defecto "No", resuelta desde CAT-TUTELA.
   useEffect(() => {
     if (w.qd_tutela || tutelaOpts.length === 0) return;
     const no = tutelaOpts.find((o) => /^\d?\.?\s*no$/i.test(o.label.trim()));
-    if (no) setValue('qd_tutela', no.value);
+    if (no) setValue('qd_tutela', no.label);
   }, [w.qd_tutela, tutelaOpts, setValue]);
 
   // FLD-334 — queja exprés por defecto "No", resuelta desde CAT-EXPRES.
   useEffect(() => {
     if (w.qd_quejaExpres || quejaExpresOpts.length === 0) return;
     const no = quejaExpresOpts.find((o) => /^\d?\.?\s*no$/i.test(o.label.trim()));
-    if (no) setValue('qd_quejaExpres', no.value);
+    if (no) setValue('qd_quejaExpres', no.label);
   }, [w.qd_quejaExpres, quejaExpresOpts, setValue]);
 
   const err = (name: keyof CrearRecibirQuejaFormData) => errors[name]?.message;

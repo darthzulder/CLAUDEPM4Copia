@@ -50,13 +50,13 @@ export default function CrearRecibirQueja() {
     if (instanciaOpts.length === 0) return;
     const esDefensor = w.qd_rol === 'DEFENSOR';
     const instancia = instanciaOpts.find((o) => (esDefensor ? /defensor/i : /entidad vigilada/i).test(o.label));
-    if (instancia) form.setValue('qd_instanciaRecepcion', instancia.value);
+    if (instancia) form.setValue('qd_instanciaRecepcion', instancia.label);
   }, [w.qd_rol, instanciaOpts, form]);
 
   useEffect(() => {
     if (w.qd_puntoRecepcion || puntoRecepcionOpts.length === 0) return;
     const virtual = puntoRecepcionOpts.find((o) => /virtual/i.test(o.label));
-    if (virtual) form.setValue('qd_puntoRecepcion', virtual.value);
+    if (virtual) form.setValue('qd_puntoRecepcion', virtual.label);
   }, [w.qd_puntoRecepcion, puntoRecepcionOpts, form]);
 
   const uploadFiles = async (requestId: number) => {

@@ -26,21 +26,21 @@ export default function SeccionConsumidor({ form }: Props) {
   useEffect(() => {
     if (w.qd_sexo || sexoOpts.length === 0) return;
     const noInforma = sexoOpts.find((o) => /no informa/i.test(o.label));
-    if (noInforma) setValue('qd_sexo', noInforma.value);
+    if (noInforma) setValue('qd_sexo', noInforma.label);
   }, [w.qd_sexo, sexoOpts, setValue]);
 
   // FLD-321 — LGBTIQ+ oculto, por defecto "No informa" (back), resuelto desde CAT-LGBTIQ.
   useEffect(() => {
     if (w.qd_lgbtiq || lgbtiqOpts.length === 0) return;
     const noInforma = lgbtiqOpts.find((o) => /no informa/i.test(o.label));
-    if (noInforma) setValue('qd_lgbtiq', noInforma.value);
+    if (noInforma) setValue('qd_lgbtiq', noInforma.label);
   }, [w.qd_lgbtiq, lgbtiqOpts, setValue]);
 
   // FLD-322 — Condición especial oculta, por defecto "NINGUNA" (back), resuelto desde CAT-COND-ESP.
   useEffect(() => {
     if (w.qd_condicionEspecial || condicionEspecialOpts.length === 0) return;
     const ninguna = condicionEspecialOpts.find((o) => /ninguna/i.test(o.label));
-    if (ninguna) setValue('qd_condicionEspecial', ninguna.value);
+    if (ninguna) setValue('qd_condicionEspecial', ninguna.label);
   }, [w.qd_condicionEspecial, condicionEspecialOpts, setValue]);
 
   // RUL-000-02 / RUL-000-03 — el tipo de documento define el tipo de persona.
@@ -50,7 +50,7 @@ export default function SeccionConsumidor({ form }: Props) {
   useEffect(() => {
     if (!w.qd_tipoIdentificacion || tipoPersonaOpts.length === 0) return;
     const tipoPersona = tipoPersonaOpts.find((o) => (esJuridica ? /jur[ií]dica/i : /natural/i).test(o.label));
-    if (tipoPersona) setValue('qd_tipoPersona', tipoPersona.value);
+    if (tipoPersona) setValue('qd_tipoPersona', tipoPersona.label);
   }, [w.qd_tipoIdentificacion, esJuridica, tipoPersonaOpts, setValue]);
 
   // RUL-000-09 — al cambiar el departamento se limpia y deshabilita la ciudad.
