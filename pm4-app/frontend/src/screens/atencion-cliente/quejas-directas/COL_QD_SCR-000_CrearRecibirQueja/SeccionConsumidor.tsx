@@ -18,6 +18,7 @@ export default function SeccionConsumidor({ form }: Props) {
   const { options: departamentoOpts } = useCollection(COLLECTION_DEFS.departamento);
   const { options: ciudadOpts } = useCollection(COLLECTION_DEFS.ciudad, w as unknown as Record<string, unknown>);
   const { options: condicionEspecialOpts } = useCollection(COLLECTION_DEFS.condicionEspecial);
+  const { options: lgbtiqOpts } = useCollection(COLLECTION_DEFS.lgbtiq);
   const { options: sexoOpts } = useCollection(COLLECTION_DEFS.sexo);
   const { options: tipoPersonaOpts } = useCollection(COLLECTION_DEFS.tipoPersona);
 
@@ -27,6 +28,20 @@ export default function SeccionConsumidor({ form }: Props) {
     const noInforma = sexoOpts.find((o) => /no informa/i.test(o.label));
     if (noInforma) setValue('qd_sexo', noInforma.value);
   }, [w.qd_sexo, sexoOpts, setValue]);
+
+  // FLD-321 — LGBTIQ+ oculto, por defecto "No informa" (back), resuelto desde CAT-LGBTIQ.
+  useEffect(() => {
+    if (w.qd_lgbtiq || lgbtiqOpts.length === 0) return;
+    const noInforma = lgbtiqOpts.find((o) => /no informa/i.test(o.label));
+    if (noInforma) setValue('qd_lgbtiq', noInforma.value);
+  }, [w.qd_lgbtiq, lgbtiqOpts, setValue]);
+
+  // FLD-322 — Condición especial oculta, por defecto "NINGUNA" (back), resuelto desde CAT-COND-ESP.
+  useEffect(() => {
+    if (w.qd_condicionEspecial || condicionEspecialOpts.length === 0) return;
+    const ninguna = condicionEspecialOpts.find((o) => /ninguna/i.test(o.label));
+    if (ninguna) setValue('qd_condicionEspecial', ninguna.value);
+  }, [w.qd_condicionEspecial, condicionEspecialOpts, setValue]);
 
   // RUL-000-02 / RUL-000-03 — el tipo de documento define el tipo de persona.
   const esJuridica = w.qd_tipoIdentificacion === 'NIT';
@@ -197,7 +212,7 @@ export default function SeccionConsumidor({ form }: Props) {
         />
       </div>
 
-      <div className="form-row cols-3">
+      <div className="form-row cols-2">
         <ZdsInput
           name="qd_direccion"
           control={control}
@@ -212,27 +227,9 @@ export default function SeccionConsumidor({ form }: Props) {
           readOnly
           helpText="Asignado por el sistema (CAT-SEXO, pendiente API SFC)."
         />
-        <ZdsInput
-          name="qd_lgbtiq"
-          control={control}
-          label="LGBTIQ+"
-          readOnly
-          helpText="Catálogo pendiente de confirmar con TI."
-        />
       </div>
-
-      <div className="form-row cols-2">
-        <ZdsSelect
-          name="qd_condicionEspecial"
-          control={control}
-          label="Condición especial"
-          options={condicionEspecialOpts}
-          rules={{ required: 'Campo requerido' }}
-          required
-          error={err('qd_condicionEspecial')}
-        />
-        <div />
-      </div>
+      {/* FLD-321 (LGBTIQ+) y FLD-322 (Condición especial) — ocultos por requerimiento,
+          se precargan por back con "No informa" / "NINGUNA" vía los effects de arriba. */}
     </FormSection>
   );
 }

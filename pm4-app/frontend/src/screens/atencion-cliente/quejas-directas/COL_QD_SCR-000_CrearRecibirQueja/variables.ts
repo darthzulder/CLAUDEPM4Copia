@@ -15,6 +15,7 @@ export const COLLECTION_DEFS = {
   departamento: GLOBAL_COLLECTIONS.qd_departamento,
   ciudad: GLOBAL_COLLECTIONS.qd_ciudad,
   condicionEspecial: GLOBAL_COLLECTIONS.qd_condicionEspecial,
+  lgbtiq: GLOBAL_COLLECTIONS.qd_lgbtiq,
   seguro: GLOBAL_COLLECTIONS.qd_seguro,
   detalleProducto: GLOBAL_COLLECTIONS.qd_detalleProducto,
   motivo: GLOBAL_COLLECTIONS.qd_motivo,
@@ -66,7 +67,8 @@ export const DEFAULTS = {
   qd_replica: 'NO',
   qd_direccion: '',            // FLD-319 — Back, default vacío (pendiente API SFC)
   qd_sexo: '',                 // FLD-320 — Back, resuelto desde CAT-SEXO ("No informa")
-  qd_lgbtiq: 'No aplica',      // FLD-321 — Back, catálogo pendiente confirmar con TI
+  qd_lgbtiq: '',                // FLD-321 — Back, oculto, resuelto desde CAT-LGBTIQ ("No informa")
+  qd_condicionEspecial: '',    // FLD-322 — Back, oculto, resuelto desde CAT-COND-ESP ("NINGUNA")
   qd_admision: '',             // FLD-331 — Back, resuelto desde CAT-ADMISION si rol ≠ Defensor
   qd_enteControl: '',          // FLD-332 — Back, resuelto desde CAT-ENTE ("Otros")
   qd_tutela: '',               // FLD-333 — Back, resuelto desde CAT-TUTELA ("No")
@@ -101,8 +103,8 @@ export interface CrearRecibirQuejaFormData {
   qd_ciudad: string;                // FLD-318
   qd_direccion: string;             // FLD-319 readonly (back)
   qd_sexo: string;                  // FLD-320 readonly (back)
-  qd_lgbtiq: string;                // FLD-321 readonly (back)
-  qd_condicionEspecial: string;     // FLD-322
+  qd_lgbtiq: string;                // FLD-321 readonly (back), oculto — default "No informa" (CAT-LGBTIQ)
+  qd_condicionEspecial: string;     // FLD-322 readonly (back), oculto — default "NINGUNA" (CAT-COND-ESP)
 
   // S3 — Detalle de la Queja
   qd_seguro: string;                // FLD-323
