@@ -57,12 +57,13 @@ export default function DetalleReasignacionRespuesta() {
 
   // ACT-0051-08 Enviar (valida RUL-0051-05: respuestaCliente no vacío).
   const onEnviar = handleSubmit(enviarCon('ENVIAR'));
-  // ACT-0051-01 Confirmar Asignación.
-  const onConfirmarAsignacion = handleSubmit(enviarCon('CONFIRMAR_ASIGNACION'));
 
-  // ACT-0051-07 Guardar Borrador · ACT-0051-04 Solicitar Prórroga (sin validación bloqueante).
+  // ACT-0051-07 Guardar Borrador · ACT-0051-04 Solicitar Prórroga · ACT-0051-01 Reasignar
+  // (sin validación bloqueante — envían los valores actuales del formulario directamente).
   const onGuardarBorrador = () => enviarCon('GUARDAR_BORRADOR')(w);
   const onSolicitarProrroga = () => enviarCon('SOLICITAR_PRORROGA')(w);
+  const onReasignarQueja = () => enviarCon('CONFIRMAR_ASIGNACION')(w);
+  const onSolicitarAyuda = () => enviarCon('AYUDA')(w);
 
   if (loading) {
     return <div className="screen-wrapper"><div className="screen-loading"><ZrLoader /></div></div>;
@@ -97,8 +98,14 @@ export default function DetalleReasignacionRespuesta() {
 
         <form onSubmit={onEnviar} noValidate>
           <SeccionDetalleCaso control={control} estado={w.qd_estadoSS || ''} />
-          <SeccionAsignacion form={form} err={err} />
-          <SeccionRespuesta form={form} fileRegistry={fileRegistry} err={err} />
+          <SeccionAsignacion form={form} err={err} onConfirmarReasignacion={onReasignarQueja} onSolicitarAyuda={onSolicitarAyuda} submitting={submitting} />
+          <SeccionRespuesta
+            form={form} fileRegistry={fileRegistry} err={err}
+            onVistaPrevia={() => setShowVistaPrevia(true)}
+            onSolicitarProrroga={onSolicitarProrroga}
+            slaCritico={slaCritico}
+            submitting={submitting}
+          />
 
           {/* RUL-0051-05 / MSG-0051-02 — bloqueo de envío si falta la respuesta. */}
           {!puedeEnviar && (
@@ -112,24 +119,10 @@ export default function DetalleReasignacionRespuesta() {
             <ZrButton config="link" icon="file-text:line" onClick={() => setShowExpediente(true)}>
               Ver Expediente Completo
             </ZrButton>
-            <ZrButton config="secondary" onClick={() => setShowVistaPrevia(true)}>
-              Vista Previa Respuesta Final
-            </ZrButton>
-            <ZrButton config="secondary"
-              disabled={!slaCritico || submitting} loading={submitting}
-              onClick={onSolicitarProrroga}>
-              Solicitar Prórroga Regulatoria
-            </ZrButton>
             <ZrButton config="secondary" disabled={submitting} loading={submitting}
               onClick={onGuardarBorrador}>
               Guardar Borrador
             </ZrButton>
-            {!w.qd_tieneResponsable && (
-              <ZrButton config="positive" disabled={!w.qd_usuarioResponsable || submitting} loading={submitting}
-                onClick={() => { onConfirmarAsignacion(); }}>
-                Confirmar Asignación
-              </ZrButton>
-            )}
             <ZrButton config="positive" disabled={!puedeEnviar || submitting} loading={submitting}
               onClick={() => { onEnviar(); }}>
               Enviar ▶

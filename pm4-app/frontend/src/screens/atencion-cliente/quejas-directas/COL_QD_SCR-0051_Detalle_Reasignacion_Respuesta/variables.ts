@@ -23,6 +23,7 @@ export const SLA_UMBRAL_PRORROGA = 2; // RUL-0051-03 (slaRestante <= 2)
 // Acción/decisión BPMN según el botón presionado.
 export type AccionFlujoCombinado =
   | 'CONFIRMAR_ASIGNACION'   // ACT-0051-01 → SP2-T01, estado 'En análisis'
+  | 'AYUDA'                  // ACT-0051-03 → solicitar ayuda a otra área (S6)
   | 'SOLICITAR_PRORROGA'     // ACT-0051-04 → SP4-T01
   | 'GUARDAR_BORRADOR'       // ACT-0051-07
   | 'ENVIAR';                // ACT-0051-08 → SP2-T04, estado 'En revisión SAC'

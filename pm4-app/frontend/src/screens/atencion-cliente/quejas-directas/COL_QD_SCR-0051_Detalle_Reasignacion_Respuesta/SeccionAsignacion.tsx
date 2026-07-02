@@ -1,4 +1,4 @@
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import type { UseFormReturn } from 'react-hook-form';
 import FormSection from '../../../../components/FormSection';
 import {
@@ -14,15 +14,17 @@ import {
 interface Props {
   form: UseFormReturn<DetalleReasignacionRespuestaFormData>;
   err: (name: keyof DetalleReasignacionRespuestaFormData) => string | undefined;
+  onConfirmarReasignacion: () => void;
+  onSolicitarAyuda: () => void;
+  submitting: boolean;
 }
 
 /** S5 Asignación · S6 Reasignación (PAN-06) · S7 Historial de Asignaciones. */
-export default function SeccionAsignacion({ form, err }: Props) {
+export default function SeccionAsignacion({ form, err, onConfirmarReasignacion, onSolicitarAyuda, submitting }: Props) {
   const { control, watch, setValue } = form;
   const w = watch();
-
-  // RUL-0051-01 — la sección de asignación solo es visible la primera vez (sin responsable).
-  const mostrarAsignacion = !w.qd_tieneResponsable;
+  const [modoReasignacion, setModoReasignacion] = useState(false);
+  const [snapshot, setSnapshot] = useState({ area: '', usuario: '', obs: '' });
 
   // RUL-0051-07 — bloque de reasignación visible si "¿Necesitas de otras áreas?" = Sí.
   const mostrarReasignacion = w.qd_necesitaOtrasAreas === 'SI';
@@ -42,6 +44,22 @@ export default function SeccionAsignacion({ form, err }: Props) {
   useEffect(() => {
     setValue('qd_nuevoResponsable', usuariosAreaDestino[0]?.label ?? '');
   }, [usuariosAreaDestino, setValue]);
+
+  const iniciarReasignacion = () => {
+    setSnapshot({
+      area: w.qd_areaResponsable || '',
+      usuario: w.qd_usuarioResponsable || '',
+      obs: w.qd_observacionesAsignacion || '',
+    });
+    setModoReasignacion(true);
+  };
+
+  const cancelarReasignacion = () => {
+    setValue('qd_areaResponsable', snapshot.area);
+    setValue('qd_usuarioResponsable', snapshot.usuario);
+    setValue('qd_observacionesAsignacion', snapshot.obs);
+    setModoReasignacion(false);
+  };
 
   // ACT-0051-03 — añade el ayudante al historial (RUL-0051-04 valida campos obligatorios).
   const reasignacionCompleta =
@@ -66,32 +84,52 @@ export default function SeccionAsignacion({ form, err }: Props) {
 
   return (
     <>
-      {/* ── S5 · Asignación de Responsable (SEC-051, RUL-0051-01) ── */}
-      {mostrarAsignacion && (
-        <FormSection title="Asignación de Responsable">
-          <div className="form-row cols-2">
-            <ZdsSelect
-              name="qd_areaResponsable" control={control} label="Área responsable"
-              options={areaOpts} withSearch required
-              rules={{ required: 'Campo requerido' }} error={err('qd_areaResponsable')}
-              helpText="Áreas habilitadas para quejas (CAT-AREA)."
-            />
-            <ZdsSelect
-              name="qd_usuarioResponsable" control={control} label="Usuario responsable"
-              options={usuariosArea} withSearch required disabled={!w.qd_areaResponsable}
-              rules={{ required: 'Campo requerido' }} error={err('qd_usuarioResponsable')}
-              helpText="Solo usuarios autorizados del área (RUL-0051-02)."
-            />
-          </div>
+      {/* ── S5 · Asignación de Responsable (SEC-051) ── */}
+      {/* Siempre visible; datos pre-calculados por el BPM. Editable solo en modoReasignacion. */}
+      <FormSection title="Asignación de Responsable">
+        <div className="form-row cols-2">
+          <ZdsSelect
+            name="qd_areaResponsable" control={control} label="Área responsable"
+            options={areaOpts} withSearch disabled={!modoReasignacion}
+            helpText="Áreas habilitadas para quejas (CAT-AREA)."
+          />
+          <ZdsSelect
+            name="qd_usuarioResponsable" control={control} label="Usuario responsable"
+            options={usuariosArea} withSearch
+            disabled={!modoReasignacion || !w.qd_areaResponsable}
+            helpText="Solo usuarios autorizados del área (RUL-0051-02)."
+          />
+        </div>
+        {modoReasignacion && (
           <div className="form-row cols-1">
             <ZdsTextarea name="qd_observacionesAsignacion" control={control}
-              label="Observaciones de asignación" maxLength={2000} />
+              label="Comentario de reasignación" maxLength={2000} />
           </div>
-        </FormSection>
-      )}
+        )}
+        <div z-flex="75" z-align="right:center" style={{ marginTop: 'var(--zs-75)' }}>
+          {modoReasignacion ? (
+            <>
+              <ZrButton config="secondary" onClick={cancelarReasignacion} disabled={submitting}>
+                Cancelar
+              </ZrButton>
+              <ZrButton
+                config="positive" loading={submitting}
+                disabled={submitting || !w.qd_usuarioResponsable}
+                onClick={onConfirmarReasignacion}
+              >
+                Confirmar Reasignación
+              </ZrButton>
+            </>
+          ) : (
+            <ZrButton config="secondary" onClick={iniciarReasignacion}>
+              Reasignar Queja
+            </ZrButton>
+          )}
+        </div>
+      </FormSection>
 
       {/* ── S6 · Reasignación / Solicitud de ayuda (SEC-052, RUL-0051-07) ── */}
-      <FormSection title="Reasignación de Caso">
+      <FormSection title="">
         <div className="form-row cols-1">
           <ZdsRadio
             name="qd_necesitaOtrasAreas" control={control}
@@ -123,7 +161,7 @@ export default function SeccionAsignacion({ form, err }: Props) {
                     helpText="Autocompletado según el área destino (CAT-USUARIOS-ROLE)." />
                 </div>
                 <div className="form-row cols-1">
-                  <ZdsSelect name="qd_motivoReasignacion" control={control} label="Motivo de reasignación"
+                  <ZdsSelect name="qd_motivoReasignacion" control={control} label="Motivo"
                     options={motivoReasignacionOpts} error={err('qd_motivoReasignacion')}
                     helpText="CAT-MOTIVO-REASIG." />
                 </div>
@@ -137,15 +175,16 @@ export default function SeccionAsignacion({ form, err }: Props) {
                 {!reasignacionCompleta && (
                   <ZrAlert config="info" {...({ 'hide-close': true } as object)}>
                     El <strong>área destino</strong>, el <strong>motivo</strong> y las{' '}
-                    <strong>observaciones</strong> son obligatorios para registrar la reasignación.
+                    <strong>observaciones</strong> son obligatorios para registrar la asignación.
                     {/* MSG-0051-03 */}
                   </ZrAlert>
                 )}
 
                 <div z-flex="75" z-align="right:center" style={{ marginTop: 'var(--zs-75)' }}>
-                  <ZrButton config="secondary" icon="plus:line"
-                    disabled={!reasignacionCompleta} onClick={confirmarReasignacion}>
-                    Confirmar Reasignación
+                  <ZrButton config="secondary"
+                    disabled={!reasignacionCompleta || submitting} loading={submitting}
+                    onClick={onSolicitarAyuda}>
+                    Confirmar
                   </ZrButton>
                 </div>
               </>

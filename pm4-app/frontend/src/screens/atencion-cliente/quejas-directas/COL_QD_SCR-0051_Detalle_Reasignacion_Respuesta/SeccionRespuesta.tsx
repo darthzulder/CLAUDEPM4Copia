@@ -2,7 +2,7 @@ import type { MutableRefObject } from 'react';
 import type { UseFormReturn } from 'react-hook-form';
 import FormSection from '../../../../components/FormSection';
 import DocSupportUploader from '../../../../components/DocSupportUploader';
-import { ZdsSelect, ZdsTextarea, ZdsInput, ZrAlert } from '../../../../components/fields/ZdsFields';
+import { ZdsSelect, ZdsTextarea, ZdsInput, ZrAlert, ZrButton } from '../../../../components/fields/ZdsFields';
 import {
   OPTIONS, ADJUNTO_KEYS, MAX_SOPORTES,
   type DetalleReasignacionRespuestaFormData,
@@ -12,10 +12,14 @@ interface Props {
   form: UseFormReturn<DetalleReasignacionRespuestaFormData>;
   fileRegistry: MutableRefObject<Map<string, File>>;
   err: (name: keyof DetalleReasignacionRespuestaFormData) => string | undefined;
+  onVistaPrevia: () => void;
+  onSolicitarProrroga: () => void;
+  slaCritico: boolean;
+  submitting: boolean;
 }
 
 /** S8 Respuesta Técnica · S9 Soportes Internos · S10 Configuración de Respuesta. */
-export default function SeccionRespuesta({ form, fileRegistry, err }: Props) {
+export default function SeccionRespuesta({ form, fileRegistry, err, onVistaPrevia, onSolicitarProrroga, slaCritico, submitting }: Props) {
   const { control, watch } = form;
   const w = watch();
 
@@ -78,6 +82,16 @@ export default function SeccionRespuesta({ form, fileRegistry, err }: Props) {
           intro={`Cargue los documentos de soporte del análisis. Se pueden agregar hasta ${MAX_SOPORTES} archivos.`}
           max={MAX_SOPORTES}
         />
+        <div z-flex="75" z-align="right:center" style={{ marginTop: 'var(--zs-75)' }}>
+          <ZrButton config="secondary" onClick={onVistaPrevia}>
+            Vista Previa Respuesta Final
+          </ZrButton>
+          <ZrButton config="secondary"
+            disabled={!slaCritico || submitting} loading={submitting}
+            onClick={onSolicitarProrroga}>
+            Solicitar Prórroga Regulatoria
+          </ZrButton>
+        </div>
       </FormSection>
     </>
   );
