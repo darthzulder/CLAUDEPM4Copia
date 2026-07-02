@@ -200,4 +200,110 @@ export const GLOBAL_COLLECTIONS = {
     labelField: 'data.descripcion',
     valueField: 'data.codigo',
   } satisfies CollectionDef,
+
+  qd_canal: {
+    id: 10,
+    labelField: 'data.descripcion',
+    valueField: 'data.codigo',
+  } satisfies CollectionDef,
+
+  qd_tipoPersona: {
+    id: 12,
+    labelField: 'data.descripcion',
+    valueField: 'data.codigo',
+  } satisfies CollectionDef,
+
+  qd_instancia: {
+    id: 19,
+    labelField: 'data.descripcion',
+    valueField: 'data.codigo',
+  } satisfies CollectionDef,
+
+  qd_puntoRecepcion: {
+    id: 20,
+    labelField: 'data.descripcion',
+    valueField: 'data.codigo',
+  } satisfies CollectionDef,
+
+  qd_ente: {
+    id: 22,
+    labelField: 'data.descripcion',
+    valueField: 'data.codigo',
+  } satisfies CollectionDef,
+
+  qd_sexo: {
+    id: 23,
+    labelField: 'data.descripcion',
+    valueField: 'data.codigo',
+  } satisfies CollectionDef,
+
+  qd_prodDigital: {
+    id: 25,
+    labelField: 'data.descripcion',
+    valueField: 'data.codigo',
+  } satisfies CollectionDef,
+
+  qd_rectificacion: {
+    id: 28,
+    labelField: 'data.descripcion',
+    valueField: 'data.codigo',
+  } satisfies CollectionDef,
+
+  qd_desistimiento: {
+    id: 29,
+    labelField: 'data.descripcion',
+    valueField: 'data.codigo',
+  } satisfies CollectionDef,
+
+  qd_tutela: {
+    id: 30,
+    labelField: 'data.descripcion',
+    valueField: 'data.codigo',
+  } satisfies CollectionDef,
+
+  qd_modFraude: {
+    id: 34,
+    labelField: 'data.descripcion',
+    valueField: 'data.codigo',
+  } satisfies CollectionDef,
+
+  qd_area: {
+    id: 35,
+    labelField: 'data.nombre_area',
+    valueField: 'data.codigo_area',
+  } satisfies CollectionDef,
+
+  qd_usuariosRole: {
+    id: 36,
+    labelField: 'data.nombre_usuario',
+    valueField: 'data.usuario',
+    dependsOn: 'qd_area',
+    pmqlTemplate: 'data.codigo_area = "{{qd_area}}"',
+  } satisfies CollectionDef,
+
+  qd_motivoReasignacion: {
+    id: 37,
+    labelField: 'data.descripcion',
+    valueField: 'data.codigo',
+  } satisfies CollectionDef,
+
+  qd_motivoProrroga: {
+    id: 38,
+    labelField: 'data.descripcion',
+    valueField: 'data.codigo',
+  } satisfies CollectionDef,
+
+  qd_detalleProducto: {
+    id: 40,
+    labelField: 'data.nombre_detalle_producto',
+    valueField: 'data.codigo_detalle_producto',
+    dependsOn: 'qd_seguro',
+    pmqlTemplate: 'data.codigo_producto_sfc = "{{qd_seguro}}"',
+  } satisfies CollectionDef,
+
+  qd_lgbtiq: {
+    id: 41,
+    labelField: 'data.descripcion',
+    valueField: 'data.codigo',
+  } satisfies CollectionDef,
 } as const;
