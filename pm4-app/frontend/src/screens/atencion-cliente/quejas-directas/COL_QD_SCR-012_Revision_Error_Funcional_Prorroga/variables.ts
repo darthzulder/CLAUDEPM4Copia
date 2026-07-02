@@ -8,24 +8,20 @@
 // (vuelve a SP4-T01) o cancela la prórroga. Es el análogo de SCR-003 para prórroga.
 //
 // data_name PM4 aún no entregados: se usan nombres descriptivos con prefijo `qd_`.
-// CAT-MOTIVO-PRORR está "Pendiente TI" en 07_Catalogs → OPTIONS placeholder (ver DOCUMENTACION §10).
+// CAT-MOTIVO-PRORR ya tiene colección PM4 activa (ver collections.ts, GLOBAL_COLLECTIONS.qd_motivoProrroga).
+
+import { GLOBAL_COLLECTIONS } from '../../../../core/collections';
 
 // Acción/decisión BPMN según el botón presionado.
 // REENVIAR → ACT-012-01 (ejecuta SP4-T01) · CANCELAR → ACT-012-02.
 export type AccionErrorFuncionalProrroga = 'REENVIAR' | 'CANCELAR';
 
 // ---------------------------------------------------------------------------
-// OPTIONS estáticas (placeholder de catálogo — pendiente de parametrización SFC)
+// Catálogo PM4 (CAT-MOTIVO-PRORR) — S2
 // ---------------------------------------------------------------------------
-export const OPTIONS = {
-  // CAT-MOTIVO-PRORR (Pendiente TI, sin valores de ejemplo en el insumo → placeholder).
-  motivoProrroga: [
-    { value: 'COMPLEJIDAD', label: 'Complejidad del caso' },
-    { value: 'INFO_ADICIONAL', label: 'Requiere información adicional del cliente' },
-    { value: 'AREA_EXTERNA', label: 'Dependencia de área/tercero externo' },
-    { value: 'VOLUMEN', label: 'Alto volumen de casos' },
-  ],
-} as const;
+export const COLLECTION_DEFS = {
+  motivoProrroga: GLOBAL_COLLECTIONS.qd_motivoProrroga,
+};
 
 // ---------------------------------------------------------------------------
 // Tipo del formulario — SCR-012

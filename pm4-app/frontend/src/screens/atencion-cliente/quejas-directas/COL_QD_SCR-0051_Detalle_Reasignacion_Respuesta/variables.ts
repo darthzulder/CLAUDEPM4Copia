@@ -10,8 +10,11 @@
 // trazabilidad de la asignación y de la respuesta.
 //
 // data_name PM4 aún no entregados: se usan nombres descriptivos con prefijo `qd_`.
-// Catálogos (CAT-*) sin colección PM4 entregada → se implementan como OPTIONS estáticas
-// placeholder a partir de los valores de ejemplo de 07_Catalogs (ver DOCUMENTACION §10).
+// Catálogos (CAT-*) ya activos en PM4 (CAT-AREA, CAT-USUARIOS-ROLE, CAT-MOTIVO-REASIG) →
+// se consumen vía COLLECTION_DEFS + useCollection. Solo CAT-FAVOR sigue "Pendiente TI"
+// (sin colección PM4 asignada aún, ver OPTIONS.favor).
+
+import { GLOBAL_COLLECTIONS } from '../../../../core/collections';
 
 export const MAX_AYUDANTES = 4;       // RUL-0051-08
 export const MAX_SOPORTES = 10;       // FLD-113
@@ -25,24 +28,21 @@ export type AccionFlujoCombinado =
   | 'ENVIAR';                // ACT-0051-08 → SP2-T04, estado 'En revisión SAC'
 
 // ---------------------------------------------------------------------------
-// OPTIONS estáticas (placeholder de catálogos — pendientes de colección PM4)
+// Catálogos PM4 (CAT-*) — S5/S6
+// ---------------------------------------------------------------------------
+export const COLLECTION_DEFS = {
+  // CAT-AREA. FLD-082 / FLD-091.
+  area: GLOBAL_COLLECTIONS.qd_area,
+  // CAT-USUARIOS-ROLE, dependiente de CAT-AREA. FLD-083 / FLD-092.
+  usuariosRole: GLOBAL_COLLECTIONS.qd_usuariosRole,
+  // CAT-MOTIVO-REASIG. FLD-093.
+  motivoReasignacion: GLOBAL_COLLECTIONS.qd_motivoReasignacion,
+};
+
+// ---------------------------------------------------------------------------
+// OPTIONS estáticas — solo catálogos aún sin colección PM4 confirmada
 // ---------------------------------------------------------------------------
 export const OPTIONS = {
-  // CAT-AREA (Activo — Zurich). FLD-082 / FLD-091.
-  area: [
-    { value: 'SIN_AUTO', label: 'Siniestros Auto' },
-    { value: 'SIN_VIDA', label: 'Siniestros Vida' },
-    { value: 'PAGOS', label: 'Pagos' },
-    { value: 'PRODUCTO', label: 'Producto' },
-    { value: 'SAC', label: 'SAC' },
-  ],
-  // CAT-MOTIVO-REASIG (Pendiente TI). FLD-093.
-  motivoReasignacion: [
-    { value: 'ERROR_ASIGNACION', label: 'Error de asignación inicial' },
-    { value: 'AREA_EQUIVOCADA', label: 'Área equivocada' },
-    { value: 'DERIVACION_PRODUCTO', label: 'Derivación por producto' },
-    { value: 'ESPECIALIZACION', label: 'Especialización requerida' },
-  ],
   // CAT-FAVOR (Pendiente TI). FLD-350.
   favor: [
     { value: 'CLIENTE', label: 'Cliente' },
@@ -54,25 +54,6 @@ export const OPTIONS = {
     { value: 'NO', label: 'No' },
   ],
 } as const;
-
-// CAT-USUARIOS-ROLE (Activo — BPM): placeholder de usuarios autorizados por área.
-// RUL-0051-02 — al cambiar el área se cargan solo los usuarios de esa área.
-export const USUARIOS_POR_AREA: Record<string, { value: string; label: string }[]> = {
-  SIN_AUTO: [{ value: 'u_auto_1', label: 'Ana Restrepo (Siniestros Auto)' }, { value: 'u_auto_2', label: 'Luis Gómez (Siniestros Auto)' }],
-  SIN_VIDA: [{ value: 'u_vida_1', label: 'María Peña (Siniestros Vida)' }],
-  PAGOS: [{ value: 'u_pagos_1', label: 'Carlos Ruiz (Pagos)' }],
-  PRODUCTO: [{ value: 'u_prod_1', label: 'Sofía Mejía (Producto)' }],
-  SAC: [{ value: 'u_sac_1', label: 'Jorge Díaz (SAC)' }, { value: 'u_sac_2', label: 'Laura Ortiz (SAC)' }],
-};
-
-// FLD-092 — responsable autocompletado por área destino (placeholder).
-export const RESPONSABLE_POR_AREA: Record<string, string> = {
-  SIN_AUTO: 'Ana Restrepo (Siniestros Auto)',
-  SIN_VIDA: 'María Peña (Siniestros Vida)',
-  PAGOS: 'Carlos Ruiz (Pagos)',
-  PRODUCTO: 'Sofía Mejía (Producto)',
-  SAC: 'Jorge Díaz (SAC)',
-};
 
 // FLD-095 — una fila del historial de asignaciones (solo lectura).
 export interface AsignacionHistorial {

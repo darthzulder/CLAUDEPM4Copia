@@ -1,7 +1,8 @@
 import type { UseFormReturn } from 'react-hook-form';
 import FormSection from '../../../../components/FormSection';
 import { ZdsSelect, ZdsInput, ZdsRadio, ZrButton, ZrAlert } from '../../../../components/fields/ZdsFields';
-import { OPTIONS, type FormularioSuperintendenciaFormData } from './variables';
+import { useCollection } from '../../../../core/useCollection';
+import { OPTIONS, COLLECTION_DEFS, type FormularioSuperintendenciaFormData } from './variables';
 
 interface Props {
   form: UseFormReturn<FormularioSuperintendenciaFormData>;
@@ -15,6 +16,9 @@ const soloMonto = { pattern: { value: /^\d+$/, message: 'Solo dígitos (COP)' } 
 export default function SeccionFraudeAnexos({ form, err }: Props) {
   const { control, watch } = form;
   const w = watch();
+
+  const { options: tipoFraudeOpts } = useCollection(COLLECTION_DEFS.tipoFraude);
+  const { options: modalidadFraudeOpts } = useCollection(COLLECTION_DEFS.modalidadFraude);
 
   // RUL-009-01 — campos de fraude visibles y obligatorios si relacionadaFraude = Sí.
   const esFraude = w.qd_relacionadaFraude === 'SI';
@@ -40,10 +44,10 @@ export default function SeccionFraudeAnexos({ form, err }: Props) {
             </ZrAlert>
             <div className="form-row cols-2">
               <ZdsSelect name="qd_tipoFraude" control={control} label="Tipo de Fraude"
-                options={OPTIONS.tipoFraude} required rules={reqFraude} error={err('qd_tipoFraude')}
+                options={tipoFraudeOpts} required rules={reqFraude} error={err('qd_tipoFraude')}
                 helpText="CAT-TIPO-FRAUDE (CE 019/2024)." />
               <ZdsSelect name="qd_modalidadFraude" control={control} label="Modalidad de Fraude"
-                options={OPTIONS.modalidadFraude} required rules={reqFraude} error={err('qd_modalidadFraude')}
+                options={modalidadFraudeOpts} required rules={reqFraude} error={err('qd_modalidadFraude')}
                 helpText="CAT-MOD-FRAUDE (CE 019/2024)." />
             </div>
             <div className="form-row cols-2">

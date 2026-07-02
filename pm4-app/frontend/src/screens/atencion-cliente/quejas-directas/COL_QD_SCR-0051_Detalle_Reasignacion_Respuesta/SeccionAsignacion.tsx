@@ -5,8 +5,9 @@ import {
   ZdsSelect, ZdsTextarea, ZdsRadio,
   ZrButton, ZrAlert, ZrTable,
 } from '../../../../components/fields/ZdsFields';
+import { useCollection } from '../../../../core/useCollection';
 import {
-  OPTIONS, USUARIOS_POR_AREA, RESPONSABLE_POR_AREA, MAX_AYUDANTES,
+  OPTIONS, COLLECTION_DEFS, MAX_AYUDANTES,
   type DetalleReasignacionRespuestaFormData, type AsignacionHistorial,
 } from './variables';
 
@@ -30,13 +31,17 @@ export default function SeccionAsignacion({ form, err }: Props) {
   const historial: AsignacionHistorial[] = Array.isArray(w.qd_historialAsignaciones) ? w.qd_historialAsignaciones : [];
   const ayudantesAlcanzado = historial.length >= MAX_AYUDANTES;
 
-  // RUL-0051-02 — usuarios filtrados por área seleccionada (asignación inicial).
-  const usuariosArea = USUARIOS_POR_AREA[w.qd_areaResponsable] ?? [];
+  const { options: areaOpts } = useCollection(COLLECTION_DEFS.area);
+  const { options: motivoReasignacionOpts } = useCollection(COLLECTION_DEFS.motivoReasignacion);
 
-  // FLD-092 — responsable autocompletado según el área destino de reasignación.
+  // RUL-0051-02 — usuarios filtrados por área seleccionada (asignación inicial).
+  const { options: usuariosArea } = useCollection(COLLECTION_DEFS.usuariosRole, { qd_area: w.qd_areaResponsable });
+
+  // FLD-092 — responsables del área destino de reasignación (autocompletado).
+  const { options: usuariosAreaDestino } = useCollection(COLLECTION_DEFS.usuariosRole, { qd_area: w.qd_areaDestino });
   useEffect(() => {
-    setValue('qd_nuevoResponsable', RESPONSABLE_POR_AREA[w.qd_areaDestino] ?? '');
-  }, [w.qd_areaDestino, setValue]);
+    setValue('qd_nuevoResponsable', usuariosAreaDestino[0]?.label ?? '');
+  }, [usuariosAreaDestino, setValue]);
 
   // ACT-0051-03 — añade el ayudante al historial (RUL-0051-04 valida campos obligatorios).
   const reasignacionCompleta =
@@ -48,7 +53,7 @@ export default function SeccionAsignacion({ form, err }: Props) {
       fecha: new Date().toISOString().slice(0, 10),
       de: w.qd_responsableActual || w.qd_usuarioResponsable || '—',
       para: w.qd_nuevoResponsable || '—',
-      motivo: OPTIONS.motivoReasignacion.find((m) => m.value === w.qd_motivoReasignacion)?.label ?? w.qd_motivoReasignacion,
+      motivo: motivoReasignacionOpts.find((m) => m.value === w.qd_motivoReasignacion)?.label ?? w.qd_motivoReasignacion,
       observaciones: w.qd_observacionesReasignacion,
     };
     setValue('qd_historialAsignaciones', [...historial, fila]);
@@ -67,7 +72,7 @@ export default function SeccionAsignacion({ form, err }: Props) {
           <div className="form-row cols-2">
             <ZdsSelect
               name="qd_areaResponsable" control={control} label="Área responsable"
-              options={OPTIONS.area} withSearch required
+              options={areaOpts} withSearch required
               rules={{ required: 'Campo requerido' }} error={err('qd_areaResponsable')}
               helpText="Áreas habilitadas para quejas (CAT-AREA)."
             />
@@ -110,16 +115,16 @@ export default function SeccionAsignacion({ form, err }: Props) {
                 </p>
                 <div className="form-row cols-2">
                   <ZdsSelect name="qd_areaDestino" control={control} label="Área destino"
-                    options={OPTIONS.area} withSearch error={err('qd_areaDestino')}
+                    options={areaOpts} withSearch error={err('qd_areaDestino')}
                     helpText="CAT-AREA." />
                   <ZdsSelect name="qd_nuevoResponsable" control={control} label="Responsable"
                     options={w.qd_nuevoResponsable ? [{ value: w.qd_nuevoResponsable, label: w.qd_nuevoResponsable }] : []}
                     disabled
-                    helpText="Autocompletado según el área destino. ⚠ Pendiente lista por área." />
+                    helpText="Autocompletado según el área destino (CAT-USUARIOS-ROLE)." />
                 </div>
                 <div className="form-row cols-1">
                   <ZdsSelect name="qd_motivoReasignacion" control={control} label="Motivo de reasignación"
-                    options={OPTIONS.motivoReasignacion} error={err('qd_motivoReasignacion')}
+                    options={motivoReasignacionOpts} error={err('qd_motivoReasignacion')}
                     helpText="CAT-MOTIVO-REASIG." />
                 </div>
                 <div className="form-row cols-1">

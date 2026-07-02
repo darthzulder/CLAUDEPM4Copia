@@ -18,15 +18,25 @@ export default function SeccionConsumidor({ form }: Props) {
   const { options: departamentoOpts } = useCollection(COLLECTION_DEFS.departamento);
   const { options: ciudadOpts } = useCollection(COLLECTION_DEFS.ciudad, w as unknown as Record<string, unknown>);
   const { options: condicionEspecialOpts } = useCollection(COLLECTION_DEFS.condicionEspecial);
+  const { options: sexoOpts } = useCollection(COLLECTION_DEFS.sexo);
+  const { options: tipoPersonaOpts } = useCollection(COLLECTION_DEFS.tipoPersona);
+
+  // FLD-320 — sexo por defecto "No informa" (back, pendiente API SFC), resuelto desde CAT-SEXO.
+  useEffect(() => {
+    if (w.qd_sexo || sexoOpts.length === 0) return;
+    const noInforma = sexoOpts.find((o) => /no informa/i.test(o.label));
+    if (noInforma) setValue('qd_sexo', noInforma.value);
+  }, [w.qd_sexo, sexoOpts, setValue]);
 
   // RUL-000-02 / RUL-000-03 — el tipo de documento define el tipo de persona.
   const esJuridica = w.qd_tipoIdentificacion === 'NIT';
 
-  // FLD-315 — tipo de persona computado (back). Se refleja en el readonly.
+  // FLD-315 — tipo de persona computado (back), resuelto desde CAT-TIPO-PERSONA.
   useEffect(() => {
-    if (!w.qd_tipoIdentificacion) return;
-    setValue('qd_tipoPersona', esJuridica ? 'Jurídica' : 'Natural');
-  }, [w.qd_tipoIdentificacion, esJuridica, setValue]);
+    if (!w.qd_tipoIdentificacion || tipoPersonaOpts.length === 0) return;
+    const tipoPersona = tipoPersonaOpts.find((o) => (esJuridica ? /jur[ií]dica/i : /natural/i).test(o.label));
+    if (tipoPersona) setValue('qd_tipoPersona', tipoPersona.value);
+  }, [w.qd_tipoIdentificacion, esJuridica, tipoPersonaOpts, setValue]);
 
   // RUL-000-09 — al cambiar el departamento se limpia y deshabilita la ciudad.
   useEffect(() => {
@@ -148,7 +158,7 @@ export default function SeccionConsumidor({ form }: Props) {
           control={control}
           label="Tipo de persona"
           readOnly
-          helpText="Asignado automáticamente según el tipo de documento."
+          helpText="Asignado automáticamente según el tipo de documento (CAT-TIPO-PERSONA)."
         />
       </div>
 
@@ -200,7 +210,7 @@ export default function SeccionConsumidor({ form }: Props) {
           control={control}
           label="Sexo"
           readOnly
-          helpText="Asignado por el sistema (pendiente API SFC)."
+          helpText="Asignado por el sistema (CAT-SEXO, pendiente API SFC)."
         />
         <ZdsInput
           name="qd_lgbtiq"

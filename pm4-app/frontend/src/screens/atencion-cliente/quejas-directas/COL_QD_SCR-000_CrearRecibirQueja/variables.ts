@@ -16,8 +16,16 @@ export const COLLECTION_DEFS = {
   ciudad: GLOBAL_COLLECTIONS.qd_ciudad,
   condicionEspecial: GLOBAL_COLLECTIONS.qd_condicionEspecial,
   seguro: GLOBAL_COLLECTIONS.qd_seguro,
+  detalleProducto: GLOBAL_COLLECTIONS.qd_detalleProducto,
   motivo: GLOBAL_COLLECTIONS.qd_motivo,
   admision: GLOBAL_COLLECTIONS.qd_admision,
+  sexo: GLOBAL_COLLECTIONS.qd_sexo,
+  ente: GLOBAL_COLLECTIONS.qd_ente,
+  tutela: GLOBAL_COLLECTIONS.qd_tutela,
+  quejaExpres: GLOBAL_COLLECTIONS.qd_quejaExpres,
+  instancia: GLOBAL_COLLECTIONS.qd_instancia,
+  puntoRecepcion: GLOBAL_COLLECTIONS.qd_puntoRecepcion,
+  tipoPersona: GLOBAL_COLLECTIONS.qd_tipoPersona,
 };
 
 // ---------------------------------------------------------------------------
@@ -57,12 +65,12 @@ export const DEFAULTS = {
   qd_pais: DEFAULT_COUNTRY_CODE,              // RUL-000-10
   qd_replica: 'NO',
   qd_direccion: '',            // FLD-319 — Back, default vacío (pendiente API SFC)
-  qd_sexo: 'No aplica',        // FLD-320 — Back, default (pendiente API SFC)
+  qd_sexo: '',                 // FLD-320 — Back, resuelto desde CAT-SEXO ("No informa")
   qd_lgbtiq: 'No aplica',      // FLD-321 — Back, catálogo pendiente confirmar con TI
-  qd_admision: 'No aplica',    // FLD-331 — Back, default si rol ≠ Defensor
-  qd_enteControl: 'Otros',     // FLD-332 — Back, default "Otros"
-  qd_tutela: 'No',             // FLD-333 — Back, default "No"
-  qd_quejaExpres: 'No',        // FLD-334 — Back, revisar con SFC
+  qd_admision: '',             // FLD-331 — Back, resuelto desde CAT-ADMISION si rol ≠ Defensor
+  qd_enteControl: '',          // FLD-332 — Back, resuelto desde CAT-ENTE ("Otros")
+  qd_tutela: '',               // FLD-333 — Back, resuelto desde CAT-TUTELA ("No")
+  qd_quejaExpres: '',          // FLD-334 — Back, resuelto desde CAT-EXPRES ("No")
 } as const;
 
 // ---------------------------------------------------------------------------

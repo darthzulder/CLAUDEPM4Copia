@@ -8,100 +8,47 @@
 // el PDF (SP2-T06). Al guardarlo completo habilita el subproceso SP3 de cierre regulatorio.
 //
 // data_name PM4 aún no entregados: se usan nombres descriptivos con prefijo `qd_`.
-// Catálogos SFC (CAT-*) marcados "Pendiente TI" en 07_Catalogs → se implementan como
-// OPTIONS estáticas placeholder con los valores de ejemplo del insumo (ver DOCUMENTACION §10).
+// Catálogos SFC (CAT-*) ya creados en PM4 (ver collections.ts, GLOBAL_COLLECTIONS) →
+// se consumen vía COLLECTION_DEFS + useCollection. Solo CAT-LGBTIQ sigue "Pendiente TI"
+// (catálogo no confirmado, ver OPTIONS.lgbtiq).
+
+import { GLOBAL_COLLECTIONS } from '../../../../core/collections';
 
 // Acción/decisión BPMN según el botón presionado.
 export type AccionFormularioSFC = 'GUARDAR' | 'GUARDAR_BORRADOR';
 
 // ---------------------------------------------------------------------------
-// OPTIONS estáticas (placeholder de catálogos SFC — pendientes de parametrización)
+// Catálogos PM4 (CAT-*) — S2/S3/S4
+// ---------------------------------------------------------------------------
+export const COLLECTION_DEFS = {
+  sexo: GLOBAL_COLLECTIONS.qd_sexo,
+  condicionEspecial: GLOBAL_COLLECTIONS.qd_condicionEspecial,
+  productoDigital: GLOBAL_COLLECTIONS.qd_prodDigital,
+  estadoQueja: GLOBAL_COLLECTIONS.qd_estadoQueja,
+  favorabilidad: GLOBAL_COLLECTIONS.qd_favorabilidad,
+  aceptacion: GLOBAL_COLLECTIONS.qd_aceptacion,
+  rectificacion: GLOBAL_COLLECTIONS.qd_rectificacion,
+  desistimiento: GLOBAL_COLLECTIONS.qd_desistimiento,
+  tutela: GLOBAL_COLLECTIONS.qd_tutela,
+  marcacion: GLOBAL_COLLECTIONS.qd_marcacion,
+  quejaExpres: GLOBAL_COLLECTIONS.qd_quejaExpres,
+  tipoFraude: GLOBAL_COLLECTIONS.qd_tipoFraude,
+  modalidadFraude: GLOBAL_COLLECTIONS.qd_modFraude,
+};
+
+// ---------------------------------------------------------------------------
+// OPTIONS estáticas — solo catálogos aún sin colección PM4 confirmada
 // ---------------------------------------------------------------------------
 export const OPTIONS = {
   sino: [
     { value: 'SI', label: 'Sí' },
     { value: 'NO', label: 'No' },
   ],
-  // CAT-SEXO
-  sexo: [
-    { value: 'M', label: 'M. Masculino' },
-    { value: 'F', label: 'F. Femenino' },
-    { value: 'I', label: 'I. No informa' },
-  ],
   // CAT-LGBTIQ ⚠ PENDIENTE CRÍTICO — catálogo no confirmado con TI (placeholder).
   lgbtiq: [
     { value: 'SI', label: 'Sí' },
     { value: 'NO', label: 'No' },
     { value: 'NI', label: 'No informa' },
-  ],
-  // CAT-COND-ESP
-  condicionEspecial: [
-    { value: 'NINGUNA', label: 'Ninguna' },
-    { value: 'ADULTO_MAYOR', label: 'Adulto mayor' },
-    { value: 'DISC_FISICA', label: 'Discapacidad física' },
-    { value: 'DISC_COGNITIVA', label: 'Discapacidad cognitiva' },
-    { value: 'VULNERABLE', label: 'Vulnerable' },
-  ],
-  // CAT-PROD-DIGITAL
-  productoDigital: [
-    { value: '1', label: '1. Sí' },
-    { value: '2', label: '2. No' },
-  ],
-  // CAT-ESTADO-QUEJA
-  estadoQueja: [
-    { value: 'CERR_CF', label: 'Cerrada a favor CF' },
-    { value: 'CERR_ENT', label: 'Cerrada a favor entidad' },
-    { value: 'DESISTIDA', label: 'Desistida' },
-    { value: 'RECTIFICADA', label: 'Rectificada' },
-  ],
-  // CAT-FAVORAB
-  favorabilidad: [
-    { value: '1', label: '1. A favor del cliente' },
-    { value: '2', label: '2. A favor de la entidad' },
-    { value: '3', label: '3. Parcial' },
-  ],
-  // CAT-ACEPTACION (sin valores de ejemplo en el insumo — placeholder)
-  aceptacion: [
-    { value: 'SI', label: 'Sí' },
-    { value: 'NO', label: 'No' },
-    { value: 'PARCIAL', label: 'Parcial' },
-  ],
-  // CAT-RECTIF (sin valores de ejemplo — placeholder)
-  rectificacion: [
-    { value: 'SI', label: 'Sí' },
-    { value: 'NO', label: 'No' },
-  ],
-  // CAT-DESIST (sin valores de ejemplo — placeholder)
-  desistimiento: [
-    { value: 'SI', label: 'Sí' },
-    { value: 'NO', label: 'No' },
-  ],
-  // CAT-TUTELA
-  tutela: [
-    { value: '1', label: '1. Sí' },
-    { value: '2', label: '2. No' },
-  ],
-  // CAT-MARCACION (sin valores de ejemplo — placeholder)
-  marcacion: [
-    { value: 'SI', label: 'Sí' },
-    { value: 'NO', label: 'No' },
-  ],
-  // CAT-EXPRES
-  quejaExpres: [
-    { value: '1', label: '1. Sí' },
-    { value: '2', label: '2. No' },
-  ],
-  // CAT-TIPO-FRAUDE (CE 019/2024)
-  tipoFraude: [
-    { value: 'EXTERNO', label: 'Fraude externo' },
-    { value: 'INTERNO', label: 'Fraude interno' },
-    { value: 'PHISHING', label: 'Phishing' },
-  ],
-  // CAT-MOD-FRAUDE (CE 019/2024)
-  modalidadFraude: [
-    { value: 'ROBO_INFO', label: 'Robo de información' },
-    { value: 'FALSIF_DOCS', label: 'Falsificación de documentos' },
-    { value: 'SUPLANTACION', label: 'Suplantación' },
   ],
 } as const;
 

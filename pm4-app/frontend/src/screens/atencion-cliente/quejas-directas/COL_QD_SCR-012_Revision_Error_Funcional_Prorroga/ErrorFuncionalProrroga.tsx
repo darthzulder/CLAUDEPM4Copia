@@ -1,6 +1,7 @@
 import { useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import { useTask } from '../../../../core/useTask';
+import { useCollection } from '../../../../core/useCollection';
 import ScreenHeader from '../../../../components/ScreenHeader';
 import FormSection from '../../../../components/FormSection';
 import { ActionBar } from '../../../../components/ActionBar';
@@ -9,7 +10,7 @@ import {
   ZrButton, ZrAlert, ZrLoader,
 } from '../../../../components/fields/ZdsFields';
 import {
-  DEFAULTS, OPTIONS,
+  DEFAULTS, COLLECTION_DEFS,
   type ErrorFuncionalProrrogaFormData, type AccionErrorFuncionalProrroga,
 } from './variables';
 
@@ -23,6 +24,8 @@ export default function ErrorFuncionalProrroga() {
   const form = useForm<ErrorFuncionalProrrogaFormData>({ defaultValues: DEFAULTS });
   const { control, watch, handleSubmit, reset, formState: { errors, isSubmitted } } = form;
   const w = watch();
+
+  const { options: motivoProrrogaOpts } = useCollection(COLLECTION_DEFS.motivoProrroga);
 
   useEffect(() => {
     if (task?.data) reset({ ...DEFAULTS, ...(task.data as Partial<ErrorFuncionalProrrogaFormData>) });
@@ -94,7 +97,7 @@ export default function ErrorFuncionalProrroga() {
           <FormSection title="Campos de Prórroga a Corregir">
             <div className="form-row cols-2">
               <ZdsSelect name="qd_motivoProrroga" control={control} label="Motivo de Prórroga"
-                options={OPTIONS.motivoProrroga} required rules={{ required: 'Campo requerido' }}
+                options={motivoProrrogaOpts} required rules={{ required: 'Campo requerido' }}
                 error={err('qd_motivoProrroga')}
                 helpText="Motivo aceptado por SmartSupervision (CAT-MOTIVO-PRORR)." />
               <ZdsDate name="qd_nuevaFechaLimite" control={control} label="Nueva Fecha Límite"

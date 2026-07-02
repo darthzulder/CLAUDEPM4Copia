@@ -1,6 +1,7 @@
 import { useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import { useTask } from '../../../../core/useTask';
+import { useCollection } from '../../../../core/useCollection';
 import ScreenHeader from '../../../../components/ScreenHeader';
 import FormSection from '../../../../components/FormSection';
 import { ActionBar } from '../../../../components/ActionBar';
@@ -8,7 +9,7 @@ import {
   ZdsInput, ZdsSelect, ZrButton, ZrAlert, ZrLoader,
 } from '../../../../components/fields/ZdsFields';
 import {
-  DEFAULTS, OPTIONS, CAMPOS_SFC_OBLIGATORIOS, CAMPOS_FRAUDE,
+  DEFAULTS, OPTIONS, COLLECTION_DEFS, CAMPOS_SFC_OBLIGATORIOS, CAMPOS_FRAUDE,
   type FormularioSuperintendenciaFormData, type AccionFormularioSFC,
 } from './variables';
 import SeccionFraudeAnexos from './SeccionFraudeAnexos';
@@ -19,6 +20,18 @@ export default function FormularioSuperintendencia() {
   const form = useForm<FormularioSuperintendenciaFormData>({ defaultValues: DEFAULTS });
   const { control, watch, handleSubmit, reset, formState: { errors, isSubmitted } } = form;
   const w = watch();
+
+  const { options: sexoOpts } = useCollection(COLLECTION_DEFS.sexo);
+  const { options: condicionEspecialOpts } = useCollection(COLLECTION_DEFS.condicionEspecial);
+  const { options: productoDigitalOpts } = useCollection(COLLECTION_DEFS.productoDigital);
+  const { options: estadoQuejaOpts } = useCollection(COLLECTION_DEFS.estadoQueja);
+  const { options: favorabilidadOpts } = useCollection(COLLECTION_DEFS.favorabilidad);
+  const { options: aceptacionOpts } = useCollection(COLLECTION_DEFS.aceptacion);
+  const { options: rectificacionOpts } = useCollection(COLLECTION_DEFS.rectificacion);
+  const { options: desistimientoOpts } = useCollection(COLLECTION_DEFS.desistimiento);
+  const { options: tutelaOpts } = useCollection(COLLECTION_DEFS.tutela);
+  const { options: marcacionOpts } = useCollection(COLLECTION_DEFS.marcacion);
+  const { options: quejaExpresOpts } = useCollection(COLLECTION_DEFS.quejaExpres);
 
   useEffect(() => {
     if (task?.data) reset({ ...DEFAULTS, ...(task.data as Partial<FormularioSuperintendenciaFormData>) });
@@ -87,17 +100,17 @@ export default function FormularioSuperintendencia() {
           <FormSection title="Datos del Consumidor — Campos SFC">
             <div className="form-row cols-2">
               <ZdsSelect name="qd_sexo" control={control} label="Sexo"
-                options={OPTIONS.sexo} required rules={req} error={err('qd_sexo')} helpText="CAT-SEXO." />
+                options={sexoOpts} required rules={req} error={err('qd_sexo')} helpText="CAT-SEXO." />
               <ZdsSelect name="qd_lgbtiq" control={control} label="LGBTIQ+"
                 options={OPTIONS.lgbtiq} required rules={req} error={err('qd_lgbtiq')}
                 helpText="CAT-LGBTIQ ⚠ pendiente confirmación con TI (CE 019/2024)." />
             </div>
             <div className="form-row cols-2">
               <ZdsSelect name="qd_condicionEspecial" control={control} label="Condición Especial"
-                options={OPTIONS.condicionEspecial} required rules={req} error={err('qd_condicionEspecial')}
+                options={condicionEspecialOpts} required rules={req} error={err('qd_condicionEspecial')}
                 helpText="CAT-COND-ESP." />
               <ZdsSelect name="qd_productoDigital" control={control} label="Producto Digital"
-                options={OPTIONS.productoDigital} required rules={req} error={err('qd_productoDigital')}
+                options={productoDigitalOpts} required rules={req} error={err('qd_productoDigital')}
                 helpText="CAT-PROD-DIGITAL." />
             </div>
             {/* MSG-009-04 — catálogo LGBTIQ+ pendiente. */}
@@ -111,25 +124,25 @@ export default function FormularioSuperintendencia() {
           <FormSection title="Condición de la Queja">
             <div className="form-row cols-3">
               <ZdsSelect name="qd_estadoQueja" control={control} label="Estado de la Queja o Reclamo"
-                options={OPTIONS.estadoQueja} required rules={req} error={err('qd_estadoQueja')} helpText="CAT-ESTADO-QUEJA." />
+                options={estadoQuejaOpts} required rules={req} error={err('qd_estadoQueja')} helpText="CAT-ESTADO-QUEJA." />
               <ZdsSelect name="qd_favorabilidad" control={control} label="Favorabilidad"
-                options={OPTIONS.favorabilidad} required rules={req} error={err('qd_favorabilidad')} helpText="CAT-FAVORAB." />
+                options={favorabilidadOpts} required rules={req} error={err('qd_favorabilidad')} helpText="CAT-FAVORAB." />
               <ZdsSelect name="qd_aceptacion" control={control} label="Aceptación"
-                options={OPTIONS.aceptacion} required rules={req} error={err('qd_aceptacion')} helpText="CAT-ACEPTACION." />
+                options={aceptacionOpts} required rules={req} error={err('qd_aceptacion')} helpText="CAT-ACEPTACION." />
             </div>
             <div className="form-row cols-3">
               <ZdsSelect name="qd_rectificacion" control={control} label="Rectificación"
-                options={OPTIONS.rectificacion} required rules={req} error={err('qd_rectificacion')} helpText="CAT-RECTIF." />
+                options={rectificacionOpts} required rules={req} error={err('qd_rectificacion')} helpText="CAT-RECTIF." />
               <ZdsSelect name="qd_desistimiento" control={control} label="Desistimiento"
-                options={OPTIONS.desistimiento} required rules={req} error={err('qd_desistimiento')} helpText="CAT-DESIST." />
+                options={desistimientoOpts} required rules={req} error={err('qd_desistimiento')} helpText="CAT-DESIST." />
               <ZdsSelect name="qd_tutela" control={control} label="Tutela"
-                options={OPTIONS.tutela} required rules={req} error={err('qd_tutela')} helpText="CAT-TUTELA." />
+                options={tutelaOpts} required rules={req} error={err('qd_tutela')} helpText="CAT-TUTELA." />
             </div>
             <div className="form-row cols-3">
               <ZdsSelect name="qd_marcacion" control={control} label="Marcación"
-                options={OPTIONS.marcacion} required rules={req} error={err('qd_marcacion')} helpText="CAT-MARCACION." />
+                options={marcacionOpts} required rules={req} error={err('qd_marcacion')} helpText="CAT-MARCACION." />
               <ZdsSelect name="qd_quejaExpres" control={control} label="Queja Exprés"
-                options={OPTIONS.quejaExpres} required rules={req} error={err('qd_quejaExpres')} helpText="CAT-EXPRES." />
+                options={quejaExpresOpts} required rules={req} error={err('qd_quejaExpres')} helpText="CAT-EXPRES." />
               <div />
             </div>
           </FormSection>

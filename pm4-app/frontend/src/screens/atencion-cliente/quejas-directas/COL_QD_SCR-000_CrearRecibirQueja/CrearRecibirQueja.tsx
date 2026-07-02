@@ -37,17 +37,27 @@ export default function CrearRecibirQueja() {
 
   const { options: tipoSolicitudOpts } = useCollection(COLLECTION_DEFS.tipoSolicitud);
   const { options: rolOpts } = useCollection(COLLECTION_DEFS.rol);
+  const { options: instanciaOpts } = useCollection(COLLECTION_DEFS.instancia);
+  const { options: puntoRecepcionOpts } = useCollection(COLLECTION_DEFS.puntoRecepcion);
 
   useEffect(() => {
     if (task?.data) reset({ ...DEFAULTS, ...(task.data as Partial<CrearRecibirQuejaFormData>) });
   }, [task, reset]);
 
-  // RUL-000-01 — el rol determina instancia y punto de recepción (back, readonly).
+  // RUL-000-01 — el rol determina instancia y punto de recepción (back, readonly),
+  // resueltos desde CAT-INSTANCIA / CAT-PUNTO.
   useEffect(() => {
+    if (instanciaOpts.length === 0) return;
     const esDefensor = w.qd_rol === 'DEFENSOR';
-    form.setValue('qd_instanciaRecepcion', esDefensor ? '1. Defensor del Consumidor Financiero' : '2. Entidad vigilada');
-    form.setValue('qd_puntoRecepcion', '2. Virtual');
-  }, [w.qd_rol, form]);
+    const instancia = instanciaOpts.find((o) => (esDefensor ? /defensor/i : /entidad vigilada/i).test(o.label));
+    if (instancia) form.setValue('qd_instanciaRecepcion', instancia.value);
+  }, [w.qd_rol, instanciaOpts, form]);
+
+  useEffect(() => {
+    if (w.qd_puntoRecepcion || puntoRecepcionOpts.length === 0) return;
+    const virtual = puntoRecepcionOpts.find((o) => /virtual/i.test(o.label));
+    if (virtual) form.setValue('qd_puntoRecepcion', virtual.value);
+  }, [w.qd_puntoRecepcion, puntoRecepcionOpts, form]);
 
   const uploadFiles = async (requestId: number) => {
     for (const [docKey, file] of fileRegistry.current.entries()) {
@@ -154,9 +164,9 @@ export default function CrearRecibirQueja() {
             </div>
             <div className="form-row cols-2">
               <ZdsInput name="qd_puntoRecepcion" control={control} label="Punto de Recepción" readOnly
-                helpText="Asignado automáticamente según canal/rol." />
+                helpText="Asignado automáticamente según canal/rol (CAT-PUNTO)." />
               <ZdsInput name="qd_instanciaRecepcion" control={control} label="Instancia de Recepción" readOnly
-                helpText="Asignada automáticamente según el rol." />
+                helpText="Asignada automáticamente según el rol (CAT-INSTANCIA)." />
             </div>
           </FormSection>
 
