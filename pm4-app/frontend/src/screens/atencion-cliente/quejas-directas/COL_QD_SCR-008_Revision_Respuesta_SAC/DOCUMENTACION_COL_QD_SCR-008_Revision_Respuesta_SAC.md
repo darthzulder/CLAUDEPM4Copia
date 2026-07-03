@@ -51,7 +51,7 @@ vista previa de la carta final. Las observaciones son obligatorias solo para dev
 
 | Campo (UI) | Variable | Tipo | Fuente |
 |---|---|---|---|
-| ID Caso / Código SFC | `qd_idCasoSFC` | `ZdsInput` readOnly | FLD-120 |
+| ID Caso / Código SFC | `qd_codigoSFC` | `ZdsInput` readOnly | FLD-120 |
 | SLA: Días hábiles restantes | `qd_slaRestante` | `ZdsInput` readOnly | FLD-121 |
 | Versión bajo revisión | `qd_versionRevision` | `ZdsInput` readOnly | FLD-122 |
 | Área Responsable | `qd_areaResponsable` | `ZdsInput` readOnly | FLD-123 |

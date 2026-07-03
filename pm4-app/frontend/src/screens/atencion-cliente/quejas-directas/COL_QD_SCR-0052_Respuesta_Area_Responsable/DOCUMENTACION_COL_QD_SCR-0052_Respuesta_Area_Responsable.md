@@ -51,8 +51,8 @@ de soporte opcional**, que quedan en el historial del caso. El cierre es "Enviar
 
 | Campo (UI) | Variable | Tipo | Fuente |
 |---|---|---|---|
-| Nombre del Consumidor | `qd_nombreConsumidor` | `ZdsInput` readOnly | FLD-066 |
-| Tipo y N.° de Identificación | `qd_identificacion` | `ZdsInput` readOnly | FLD-067 |
+| Nombre del Consumidor | (derivado de `qd_nombres` + `qd_apellidos` / `qd_razonSocial`) | `ZdsInput` readOnly | FLD-066 |
+| Tipo y N.° de Identificación | (derivado de `qd_tipoIdentificacion` + `qd_numeroIdentificacion`) | `ZdsInput` readOnly | FLD-067 |
 | Correo Electrónico | `qd_correoElectronico` | `ZdsInput` readOnly | FLD-068 |
 | Tipo de Persona | `qd_tipoPersona` | `ZdsInput` readOnly | FLD-069 |
 
@@ -63,7 +63,7 @@ de soporte opcional**, que quedan en el historial del caso. El cierre es "Enviar
 | Canal de Recepción | `qd_canal` | `ZdsInput` readOnly | FLD-070 |
 | Producto SFC | `qd_productoSFC` | `ZdsInput` readOnly | FLD-071 |
 | Motivo SFC | `qd_motivoSFC` | `ZdsInput` readOnly | FLD-072 |
-| Instancia / Punto de Recepción | `qd_instanciaPunto` | `ZdsInput` readOnly | FLD-073 |
+| Instancia / Punto de Recepción | `qd_instanciaRecepcion` | `ZdsInput` readOnly | FLD-073 |
 | Admisión | `qd_admision` | `ZdsInput` readOnly | FLD-074 |
 | Ente de Control | `qd_enteControl` | `ZdsInput` readOnly | FLD-075 |
 
@@ -71,15 +71,15 @@ de soporte opcional**, que quedan en el historial del caso. El cierre es "Enviar
 
 | Campo (UI) | Variable | Tipo | Fuente |
 |---|---|---|---|
-| Asunto de la Queja | `qd_resumen` | `ZdsInput` readOnly | FLD-076 |
+| Asunto de la Queja | `qd_motivoSFC` | `ZdsInput` readOnly | FLD-076 |
 | Descripción / Texto de la Queja | `qd_textoQueja` | `ZdsTextarea` readOnly | FLD-077 |
 
 ### S4 — Datos de la Asignación (SEC-057, solo lectura)
 
 | Campo (UI) | Variable | Tipo | Fuente |
 |---|---|---|---|
-| Área | `qd_areaAsignada` | `ZdsInput` readOnly | FLD-351 |
-| Responsable | `qd_responsableAsignado` | `ZdsInput` readOnly | FLD-352 |
+| Área | `qd_areaResponsable` | `ZdsInput` readOnly | FLD-351 |
+| Responsable | `qd_usuarioResponsable` | `ZdsInput` readOnly | FLD-352 |
 | Observaciones | `qd_observacionesAsignacion` | `ZdsTextarea` readOnly | FLD-353 |
 
 ### S5 — Comentario y Adjunto (SEC-058, editable)

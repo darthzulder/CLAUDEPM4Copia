@@ -16,17 +16,25 @@ function estadoVariant(estado: string): 'success' | 'danger' | 'info' | 'neutral
 interface Props {
   control: Control<DetalleReasignacionRespuestaFormData>;
   estado: string;
+  nombre: string;          // derivado de qd_nombres+qd_apellidos / qd_razonSocial
+  identificacion: string;  // derivado de qd_tipoIdentificacion+qd_numeroIdentificacion
 }
 
 /** S1–S4 · Expediente del caso (solo lectura). */
-export default function SeccionDetalleCaso({ control, estado }: Props) {
+export default function SeccionDetalleCaso({ control, estado, nombre, identificacion }: Props) {
   return (
     <>
       {/* ── S1 · Datos del Consumidor (SEC-047) ── */}
       <FormSection title="Datos del Consumidor">
         <div className="form-row cols-2">
-          <ZdsInput name="qd_nombreConsumidor" control={control} label="Nombre del Consumidor" readOnly />
-          <ZdsInput name="qd_identificacion" control={control} label="Tipo y N.° de Identificación" readOnly />
+          <div className="zds-field-wrap">
+            <span className="info-bar-label">Nombre del Consumidor</span>
+            <div className="info-bar-value" style={{ marginTop: 'var(--zs-50)' }}>{nombre || '—'}</div>
+          </div>
+          <div className="zds-field-wrap">
+            <span className="info-bar-label">Tipo y N.° de Identificación</span>
+            <div className="info-bar-value" style={{ marginTop: 'var(--zs-50)' }}>{identificacion || '—'}</div>
+          </div>
         </div>
         <div className="form-row cols-2">
           <ZdsInput name="qd_correoElectronico" control={control} label="Correo Electrónico" readOnly
@@ -43,7 +51,7 @@ export default function SeccionDetalleCaso({ control, estado }: Props) {
           <ZdsInput name="qd_motivoSFC" control={control} label="Motivo SFC" readOnly />
         </div>
         <div className="form-row cols-3">
-          <ZdsInput name="qd_instanciaPunto" control={control} label="Instancia / Punto de Recepción" readOnly />
+          <ZdsInput name="qd_instanciaRecepcion" control={control} label="Instancia de Recepción" readOnly />
           <ZdsInput name="qd_admision" control={control} label="Admisión" readOnly />
           <ZdsInput name="qd_enteControl" control={control} label="Ente de Control" readOnly />
         </div>
@@ -52,7 +60,7 @@ export default function SeccionDetalleCaso({ control, estado }: Props) {
       {/* ── S3 · Descripción de la Queja (SEC-049) ── */}
       <FormSection title="Descripción de la Queja">
         <div className="form-row cols-1">
-          <ZdsInput name="qd_resumen" control={control} label="Asunto de la Queja" readOnly />
+          <ZdsInput name="qd_motivoSFC" control={control} label="Asunto de la Queja" readOnly />
         </div>
         <div className="form-row cols-1">
           <ZdsTextarea name="qd_textoQueja" control={control} label="Descripción / Texto de la Queja" readOnly />

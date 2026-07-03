@@ -19,11 +19,13 @@ export interface CampoConError {
 
 export interface CorregirDatosFormData {
   // Encabezado (solo lectura — FLD-030..032)
-  qd_numeroCaso: string;
-  qd_canalRecepcion: string;
+  qd_idCasoBPM: string;
+  qd_canal: string;
   qd_slaRestante: string;
-  // Datos del consumidor corregibles
-  qd_nombreConsumidor: string;
+  // Datos del consumidor corregibles (granulares, alineados con SCR-000)
+  qd_nombres: string;
+  qd_apellidos: string;
+  qd_razonSocial: string;
   qd_tipoIdentificacion: string;
   qd_numeroIdentificacion: string;
   qd_correoElectronico: string;
@@ -33,14 +35,13 @@ export interface CorregirDatosFormData {
   qd_municipio: string;
   // Clasificación corregible
   qd_productoSFC: string;
-  qd_motivoSFC: string;
+  qd_motivoSFC: string;  // también resuelve el "Asunto de la Queja" (no hay campo asunto propio)
   qd_tipoSolicitud: string;
   qd_instanciaRecepcion: string;
   qd_puntoRecepcion: string;
   qd_admision: string;
   qd_enteControl: string;
-  qd_asunto: string;
-  qd_descripcionQueja: string;
+  qd_textoQueja: string;
   // Metadata de errores inyectada por el BPM — JSON serializado: CampoConError[]
   qd_errores_json: string;
 }

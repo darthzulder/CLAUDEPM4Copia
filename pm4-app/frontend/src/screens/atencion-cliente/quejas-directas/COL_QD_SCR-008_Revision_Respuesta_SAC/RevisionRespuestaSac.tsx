@@ -92,7 +92,7 @@ export default function RevisionRespuestaSac() {
           {/* ── S1 · Contexto del Caso (SEC-025, solo lectura) ── */}
           <FormSection title="Contexto del Caso">
             <div className="form-row cols-3">
-              <ZdsInput name="qd_idCasoSFC" control={control} label="ID Caso / Código SFC" readOnly />
+              <ZdsInput name="qd_codigoSFC" control={control} label="ID Caso / Código SFC" readOnly />
               <ZdsInput name="qd_slaRestante" control={control} label="SLA: Días hábiles restantes" readOnly />
               <ZdsInput name="qd_versionRevision" control={control} label="Versión bajo revisión" readOnly />
             </div>
@@ -173,7 +173,7 @@ export default function RevisionRespuestaSac() {
           <h3 style={{ margin: '0 0 var(--zs-75)', font: 'var(--zf-h-20--700)', color: 'var(--z-text)' }}>
             Vista previa — carta de respuesta final
           </h3>
-          <p className="subsection-note">Caso {w.qd_idCasoSFC} · Versión {w.qd_versionRevision}</p>
+          <p className="subsection-note">Caso {w.qd_codigoSFC} · Versión {w.qd_versionRevision}</p>
           <p style={{ font: 'var(--zf-cap-14)', whiteSpace: 'pre-wrap' }}>
             {w.qd_respuestaCliente || 'Sin respuesta redactada.'}
           </p>

@@ -63,7 +63,7 @@ export const ADJUNTO_KEYS = [
 // Valores por defecto del back / reglas de precarga
 // ---------------------------------------------------------------------------
 export const DEFAULTS = {
-  qd_pais: DEFAULT_COUNTRY_CODE,              // RUL-000-10
+  qd_codigoPais: DEFAULT_COUNTRY_CODE,        // RUL-000-10
   qd_replica: 'NO',
   qd_direccion: '',            // FLD-319 — Back, default vacío (pendiente API SFC)
   qd_sexo: '',                 // FLD-320 — Back, resuelto desde CAT-SEXO ("No informa")
@@ -80,10 +80,10 @@ export const DEFAULTS = {
 // ---------------------------------------------------------------------------
 export interface CrearRecibirQuejaFormData {
   // S1 — Tipo de Solicitud y Rol
-  qd_numeroCaso: string;            // FLD-300 readonly (BPM)
-  qd_fechaHoraCreacion: string;     // FLD-301 readonly (BPM)
+  qd_idCasoBPM: string;             // FLD-300 readonly (BPM)
+  qd_fechaCreacion: string;         // FLD-301 readonly (BPM)
   qd_tipoSolicitud: string;         // FLD-302
-  qd_rol: string;                   // FLD-303
+  qd_rolRadicador: string;          // FLD-303
   qd_puntoRecepcion: string;        // FLD-304 readonly (back)
   qd_instanciaRecepcion: string;    // FLD-305 readonly (computado de rol)
 
@@ -93,27 +93,27 @@ export interface CrearRecibirQuejaFormData {
   qd_nombres: string;               // FLD-308 (persona natural)
   qd_apellidos: string;             // FLD-309 (persona natural)
   qd_razonSocial: string;           // FLD-310 (persona jurídica)
-  qd_contactoNombres: string;       // FLD-311 (persona jurídica)
-  qd_contactoApellidos: string;     // FLD-312 (persona jurídica)
-  qd_celular: string;               // FLD-313
+  qd_nombresContacto: string;       // FLD-311 (persona jurídica)
+  qd_apellidosContacto: string;     // FLD-312 (persona jurídica)
+  qd_telefono: string;              // FLD-313
   qd_correoElectronico: string;     // FLD-314
   qd_tipoPersona: string;           // FLD-315 readonly (computado de tipo doc)
-  qd_pais: string;                  // FLD-316
+  qd_codigoPais: string;            // FLD-316
   qd_departamento: string;          // FLD-317
-  qd_ciudad: string;                // FLD-318
+  qd_municipio: string;             // FLD-318
   qd_direccion: string;             // FLD-319 readonly (back)
   qd_sexo: string;                  // FLD-320 readonly (back)
   qd_lgbtiq: string;                // FLD-321 readonly (back), oculto — default "No informa" (CAT-LGBTIQ)
   qd_condicionEspecial: string;     // FLD-322 readonly (back), oculto — default "NINGUNA" (CAT-COND-ESP)
 
   // S3 — Detalle de la Queja
-  qd_seguro: string;                // FLD-323
+  qd_productoSFC: string;           // FLD-323
   qd_detalleProducto: string;       // FLD-324 readonly (back)
   qd_replica: string;               // FLD-325
   qd_argumentoReplica: string;      // FLD-326 (visible si réplica = Sí)
   qd_escalamientoDefensor: string;  // FLD-327 readonly (computado de instancia)
-  qd_motivo: string;                // FLD-328
-  qd_detalle: string;               // FLD-329 (50–2000 caracteres)
+  qd_motivoSFC: string;             // FLD-328
+  qd_textoQueja: string;            // FLD-329 (50–2000 caracteres)
   qd_adjunto_01: string;            // FLD-330 (nombres de archivo)
   qd_adjunto_02: string;
   qd_adjunto_03: string;
@@ -134,6 +134,6 @@ export interface CrearRecibirQuejaFormData {
   qd_fechaRadicacionSFC: string;    // FLD-339 readonly
 
   // S6 — Responsable Asignado (post-radicación, readonly)
-  qd_rolGrupo: string;              // FLD-340 readonly
+  qd_rolResponsable: string;        // FLD-340 readonly
   qd_responsable: string;           // FLD-341 readonly
 }

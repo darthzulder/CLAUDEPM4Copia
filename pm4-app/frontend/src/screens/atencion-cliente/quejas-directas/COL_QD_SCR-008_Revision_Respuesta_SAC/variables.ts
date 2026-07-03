@@ -24,7 +24,7 @@ export interface SoporteAdjunto {
 // ---------------------------------------------------------------------------
 export interface RevisionRespuestaSacFormData {
   // ── S1 Contexto del Caso (solo lectura) ──
-  qd_idCasoSFC:       string; // FLD-120
+  qd_codigoSFC:       string; // FLD-120 (unificado con SCR-009/010)
   qd_slaRestante:     string; // FLD-121 (días hábiles restantes)
   qd_versionRevision: string; // FLD-122
   qd_areaResponsable: string; // FLD-123

@@ -32,15 +32,15 @@ export default function RevisionErrorTecnicoApi() {
 
   // RUL-004-01 (🔴 BLOQUEA): causaRaiz o correccionAplicada vacíos ⇒ no se puede autorizar.
   const puedeAutorizar =
-    !!w.et_causaRaiz?.trim() && !!w.et_correccionAplicada?.trim();
+    !!w.qd_causaRaiz?.trim() && !!w.qd_correccionAplicada?.trim();
 
   // ACT-004-01 / ACT-004-02 — ambos completan la tarea; difieren en la acción registrada.
   const enviar = (accion: AccionErrorTecnico) =>
-    completeTask({ ...w, et_accion: accion } as unknown as Record<string, unknown>)
+    completeTask({ ...w, qd_accion: accion } as unknown as Record<string, unknown>)
       .catch((e) => console.error('[RevisionErrorTecnicoApi] Error al enviar:', e));
 
   const onAutorizar = handleSubmit((data) =>
-    completeTask({ ...data, et_accion: 'AUTORIZAR_REENVIO' } as unknown as Record<string, unknown>)
+    completeTask({ ...data, qd_accion: 'AUTORIZAR_REENVIO' } as unknown as Record<string, unknown>)
       .catch((e) => console.error('[RevisionErrorTecnicoApi] Error al autorizar:', e)),
   );
 
@@ -57,7 +57,7 @@ export default function RevisionErrorTecnicoApi() {
     );
   }
 
-  const ajustaPayload = w.et_requiereAjustePayload === 'SI';
+  const ajustaPayload = w.qd_requiereAjustePayload === 'SI';
 
   return (
     <div className="screen-wrapper">
@@ -82,22 +82,22 @@ export default function RevisionErrorTecnicoApi() {
             <ZrAlert config="negative" {...({ 'hide-close': true } as object)}>
               La integración con SmartSupervision <strong>falló por un error técnico</strong> tras
               varios intentos. Revise el detalle, registre la corrección y autorice el reenvío.
-              {w.et_numeroIntento && <> — Intento acumulado <strong>#{w.et_numeroIntento}</strong>.</>}
+              {w.qd_numeroIntento && <> — Intento acumulado <strong>#{w.qd_numeroIntento}</strong>.</>}
             </ZrAlert>
 
             <div className="form-row cols-3">
-              <ZdsInput name="et_codigoHttp" control={control} label="Código HTTP" readOnly />
-              <ZdsInput name="et_tipoError" control={control} label="Tipo de Error" readOnly />
-              <ZdsInput name="et_numeroIntento" control={control} label="Número de Intento Acumulado" readOnly />
+              <ZdsInput name="qd_codigoHTTP" control={control} label="Código HTTP" readOnly />
+              <ZdsInput name="qd_tipoError" control={control} label="Tipo de Error" readOnly />
+              <ZdsInput name="qd_numeroIntento" control={control} label="Número de Intento Acumulado" readOnly />
             </div>
 
             <div className="form-row cols-1">
-              <ZdsInput name="et_endpoint" control={control} label="Endpoint Invocado" readOnly />
+              <ZdsInput name="qd_endpointInvocado" control={control} label="Endpoint Invocado" readOnly />
             </div>
 
             <div className="form-row cols-1">
               <ZdsTextarea
-                name="et_mensajeTecnico"
+                name="qd_mensajeTecnicoAPI"
                 control={control}
                 label="Mensaje Técnico de la API"
                 readOnly
@@ -107,7 +107,7 @@ export default function RevisionErrorTecnicoApi() {
 
             <div className="form-row cols-1">
               <ZdsTextarea
-                name="et_payloadEnviado"
+                name="qd_payloadEnviado"
                 control={control}
                 label="Payload Enviado (JSON)"
                 readOnly={!ajustaPayload}
@@ -124,38 +124,38 @@ export default function RevisionErrorTecnicoApi() {
           <FormSection title="Registro de Corrección Técnica">
             <div className="form-row cols-1">
               <ZdsTextarea
-                name="et_causaRaiz"
+                name="qd_causaRaiz"
                 control={control}
                 label="Causa Raíz Identificada"
                 required
                 rules={{ required: 'Campo requerido', maxLength: { value: 2000, message: 'Máximo 2000 caracteres' } }}
                 maxLength={2000}
-                error={isSubmitted ? err('et_causaRaiz') : undefined}
+                error={isSubmitted ? err('qd_causaRaiz') : undefined}
               />
             </div>
 
             <div className="form-row cols-1">
               <ZdsTextarea
-                name="et_correccionAplicada"
+                name="qd_correccionAplicada"
                 control={control}
                 label="Corrección Aplicada"
                 required
                 rules={{ required: 'Campo requerido', maxLength: { value: 2000, message: 'Máximo 2000 caracteres' } }}
                 maxLength={2000}
-                error={isSubmitted ? err('et_correccionAplicada') : undefined}
+                error={isSubmitted ? err('qd_correccionAplicada') : undefined}
               />
             </div>
 
             <div className="form-row cols-1">
               <ZdsRadio
                 label="¿Requiere ajuste en payload?"
-                name="et_requiereAjustePayload"
+                name="qd_requiereAjustePayload"
                 control={control}
                 options={OPTIONS.sino}
                 inline
                 rules={{ required: 'Campo requerido' }}
                 required
-                error={err('et_requiereAjustePayload')}
+                error={err('qd_requiereAjustePayload')}
               />
             </div>
 
@@ -202,9 +202,9 @@ export default function RevisionErrorTecnicoApi() {
           <h3 style={{ margin: '0 0 var(--zs-75)', font: 'var(--zf-h-20--700)', color: 'var(--z-text)' }}>
             Log completo del error técnico
           </h3>
-          <ZdsInput name="et_endpoint" control={control} label="Endpoint Invocado" readOnly />
-          <ZdsTextarea name="et_mensajeTecnico" control={control} label="Mensaje Técnico de la API" readOnly />
-          <ZdsTextarea name="et_payloadEnviado" control={control} label="Payload Enviado (JSON)" readOnly />
+          <ZdsInput name="qd_endpointInvocado" control={control} label="Endpoint Invocado" readOnly />
+          <ZdsTextarea name="qd_mensajeTecnicoAPI" control={control} label="Mensaje Técnico de la API" readOnly />
+          <ZdsTextarea name="qd_payloadEnviado" control={control} label="Payload Enviado (JSON)" readOnly />
           <div z-flex="75" z-align="right:center" style={{ marginTop: 'var(--zs-100)' }}>
             <ZrButton config="secondary:s" onClick={() => setShowLog(false)}>Cerrar</ZrButton>
           </div>

@@ -35,24 +35,24 @@ export default function CorreccionErrorFuncional() {
 
   // RUL-003-01 (🔴 BLOQUEA): el campo señalado debe MODIFICARSE antes de reenviar.
   // "Modificado" = no vacío y distinto del valor rechazado original (FLD-042).
-  const correccion = (w.ef_campoCorreccion ?? '').trim();
-  const valorOriginal = (w.ef_valorRechazado ?? '').trim();
+  const correccion = (w.qd_campoCorreccion ?? '').trim();
+  const valorOriginal = (w.qd_valorRechazado ?? '').trim();
   const campoModificado = correccion !== '' && correccion !== valorOriginal;
 
   // RUL-003-02 (info): a partir de UMBRAL_INTENTOS sugerir escalamiento técnico.
-  const intentos = Number.parseInt(w.ef_numeroIntento ?? '', 10);
+  const intentos = Number.parseInt(w.qd_numeroIntentoM1M2 ?? '', 10);
   const multiplesIntentos = Number.isFinite(intentos) && intentos >= UMBRAL_INTENTOS;
 
-  const historial = Array.isArray(w.ef_historialIntentos) ? w.ef_historialIntentos : [];
+  const historial = Array.isArray(w.qd_historialIntentos) ? w.qd_historialIntentos : [];
 
   // ACT-003-02 — escalar a soporte técnico (siempre disponible; no requiere corrección).
   const onEscalar = () =>
-    completeTask({ ...w, ef_accion: 'ESCALAR_SOPORTE' as AccionErrorFuncional } as unknown as Record<string, unknown>)
+    completeTask({ ...w, qd_accion: 'ESCALAR_SOPORTE' as AccionErrorFuncional } as unknown as Record<string, unknown>)
       .catch((e) => console.error('[CorreccionErrorFuncional] Error al escalar:', e));
 
   // ACT-003-01 — corregir y reenviar (valida campo obligatorio + modificación).
   const onReenviar = handleSubmit((data) =>
-    completeTask({ ...data, ef_accion: 'CORREGIR_REENVIAR' as AccionErrorFuncional } as unknown as Record<string, unknown>)
+    completeTask({ ...data, qd_accion: 'CORREGIR_REENVIAR' as AccionErrorFuncional } as unknown as Record<string, unknown>)
       .catch((e) => console.error('[CorreccionErrorFuncional] Error al reenviar:', e)),
   );
 
@@ -93,23 +93,23 @@ export default function CorreccionErrorFuncional() {
               SmartSupervision <strong>rechazó la radicación (HTTP 400 funcional)</strong> por datos
               inválidos. Corrija únicamente el campo señalado y reenvíe — no es necesario navegar por
               el formulario completo.
-              {w.ef_numeroIntento && <> Intento actual <strong>#{w.ef_numeroIntento}</strong>.</>}
+              {w.qd_numeroIntentoM1M2 && <> Intento actual <strong>#{w.qd_numeroIntentoM1M2}</strong>.</>}
             </ZrAlert>
 
             <div className="form-row cols-3">
-              <ZdsInput name="ef_codigoErrorSFC" control={control} label="Código de Error SFC" readOnly />
-              <ZdsInput name="ef_campoAfectado" control={control} label="Campo Afectado" readOnly />
-              <ZdsInput name="ef_valorRechazado" control={control} label="Valor Rechazado" readOnly />
+              <ZdsInput name="qd_codigoErrorSFC" control={control} label="Código de Error SFC" readOnly />
+              <ZdsInput name="qd_campoAfectado" control={control} label="Campo Afectado" readOnly />
+              <ZdsInput name="qd_valorRechazado" control={control} label="Valor Rechazado" readOnly />
             </div>
 
             <div className="form-row cols-2">
-              <ZdsInput name="ef_numeroIntento" control={control} label="Intento N.° actual (M1/M2)" readOnly />
-              <ZdsInput name="ef_fechaRechazo" control={control} label="Fecha/Hora del rechazo" readOnly />
+              <ZdsInput name="qd_numeroIntentoM1M2" control={control} label="Intento N.° actual (M1/M2)" readOnly />
+              <ZdsInput name="qd_fechaRechazo" control={control} label="Fecha/Hora del rechazo" readOnly />
             </div>
 
             <div className="form-row cols-1">
               <ZdsTextarea
-                name="ef_mensajeErrorSFC"
+                name="qd_mensajeErrorSFC"
                 control={control}
                 label="Mensaje de Error SFC"
                 readOnly
@@ -120,7 +120,7 @@ export default function CorreccionErrorFuncional() {
             {/* RUL-003-02 / MSG-003-02 — múltiples intentos: sugerir escalamiento. */}
             {multiplesIntentos && (
               <ZrAlert config="alert" {...({ 'hide-close': true } as object)}>
-                Ha intentado <strong>{w.ef_numeroIntento}</strong> veces. Si el problema persiste,
+                Ha intentado <strong>{w.qd_numeroIntentoM1M2}</strong> veces. Si el problema persiste,
                 considere <strong>escalar a soporte técnico</strong>. {/* MSG-003-02 */}
               </ZrAlert>
             )}
@@ -130,19 +130,19 @@ export default function CorreccionErrorFuncional() {
           <FormSection title="Campo a Corregir">
             <div className="form-row cols-1">
               <ZdsInput
-                name="ef_campoCorreccion"
+                name="qd_campoCorreccion"
                 control={control}
-                label={w.ef_campoAfectado ? `Corrección — ${w.ef_campoAfectado}` : 'Campo específico en corrección'}
+                label={w.qd_campoAfectado ? `Corrección — ${w.qd_campoAfectado}` : 'Campo específico en corrección'}
                 required
                 rules={{ required: 'Campo requerido' }}
-                error={err('ef_campoCorreccion')}
+                error={err('qd_campoCorreccion')}
                 helpText="Edite solo el campo señalado por SmartSupervision. No el formulario completo."
               />
             </div>
 
             <div className="form-row cols-1">
               <ZdsTextarea
-                name="ef_justificacionCorreccion"
+                name="qd_justificacionCorreccion"
                 control={control}
                 label="Justificación de la corrección"
                 maxLength={2000}
@@ -219,11 +219,11 @@ export default function CorreccionErrorFuncional() {
           <h3 style={{ margin: '0 0 var(--zs-75)', font: 'var(--zf-h-20--700)', color: 'var(--z-text)' }}>
             Log completo del rechazo funcional
           </h3>
-          <ZdsInput name="ef_codigoErrorSFC" control={control} label="Código de Error SFC" readOnly />
-          <ZdsInput name="ef_campoAfectado" control={control} label="Campo Afectado" readOnly />
-          <ZdsInput name="ef_valorRechazado" control={control} label="Valor Rechazado" readOnly />
-          <ZdsTextarea name="ef_mensajeErrorSFC" control={control} label="Mensaje de Error SFC" readOnly />
-          <ZdsInput name="ef_fechaRechazo" control={control} label="Fecha/Hora del rechazo" readOnly />
+          <ZdsInput name="qd_codigoErrorSFC" control={control} label="Código de Error SFC" readOnly />
+          <ZdsInput name="qd_campoAfectado" control={control} label="Campo Afectado" readOnly />
+          <ZdsInput name="qd_valorRechazado" control={control} label="Valor Rechazado" readOnly />
+          <ZdsTextarea name="qd_mensajeErrorSFC" control={control} label="Mensaje de Error SFC" readOnly />
+          <ZdsInput name="qd_fechaRechazo" control={control} label="Fecha/Hora del rechazo" readOnly />
           <div z-flex="75" z-align="right:center" style={{ marginTop: 'var(--zs-100)' }}>
             <ZrButton config="secondary:s" onClick={() => setShowLog(false)}>Cerrar</ZrButton>
           </div>

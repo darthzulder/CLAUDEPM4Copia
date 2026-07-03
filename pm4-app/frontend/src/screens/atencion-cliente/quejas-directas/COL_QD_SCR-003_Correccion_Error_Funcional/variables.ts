@@ -8,8 +8,8 @@
 // campo afectado y el valor rechazado, corrige SOLO ese campo y reenvía a
 // SmartSupervision (vuelve a SP1-T02), o escala el caso a soporte técnico.
 //
-// data_name PM4 aún no entregados: se usan nombres descriptivos con prefijo `ef_`
-// (Error Funcional). Se actualizarán cuando negocio/TI entreguen el diccionario final.
+// data_name PM4 alineados a `qd_` + Nombre Técnico del Anexo02 (columna 03_Campos).
+// Se actualizarán en el Anexo02 cuando negocio/TI entreguen el diccionario final.
 
 // Acción/decisión BPMN tomada según el botón presionado al enviar.
 // CORREGIR_REENVIAR → ACT-003-01 (ejecuta SP1-T02, reenvío M2)
@@ -32,28 +32,28 @@ export const UMBRAL_INTENTOS = 3;
 // ---------------------------------------------------------------------------
 export interface CorreccionErrorFuncionalFormData {
   // ── S1 Panel de Error SmartSupervision (solo lectura, inyectado por la API/BPM) ──
-  ef_codigoErrorSFC:        string; // FLD-040 · Código HTTP + código funcional devuelto por SFC
-  ef_campoAfectado:         string; // FLD-041 · Nombre exacto del campo rechazado
-  ef_valorRechazado:        string; // FLD-042 · Valor enviado y rechazado
-  ef_mensajeErrorSFC:       string; // FLD-043 · Mensaje literal devuelto por SmartSupervision
-  ef_numeroIntento:         string; // FLD-044 · Intento N.° actual (M1/M2)
-  ef_fechaRechazo:          string; // FLD-045 · Fecha/hora del rechazo (timestamp del log)
+  qd_codigoErrorSFC:        string; // FLD-040 · Código HTTP + código funcional devuelto por SFC
+  qd_campoAfectado:         string; // FLD-041 · Nombre exacto del campo rechazado
+  qd_valorRechazado:        string; // FLD-042 · Valor enviado y rechazado
+  qd_mensajeErrorSFC:       string; // FLD-043 · Mensaje literal devuelto por SmartSupervision
+  qd_numeroIntentoM1M2:         string; // FLD-044 · Intento N.° actual (M1/M2)
+  qd_fechaRechazo:          string; // FLD-045 · Fecha/hora del rechazo (timestamp del log)
 
   // ── S2 Campo a Corregir (editable por el Gestor de Experiencia) ──
-  ef_campoCorreccion:       string; // FLD-046 · Corrección del campo señalado (obligatorio)
-  ef_justificacionCorreccion: string; // FLD-047 · Justificación de la corrección (opcional)
+  qd_campoCorreccion:       string; // FLD-046 · Corrección del campo señalado (obligatorio)
+  qd_justificacionCorreccion: string; // FLD-047 · Justificación de la corrección (opcional)
 
   // ── S3 Historial de Intentos (solo lectura) ──
-  ef_historialIntentos:     IntentoHistorial[]; // FLD-048 · Tabla de intentos anteriores
+  qd_historialIntentos:     IntentoHistorial[]; // FLD-048 · Tabla de intentos anteriores
 
   // ── Metadato de flujo (no visible) ──
-  ef_accion:                AccionErrorFuncional; // acción/decisión BPMN seleccionada
+  qd_accion:                AccionErrorFuncional; // acción/decisión BPMN seleccionada
 }
 
 // Valores por defecto para campos controlados por el formulario.
 export const DEFAULTS: Partial<CorreccionErrorFuncionalFormData> = {
-  ef_campoCorreccion: '',
-  ef_justificacionCorreccion: '',
-  ef_historialIntentos: [],
-  ef_accion: 'CORREGIR_REENVIAR',
+  qd_campoCorreccion: '',
+  qd_justificacionCorreccion: '',
+  qd_historialIntentos: [],
+  qd_accion: 'CORREGIR_REENVIAR',
 };

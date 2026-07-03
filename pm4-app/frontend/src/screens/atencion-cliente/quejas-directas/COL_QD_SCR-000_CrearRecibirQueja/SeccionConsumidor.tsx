@@ -55,15 +55,15 @@ export default function SeccionConsumidor({ form }: Props) {
 
   // RUL-000-09 — al cambiar el departamento se limpia y deshabilita la ciudad.
   useEffect(() => {
-    setValue('qd_ciudad', '');
+    setValue('qd_municipio', '');
   }, [w.qd_departamento, setValue]);
 
   // RUL-000-10 — país por ahora en read-only y fijado en Colombia (170)
   useEffect(() => {
-    if (LOCK_COUNTRY && w.qd_pais !== DEFAULT_COUNTRY_CODE) {
-      setValue('qd_pais', DEFAULT_COUNTRY_CODE);
+    if (LOCK_COUNTRY && w.qd_codigoPais !== DEFAULT_COUNTRY_CODE) {
+      setValue('qd_codigoPais', DEFAULT_COUNTRY_CODE);
     }
-  }, [w.qd_pais, setValue]);
+  }, [w.qd_codigoPais, setValue]);
 
   const err = (name: keyof CrearRecibirQuejaFormData) => errors[name]?.message;
 
@@ -130,20 +130,20 @@ export default function SeccionConsumidor({ form }: Props) {
           </div>
           <div className="form-row cols-2">
             <ZdsInput
-              name="qd_contactoNombres"
+              name="qd_nombresContacto"
               control={control}
               label="Nombres de la persona de contacto"
               rules={{ required: 'Campo requerido', pattern: { value: /^[A-Za-zÀ-ÿ\s]+$/, message: 'Solo letras' } }}
               required
-              error={err('qd_contactoNombres')}
+              error={err('qd_nombresContacto')}
             />
             <ZdsInput
-              name="qd_contactoApellidos"
+              name="qd_apellidosContacto"
               control={control}
               label="Apellidos de la persona de contacto"
               rules={{ required: 'Campo requerido', pattern: { value: /^[A-Za-zÀ-ÿ\s]+$/, message: 'Solo letras' } }}
               required
-              error={err('qd_contactoApellidos')}
+              error={err('qd_apellidosContacto')}
             />
           </div>
         </>
@@ -151,13 +151,13 @@ export default function SeccionConsumidor({ form }: Props) {
 
       <div className="form-row cols-3">
         <ZdsInput
-          name="qd_celular"
+          name="qd_telefono"
           control={control}
           label="Celular"
           inputType="tel"
           rules={{ required: 'Campo requerido', pattern: { value: /^\d{10}$/, message: 'Debe contener exactamente 10 dígitos (MSG-000-01)' } }}
           required
-          error={err('qd_celular')}
+          error={err('qd_telefono')}
         />
         <ZdsInput
           name="qd_correoElectronico"
@@ -179,14 +179,14 @@ export default function SeccionConsumidor({ form }: Props) {
 
       <div className="form-row cols-3">
         <ZdsSelect
-          name="qd_pais"
+          name="qd_codigoPais"
           control={control}
           label="País"
           options={paisOpts}
           rules={{ required: 'Campo requerido' }}
           required
           disabled={LOCK_COUNTRY}
-          error={err('qd_pais')}
+          error={err('qd_codigoPais')}
         />
         <ZdsSelect
           name="qd_departamento"
@@ -199,7 +199,7 @@ export default function SeccionConsumidor({ form }: Props) {
           error={err('qd_departamento')}
         />
         <ZdsSelect
-          name="qd_ciudad"
+          name="qd_municipio"
           control={control}
           label="Ciudad"
           options={ciudadOpts}
@@ -208,7 +208,7 @@ export default function SeccionConsumidor({ form }: Props) {
           disabled={!w.qd_departamento}
           withSearch
           placeholder={w.qd_departamento ? 'Seleccione ciudad...' : 'Seleccione primero el departamento'}
-          error={err('qd_ciudad')}
+          error={err('qd_municipio')}
         />
       </div>
 

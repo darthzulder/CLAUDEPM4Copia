@@ -17,14 +17,14 @@ export default function SeccionDetalleQueja({ form, fileRegistry }: Props) {
   const w = watch();
 
   const { options: seguroOpts } = useCollection(COLLECTION_DEFS.seguro);
-  const { options: detalleProductoOpts } = useCollection(COLLECTION_DEFS.detalleProducto, { qd_seguro: w.qd_seguro });
+  const { options: detalleProductoOpts } = useCollection(COLLECTION_DEFS.detalleProducto, { qd_productoSFC: w.qd_productoSFC });
   const { options: motivoOpts } = useCollection(COLLECTION_DEFS.motivo);
   const { options: admisionOpts } = useCollection(COLLECTION_DEFS.admision);
   const { options: enteOpts } = useCollection(COLLECTION_DEFS.ente);
   const { options: tutelaOpts } = useCollection(COLLECTION_DEFS.tutela);
   const { options: quejaExpresOpts } = useCollection(COLLECTION_DEFS.quejaExpres);
 
-  const esDefensor = w.qd_rol === 'DEFENSOR';
+  const esDefensor = w.qd_rolRadicador === 'DEFENSOR';
 
   // FLD-327 — escalamiento al Defensor computado (back): Defensor → "Sí".
   useEffect(() => {
@@ -70,14 +70,14 @@ export default function SeccionDetalleQueja({ form, fileRegistry }: Props) {
     <FormSection title="Detalle de la Queja">
       <div className="form-row cols-2">
         <ZdsSelect
-          name="qd_seguro"
+          name="qd_productoSFC"
           control={control}
           label="Selecciona el seguro"
           options={seguroOpts}
           rules={{ required: 'Campo requerido' }}
           required
           withSearch
-          error={err('qd_seguro')}
+          error={err('qd_productoSFC')}
         />
         <ZdsInput
           name="qd_detalleProducto"
@@ -122,20 +122,20 @@ export default function SeccionDetalleQueja({ form, fileRegistry }: Props) {
 
       <div className="form-row cols-1">
         <ZdsSelect
-          name="qd_motivo"
+          name="qd_motivoSFC"
           control={control}
           label="Cuéntanos el motivo"
           options={motivoOpts}
           rules={{ required: 'Campo requerido' }}
           required
           withSearch
-          error={err('qd_motivo')}
+          error={err('qd_motivoSFC')}
         />
       </div>
 
       <div className="form-row cols-1">
         <ZdsTextarea
-          name="qd_detalle"
+          name="qd_textoQueja"
           control={control}
           label="Ingresa el detalle"
           rules={{
@@ -145,7 +145,7 @@ export default function SeccionDetalleQueja({ form, fileRegistry }: Props) {
           }}
           required
           maxLength={2000}
-          error={err('qd_detalle')}
+          error={err('qd_textoQueja')}
         />
       </div>
 

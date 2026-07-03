@@ -37,6 +37,10 @@ export default function DetalleReasignacionRespuesta() {
   const sla = Number.parseInt(w.qd_slaRestante ?? '', 10);
   const slaCritico = Number.isFinite(sla) && sla <= SLA_UMBRAL_PRORROGA;
 
+  // Datos del consumidor derivados de los campos granulares producidos por SCR-000.
+  const nombre = (w.qd_razonSocial || `${w.qd_nombres ?? ''} ${w.qd_apellidos ?? ''}`).trim();
+  const identificacion = `${w.qd_tipoIdentificacion ?? ''} ${w.qd_numeroIdentificacion ?? ''}`.trim();
+
   const uploadFiles = async (requestId: number) => {
     for (const [docKey, file] of fileRegistry.current.entries()) {
       const fd = new FormData();
@@ -97,7 +101,7 @@ export default function DetalleReasignacionRespuesta() {
         )}
 
         <form onSubmit={onEnviar} noValidate>
-          <SeccionDetalleCaso control={control} estado={w.qd_estadoSS || ''} />
+          <SeccionDetalleCaso control={control} estado={w.qd_estadoSS || ''} nombre={nombre} identificacion={identificacion} />
           <SeccionAsignacion form={form} err={err} onConfirmarReasignacion={onReasignarQueja} onSolicitarAyuda={onSolicitarAyuda} submitting={submitting} />
           <SeccionRespuesta
             form={form} fileRegistry={fileRegistry} err={err}
@@ -138,7 +142,7 @@ export default function DetalleReasignacionRespuesta() {
             Expediente del caso
           </h3>
           <p className="subsection-note">
-            {w.qd_nombreConsumidor} · {w.qd_identificacion} · {w.qd_productoSFC} · {w.qd_motivoSFC}
+            {nombre} · {identificacion} · {w.qd_productoSFC} · {w.qd_motivoSFC}
           </p>
           <p style={{ font: 'var(--zf-cap-14)' }}>{w.qd_textoQueja || 'Sin descripción.'}</p>
           <div z-flex="75" z-align="right:center" style={{ marginTop: 'var(--zs-100)' }}>
@@ -153,7 +157,7 @@ export default function DetalleReasignacionRespuesta() {
           <h3 style={{ margin: '0 0 var(--zs-75)', font: 'var(--zf-h-20--700)', color: 'var(--z-text)' }}>
             Vista previa — carta de respuesta final
           </h3>
-          <p className="subsection-note">Destinatario: {w.qd_nombreConsumidor} ({w.qd_correoElectronico})</p>
+          <p className="subsection-note">Destinatario: {nombre} ({w.qd_correoElectronico})</p>
           <p style={{ font: 'var(--zf-cap-14)', whiteSpace: 'pre-wrap' }}>
             {w.qd_respuestaCliente || 'Aún no se ha redactado la respuesta al cliente.'}
           </p>

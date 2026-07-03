@@ -36,6 +36,10 @@ export default function RespuestaAreaResponsable() {
   // RUL-0052-01 (🔴 BLOQUEA): el comentario es obligatorio para enviar.
   const puedeEnviar = !!w.qd_comentarioArea?.trim();
 
+  // Datos del consumidor derivados de los campos granulares producidos por SCR-000.
+  const nombre = (w.qd_razonSocial || `${w.qd_nombres ?? ''} ${w.qd_apellidos ?? ''}`).trim();
+  const identificacion = `${w.qd_tipoIdentificacion ?? ''} ${w.qd_numeroIdentificacion ?? ''}`.trim();
+
   const uploadFiles = async (requestId: number) => {
     for (const [docKey, file] of fileRegistry.current.entries()) {
       const fd = new FormData();
@@ -84,8 +88,14 @@ export default function RespuestaAreaResponsable() {
           {/* ── S1 · Datos del Consumidor (SEC-059, solo lectura) ── */}
           <FormSection title="Datos del Consumidor">
             <div className="form-row cols-2">
-              <ZdsInput name="qd_nombreConsumidor" control={control} label="Nombre del Consumidor" readOnly />
-              <ZdsInput name="qd_identificacion" control={control} label="Tipo y N.° de Identificación" readOnly />
+              <div className="zds-field-wrap">
+                <span className="info-bar-label">Nombre del Consumidor</span>
+                <div className="info-bar-value" style={{ marginTop: 'var(--zs-50)' }}>{nombre || '—'}</div>
+              </div>
+              <div className="zds-field-wrap">
+                <span className="info-bar-label">Tipo y N.° de Identificación</span>
+                <div className="info-bar-value" style={{ marginTop: 'var(--zs-50)' }}>{identificacion || '—'}</div>
+              </div>
             </div>
             <div className="form-row cols-2">
               <ZdsInput name="qd_correoElectronico" control={control} label="Correo Electrónico" readOnly
@@ -102,7 +112,7 @@ export default function RespuestaAreaResponsable() {
               <ZdsInput name="qd_motivoSFC" control={control} label="Motivo SFC" readOnly />
             </div>
             <div className="form-row cols-3">
-              <ZdsInput name="qd_instanciaPunto" control={control} label="Instancia / Punto de Recepción" readOnly />
+              <ZdsInput name="qd_instanciaRecepcion" control={control} label="Instancia de Recepción" readOnly />
               <ZdsInput name="qd_admision" control={control} label="Admisión" readOnly />
               <ZdsInput name="qd_enteControl" control={control} label="Ente de Control" readOnly />
             </div>
@@ -111,7 +121,7 @@ export default function RespuestaAreaResponsable() {
           {/* ── S3 · Descripción de la Queja (SEC-061, solo lectura) ── */}
           <FormSection title="Descripción de la Queja">
             <div className="form-row cols-1">
-              <ZdsInput name="qd_resumen" control={control} label="Asunto de la Queja" readOnly />
+              <ZdsInput name="qd_motivoSFC" control={control} label="Asunto de la Queja" readOnly />
             </div>
             <div className="form-row cols-1">
               <ZdsTextarea name="qd_textoQueja" control={control} label="Descripción / Texto de la Queja" readOnly />
@@ -121,9 +131,9 @@ export default function RespuestaAreaResponsable() {
           {/* ── S4 · Datos de la Asignación (SEC-057, solo lectura) ── */}
           <FormSection title="Datos de la Asignación">
             <div className="form-row cols-2">
-              <ZdsInput name="qd_areaAsignada" control={control} label="Área" readOnly
+              <ZdsInput name="qd_areaResponsable" control={control} label="Área" readOnly
                 helpText="Área responsable asignada al caso." />
-              <ZdsInput name="qd_responsableAsignado" control={control} label="Responsable" readOnly
+              <ZdsInput name="qd_usuarioResponsable" control={control} label="Responsable" readOnly
                 helpText="Usuario asignado para gestionar el caso." />
             </div>
             <div className="form-row cols-1">

@@ -78,23 +78,26 @@ export const ADJUNTO_KEYS = [
 // Tipo del formulario — SCR-0051
 // ---------------------------------------------------------------------------
 export interface DetalleReasignacionRespuestaFormData {
-  // ── S1 Datos del Consumidor (solo lectura) ──
-  qd_nombreConsumidor: string;   // FLD-066
-  qd_identificacion:   string;   // FLD-067
-  qd_correoElectronico: string;  // FLD-068
-  qd_tipoPersona:      string;   // FLD-069
+  // ── S1 Datos del Consumidor (solo lectura, granulares desde SCR-000) ──
+  qd_nombres:              string; // FLD-308 (persona natural)
+  qd_apellidos:            string; // FLD-309 (persona natural)
+  qd_razonSocial:          string; // FLD-310 (persona jurídica)
+  qd_tipoIdentificacion:   string; // FLD-306
+  qd_numeroIdentificacion: string; // FLD-307
+  qd_correoElectronico:    string; // FLD-068
+  qd_tipoPersona:          string; // FLD-069
 
   // ── S2 Clasificación Regulatoria (precargada M1, solo lectura) ──
   qd_canal:          string; // FLD-070
   qd_productoSFC:    string; // FLD-071
   qd_motivoSFC:      string; // FLD-072
-  qd_instanciaPunto: string; // FLD-073
+  qd_instanciaRecepcion: string; // FLD-305
+  qd_puntoRecepcion:     string; // FLD-304
   qd_admision:       string; // FLD-074
   qd_enteControl:    string; // FLD-075
 
   // ── S3 Descripción de la Queja (solo lectura) ──
-  qd_resumen:   string; // FLD-076 (Asunto)
-  qd_textoQueja: string; // FLD-077
+  qd_textoQueja: string; // FLD-077 (el "Asunto de la Queja" se muestra con qd_motivoSFC)
 
   // ── S4 Estado SmartSupervision (solo lectura) ──
   qd_estadoSS:        string; // FLD-079 (badge)

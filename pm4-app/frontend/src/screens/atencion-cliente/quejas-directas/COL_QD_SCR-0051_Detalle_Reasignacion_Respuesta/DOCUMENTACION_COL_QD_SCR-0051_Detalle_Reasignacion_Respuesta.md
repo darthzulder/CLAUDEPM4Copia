@@ -54,8 +54,8 @@ borrador y solicitar prórroga regulatoria cuando el SLA es crítico.
 
 | Campo (UI) | Variable | Tipo | Obligatorio | Fuente |
 |---|---|---|---|---|
-| Nombre del Consumidor | `qd_nombreConsumidor` | `ZdsInput` readOnly | No | Anexo02 > SCR-0051 > FLD-066 |
-| Tipo y N.° de Identificación | `qd_identificacion` | `ZdsInput` readOnly | No | Anexo02 > SCR-0051 > FLD-067 |
+| Nombre del Consumidor | (derivado de `qd_nombres` + `qd_apellidos` / `qd_razonSocial`) | `ZdsInput` readOnly | No | Anexo02 > SCR-0051 > FLD-066 |
+| Tipo y N.° de Identificación | (derivado de `qd_tipoIdentificacion` + `qd_numeroIdentificacion`) | `ZdsInput` readOnly | No | Anexo02 > SCR-0051 > FLD-067 |
 | Correo Electrónico | `qd_correoElectronico` | `ZdsInput` readOnly | No | Anexo02 > SCR-0051 > FLD-068 |
 | Tipo de Persona | `qd_tipoPersona` | `ZdsInput` readOnly | No | Anexo02 > SCR-0051 > FLD-069 |
 
@@ -66,7 +66,7 @@ borrador y solicitar prórroga regulatoria cuando el SLA es crítico.
 | Canal de Recepción | `qd_canal` | `ZdsInput` readOnly | FLD-070 |
 | Producto SFC | `qd_productoSFC` | `ZdsInput` readOnly | FLD-071 |
 | Motivo SFC | `qd_motivoSFC` | `ZdsInput` readOnly | FLD-072 |
-| Instancia / Punto de Recepción | `qd_instanciaPunto` | `ZdsInput` readOnly | FLD-073 |
+| Instancia / Punto de Recepción | `qd_instanciaRecepcion` | `ZdsInput` readOnly | FLD-073 |
 | Admisión | `qd_admision` | `ZdsInput` readOnly | FLD-074 |
 | Ente de Control | `qd_enteControl` | `ZdsInput` readOnly | FLD-075 |
 
@@ -74,7 +74,7 @@ borrador y solicitar prórroga regulatoria cuando el SLA es crítico.
 
 | Campo (UI) | Variable | Tipo | Fuente |
 |---|---|---|---|
-| Asunto de la Queja | `qd_resumen` | `ZdsInput` readOnly | FLD-076 |
+| Asunto de la Queja | `qd_motivoSFC` | `ZdsInput` readOnly | FLD-076 |
 | Descripción / Texto de la Queja | `qd_textoQueja` | `ZdsTextarea` readOnly | FLD-077 |
 
 ### S4 — Estado SmartSupervision (SEC-050, solo lectura)

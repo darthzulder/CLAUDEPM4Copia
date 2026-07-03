@@ -15,11 +15,11 @@ export default function CierreM3() {
 
   const { control, watch, handleSubmit, reset, setValue, setError, clearErrors, formState: { errors, isSubmitted } } = useForm<CierreM3FormData>({
     defaultValues: {
-      estadoCierreM3: '', intentosCierreM3: '0', ultimoError: '',
-      codigoSFC: '', estadoQueja: '', fechaActualizacion: '', fechaCierre: '',
-      favorabilidad: '', aceptacion: '', marcacion: '', quejaExpres: '',
-      pdfRespuestaFinal: '', adjuntoRespuestaFinal: '',
-      relacionadaFraude: '', tipoFraude: '', montoReclamado: '', montoReconocido: '',
+      qd_estadoCierreM3: '', qd_intentosCierreM3: '0', qd_ultimoError: '',
+      qd_codigoSFC: '', qd_estadoQueja: '', qd_fechaActualizacion: '', qd_fechaCierre: '',
+      qd_favorabilidad: '', qd_aceptacion: '', qd_marcacion: '', qd_quejaExpres: '',
+      qd_pdfRespuestaFinal: '', qd_validacionNomenclatura: '', qd_adjuntoRespuestaFinal: '',
+      qd_relacionadaFraude: '', qd_tipoFraude: '', qd_montoReclamado: '', qd_montoReconocido: '',
     },
   });
 
@@ -37,18 +37,18 @@ export default function CierreM3() {
   }, [task, reset]);
 
   // RUL-010-01: fechaActualizacion debe coincidir con fechaCierre
-  const fechasCoinciden = !w.fechaActualizacion || !w.fechaCierre || w.fechaActualizacion === w.fechaCierre;
+  const fechasCoinciden = !w.qd_fechaActualizacion || !w.qd_fechaCierre || w.qd_fechaActualizacion === w.qd_fechaCierre;
   // RUL-010-02: PDF con nomenclatura correcta si se adjunta
-  const pdfValido = !w.pdfRespuestaFinal || REGEX_NOMENCLATURA_PDF.test(w.pdfRespuestaFinal);
+  const pdfValido = !w.qd_pdfRespuestaFinal || REGEX_NOMENCLATURA_PDF.test(w.qd_pdfRespuestaFinal);
   // RUL-010-03: todos los obligatorios completos + reglas anteriores
   const camposObligatorios: (keyof CierreM3FormData)[] = [
-    'codigoSFC', 'estadoQueja', 'fechaActualizacion', 'fechaCierre',
-    'favorabilidad', 'aceptacion', 'marcacion', 'quejaExpres', 'adjuntoRespuestaFinal',
+    'qd_codigoSFC', 'qd_estadoQueja', 'qd_fechaActualizacion', 'qd_fechaCierre',
+    'qd_favorabilidad', 'qd_aceptacion', 'qd_marcacion', 'qd_quejaExpres', 'qd_adjuntoRespuestaFinal',
   ];
   const todosCompletos = camposObligatorios.every(c => !!w[c]);
   const puedeEnviar = fechasCoinciden && pdfValido && todosCompletos;
 
-  const esRechazado = w.estadoCierreM3 === 'Rechazado (400)';
+  const esRechazado = w.qd_estadoCierreM3 === 'Rechazado (400)';
 
   const err = (name: keyof CierreM3FormData) => {
     const e = errors[name];
@@ -108,18 +108,18 @@ export default function CierreM3() {
         {/* Sección 1 — Estado del envío a SFC */}
         <FormSection title="Estado del Envío a SmartSupervision (SFC)">
           <SeccionEstadoCierre
-            estadoCierreM3={w.estadoCierreM3}
-            intentosCierreM3={w.intentosCierreM3}
-            ultimoError={w.ultimoError}
+            estadoCierreM3={w.qd_estadoCierreM3}
+            intentosCierreM3={w.qd_intentosCierreM3}
+            ultimoError={w.qd_ultimoError}
           />
           <div className="form-row cols-1">
             <ZdsInput
-              name="codigoSFC"
+              name="qd_codigoSFC"
               control={control}
               label="Código SFC / Número de Radicado"
               rules={{ required: 'Campo requerido', maxLength: { value: 100, message: 'Máximo 100 caracteres' } }}
               required
-              error={err('codigoSFC')}
+              error={err('qd_codigoSFC')}
             />
           </div>
           {esRechazado && (
@@ -133,32 +133,32 @@ export default function CierreM3() {
         <FormSection title="Datos de Cierre Regulatorio">
           <div className="form-row cols-1">
             <ZdsSelect
-              name="estadoQueja"
+              name="qd_estadoQueja"
               control={control}
               label="Estado de la Queja"
               options={estadoQuejaOpts}
               rules={{ required: 'Campo requerido' }}
               required
-              error={err('estadoQueja')}
+              error={err('qd_estadoQueja')}
             />
           </div>
 
           <div className="form-row cols-2">
             <ZdsDate
-              name="fechaActualizacion"
+              name="qd_fechaActualizacion"
               control={control}
               label="Fecha de Actualización"
               rules={{ required: 'Campo requerido' }}
               required
-              error={err('fechaActualizacion')}
+              error={err('qd_fechaActualizacion')}
             />
             <ZdsDate
-              name="fechaCierre"
+              name="qd_fechaCierre"
               control={control}
               label="Fecha de Cierre"
               rules={{ required: 'Campo requerido' }}
               required
-              error={err('fechaCierre')}
+              error={err('qd_fechaCierre')}
             />
           </div>
 
@@ -170,43 +170,43 @@ export default function CierreM3() {
 
           <div className="form-row cols-2">
             <ZdsSelect
-              name="favorabilidad"
+              name="qd_favorabilidad"
               control={control}
               label="Favorabilidad"
               options={favorabilidadOpts}
               rules={{ required: 'Campo requerido' }}
               required
-              error={err('favorabilidad')}
+              error={err('qd_favorabilidad')}
             />
             <ZdsSelect
-              name="aceptacion"
+              name="qd_aceptacion"
               control={control}
               label="Aceptación"
               options={aceptacionOpts}
               rules={{ required: 'Campo requerido' }}
               required
-              error={err('aceptacion')}
+              error={err('qd_aceptacion')}
             />
           </div>
 
           <div className="form-row cols-2">
             <ZdsSelect
-              name="marcacion"
+              name="qd_marcacion"
               control={control}
               label="Marcación"
               options={marcacionOpts}
               rules={{ required: 'Campo requerido' }}
               required
-              error={err('marcacion')}
+              error={err('qd_marcacion')}
             />
             <ZdsSelect
-              name="quejaExpres"
+              name="qd_quejaExpres"
               control={control}
               label="Queja Exprés"
               options={quejaExpresOpts}
               rules={{ required: 'Campo requerido' }}
               required
-              error={err('quejaExpres')}
+              error={err('qd_quejaExpres')}
             />
           </div>
         </FormSection>
@@ -215,21 +215,21 @@ export default function CierreM3() {
         <FormSection title="Adjunto Respuesta Final al Consumidor">
           <div className="form-row cols-1">
             <ZdsRadio
-              name="adjuntoRespuestaFinal"
+              name="qd_adjuntoRespuestaFinal"
               control={control}
               label="¿Se adjunta PDF de respuesta final?"
               options={OPTIONS.adjuntoRespuestaFinal}
               rules={{ required: 'Campo requerido' }}
               required
-              error={err('adjuntoRespuestaFinal')}
+              error={err('qd_adjuntoRespuestaFinal')}
             />
           </div>
 
-          {w.adjuntoRespuestaFinal === 'SI' && (
+          {w.qd_adjuntoRespuestaFinal === 'SI' && (
             <div className="form-row cols-1">
               <ZdsFileInput
                 control={control}
-                name="pdfRespuestaFinal"
+                name="qd_pdfRespuestaFinal"
                 label="PDF Respuesta Final"
                 fileRegistry={fileRegistry}
                 setValue={setValue}
@@ -239,10 +239,10 @@ export default function CierreM3() {
                 maxSizeMb={5}
                 errorMessage="Solo se permiten archivos PDF, máx 5 MB"
               />
-              {w.pdfRespuestaFinal && (
+              {w.qd_pdfRespuestaFinal && (
                 <p className={`cierre-m3--form-helper ${pdfValido ? 'cierre-m3--validacion-ok' : 'cierre-m3--validacion-error'}`}>
                   {pdfValido
-                    ? `✓ Nomenclatura correcta: ${w.pdfRespuestaFinal}`
+                    ? `✓ Nomenclatura correcta: ${w.qd_pdfRespuestaFinal}`
                     : `✗ Nomenclatura inválida. Formato esperado: ENTIDAD_NRO_RESP_FINAL_SFC_NNNNN.pdf`}
                 </p>
               )}
@@ -254,42 +254,42 @@ export default function CierreM3() {
         <FormSection title="Datos de Fraude">
           <div className="form-row cols-1">
             <ZdsRadio
-              name="relacionadaFraude"
+              name="qd_relacionadaFraude"
               control={control}
               label="¿Queja relacionada con fraude?"
               options={OPTIONS.siNo}
-              error={err('relacionadaFraude')}
+              error={err('qd_relacionadaFraude')}
             />
           </div>
 
-          {w.relacionadaFraude === 'SI' && (
+          {w.qd_relacionadaFraude === 'SI' && (
             <>
               <div className="form-row cols-1">
                 <ZdsSelect
-                  name="tipoFraude"
+                  name="qd_tipoFraude"
                   control={control}
                   label="Tipo de Fraude"
                   options={tipoFraudeOpts}
                   rules={{ required: 'Campo requerido' }}
                   required
-                  error={err('tipoFraude')}
+                  error={err('qd_tipoFraude')}
                 />
               </div>
               <div className="form-row cols-2">
                 <ZdsInput
-                  name="montoReclamado"
+                  name="qd_montoReclamado"
                   control={control}
                   label="Monto Reclamado (COP)"
                   rules={{ required: 'Campo requerido', pattern: { value: /^\d+(\.\d{1,2})?$/, message: 'Solo números (ej: 1500000)' } }}
                   required
-                  error={err('montoReclamado')}
+                  error={err('qd_montoReclamado')}
                 />
                 <ZdsInput
-                  name="montoReconocido"
+                  name="qd_montoReconocido"
                   control={control}
                   label="Monto Reconocido (COP)"
                   rules={{ pattern: { value: /^\d+(\.\d{1,2})?$/, message: 'Solo números (ej: 1500000)' } }}
-                  error={err('montoReconocido')}
+                  error={err('qd_montoReconocido')}
                 />
               </div>
             </>

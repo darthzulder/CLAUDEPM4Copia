@@ -48,10 +48,10 @@ export default function CrearRecibirQueja() {
   // resueltos desde CAT-INSTANCIA / CAT-PUNTO.
   useEffect(() => {
     if (instanciaOpts.length === 0) return;
-    const esDefensor = w.qd_rol === 'DEFENSOR';
+    const esDefensor = w.qd_rolRadicador === 'DEFENSOR';
     const instancia = instanciaOpts.find((o) => (esDefensor ? /defensor/i : /entidad vigilada/i).test(o.label));
     if (instancia) form.setValue('qd_instanciaRecepcion', instancia.label);
-  }, [w.qd_rol, instanciaOpts, form]);
+  }, [w.qd_rolRadicador, instanciaOpts, form]);
 
   useEffect(() => {
     if (w.qd_puntoRecepcion || puntoRecepcionOpts.length === 0) return;
@@ -126,7 +126,7 @@ export default function CrearRecibirQueja() {
   const err = (name: keyof CrearRecibirQuejaFormData) => errors[name]?.message;
   const puedeEnviar = !!w.qd_autorizacionDatos && !!w.qd_captcha;
   const tieneEstadoSFC = !!w.qd_estadoSmartSupervision || !!w.qd_fechaRadicacionSFC;
-  const tieneResponsable = !!w.qd_rolGrupo || !!w.qd_responsable;
+  const tieneResponsable = !!w.qd_rolResponsable || !!w.qd_responsable;
 
   return (
     <div className="screen-wrapper">
@@ -149,18 +149,18 @@ export default function CrearRecibirQueja() {
               acepta el tratamiento de datos y valida el captcha para presionar <strong>Enviar PQRS</strong>.
             </ZrAlert>
             <div className="form-row cols-2">
-              <ZdsInput name="qd_numeroCaso" control={control} label="Número de Caso (ID BPM)" readOnly
+              <ZdsInput name="qd_idCasoBPM" control={control} label="Número de Caso (ID BPM)" readOnly
                 helpText="Se asigna automáticamente al radicar." />
-              <ZdsInput name="qd_fechaHoraCreacion" control={control} label="Fecha y Hora de Creación" readOnly
+              <ZdsInput name="qd_fechaCreacion" control={control} label="Fecha y Hora de Creación" readOnly
                 helpText="Timestamp automático del sistema." />
             </div>
             <div className="form-row cols-2">
               <ZdsSelect name="qd_tipoSolicitud" control={control} label="¿A qué está asociado tu comentario?"
                 options={tipoSolicitudOpts} rules={{ required: 'Campo requerido' }} required
                 error={err('qd_tipoSolicitud')} />
-              <ZdsSelect name="qd_rol" control={control} label="Selecciona tu rol"
+              <ZdsSelect name="qd_rolRadicador" control={control} label="Selecciona tu rol"
                 options={rolOpts} rules={{ required: 'Campo requerido' }} required
-                error={err('qd_rol')} />
+                error={err('qd_rolRadicador')} />
             </div>
             <div className="form-row cols-2">
               <ZdsInput name="qd_puntoRecepcion" control={control} label="Punto de Recepción" readOnly
@@ -229,7 +229,7 @@ export default function CrearRecibirQueja() {
           {tieneResponsable && (
             <FormSection title="Responsable Asignado">
               <div className="form-row cols-2">
-                <ZdsInput name="qd_rolGrupo" control={control} label="Rol (Grupo)" readOnly />
+                <ZdsInput name="qd_rolResponsable" control={control} label="Rol (Grupo)" readOnly />
                 <ZdsInput name="qd_responsable" control={control} label="Responsable" readOnly />
               </div>
             </FormSection>

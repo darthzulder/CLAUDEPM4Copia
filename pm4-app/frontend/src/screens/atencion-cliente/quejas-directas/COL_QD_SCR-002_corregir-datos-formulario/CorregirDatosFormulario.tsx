@@ -92,7 +92,7 @@ export default function CorregirDatosFormulario() {
 
       <div className="screen-content">
         <InfoBar items={[
-          { label: 'Caso',              value: w.qd_numeroCaso || '—' },
+          { label: 'Caso',              value: w.qd_idCasoBPM || '—' },
           { label: 'SLA Restante',      value: w.qd_slaRestante || '—' },
           { label: 'Estado',            value: 'En corrección preventiva' },
           { label: 'Errores pendientes', value: `${pendingErrors} de ${camposConError.length}` },
@@ -115,8 +115,8 @@ export default function CorregirDatosFormulario() {
           {/* Datos del Caso — solo lectura */}
           <FormSection title="Datos del Caso">
             <div className="form-row cols-3">
-              <ZdsInput name="qd_numeroCaso"     control={control} label="Número de Caso"      readOnly />
-              <ZdsInput name="qd_canalRecepcion" control={control} label="Canal de Recepción"  readOnly />
+              <ZdsInput name="qd_idCasoBPM"      control={control} label="Número de Caso"      readOnly />
+              <ZdsInput name="qd_canal"          control={control} label="Canal de Recepción"  readOnly />
               <ZdsInput name="qd_slaRestante"    control={control} label="SLA Restante"         readOnly />
             </div>
           </FormSection>
