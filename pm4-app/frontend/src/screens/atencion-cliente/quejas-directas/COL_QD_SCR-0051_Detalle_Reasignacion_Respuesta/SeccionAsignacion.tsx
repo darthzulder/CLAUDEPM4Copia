@@ -183,7 +183,7 @@ export default function SeccionAsignacion({ form, err, onConfirmarReasignacion, 
                 <div z-flex="75" z-align="right:center" style={{ marginTop: 'var(--zs-75)' }}>
                   <ZrButton config="secondary"
                     disabled={!reasignacionCompleta || submitting} loading={submitting}
-                    onClick={onSolicitarAyuda}>
+                    onClick={() => { confirmarReasignacion(); onSolicitarAyuda(); }}>
                     Confirmar
                   </ZrButton>
                 </div>
