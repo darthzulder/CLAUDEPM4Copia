@@ -1,10 +1,11 @@
-import type { MutableRefObject } from 'react';
+import { useState, type MutableRefObject } from 'react';
 import type { UseFormReturn } from 'react-hook-form';
 import FormSection from '../../../../components/FormSection';
 import DocSupportUploader from '../../../../components/DocSupportUploader';
 import { ZdsSelect, ZdsTextarea, ZdsInput, ZrAlert, ZrButton } from '../../../../components/fields/ZdsFields';
+import { useCollection } from '../../../../core/useCollection';
 import {
-  OPTIONS, ADJUNTO_KEYS, MAX_SOPORTES,
+  OPTIONS, ADJUNTO_KEYS, MAX_SOPORTES, COLLECTION_DEFS,
   type DetalleReasignacionRespuestaFormData,
 } from './variables';
 
@@ -25,6 +26,11 @@ export default function SeccionRespuesta({ form, fileRegistry, err, onVistaPrevi
 
   // RUL-0051-09 — "Acciones Tomadas" visible solo si la respuesta es a favor del Cliente.
   const mostrarAcciones = w.qd_respuestaFavorDe === 'CLIENTE';
+
+  // ACT-0051-04 — flujo de prórroga en dos pasos: primero se elige el motivo, luego se envía.
+  const [modoProrroga, setModoProrroga] = useState(false);
+  const { options: motivoProrrogaOpts } = useCollection(COLLECTION_DEFS.motivoProrroga);
+  const puedeEnviarProrroga = !!w.qd_motivoProrroga;
 
   return (
     <>
@@ -92,15 +98,40 @@ export default function SeccionRespuesta({ form, fileRegistry, err, onVistaPrevi
           intro={`Cargue los documentos de soporte del análisis. Se pueden agregar hasta ${MAX_SOPORTES} archivos.`}
           max={MAX_SOPORTES}
         />
+        {/* ACT-0051-04 — al pedir prórroga se muestra el motivo (CAT-MOTIVO-PRORROGA); el
+            botón Enviar aparece recién con el motivo elegido y hace submit SOLICITAR_PRORROGA. */}
+        {modoProrroga && (
+          <div className="form-row cols-1" style={{ marginTop: 'var(--zs-75)' }}>
+            <ZdsSelect
+              name="qd_motivoProrroga" control={control} label="Motivo de la prórroga"
+              options={motivoProrrogaOpts} withSearch required
+              helpText="Catálogo CAT-MOTIVO-PRORROGA (motivo_prorr)."
+            />
+          </div>
+        )}
+
         <div z-flex="75" z-align="right:center" style={{ marginTop: 'var(--zs-75)' }}>
           <ZrButton config="secondary" onClick={onVistaPrevia}>
             Vista Previa Respuesta Final
           </ZrButton>
-          <ZrButton config="secondary"
-            disabled={!slaCritico || submitting} loading={submitting}
-            onClick={onSolicitarProrroga}>
-            Solicitar Prórroga Regulatoria
-          </ZrButton>
+          {!modoProrroga ? (
+            <ZrButton config="secondary"
+              disabled={!slaCritico || submitting}
+              onClick={() => setModoProrroga(true)}>
+              Solicitar Prórroga Regulatoria
+            </ZrButton>
+          ) : (
+            <>
+              <ZrButton config="secondary" disabled={submitting} onClick={() => setModoProrroga(false)}>
+                Cancelar
+              </ZrButton>
+              <ZrButton config="positive"
+                disabled={!puedeEnviarProrroga || submitting} loading={submitting}
+                onClick={onSolicitarProrroga}>
+                Enviar Prórroga ▶
+              </ZrButton>
+            </>
+          )}
         </div>
       </FormSection>
     </>

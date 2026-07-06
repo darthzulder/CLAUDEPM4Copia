@@ -38,6 +38,8 @@ export const COLLECTION_DEFS = {
   usuariosRole: GLOBAL_COLLECTIONS.qd_usuariosRole,
   // CAT-MOTIVO-REASIG. FLD-093.
   motivoReasignacion: GLOBAL_COLLECTIONS.qd_motivoReasignacion,
+  // CAT-MOTIVO-PRORROGA (motivo_prorr). ACT-0051-04.
+  motivoProrroga: GLOBAL_COLLECTIONS.qd_motivoProrroga,
 };
 
 // ---------------------------------------------------------------------------
@@ -145,6 +147,9 @@ export interface DetalleReasignacionRespuestaFormData {
   // ── S10 Configuración de Respuesta ──
   qd_respuestaFavorDe: string; // FLD-350 (req.)
 
+  // ── Solicitud de Prórroga (ACT-0051-04) ──
+  qd_motivoProrroga: string; // CAT-MOTIVO-PRORROGA (motivo_prorr)
+
   // ── Metadato de flujo (no visible) ──
   qd_accion: AccionFlujoCombinado;
 }
@@ -164,5 +169,6 @@ export const DEFAULTS: Partial<DetalleReasignacionRespuestaFormData> = {
   qd_respuestaCliente: '',
   qd_accionesTomadas: '',
   qd_respuestaFavorDe: '',
+  qd_motivoProrroga: '',
   qd_accion: 'ENVIAR',
 };

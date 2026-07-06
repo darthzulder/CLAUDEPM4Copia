@@ -84,10 +84,12 @@ export default function RespuestaAreaResponsable() {
       (pdata?._parent as { request_id?: number } | undefined)?.request_id;
     if (parentRequestId) {
       try {
-        const r = await pm4.get(`/requests/${parentRequestId}`);
+        // include=data es obligatorio: sin él PM4 no devuelve las variables del caso.
+        const r = await pm4.get(`/requests/${parentRequestId}`, { params: { include: 'data' } });
         const fresh = (r.data?.data ?? r.data ?? {}) as Record<string, unknown>;
         if (Array.isArray(fresh.qd_historialAsignaciones)) historial = [...fresh.qd_historialAsignaciones];
         if (Array.isArray(fresh.qd_respuestasAyuda)) respuestas = [...fresh.qd_respuestasAyuda];
+        console.log(`[RespuestaAreaResponsable] Historial padre (req ${parentRequestId}): ${historial.length} filas`, historial);
       } catch (e) {
         console.warn('[RespuestaAreaResponsable] No se pudo leer el request padre; se usa el snapshot local:', e);
       }
