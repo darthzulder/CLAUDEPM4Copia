@@ -12,3 +12,10 @@ services:
         sync: false
       - key: PM4_TOKEN
         sync: false
+      # reCAPTCHA v2. La site key es PÚBLICA (viaja en el HTML) → se puede commitear.
+      # Debe estar presente en BUILD para que Vite la inyecte (__RECAPTCHA_SITE_KEY__).
+      - key: VITE_RECAPTCHA_SITE_KEY
+        value: 6Le5LjItAAAAAPPr5YQM3dIey2zhH9WZVz9n75c9
+      # El secret es PRIVADO → cargar el valor en el dashboard de Render (no en el repo).
+      - key: RECAPTCHA_SECRET_KEY
+        sync: false

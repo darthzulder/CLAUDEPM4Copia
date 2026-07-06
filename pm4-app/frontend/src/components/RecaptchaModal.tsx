@@ -5,9 +5,14 @@ import { ZrModal, ZrButton, ZrAlert, ZrLoader } from './fields/ZdsFields';
 // del modal al abrirlo; cuando el usuario lo resuelve se dispara `onVerified(token)`.
 // El token debe verificarse server-side (backend /api/recaptcha/verify) antes de confiar.
 
-// Inyectada por Vite (define) desde VITE_RECAPTCHA_SITE_KEY del .env raíz.
+// La site key de reCAPTCHA v2 es PÚBLICA (viaja en el HTML de cualquier sitio que la use),
+// no es un secreto. Se toma de VITE_RECAPTCHA_SITE_KEY (inyectada por Vite como
+// __RECAPTCHA_SITE_KEY__), con fallback al valor conocido para que funcione aunque la
+// inyección por env falle (p.ej. dev server no reiniciado en el mount de Windows sin HMR).
+// El secret SÍ es privado y vive solo en el backend (RECAPTCHA_SECRET_KEY).
 declare const __RECAPTCHA_SITE_KEY__: string;
-const SITE_KEY = __RECAPTCHA_SITE_KEY__;
+const DEFAULT_SITE_KEY = '6Le5LjItAAAAAPPr5YQM3dIey2zhH9WZVz9n75c9';
+const SITE_KEY = (typeof __RECAPTCHA_SITE_KEY__ !== 'undefined' && __RECAPTCHA_SITE_KEY__) || DEFAULT_SITE_KEY;
 const SCRIPT_ID = 'google-recaptcha-api';
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -63,23 +68,39 @@ export default function RecaptchaModal({ open, onVerified, onClose }: Props) {
     // renderizar uno nuevo (en un contenedor visible) la próxima vez que se abra.
     if (!open) { widgetIdRef.current = null; return; }
 
-    if (!SITE_KEY) { setStatus('error'); return; }
+    if (!SITE_KEY) {
+      console.error(
+        '[recaptcha] site key vacía. Vite la inyecta como __RECAPTCHA_SITE_KEY__ en build time ' +
+        'desde VITE_RECAPTCHA_SITE_KEY (.env raíz de pm4-app). Verifica el .env y REINICIA/REBUILD ' +
+        'el frontend (docker restart no basta si el dev server no relee vite.config).',
+      );
+      setStatus('error');
+      return;
+    }
 
     let cancelled = false;
     setStatus('loading');
     loadRecaptcha()
       .then(() => {
         if (cancelled || !containerRef.current || widgetIdRef.current !== null) return;
-        widgetIdRef.current = window.grecaptcha.render(containerRef.current, {
-          sitekey: SITE_KEY,
-          callback: (token: string) => onVerifiedRef.current(token),
-          'expired-callback': () => {
-            if (widgetIdRef.current !== null) window.grecaptcha.reset(widgetIdRef.current);
-          },
-        });
-        setStatus('ready');
+        try {
+          widgetIdRef.current = window.grecaptcha.render(containerRef.current, {
+            sitekey: SITE_KEY,
+            callback: (token: string) => onVerifiedRef.current(token),
+            'expired-callback': () => {
+              if (widgetIdRef.current !== null) window.grecaptcha.reset(widgetIdRef.current);
+            },
+          });
+          setStatus('ready');
+        } catch (e) {
+          console.error('[recaptcha] grecaptcha.render() falló:', e);
+          if (!cancelled) setStatus('error');
+        }
       })
-      .catch(() => { if (!cancelled) setStatus('error'); });
+      .catch((e) => {
+        console.error('[recaptcha] no se pudo cargar api.js:', e);
+        if (!cancelled) setStatus('error');
+      });
 
     return () => { cancelled = true; };
   }, [open]);
@@ -95,15 +116,18 @@ export default function RecaptchaModal({ open, onVerified, onClose }: Props) {
         Confirma que no eres un robot para radicar tu solicitud.
       </p>
 
-      <div style={{ display: 'flex', justifyContent: 'center', minHeight: '78px' }}>
+      <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', minHeight: '78px' }}>
         {status === 'loading' && <ZrLoader />}
         {status === 'error' && (
           <ZrAlert config="negative" {...({ 'hide-close': true } as object)}>
-            No se pudo cargar la validación de seguridad. Verifica tu conexión e inténtalo de nuevo.
+            {!SITE_KEY
+              ? 'Falta configurar la clave del captcha (site key). Avisa al equipo técnico.'
+              : 'No se pudo cargar la validación de seguridad. Verifica tu conexión e inténtalo de nuevo.'}
           </ZrAlert>
         )}
-        {/* Google renderiza el checkbox dentro de este contenedor */}
-        <div ref={containerRef} style={{ display: status === 'ready' ? 'block' : 'none' }} />
+        {/* Google renderiza el checkbox dentro de este contenedor (siempre presente/visible;
+            renderizar en un contenedor display:none puede hacer fallar grecaptcha.render). */}
+        <div ref={containerRef} />
       </div>
 
       <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 'var(--zs-75)', marginTop: 'var(--zs-200)' }}>
