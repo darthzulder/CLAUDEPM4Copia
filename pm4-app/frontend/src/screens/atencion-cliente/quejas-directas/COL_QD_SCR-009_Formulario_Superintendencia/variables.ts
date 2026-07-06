@@ -111,8 +111,11 @@ export interface FormularioSuperintendenciaFormData {
 
 export const DEFAULTS: Partial<FormularioSuperintendenciaFormData> = {
   qd_sexo: '', qd_lgbtiq: '', qd_condicionEspecial: '', qd_productoDigital: '',
-  qd_estadoQueja: '', qd_favorabilidad: '', qd_aceptacion: '', qd_rectificacion: '',
-  qd_desistimiento: '', qd_tutela: '', qd_marcacion: '', qd_quejaExpres: '',
+  qd_estadoQueja: '', qd_favorabilidad: '', qd_aceptacion: '',
+  // Defaults de negocio (CATALOGOS v2): rectificación código 1, desistimiento código 2.
+  qd_rectificacion: '1',
+  qd_desistimiento: '2',
+  qd_tutela: '', qd_marcacion: '', qd_quejaExpres: '',
   qd_relacionadaFraude: 'NO',
   qd_tipoFraude: '', qd_modalidadFraude: '', qd_montoReclamado: '', qd_montoReconocido: '',
   qd_incluyeAnexosQueja: '', qd_incluyeAdjuntoRespuesta: 'SI', qd_diasProrroga: '0',

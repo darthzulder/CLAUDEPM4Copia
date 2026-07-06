@@ -44,19 +44,26 @@ export default function CrearRecibirQueja() {
     if (task?.data) reset({ ...DEFAULTS, ...(task.data as Partial<CrearRecibirQuejaFormData>) });
   }, [task, reset]);
 
-  // RUL-000-01 — el rol determina instancia y punto de recepción (back, readonly),
-  // resueltos desde CAT-INSTANCIA / CAT-PUNTO.
+  // RUL-000-01 — el rol determina la instancia de recepción (back, readonly),
+  // resuelta desde CAT-INSTANCIA por código:
+  //   Cliente(1) / Intermediario(2) / Empleado Zurich(3) / No cliente(5) → Entidad vigilada (2)
+  //   Defensor del consumidor(4)                                          → Defensor del consumidor financiero (3)
+  //   SFC (instancia 1) se asigna automáticamente vía la integración SFC, no aquí.
   useEffect(() => {
-    if (instanciaOpts.length === 0) return;
-    const esDefensor = w.qd_rolRadicador === 'DEFENSOR';
-    const instancia = instanciaOpts.find((o) => (esDefensor ? /defensor/i : /entidad vigilada/i).test(o.label));
+    if (!w.qd_rolRadicador || instanciaOpts.length === 0) return;
+    const rol = String(w.qd_rolRadicador);
+    let codigoInstancia = '';
+    if (rol === '4') codigoInstancia = '3';
+    else if (['1', '2', '3', '5'].includes(rol)) codigoInstancia = '2';
+    const instancia = instanciaOpts.find((o) => o.value === codigoInstancia);
     if (instancia) form.setValue('qd_instanciaRecepcion', instancia.label);
   }, [w.qd_rolRadicador, instanciaOpts, form]);
 
+  // Punto de recepción por defecto para radicación web = "Internet" (CAT-PUNTO).
   useEffect(() => {
     if (w.qd_puntoRecepcion || puntoRecepcionOpts.length === 0) return;
-    const virtual = puntoRecepcionOpts.find((o) => /virtual/i.test(o.label));
-    if (virtual) form.setValue('qd_puntoRecepcion', virtual.label);
+    const internet = puntoRecepcionOpts.find((o) => /internet/i.test(o.label));
+    if (internet) form.setValue('qd_puntoRecepcion', internet.label);
   }, [w.qd_puntoRecepcion, puntoRecepcionOpts, form]);
 
   const uploadFiles = async (requestId: number) => {

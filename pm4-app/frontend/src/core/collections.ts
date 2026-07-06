@@ -104,7 +104,7 @@ export const GLOBAL_COLLECTIONS = {
   // QUEJAS DIRECTAS COLLECTIONS
   // ==========================================
   qd_tipoSolicitud: {
-    id: 43,
+    id: 18,
     labelField: 'data.descripcion',
     valueField: 'data.codigo',
   } satisfies CollectionDef,
@@ -304,6 +304,13 @@ export const GLOBAL_COLLECTIONS = {
   qd_lgbtiq: {
     id: 41,
     labelField: 'data.descripcion',
+    valueField: 'data.codigo',
+  } satisfies CollectionDef,
+
+  // Catálogo de alianzas comerciales (CATALOGOS v2). Creado pero aún sin uso en pantalla.
+  qd_alianza: {
+    id: 44,
+    labelField: 'data.alianza',
     valueField: 'data.codigo',
   } satisfies CollectionDef,
 } as const;

@@ -325,10 +325,22 @@ def get_catalog_fields(slug):
             {"name": "nombre_detalle_producto", "label": "Nombre Detalle Producto"}
         ]
     elif slug == "cat-rol-radicador":
+        # CATALOGOS v2: se elimina la relación con instancia; ahora se deriva por reglas en el frontend.
         return [
-            {"name": "codigo_instancia", "label": "Código Instancia (Padre)"},
             {"name": "codigo_rol_radicador", "label": "Código Rol Radicador"},
             {"name": "nombre_rol_radicador", "label": "Nombre Rol Radicador"}
+        ]
+    elif slug == "cat-tipo-id":
+        # CATALOGOS v2: se agrega la relación con cat-tipo-persona (1 Natural / 2 Jurídica).
+        return [
+            {"name": "codigo", "label": "Código"},
+            {"name": "descripcion", "label": "Descripción"},
+            {"name": "codigo_tipo_persona", "label": "Código Tipo Persona (Relación)"}
+        ]
+    elif slug == "cat-alianza":
+        return [
+            {"name": "codigo", "label": "Código"},
+            {"name": "alianza", "label": "Alianza"}
         ]
     else:
         # Catálogo estándar (con código y descripción)

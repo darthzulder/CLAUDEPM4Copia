@@ -13,7 +13,7 @@ export default function SeccionConsumidor({ form }: Props) {
   const { control, watch, setValue, formState: { errors } } = form;
   const w = watch();
 
-  const { options: tipoIdentificacionOpts } = useCollection(COLLECTION_DEFS.tipoIdentificacion);
+  const { options: tipoIdentificacionOpts, rawMap: tipoIdRaw } = useCollection(COLLECTION_DEFS.tipoIdentificacion);
   const { options: paisOpts } = useCollection(COLLECTION_DEFS.pais);
   const { options: departamentoOpts } = useCollection(COLLECTION_DEFS.departamento);
   const { options: ciudadOpts } = useCollection(COLLECTION_DEFS.ciudad, w as unknown as Record<string, unknown>);
@@ -44,14 +44,18 @@ export default function SeccionConsumidor({ form }: Props) {
   }, [w.qd_condicionEspecial, condicionEspecialOpts, setValue]);
 
   // RUL-000-02 / RUL-000-03 — el tipo de documento define el tipo de persona.
-  const esJuridica = w.qd_tipoIdentificacion === 'NIT';
+  // Se resuelve por el campo `codigo_tipo_persona` del registro de CAT-TIPO-ID
+  // (1 = Natural, 2 = Jurídica), no por el código del documento.
+  const tipoIdRec = tipoIdRaw[w.qd_tipoIdentificacion ?? ''] as { data?: Record<string, unknown> } | undefined;
+  const codigoTipoPersona = String(tipoIdRec?.data?.codigo_tipo_persona ?? '');
+  const esJuridica = codigoTipoPersona === '2';
 
   // FLD-315 — tipo de persona computado (back), resuelto desde CAT-TIPO-PERSONA.
   useEffect(() => {
-    if (!w.qd_tipoIdentificacion || tipoPersonaOpts.length === 0) return;
-    const tipoPersona = tipoPersonaOpts.find((o) => (esJuridica ? /jur[ií]dica/i : /natural/i).test(o.label));
+    if (!codigoTipoPersona || tipoPersonaOpts.length === 0) return;
+    const tipoPersona = tipoPersonaOpts.find((o) => o.value === codigoTipoPersona);
     if (tipoPersona) setValue('qd_tipoPersona', tipoPersona.label);
-  }, [w.qd_tipoIdentificacion, esJuridica, tipoPersonaOpts, setValue]);
+  }, [codigoTipoPersona, tipoPersonaOpts, setValue]);
 
   // RUL-000-09 — al cambiar el departamento se limpia y deshabilita la ciudad.
   useEffect(() => {
