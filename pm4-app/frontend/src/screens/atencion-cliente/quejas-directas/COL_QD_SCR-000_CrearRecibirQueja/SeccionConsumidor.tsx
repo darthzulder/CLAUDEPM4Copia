@@ -88,6 +88,7 @@ export default function SeccionConsumidor({ form }: Props) {
           name="qd_numeroIdentificacion"
           control={control}
           label="Número de identificación"
+          autoComplete="off"
           rules={{
             required: 'Campo requerido',
             pattern: { value: /^[A-Za-z0-9]{5,15}$/, message: 'Verifica el formato según el tipo de documento (MSG-000-07)' },
@@ -216,24 +217,10 @@ export default function SeccionConsumidor({ form }: Props) {
         />
       </div>
 
-      <div className="form-row cols-2">
-        <ZdsInput
-          name="qd_direccion"
-          control={control}
-          label="Dirección"
-          readOnly
-          helpText="Asignada por el sistema (pendiente API SFC)."
-        />
-        <ZdsInput
-          name="qd_sexo"
-          control={control}
-          label="Sexo"
-          readOnly
-          helpText="Asignado por el sistema (CAT-SEXO, pendiente API SFC)."
-        />
-      </div>
-      {/* FLD-321 (LGBTIQ+) y FLD-322 (Condición especial) — ocultos por requerimiento,
-          se precargan por back con "No informa" / "NINGUNA" vía los effects de arriba. */}
+      {/* FLD-319 (Dirección) y FLD-320 (Sexo) — ocultos por requerimiento: son variables
+          de back (Sexo se precarga "No informa" vía el effect de arriba; Dirección queda
+          vacía pendiente API SFC). Igual que FLD-321 (LGBTIQ+) y FLD-322 (Condición
+          especial), no se muestran en el formulario. */}
     </FormSection>
   );
 }

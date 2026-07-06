@@ -105,10 +105,11 @@ interface InputProps<TFV extends FieldValues> {
   rules?: RegisterOptions<TFV, FieldPath<TFV>>;
   inputType?: 'text' | 'email' | 'tel';
   icon?: string;
+  autoComplete?: string;   // pasa `autocomplete` al input nativo (p.ej. "off" para evitar autofill de tarjetas)
 }
 
 export function ZdsInput<TFV extends FieldValues>({
-  control, name, label, required, readOnly, helpText, error, rules, inputType, icon,
+  control, name, label, required, readOnly, helpText, error, rules, inputType, icon, autoComplete,
 }: InputProps<TFV>) {
   const effectiveIcon = icon ?? (inputType === 'email' ? 'mail-closed:line' : undefined);
   return (
@@ -127,7 +128,10 @@ export function ZdsInput<TFV extends FieldValues>({
             invalid={!!error}
             onChange={(val: string | null) => field.onChange(val ?? '')}
             onBlur={field.onBlur}
-            {...(kp(error, helpText, inputType, effectiveIcon) as Record<string, unknown>)}
+            {...({
+              ...kp(error, helpText, inputType, effectiveIcon),
+              ...(autoComplete ? { autocomplete: autoComplete } : {}),
+            } as Record<string, unknown>)}
           />
         )}
       />

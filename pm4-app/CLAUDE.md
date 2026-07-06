@@ -282,6 +282,7 @@ Al construir UI hay **dos ejes** con escaleras distintas. Recorre cada una **de 
 | `ResultCard` | `components/ResultCard` | Card centrado de resultado/confirmación (variantes) |
 | `DocList` / `DocItem` | `components/DocList`, `components/DocItem` | Lista/fila de documentos (modo upload o validación) |
 | `DocSupportUploader` | `components/DocSupportUploader` | Bloque de carga de documentos de soporte |
+| `RecaptchaModal` | `components/RecaptchaModal` | Modal con reCAPTCHA v2 (checkbox); `onVerified(token)` al pasar. Site key en `VITE_RECAPTCHA_SITE_KEY`, verificación server-side en `/api/recaptcha/verify` |
 | Wrappers de campo | `components/fields/ZdsFields` | `ZdsInput/Select/Radio/Date/Textarea/CheckboxField/Segmented` |
 
 > Mantén esta tabla actualizada al crear/eliminar un componente propio.

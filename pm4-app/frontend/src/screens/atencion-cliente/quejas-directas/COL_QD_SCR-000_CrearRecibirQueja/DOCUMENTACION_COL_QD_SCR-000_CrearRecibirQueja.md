@@ -58,14 +58,17 @@ Catálogos implementados como **colecciones dinámicas PM4** (no listas estátic
 
 **S1 — Tipo de Solicitud y Rol** (`CrearRecibirQueja.tsx`):
 
+> **Nota:** `qd_idCasoBPM` (FLD-300) y `qd_fechaCreacion` (FLD-301) se retiraron del formulario:
+> el caso y su timestamp los genera y captura el BPM al radicar, no el usuario en la creación.
+
 | Campo (UI) | Variable | Tipo | Obligatorio | Fuente |
 |---|---|---|---|---|
-| Número de Caso (ID BPM) | `qd_idCasoBPM` | Texto, solo lectura | No | Anexo02 > SCR-000 > FLD-300 (fila 16) |
-| Fecha y Hora de Creación | `qd_fechaCreacion` | Texto, solo lectura | No | Anexo02 > SCR-000 > FLD-301 (fila 17) |
 | ¿A qué está asociado tu comentario? | `qd_tipoSolicitud` | Select (CAT-TIPO-SOLIC-PQRS) | Sí | Anexo02 > SCR-000 > FLD-302 (fila 18) |
 | Selecciona tu rol | `qd_rolRadicador` | Select (CAT-ROL-RADICADOR) | Sí | Anexo02 > SCR-000 > FLD-303 (fila 19) — "Determina instancia y punto de recepción" |
-| Punto de Recepción | `qd_puntoRecepcion` | Texto, solo lectura (back) | Sí | Anexo02 > SCR-000 > FLD-304 (fila 20) |
+| Canal | `qd_canal` | Select (CAT-CANAL) | Sí | Requerimiento — colección `qd_canal` (id 10) |
+| Punto de Recepción | `qd_puntoRecepcion` | Select (CAT-PUNTO), default "Internet" | Sí | Anexo02 > SCR-000 > FLD-304 (fila 20) — ahora editable |
 | Instancia de Recepción | `qd_instanciaRecepcion` | Texto, solo lectura (computado de rol) | Sí | Anexo02 > SCR-000 > FLD-305 (fila 21) |
+| Alianza | `qd_alianza` | Select (CAT-ALIANZA), visible solo si rol = Empleado Zurich | No | Requerimiento — colección `qd_alianza` (id 44) |
 
 **S2 — Datos del Consumidor Financiero** (`SeccionConsumidor.tsx`):
 
@@ -84,9 +87,9 @@ Catálogos implementados como **colecciones dinámicas PM4** (no listas estátic
 | País | `qd_codigoPais` | Select (CAT-PAIS), default `170` | Sí | Anexo02 > SCR-000 > FLD-316 (fila 32) |
 | Departamento | `qd_departamento` | Select (CAT-DPTO) con búsqueda | Sí | Anexo02 > SCR-000 > FLD-317 (fila 33) |
 | Ciudad | `qd_municipio` | Select (CAT-MPIO), dependiente | Sí | Anexo02 > SCR-000 > FLD-318 (fila 34) |
-| Dirección | `qd_direccion` | Texto, solo lectura (back) | Sí | Anexo02 > SCR-000 > FLD-319 (fila 35) — "default vacío, pendiente API SFC" |
-| Sexo | `qd_sexo` | Texto, solo lectura (back) | Sí | Anexo02 > SCR-000 > FLD-320 (fila 36) — default "No aplica" |
-| LGBTIQ+ | `qd_lgbtiq` | Texto, solo lectura (back) | Sí | Anexo02 > SCR-000 > FLD-321 (fila 37) — catálogo pendiente TI |
+| Dirección | `qd_direccion` | Variable de back, **oculta** (no se muestra) | — | Anexo02 > SCR-000 > FLD-319 (fila 35) — "default vacío, pendiente API SFC" |
+| Sexo | `qd_sexo` | Variable de back, **oculta** (no se muestra), default "No informa" | — | Anexo02 > SCR-000 > FLD-320 (fila 36) |
+| LGBTIQ+ | `qd_lgbtiq` | Variable de back, oculta | — | Anexo02 > SCR-000 > FLD-321 (fila 37) — catálogo pendiente TI |
 | Condición especial | `qd_condicionEspecial` | Select (CAT-COND-ESP) | Sí | Anexo02 > SCR-000 > FLD-322 (fila 38) |
 
 **S3 — Detalle de la Queja** (`SeccionDetalleQueja.tsx`):

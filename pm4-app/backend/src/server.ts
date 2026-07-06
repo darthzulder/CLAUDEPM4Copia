@@ -3,6 +3,7 @@ import cors from 'cors';
 import dotenv from 'dotenv';
 import path from 'path';
 import pm4Routes from './routes/pm4.routes';
+import recaptchaRoutes from './routes/recaptcha.routes';
 
 dotenv.config({ path: '../.env' });
 
@@ -13,6 +14,7 @@ const isProd = process.env.NODE_ENV === 'production';
 app.use(cors());
 app.use(express.json());
 
+app.use('/api/recaptcha', recaptchaRoutes);
 app.use('/api', pm4Routes);
 
 app.get('/health', (_req, res) => {

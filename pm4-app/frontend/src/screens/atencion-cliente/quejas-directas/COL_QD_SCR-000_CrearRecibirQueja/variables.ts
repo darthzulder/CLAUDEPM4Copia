@@ -27,6 +27,8 @@ export const COLLECTION_DEFS = {
   instancia: GLOBAL_COLLECTIONS.qd_instancia,
   puntoRecepcion: GLOBAL_COLLECTIONS.qd_puntoRecepcion,
   tipoPersona: GLOBAL_COLLECTIONS.qd_tipoPersona,
+  canal: GLOBAL_COLLECTIONS.qd_canal,
+  alianza: GLOBAL_COLLECTIONS.qd_alianza,
 };
 
 // ---------------------------------------------------------------------------
@@ -80,12 +82,12 @@ export const DEFAULTS = {
 // ---------------------------------------------------------------------------
 export interface CrearRecibirQuejaFormData {
   // S1 — Tipo de Solicitud y Rol
-  qd_idCasoBPM: string;             // FLD-300 readonly (BPM)
-  qd_fechaCreacion: string;         // FLD-301 readonly (BPM)
   qd_tipoSolicitud: string;         // FLD-302
   qd_rolRadicador: string;          // FLD-303
-  qd_puntoRecepcion: string;        // FLD-304 readonly (back)
+  qd_canal: string;                 // Canal de recepción (CAT-CANAL)
+  qd_puntoRecepcion: string;        // FLD-304 (select CAT-PUNTO)
   qd_instanciaRecepcion: string;    // FLD-305 readonly (computado de rol)
+  qd_alianza: string;               // Alianza comercial (CAT-ALIANZA) — solo visible si rol = Empleado Zurich
 
   // S2 — Datos del Consumidor Financiero
   qd_tipoIdentificacion: string;    // FLD-306
