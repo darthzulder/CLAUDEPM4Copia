@@ -15,7 +15,7 @@ interface Props {
   form: UseFormReturn<DetalleReasignacionRespuestaFormData>;
   err: (name: keyof DetalleReasignacionRespuestaFormData) => string | undefined;
   onConfirmarReasignacion: () => void;
-  onSolicitarAyuda: () => void;
+  onSolicitarAyuda: (data?: DetalleReasignacionRespuestaFormData) => void;
   submitting: boolean;
 }
 
@@ -74,12 +74,24 @@ export default function SeccionAsignacion({ form, err, onConfirmarReasignacion, 
       motivo: motivoReasignacionOpts.find((m) => m.value === w.qd_motivoReasignacion)?.label ?? w.qd_motivoReasignacion,
       observaciones: w.qd_observacionesReasignacion,
     };
-    setValue('qd_historialAsignaciones', [...historial, fila]);
+    const nuevoHistorial = [...historial, fila];
+    setValue('qd_historialAsignaciones', nuevoHistorial);
     // limpiar el formulario de ayudante para el siguiente
     setValue('qd_areaDestino', '');
     setValue('qd_nuevoResponsable', '');
     setValue('qd_motivoReasignacion', '');
     setValue('qd_observacionesReasignacion', '');
+    // Submit inmediato con el snapshot fresco: watch() (w) aún no refleja los setValue
+    // anteriores, por eso construimos el payload explícitamente para que PM4 persista
+    // la nueva fila del historial junto con el resto de variables.
+    onSolicitarAyuda({
+      ...w,
+      qd_historialAsignaciones: nuevoHistorial,
+      qd_areaDestino: '',
+      qd_nuevoResponsable: '',
+      qd_motivoReasignacion: '',
+      qd_observacionesReasignacion: '',
+    });
   };
 
   return (
@@ -183,7 +195,7 @@ export default function SeccionAsignacion({ form, err, onConfirmarReasignacion, 
                 <div z-flex="75" z-align="right:center" style={{ marginTop: 'var(--zs-75)' }}>
                   <ZrButton config="secondary"
                     disabled={!reasignacionCompleta || submitting} loading={submitting}
-                    onClick={() => { confirmarReasignacion(); onSolicitarAyuda(); }}>
+                    onClick={confirmarReasignacion}>
                     Confirmar
                   </ZrButton>
                 </div>

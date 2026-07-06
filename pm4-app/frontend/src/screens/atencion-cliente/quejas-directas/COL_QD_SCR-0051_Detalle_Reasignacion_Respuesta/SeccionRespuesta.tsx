@@ -44,6 +44,16 @@ export default function SeccionRespuesta({ form, fileRegistry, err, onVistaPrevi
 
       {/* ── S8 · Elaboración de Respuesta Técnica (SEC-054) ── */}
       <FormSection title="Elaboración de Respuesta Técnica">
+        {/* Visible solo si el Analista SAC devolvió el caso con observaciones (FLD-131, SCR-008). */}
+        {!!w.qd_observacionesSAC?.trim() && (
+          <div className="form-row cols-1">
+            <ZdsTextarea
+              name="qd_observacionesSAC" control={control} label="Observaciones SAC" readOnly
+              helpText="Devuelto por el Analista SAC en la revisión de respuesta."
+            />
+          </div>
+        )}
+
         <div className="form-row cols-1">
           <ZdsTextarea
             name="qd_respuestaCliente" control={control} label="Respuesta al Cliente (borrador)"

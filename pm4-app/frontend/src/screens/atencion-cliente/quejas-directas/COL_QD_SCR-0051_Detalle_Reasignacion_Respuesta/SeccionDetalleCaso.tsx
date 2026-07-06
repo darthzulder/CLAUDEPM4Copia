@@ -4,7 +4,7 @@ import { ZdsInput, ZdsTextarea, ZdsStatusBadge } from '../../../../components/fi
 import type { DetalleReasignacionRespuestaFormData } from './variables';
 
 // Mapea el estado SmartSupervision (FLD-079) al color del semáforo.
-function estadoVariant(estado: string): 'success' | 'danger' | 'info' | 'neutral' {
+export function estadoVariant(estado: string): 'success' | 'danger' | 'info' | 'neutral' {
   const e = estado.toLowerCase();
   if (e.includes('cerrad') || e.includes('200') || e.includes('verde')) return 'success';
   if (e.includes('radicad') || e.includes('201')) return 'success';

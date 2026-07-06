@@ -1,7 +1,9 @@
 
+import type { ReactNode } from 'react';
+
 interface InfoItem {
   label: string;
-  value: string | number | undefined | null;
+  value: ReactNode;
 }
 
 interface InfoBarProps {
@@ -14,7 +16,7 @@ export default function InfoBar({ items }: InfoBarProps) {
       {items.map((item, idx) => (
         <div className="info-bar-item" key={idx}>
           <span className="info-bar-label">{item.label}</span>
-          <span className="info-bar-value">{String(item.value ?? 'â€”')}</span>
+          <span className="info-bar-value">{item.value ?? '—'}</span>
         </div>
       ))}
     </div>

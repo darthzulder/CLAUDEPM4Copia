@@ -2,14 +2,15 @@ import { useEffect, useRef, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { useTask } from '../../../../core/useTask';
 import ScreenHeader from '../../../../components/ScreenHeader';
+import InfoBar from '../../../../components/InfoBar';
 import { ActionBar } from '../../../../components/ActionBar';
-import { ZrButton, ZrAlert, ZrModal, ZrLoader } from '../../../../components/fields/ZdsFields';
+import { ZrButton, ZrAlert, ZrModal, ZrLoader, ZdsStatusBadge } from '../../../../components/fields/ZdsFields';
 import pm4 from '../../../../api/pm4Client';
 import {
   DEFAULTS, SLA_UMBRAL_PRORROGA,
   type DetalleReasignacionRespuestaFormData, type AccionFlujoCombinado,
 } from './variables';
-import SeccionDetalleCaso from './SeccionDetalleCaso';
+import SeccionDetalleCaso, { estadoVariant } from './SeccionDetalleCaso';
 import SeccionAsignacion from './SeccionAsignacion';
 import SeccionRespuesta from './SeccionRespuesta';
 
@@ -67,7 +68,10 @@ export default function DetalleReasignacionRespuesta() {
   const onGuardarBorrador = () => enviarCon('GUARDAR_BORRADOR')(w);
   const onSolicitarProrroga = () => enviarCon('SOLICITAR_PRORROGA')(w);
   const onReasignarQueja = () => enviarCon('CONFIRMAR_ASIGNACION')(w);
-  const onSolicitarAyuda = () => enviarCon('AYUDA')(w);
+  // La sección de asignación pasa el snapshot fresco del formulario (incluye la fila
+  // recién agregada al historial), evitando el stale closure de watch() tras setValue.
+  const onSolicitarAyuda = (data?: DetalleReasignacionRespuestaFormData) =>
+    enviarCon('AYUDA')(data ?? w);
 
   if (loading) {
     return <div className="screen-wrapper"><div className="screen-loading"><ZrLoader /></div></div>;
@@ -92,6 +96,20 @@ export default function DetalleReasignacionRespuesta() {
       />
 
       <div className="screen-content">
+        <InfoBar items={[
+          { label: 'Case', value: w.qd_idCasoBPM || '—' },
+          { label: 'SLA', value: w.qd_slaRestante ? `${w.qd_slaRestante} días hábiles` : '—' },
+          {
+            label: 'Estado',
+            value: (
+              <ZdsStatusBadge variant={estadoVariant(w.qd_estadoSS || '')}>
+                {w.qd_estadoSS || 'Sin estado'}
+              </ZdsStatusBadge>
+            ),
+          },
+          { label: 'SmartSupervision', value: w.qd_codigoSFC || '—' },
+        ]} />
+
         {/* RUL-0051-03 / MSG-0051-01 — banner SLA crítico. */}
         {slaCritico && (
           <ZrAlert config="negative" {...({ 'hide-close': true } as object)}>

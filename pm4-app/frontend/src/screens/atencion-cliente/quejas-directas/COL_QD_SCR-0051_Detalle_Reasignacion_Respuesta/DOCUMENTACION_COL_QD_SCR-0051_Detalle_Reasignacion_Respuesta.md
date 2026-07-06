@@ -50,6 +50,15 @@ borrador y solicitar prórroga regulatoria cuando el SLA es crítico.
 
 ## 4. Campos Implementados
 
+### Cabecera (`InfoBar`, solo lectura) — `DetalleReasignacionRespuesta.tsx`
+
+| Campo (UI) | Variable | Tipo | Fuente |
+|---|---|---|---|
+| Case | `qd_idCasoBPM` | `InfoBar` | FLD-300 en SCR-000 (unificado con SCR-002) |
+| SLA | `qd_slaRestante` | `InfoBar` ("N días hábiles") | Inferido de RUL-0051-03 (§10), unificado con SCR-002/008 |
+| Estado | `qd_estadoSS` | `InfoBar` + `ZdsStatusBadge` (`estadoVariant()`) | FLD-079 |
+| SmartSupervision | `qd_codigoSFC` | `InfoBar` | FLD-120/140/173 en SCR-008/009/010 |
+
 ### S1 — Datos del Consumidor (SEC-047, solo lectura) — `SeccionDetalleCaso.tsx`
 
 | Campo (UI) | Variable | Tipo | Obligatorio | Fuente |
@@ -115,6 +124,7 @@ borrador y solicitar prórroga regulatoria cuando el SLA es crítico.
 
 | Campo (UI) | Variable | Tipo | Obligatorio | Fuente |
 |---|---|---|---|---|
+| Observaciones SAC | `qd_observacionesSAC` | `ZdsTextarea` readOnly (condicional) | No | FLD-131 en SCR-008 |
 | Respuesta al Cliente (borrador) | `qd_respuestaCliente` | `ZdsTextarea` | **Sí** | FLD-110 |
 | Acciones Tomadas | `qd_accionesTomadas` | `ZdsTextarea` (condicional) | No | FLD-111 |
 | ¿Reconocimiento al cliente? | `qd_reconocimiento` | `ZdsInput` readOnly (back) | No | FLD-112 |
@@ -223,6 +233,16 @@ borrador y solicitar prórroga regulatoria cuando el SLA es crítico.
   para implementar la condición textual de RUL-0051-07 ("¿Necesitas de otras áreas?").
 - **`qd_slaRestante`**: no hay FLD explícito, pero RUL-0051-03 referencia `slaRestante`. Se añadió
   como campo de sistema (solo lectura) que alimenta el banner y la habilitación de prórroga.
+- **`qd_idCasoBPM` / `qd_codigoSFC` en la cabecera**: no son FLD propios de SCR-0051; se añadieron
+  para mostrar "Case", "Estado" y "SmartSupervision" en la cabecera (pedido del usuario, jul-2026),
+  reutilizando los mismos `data_name` que ya produce SCR-000 (`qd_idCasoBPM`, FLD-300) y que
+  consumen SCR-008/009/010 (`qd_codigoSFC`, FLD-120/140/173), para mantener la correlación de
+  variables del proceso.
+- **`qd_observacionesSAC` en S8**: no es un FLD propio de SCR-0051; se añadió (pedido del usuario,
+  jul-2026) reutilizando el mismo `data_name` que ya escribe el Analista SAC en SCR-008
+  (`qd_observacionesSAC`, FLD-131) al devolver el caso al área responsable. Se muestra readOnly y
+  solo si el campo trae contenido (caso devuelto); si el caso nunca fue devuelto, el campo llega
+  vacío y la sección lo oculta.
 - **`qd_tieneResponsable`**: flag de sistema inferido para implementar la visibilidad "solo la
   primera vez" de RUL-0051-01.
 - **Añadir ayudante = push local al historial.** ACT-0051-03 "añade el ayudante al historial"; se

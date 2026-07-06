@@ -78,6 +78,10 @@ export const ADJUNTO_KEYS = [
 // Tipo del formulario — SCR-0051
 // ---------------------------------------------------------------------------
 export interface DetalleReasignacionRespuestaFormData {
+  // ── Cabecera del caso (solo lectura, no es un FLD propio de SCR-0051) ──
+  qd_idCasoBPM: string; // Número de caso BPM. FLD-300 en SCR-000 (unificado con SCR-002).
+  qd_codigoSFC: string; // Código/radicado SFC devuelto al validar y radicar (SP1). FLD-120/140/173 en SCR-008/009/010.
+
   // ── S1 Datos del Consumidor (solo lectura, granulares desde SCR-000) ──
   qd_nombres:              string; // FLD-308 (persona natural)
   qd_apellidos:            string; // FLD-309 (persona natural)
@@ -126,6 +130,7 @@ export interface DetalleReasignacionRespuestaFormData {
   qd_respuestaCliente: string;  // FLD-110 (req.)
   qd_accionesTomadas:  string;  // FLD-111 (visible si favor = Cliente)
   qd_reconocimiento:   string;  // FLD-112 (back, solo lectura)
+  qd_observacionesSAC: string;  // FLD-131 en SCR-008 (solo lectura, visible si el SAC devolvió con observaciones)
 
   // ── S9 Soportes Internos (multi archivo, máx 10) ──
   qd_soporte_01: string; qd_soporte_02: string; qd_soporte_03: string; qd_soporte_04: string; qd_soporte_05: string;
