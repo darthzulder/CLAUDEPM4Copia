@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { useTask } from '../../../../core/useTask';
+import { useCollection } from '../../../../core/useCollection';
 import ScreenHeader from '../../../../components/ScreenHeader';
 import FormSection from '../../../../components/FormSection';
 import { ActionBar } from '../../../../components/ActionBar';
@@ -10,7 +11,7 @@ import {
 } from '../../../../components/fields/ZdsFields';
 import pm4 from '../../../../api/pm4Client';
 import {
-  DEFAULTS, ADJUNTO_KEY, MAX_ADJUNTO_MB,
+  DEFAULTS, ADJUNTO_KEY, MAX_ADJUNTO_MB, COLLECTION_DEFS,
   type RespuestaAreaResponsableFormData, type AccionRespuestaArea, type RespuestaAyuda,
 } from './variables';
 import type { AsignacionHistorial } from '../COL_QD_SCR-0051_Detalle_Reasignacion_Respuesta/variables';
@@ -47,6 +48,21 @@ export default function RespuestaAreaResponsable() {
   const numeroAyuda = Number(w.qd_numeroAyuda) || 0;
   const historialAsig: AsignacionHistorial[] = Array.isArray(w.qd_historialAsignaciones) ? w.qd_historialAsignaciones : [];
   const solicitud = historialAsig[numeroAyuda - 1];
+
+  // Estos campos guardan el CÓDIGO en PM4; resolvemos su descripción vía catálogo para mostrar.
+  const { options: canalOpts } = useCollection(COLLECTION_DEFS.canal);
+  const { options: productoOpts } = useCollection(COLLECTION_DEFS.producto);
+  const { options: motivoOpts } = useCollection(COLLECTION_DEFS.motivo);
+  const { options: admisionOpts } = useCollection(COLLECTION_DEFS.admision);
+
+  const desc = (opts: { value: string; label: string }[], code: string | undefined): string => {
+    if (!code) return '—';
+    return opts.find((o) => o.value === code)?.label ?? code;
+  };
+  const canalDesc = desc(canalOpts, w.qd_canal);
+  const productoDesc = desc(productoOpts, w.qd_productoSFC);
+  const motivoDesc = desc(motivoOpts, w.qd_motivoSFC);
+  const admisionDesc = desc(admisionOpts, w.qd_admision);
 
   // Sube cada archivo y devuelve un mapa docKey → file_id (fileUploadId de PM4),
   // para poder guardar el id del adjunto en el historial y descargarlo luego.
@@ -189,15 +205,28 @@ export default function RespuestaAreaResponsable() {
           </FormSection>
 
           {/* ── S2 · Clasificación Regulatoria (SEC-060, solo lectura) ── */}
+          {/* Canal/Producto/Motivo/Admisión guardan código → se muestra la descripción del catálogo. */}
           <FormSection title="Clasificación Regulatoria">
             <div className="form-row cols-3">
-              <ZdsInput name="qd_canal" control={control} label="Canal de Recepción" readOnly />
-              <ZdsInput name="qd_productoSFC" control={control} label="Producto SFC" readOnly />
-              <ZdsInput name="qd_motivoSFC" control={control} label="Motivo SFC" readOnly />
+              <div className="zds-field-wrap">
+                <span className="info-bar-label">Canal de Recepción</span>
+                <div className="info-bar-value" style={{ marginTop: 'var(--zs-50)' }}>{canalDesc}</div>
+              </div>
+              <div className="zds-field-wrap">
+                <span className="info-bar-label">Producto SFC</span>
+                <div className="info-bar-value" style={{ marginTop: 'var(--zs-50)' }}>{productoDesc}</div>
+              </div>
+              <div className="zds-field-wrap">
+                <span className="info-bar-label">Motivo SFC</span>
+                <div className="info-bar-value" style={{ marginTop: 'var(--zs-50)' }}>{motivoDesc}</div>
+              </div>
             </div>
             <div className="form-row cols-3">
               <ZdsInput name="qd_instanciaRecepcion" control={control} label="Instancia de Recepción" readOnly />
-              <ZdsInput name="qd_admision" control={control} label="Admisión" readOnly />
+              <div className="zds-field-wrap">
+                <span className="info-bar-label">Admisión</span>
+                <div className="info-bar-value" style={{ marginTop: 'var(--zs-50)' }}>{admisionDesc}</div>
+              </div>
               <ZdsInput name="qd_enteControl" control={control} label="Ente de Control" readOnly />
             </div>
           </FormSection>
@@ -205,7 +234,10 @@ export default function RespuestaAreaResponsable() {
           {/* ── S3 · Descripción de la Queja (SEC-061, solo lectura) ── */}
           <FormSection title="Descripción de la Queja">
             <div className="form-row cols-1">
-              <ZdsInput name="qd_motivoSFC" control={control} label="Asunto de la Queja" readOnly />
+              <div className="zds-field-wrap">
+                <span className="info-bar-label">Asunto de la Queja</span>
+                <div className="info-bar-value" style={{ marginTop: 'var(--zs-50)' }}>{motivoDesc}</div>
+              </div>
             </div>
             <div className="form-row cols-1">
               <ZdsTextarea name="qd_textoQueja" control={control} label="Descripción / Texto de la Queja" readOnly />

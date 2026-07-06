@@ -10,9 +10,18 @@
 // data_name PM4 aún no entregados: se usan nombres descriptivos con prefijo `qd_`.
 
 import type { AsignacionHistorial } from '../COL_QD_SCR-0051_Detalle_Reasignacion_Respuesta/variables';
+import { GLOBAL_COLLECTIONS } from '../../../../core/collections';
 
 export const MAX_ADJUNTO_MB = 10; // FLD-355 (máx 10 MB)
 export const ADJUNTO_KEY = 'qd_adjuntoArea' as const; // FLD-355
+
+// Catálogos para resolver código → descripción en los campos de solo lectura (S2/S3).
+export const COLLECTION_DEFS = {
+  canal: GLOBAL_COLLECTIONS.qd_canal,       // Canal de Recepción
+  producto: GLOBAL_COLLECTIONS.qd_seguro,   // Producto SFC
+  motivo: GLOBAL_COLLECTIONS.qd_motivo,     // Motivo SFC / Asunto de la Queja
+  admision: GLOBAL_COLLECTIONS.qd_admision, // Admisión
+};
 
 // Acción/decisión BPMN según el botón presionado.
 export type AccionRespuestaArea = 'ENVIAR' | 'GUARDAR_BORRADOR';
