@@ -59,15 +59,40 @@ export default function RespuestaAreaResponsable() {
   // Registra la respuesta del ayudante en el array diferenciado (qd_respuestasAyuda) y
   // completa la fila correspondiente del historial (qd_historialAsignaciones), matcheando
   // por qd_numeroAyuda (1-based) → índice del array. Solo se aplica al ENVIAR definitivo.
-  const registrarRespuesta = (data: RespuestaAreaResponsableFormData, adjuntoFileId?: number) => {
+  //
+  // IMPORTANTE: este subproceso arrancó con un SNAPSHOT del historial del momento en que se
+  // pidió la ayuda. Si después se pidieron más ayudas, ese snapshot está desactualizado y
+  // escribirlo de vuelta borraría las ayudas posteriores. Por eso releemos el estado FRESCO
+  // del request padre y fusionamos la respuesta sobre esa versión antes de guardar.
+  const registrarRespuesta = async (data: RespuestaAreaResponsableFormData, adjuntoFileId?: number) => {
     const numero = Number(data.qd_numeroAyuda) || 0;
     const idx = numero - 1;
     const respondio = data.qd_usuarioResponsable || data.qd_areaResponsable || '—';
     const fecha = new Date().toISOString().slice(0, 10);
     const adjunto = data.qd_adjuntoArea || '';
 
-    const historial: AsignacionHistorial[] = Array.isArray(data.qd_historialAsignaciones)
+    // Partimos del snapshot local como fallback.
+    let historial: AsignacionHistorial[] = Array.isArray(data.qd_historialAsignaciones)
       ? [...data.qd_historialAsignaciones] : [];
+    let respuestas: RespuestaAyuda[] = Array.isArray(data.qd_respuestasAyuda)
+      ? [...data.qd_respuestasAyuda] : [];
+
+    // Releer el request padre para tener el historial completo y actualizado.
+    const pdata = task?.data as Record<string, unknown> | undefined;
+    const parentRequestId =
+      (pdata?._request as { parent_request_id?: number } | undefined)?.parent_request_id ??
+      (pdata?._parent as { request_id?: number } | undefined)?.request_id;
+    if (parentRequestId) {
+      try {
+        const r = await pm4.get(`/requests/${parentRequestId}`);
+        const fresh = (r.data?.data ?? r.data ?? {}) as Record<string, unknown>;
+        if (Array.isArray(fresh.qd_historialAsignaciones)) historial = [...fresh.qd_historialAsignaciones];
+        if (Array.isArray(fresh.qd_respuestasAyuda)) respuestas = [...fresh.qd_respuestasAyuda];
+      } catch (e) {
+        console.warn('[RespuestaAreaResponsable] No se pudo leer el request padre; se usa el snapshot local:', e);
+      }
+    }
+
     if (idx >= 0 && idx < historial.length) {
       historial[idx] = {
         ...historial[idx],
@@ -78,8 +103,6 @@ export default function RespuestaAreaResponsable() {
       };
     }
 
-    const respuestas: RespuestaAyuda[] = Array.isArray(data.qd_respuestasAyuda)
-      ? [...data.qd_respuestasAyuda] : [];
     const nuevaRespuesta: RespuestaAyuda = { numero, fecha, respondio, comentario: data.qd_comentarioArea, adjunto, adjuntoFileId };
     if (idx >= 0) respuestas[idx] = nuevaRespuesta;
     else respuestas.push(nuevaRespuesta);
@@ -93,7 +116,7 @@ export default function RespuestaAreaResponsable() {
       const requestId = task?.process_request_id;
       let uploadedIds: Record<string, number> = {};
       if (requestId && fileRegistry.current.size > 0) uploadedIds = await uploadFiles(requestId);
-      const extra = accion === 'ENVIAR' ? registrarRespuesta(data, uploadedIds[ADJUNTO_KEY]) : {};
+      const extra = accion === 'ENVIAR' ? await registrarRespuesta(data, uploadedIds[ADJUNTO_KEY]) : {};
       await completeTask({ ...data, ...extra, qd_accion: accion } as unknown as Record<string, unknown>);
     } catch (e) {
       // No tragar el error: si la tarea no se completa, PM4 no cierra el iframe.
