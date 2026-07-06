@@ -75,7 +75,11 @@ export default function SeccionAsignacion({ form, err, onConfirmarReasignacion, 
       observaciones: w.qd_observacionesReasignacion,
     };
     const nuevoHistorial = [...historial, fila];
+    // Número de esta ayuda (1-based) = posición de la fila recién agregada. Viaja con el
+    // subproceso para que SCR-0052 sepa a qué ayuda responde (matchea el índice del historial).
+    const numeroAyuda = nuevoHistorial.length;
     setValue('qd_historialAsignaciones', nuevoHistorial);
+    setValue('qd_numeroAyuda', numeroAyuda);
     // limpiar el formulario de ayudante para el siguiente
     setValue('qd_areaDestino', '');
     setValue('qd_nuevoResponsable', '');
@@ -87,6 +91,7 @@ export default function SeccionAsignacion({ form, err, onConfirmarReasignacion, 
     onSolicitarAyuda({
       ...w,
       qd_historialAsignaciones: nuevoHistorial,
+      qd_numeroAyuda: numeroAyuda,
       qd_areaDestino: '',
       qd_nuevoResponsable: '',
       qd_motivoReasignacion: '',

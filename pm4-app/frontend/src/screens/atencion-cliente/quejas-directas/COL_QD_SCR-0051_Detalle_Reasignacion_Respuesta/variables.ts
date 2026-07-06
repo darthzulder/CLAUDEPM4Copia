@@ -57,6 +57,8 @@ export const OPTIONS = {
 } as const;
 
 // FLD-095 — una fila del historial de asignaciones (solo lectura).
+// Los campos respondio/comentario/adjunto los completa SCR-0052 cuando el ayudante
+// responde su subproceso (matcheado por qd_numeroAyuda ↔ índice de la fila).
 export interface AsignacionHistorial {
   fecha: string;
   de: string;
@@ -125,6 +127,9 @@ export interface DetalleReasignacionRespuestaFormData {
 
   // ── S7 Historial de Asignaciones (solo lectura) ──
   qd_historialAsignaciones: AsignacionHistorial[]; // FLD-095
+  // Número de la ayuda solicitada (1-based) = posición de la fila en el historial.
+  // Viaja con el subproceso de ayuda para que SCR-0052 sepa a qué ayuda responder.
+  qd_numeroAyuda: number;
 
   // ── S8 Elaboración de Respuesta Técnica ──
   qd_respuestaCliente: string;  // FLD-110 (req.)
@@ -154,6 +159,7 @@ export const DEFAULTS: Partial<DetalleReasignacionRespuestaFormData> = {
   qd_motivoReasignacion: '',
   qd_observacionesReasignacion: '',
   qd_historialAsignaciones: [],
+  qd_numeroAyuda: 0,
   qd_respuestaCliente: '',
   qd_accionesTomadas: '',
   qd_respuestaFavorDe: '',

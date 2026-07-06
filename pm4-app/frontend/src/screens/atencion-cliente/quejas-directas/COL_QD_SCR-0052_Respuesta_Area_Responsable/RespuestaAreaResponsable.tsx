@@ -1,4 +1,4 @@
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { useTask } from '../../../../core/useTask';
 import ScreenHeader from '../../../../components/ScreenHeader';
@@ -11,12 +11,14 @@ import {
 import pm4 from '../../../../api/pm4Client';
 import {
   DEFAULTS, ADJUNTO_KEY, MAX_ADJUNTO_MB,
-  type RespuestaAreaResponsableFormData, type AccionRespuestaArea,
+  type RespuestaAreaResponsableFormData, type AccionRespuestaArea, type RespuestaAyuda,
 } from './variables';
+import type { AsignacionHistorial } from '../COL_QD_SCR-0051_Detalle_Reasignacion_Respuesta/variables';
 
 export default function RespuestaAreaResponsable() {
   const { task, loading, error, submitting, completeTask } = useTask();
   const fileRegistry = useRef(new Map<string, File>());
+  const [enviarError, setEnviarError] = useState<string | null>(null);
 
   const form = useForm<RespuestaAreaResponsableFormData>({ defaultValues: DEFAULTS });
   const { control, watch, handleSubmit, reset, setValue, setError, clearErrors,
@@ -48,13 +50,50 @@ export default function RespuestaAreaResponsable() {
     }
   };
 
+  // Registra la respuesta del ayudante en el array diferenciado (qd_respuestasAyuda) y
+  // completa la fila correspondiente del historial (qd_historialAsignaciones), matcheando
+  // por qd_numeroAyuda (1-based) → índice del array. Solo se aplica al ENVIAR definitivo.
+  const registrarRespuesta = (data: RespuestaAreaResponsableFormData) => {
+    const numero = Number(data.qd_numeroAyuda) || 0;
+    const idx = numero - 1;
+    const respondio = data.qd_usuarioResponsable || data.qd_areaResponsable || '—';
+    const fecha = new Date().toISOString().slice(0, 10);
+    const adjunto = data.qd_adjuntoArea || '';
+
+    const historial: AsignacionHistorial[] = Array.isArray(data.qd_historialAsignaciones)
+      ? [...data.qd_historialAsignaciones] : [];
+    if (idx >= 0 && idx < historial.length) {
+      historial[idx] = {
+        ...historial[idx],
+        respondio,
+        comentario: data.qd_comentarioArea,
+        adjunto: adjunto || '—',
+      };
+    }
+
+    const respuestas: RespuestaAyuda[] = Array.isArray(data.qd_respuestasAyuda)
+      ? [...data.qd_respuestasAyuda] : [];
+    const nuevaRespuesta: RespuestaAyuda = { numero, fecha, respondio, comentario: data.qd_comentarioArea, adjunto };
+    if (idx >= 0) respuestas[idx] = nuevaRespuesta;
+    else respuestas.push(nuevaRespuesta);
+
+    return { qd_historialAsignaciones: historial, qd_respuestasAyuda: respuestas };
+  };
+
   const enviarCon = (accion: AccionRespuestaArea) => async (data: RespuestaAreaResponsableFormData) => {
+    setEnviarError(null);
     try {
       const requestId = task?.process_request_id;
       if (requestId && fileRegistry.current.size > 0) await uploadFiles(requestId);
-      await completeTask({ ...data, qd_accion: accion } as unknown as Record<string, unknown>);
+      const extra = accion === 'ENVIAR' ? registrarRespuesta(data) : {};
+      await completeTask({ ...data, ...extra, qd_accion: accion } as unknown as Record<string, unknown>);
     } catch (e) {
+      // No tragar el error: si la tarea no se completa, PM4 no cierra el iframe.
+      // Mostrarlo en pantalla para saber la causa real del fallo.
+      const err = e as { response?: { data?: { message?: string } }; message?: string };
+      const msg = err.response?.data?.message ?? err.message ?? 'Error desconocido al enviar.';
       console.error('[RespuestaAreaResponsable] Error al enviar:', e);
+      setEnviarError(msg);
     }
   };
 
@@ -171,6 +210,13 @@ export default function RespuestaAreaResponsable() {
               </ZrAlert>
             )}
           </FormSection>
+
+          {/* Error de envío — la tarea no se completó (por eso PM4 no cierra el iframe). */}
+          {enviarError && (
+            <ZrAlert config="negative" {...({ 'hide-close': true } as object)}>
+              No se pudo enviar: {enviarError}
+            </ZrAlert>
+          )}
 
           {/* ── Acciones (ACT-0052-01/02/03) ── */}
           <ActionBar>

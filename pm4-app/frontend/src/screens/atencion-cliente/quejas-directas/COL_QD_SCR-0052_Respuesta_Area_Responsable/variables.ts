@@ -9,11 +9,23 @@
 //
 // data_name PM4 aún no entregados: se usan nombres descriptivos con prefijo `qd_`.
 
+import type { AsignacionHistorial } from '../COL_QD_SCR-0051_Detalle_Reasignacion_Respuesta/variables';
+
 export const MAX_ADJUNTO_MB = 10; // FLD-355 (máx 10 MB)
 export const ADJUNTO_KEY = 'qd_adjuntoArea' as const; // FLD-355
 
 // Acción/decisión BPMN según el botón presionado.
 export type AccionRespuestaArea = 'ENVIAR' | 'GUARDAR_BORRADOR';
+
+// Respuesta de un ayudante, guardada en un array diferenciado por su número de ayuda.
+// El índice del array = qd_numeroAyuda - 1 (mismo índice que la fila del historial en SCR-0051).
+export interface RespuestaAyuda {
+  numero: number;      // qd_numeroAyuda (1-based)
+  fecha: string;       // ISO YYYY-MM-DD
+  respondio: string;   // usuario/área que respondió
+  comentario: string;  // qd_comentarioArea
+  adjunto: string;     // nombre del archivo adjunto (qd_adjuntoArea), '' si no hay
+}
 
 // ---------------------------------------------------------------------------
 // Tipo del formulario — SCR-0052
@@ -49,6 +61,11 @@ export interface RespuestaAreaResponsableFormData {
   qd_comentarioArea: string; // FLD-354 (obligatorio)
   qd_adjuntoArea:    string; // FLD-355 (nombre del archivo; binario en fileRegistry)
 
+  // ── Trazabilidad de la ayuda (viaja con el subproceso desde SCR-0051) ──
+  qd_numeroAyuda:           number;                // ayuda a la que responde (1-based)
+  qd_historialAsignaciones: AsignacionHistorial[]; // FLD-095, se actualiza la fila correspondiente
+  qd_respuestasAyuda:       RespuestaAyuda[];       // array diferenciado por número de ayuda
+
   // ── Metadato de flujo (no visible) ──
   qd_accion: AccionRespuestaArea;
 }
@@ -56,5 +73,8 @@ export interface RespuestaAreaResponsableFormData {
 export const DEFAULTS: Partial<RespuestaAreaResponsableFormData> = {
   qd_comentarioArea: '',
   qd_adjuntoArea: '',
+  qd_numeroAyuda: 0,
+  qd_historialAsignaciones: [],
+  qd_respuestasAyuda: [],
   qd_accion: 'ENVIAR',
 };
