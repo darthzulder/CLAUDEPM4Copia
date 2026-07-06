@@ -40,6 +40,11 @@ export const COLLECTION_DEFS = {
   motivoReasignacion: GLOBAL_COLLECTIONS.qd_motivoReasignacion,
   // CAT-MOTIVO-PRORROGA (motivo_prorr). ACT-0051-04.
   motivoProrroga: GLOBAL_COLLECTIONS.qd_motivoProrroga,
+  // Catálogos para resolver código → descripción en los campos de solo lectura (S2/S3).
+  canal: GLOBAL_COLLECTIONS.qd_canal,           // Canal de Recepción
+  producto: GLOBAL_COLLECTIONS.qd_seguro,       // Producto SFC
+  motivo: GLOBAL_COLLECTIONS.qd_motivo,         // Motivo SFC / Asunto de la Queja
+  admision: GLOBAL_COLLECTIONS.qd_admision,     // Admisión
 };
 
 // ---------------------------------------------------------------------------

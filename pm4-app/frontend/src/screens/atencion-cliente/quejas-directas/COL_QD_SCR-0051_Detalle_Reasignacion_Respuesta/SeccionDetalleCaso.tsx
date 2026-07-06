@@ -1,7 +1,8 @@
-import type { Control } from 'react-hook-form';
+import type { UseFormReturn } from 'react-hook-form';
 import FormSection from '../../../../components/FormSection';
 import { ZdsInput, ZdsTextarea, ZdsStatusBadge } from '../../../../components/fields/ZdsFields';
-import type { DetalleReasignacionRespuestaFormData } from './variables';
+import { useCollection } from '../../../../core/useCollection';
+import { COLLECTION_DEFS, type DetalleReasignacionRespuestaFormData } from './variables';
 
 // Mapea el estado SmartSupervision (FLD-079) al color del semáforo.
 export function estadoVariant(estado: string): 'success' | 'danger' | 'info' | 'neutral' {
@@ -14,14 +15,34 @@ export function estadoVariant(estado: string): 'success' | 'danger' | 'info' | '
 }
 
 interface Props {
-  control: Control<DetalleReasignacionRespuestaFormData>;
+  form: UseFormReturn<DetalleReasignacionRespuestaFormData>;
   estado: string;
   nombre: string;          // derivado de qd_nombres+qd_apellidos / qd_razonSocial
   identificacion: string;  // derivado de qd_tipoIdentificacion+qd_numeroIdentificacion
 }
 
 /** S1–S4 · Expediente del caso (solo lectura). */
-export default function SeccionDetalleCaso({ control, estado, nombre, identificacion }: Props) {
+export default function SeccionDetalleCaso({ form, estado, nombre, identificacion }: Props) {
+  const { control, watch } = form;
+  const w = watch();
+
+  // Estos campos guardan el CÓDIGO en PM4; resolvemos su descripción vía catálogo para mostrar.
+  // El valor almacenado no cambia (sigue siendo el código que espera el BPM).
+  const { options: canalOpts } = useCollection(COLLECTION_DEFS.canal);
+  const { options: productoOpts } = useCollection(COLLECTION_DEFS.producto);
+  const { options: motivoOpts } = useCollection(COLLECTION_DEFS.motivo);
+  const { options: admisionOpts } = useCollection(COLLECTION_DEFS.admision);
+
+  const desc = (opts: { value: string; label: string }[], code: string | undefined): string => {
+    if (!code) return '—';
+    return opts.find((o) => o.value === code)?.label ?? code;
+  };
+
+  const canalDesc = desc(canalOpts, w.qd_canal);
+  const productoDesc = desc(productoOpts, w.qd_productoSFC);
+  const motivoDesc = desc(motivoOpts, w.qd_motivoSFC);
+  const admisionDesc = desc(admisionOpts, w.qd_admision);
+
   return (
     <>
       {/* ── S1 · Datos del Consumidor (SEC-047) ── */}
@@ -46,13 +67,25 @@ export default function SeccionDetalleCaso({ control, estado, nombre, identifica
       {/* ── S2 · Clasificación Regulatoria (precargada M1) (SEC-048) ── */}
       <FormSection title="Clasificación Regulatoria (precargada M1)">
         <div className="form-row cols-3">
-          <ZdsInput name="qd_canal" control={control} label="Canal de Recepción" readOnly />
-          <ZdsInput name="qd_productoSFC" control={control} label="Producto SFC" readOnly />
-          <ZdsInput name="qd_motivoSFC" control={control} label="Motivo SFC" readOnly />
+          <div className="zds-field-wrap">
+            <span className="info-bar-label">Canal de Recepción</span>
+            <div className="info-bar-value" style={{ marginTop: 'var(--zs-50)' }}>{canalDesc}</div>
+          </div>
+          <div className="zds-field-wrap">
+            <span className="info-bar-label">Producto SFC</span>
+            <div className="info-bar-value" style={{ marginTop: 'var(--zs-50)' }}>{productoDesc}</div>
+          </div>
+          <div className="zds-field-wrap">
+            <span className="info-bar-label">Motivo SFC</span>
+            <div className="info-bar-value" style={{ marginTop: 'var(--zs-50)' }}>{motivoDesc}</div>
+          </div>
         </div>
         <div className="form-row cols-3">
           <ZdsInput name="qd_instanciaRecepcion" control={control} label="Instancia de Recepción" readOnly />
-          <ZdsInput name="qd_admision" control={control} label="Admisión" readOnly />
+          <div className="zds-field-wrap">
+            <span className="info-bar-label">Admisión</span>
+            <div className="info-bar-value" style={{ marginTop: 'var(--zs-50)' }}>{admisionDesc}</div>
+          </div>
           <ZdsInput name="qd_enteControl" control={control} label="Ente de Control" readOnly />
         </div>
       </FormSection>
@@ -60,7 +93,10 @@ export default function SeccionDetalleCaso({ control, estado, nombre, identifica
       {/* ── S3 · Descripción de la Queja (SEC-049) ── */}
       <FormSection title="Descripción de la Queja">
         <div className="form-row cols-1">
-          <ZdsInput name="qd_motivoSFC" control={control} label="Asunto de la Queja" readOnly />
+          <div className="zds-field-wrap">
+            <span className="info-bar-label">Asunto de la Queja</span>
+            <div className="info-bar-value" style={{ marginTop: 'var(--zs-50)' }}>{motivoDesc}</div>
+          </div>
         </div>
         <div className="form-row cols-1">
           <ZdsTextarea name="qd_textoQueja" control={control} label="Descripción / Texto de la Queja" readOnly />

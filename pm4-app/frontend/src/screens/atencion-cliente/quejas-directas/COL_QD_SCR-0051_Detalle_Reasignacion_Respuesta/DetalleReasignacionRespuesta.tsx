@@ -21,7 +21,7 @@ export default function DetalleReasignacionRespuesta() {
   const [showVistaPrevia, setShowVistaPrevia] = useState(false);
 
   const form = useForm<DetalleReasignacionRespuestaFormData>({ defaultValues: DEFAULTS });
-  const { control, watch, handleSubmit, reset, formState: { errors, isSubmitted } } = form;
+  const { watch, handleSubmit, reset, formState: { errors, isSubmitted } } = form;
   const w = watch();
 
   useEffect(() => {
@@ -119,7 +119,7 @@ export default function DetalleReasignacionRespuesta() {
         )}
 
         <form onSubmit={onEnviar} noValidate>
-          <SeccionDetalleCaso control={control} estado={w.qd_estadoSS || ''} nombre={nombre} identificacion={identificacion} />
+          <SeccionDetalleCaso form={form} estado={w.qd_estadoSS || ''} nombre={nombre} identificacion={identificacion} />
           <SeccionAsignacion form={form} err={err} onConfirmarReasignacion={onReasignarQueja} onSolicitarAyuda={onSolicitarAyuda} submitting={submitting} />
           <SeccionRespuesta
             form={form} fileRegistry={fileRegistry} err={err}
