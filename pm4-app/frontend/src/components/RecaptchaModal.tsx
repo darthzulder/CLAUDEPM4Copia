@@ -62,10 +62,29 @@ export default function RecaptchaModal({ open, onVerified, onClose }: Props) {
   onVerifiedRef.current = onVerified;
   const [status, setStatus] = useState<'loading' | 'ready' | 'error'>('loading');
 
+  // Google a veces emite "reCAPTCHA Timeout (d)" como unhandledrejection interno
+  // (bug conocido del script; el token ya se consumió, es inofensivo). Lo silenciamos
+  // de forma acotada para no ensuciar la consola en producción.
   useEffect(() => {
-    // Al cerrar, el modal se desmonta con su contenedor; olvidamos el widget para
-    // renderizar uno nuevo (en un contenedor visible) la próxima vez que se abra.
-    if (!open) { widgetIdRef.current = null; return; }
+    const onRejection = (e: PromiseRejectionEvent) => {
+      const msg = String(e?.reason?.message ?? e?.reason ?? '');
+      if (/recaptcha/i.test(msg) && /timeout/i.test(msg)) e.preventDefault();
+    };
+    window.addEventListener('unhandledrejection', onRejection);
+    return () => window.removeEventListener('unhandledrejection', onRejection);
+  }, []);
+
+  useEffect(() => {
+    // Al cerrar, el modal se desmonta con su contenedor; reseteamos el widget (limpia el
+    // token y su timer de expiración → evita el "Timeout" tardío) y lo olvidamos para
+    // renderizar uno nuevo la próxima vez que se abra.
+    if (!open) {
+      if (widgetIdRef.current !== null) {
+        try { window.grecaptcha?.reset?.(widgetIdRef.current); } catch { /* widget ya removido */ }
+      }
+      widgetIdRef.current = null;
+      return;
+    }
 
     if (!SITE_KEY) { setStatus('error'); return; }
 

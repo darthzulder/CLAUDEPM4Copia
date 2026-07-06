@@ -47,6 +47,9 @@ router.post('/verify', async (req: Request, res: Response) => {
     if (data.success) {
       res.json({ success: true, verified: true });
     } else {
+      // error-codes típicos: invalid-input-secret (secret incorrecto / es la site key),
+      // invalid-input-response (token inválido/mal formado), timeout-or-duplicate (token ya usado/expirado).
+      console.warn('[recaptcha] siteverify rechazó el token. error-codes:', data['error-codes']);
       res.status(400).json({ success: false, verified: false, errors: data['error-codes'] ?? [] });
     }
   } catch (err) {
