@@ -42,18 +42,24 @@ export default function RespuestaAreaResponsable() {
   const nombre = (w.qd_razonSocial || `${w.qd_nombres ?? ''} ${w.qd_apellidos ?? ''}`).trim();
   const identificacion = `${w.qd_tipoIdentificacion ?? ''} ${w.qd_numeroIdentificacion ?? ''}`.trim();
 
-  const uploadFiles = async (requestId: number) => {
+  // Sube cada archivo y devuelve un mapa docKey → file_id (fileUploadId de PM4),
+  // para poder guardar el id del adjunto en el historial y descargarlo luego.
+  const uploadFiles = async (requestId: number): Promise<Record<string, number>> => {
+    const ids: Record<string, number> = {};
     for (const [docKey, file] of fileRegistry.current.entries()) {
       const fd = new FormData();
       fd.append('file', file);
-      await pm4.post(`/requests/${requestId}/files?data_name=${docKey}`, fd);
+      const r = await pm4.post(`/requests/${requestId}/files?data_name=${docKey}`, fd);
+      const id = (r.data as { fileUploadId?: number })?.fileUploadId;
+      if (typeof id === 'number') ids[docKey] = id;
     }
+    return ids;
   };
 
   // Registra la respuesta del ayudante en el array diferenciado (qd_respuestasAyuda) y
   // completa la fila correspondiente del historial (qd_historialAsignaciones), matcheando
   // por qd_numeroAyuda (1-based) → índice del array. Solo se aplica al ENVIAR definitivo.
-  const registrarRespuesta = (data: RespuestaAreaResponsableFormData) => {
+  const registrarRespuesta = (data: RespuestaAreaResponsableFormData, adjuntoFileId?: number) => {
     const numero = Number(data.qd_numeroAyuda) || 0;
     const idx = numero - 1;
     const respondio = data.qd_usuarioResponsable || data.qd_areaResponsable || '—';
@@ -65,15 +71,16 @@ export default function RespuestaAreaResponsable() {
     if (idx >= 0 && idx < historial.length) {
       historial[idx] = {
         ...historial[idx],
-        respondio,
+        respondio: 'si', // marca que el ayudante ya respondió (SCR-0051 lo pinta con un check verde)
         comentario: data.qd_comentarioArea,
-        adjunto: adjunto || '—',
+        adjunto, // nombre real del archivo ('' si no adjuntó) → SCR-0051 lo enlaza para descarga
+        adjuntoFileId, // file_id en PM4 para descarga exacta
       };
     }
 
     const respuestas: RespuestaAyuda[] = Array.isArray(data.qd_respuestasAyuda)
       ? [...data.qd_respuestasAyuda] : [];
-    const nuevaRespuesta: RespuestaAyuda = { numero, fecha, respondio, comentario: data.qd_comentarioArea, adjunto };
+    const nuevaRespuesta: RespuestaAyuda = { numero, fecha, respondio, comentario: data.qd_comentarioArea, adjunto, adjuntoFileId };
     if (idx >= 0) respuestas[idx] = nuevaRespuesta;
     else respuestas.push(nuevaRespuesta);
 
@@ -84,8 +91,9 @@ export default function RespuestaAreaResponsable() {
     setEnviarError(null);
     try {
       const requestId = task?.process_request_id;
-      if (requestId && fileRegistry.current.size > 0) await uploadFiles(requestId);
-      const extra = accion === 'ENVIAR' ? registrarRespuesta(data) : {};
+      let uploadedIds: Record<string, number> = {};
+      if (requestId && fileRegistry.current.size > 0) uploadedIds = await uploadFiles(requestId);
+      const extra = accion === 'ENVIAR' ? registrarRespuesta(data, uploadedIds[ADJUNTO_KEY]) : {};
       await completeTask({ ...data, ...extra, qd_accion: accion } as unknown as Record<string, unknown>);
     } catch (e) {
       // No tragar el error: si la tarea no se completa, PM4 no cierra el iframe.

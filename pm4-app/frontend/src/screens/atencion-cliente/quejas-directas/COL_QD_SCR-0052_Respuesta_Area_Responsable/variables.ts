@@ -25,6 +25,7 @@ export interface RespuestaAyuda {
   respondio: string;   // usuario/área que respondió
   comentario: string;  // qd_comentarioArea
   adjunto: string;     // nombre del archivo adjunto (qd_adjuntoArea), '' si no hay
+  adjuntoFileId?: number; // file_id devuelto por PM4 al subir (para descarga exacta)
 }
 
 // ---------------------------------------------------------------------------

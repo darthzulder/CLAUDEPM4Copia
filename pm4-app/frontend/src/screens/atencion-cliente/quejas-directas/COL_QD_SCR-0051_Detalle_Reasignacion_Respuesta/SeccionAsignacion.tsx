@@ -3,9 +3,10 @@ import type { UseFormReturn } from 'react-hook-form';
 import FormSection from '../../../../components/FormSection';
 import {
   ZdsSelect, ZdsTextarea, ZdsRadio,
-  ZrButton, ZrAlert, ZrTable,
+  ZrButton, ZrAlert, ZrTable, ZdsStatusBadge,
 } from '../../../../components/fields/ZdsFields';
 import { useCollection } from '../../../../core/useCollection';
+import pm4 from '../../../../api/pm4Client';
 import {
   OPTIONS, COLLECTION_DEFS, MAX_AYUDANTES,
   type DetalleReasignacionRespuestaFormData, type AsignacionHistorial,
@@ -32,6 +33,17 @@ export default function SeccionAsignacion({ form, err, onConfirmarReasignacion, 
   // RUL-0051-08 — máx. 4 ayudantes.
   const historial: AsignacionHistorial[] = Array.isArray(w.qd_historialAsignaciones) ? w.qd_historialAsignaciones : [];
   const ayudantesAlcanzado = historial.length >= MAX_AYUDANTES;
+
+  // Descarga el adjunto de un ayudante por su file_id (guardado por SCR-0052 al responder).
+  const descargarAdjunto = async (fileId: number, fileName: string) => {
+    const r = await pm4.get(`/files/${fileId}/contents`, { responseType: 'blob' });
+    const url = URL.createObjectURL(r.data as Blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = fileName;
+    a.click();
+    URL.revokeObjectURL(url);
+  };
 
   const { options: areaOpts } = useCollection(COLLECTION_DEFS.area);
   const { options: motivoReasignacionOpts } = useCollection(COLLECTION_DEFS.motivoReasignacion);
@@ -211,7 +223,9 @@ export default function SeccionAsignacion({ form, err, onConfirmarReasignacion, 
       </FormSection>
 
       {/* ── S7 · Historial de Asignaciones (SEC-053) ── */}
-      {mostrarReasignacion && (
+      {/* Visible si se está reasignando o si ya hay filas: así no desaparece al llegar al
+          máximo de ayudantes (RUL-0051-08) ni al cerrar el bloque de solicitud. */}
+      {(mostrarReasignacion || historial.length > 0) && (
         <FormSection title="Historial de Asignaciones">
           <ZrTable zebra>
             <table>
@@ -232,9 +246,20 @@ export default function SeccionAsignacion({ form, err, onConfirmarReasignacion, 
                       <td>{row.para}</td>
                       <td>{row.motivo}</td>
                       <td>{row.observaciones}</td>
-                      <td>{row.respondio ?? '—'}</td>
+                      <td>
+                        {row.respondio === 'si'
+                          ? <ZdsStatusBadge variant="success">✓</ZdsStatusBadge>
+                          : '—'}
+                      </td>
                       <td>{row.comentario ?? '—'}</td>
-                      <td>{row.adjunto ?? '—'}</td>
+                      <td>
+                        {row.adjunto && row.adjuntoFileId
+                          ? <ZrButton config="link:s" icon="download:line"
+                              onClick={() => descargarAdjunto(row.adjuntoFileId as number, row.adjunto as string)}>
+                              {row.adjunto}
+                            </ZrButton>
+                          : (row.adjunto || '—')}
+                      </td>
                     </tr>
                   ))
                 )}

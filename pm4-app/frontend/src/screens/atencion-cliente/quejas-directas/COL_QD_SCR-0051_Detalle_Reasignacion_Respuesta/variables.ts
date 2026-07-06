@@ -67,7 +67,8 @@ export interface AsignacionHistorial {
   observaciones: string;
   respondio?: string;
   comentario?: string;
-  adjunto?: string;
+  adjunto?: string;       // nombre del archivo (para mostrar)
+  adjuntoFileId?: number; // file_id en PM4 (para descargar) — lo setea SCR-0052
 }
 
 // Claves de adjuntos internos de soporte (FLD-113, S9). Máx. MAX_SOPORTES.
