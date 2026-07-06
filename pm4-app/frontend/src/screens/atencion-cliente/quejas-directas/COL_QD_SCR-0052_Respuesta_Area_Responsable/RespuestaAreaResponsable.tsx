@@ -42,6 +42,12 @@ export default function RespuestaAreaResponsable() {
   const nombre = (w.qd_razonSocial || `${w.qd_nombres ?? ''} ${w.qd_apellidos ?? ''}`).trim();
   const identificacion = `${w.qd_tipoIdentificacion ?? ''} ${w.qd_numeroIdentificacion ?? ''}`.trim();
 
+  // Solicitud de ayuda específica (fila del historial que originó este subproceso, SCR-0051).
+  // Se matchea por qd_numeroAyuda (1-based) → índice del historial.
+  const numeroAyuda = Number(w.qd_numeroAyuda) || 0;
+  const historialAsig: AsignacionHistorial[] = Array.isArray(w.qd_historialAsignaciones) ? w.qd_historialAsignaciones : [];
+  const solicitud = historialAsig[numeroAyuda - 1];
+
   // Sube cada archivo y devuelve un mapa docKey → file_id (fileUploadId de PM4),
   // para poder guardar el id del adjunto en el historial y descargarlo luego.
   const uploadFiles = async (requestId: number): Promise<Record<string, number>> => {
@@ -112,7 +118,7 @@ export default function RespuestaAreaResponsable() {
     return { qd_historialAsignaciones: historial, qd_respuestasAyuda: respuestas };
   };
 
-  const enviarCon = (accion: AccionRespuestaArea) => async (data: RespuestaAreaResponsableFormData) => {
+  const enviarCon = (accion: AccionRespuestaArea) => async (data: RespuestaAreaResponsableFormData): Promise<boolean> => {
     setEnviarError(null);
     try {
       const requestId = task?.process_request_id;
@@ -120,6 +126,7 @@ export default function RespuestaAreaResponsable() {
       if (requestId && fileRegistry.current.size > 0) uploadedIds = await uploadFiles(requestId);
       const extra = accion === 'ENVIAR' ? await registrarRespuesta(data, uploadedIds[ADJUNTO_KEY]) : {};
       await completeTask({ ...data, ...extra, qd_accion: accion } as unknown as Record<string, unknown>);
+      return true;
     } catch (e) {
       // No tragar el error: si la tarea no se completa, PM4 no cierra el iframe.
       // Mostrarlo en pantalla para saber la causa real del fallo.
@@ -127,12 +134,17 @@ export default function RespuestaAreaResponsable() {
       const msg = err.response?.data?.message ?? err.message ?? 'Error desconocido al enviar.';
       console.error('[RespuestaAreaResponsable] Error al enviar:', e);
       setEnviarError(msg);
+      return false;
     }
   };
 
   // ACT-0052-01 Enviar comentario (valida RUL-0052-01) · ACT-0052-02 Guardar Borrador.
   const onEnviar = handleSubmit(enviarCon('ENVIAR'));
-  const onGuardarBorrador = () => enviarCon('GUARDAR_BORRADOR')(w);
+  // Guardar Borrador: guarda los datos del formulario y sale a la URL base (solo si se guardó bien).
+  const onGuardarBorrador = async () => {
+    const ok = await enviarCon('GUARDAR_BORRADOR')(w);
+    if (ok) window.location.href = window.location.origin;
+  };
 
   if (loading) {
     return <div className="screen-wrapper"><div className="screen-loading"><ZrLoader /></div></div>;
@@ -200,17 +212,31 @@ export default function RespuestaAreaResponsable() {
             </div>
           </FormSection>
 
-          {/* ── S4 · Datos de la Asignación (SEC-057, solo lectura) ── */}
-          <FormSection title="Datos de la Asignación">
+          {/* ── S4 · Solicitud de Ayuda (datos que vienen de SCR-0051 para esta petición) ── */}
+          <FormSection title="Solicitud de Ayuda">
             <div className="form-row cols-2">
-              <ZdsInput name="qd_areaResponsable" control={control} label="Área" readOnly
-                helpText="Área responsable asignada al caso." />
-              <ZdsInput name="qd_usuarioResponsable" control={control} label="Responsable" readOnly
-                helpText="Usuario asignado para gestionar el caso." />
+              <div className="zds-field-wrap">
+                <span className="info-bar-label">Fecha de solicitud</span>
+                <div className="info-bar-value" style={{ marginTop: 'var(--zs-50)' }}>{solicitud?.fecha || '—'}</div>
+              </div>
+              <div className="zds-field-wrap">
+                <span className="info-bar-label">Solicitado por</span>
+                <div className="info-bar-value" style={{ marginTop: 'var(--zs-50)' }}>{solicitud?.de || '—'}</div>
+              </div>
             </div>
             <div className="form-row cols-1">
-              <ZdsTextarea name="qd_observacionesAsignacion" control={control} label="Observaciones" readOnly
-                helpText="Observaciones registradas al momento de la asignación." />
+              <div className="zds-field-wrap">
+                <span className="info-bar-label">Motivo</span>
+                <div className="info-bar-value" style={{ marginTop: 'var(--zs-50)' }}>{solicitud?.motivo || '—'}</div>
+              </div>
+            </div>
+            <div className="form-row cols-1">
+              <div className="zds-field-wrap">
+                <span className="info-bar-label">Observaciones</span>
+                <div className="info-bar-value" style={{ marginTop: 'var(--zs-50)', whiteSpace: 'pre-wrap' }}>
+                  {solicitud?.observaciones || '—'}
+                </div>
+              </div>
             </div>
           </FormSection>
 
