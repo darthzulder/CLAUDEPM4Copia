@@ -27,13 +27,13 @@ export default function DocSupportUploader<T extends FieldValues>({
   const { watch, setValue, setError, clearErrors, control, formState: { errors } } = form;
   // Valores actuales del formulario para poder desplazar los slots.
   const objWatch = watch();
-  const [numDocs, setNumDocs] = useState(1);
+  const [intNumDocs, setIntNumDocs] = useState(1);
   // Tope real de documentos, acotado por la cantidad de claves disponibles.
   const intLimit = Math.min(max, docKeys.length);
 
   const handleRemoveSlot = (in_intIdxDelete: number) => {
     // Desplazamos hacia arriba los campos posteriores al eliminado.
-    for (let intI = in_intIdxDelete; intI < numDocs - 1; intI++) {
+    for (let intI = in_intIdxDelete; intI < intNumDocs - 1; intI++) {
       const strCurrentKey = docKeys[intI];
       const strNextKey = docKeys[intI + 1];
       const objNextVal = (objWatch as Record<string, unknown>)[strNextKey as string];
@@ -63,13 +63,13 @@ export default function DocSupportUploader<T extends FieldValues>({
     }
 
     // Limpiamos el ultimo slot.
-    const strLastKey = docKeys[numDocs - 1];
+    const strLastKey = docKeys[intNumDocs - 1];
     setValue(strLastKey, '' as never);
     fileRegistry.current.delete(strLastKey as string);
     clearErrors(strLastKey);
 
     // Reducimos el contador de documentos.
-    setNumDocs((n) => Math.max(1, n - 1));
+    setIntNumDocs((n) => Math.max(1, n - 1));
   };
 
   return (
@@ -77,7 +77,7 @@ export default function DocSupportUploader<T extends FieldValues>({
       <div className="form-subsection-title">{title}</div>
       <p className="subsection-intro">{intro}</p>
       <div z-flex="col:75">
-        {docKeys.slice(0, numDocs).map((docKey, in_intIdx) => {
+        {docKeys.slice(0, intNumDocs).map((docKey, in_intIdx) => {
           const strErrorMsg = (errors as Record<string, any>)[docKey]?.message;
           return (
             <div key={docKey} className="doc-row">
@@ -94,7 +94,7 @@ export default function DocSupportUploader<T extends FieldValues>({
                 maxSizeMb={5}
                 errorMessage="Solo se permiten archivos pdf, jpg, png o docx, máx 5 MB (MSG-000-06)"
               />
-              {numDocs > 1 && (
+              {intNumDocs > 1 && (
                 <ZrButton
                   config="secondary:s"
                   icon="trash:line"
@@ -106,10 +106,10 @@ export default function DocSupportUploader<T extends FieldValues>({
           );
         })}
       </div>
-      {numDocs < intLimit && (
+      {intNumDocs < intLimit && (
         <ZrButton
           config="secondary"
-          onClick={() => setNumDocs((n) => n + 1)}
+          onClick={() => setIntNumDocs((n) => n + 1)}
           style={{ marginTop: 'var(--zs-75)' }}
           icon="plus:line"
         >

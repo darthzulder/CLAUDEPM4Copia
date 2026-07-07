@@ -18,7 +18,7 @@ function parsearErrores(in_objErrorsJson: unknown): CampoConError[] {
 
 export default function CorregirDatosFormulario() {
   const { task, loading, error, submitting, completeTask } = useTask();
-  const [triggered, setTriggered] = useState(false);
+  const [blnTriggered, setBlnTriggered] = useState(false);
 
   const form = useForm<CorregirDatosFormData>({ mode: 'onChange' });
   const { control, handleSubmit, reset, trigger, watch, formState: { errors } } = form;
@@ -39,12 +39,12 @@ export default function CorregirDatosFormulario() {
   }, [lstFieldsWithError]);
 
   // Antes del trigger asumimos todos pendientes; luego leemos formState.errors
-  const intPendingErrors = triggered
+  const intPendingErrors = blnTriggered
     ? lstErrorFieldNames.filter(objName => !!errors[objName]).length
     : lstFieldsWithError.length;
 
   // Habilita el envío solo cuando no quedan errores pendientes.
-  const blnCanSubmit = triggered && intPendingErrors === 0 && !submitting;
+  const blnCanSubmit = blnTriggered && intPendingErrors === 0 && !submitting;
 
   // Precargamos el formulario y disparamos la validación de los campos con error.
   useEffect(() => {
@@ -65,7 +65,7 @@ export default function CorregirDatosFormulario() {
 
     const tspTimer = setTimeout(async () => {
       await trigger(lstFieldsToTrigger);
-      setTriggered(true);
+      setBlnTriggered(true);
     }, 80);
     return () => clearTimeout(tspTimer);
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -127,7 +127,7 @@ export default function CorregirDatosFormulario() {
           </FormSection>
 
           {/* Campos con Error */}
-          <SeccionErroresValidacion camposConError={lstFieldsWithError} form={form} triggered={triggered} />
+          <SeccionErroresValidacion camposConError={lstFieldsWithError} form={form} triggered={blnTriggered} />
 
           {/* Aviso sobre re-ejecución automática */}
           <ZrAlert config="alert" {...({ 'hide-close': true } as object)}>

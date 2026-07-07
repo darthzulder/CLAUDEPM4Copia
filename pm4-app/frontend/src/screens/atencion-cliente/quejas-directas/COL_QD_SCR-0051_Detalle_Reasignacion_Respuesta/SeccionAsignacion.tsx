@@ -25,8 +25,8 @@ export default function SeccionAsignacion({ form, err, onConfirmarReasignacion, 
   const { control, watch, setValue } = form;
   // Tomamos una foto de los valores actuales del formulario.
   const objWatch = watch();
-  const [modoReasignacion, setModoReasignacion] = useState(false);
-  const [snapshot, setSnapshot] = useState({ area: '', usuario: '', obs: '' });
+  const [blnReassignMode, setBlnReassignMode] = useState(false);
+  const [objSnapshot, setObjSnapshot] = useState({ area: '', usuario: '', obs: '' });
 
   // RUL-0051-07 — bloque de reasignación visible si "¿Necesitas de otras áreas?" = Sí.
   const blnShowReassign = objWatch.qd_necesitaOtrasAreas === 'SI';
@@ -61,20 +61,20 @@ export default function SeccionAsignacion({ form, err, onConfirmarReasignacion, 
 
   // Guarda un snapshot de la asignación actual y entra en modo reasignación.
   const iniciarReasignacion = () => {
-    setSnapshot({
+    setObjSnapshot({
       area: objWatch.qd_areaResponsable || '',
       usuario: objWatch.qd_usuarioResponsable || '',
       obs: objWatch.qd_observacionesAsignacion || '',
     });
-    setModoReasignacion(true);
+    setBlnReassignMode(true);
   };
 
   // Restaura el snapshot y sale del modo reasignación.
   const cancelarReasignacion = () => {
-    setValue('qd_areaResponsable', snapshot.area);
-    setValue('qd_usuarioResponsable', snapshot.usuario);
-    setValue('qd_observacionesAsignacion', snapshot.obs);
-    setModoReasignacion(false);
+    setValue('qd_areaResponsable', objSnapshot.area);
+    setValue('qd_usuarioResponsable', objSnapshot.usuario);
+    setValue('qd_observacionesAsignacion', objSnapshot.obs);
+    setBlnReassignMode(false);
   };
 
   // ACT-0051-03 — añade el ayudante al historial (RUL-0051-04 valida campos obligatorios).
@@ -119,29 +119,29 @@ export default function SeccionAsignacion({ form, err, onConfirmarReasignacion, 
   return (
     <>
       {/* ── S5 · Asignación de Responsable (SEC-051) ── */}
-      {/* Siempre visible; datos pre-calculados por el BPM. Editable solo en modoReasignacion. */}
+      {/* Siempre visible; datos pre-calculados por el BPM. Editable solo en blnReassignMode. */}
       <FormSection title="Asignación de Responsable">
         <div className="form-row cols-2">
           <ZdsSelect
             name="qd_areaResponsable" control={control} label="Área responsable"
-            options={cllArea} withSearch disabled={!modoReasignacion}
+            options={cllArea} withSearch disabled={!blnReassignMode}
             helpText="Áreas habilitadas para quejas (CAT-AREA)."
           />
           <ZdsSelect
             name="qd_usuarioResponsable" control={control} label="Usuario responsable"
             options={cllAreaUsers} withSearch
-            disabled={!modoReasignacion || !objWatch.qd_areaResponsable}
+            disabled={!blnReassignMode || !objWatch.qd_areaResponsable}
             helpText="Solo usuarios autorizados del área (RUL-0051-02)."
           />
         </div>
-        {modoReasignacion && (
+        {blnReassignMode && (
           <div className="form-row cols-1">
             <ZdsTextarea name="qd_observacionesAsignacion" control={control}
               label="Comentario de reasignación" maxLength={2000} />
           </div>
         )}
         <div z-flex="75" z-align="right:center" style={{ marginTop: 'var(--zs-75)' }}>
-          {modoReasignacion ? (
+          {blnReassignMode ? (
             <>
               <ZrButton config="secondary" onClick={cancelarReasignacion} disabled={submitting}>
                 Cancelar

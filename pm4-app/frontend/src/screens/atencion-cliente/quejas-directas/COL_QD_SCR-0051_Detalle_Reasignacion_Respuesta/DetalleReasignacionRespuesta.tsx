@@ -17,8 +17,8 @@ import SeccionRespuesta from './SeccionRespuesta';
 export default function DetalleReasignacionRespuesta() {
   const { task, loading, error, submitting, completeTask } = useTask();
   const fileRegistry = useRef(new Map<string, File>());
-  const [showExpediente, setShowExpediente] = useState(false);
-  const [showVistaPrevia, setShowVistaPrevia] = useState(false);
+  const [blnShowExpediente, setBlnShowExpediente] = useState(false);
+  const [blnShowPreview, setBlnShowPreview] = useState(false);
 
   const form = useForm<DetalleReasignacionRespuestaFormData>({ defaultValues: DEFAULTS });
   const { watch, handleSubmit, reset, formState: { errors, isSubmitted } } = form;
@@ -129,7 +129,7 @@ export default function DetalleReasignacionRespuesta() {
           <SeccionAsignacion form={form} err={err} onConfirmarReasignacion={onReasignarQueja} onSolicitarAyuda={onSolicitarAyuda} submitting={submitting} />
           <SeccionRespuesta
             form={form} fileRegistry={fileRegistry} err={err}
-            onVistaPrevia={() => setShowVistaPrevia(true)}
+            onVistaPrevia={() => setBlnShowPreview(true)}
             onSolicitarProrroga={onSolicitarProrroga}
             slaCritico={blnSlaCritical}
             submitting={submitting}
@@ -144,7 +144,7 @@ export default function DetalleReasignacionRespuesta() {
 
           {/* Acciones (ACT-0051-01..08) */}
           <ActionBar>
-            <ZrButton config="link" icon="file-text:line" onClick={() => setShowExpediente(true)}>
+            <ZrButton config="link" icon="file-text:line" onClick={() => setBlnShowExpediente(true)}>
               Ver Expediente Completo
             </ZrButton>
             <ZrButton config="secondary" disabled={submitting} loading={submitting}
@@ -160,8 +160,8 @@ export default function DetalleReasignacionRespuesta() {
       </div>
 
       {/* ACT-0051-06 · Ver Expediente Completo */}
-      {showExpediente && (
-        <ZrModal model={showExpediente} onChange={(open: boolean) => setShowExpediente(open)}>
+      {blnShowExpediente && (
+        <ZrModal model={blnShowExpediente} onChange={(open: boolean) => setBlnShowExpediente(open)}>
           <h3 style={{ margin: '0 0 var(--zs-75)', font: 'var(--zf-h-20--700)', color: 'var(--z-text)' }}>
             Expediente del caso
           </h3>
@@ -170,14 +170,14 @@ export default function DetalleReasignacionRespuesta() {
           </p>
           <p style={{ font: 'var(--zf-cap-14)' }}>{objWatch.qd_textoQueja || 'Sin descripción.'}</p>
           <div z-flex="75" z-align="right:center" style={{ marginTop: 'var(--zs-100)' }}>
-            <ZrButton config="secondary:s" onClick={() => setShowExpediente(false)}>Cerrar</ZrButton>
+            <ZrButton config="secondary:s" onClick={() => setBlnShowExpediente(false)}>Cerrar</ZrButton>
           </div>
         </ZrModal>
       )}
 
       {/* ACT-0051-05 · Vista Previa Respuesta Final */}
-      {showVistaPrevia && (
-        <ZrModal model={showVistaPrevia} onChange={(open: boolean) => setShowVistaPrevia(open)}>
+      {blnShowPreview && (
+        <ZrModal model={blnShowPreview} onChange={(open: boolean) => setBlnShowPreview(open)}>
           <h3 style={{ margin: '0 0 var(--zs-75)', font: 'var(--zf-h-20--700)', color: 'var(--z-text)' }}>
             Vista previa — carta de respuesta final
           </h3>
@@ -186,7 +186,7 @@ export default function DetalleReasignacionRespuesta() {
             {objWatch.qd_respuestaCliente || 'Aún no se ha redactado la respuesta al cliente.'}
           </p>
           <div z-flex="75" z-align="right:center" style={{ marginTop: 'var(--zs-100)' }}>
-            <ZrButton config="secondary:s" onClick={() => setShowVistaPrevia(false)}>Cerrar</ZrButton>
+            <ZrButton config="secondary:s" onClick={() => setBlnShowPreview(false)}>Cerrar</ZrButton>
           </div>
         </ZrModal>
       )}

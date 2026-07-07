@@ -29,7 +29,7 @@ export default function SeccionRespuesta({ form, fileRegistry, err, onVistaPrevi
   const blnShowActions = objWatch.qd_respuestaFavorDe === 'CLIENTE';
 
   // ACT-0051-04 — flujo de prórroga en dos pasos: primero se elige el motivo, luego se envía.
-  const [modoProrroga, setModoProrroga] = useState(false);
+  const [blnExtensionMode, setBlnExtensionMode] = useState(false);
   // Cargamos el catálogo de motivos de prórroga.
   const { options: cllExtensionReason } = useCollection(COLLECTION_DEFS.motivoProrroga);
   const blnCanSendExt = !!objWatch.qd_motivoProrroga;
@@ -102,7 +102,7 @@ export default function SeccionRespuesta({ form, fileRegistry, err, onVistaPrevi
         />
         {/* ACT-0051-04 — al pedir prórroga se muestra el motivo (CAT-MOTIVO-PRORROGA); el
             botón Enviar aparece recién con el motivo elegido y hace submit SOLICITAR_PRORROGA. */}
-        {modoProrroga && (
+        {blnExtensionMode && (
           <div className="form-row cols-1" style={{ marginTop: 'var(--zs-75)' }}>
             <ZdsSelect
               name="qd_motivoProrroga" control={control} label="Motivo de la prórroga"
@@ -116,15 +116,15 @@ export default function SeccionRespuesta({ form, fileRegistry, err, onVistaPrevi
           <ZrButton config="secondary" onClick={onVistaPrevia}>
             Vista Previa Respuesta Final
           </ZrButton>
-          {!modoProrroga ? (
+          {!blnExtensionMode ? (
             <ZrButton config="secondary"
               disabled={!slaCritico || submitting}
-              onClick={() => setModoProrroga(true)}>
+              onClick={() => setBlnExtensionMode(true)}>
               Solicitar Prórroga Regulatoria
             </ZrButton>
           ) : (
             <>
-              <ZrButton config="secondary" disabled={submitting} onClick={() => setModoProrroga(false)}>
+              <ZrButton config="secondary" disabled={submitting} onClick={() => setBlnExtensionMode(false)}>
                 Cancelar
               </ZrButton>
               <ZrButton config="positive"

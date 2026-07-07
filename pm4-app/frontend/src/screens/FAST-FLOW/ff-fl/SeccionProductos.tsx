@@ -18,7 +18,7 @@ const TABS = [
 
 export default function SeccionProductos({ form, fileRegistry }: { form: Form; fileRegistry: React.MutableRefObject<Map<string, File>> }) {
   const objWatch = form.watch();
-  const [activeTab, setActiveTab] = useState('');
+  const [strActiveTab, setStrActiveTab] = useState('');
 
   // Dejamos solo las pestañas de los productos que el usuario seleccionó
   const lstActiveTabs = TABS.filter((objTab) => objWatch[objTab.field]);
@@ -27,8 +27,8 @@ export default function SeccionProductos({ form, fileRegistry }: { form: Form; f
   // Si la pestaña activa ya no existe, saltamos a la primera disponible
   useEffect(() => {
     if (lstActiveTabs.length === 0) return;
-    if (!lstActiveTabs.find((objTab) => objTab.key === activeTab)) {
-      setActiveTab(lstActiveTabs[0].key);
+    if (!lstActiveTabs.find((objTab) => objTab.key === strActiveTab)) {
+      setStrActiveTab(lstActiveTabs[0].key);
     }
   }, [strActiveTabKeys]);  // eslint-disable-line react-hooks/exhaustive-deps
 
@@ -37,17 +37,17 @@ export default function SeccionProductos({ form, fileRegistry }: { form: Form; f
   return (
     <div className="products-card">
       <ZrTabs
-        model={Math.max(1, lstActiveTabs.findIndex((objTab) => objTab.key === activeTab) + 1)}
-        onChange={(in_intIdx: number) => { const objTab = lstActiveTabs[in_intIdx - 1]; if (objTab) setActiveTab(objTab.key); }}
+        model={Math.max(1, lstActiveTabs.findIndex((objTab) => objTab.key === strActiveTab) + 1)}
+        onChange={(in_intIdx: number) => { const objTab = lstActiveTabs[in_intIdx - 1]; if (objTab) setStrActiveTab(objTab.key); }}
         {...({ tabs: lstActiveTabs.map((objTab) => ({ name: objTab.label })) } as Record<string, unknown>)}
       />
 
       {/* Mostramos la sección del producto según la pestaña activa */}
       <div className="products-tab-body">
-        {activeTab === 'dyo'   && <SeccionDyO   form={form} fileRegistry={fileRegistry} />}
-        {activeTab === 'cc'    && <SeccionCC    form={form} fileRegistry={fileRegistry} />}
-        {activeTab === 'pdysi' && <SeccionPDySI form={form} fileRegistry={fileRegistry} />}
-        {activeTab === 'pi'    && <SeccionPI    form={form} fileRegistry={fileRegistry} />}
+        {strActiveTab === 'dyo'   && <SeccionDyO   form={form} fileRegistry={fileRegistry} />}
+        {strActiveTab === 'cc'    && <SeccionCC    form={form} fileRegistry={fileRegistry} />}
+        {strActiveTab === 'pdysi' && <SeccionPDySI form={form} fileRegistry={fileRegistry} />}
+        {strActiveTab === 'pi'    && <SeccionPI    form={form} fileRegistry={fileRegistry} />}
       </div>
     </div>
   );

@@ -130,9 +130,9 @@ def ensure_alianza_collection(in_strBase, in_strToken, in_strTitle, in_arrFields
         {"name": strCodeField, "label": "Código"},
         {"name": strLabelField, "label": "Alianza"},
     ]
-    dicCreateScreenJson = generate_screen_json(in_strTitle, lstScreenFields, is_view=False, screen_category_id=in_strScreenCatId)
+    dicCreateScreenJson = generate_screen_json(in_strTitle, lstScreenFields, in_blnIsView=False, in_strScreenCatId=in_strScreenCatId)
     dicCScreen = create_screen(in_strBase, in_strToken, dicCreateScreenJson)
-    dicViewScreenJson = generate_screen_json(in_strTitle, lstScreenFields, is_view=True, screen_category_id=in_strScreenCatId)
+    dicViewScreenJson = generate_screen_json(in_strTitle, lstScreenFields, in_blnIsView=True, in_strScreenCatId=in_strScreenCatId)
     dicVScreen = create_screen(in_strBase, in_strToken, dicViewScreenJson)
     dicCol = create_collection(in_strBase, in_strToken, {
         "name": in_strTitle,

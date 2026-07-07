@@ -20,7 +20,7 @@ function fe(
 const TIPOS_EMPRESA_BLOQUEADOS = new Set(['ESTATAL', 'ENTIDAD_PUBLICA', 'EXTRANJERA']);
 
 export default function CreacionTomador({ form }: { form: Form }) {
-  const [open, setOpen] = useState(true);
+  const [blnOpen, setBlnOpen] = useState(true);
   const { register, control, formState: { errors, isSubmitted }, watch, setValue } = form;
   const objWatch = watch();
 
@@ -48,7 +48,7 @@ export default function CreacionTomador({ form }: { form: Form }) {
         config="secondary"
         wide
         icon="alert-triangle:line"
-        onClick={() => setOpen(!open)}
+        onClick={() => setBlnOpen(!blnOpen)}
         style={{
           ['--z-button--bg' as any]:    'var(--zc-lemon-20)',
           ['--z-button--color' as any]: 'var(--zc-lemon-aa)',
@@ -56,11 +56,11 @@ export default function CreacionTomador({ form }: { form: Form }) {
           marginBottom: 'var(--zs-75)',
         }}
       >
-        {open ? '▾' : '▸'} Creación de tomador — Persona Jurídica
+        {blnOpen ? '▾' : '▸'} Creación de tomador — Persona Jurídica
         <span style={{ font: 'var(--zf-capt-12)', marginLeft: 'var(--zs-50)' }}>(completar si TIA no encontró el tomador)</span>
       </ZrButton>
 
-      {open && (
+      {blnOpen && (
         <div className="policyholder-create-body">
           {/* Datos básicos de la compañía */}
           <div className="form-row cols-3">

@@ -437,13 +437,13 @@ function SeccionDecision({
 
 export default function CotizacionFfFl() {
   const { task, loading, error, submitting, completeTask } = useTask();
-  const [submitError, setSubmitError] = useState('');
-  const [sent, setSent] = useState(false);
-  const [personalizacionConfirmada, setPersonalizacionConfirmada] = useState(false);
+  const [strSubmitError, setStrSubmitError] = useState('');
+  const [blnSent, setBlnSent] = useState(false);
+  const [blnCustomConfirmed, setBlnCustomConfirmed] = useState(false);
 
   const dicTaskData = (task?.data ?? {}) as Record<string, any>;
 
-  const [slipTab, setSlipTab] = useState('');
+  const [strSlipTab, setStrSlipTab] = useState('');
 
   const intRequestId = task?.process_request_id ?? null;
   const { files } = useRequestFiles(intRequestId);
@@ -465,12 +465,12 @@ export default function CotizacionFfFl() {
 
   // Si la pestaña activa del slip ya no existe, saltamos a la primera
   useEffect(() => {
-    if (lstSlipLines.length > 0 && !lstSlipLines.find((objLine) => objLine.key === slipTab)) {
-      setSlipTab(lstSlipLines[0].key);
+    if (lstSlipLines.length > 0 && !lstSlipLines.find((objLine) => objLine.key === strSlipTab)) {
+      setStrSlipTab(lstSlipLines[0].key);
     }
   }, [lstSlipLines.map((objLine) => objLine.key).join(',')]); // eslint-disable-line react-hooks/exhaustive-deps
 
-  const objCurrentSlipLine = lstSlipLines.find((objLine) => objLine.key === slipTab);
+  const objCurrentSlipLine = lstSlipLines.find((objLine) => objLine.key === strSlipTab);
   // Resolvemos el id del archivo de slip a mostrar
   const intEffectiveSlipId = (() => {
     if (!objCurrentSlipLine) return null;
@@ -512,38 +512,38 @@ export default function CotizacionFfFl() {
   }, [objWatch.cot_dyo_enviar_nc, objWatch.cot_cc_enviar_nc, objWatch.cot_pdysi_enviar_nc, objWatch.cot_pi_enviar_nc, objWatch.cot_orden_firme_nombre, objWatch.cot_decision]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const handleEnviar = async () => {
-    setSubmitError('');
+    setStrSubmitError('');
     const objData = form.getValues();
     const strDecision = objData.cot_decision;
 
-    if (!strDecision) { setSubmitError('Seleccione una decisión para continuar.'); return; }
+    if (!strDecision) { setStrSubmitError('Seleccione una decisión para continuar.'); return; }
 
     if (strDecision === 'PERSONALIZACION') {
-      setPersonalizacionConfirmada(true);
+      setBlnCustomConfirmed(true);
       return;
     }
 
     // Validamos la selección de opción y los datos obligatorios cuando se aprueba
     if (strDecision === 'APROBADA') {
-      if (blnHasDyo   && !objData.cot_dyo_opcion)   { setSubmitError('D&O: Debe seleccionar una opción de cotización.'); return; }
-      if (blnHasCc    && !objData.cot_cc_opcion)    { setSubmitError('Crimen Comercial: Debe seleccionar una opción de cotización.'); return; }
-      if (blnHasPdysi && !objData.cot_pdysi_opcion) { setSubmitError('Protección de Datos y SI: Debe seleccionar una opción de cotización.'); return; }
-      if (blnHasPi    && !objData.cot_pi_opcion)    { setSubmitError('Seg. Profesional: Debe seleccionar una opción de cotización.'); return; }
-      if (!objData.cot_correo_facturacion)        { setSubmitError('Ingrese el correo para facturación.'); return; }
-      if (!objData.cot_orden_firme_nombre)        { setSubmitError('Cargue la orden en firme.'); return; }
+      if (blnHasDyo   && !objData.cot_dyo_opcion)   { setStrSubmitError('D&O: Debe seleccionar una opción de cotización.'); return; }
+      if (blnHasCc    && !objData.cot_cc_opcion)    { setStrSubmitError('Crimen Comercial: Debe seleccionar una opción de cotización.'); return; }
+      if (blnHasPdysi && !objData.cot_pdysi_opcion) { setStrSubmitError('Protección de Datos y SI: Debe seleccionar una opción de cotización.'); return; }
+      if (blnHasPi    && !objData.cot_pi_opcion)    { setStrSubmitError('Seg. Profesional: Debe seleccionar una opción de cotización.'); return; }
+      if (!objData.cot_correo_facturacion)        { setStrSubmitError('Ingrese el correo para facturación.'); return; }
+      if (!objData.cot_orden_firme_nombre)        { setStrSubmitError('Cargue la orden en firme.'); return; }
     }
 
     // Validamos motivo y comentarios cuando se rechaza
     if (strDecision === 'RECHAZADA') {
-      if (!objData.cot_motivo_rechazo)           { setSubmitError('Seleccione el motivo del rechazo.'); return; }
-      if (!objData.cot_comentarios?.trim())       { setSubmitError('Ingrese los comentarios del rechazo.'); return; }
+      if (!objData.cot_motivo_rechazo)           { setStrSubmitError('Seleccione el motivo del rechazo.'); return; }
+      if (!objData.cot_comentarios?.trim())       { setStrSubmitError('Ingrese los comentarios del rechazo.'); return; }
     }
 
     try {
       await completeTask({ ...dicTaskData, ...objData });
-      setSent(true);
+      setBlnSent(true);
     } catch (excError) {
-      setSubmitError((excError as Error).message ?? 'Error desconocido al enviar');
+      setStrSubmitError((excError as Error).message ?? 'Error desconocido al enviar');
     }
   };
 
@@ -552,7 +552,7 @@ export default function CotizacionFfFl() {
   if (error)   return <ZrAlert config="negative" {...({ 'hide-close': true } as object)}>Error cargando la tarea: {error}</ZrAlert>;
 
   // ── Pantalla: Personalización confirmada ────────────────────────────────────
-  if (personalizacionConfirmada) {
+  if (blnCustomConfirmed) {
     return (
       <div className="screen-wrapper">
         <ScreenHeader title="Cotizador Fast Flow — Líneas Financieras" subtitle={[`Cotización # ${String(dicTaskData.frm_gen_num_cotizacion ?? '—')}`]} />
@@ -569,7 +569,7 @@ export default function CotizacionFfFl() {
   }
 
   // ── Pantalla: Enviado ───────────────────────────────────────────────────────
-  if (sent) {
+  if (blnSent) {
     const strDec = objWatch.cot_decision;
     return (
       <div className="screen-wrapper">
@@ -626,8 +626,8 @@ export default function CotizacionFfFl() {
             {lstSlipLines.length > 1 && (
               <div className="slip-tabs">
                 <ZrTabs
-                  model={Math.max(1, lstSlipLines.findIndex((objLine) => objLine.key === slipTab) + 1)}
-                  onChange={(in_intIdx: number) => { const objLine = lstSlipLines[in_intIdx - 1]; if (objLine) setSlipTab(objLine.key); }}
+                  model={Math.max(1, lstSlipLines.findIndex((objLine) => objLine.key === strSlipTab) + 1)}
+                  onChange={(in_intIdx: number) => { const objLine = lstSlipLines[in_intIdx - 1]; if (objLine) setStrSlipTab(objLine.key); }}
                   {...({ tabs: lstSlipLines.map((objLine) => ({ name: objLine.label })) } as Record<string, unknown>)}
                 />
               </div>
@@ -673,7 +673,7 @@ export default function CotizacionFfFl() {
         <SeccionDecision
           form={form}
           onEnviar={handleEnviar}
-          submitError={submitError}
+          submitError={strSubmitError}
           submitting={submitting}
         />
       </div>

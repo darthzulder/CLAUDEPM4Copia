@@ -62,7 +62,7 @@ export default function RecaptchaModal({ open, onVerified, onClose }: Props) {
   // Ref al callback para no re-ejecutar el effect (ni re-renderizar el widget) al cambiarlo.
   const onVerifiedRef = useRef(onVerified);
   onVerifiedRef.current = onVerified;
-  const [status, setStatus] = useState<'loading' | 'ready' | 'error'>('loading');
+  const [strStatus, setStrStatus] = useState<'loading' | 'ready' | 'error'>('loading');
 
   // Google a veces emite "reCAPTCHA Timeout (d)" como unhandledrejection interno
   // (bug conocido del script; el token ya se consumió, es inofensivo). Lo silenciamos
@@ -88,10 +88,10 @@ export default function RecaptchaModal({ open, onVerified, onClose }: Props) {
       return;
     }
 
-    if (!SITE_KEY) { setStatus('error'); return; }
+    if (!SITE_KEY) { setStrStatus('error'); return; }
 
     let blnCancelled = false;
-    setStatus('loading');
+    setStrStatus('loading');
     loadRecaptcha()
       .then(() => {
         if (blnCancelled || !containerRef.current || widgetIdRef.current !== null) return;
@@ -103,15 +103,15 @@ export default function RecaptchaModal({ open, onVerified, onClose }: Props) {
               if (widgetIdRef.current !== null) window.grecaptcha.reset(widgetIdRef.current);
             },
           });
-          setStatus('ready');
+          setStrStatus('ready');
         } catch (in_excError) {
           console.error('[recaptcha] grecaptcha.render() falló:', in_excError);
-          if (!blnCancelled) setStatus('error');
+          if (!blnCancelled) setStrStatus('error');
         }
       })
       .catch((in_excError) => {
         console.error('[recaptcha] no se pudo cargar api.js:', in_excError);
-        if (!blnCancelled) setStatus('error');
+        if (!blnCancelled) setStrStatus('error');
       });
 
     return () => { blnCancelled = true; };
@@ -129,8 +129,8 @@ export default function RecaptchaModal({ open, onVerified, onClose }: Props) {
       </p>
 
       <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', minHeight: '78px' }}>
-        {status === 'loading' && <ZrLoader />}
-        {status === 'error' && (
+        {strStatus === 'loading' && <ZrLoader />}
+        {strStatus === 'error' && (
           <ZrAlert config="negative" {...({ 'hide-close': true } as object)}>
             No se pudo cargar la validación de seguridad. Verifica tu conexión e inténtalo de nuevo.
           </ZrAlert>

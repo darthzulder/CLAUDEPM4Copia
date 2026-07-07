@@ -12,7 +12,7 @@ import { OPTIONS, DEFAULTS, RevisionErrorTecnicoApiFormData, AccionErrorTecnico 
 
 export default function RevisionErrorTecnicoApi() {
   const { task, loading, error, submitting, completeTask } = useTask();
-  const [showLog, setShowLog] = useState(false);
+  const [blnShowLog, setBlnShowLog] = useState(false);
 
   const form = useForm<RevisionErrorTecnicoApiFormData>({ defaultValues: DEFAULTS });
   const { control, watch, handleSubmit, reset, formState: { errors, isSubmitted } } = form;
@@ -79,7 +79,7 @@ export default function RevisionErrorTecnicoApi() {
             title="Detalle del Error Técnico"
             color="var(--z-red)"
             action={
-              <ZrButton config="link" icon="file-text:line" onClick={() => setShowLog(true)}>
+              <ZrButton config="link" icon="file-text:line" onClick={() => setBlnShowLog(true)}>
                 Ver Log Completo
               </ZrButton>
             }
@@ -202,8 +202,8 @@ export default function RevisionErrorTecnicoApi() {
       </div>
 
       {/* ACT-004-03 · Ver Log Completo */}
-      {showLog && (
-        <ZrModal model={showLog} onChange={(open: boolean) => setShowLog(open)}>
+      {blnShowLog && (
+        <ZrModal model={blnShowLog} onChange={(open: boolean) => setBlnShowLog(open)}>
           <h3 style={{ margin: '0 0 var(--zs-75)', font: 'var(--zf-h-20--700)', color: 'var(--z-text)' }}>
             Log completo del error técnico
           </h3>
@@ -211,7 +211,7 @@ export default function RevisionErrorTecnicoApi() {
           <ZdsTextarea name="qd_mensajeTecnicoAPI" control={control} label="Mensaje Técnico de la API" readOnly />
           <ZdsTextarea name="qd_payloadEnviado" control={control} label="Payload Enviado (JSON)" readOnly />
           <div z-flex="75" z-align="right:center" style={{ marginTop: 'var(--zs-100)' }}>
-            <ZrButton config="secondary:s" onClick={() => setShowLog(false)}>Cerrar</ZrButton>
+            <ZrButton config="secondary:s" onClick={() => setBlnShowLog(false)}>Cerrar</ZrButton>
           </div>
         </ZrModal>
       )}

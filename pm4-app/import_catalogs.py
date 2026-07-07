@@ -356,7 +356,7 @@ def clean_screen_title(in_strTitle):
     return re.sub(r"[^a-zA-Z0-9\s\-]", "", in_strTitle).strip()
 
 
-def generate_screen_json(title, fields, is_view=False, screen_category_id="1"):
+def generate_screen_json(title, fields, in_blnIsView=False, in_strScreenCatId="1"):
     """Genera la estructura JSON de una pantalla de ProcessMaker 4."""
     strCleanedTitle = clean_screen_title(title)
     lstItems = []
@@ -373,9 +373,9 @@ def generate_screen_json(title, fields, is_view=False, screen_category_id="1"):
                 "type": "text",
                 "label": dicField["label"],
                 "helper": None,
-                "readonly": is_view,
+                "readonly": in_blnIsView,
                 "dataFormat": "string",
-                "validation": [] if is_view else ["required"],
+                "validation": [] if in_blnIsView else ["required"],
                 "placeholder": f"Ingrese {dicField['label'].lower()}",
                 "defaultValue": { "mode": "js", "value": None },
                 "conditionalHide": None,
@@ -386,7 +386,7 @@ def generate_screen_json(title, fields, is_view=False, screen_category_id="1"):
         })
 
     # 2. Botón de guardar si no es pantalla de lectura
-    if not is_view:
+    if not in_blnIsView:
         lstItems.append({
             "uuid": str(uuid.uuid4()),
             "label": "Submit Button",
@@ -408,10 +408,10 @@ def generate_screen_json(title, fields, is_view=False, screen_category_id="1"):
         })
 
     return {
-        "title": f"Ver - {strCleanedTitle}" if is_view else f"Crear - {strCleanedTitle}",
-        "description": f"Pantalla de visualización para {title}" if is_view else f"Pantalla de creación/edición para {title}",
+        "title": f"Ver - {strCleanedTitle}" if in_blnIsView else f"Crear - {strCleanedTitle}",
+        "description": f"Pantalla de visualización para {title}" if in_blnIsView else f"Pantalla de creación/edición para {title}",
         "type": "FORM",
-        "screen_category_id": screen_category_id,
+        "screen_category_id": in_strScreenCatId,
         "config": [
             {
                 "name": title,
@@ -629,8 +629,8 @@ def main():
 
         if objArgs.dry_run:
             # Generar JSONs para validar sintaxis de Dry Run
-            dicCreateScreenJson = generate_screen_json(strName, lstFields, is_view=False, screen_category_id=strScreenCatId)
-            dicViewScreenJson = generate_screen_json(strName, lstFields, is_view=True, screen_category_id=strScreenCatId)
+            dicCreateScreenJson = generate_screen_json(strName, lstFields, in_blnIsView=False, in_strScreenCatId=strScreenCatId)
+            dicViewScreenJson = generate_screen_json(strName, lstFields, in_blnIsView=True, in_strScreenCatId=strScreenCatId)
             print(f"  [Dry Run] Generada Create Screen '{dicCreateScreenJson['title']}' con {len(dicCreateScreenJson['config'][0]['items'])} items.")
             print(f"  [Dry Run] Generada View Screen '{dicViewScreenJson['title']}' con {len(dicViewScreenJson['config'][0]['items'])} items.")
             intSuccessCount += 1
@@ -647,14 +647,14 @@ def main():
             else:
                 # 1. Crear Screen de Creación/Edición
                 print("  Creando pantalla de Creación/Edición…")
-                dicCreateScreenData = generate_screen_json(strName, lstFields, is_view=False, screen_category_id=strScreenCatId)
+                dicCreateScreenData = generate_screen_json(strName, lstFields, in_blnIsView=False, in_strScreenCatId=strScreenCatId)
                 dicCScreen = create_screen(strPm4Url, strPm4Token, dicCreateScreenData)
                 genCreateScreenId = dicCScreen["id"]
                 print(f"    Creada con ID: {genCreateScreenId}")
 
                 # 2. Crear Screen de Visualización (Readonly)
                 print("  Creando pantalla de Visualización (Readonly)…")
-                dicViewScreenData = generate_screen_json(strName, lstFields, is_view=True, screen_category_id=strScreenCatId)
+                dicViewScreenData = generate_screen_json(strName, lstFields, in_blnIsView=True, in_strScreenCatId=strScreenCatId)
                 dicVScreen = create_screen(strPm4Url, strPm4Token, dicViewScreenData)
                 genReadScreenId = dicVScreen["id"]
                 print(f"    Creada con ID: {genReadScreenId}")

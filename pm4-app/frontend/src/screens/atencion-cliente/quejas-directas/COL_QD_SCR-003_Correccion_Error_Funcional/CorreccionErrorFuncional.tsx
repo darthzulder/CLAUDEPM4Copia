@@ -15,7 +15,7 @@ import {
 
 export default function CorreccionErrorFuncional() {
   const { task, loading, error, submitting, completeTask } = useTask();
-  const [showLog, setShowLog] = useState(false);
+  const [blnShowLog, setBlnShowLog] = useState(false);
 
   const form = useForm<CorreccionErrorFuncionalFormData>({ defaultValues: DEFAULTS });
   const { control, watch, handleSubmit, reset, formState: { errors, isSubmitted } } = form;
@@ -88,7 +88,7 @@ export default function CorreccionErrorFuncional() {
             title="Panel de Error SmartSupervision"
             color="var(--z-red)"
             action={
-              <ZrButton config="link" icon="file-text:line" onClick={() => setShowLog(true)}>
+              <ZrButton config="link" icon="file-text:line" onClick={() => setBlnShowLog(true)}>
                 Ver Log Completo
               </ZrButton>
             }
@@ -218,8 +218,8 @@ export default function CorreccionErrorFuncional() {
       </div>
 
       {/* ACT-003-03 · Ver Log Completo */}
-      {showLog && (
-        <ZrModal model={showLog} onChange={(open: boolean) => setShowLog(open)}>
+      {blnShowLog && (
+        <ZrModal model={blnShowLog} onChange={(open: boolean) => setBlnShowLog(open)}>
           <h3 style={{ margin: '0 0 var(--zs-75)', font: 'var(--zf-h-20--700)', color: 'var(--z-text)' }}>
             Log completo del rechazo funcional
           </h3>
@@ -229,7 +229,7 @@ export default function CorreccionErrorFuncional() {
           <ZdsTextarea name="qd_mensajeErrorSFC" control={control} label="Mensaje de Error SFC" readOnly />
           <ZdsInput name="qd_fechaRechazo" control={control} label="Fecha/Hora del rechazo" readOnly />
           <div z-flex="75" z-align="right:center" style={{ marginTop: 'var(--zs-100)' }}>
-            <ZrButton config="secondary:s" onClick={() => setShowLog(false)}>Cerrar</ZrButton>
+            <ZrButton config="secondary:s" onClick={() => setBlnShowLog(false)}>Cerrar</ZrButton>
           </div>
         </ZrModal>
       )}

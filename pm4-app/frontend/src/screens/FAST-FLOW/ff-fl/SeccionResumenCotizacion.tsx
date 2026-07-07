@@ -1,6 +1,6 @@
 import FormSection from '../../../components/FormSection';
 import { ZrTable, ZrAlert, ZrLoader } from '../../../components/fields/ZdsFields';
-import { CotizadorResult, CotizadorInputs } from '../../../core/useCotizador';
+import { QuoterResult, QuoterInputs } from '../../../core/useCotizador';
 
 // ─── Helpers ─────────────────────────────────────────────────────────────────
 
@@ -33,7 +33,7 @@ function Estado({ loading, warmingUp, error }: { loading: boolean; warmingUp: bo
 
 // ─── Tablas por producto ─────────────────────────────────────────────────────
 
-function TablaDyO({ result, inputs }: { result: CotizadorResult; inputs: CotizadorInputs }) {
+function TablaDyO({ result, inputs }: { result: QuoterResult; inputs: QuoterInputs }) {
   const objDyo = result.dyo;
   if (!objDyo) return null;
   // Reunimos los límites elegidos para las tres opciones
@@ -68,7 +68,7 @@ function TablaDyO({ result, inputs }: { result: CotizadorResult; inputs: Cotizad
   );
 }
 
-function TablaCC({ result, inputs }: { result: CotizadorResult; inputs: CotizadorInputs }) {
+function TablaCC({ result, inputs }: { result: QuoterResult; inputs: QuoterInputs }) {
   const objCc = result.cc;
   if (!objCc) return null;
   // Reunimos los límites por evento y por agregado de las tres opciones
@@ -106,7 +106,7 @@ function TablaCC({ result, inputs }: { result: CotizadorResult; inputs: Cotizado
   );
 }
 
-function TablaPdysi({ result, inputs }: { result: CotizadorResult; inputs: CotizadorInputs }) {
+function TablaPdysi({ result, inputs }: { result: QuoterResult; inputs: QuoterInputs }) {
   const objPdysi = result.pdysi;
   if (!objPdysi) return null;
   // Reunimos los límites elegidos para las tres opciones
@@ -141,7 +141,7 @@ function TablaPdysi({ result, inputs }: { result: CotizadorResult; inputs: Cotiz
   );
 }
 
-function TablaPi({ result }: { result: CotizadorResult }) {
+function TablaPi({ result }: { result: QuoterResult }) {
   const objPi = result.pi;
   if (!objPi) return null;
   return (
@@ -189,11 +189,11 @@ export default function SeccionResumenCotizacion({
   hasPdysi,
   hasPi,
 }: {
-  result: CotizadorResult | null;
+  result: QuoterResult | null;
   loading: boolean;
   warmingUp: boolean;
   error: string | null;
-  inputs: CotizadorInputs;
+  inputs: QuoterInputs;
   hasDyo: boolean;
   hasCc: boolean;
   hasPdysi: boolean;

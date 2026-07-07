@@ -19,7 +19,7 @@ import type { AsignacionHistorial } from '../COL_QD_SCR-0051_Detalle_Reasignacio
 export default function RespuestaAreaResponsable() {
   const { task, loading, error, submitting, completeTask } = useTask();
   const fileRegistry = useRef(new Map<string, File>());
-  const [enviarError, setEnviarError] = useState<string | null>(null);
+  const [strSendError, setStrSendError] = useState<string | null>(null);
 
   const form = useForm<RespuestaAreaResponsableFormData>({ defaultValues: DEFAULTS });
   const { control, watch, handleSubmit, reset, setValue, setError, clearErrors,
@@ -98,33 +98,33 @@ export default function RespuestaAreaResponsable() {
     const strAttachment = in_objData.qd_adjuntoArea || '';
 
     // Partimos del snapshot local como fallback.
-    let historial: AsignacionHistorial[] = Array.isArray(in_objData.qd_historialAsignaciones)
+    let lstAssignHistory: AsignacionHistorial[] = Array.isArray(in_objData.qd_historialAsignaciones)
       ? [...in_objData.qd_historialAsignaciones] : [];
     let lstResponses: RespuestaAyuda[] = Array.isArray(in_objData.qd_respuestasAyuda)
       ? [...in_objData.qd_respuestasAyuda] : [];
 
     // Releer el request padre para tener el historial completo y actualizado.
     const objParentData = task?.data as Record<string, unknown> | undefined;
-    const parentRequestId =
+    const intParentRequestId =
       (objParentData?._request as { parent_request_id?: number } | undefined)?.parent_request_id ??
       (objParentData?._parent as { request_id?: number } | undefined)?.request_id;
-    if (parentRequestId) {
+    if (intParentRequestId) {
       try {
         // include=data es obligatorio: sin él PM4 no devuelve las variables del caso.
-        const objResponse = await pm4.get(`/requests/${parentRequestId}`, { params: { include: 'data' } });
+        const objResponse = await pm4.get(`/requests/${intParentRequestId}`, { params: { include: 'data' } });
         const objFresh = (objResponse.data?.data ?? objResponse.data ?? {}) as Record<string, unknown>;
-        if (Array.isArray(objFresh.qd_historialAsignaciones)) historial = [...objFresh.qd_historialAsignaciones];
+        if (Array.isArray(objFresh.qd_historialAsignaciones)) lstAssignHistory = [...objFresh.qd_historialAsignaciones];
         if (Array.isArray(objFresh.qd_respuestasAyuda)) lstResponses = [...objFresh.qd_respuestasAyuda];
-        console.log(`[RespuestaAreaResponsable] Historial padre (req ${parentRequestId}): ${historial.length} filas`, historial);
+        console.log(`[RespuestaAreaResponsable] Historial padre (req ${intParentRequestId}): ${lstAssignHistory.length} filas`, lstAssignHistory);
       } catch (exc) {
         console.warn('[RespuestaAreaResponsable] No se pudo leer el request padre; se usa el snapshot local:', exc);
       }
     }
 
     // Completamos la fila del historial que corresponde a esta ayuda.
-    if (intIndex >= 0 && intIndex < historial.length) {
-      historial[intIndex] = {
-        ...historial[intIndex],
+    if (intIndex >= 0 && intIndex < lstAssignHistory.length) {
+      lstAssignHistory[intIndex] = {
+        ...lstAssignHistory[intIndex],
         respondio: 'si', // marca que el ayudante ya respondió (SCR-0051 lo pinta con un check verde)
         comentario: in_objData.qd_comentarioArea,
         adjunto: strAttachment, // nombre real del archivo ('' si no adjuntó) → SCR-0051 lo enlaza para descarga
@@ -137,12 +137,12 @@ export default function RespuestaAreaResponsable() {
     if (intIndex >= 0) lstResponses[intIndex] = objNewResponse;
     else lstResponses.push(objNewResponse);
 
-    return { qd_historialAsignaciones: historial, qd_respuestasAyuda: lstResponses };
+    return { qd_historialAsignaciones: lstAssignHistory, qd_respuestasAyuda: lstResponses };
   };
 
   // Sube adjuntos, registra la respuesta si aplica y completa la tarea.
   const enviarCon = (in_strAction: AccionRespuestaArea) => async (in_objData: RespuestaAreaResponsableFormData): Promise<boolean> => {
-    setEnviarError(null);
+    setStrSendError(null);
     try {
       const intRequestId = task?.process_request_id;
       let dicUploadedIds: Record<string, number> = {};
@@ -156,7 +156,7 @@ export default function RespuestaAreaResponsable() {
       const objErr = exc as { response?: { data?: { message?: string } }; message?: string };
       const strMsg = objErr.response?.data?.message ?? objErr.message ?? 'Error desconocido al enviar.';
       console.error('[RespuestaAreaResponsable] Error al enviar:', exc);
-      setEnviarError(strMsg);
+      setStrSendError(strMsg);
       return false;
     }
   };
@@ -310,9 +310,9 @@ export default function RespuestaAreaResponsable() {
           </FormSection>
 
           {/* Error de envío — la tarea no se completó (por eso PM4 no cierra el iframe). */}
-          {enviarError && (
+          {strSendError && (
             <ZrAlert config="negative" {...({ 'hide-close': true } as object)}>
-              No se pudo enviar: {enviarError}
+              No se pudo enviar: {strSendError}
             </ZrAlert>
           )}
 

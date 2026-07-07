@@ -9,7 +9,7 @@ import ScreenHeader from '../../../components/ScreenHeader';
 import CreacionTomador from './CreacionTomador';
 import SeccionProductos from './SeccionProductos';
 import SeccionResumenCotizacion from './SeccionResumenCotizacion';
-import { useCotizador, cotizadorResultToPayload, type CotizadorInputs } from '../../../core/useCotizador';
+import { useQuoter, quoterResultToPayload, type QuoterInputs } from '../../../core/useCotizador';
 import { ZdsInput, ZdsDate, ZdsCheckboxField, ZdsSelect, ZrButton, ZrAlert, ZrTable, ZrFieldset, ZrLoader } from '../../../components/fields/ZdsFields';
 import ResultCard from '../../../components/ResultCard';
 import {
@@ -571,13 +571,13 @@ const TIPOS_EMPRESA_BLOQUEADOS = new Set(['ESTATAL', 'ENTIDAD_PUBLICA', 'EXTRANJ
 // ---------------------------------------------------------------------------
 export default function SolicitudFfFl() {
   const { task, loading, error, submitting, completeTask } = useTask();
-  const [productError, setProductError] = useState('');
-  const [submitError, setSubmitError] = useState('');
-  const [sent, setSent] = useState(false);
-  const [nitLoading, setNitLoading] = useState(false);
-  const [nitNotFound, setNitNotFound] = useState(false);
-  const [nitConfirmCreate, setNitConfirmCreate] = useState(false);
-  const [tiaFilledFields, setTiaFilledFields] = useState<Set<string>>(new Set());
+  const [strProductError, setStrProductError] = useState('');
+  const [strSubmitError, setStrSubmitError] = useState('');
+  const [blnSent, setBlnSent] = useState(false);
+  const [blnNitLoading, setBlnNitLoading] = useState(false);
+  const [blnNitNotFound, setBlnNitNotFound] = useState(false);
+  const [blnNitConfirmCreate, setBlnNitConfirmCreate] = useState(false);
+  const [objTiaFields, setObjTiaFields] = useState<Set<string>>(new Set());
   const dicFileRegistry = useRef(new Map<string, File>());
 
   const form = useForm<FfFlSolicitudFormData>({
@@ -621,14 +621,14 @@ export default function SolicitudFfFl() {
   const objWatch = form.watch();
 
   // Construimos las entradas para el cotizador según los productos y valores elegidos
-  const objCotizadorInputs = useMemo((): CotizadorInputs | null => {
+  const objQuoterInputs = useMemo((): QuoterInputs | null => {
     const blnHasDyo   = Boolean(objWatch.frm_gen_prod_dyo);
     const blnHasCc    = Boolean(objWatch.frm_gen_prod_cc);
     const blnHasPdysi = Boolean(objWatch.frm_gen_prod_pdysi);
     const blnHasPi    = Boolean(objWatch.frm_gen_prod_pi);
     if (!blnHasDyo && !blnHasCc && !blnHasPdysi && !blnHasPi) return null;
 
-    const objInputs: CotizadorInputs = {};
+    const objInputs: QuoterInputs = {};
 
     if (blnHasDyo && objWatch.frm_cot_fact_anual_dyo) {
       objInputs.dyo = {
@@ -684,22 +684,22 @@ export default function SolicitudFfFl() {
     objWatch.frm_cot_fact_anual_pi, objWatch.frm_pi_prop_01_limite, objWatch.frm_act_pi_actividad,
   ]);
 
-  const { result: objCotResult, loading: blnCotLoading, error: strCotError, warmingUp: blnCotWarmingUp } = useCotizador(objCotizadorInputs);
+  const { result: objQuoteResult, loading: blnQuoteLoading, error: strQuoteError, warmingUp: blnQuoteWarming } = useQuoter(objQuoterInputs);
 
   const onSubmit = async (in_objData: FfFlSolicitudFormData) => {
     // Validamos que haya al menos un producto y que CC no vaya solo
     const lstProds = [in_objData.frm_gen_prod_dyo, in_objData.frm_gen_prod_cc, in_objData.frm_gen_prod_pdysi, in_objData.frm_gen_prod_pi];
     const intCount = lstProds.filter(Boolean).length;
-    if (intCount === 0) { setProductError('Seleccione al menos un producto'); return; }
-    if (in_objData.frm_gen_prod_cc && intCount === 1) { setProductError('El seguro de Crimen Comercial solo puede cotizarse junto con otro producto'); return; }
-    setProductError('');
-    setSubmitError('');
+    if (intCount === 0) { setStrProductError('Seleccione al menos un producto'); return; }
+    if (in_objData.frm_gen_prod_cc && intCount === 1) { setStrProductError('El seguro de Crimen Comercial solo puede cotizarse junto con otro producto'); return; }
+    setStrProductError('');
+    setStrSubmitError('');
 
     const dicData = in_objData as Record<string, unknown>;
     let strWarning = '';
 
     // Bloqueamos si el tipo de empresa creada no es cotizable por este canal
-    if (nitNotFound && TIPOS_EMPRESA_BLOQUEADOS.has(in_objData.frm_cre_tipo_empresa ?? '')) {
+    if (blnNitNotFound && TIPOS_EMPRESA_BLOQUEADOS.has(in_objData.frm_cre_tipo_empresa ?? '')) {
       strWarning = MSG_CASE_UW;
     }
 
@@ -711,7 +711,7 @@ export default function SolicitudFfFl() {
         strWarning = `D&O: ${MSG_CASE_UW}`;
       } else {
         const blnHasLimit = in_objData.frm_dyo_prop_01_limite || in_objData.frm_dyo_prop_02_limite || in_objData.frm_dyo_prop_03_limite;
-        if (!blnHasLimit) { setSubmitError('D&O: Debe ingresar al menos un límite asegurado en la Propuesta Económica.'); return; }
+        if (!blnHasLimit) { setStrSubmitError('D&O: Debe ingresar al menos un límite asegurado en la Propuesta Económica.'); return; }
       }
     }
 
@@ -723,7 +723,7 @@ export default function SolicitudFfFl() {
         strWarning = `Crimen Comercial: ${MSG_CASE_UW}`;
       } else {
         const blnHasLimit = in_objData.frm_cc_prop_01_evento || in_objData.frm_cc_prop_02_evento || in_objData.frm_cc_prop_03_evento;
-        if (!blnHasLimit) { setSubmitError('Crimen Comercial: Debe ingresar al menos un límite asegurado en la Propuesta Económica.'); return; }
+        if (!blnHasLimit) { setStrSubmitError('Crimen Comercial: Debe ingresar al menos un límite asegurado en la Propuesta Económica.'); return; }
       }
     }
 
@@ -735,7 +735,7 @@ export default function SolicitudFfFl() {
         strWarning = `Protección de Datos y SI: ${MSG_CASE_UW}`;
       } else {
         const blnHasLimit = in_objData.frm_pdysi_prop_01_limite || in_objData.frm_pdysi_prop_02_limite || in_objData.frm_pdysi_prop_03_limite;
-        if (!blnHasLimit) { setSubmitError('Protección de Datos y SI: Debe ingresar al menos un límite asegurado en la Propuesta Económica.'); return; }
+        if (!blnHasLimit) { setStrSubmitError('Protección de Datos y SI: Debe ingresar al menos un límite asegurado en la Propuesta Económica.'); return; }
       }
     }
 
@@ -747,11 +747,11 @@ export default function SolicitudFfFl() {
         strWarning = `Seg. Profesional: ${MSG_CASE_UW}`;
       } else {
         const blnHasLimit = in_objData.frm_pi_prop_01_limite || in_objData.frm_pi_prop_02_limite || in_objData.frm_pi_prop_03_limite;
-        if (!blnHasLimit) { setSubmitError('Seg. Profesional: Debe ingresar al menos un límite asegurado en la Propuesta Económica.'); return; }
+        if (!blnHasLimit) { setStrSubmitError('Seg. Profesional: Debe ingresar al menos un límite asegurado en la Propuesta Económica.'); return; }
       }
     }
 
-    if (strWarning) setSubmitError(strWarning);
+    if (strWarning) setStrSubmitError(strWarning);
 
     try {
       // ── Subir archivos ──────────────────────────────────────────────────────
@@ -774,21 +774,21 @@ export default function SolicitudFfFl() {
       const dicPayload: Record<string, unknown> = {
         ...dicTaskData,
         ...(in_objData as unknown as Record<string, unknown>),
-        ...(objCotResult && objCotizadorInputs ? cotizadorResultToPayload(objCotResult, objCotizadorInputs) : {}),
+        ...(objQuoteResult && objQuoterInputs ? quoterResultToPayload(objQuoteResult, objQuoterInputs) : {}),
       };
       await completeTask(dicPayload);
-      setSent(true);
+      setBlnSent(true);
     } catch (excError) {
-      setSubmitError((excError as Error).message ?? 'Error desconocido al enviar');
+      setStrSubmitError((excError as Error).message ?? 'Error desconocido al enviar');
     }
   };
 
   const handleConsultarNIT = async () => {
     const strNit = form.getValues('frm_tom_nit');
-    if (!strNit) { setSubmitError('Ingrese el NIT primero.'); return; }
+    if (!strNit) { setStrSubmitError('Ingrese el NIT primero.'); return; }
 
-    setNitLoading(true);
-    setSubmitError('');
+    setBlnNitLoading(true);
+    setStrSubmitError('');
     console.log(`[TIA] NIT: ${strNit}`);
 
     try {
@@ -809,7 +809,7 @@ export default function SolicitudFfFl() {
       // Si output es string con "No party found" → cliente no existe en TIA
       if (typeof objOutput === 'string' && (objOutput.includes('No party found') || objOutput.includes('HTTP 400'))) {
         console.warn('[TIA] No party found — solicitando confirmación para crear tomador');
-        setNitConfirmCreate(true);
+        setBlnNitConfirmCreate(true);
         return;
       }
 
@@ -822,21 +822,21 @@ export default function SolicitudFfFl() {
       for (const [strDest, strVal] of Object.entries(objMapped) as Array<[keyof FfFlSolicitudFormData, string]>) {
         form.setValue(strDest, strVal as never, { shouldDirty: true });
       }
-      setTiaFilledFields(new Set(lstKeys));
+      setObjTiaFields(new Set(lstKeys));
 
       if (lstKeys.length > 0) {
-        setNitNotFound(false);
+        setBlnNitNotFound(false);
       } else {
-        setSubmitError('TIA respondió pero sin campos reconocibles. Ver consola.');
+        setStrSubmitError('TIA respondió pero sin campos reconocibles. Ver consola.');
       }
 
     } catch (excErr: unknown) {
       const objErr = excErr as { response?: { status: number; data: unknown }; message: string };
       console.error(`[TIA] ERROR — status:`, objErr.response?.status ?? 'sin respuesta');
       console.error(`[TIA] Body:`, JSON.stringify(objErr.response?.data ?? objErr.message, null, 2));
-      setSubmitError(`Error consultando TIA (${objErr.response?.status ?? 'red'}): ${JSON.stringify(objErr.response?.data ?? objErr.message)}`);
+      setStrSubmitError(`Error consultando TIA (${objErr.response?.status ?? 'red'}): ${JSON.stringify(objErr.response?.data ?? objErr.message)}`);
     } finally {
-      setNitLoading(false);
+      setBlnNitLoading(false);
     }
   };
 
@@ -844,7 +844,7 @@ export default function SolicitudFfFl() {
   if (error) return <ZrAlert config="negative" {...({ 'hide-close': true } as object)}>Error cargando la tarea: {error}</ZrAlert>;
 
   // Pantalla de confirmación tras enviar la solicitud
-  if (sent) {
+  if (blnSent) {
     return (
       <div className="screen-wrapper">
         <ScreenHeader title="Cotizador Fast Flow — Líneas Financieras" />
@@ -870,34 +870,34 @@ export default function SolicitudFfFl() {
 
       <div className="screen-content">
         <div>
-          <InfoGeneral form={form} productError={productError} />
+          <InfoGeneral form={form} productError={strProductError} />
           <InfoTomador
             form={form}
             onConsultarNIT={handleConsultarNIT}
-            nitLoading={nitLoading}
-            nitNotFound={nitNotFound}
-            nitConfirmCreate={nitConfirmCreate}
-            onConfirmCreate={() => { setNitConfirmCreate(false); setNitNotFound(true); }}
-            onCancelCreate={() => setNitConfirmCreate(false)}
-            tiaFilledFields={tiaFilledFields}
+            nitLoading={blnNitLoading}
+            nitNotFound={blnNitNotFound}
+            nitConfirmCreate={blnNitConfirmCreate}
+            onConfirmCreate={() => { setBlnNitConfirmCreate(false); setBlnNitNotFound(true); }}
+            onCancelCreate={() => setBlnNitConfirmCreate(false)}
+            tiaFilledFields={objTiaFields}
           />
           <SeccionProductos form={form} fileRegistry={dicFileRegistry} />
           <DatosCotizacion form={form} />
           <PlanPago form={form} />
 
           <SeccionResumenCotizacion
-            result={objCotResult}
-            loading={blnCotLoading}
-            warmingUp={blnCotWarmingUp}
-            error={strCotError}
-            inputs={objCotizadorInputs ?? {}}
+            result={objQuoteResult}
+            loading={blnQuoteLoading}
+            warmingUp={blnQuoteWarming}
+            error={strQuoteError}
+            inputs={objQuoterInputs ?? {}}
             hasDyo={Boolean(objWatch.frm_gen_prod_dyo)}
             hasCc={Boolean(objWatch.frm_gen_prod_cc)}
             hasPdysi={Boolean(objWatch.frm_gen_prod_pdysi)}
             hasPi={Boolean(objWatch.frm_gen_prod_pi)}
           />
 
-          {submitError && <ZrAlert config="negative" {...({ 'hide-close': true } as object)}>{submitError}</ZrAlert>}
+          {strSubmitError && <ZrAlert config="negative" {...({ 'hide-close': true } as object)}>{strSubmitError}</ZrAlert>}
 
           <ActionBar>
             <ZrButton

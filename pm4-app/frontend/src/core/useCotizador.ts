@@ -3,7 +3,7 @@ import pm4 from '../api/pm4Client';
 
 // ─── Tipos ────────────────────────────────────────────────────────────────────
 
-export interface CotizadorInputs {
+export interface QuoterInputs {
   dyo?: {
     facturacion: string | number;
     limite1: string | number;
@@ -40,40 +40,40 @@ export interface CotizadorInputs {
   };
 }
 
-export interface CotizadorOptDyo {
+export interface QuoterOptDyo {
   prima_a: number | null;
   deducible: number;
   ent_limite: number | null;
   ent_deducible: number | null;
 }
 
-export interface CotizadorOptCC {
+export interface QuoterOptCC {
   deducible: number | null;
   prima: number | null;
 }
 
-export interface CotizadorOptPdysi {
+export interface QuoterOptPdysi {
   deducible: number | null;
   prima: number | null;
 }
 
-export interface CotizadorOptPi {
+export interface QuoterOptPi {
   limite: number | null;
   deducible: number | null;
   prima: number | null;
 }
 
-export interface CotizadorResult {
-  dyo?:   { opt1: CotizadorOptDyo;   opt2: CotizadorOptDyo;   opt3: CotizadorOptDyo };
-  cc?:    { opt1: CotizadorOptCC;    opt2: CotizadorOptCC;    opt3: CotizadorOptCC };
-  pdysi?: { opt1: CotizadorOptPdysi; opt2: CotizadorOptPdysi; opt3: CotizadorOptPdysi };
-  pi?:    { opt1: CotizadorOptPi; opt2: CotizadorOptPi; opt3: CotizadorOptPi };
+export interface QuoterResult {
+  dyo?:   { opt1: QuoterOptDyo;   opt2: QuoterOptDyo;   opt3: QuoterOptDyo };
+  cc?:    { opt1: QuoterOptCC;    opt2: QuoterOptCC;    opt3: QuoterOptCC };
+  pdysi?: { opt1: QuoterOptPdysi; opt2: QuoterOptPdysi; opt3: QuoterOptPdysi };
+  pi?:    { opt1: QuoterOptPi; opt2: QuoterOptPi; opt3: QuoterOptPi };
 }
 
 // ─── Hook ────────────────────────────────────────────────────────────────────
 
-export function useCotizador(in_objInputs: CotizadorInputs | null, in_intDebounceMs = 800) {
-  const [result, setResult]       = useState<CotizadorResult | null>(null);
+export function useQuoter(in_objInputs: QuoterInputs | null, in_intDebounceMs = 800) {
+  const [result, setResult]       = useState<QuoterResult | null>(null);
   const [loading, setLoading]     = useState(false);
   const [error, setError]         = useState<string | null>(null);
   const [warmingUp, setWarmingUp] = useState(false);
@@ -82,14 +82,14 @@ export function useCotizador(in_objInputs: CotizadorInputs | null, in_intDebounc
   const objInputsRef = useRef(in_objInputs);
 
   // Función de cálculo reutilizable para reintentos
-  const doCalculate = async (in_objInp: CotizadorInputs) => {
+  const doCalculate = async (in_objInp: QuoterInputs) => {
     setLoading(true);
     setError(null);
     try {
       // Llamamos al servicio de cotizacion
       const objRes = await pm4.post('/cotizador/calcular', in_objInp, { timeout: 35000 });
       if (objRes.data?.ok) {
-        setResult(objRes.data.result as CotizadorResult);
+        setResult(objRes.data.result as QuoterResult);
         setWarmingUp(false);
       } else {
         setError(objRes.data?.message ?? 'Error desconocido del cotizador');
@@ -104,7 +104,7 @@ export function useCotizador(in_objInputs: CotizadorInputs | null, in_intDebounc
         || objErr.code === 'ECONNABORTED' || objErr.code === 'ERR_NETWORK';
 
       if (blnIsConnectivity) {
-        console.warn('[useCotizador] Servicio iniciando (cold start), reintentando en 10s…');
+        console.warn('[useQuoter] Servicio iniciando (cold start), reintentando en 10s…');
         setWarmingUp(true);
         setResult(null);
         // Reintento automático en 10s con los inputs actuales
@@ -119,7 +119,7 @@ export function useCotizador(in_objInputs: CotizadorInputs | null, in_intDebounc
           : (objErr.message ?? 'Error al calcular');
         setError(strMsg);
         setWarmingUp(false);
-        console.error('[useCotizador] Error:', strMsg);
+        console.error('[useQuoter] Error:', strMsg);
       }
     } finally {
       setLoading(false);
@@ -154,9 +154,9 @@ export function useCotizador(in_objInputs: CotizadorInputs | null, in_intDebounc
 
 // ─── Helper: convierte resultado a variables PM4 para incluir en el payload ──
 
-export function cotizadorResultToPayload(
-  in_objResult: CotizadorResult,
-  in_objInputs: CotizadorInputs,
+export function quoterResultToPayload(
+  in_objResult: QuoterResult,
+  in_objInputs: QuoterInputs,
 ): Record<string, unknown> {
   // Acumulamos aqui las variables PM4 del resultado
   const dicPayload: Record<string, unknown> = {};

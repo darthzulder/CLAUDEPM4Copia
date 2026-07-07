@@ -27,13 +27,13 @@ function estadoVariant(in_strStatus: string): 'success' | 'danger' | 'info' | 'n
 export default function CrearRecibirQueja() {
   const { task, loading, error, submitting, completeTask, isWebEntry } = useTask();
   const fileRegistry = useRef(new Map<string, File>());
-  const [sent, setSent] = useState(false);
-  const [captchaOpen, setCaptchaOpen] = useState(false);
-  const [captchaError, setCaptchaError] = useState('');
-  const [pendingData, setPendingData] = useState<CrearRecibirQuejaFormData | null>(null);
+  const [blnSent, setBlnSent] = useState(false);
+  const [blnCaptchaOpen, setBlnCaptchaOpen] = useState(false);
+  const [strCaptchaError, setStrCaptchaError] = useState('');
+  const [objPendingData, setObjPendingData] = useState<CrearRecibirQuejaFormData | null>(null);
   // Overlay de "enviando": cubre el lapso captcha-verificado → verify + envío a PM4,
   // hasta que aparece la pantalla de éxito.
-  const [enviando, setEnviando] = useState(false);
+  const [blnSending, setBlnSending] = useState(false);
 
   const form = useForm<CrearRecibirQuejaFormData>({
     mode: 'onTouched',
@@ -99,9 +99,9 @@ export default function CrearRecibirQueja() {
   // Paso 1 — el submit valida el formulario (react-hook-form) y, si es válido,
   // abre el modal de captcha. El envío real NO ocurre hasta pasar la validación.
   const requestCaptcha = (in_objData: CrearRecibirQuejaFormData) => {
-    setCaptchaError('');
-    setPendingData(in_objData);
-    setCaptchaOpen(true);
+    setStrCaptchaError('');
+    setObjPendingData(in_objData);
+    setBlnCaptchaOpen(true);
   };
 
   // Envía la solicitud a PM4, ya sea como web entry o completando la tarea.
@@ -117,45 +117,45 @@ export default function CrearRecibirQueja() {
         if (intNewRequestId && fileRegistry.current.size > 0) {
           await uploadFiles(intNewRequestId);
         }
-        setSent(true);
+        setBlnSent(true);
       } else {
         const intRequestId = task?.process_request_id;
         if (intRequestId && fileRegistry.current.size > 0) {
           await uploadFiles(intRequestId);
         }
         await completeTask(in_objData as unknown as Record<string, unknown>);
-        setSent(true);
+        setBlnSent(true);
       }
     } catch (exc) {
       console.error('[CrearRecibirQueja] Error al enviar:', exc);
-      setCaptchaError('Ocurrió un error al radicar la solicitud. Intenta nuevamente.');
+      setStrCaptchaError('Ocurrió un error al radicar la solicitud. Intenta nuevamente.');
     }
   };
 
   // Paso 2 — el usuario resolvió el checkbox "No soy un robot": verificamos el
   // token contra Google (backend) y recién ahí enviamos a PM4.
   const handleCaptchaVerified = async (in_strToken: string) => {
-    setCaptchaOpen(false);
-    const objData = pendingData;
+    setBlnCaptchaOpen(false);
+    const objData = objPendingData;
     if (!objData) return;
-    setPendingData(null);
-    setEnviando(true);
+    setObjPendingData(null);
+    setBlnSending(true);
     try {
       const { data: objVerify } = await pm4.post<{ success: boolean }>('/recaptcha/verify', { token: in_strToken });
       if (!objVerify?.success) {
-        setCaptchaError('No pudimos validar la seguridad. Vuelve a intentarlo.');
-        setEnviando(false);
+        setStrCaptchaError('No pudimos validar la seguridad. Vuelve a intentarlo.');
+        setBlnSending(false);
         return;
       }
     } catch {
-      setCaptchaError('No pudimos validar la seguridad. Vuelve a intentarlo.');
-      setEnviando(false);
+      setStrCaptchaError('No pudimos validar la seguridad. Vuelve a intentarlo.');
+      setBlnSending(false);
       return;
     }
     await sendToPm4({ ...objData, qd_captcha: true });
-    // En éxito, sendToPm4 pone sent=true y se muestra la pantalla de confirmación;
+    // En éxito, sendToPm4 pone blnSent=true y se muestra la pantalla de confirmación;
     // si falló, quitamos el overlay para que el usuario vea el form y el error.
-    setEnviando(false);
+    setBlnSending(false);
   };
 
   // Reinicia el formulario y limpia los adjuntos cargados.
@@ -165,7 +165,7 @@ export default function CrearRecibirQueja() {
     ADJUNTO_KEYS.forEach((strKey) => form.setValue(strKey, ''));
   };
 
-  if (sent) {
+  if (blnSent) {
     return (
       <div className="screen-wrapper">
         <ScreenHeader title="Radicación de PQRS" />
@@ -200,7 +200,7 @@ export default function CrearRecibirQueja() {
 
   return (
     <div className="screen-wrapper">
-      {enviando && (
+      {blnSending && (
         <div className="loading-overlay">
           <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 'var(--zs-100)' }}>
             <ZrLoader />
@@ -274,9 +274,9 @@ export default function CrearRecibirQueja() {
             )}
             {/* FLD-336 — validación de seguridad: reCAPTCHA v2 (checkbox) en un modal
                 que se abre al presionar "Enviar PQRS". Ver RecaptchaModal más abajo. */}
-            {captchaError && (
+            {strCaptchaError && (
               <ZrAlert config="negative" {...({ 'hide-close': true } as object)}>
-                {captchaError}
+                {strCaptchaError}
               </ZrAlert>
             )}
             <div className="form-row cols-2">
@@ -331,9 +331,9 @@ export default function CrearRecibirQueja() {
         </form>
 
         <RecaptchaModal
-          open={captchaOpen}
+          open={blnCaptchaOpen}
           onVerified={handleCaptchaVerified}
-          onClose={() => { setCaptchaOpen(false); setPendingData(null); }}
+          onClose={() => { setBlnCaptchaOpen(false); setObjPendingData(null); }}
         />
       </div>
     </div>
