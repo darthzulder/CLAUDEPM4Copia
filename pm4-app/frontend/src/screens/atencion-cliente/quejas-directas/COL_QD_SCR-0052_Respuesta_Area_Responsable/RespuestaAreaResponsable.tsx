@@ -17,7 +17,7 @@ import {
 import type { AsignacionHistorial } from '../COL_QD_SCR-0051_Detalle_Reasignacion_Respuesta/variables';
 
 export default function RespuestaAreaResponsable() {
-  const { task, loading, error, submitting, completeTask } = useTask();
+  const { task, loading, error, submitting, completeTask, saveDraft } = useTask();
   const fileRegistry = useRef(new Map<string, File>());
   const [enviarError, setEnviarError] = useState<string | null>(null);
 
@@ -140,7 +140,11 @@ export default function RespuestaAreaResponsable() {
       const requestId = task?.process_request_id;
       let uploadedIds: Record<string, number> = {};
       if (requestId && fileRegistry.current.size > 0) uploadedIds = await uploadFiles(requestId);
-      const extra = accion === 'ENVIAR' ? await registrarRespuesta(data, uploadedIds[ADJUNTO_KEY]) : {};
+      if (accion === 'GUARDAR_BORRADOR') {
+        await saveDraft({ ...data, qd_accion: accion } as unknown as Record<string, unknown>);
+        return true;
+      }
+      const extra = await registrarRespuesta(data, uploadedIds[ADJUNTO_KEY]);
       await completeTask({ ...data, ...extra, qd_accion: accion } as unknown as Record<string, unknown>);
       return true;
     } catch (e) {

@@ -70,6 +70,24 @@ export function useTask() {
     [task]
   );
 
+  // Guarda los datos del caso sin completar/avanzar la tarea (p.ej. "Guardar Borrador").
+  const saveDraft = useCallback(
+    async (formData: Record<string, unknown>) => {
+      if (!task?.process_request_id) throw new Error('No hay process_request_id resuelto');
+      setSubmitting(true);
+      try {
+        const payload = { data: formData };
+        console.log(`[useTask] Guardando borrador request_id=${task.process_request_id}:`, payload);
+        const response = await pm4.put(`/requests/${task.process_request_id}`, payload);
+        console.log('[useTask] Respuesta de PM4:', response.data);
+        return response.data;
+      } finally {
+        setSubmitting(false);
+      }
+    },
+    [task]
+  );
+
   const startProcess = useCallback(
     async (formData: Record<string, unknown>) => {
       if (!processId) throw new Error('No hay process_id para iniciar el proceso');
@@ -87,5 +105,5 @@ export function useTask() {
     [processId, eventId]
   );
 
-  return { task, loading, error, submitting, completeTask, startProcess, isWebEntry };
+  return { task, loading, error, submitting, completeTask, saveDraft, startProcess, isWebEntry };
 }

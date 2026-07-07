@@ -101,6 +101,9 @@ router.put('/tasks/:id', (req, res) => {
 // Requests (casos)
 router.get('/requests/:id', (req, res) => pm4Request('GET', `/requests/${req.params.id}`, req, res));
 
+// Actualiza los datos del caso sin completar/avanzar la tarea (p.ej. "Guardar Borrador").
+router.put('/requests/:id', (req, res) => pm4Request('PUT', `/requests/${req.params.id}`, req, res));
+
 // Resolver task activo a partir de un case_id (request_id)
 router.get('/cases/:case_id/task', async (req, res) => {
   const token = getToken(req);
