@@ -23,6 +23,7 @@ import RevisionRespuestaSac from './screens/atencion-cliente/quejas-directas/COL
 import FormularioSuperintendencia from './screens/atencion-cliente/quejas-directas/COL_QD_SCR-009_Formulario_Superintendencia/FormularioSuperintendencia';
 import RevisionErrorTecnicoProrroga from './screens/atencion-cliente/quejas-directas/COL_QD_SCR-011_Revision_Error_Tecnico_Prorroga/RevisionErrorTecnicoProrroga';
 import ErrorFuncionalProrroga from './screens/atencion-cliente/quejas-directas/COL_QD_SCR-012_Revision_Error_Funcional_Prorroga/ErrorFuncionalProrroga';
+import DashboardGestionCasos from './screens/atencion-cliente/quejas-directas/COL_QD_SCR-013_Dashboard_Gestion_Casos/DashboardGestionCasos';
 
 class ErrorBoundary extends Component<{ children: ReactNode }, { error: Error | null }> {
   state = { error: null };
@@ -66,6 +67,7 @@ const SCREENS: Record<string, React.ComponentType> = {
   'COL_QD_SCR-009_Formulario_Superintendencia': FormularioSuperintendencia,
   'COL_QD_SCR-011_Revision_Error_Tecnico_Prorroga': RevisionErrorTecnicoProrroga,
   'COL_QD_SCR-012_Revision_Error_Funcional_Prorroga': ErrorFuncionalProrroga,
+  'COL_QD_SCR-013_Dashboard_Gestion_Casos': DashboardGestionCasos,
   'ds-catalog': DsCatalog,
 };
 

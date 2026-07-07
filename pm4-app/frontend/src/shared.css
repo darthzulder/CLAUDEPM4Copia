@@ -1218,3 +1218,96 @@ z-table :is(th, td)[config*="right"] {
 
 .cierre-m3--validacion-ok  { color: var(--z-green); }
 .cierre-m3--validacion-error { color: var(--z-red); }
+
+
+/* ========== dashboard-gestion-casos (SCR-013 / PAN-13) ========== */
+/* =====================================================
+   DASHBOARD — GESTIÓN DE CASOS — P01 (Supervisor / Jefe SAC)
+   Patrones de dominio sin equivalente en el DS: KPIs de SLA,
+   punto-semáforo de días y barras de encabezado/paginación.
+   ===================================================== */
+
+/* ── Barra superior: título de trabajo + acción "Nuevo caso" ── */
+.dashboard-toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--zs-100);
+  margin: var(--zs-100) 0;
+}
+
+/* ── KPIs de SLA (4 tarjetas) ── */
+.kpi-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: var(--zs-100);
+  margin-bottom: var(--zs-150);
+}
+
+@media (max-width: 900px) { .kpi-grid { grid-template-columns: repeat(2, 1fr); } }
+@media (max-width: 600px) { .kpi-grid { grid-template-columns: 1fr; } }
+
+.kpi-card {
+  display: flex;
+  flex-direction: column;
+  gap: var(--zs-25);
+  background: var(--zg-white);
+  border: 1px solid var(--z-card-border);
+  border-radius: 8px;
+  padding: var(--zs-100) var(--zs-150);
+  box-shadow: var(--z-card-shadow);
+}
+
+.kpi-card-label {
+  font: var(--zf-capt-12--700);
+  color: var(--z-muted);
+}
+
+.kpi-card-value {
+  font: var(--zf-h-28);
+  font-weight: 700;
+  line-height: 1.1;
+  color: var(--z-text);
+}
+
+.kpi-card--warn   .kpi-card-value { color: var(--z-orange); }
+.kpi-card--danger .kpi-card-value { color: var(--z-red); }
+.kpi-card--ok     .kpi-card-value { color: var(--z-green); }
+
+/* ── Columna "Días": punto-semáforo + texto ── */
+.days-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--zs-50);
+  font: var(--zf-capt-12--700);
+  color: var(--z-text);
+  white-space: nowrap;
+}
+
+.days-dot {
+  flex-shrink: 0;
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font: var(--zf-capt-12--700);
+  font-size: 10px;
+  color: var(--zg-white);
+}
+
+.days-dot--danger  { background: var(--z-red); }
+.days-dot--warn    { background: var(--z-orange); }
+.days-dot--ok      { background: var(--z-green); }
+.days-dot--neutral { background: var(--z-muted); }
+
+/* ── Paginación de la tabla de casos ── */
+.dashboard-pagination {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: var(--zs-75);
+  margin-top: var(--zs-100);
+}

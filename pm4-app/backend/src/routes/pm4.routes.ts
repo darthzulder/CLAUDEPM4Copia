@@ -98,6 +98,9 @@ router.put('/tasks/:id', (req, res) => {
   pm4Request('PUT', `/tasks/${req.params.id}`, req, res);
 });
 
+// Requests (casos) — listado paginado (dashboard). Reenvía query (include, per_page, page, type, pmql).
+router.get('/requests', (req, res) => pm4Request('GET', '/requests', req, res));
+
 // Requests (casos)
 router.get('/requests/:id', (req, res) => pm4Request('GET', `/requests/${req.params.id}`, req, res));
 
