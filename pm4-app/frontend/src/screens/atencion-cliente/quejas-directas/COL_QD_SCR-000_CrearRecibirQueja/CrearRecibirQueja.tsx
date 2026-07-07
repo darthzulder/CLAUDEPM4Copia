@@ -31,6 +31,9 @@ export default function CrearRecibirQueja() {
   const [captchaOpen, setCaptchaOpen] = useState(false);
   const [captchaError, setCaptchaError] = useState('');
   const [pendingData, setPendingData] = useState<CrearRecibirQuejaFormData | null>(null);
+  // Overlay de "enviando": cubre el lapso captcha-verificado → verify + envío a PM4,
+  // hasta que aparece la pantalla de éxito.
+  const [enviando, setEnviando] = useState(false);
 
   const form = useForm<CrearRecibirQuejaFormData>({
     mode: 'onTouched',
@@ -131,17 +134,23 @@ export default function CrearRecibirQueja() {
     const data = pendingData;
     if (!data) return;
     setPendingData(null);
+    setEnviando(true);
     try {
       const { data: v } = await pm4.post<{ success: boolean }>('/recaptcha/verify', { token });
       if (!v?.success) {
         setCaptchaError('No pudimos validar la seguridad. Vuelve a intentarlo.');
+        setEnviando(false);
         return;
       }
     } catch {
       setCaptchaError('No pudimos validar la seguridad. Vuelve a intentarlo.');
+      setEnviando(false);
       return;
     }
     await sendToPm4({ ...data, qd_captcha: true });
+    // En éxito, sendToPm4 pone sent=true y se muestra la pantalla de confirmación;
+    // si falló, quitamos el overlay para que el usuario vea el form y el error.
+    setEnviando(false);
   };
 
   const limpiarFormulario = () => {
@@ -181,6 +190,14 @@ export default function CrearRecibirQueja() {
 
   return (
     <div className="screen-wrapper">
+      {enviando && (
+        <div className="loading-overlay">
+          <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 'var(--zs-100)' }}>
+            <ZrLoader />
+            <span style={{ font: 'var(--zf-body-16--400)', color: 'var(--z-text)' }}>Radicando tu solicitud...</span>
+          </div>
+        </div>
+      )}
       <ScreenHeader
         title="Radicación de PQRS"
         subtitle={[
