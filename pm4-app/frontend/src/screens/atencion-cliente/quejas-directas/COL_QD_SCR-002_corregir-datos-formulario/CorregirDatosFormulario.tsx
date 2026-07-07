@@ -6,6 +6,7 @@ import InfoBar from '../../../../components/InfoBar';
 import ScreenHeader from '../../../../components/ScreenHeader';
 import { ZdsInput, ZrAlert, ZrButton, ZrLoader } from '../../../../components/fields/ZdsFields';
 import { useTask } from '../../../../core/useTask';
+import { pm4TasksUrl } from '../../../../core/useToken';
 import { ERRORES_EJEMPLO, type CampoConError, type CorregirDatosFormData } from './variables';
 import SeccionErroresValidacion from './SeccionErroresValidacion';
 
@@ -17,7 +18,7 @@ function parsearErrores(erroresJson: unknown): CampoConError[] {
 }
 
 export default function CorregirDatosFormulario() {
-  const { task, loading, error, submitting, completeTask } = useTask();
+  const { task, loading, error, submitting, completeTask, saveDraft } = useTask();
   const [triggered, setTriggered] = useState(false);
 
   const form = useForm<CorregirDatosFormData>({ mode: 'onChange' });
@@ -76,6 +77,17 @@ export default function CorregirDatosFormulario() {
     }
   };
 
+  // Guardar y Cerrar: guarda los datos actuales sin completar la tarea y redirige el
+  // frame superior al home de tareas de ProcessMaker (solo si se guardó bien).
+  const onGuardarYCerrar = async () => {
+    try {
+      await saveDraft(w as unknown as Record<string, unknown>);
+      window.top!.location.href = pm4TasksUrl();
+    } catch (e) {
+      console.error('[CorregirDatosFormulario] Error al guardar borrador:', e);
+    }
+  };
+
   if (loading) return <div className="screen-wrapper"><div className="screen-loading"><ZrLoader /></div></div>;
   if (error) return <div className="screen-wrapper"><ZrAlert config="negative" {...({ 'hide-close': true } as object)}>Error al cargar el formulario: {error}</ZrAlert></div>;
 
@@ -130,8 +142,8 @@ export default function CorregirDatosFormulario() {
           </ZrAlert>
 
           <ActionBar>
-            <ZrButton config="secondary" onClick={() => window.history.back()}>
-              Cancelar Corrección
+            <ZrButton config="secondary" disabled={submitting} loading={submitting} onClick={onGuardarYCerrar}>
+              Guardar y Cerrar
             </ZrButton>
             <ZrButton
               config="positive"

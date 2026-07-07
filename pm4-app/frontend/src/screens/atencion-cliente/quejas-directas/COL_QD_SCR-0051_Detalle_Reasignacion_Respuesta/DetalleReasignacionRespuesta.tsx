@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { useTask } from '../../../../core/useTask';
+import { pm4TasksUrl } from '../../../../core/useToken';
 import ScreenHeader from '../../../../components/ScreenHeader';
 import InfoBar from '../../../../components/InfoBar';
 import { ActionBar } from '../../../../components/ActionBar';
@@ -15,7 +16,7 @@ import SeccionAsignacion from './SeccionAsignacion';
 import SeccionRespuesta from './SeccionRespuesta';
 
 export default function DetalleReasignacionRespuesta() {
-  const { task, loading, error, submitting, completeTask } = useTask();
+  const { task, loading, error, submitting, completeTask, saveDraft } = useTask();
   const fileRegistry = useRef(new Map<string, File>());
   const [showExpediente, setShowExpediente] = useState(false);
   const [showVistaPrevia, setShowVistaPrevia] = useState(false);
@@ -50,22 +51,33 @@ export default function DetalleReasignacionRespuesta() {
     }
   };
 
-  const enviarCon = (accion: AccionFlujoCombinado) => async (data: DetalleReasignacionRespuestaFormData) => {
+  const enviarCon = (accion: AccionFlujoCombinado) => async (data: DetalleReasignacionRespuestaFormData): Promise<boolean> => {
     try {
       const requestId = task?.process_request_id;
       if (requestId && fileRegistry.current.size > 0) await uploadFiles(requestId);
+      if (accion === 'GUARDAR_BORRADOR') {
+        await saveDraft({ ...data, qd_accion: accion } as unknown as Record<string, unknown>);
+        return true;
+      }
       await completeTask({ ...data, qd_accion: accion } as unknown as Record<string, unknown>);
+      return true;
     } catch (e) {
       console.error('[DetalleReasignacionRespuesta] Error al enviar:', e);
+      return false;
     }
   };
 
   // ACT-0051-08 Enviar (valida RUL-0051-05: respuestaCliente no vacío).
   const onEnviar = handleSubmit(enviarCon('ENVIAR'));
 
-  // ACT-0051-07 Guardar Borrador · ACT-0051-04 Solicitar Prórroga · ACT-0051-01 Reasignar
+  // ACT-0051-07 Guardar Borrador: guarda sin completar la tarea y redirige el frame
+  // superior al home de tareas de ProcessMaker (solo si se guardó bien).
+  const onGuardarBorrador = async () => {
+    const ok = await enviarCon('GUARDAR_BORRADOR')(w);
+    if (ok) window.top!.location.href = pm4TasksUrl();
+  };
+  // ACT-0051-04 Solicitar Prórroga · ACT-0051-01 Reasignar
   // (sin validación bloqueante — envían los valores actuales del formulario directamente).
-  const onGuardarBorrador = () => enviarCon('GUARDAR_BORRADOR')(w);
   const onSolicitarProrroga = () => enviarCon('SOLICITAR_PRORROGA')(w);
   const onReasignarQueja = () => enviarCon('CONFIRMAR_ASIGNACION')(w);
   // La sección de asignación pasa el snapshot fresco del formulario (incluye la fila

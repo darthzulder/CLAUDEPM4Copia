@@ -1,6 +1,7 @@
 import { useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import { useTask } from '../../../../core/useTask';
+import { pm4TasksUrl } from '../../../../core/useToken';
 import { useCollection } from '../../../../core/useCollection';
 import ScreenHeader from '../../../../components/ScreenHeader';
 import FormSection from '../../../../components/FormSection';
@@ -15,7 +16,7 @@ import {
 import SeccionFraudeAnexos from './SeccionFraudeAnexos';
 
 export default function FormularioSuperintendencia() {
-  const { task, loading, error, submitting, completeTask } = useTask();
+  const { task, loading, error, submitting, completeTask, saveDraft } = useTask();
 
   const form = useForm<FormularioSuperintendenciaFormData>({ defaultValues: DEFAULTS });
   const { control, watch, handleSubmit, reset, formState: { errors, isSubmitted } } = form;
@@ -50,12 +51,27 @@ export default function FormularioSuperintendencia() {
   const anexosCompletos = !!w.qd_incluyeAnexosQueja && !!w.qd_incluyeAdjuntoRespuesta;
   const puedeGuardar = sfcCompletos && fraudeCompleto && anexosCompletos;
 
-  const enviarCon = (accion: AccionFormularioSFC) => (data: FormularioSuperintendenciaFormData) =>
-    completeTask({ ...data, qd_accion: accion } as unknown as Record<string, unknown>)
-      .catch((e) => console.error('[FormularioSuperintendencia] Error al enviar:', e));
+  const enviarCon = (accion: AccionFormularioSFC) => async (data: FormularioSuperintendenciaFormData): Promise<boolean> => {
+    try {
+      if (accion === 'GUARDAR_BORRADOR') {
+        await saveDraft({ ...data, qd_accion: accion } as unknown as Record<string, unknown>);
+        return true;
+      }
+      await completeTask({ ...data, qd_accion: accion } as unknown as Record<string, unknown>);
+      return true;
+    } catch (e) {
+      console.error('[FormularioSuperintendencia] Error al enviar:', e);
+      return false;
+    }
+  };
 
   const onGuardar = handleSubmit(enviarCon('GUARDAR'));         // ACT-009-01
-  const onGuardarBorrador = () => enviarCon('GUARDAR_BORRADOR')(w); // ACT-009-02
+  // ACT-009-02 Guardar Borrador: guarda sin completar la tarea y redirige el frame
+  // superior al home de tareas de ProcessMaker (solo si se guardó bien).
+  const onGuardarBorrador = async () => {
+    const ok = await enviarCon('GUARDAR_BORRADOR')(w);
+    if (ok) window.top!.location.href = pm4TasksUrl();
+  };
 
   if (loading) {
     return <div className="screen-wrapper"><div className="screen-loading"><ZrLoader /></div></div>;
