@@ -15,12 +15,13 @@ interface PreviewModalProps {
 }
 
 export default function PreviewModal({ isOpen, onClose, previewDoc }: PreviewModalProps) {
-  const hasFileId = previewDoc?.fileId !== undefined && previewDoc?.fileId !== null;
+  // Determinamos si el documento tiene un id de archivo en PM4.
+  const blnHasFileId = previewDoc?.fileId !== undefined && previewDoc?.fileId !== null;
 
   return (
     <ZrModal
       model={isOpen}
-      onChange={(v: boolean) => { if (!v) onClose(); }}
+      onChange={(in_blnOpen: boolean) => { if (!in_blnOpen) onClose(); }}
       style={{ ['--z-modal--padding' as any]: '0', ['--z-modal--backdrop' as any]: 'color-mix(in srgb, var(--z-modal-backdrop) 55%, transparent)' }}
     >
       <div className="preview-modal">
@@ -35,7 +36,7 @@ export default function PreviewModal({ isOpen, onClose, previewDoc }: PreviewMod
             </div>
           </div>
         </div>
-        {hasFileId ? (
+        {blnHasFileId ? (
           <div style={{ padding: '0' }}>
             <PdfViewer
               fileId={previewDoc!.fileId!}

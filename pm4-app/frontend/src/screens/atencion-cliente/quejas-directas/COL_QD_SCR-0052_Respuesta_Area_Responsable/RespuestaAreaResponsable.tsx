@@ -24,58 +24,62 @@ export default function RespuestaAreaResponsable() {
   const form = useForm<RespuestaAreaResponsableFormData>({ defaultValues: DEFAULTS });
   const { control, watch, handleSubmit, reset, setValue, setError, clearErrors,
     formState: { errors, isSubmitted } } = form;
-  const w = watch();
+  // Tomamos una foto de los valores actuales del formulario.
+  const objWatch = watch();
 
+  // Precargamos el formulario con los datos que llegan de la tarea.
   useEffect(() => {
     if (task?.data) reset({ ...DEFAULTS, ...(task.data as Partial<RespuestaAreaResponsableFormData>) });
   }, [task, reset]);
 
-  const err = (name: keyof RespuestaAreaResponsableFormData): string | undefined => {
-    const e = errors[name];
-    if (!e || (e.type === 'required' && !isSubmitted)) return undefined;
-    return String(e.message);
+  // Atajo para leer el mensaje de error de un campo (solo tras el submit).
+  const err = (in_strName: keyof RespuestaAreaResponsableFormData): string | undefined => {
+    const objErr = errors[in_strName];
+    if (!objErr || (objErr.type === 'required' && !isSubmitted)) return undefined;
+    return String(objErr.message);
   };
 
   // RUL-0052-01 (🔴 BLOQUEA): el comentario es obligatorio para enviar.
-  const puedeEnviar = !!w.qd_comentarioArea?.trim();
+  const blnCanSubmit = !!objWatch.qd_comentarioArea?.trim();
 
   // Datos del consumidor derivados de los campos granulares producidos por SCR-000.
-  const nombre = (w.qd_razonSocial || `${w.qd_nombres ?? ''} ${w.qd_apellidos ?? ''}`).trim();
-  const identificacion = `${w.qd_tipoIdentificacion ?? ''} ${w.qd_numeroIdentificacion ?? ''}`.trim();
+  const strName = (objWatch.qd_razonSocial || `${objWatch.qd_nombres ?? ''} ${objWatch.qd_apellidos ?? ''}`).trim();
+  const strIdentification = `${objWatch.qd_tipoIdentificacion ?? ''} ${objWatch.qd_numeroIdentificacion ?? ''}`.trim();
 
   // Solicitud de ayuda específica (fila del historial que originó este subproceso, SCR-0051).
   // Se matchea por qd_numeroAyuda (1-based) → índice del historial.
-  const numeroAyuda = Number(w.qd_numeroAyuda) || 0;
-  const historialAsig: AsignacionHistorial[] = Array.isArray(w.qd_historialAsignaciones) ? w.qd_historialAsignaciones : [];
-  const solicitud = historialAsig[numeroAyuda - 1];
+  const intHelpNumber = Number(objWatch.qd_numeroAyuda) || 0;
+  const lstHistory: AsignacionHistorial[] = Array.isArray(objWatch.qd_historialAsignaciones) ? objWatch.qd_historialAsignaciones : [];
+  const objRequest = lstHistory[intHelpNumber - 1];
 
   // Estos campos guardan el CÓDIGO en PM4; resolvemos su descripción vía catálogo para mostrar.
-  const { options: canalOpts } = useCollection(COLLECTION_DEFS.canal);
-  const { options: productoOpts } = useCollection(COLLECTION_DEFS.producto);
-  const { options: motivoOpts } = useCollection(COLLECTION_DEFS.motivo);
-  const { options: admisionOpts } = useCollection(COLLECTION_DEFS.admision);
+  const { options: cllChannel } = useCollection(COLLECTION_DEFS.canal);
+  const { options: cllProduct } = useCollection(COLLECTION_DEFS.producto);
+  const { options: cllReason } = useCollection(COLLECTION_DEFS.motivo);
+  const { options: cllAdmission } = useCollection(COLLECTION_DEFS.admision);
 
-  const desc = (opts: { value: string; label: string }[], code: string | undefined): string => {
-    if (!code) return '—';
-    return opts.find((o) => o.value === code)?.label ?? code;
+  // Resuelve la descripción de un código contra su catálogo.
+  const desc = (in_lstOptions: { value: string; label: string }[], in_strCode: string | undefined): string => {
+    if (!in_strCode) return '—';
+    return in_lstOptions.find((o) => o.value === in_strCode)?.label ?? in_strCode;
   };
-  const canalDesc = desc(canalOpts, w.qd_canal);
-  const productoDesc = desc(productoOpts, w.qd_productoSFC);
-  const motivoDesc = desc(motivoOpts, w.qd_motivoSFC);
-  const admisionDesc = desc(admisionOpts, w.qd_admision);
+  const strChannelDesc = desc(cllChannel, objWatch.qd_canal);
+  const strProductDesc = desc(cllProduct, objWatch.qd_productoSFC);
+  const strReasonDesc = desc(cllReason, objWatch.qd_motivoSFC);
+  const strAdmissionDesc = desc(cllAdmission, objWatch.qd_admision);
 
   // Sube cada archivo y devuelve un mapa docKey → file_id (fileUploadId de PM4),
   // para poder guardar el id del adjunto en el historial y descargarlo luego.
-  const uploadFiles = async (requestId: number): Promise<Record<string, number>> => {
-    const ids: Record<string, number> = {};
-    for (const [docKey, file] of fileRegistry.current.entries()) {
-      const fd = new FormData();
-      fd.append('file', file);
-      const r = await pm4.post(`/requests/${requestId}/files?data_name=${docKey}`, fd);
-      const id = (r.data as { fileUploadId?: number })?.fileUploadId;
-      if (typeof id === 'number') ids[docKey] = id;
+  const uploadFiles = async (in_intRequestId: number): Promise<Record<string, number>> => {
+    const dicIds: Record<string, number> = {};
+    for (const [strDocKey, objFile] of fileRegistry.current.entries()) {
+      const objFormData = new FormData();
+      objFormData.append('file', objFile);
+      const objResponse = await pm4.post(`/requests/${in_intRequestId}/files?data_name=${strDocKey}`, objFormData);
+      const intId = (objResponse.data as { fileUploadId?: number })?.fileUploadId;
+      if (typeof intId === 'number') dicIds[strDocKey] = intId;
     }
-    return ids;
+    return dicIds;
   };
 
   // Registra la respuesta del ayudante en el array diferenciado (qd_respuestasAyuda) y
@@ -86,70 +90,73 @@ export default function RespuestaAreaResponsable() {
   // pidió la ayuda. Si después se pidieron más ayudas, ese snapshot está desactualizado y
   // escribirlo de vuelta borraría las ayudas posteriores. Por eso releemos el estado FRESCO
   // del request padre y fusionamos la respuesta sobre esa versión antes de guardar.
-  const registrarRespuesta = async (data: RespuestaAreaResponsableFormData, adjuntoFileId?: number) => {
-    const numero = Number(data.qd_numeroAyuda) || 0;
-    const idx = numero - 1;
-    const respondio = data.qd_usuarioResponsable || data.qd_areaResponsable || '—';
-    const fecha = new Date().toISOString().slice(0, 10);
-    const adjunto = data.qd_adjuntoArea || '';
+  const registrarRespuesta = async (in_objData: RespuestaAreaResponsableFormData, in_intAttachFileId?: number) => {
+    const intNumber = Number(in_objData.qd_numeroAyuda) || 0;
+    const intIndex = intNumber - 1;
+    const strResponder = in_objData.qd_usuarioResponsable || in_objData.qd_areaResponsable || '—';
+    const strDate = new Date().toISOString().slice(0, 10);
+    const strAttachment = in_objData.qd_adjuntoArea || '';
 
     // Partimos del snapshot local como fallback.
-    let historial: AsignacionHistorial[] = Array.isArray(data.qd_historialAsignaciones)
-      ? [...data.qd_historialAsignaciones] : [];
-    let respuestas: RespuestaAyuda[] = Array.isArray(data.qd_respuestasAyuda)
-      ? [...data.qd_respuestasAyuda] : [];
+    let historial: AsignacionHistorial[] = Array.isArray(in_objData.qd_historialAsignaciones)
+      ? [...in_objData.qd_historialAsignaciones] : [];
+    let lstResponses: RespuestaAyuda[] = Array.isArray(in_objData.qd_respuestasAyuda)
+      ? [...in_objData.qd_respuestasAyuda] : [];
 
     // Releer el request padre para tener el historial completo y actualizado.
-    const pdata = task?.data as Record<string, unknown> | undefined;
+    const objParentData = task?.data as Record<string, unknown> | undefined;
     const parentRequestId =
-      (pdata?._request as { parent_request_id?: number } | undefined)?.parent_request_id ??
-      (pdata?._parent as { request_id?: number } | undefined)?.request_id;
+      (objParentData?._request as { parent_request_id?: number } | undefined)?.parent_request_id ??
+      (objParentData?._parent as { request_id?: number } | undefined)?.request_id;
     if (parentRequestId) {
       try {
         // include=data es obligatorio: sin él PM4 no devuelve las variables del caso.
-        const r = await pm4.get(`/requests/${parentRequestId}`, { params: { include: 'data' } });
-        const fresh = (r.data?.data ?? r.data ?? {}) as Record<string, unknown>;
-        if (Array.isArray(fresh.qd_historialAsignaciones)) historial = [...fresh.qd_historialAsignaciones];
-        if (Array.isArray(fresh.qd_respuestasAyuda)) respuestas = [...fresh.qd_respuestasAyuda];
+        const objResponse = await pm4.get(`/requests/${parentRequestId}`, { params: { include: 'data' } });
+        const objFresh = (objResponse.data?.data ?? objResponse.data ?? {}) as Record<string, unknown>;
+        if (Array.isArray(objFresh.qd_historialAsignaciones)) historial = [...objFresh.qd_historialAsignaciones];
+        if (Array.isArray(objFresh.qd_respuestasAyuda)) lstResponses = [...objFresh.qd_respuestasAyuda];
         console.log(`[RespuestaAreaResponsable] Historial padre (req ${parentRequestId}): ${historial.length} filas`, historial);
-      } catch (e) {
-        console.warn('[RespuestaAreaResponsable] No se pudo leer el request padre; se usa el snapshot local:', e);
+      } catch (exc) {
+        console.warn('[RespuestaAreaResponsable] No se pudo leer el request padre; se usa el snapshot local:', exc);
       }
     }
 
-    if (idx >= 0 && idx < historial.length) {
-      historial[idx] = {
-        ...historial[idx],
+    // Completamos la fila del historial que corresponde a esta ayuda.
+    if (intIndex >= 0 && intIndex < historial.length) {
+      historial[intIndex] = {
+        ...historial[intIndex],
         respondio: 'si', // marca que el ayudante ya respondió (SCR-0051 lo pinta con un check verde)
-        comentario: data.qd_comentarioArea,
-        adjunto, // nombre real del archivo ('' si no adjuntó) → SCR-0051 lo enlaza para descarga
-        adjuntoFileId, // file_id en PM4 para descarga exacta
+        comentario: in_objData.qd_comentarioArea,
+        adjunto: strAttachment, // nombre real del archivo ('' si no adjuntó) → SCR-0051 lo enlaza para descarga
+        adjuntoFileId: in_intAttachFileId, // file_id en PM4 para descarga exacta
       };
     }
 
-    const nuevaRespuesta: RespuestaAyuda = { numero, fecha, respondio, comentario: data.qd_comentarioArea, adjunto, adjuntoFileId };
-    if (idx >= 0) respuestas[idx] = nuevaRespuesta;
-    else respuestas.push(nuevaRespuesta);
+    // Registramos la respuesta en el array diferenciado por número de ayuda.
+    const objNewResponse: RespuestaAyuda = { numero: intNumber, fecha: strDate, respondio: strResponder, comentario: in_objData.qd_comentarioArea, adjunto: strAttachment, adjuntoFileId: in_intAttachFileId };
+    if (intIndex >= 0) lstResponses[intIndex] = objNewResponse;
+    else lstResponses.push(objNewResponse);
 
-    return { qd_historialAsignaciones: historial, qd_respuestasAyuda: respuestas };
+    return { qd_historialAsignaciones: historial, qd_respuestasAyuda: lstResponses };
   };
 
-  const enviarCon = (accion: AccionRespuestaArea) => async (data: RespuestaAreaResponsableFormData): Promise<boolean> => {
+  // Sube adjuntos, registra la respuesta si aplica y completa la tarea.
+  const enviarCon = (in_strAction: AccionRespuestaArea) => async (in_objData: RespuestaAreaResponsableFormData): Promise<boolean> => {
     setEnviarError(null);
     try {
-      const requestId = task?.process_request_id;
-      let uploadedIds: Record<string, number> = {};
-      if (requestId && fileRegistry.current.size > 0) uploadedIds = await uploadFiles(requestId);
-      const extra = accion === 'ENVIAR' ? await registrarRespuesta(data, uploadedIds[ADJUNTO_KEY]) : {};
-      await completeTask({ ...data, ...extra, qd_accion: accion } as unknown as Record<string, unknown>);
+      const intRequestId = task?.process_request_id;
+      let dicUploadedIds: Record<string, number> = {};
+      if (intRequestId && fileRegistry.current.size > 0) dicUploadedIds = await uploadFiles(intRequestId);
+      const objExtra = in_strAction === 'ENVIAR' ? await registrarRespuesta(in_objData, dicUploadedIds[ADJUNTO_KEY]) : {};
+      await completeTask({ ...in_objData, ...objExtra, qd_accion: in_strAction } as unknown as Record<string, unknown>);
       return true;
-    } catch (e) {
+    } catch (exc) {
       // No tragar el error: si la tarea no se completa, PM4 no cierra el iframe.
       // Mostrarlo en pantalla para saber la causa real del fallo.
-      const err = e as { response?: { data?: { message?: string } }; message?: string };
-      const msg = err.response?.data?.message ?? err.message ?? 'Error desconocido al enviar.';
-      console.error('[RespuestaAreaResponsable] Error al enviar:', e);
-      setEnviarError(msg);
+      const objErr = exc as { response?: { data?: { message?: string } }; message?: string };
+      const strMsg = objErr.response?.data?.message ?? objErr.message ?? 'Error desconocido al enviar.';
+      console.error('[RespuestaAreaResponsable] Error al enviar:', exc);
+      setEnviarError(strMsg);
       return false;
     }
   };
@@ -158,8 +165,8 @@ export default function RespuestaAreaResponsable() {
   const onEnviar = handleSubmit(enviarCon('ENVIAR'));
   // Guardar Borrador: guarda los datos del formulario y sale a la URL base (solo si se guardó bien).
   const onGuardarBorrador = async () => {
-    const ok = await enviarCon('GUARDAR_BORRADOR')(w);
-    if (ok) window.location.href = window.location.origin;
+    const blnOk = await enviarCon('GUARDAR_BORRADOR')(objWatch);
+    if (blnOk) window.location.href = window.location.origin;
   };
 
   if (loading) {
@@ -190,11 +197,11 @@ export default function RespuestaAreaResponsable() {
             <div className="form-row cols-2">
               <div className="zds-field-wrap">
                 <span className="info-bar-label">Nombre del Consumidor</span>
-                <div className="info-bar-value" style={{ marginTop: 'var(--zs-50)' }}>{nombre || '—'}</div>
+                <div className="info-bar-value" style={{ marginTop: 'var(--zs-50)' }}>{strName || '—'}</div>
               </div>
               <div className="zds-field-wrap">
                 <span className="info-bar-label">Tipo y N.° de Identificación</span>
-                <div className="info-bar-value" style={{ marginTop: 'var(--zs-50)' }}>{identificacion || '—'}</div>
+                <div className="info-bar-value" style={{ marginTop: 'var(--zs-50)' }}>{strIdentification || '—'}</div>
               </div>
             </div>
             <div className="form-row cols-2">
@@ -210,22 +217,22 @@ export default function RespuestaAreaResponsable() {
             <div className="form-row cols-3">
               <div className="zds-field-wrap">
                 <span className="info-bar-label">Canal de Recepción</span>
-                <div className="info-bar-value" style={{ marginTop: 'var(--zs-50)' }}>{canalDesc}</div>
+                <div className="info-bar-value" style={{ marginTop: 'var(--zs-50)' }}>{strChannelDesc}</div>
               </div>
               <div className="zds-field-wrap">
                 <span className="info-bar-label">Producto SFC</span>
-                <div className="info-bar-value" style={{ marginTop: 'var(--zs-50)' }}>{productoDesc}</div>
+                <div className="info-bar-value" style={{ marginTop: 'var(--zs-50)' }}>{strProductDesc}</div>
               </div>
               <div className="zds-field-wrap">
                 <span className="info-bar-label">Motivo SFC</span>
-                <div className="info-bar-value" style={{ marginTop: 'var(--zs-50)' }}>{motivoDesc}</div>
+                <div className="info-bar-value" style={{ marginTop: 'var(--zs-50)' }}>{strReasonDesc}</div>
               </div>
             </div>
             <div className="form-row cols-3">
               <ZdsInput name="qd_instanciaRecepcion" control={control} label="Instancia de Recepción" readOnly />
               <div className="zds-field-wrap">
                 <span className="info-bar-label">Admisión</span>
-                <div className="info-bar-value" style={{ marginTop: 'var(--zs-50)' }}>{admisionDesc}</div>
+                <div className="info-bar-value" style={{ marginTop: 'var(--zs-50)' }}>{strAdmissionDesc}</div>
               </div>
               <ZdsInput name="qd_enteControl" control={control} label="Ente de Control" readOnly />
             </div>
@@ -236,7 +243,7 @@ export default function RespuestaAreaResponsable() {
             <div className="form-row cols-1">
               <div className="zds-field-wrap">
                 <span className="info-bar-label">Asunto de la Queja</span>
-                <div className="info-bar-value" style={{ marginTop: 'var(--zs-50)' }}>{motivoDesc}</div>
+                <div className="info-bar-value" style={{ marginTop: 'var(--zs-50)' }}>{strReasonDesc}</div>
               </div>
             </div>
             <div className="form-row cols-1">
@@ -249,24 +256,24 @@ export default function RespuestaAreaResponsable() {
             <div className="form-row cols-2">
               <div className="zds-field-wrap">
                 <span className="info-bar-label">Fecha de solicitud</span>
-                <div className="info-bar-value" style={{ marginTop: 'var(--zs-50)' }}>{solicitud?.fecha || '—'}</div>
+                <div className="info-bar-value" style={{ marginTop: 'var(--zs-50)' }}>{objRequest?.fecha || '—'}</div>
               </div>
               <div className="zds-field-wrap">
                 <span className="info-bar-label">Solicitado por</span>
-                <div className="info-bar-value" style={{ marginTop: 'var(--zs-50)' }}>{solicitud?.de || '—'}</div>
+                <div className="info-bar-value" style={{ marginTop: 'var(--zs-50)' }}>{objRequest?.de || '—'}</div>
               </div>
             </div>
             <div className="form-row cols-1">
               <div className="zds-field-wrap">
                 <span className="info-bar-label">Motivo</span>
-                <div className="info-bar-value" style={{ marginTop: 'var(--zs-50)' }}>{solicitud?.motivo || '—'}</div>
+                <div className="info-bar-value" style={{ marginTop: 'var(--zs-50)' }}>{objRequest?.motivo || '—'}</div>
               </div>
             </div>
             <div className="form-row cols-1">
               <div className="zds-field-wrap">
                 <span className="info-bar-label">Observaciones</span>
                 <div className="info-bar-value" style={{ marginTop: 'var(--zs-50)', whiteSpace: 'pre-wrap' }}>
-                  {solicitud?.observaciones || '—'}
+                  {objRequest?.observaciones || '—'}
                 </div>
               </div>
             </div>
@@ -295,7 +302,7 @@ export default function RespuestaAreaResponsable() {
             </div>
 
             {/* RUL-0052-01 / MSG-0052-01 — comentario obligatorio. */}
-            {!puedeEnviar && (
+            {!blnCanSubmit && (
               <ZrAlert config="info" {...({ 'hide-close': true } as object)}>
                 Debe escribir un <strong>comentario</strong> antes de enviarlo. {/* MSG-0052-01 */}
               </ZrAlert>
@@ -318,7 +325,7 @@ export default function RespuestaAreaResponsable() {
               onClick={onGuardarBorrador}>
               Guardar Borrador
             </ZrButton>
-            <ZrButton config="positive" disabled={!puedeEnviar || submitting} loading={submitting}
+            <ZrButton config="positive" disabled={!blnCanSubmit || submitting} loading={submitting}
               onClick={() => { onEnviar(); }}>
               Enviar comentario ▶
             </ZrButton>

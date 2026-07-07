@@ -30,7 +30,8 @@ const REQUISITOS = [
 ] as const;
 
 export default function SeccionPI({ form, fileRegistry }: { form: Form; fileRegistry: React.MutableRefObject<Map<string, File>> }) {
-  const docKeys = [
+  // Claves PM4 de los documentos de soporte de este producto
+  const arrDocKeys = [
     'frm_pi_doc_01_nombre', 'frm_pi_doc_02_nombre', 'frm_pi_doc_03_nombre',
   ] as const;
 
@@ -43,8 +44,9 @@ export default function SeccionPI({ form, fileRegistry }: { form: Form; fileRegi
           Servicios profesionales a los que se puede ofrecer este producto:
         </p>
         <ol className="service-list">
-          {SERVICIOS_ELEGIBLES.map((servicio, i) => (
-            <li key={i} className="service-item">{servicio}</li>
+          {/* Listamos cada servicio elegible del producto */}
+          {SERVICIOS_ELEGIBLES.map((strService, i) => (
+            <li key={i} className="service-item">{strService}</li>
           ))}
         </ol>
       </div>
@@ -65,7 +67,7 @@ export default function SeccionPI({ form, fileRegistry }: { form: Form; fileRegi
       />
 
       {/* ── DOCUMENTO DE SOPORTE ── */}
-      <DocSupportUploader form={form} fileRegistry={fileRegistry} docKeys={docKeys} />
+      <DocSupportUploader form={form} fileRegistry={fileRegistry} docKeys={arrDocKeys} />
 
       {/* ── PROPUESTA ECONÓMICA ── */}
       <PropuestaEconomicaTable

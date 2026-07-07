@@ -38,7 +38,8 @@ export const COLLECTION_DEFS = {
 // ---------------------------------------------------------------------------
 // Opciones estáticas
 // ---------------------------------------------------------------------------
-const cop = (v: number) => `$${new Intl.NumberFormat('es-CO').format(v)}`;
+// Formateamos un número como moneda colombiana
+const cop = (in_dblValue: number) => `$${new Intl.NumberFormat('es-CO').format(in_dblValue)}`;
 
 export const OPTIONS = {
   sucursal: [
@@ -78,22 +79,22 @@ export const OPTIONS = {
   facturacionDyO: [
     7_000_000_000, 13_000_000_000, 20_000_000_000, 45_000_000_000,
     60_000_000_000, 85_000_000_000, 120_000_000_000, 150_000_000_000, 200_000_000_000,
-  ].map((v) => ({ value: String(v), label: cop(v) })),
+  ].map((dblValue) => ({ value: String(dblValue), label: cop(dblValue) })),
 
   facturacionCC: [
     15_000_000_000, 30_000_000_000, 45_000_000_000,
     60_000_000_000, 80_000_000_000, 100_000_000_000,
-  ].map((v) => ({ value: String(v), label: cop(v) })),
+  ].map((dblValue) => ({ value: String(dblValue), label: cop(dblValue) })),
 
   facturacionPDySI: [
     15_000_000_000, 30_000_000_000, 45_000_000_000,
     60_000_000_000, 80_000_000_000, 100_000_000_000,
-  ].map((v) => ({ value: String(v), label: cop(v) })),
+  ].map((dblValue) => ({ value: String(dblValue), label: cop(dblValue) })),
 
   facturacionPI: [
     3_000_000_000, 5_000_000_000, 7_500_000_000,
     10_000_000_000, 15_000_000_000, 20_000_000_000,
-  ].map((v) => ({ value: String(v), label: cop(v) })),
+  ].map((dblValue) => ({ value: String(dblValue), label: cop(dblValue) })),
 
   planPago: [
     { value: '102', label: '102 Transferencia bancaria a 30 días' },
@@ -127,25 +128,25 @@ export const OPTIONS = {
   limiteDyo: [
     3_000_000_000, 5_000_000_000, 7_500_000_000, 10_000_000_000,
     15_000_000_000, 20_000_000_000, 30_000_000_000, 50_000_000_000,
-  ].map((v) => ({ value: String(v), label: cop(v) })),
+  ].map((dblValue) => ({ value: String(dblValue), label: cop(dblValue) })),
 
   // PDySI — Límite asegurado (Propuesta Económica)
   limitePdySI: [
     3_000_000_000, 5_000_000_000, 7_500_000_000, 10_000_000_000,
     15_000_000_000, 20_000_000_000, 30_000_000_000, 50_000_000_000,
-  ].map((v) => ({ value: String(v), label: cop(v) })),
+  ].map((dblValue) => ({ value: String(dblValue), label: cop(dblValue) })),
 
   // Responsabilidad Civil Profesional — Límite asegurado (Propuesta Económica)
   limitePI: [
     1_000_000_000, 2_000_000_000, 3_000_000_000, 5_000_000_000,
     7_500_000_000, 10_000_000_000, 15_000_000_000, 20_000_000_000,
-  ].map((v) => ({ value: String(v), label: cop(v) })),
+  ].map((dblValue) => ({ value: String(dblValue), label: cop(dblValue) })),
 
   // Crimen Comercial — Límite asegurado (Propuesta Económica)
   limiteCC: [
     1_000_000_000, 2_000_000_000, 3_000_000_000, 5_000_000_000,
     7_500_000_000, 10_000_000_000, 15_000_000_000, 20_000_000_000,
-  ].map((v) => ({ value: String(v), label: cop(v) })),
+  ].map((dblValue) => ({ value: String(dblValue), label: cop(dblValue) })),
 } as const;
 
 // ---------------------------------------------------------------------------
@@ -425,53 +426,60 @@ export interface FfFlSolicitudFormData {
 // ---------------------------------------------------------------------------
 export const CONSULTAR_CLIENTE_SCRIPT_ID = 56;
 
-export function parseClienteTia(rawOutput: unknown): Partial<FfFlSolicitudFormData> {
-  const tia = ((rawOutput as Record<string, unknown> | null | undefined) ?? {}) as Record<string, unknown>;
+export function parseClienteTia(in_objRawOutput: unknown): Partial<FfFlSolicitudFormData> {
+  const objTia = ((in_objRawOutput as Record<string, unknown> | null | undefined) ?? {}) as Record<string, unknown>;
 
-  const flex: Record<string, unknown> = {};
-  const flexAttrs = tia['flexAttributes'] as Array<{ attributeName: string; attributeValue: unknown }> | undefined;
-  if (Array.isArray(flexAttrs)) {
-    for (const attr of flexAttrs) flex[attr.attributeName] = attr.attributeValue;
+  // Aplanamos los atributos flexibles a un diccionario de fácil acceso
+  const dicFlex: Record<string, unknown> = {};
+  const lstFlexAttrs = objTia['flexAttributes'] as Array<{ attributeName: string; attributeValue: unknown }> | undefined;
+  if (Array.isArray(lstFlexAttrs)) {
+    for (const objAttr of lstFlexAttrs) dicFlex[objAttr.attributeName] = objAttr.attributeValue;
   }
 
-  const addresses = tia['addresses'] as Array<Record<string, unknown>> | undefined;
-  const mainAddr = addresses?.find(a => a['addressType'] === 'address') ?? {};
+  // Tomamos la dirección principal del listado de direcciones
+  const lstAddresses = objTia['addresses'] as Array<Record<string, unknown>> | undefined;
+  const objMainAddr = lstAddresses?.find(objAddr => objAddr['addressType'] === 'address') ?? {};
 
-  const tomadorNombre = (() => {
-    if (tia['partyType'] === 'INSTITUTION') return tia['name'] as string | null;
-    const parts = [flex['FIRST_NAME'], flex['SECOND_NAME'], flex['FIRST_SURNAME'], flex['SECOND_SURNAME']].filter(Boolean);
-    return parts.length ? parts.join(' ') : (tia['name'] as string | null);
+  // Componemos el nombre del tomador según sea institución o persona
+  const strHolderName = (() => {
+    if (objTia['partyType'] === 'INSTITUTION') return objTia['name'] as string | null;
+    const lstParts = [dicFlex['FIRST_NAME'], dicFlex['SECOND_NAME'], dicFlex['FIRST_SURNAME'], dicFlex['SECOND_SURNAME']].filter(Boolean);
+    return lstParts.length ? lstParts.join(' ') : (objTia['name'] as string | null);
   })();
 
-  const direccion = (() => {
-    const street = mainAddr['street'] as string | null;
-    if (street) return street;
-    const parts = [
-      flex['TYPE_VIA'], flex['NO_VIA'], '#',
-      flex['TYPE_VIA2'], flex['NO_VIA2'], flex['PLACA'], flex['DETAILS_ADDRESS'],
-    ].filter(v => v !== null && v !== undefined && v !== '');
-    return parts.length > 2 ? parts.join(' ') : null;
+  // Componemos la dirección desde la calle o, si falta, desde los atributos flexibles
+  const strAddress = (() => {
+    const strStreet = objMainAddr['street'] as string | null;
+    if (strStreet) return strStreet;
+    const lstParts = [
+      dicFlex['TYPE_VIA'], dicFlex['NO_VIA'], '#',
+      dicFlex['TYPE_VIA2'], dicFlex['NO_VIA2'], dicFlex['PLACA'], dicFlex['DETAILS_ADDRESS'],
+    ].filter(objVal => objVal !== null && objVal !== undefined && objVal !== '');
+    return lstParts.length > 2 ? lstParts.join(' ') : null;
   })();
 
-  const rawDepto = (mainAddr['county'] ?? mainAddr['departmentName'] ?? flex['STATE']) as string | null;
-  const deptoMatch = rawDepto
-    ? DEPARTAMENTOS.find(d => d.label.toLowerCase() === rawDepto.toLowerCase())?.value ?? null
+  // Emparejamos el departamento recibido con nuestro catálogo
+  const strRawDept = (objMainAddr['county'] ?? objMainAddr['departmentName'] ?? dicFlex['STATE']) as string | null;
+  const strDeptMatch = strRawDept
+    ? DEPARTAMENTOS.find(objDept => objDept.label.toLowerCase() === strRawDept.toLowerCase())?.value ?? null
     : null;
 
-  const rawCiudad = mainAddr['city'] as string | null;
-  const ciudadMatch = (() => {
-    if (!rawCiudad) return null;
-    const allCities = deptoMatch
-      ? (CIUDADES_POR_DEPTO[deptoMatch] ?? [])
+  // Emparejamos la ciudad recibida con nuestro catálogo
+  const strRawCity = objMainAddr['city'] as string | null;
+  const strCityMatch = (() => {
+    if (!strRawCity) return null;
+    const lstAllCities = strDeptMatch
+      ? (CIUDADES_POR_DEPTO[strDeptMatch] ?? [])
       : Object.values(CIUDADES_POR_DEPTO).flat();
-    return allCities.find(c => c.label.toLowerCase() === rawCiudad.toLowerCase())?.value ?? null;
+    return lstAllCities.find(objCity => objCity.label.toLowerCase() === strRawCity.toLowerCase())?.value ?? null;
   })();
 
-  const result: Partial<FfFlSolicitudFormData> = {};
-  if (tomadorNombre)     result.frm_tom_tomador           = tomadorNombre;
-  if (direccion)         result.frm_tom_direccion          = direccion;
-  if (deptoMatch)        result.frm_tom_departamento       = deptoMatch;
-  if (ciudadMatch)       result.frm_tom_ciudad             = ciudadMatch;
-  if (flex['WEB_EMAIL']) result.frm_tom_correo_facturacion = String(flex['WEB_EMAIL']);
-  return result;
+  // Devolvemos solo los campos que pudimos resolver
+  const objResult: Partial<FfFlSolicitudFormData> = {};
+  if (strHolderName)      objResult.frm_tom_tomador           = strHolderName;
+  if (strAddress)         objResult.frm_tom_direccion          = strAddress;
+  if (strDeptMatch)       objResult.frm_tom_departamento       = strDeptMatch;
+  if (strCityMatch)       objResult.frm_tom_ciudad             = strCityMatch;
+  if (dicFlex['WEB_EMAIL']) objResult.frm_tom_correo_facturacion = String(dicFlex['WEB_EMAIL']);
+  return objResult;
 }

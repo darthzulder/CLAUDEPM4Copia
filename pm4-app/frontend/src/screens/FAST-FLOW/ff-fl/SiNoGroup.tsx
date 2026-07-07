@@ -35,15 +35,16 @@ export function SiNoSelectAll({ form, prefix, count }: {
   count: number;
 }) {
   const { setValue } = form;
-  const keys = Array.from({ length: count }, (_, i) =>
+  // Armamos las claves de todas las preguntas del bloque
+  const lstKeys = Array.from({ length: count }, (_, i) =>
     `${prefix}${String(i + 1).padStart(2, '0')}` as keyof FfFlSolicitudFormData
   );
   return (
     <div className="si-no-select-all">
-      <ZrButton config="secondary:s" icon="check:line" onClick={() => keys.forEach((k) => setValue(k, 'SI'))}>
+      <ZrButton config="secondary:s" icon="check:line" onClick={() => lstKeys.forEach((strKey) => setValue(strKey, 'SI'))}>
         Marcar todas SÍ
       </ZrButton>
-      <ZrButton config="secondary:s" icon="close:line" onClick={() => keys.forEach((k) => setValue(k, 'NO'))}>
+      <ZrButton config="secondary:s" icon="close:line" onClick={() => lstKeys.forEach((strKey) => setValue(strKey, 'NO'))}>
         Marcar todas NO
       </ZrButton>
     </div>
@@ -75,9 +76,10 @@ export function SiNoQuestionTable({
   blockOn?: 'SI' | 'NO';
   blockMsg?: string;
 }) {
-  const w = form.watch();
-  const blocked = !!blockOn && items.some(
-    (_, i) => w[`${prefix}${String(i + 1).padStart(2, '0')}` as keyof FfFlSolicitudFormData] === blockOn
+  const objWatch = form.watch();
+  // Marcamos el bloqueo si alguna respuesta coincide con el valor que bloquea
+  const blnBlocked = !!blockOn && items.some(
+    (_, i) => objWatch[`${prefix}${String(i + 1).padStart(2, '0')}` as keyof FfFlSolicitudFormData] === blockOn
   );
   return (
     <div className="form-subsection form-subsection--stack">
@@ -94,20 +96,22 @@ export function SiNoQuestionTable({
             </tr>
           </thead>
           <tbody>
-            {items.map((pregunta, i) => {
-              const name = `${prefix}${String(i + 1).padStart(2, '0')}` as keyof FfFlSolicitudFormData;
+            {/* Recorremos las preguntas para pintar cada fila con su control SÍ/NO */}
+            {items.map((strQuestion, i) => {
+              const strFieldName = `${prefix}${String(i + 1).padStart(2, '0')}` as keyof FfFlSolicitudFormData;
               return (
-                <tr key={name}>
+                <tr key={strFieldName}>
                   <td {...({ config: 'center' } as object)}>{i + 1}</td>
-                  <td>{pregunta}</td>
-                  <td {...({ config: 'center' } as object)}><SiNoField form={form} name={name} /></td>
+                  <td>{strQuestion}</td>
+                  <td {...({ config: 'center' } as object)}><SiNoField form={form} name={strFieldName} /></td>
                 </tr>
               );
             })}
           </tbody>
         </table>
       </ZrTable>
-      {blocked && blockMsg && (
+      {/* Mostramos la alerta de bloqueo solo si corresponde */}
+      {blnBlocked && blockMsg && (
         <ZrAlert config="alert" {...({ 'hide-close': true } as object)}>{blockMsg}</ZrAlert>
       )}
     </div>

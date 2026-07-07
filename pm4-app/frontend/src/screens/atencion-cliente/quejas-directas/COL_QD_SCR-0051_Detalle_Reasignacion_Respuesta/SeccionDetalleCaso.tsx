@@ -5,12 +5,12 @@ import { useCollection } from '../../../../core/useCollection';
 import { COLLECTION_DEFS, type DetalleReasignacionRespuestaFormData } from './variables';
 
 // Mapea el estado SmartSupervision (FLD-079) al color del semáforo.
-export function estadoVariant(estado: string): 'success' | 'danger' | 'info' | 'neutral' {
-  const e = estado.toLowerCase();
-  if (e.includes('cerrad') || e.includes('200') || e.includes('verde')) return 'success';
-  if (e.includes('radicad') || e.includes('201')) return 'success';
-  if (e.includes('rechaz') || e.includes('400') || e.includes('error')) return 'danger';
-  if (e.includes('pendiente') || e.includes('proceso')) return 'info';
+export function estadoVariant(in_strStatus: string): 'success' | 'danger' | 'info' | 'neutral' {
+  const strStatus = in_strStatus.toLowerCase();
+  if (strStatus.includes('cerrad') || strStatus.includes('200') || strStatus.includes('verde')) return 'success';
+  if (strStatus.includes('radicad') || strStatus.includes('201')) return 'success';
+  if (strStatus.includes('rechaz') || strStatus.includes('400') || strStatus.includes('error')) return 'danger';
+  if (strStatus.includes('pendiente') || strStatus.includes('proceso')) return 'info';
   return 'neutral';
 }
 
@@ -24,24 +24,26 @@ interface Props {
 /** S1–S4 · Expediente del caso (solo lectura). */
 export default function SeccionDetalleCaso({ form, estado, nombre, identificacion }: Props) {
   const { control, watch } = form;
-  const w = watch();
+  // Tomamos una foto de los valores actuales del formulario.
+  const objWatch = watch();
 
   // Estos campos guardan el CÓDIGO en PM4; resolvemos su descripción vía catálogo para mostrar.
   // El valor almacenado no cambia (sigue siendo el código que espera el BPM).
-  const { options: canalOpts } = useCollection(COLLECTION_DEFS.canal);
-  const { options: productoOpts } = useCollection(COLLECTION_DEFS.producto);
-  const { options: motivoOpts } = useCollection(COLLECTION_DEFS.motivo);
-  const { options: admisionOpts } = useCollection(COLLECTION_DEFS.admision);
+  const { options: cllChannel } = useCollection(COLLECTION_DEFS.canal);
+  const { options: cllProduct } = useCollection(COLLECTION_DEFS.producto);
+  const { options: cllReason } = useCollection(COLLECTION_DEFS.motivo);
+  const { options: cllAdmission } = useCollection(COLLECTION_DEFS.admision);
 
-  const desc = (opts: { value: string; label: string }[], code: string | undefined): string => {
-    if (!code) return '—';
-    return opts.find((o) => o.value === code)?.label ?? code;
+  // Resuelve la descripción de un código contra su catálogo.
+  const desc = (in_lstOptions: { value: string; label: string }[], in_strCode: string | undefined): string => {
+    if (!in_strCode) return '—';
+    return in_lstOptions.find((o) => o.value === in_strCode)?.label ?? in_strCode;
   };
 
-  const canalDesc = desc(canalOpts, w.qd_canal);
-  const productoDesc = desc(productoOpts, w.qd_productoSFC);
-  const motivoDesc = desc(motivoOpts, w.qd_motivoSFC);
-  const admisionDesc = desc(admisionOpts, w.qd_admision);
+  const strChannelDesc = desc(cllChannel, objWatch.qd_canal);
+  const strProductDesc = desc(cllProduct, objWatch.qd_productoSFC);
+  const strReasonDesc = desc(cllReason, objWatch.qd_motivoSFC);
+  const strAdmissionDesc = desc(cllAdmission, objWatch.qd_admision);
 
   return (
     <>
@@ -69,22 +71,22 @@ export default function SeccionDetalleCaso({ form, estado, nombre, identificacio
         <div className="form-row cols-3">
           <div className="zds-field-wrap">
             <span className="info-bar-label">Canal de Recepción</span>
-            <div className="info-bar-value" style={{ marginTop: 'var(--zs-50)' }}>{canalDesc}</div>
+            <div className="info-bar-value" style={{ marginTop: 'var(--zs-50)' }}>{strChannelDesc}</div>
           </div>
           <div className="zds-field-wrap">
             <span className="info-bar-label">Producto SFC</span>
-            <div className="info-bar-value" style={{ marginTop: 'var(--zs-50)' }}>{productoDesc}</div>
+            <div className="info-bar-value" style={{ marginTop: 'var(--zs-50)' }}>{strProductDesc}</div>
           </div>
           <div className="zds-field-wrap">
             <span className="info-bar-label">Motivo SFC</span>
-            <div className="info-bar-value" style={{ marginTop: 'var(--zs-50)' }}>{motivoDesc}</div>
+            <div className="info-bar-value" style={{ marginTop: 'var(--zs-50)' }}>{strReasonDesc}</div>
           </div>
         </div>
         <div className="form-row cols-3">
           <ZdsInput name="qd_instanciaRecepcion" control={control} label="Instancia de Recepción" readOnly />
           <div className="zds-field-wrap">
             <span className="info-bar-label">Admisión</span>
-            <div className="info-bar-value" style={{ marginTop: 'var(--zs-50)' }}>{admisionDesc}</div>
+            <div className="info-bar-value" style={{ marginTop: 'var(--zs-50)' }}>{strAdmissionDesc}</div>
           </div>
           <ZdsInput name="qd_enteControl" control={control} label="Ente de Control" readOnly />
         </div>
@@ -95,7 +97,7 @@ export default function SeccionDetalleCaso({ form, estado, nombre, identificacio
         <div className="form-row cols-1">
           <div className="zds-field-wrap">
             <span className="info-bar-label">Asunto de la Queja</span>
-            <div className="info-bar-value" style={{ marginTop: 'var(--zs-50)' }}>{motivoDesc}</div>
+            <div className="info-bar-value" style={{ marginTop: 'var(--zs-50)' }}>{strReasonDesc}</div>
           </div>
         </div>
         <div className="form-row cols-1">

@@ -85,12 +85,13 @@ export function ZdsStatusBadge({
 
 // ─── kp: construye props kebab-case (JSX no admite guiones en nombres de prop) ─
 function kp(error?: string, helpText?: string, inputType?: string, icon?: string): Record<string, unknown> {
-  const out: Record<string, unknown> = {};
-  if (error)          out['help-text']  = error;
-  else if (helpText)  out['help-text']  = helpText;
-  if (inputType && inputType !== 'text') out['input-type'] = inputType;
-  if (icon)           out['icon']       = icon;
-  return out;
+  // Armamos el diccionario de props kebab-case solo con lo que aplica.
+  const dicOut: Record<string, unknown> = {};
+  if (error)          dicOut['help-text']  = error;
+  else if (helpText)  dicOut['help-text']  = helpText;
+  if (inputType && inputType !== 'text') dicOut['input-type'] = inputType;
+  if (icon)           dicOut['icon']       = icon;
+  return dicOut;
 }
 
 // ─── ZdsInput — ZrTextInput + Controller ─────────────────────────────────────
@@ -111,7 +112,8 @@ interface InputProps<TFV extends FieldValues> {
 export function ZdsInput<TFV extends FieldValues>({
   control, name, label, required, readOnly, helpText, error, rules, inputType, icon, autoComplete,
 }: InputProps<TFV>) {
-  const effectiveIcon = icon ?? (inputType === 'email' ? 'mail-closed:line' : undefined);
+  // Usamos el icono recibido o el de correo por defecto para email.
+  const strEffectiveIcon = icon ?? (inputType === 'email' ? 'mail-closed:line' : undefined);
   return (
     <div className="zds-field-wrap">
       <Controller
@@ -129,7 +131,7 @@ export function ZdsInput<TFV extends FieldValues>({
             onChange={(val: string | null) => field.onChange(val ?? '')}
             onBlur={field.onBlur}
             {...({
-              ...kp(error, helpText, inputType, effectiveIcon),
+              ...kp(error, helpText, inputType, strEffectiveIcon),
               ...(autoComplete ? { autocomplete: autoComplete } : {}),
             } as Record<string, unknown>)}
           />
@@ -485,8 +487,9 @@ export function ZdsFileInput<TFV extends FieldValues>({
   errorMessage,
   droppable = true,
 }: FileInputProps<TFV>) {
-  const defaultError = `Solo se permiten archivos ${allowedExtensions.join(', ')}, máx ${maxSizeMb} MB`;
-  const effectiveError = errorMessage || defaultError;
+  // Mensaje de error a mostrar: el recibido o uno construido por defecto.
+  const strDefaultError = `Solo se permiten archivos ${allowedExtensions.join(', ')}, máx ${maxSizeMb} MB`;
+  const strEffectiveError = errorMessage || strDefaultError;
 
   return (
     <div style={{ flexGrow: 1, display: 'flex', flexDirection: 'column' }}>
@@ -517,7 +520,7 @@ export function ZdsFileInput<TFV extends FieldValues>({
                   }
                   setError(name, {
                     type: 'manual',
-                    message: effectiveError,
+                    message: strEffectiveError,
                   } as any);
                   setValue(name, '' as any);
                   if (fileRegistry) {

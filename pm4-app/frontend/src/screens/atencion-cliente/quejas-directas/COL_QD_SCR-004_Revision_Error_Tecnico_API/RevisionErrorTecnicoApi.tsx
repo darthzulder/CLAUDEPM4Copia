@@ -16,32 +16,36 @@ export default function RevisionErrorTecnicoApi() {
 
   const form = useForm<RevisionErrorTecnicoApiFormData>({ defaultValues: DEFAULTS });
   const { control, watch, handleSubmit, reset, formState: { errors, isSubmitted } } = form;
-  const w = watch();
+  // Tomamos una foto de los valores actuales del formulario.
+  const objWatch = watch();
 
+  // Precargamos el formulario con los datos que llegan de la tarea.
   useEffect(() => {
     if (task?.data) {
       reset({ ...DEFAULTS, ...(task.data as Partial<RevisionErrorTecnicoApiFormData>) });
     }
   }, [task, reset]);
 
-  const err = (name: keyof RevisionErrorTecnicoApiFormData): string | undefined => {
-    const e = errors[name];
-    if (!e || (e.type === 'required' && !isSubmitted)) return undefined;
-    return String(e.message);
+  // Atajo para leer el mensaje de error de un campo (solo tras el submit).
+  const err = (in_strName: keyof RevisionErrorTecnicoApiFormData): string | undefined => {
+    const objErr = errors[in_strName];
+    if (!objErr || (objErr.type === 'required' && !isSubmitted)) return undefined;
+    return String(objErr.message);
   };
 
   // RUL-004-01 (🔴 BLOQUEA): causaRaiz o correccionAplicada vacíos ⇒ no se puede autorizar.
-  const puedeAutorizar =
-    !!w.qd_causaRaiz?.trim() && !!w.qd_correccionAplicada?.trim();
+  const blnCanAuthorize =
+    !!objWatch.qd_causaRaiz?.trim() && !!objWatch.qd_correccionAplicada?.trim();
 
   // ACT-004-01 / ACT-004-02 — ambos completan la tarea; difieren en la acción registrada.
-  const enviar = (accion: AccionErrorTecnico) =>
-    completeTask({ ...w, qd_accion: accion } as unknown as Record<string, unknown>)
-      .catch((e) => console.error('[RevisionErrorTecnicoApi] Error al enviar:', e));
+  const enviar = (in_strAction: AccionErrorTecnico) =>
+    completeTask({ ...objWatch, qd_accion: in_strAction } as unknown as Record<string, unknown>)
+      .catch((exc) => console.error('[RevisionErrorTecnicoApi] Error al enviar:', exc));
 
-  const onAutorizar = handleSubmit((data) =>
-    completeTask({ ...data, qd_accion: 'AUTORIZAR_REENVIO' } as unknown as Record<string, unknown>)
-      .catch((e) => console.error('[RevisionErrorTecnicoApi] Error al autorizar:', e)),
+  // ACT-004-01 — autorizar el reenvío (valida causa raíz y corrección).
+  const onAutorizar = handleSubmit((in_objData) =>
+    completeTask({ ...in_objData, qd_accion: 'AUTORIZAR_REENVIO' } as unknown as Record<string, unknown>)
+      .catch((exc) => console.error('[RevisionErrorTecnicoApi] Error al autorizar:', exc)),
   );
 
   if (loading) {
@@ -57,7 +61,8 @@ export default function RevisionErrorTecnicoApi() {
     );
   }
 
-  const ajustaPayload = w.qd_requiereAjustePayload === 'SI';
+  // Indica si el analista debe ajustar el payload antes de reenviar.
+  const blnAdjustPayload = objWatch.qd_requiereAjustePayload === 'SI';
 
   return (
     <div className="screen-wrapper">
@@ -82,7 +87,7 @@ export default function RevisionErrorTecnicoApi() {
             <ZrAlert config="negative" {...({ 'hide-close': true } as object)}>
               La integración con SmartSupervision <strong>falló por un error técnico</strong> tras
               varios intentos. Revise el detalle, registre la corrección y autorice el reenvío.
-              {w.qd_numeroIntento && <> — Intento acumulado <strong>#{w.qd_numeroIntento}</strong>.</>}
+              {objWatch.qd_numeroIntento && <> — Intento acumulado <strong>#{objWatch.qd_numeroIntento}</strong>.</>}
             </ZrAlert>
 
             <div className="form-row cols-3">
@@ -110,9 +115,9 @@ export default function RevisionErrorTecnicoApi() {
                 name="qd_payloadEnviado"
                 control={control}
                 label="Payload Enviado (JSON)"
-                readOnly={!ajustaPayload}
+                readOnly={!blnAdjustPayload}
                 helpText={
-                  ajustaPayload
+                  blnAdjustPayload
                     ? 'Ajuste el JSON del payload que se reenviará a SmartSupervision.'
                     : 'JSON del payload del intento fallido — solo lectura.'
                 }
@@ -159,14 +164,14 @@ export default function RevisionErrorTecnicoApi() {
               />
             </div>
 
-            {ajustaPayload && (
+            {blnAdjustPayload && (
               <ZrAlert config="alert" {...({ 'hide-close': true } as object)}>
                 Edite el <strong>Payload Enviado (JSON)</strong> en la sección superior antes de
                 autorizar: el reenvío usará el payload corregido.
               </ZrAlert>
             )}
 
-            {!puedeAutorizar && (
+            {!blnCanAuthorize && (
               <ZrAlert config="info" {...({ 'hide-close': true } as object)}>
                 Debe registrar la <strong>causa raíz</strong> y la <strong>corrección aplicada</strong>{' '}
                 antes de autorizar el reenvío. {/* MSG-004-01 / RUL-004-01 */}
@@ -187,7 +192,7 @@ export default function RevisionErrorTecnicoApi() {
             <ZrButton
               config="positive"
               loading={submitting}
-              disabled={submitting || !puedeAutorizar}
+              disabled={submitting || !blnCanAuthorize}
               onClick={() => { onAutorizar(); }}
             >
               Autorizar Reenvío ▶

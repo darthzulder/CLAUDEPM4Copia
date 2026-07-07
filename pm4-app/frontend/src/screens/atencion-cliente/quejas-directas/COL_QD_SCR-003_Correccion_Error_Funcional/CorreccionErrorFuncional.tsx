@@ -19,41 +19,45 @@ export default function CorreccionErrorFuncional() {
 
   const form = useForm<CorreccionErrorFuncionalFormData>({ defaultValues: DEFAULTS });
   const { control, watch, handleSubmit, reset, formState: { errors, isSubmitted } } = form;
-  const w = watch();
+  // Tomamos una foto de los valores actuales del formulario.
+  const objWatch = watch();
 
+  // Precargamos el formulario con los datos que llegan de la tarea.
   useEffect(() => {
     if (task?.data) {
       reset({ ...DEFAULTS, ...(task.data as Partial<CorreccionErrorFuncionalFormData>) });
     }
   }, [task, reset]);
 
-  const err = (name: keyof CorreccionErrorFuncionalFormData): string | undefined => {
-    const e = errors[name];
-    if (!e || (e.type === 'required' && !isSubmitted)) return undefined;
-    return String(e.message);
+  // Atajo para leer el mensaje de error de un campo (solo tras el submit).
+  const err = (in_strName: keyof CorreccionErrorFuncionalFormData): string | undefined => {
+    const objErr = errors[in_strName];
+    if (!objErr || (objErr.type === 'required' && !isSubmitted)) return undefined;
+    return String(objErr.message);
   };
 
   // RUL-003-01 (🔴 BLOQUEA): el campo señalado debe MODIFICARSE antes de reenviar.
   // "Modificado" = no vacío y distinto del valor rechazado original (FLD-042).
-  const correccion = (w.qd_campoCorreccion ?? '').trim();
-  const valorOriginal = (w.qd_valorRechazado ?? '').trim();
-  const campoModificado = correccion !== '' && correccion !== valorOriginal;
+  const strCorrection = (objWatch.qd_campoCorreccion ?? '').trim();
+  const strOriginalValue = (objWatch.qd_valorRechazado ?? '').trim();
+  const blnFieldModified = strCorrection !== '' && strCorrection !== strOriginalValue;
 
   // RUL-003-02 (info): a partir de UMBRAL_INTENTOS sugerir escalamiento técnico.
-  const intentos = Number.parseInt(w.qd_numeroIntentoM1M2 ?? '', 10);
-  const multiplesIntentos = Number.isFinite(intentos) && intentos >= UMBRAL_INTENTOS;
+  const intAttempts = Number.parseInt(objWatch.qd_numeroIntentoM1M2 ?? '', 10);
+  const blnMultipleAttempts = Number.isFinite(intAttempts) && intAttempts >= UMBRAL_INTENTOS;
 
-  const historial = Array.isArray(w.qd_historialIntentos) ? w.qd_historialIntentos : [];
+  // Lista de intentos previos del caso.
+  const lstHistory = Array.isArray(objWatch.qd_historialIntentos) ? objWatch.qd_historialIntentos : [];
 
   // ACT-003-02 — escalar a soporte técnico (siempre disponible; no requiere corrección).
   const onEscalar = () =>
-    completeTask({ ...w, qd_accion: 'ESCALAR_SOPORTE' as AccionErrorFuncional } as unknown as Record<string, unknown>)
-      .catch((e) => console.error('[CorreccionErrorFuncional] Error al escalar:', e));
+    completeTask({ ...objWatch, qd_accion: 'ESCALAR_SOPORTE' as AccionErrorFuncional } as unknown as Record<string, unknown>)
+      .catch((exc) => console.error('[CorreccionErrorFuncional] Error al escalar:', exc));
 
   // ACT-003-01 — corregir y reenviar (valida campo obligatorio + modificación).
-  const onReenviar = handleSubmit((data) =>
-    completeTask({ ...data, qd_accion: 'CORREGIR_REENVIAR' as AccionErrorFuncional } as unknown as Record<string, unknown>)
-      .catch((e) => console.error('[CorreccionErrorFuncional] Error al reenviar:', e)),
+  const onReenviar = handleSubmit((in_objData) =>
+    completeTask({ ...in_objData, qd_accion: 'CORREGIR_REENVIAR' as AccionErrorFuncional } as unknown as Record<string, unknown>)
+      .catch((exc) => console.error('[CorreccionErrorFuncional] Error al reenviar:', exc)),
   );
 
   if (loading) {
@@ -93,7 +97,7 @@ export default function CorreccionErrorFuncional() {
               SmartSupervision <strong>rechazó la radicación (HTTP 400 funcional)</strong> por datos
               inválidos. Corrija únicamente el campo señalado y reenvíe — no es necesario navegar por
               el formulario completo.
-              {w.qd_numeroIntentoM1M2 && <> Intento actual <strong>#{w.qd_numeroIntentoM1M2}</strong>.</>}
+              {objWatch.qd_numeroIntentoM1M2 && <> Intento actual <strong>#{objWatch.qd_numeroIntentoM1M2}</strong>.</>}
             </ZrAlert>
 
             <div className="form-row cols-3">
@@ -118,9 +122,9 @@ export default function CorreccionErrorFuncional() {
             </div>
 
             {/* RUL-003-02 / MSG-003-02 — múltiples intentos: sugerir escalamiento. */}
-            {multiplesIntentos && (
+            {blnMultipleAttempts && (
               <ZrAlert config="alert" {...({ 'hide-close': true } as object)}>
-                Ha intentado <strong>{w.qd_numeroIntentoM1M2}</strong> veces. Si el problema persiste,
+                Ha intentado <strong>{objWatch.qd_numeroIntentoM1M2}</strong> veces. Si el problema persiste,
                 considere <strong>escalar a soporte técnico</strong>. {/* MSG-003-02 */}
               </ZrAlert>
             )}
@@ -132,7 +136,7 @@ export default function CorreccionErrorFuncional() {
               <ZdsInput
                 name="qd_campoCorreccion"
                 control={control}
-                label={w.qd_campoAfectado ? `Corrección — ${w.qd_campoAfectado}` : 'Campo específico en corrección'}
+                label={objWatch.qd_campoAfectado ? `Corrección — ${objWatch.qd_campoAfectado}` : 'Campo específico en corrección'}
                 required
                 rules={{ required: 'Campo requerido' }}
                 error={err('qd_campoCorreccion')}
@@ -151,7 +155,7 @@ export default function CorreccionErrorFuncional() {
             </div>
 
             {/* RUL-003-01 / MSG-003-01 — bloquea reenvío si el campo no fue modificado. */}
-            {!campoModificado && (
+            {!blnFieldModified && (
               <ZrAlert config="info" {...({ 'hide-close': true } as object)}>
                 Debe <strong>modificar el campo señalado</strong> antes de reenviar a
                 SmartSupervision. {/* MSG-003-01 */}
@@ -172,17 +176,17 @@ export default function CorreccionErrorFuncional() {
                   </tr>
                 </thead>
                 <tbody>
-                  {historial.length === 0 ? (
+                  {lstHistory.length === 0 ? (
                     <tr>
                       <td colSpan={4} className="record-empty">Sin intentos anteriores registrados</td>
                     </tr>
                   ) : (
-                    historial.map((row, i) => (
-                      <tr key={i}>
-                        <td>{row.intento}</td>
-                        <td>{row.fecha}</td>
-                        <td>{row.campoAfectado}</td>
-                        <td>{row.codigoError}</td>
+                    lstHistory.map((objRow, intIndex) => (
+                      <tr key={intIndex}>
+                        <td>{objRow.intento}</td>
+                        <td>{objRow.fecha}</td>
+                        <td>{objRow.campoAfectado}</td>
+                        <td>{objRow.codigoError}</td>
                       </tr>
                     ))
                   )}
@@ -204,7 +208,7 @@ export default function CorreccionErrorFuncional() {
             <ZrButton
               config="positive"
               loading={submitting}
-              disabled={submitting || !campoModificado}
+              disabled={submitting || !blnFieldModified}
               onClick={() => { onReenviar(); }}
             >
               Corregir y Reenviar ▶

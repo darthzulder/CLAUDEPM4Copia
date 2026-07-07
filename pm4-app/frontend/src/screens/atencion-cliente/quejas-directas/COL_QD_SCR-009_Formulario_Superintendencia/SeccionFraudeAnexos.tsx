@@ -10,19 +10,20 @@ interface Props {
 }
 
 // COP como texto numérico (el DS no expone inputType="number"; ver DOCUMENTACION §10).
-const soloMonto = { pattern: { value: /^\d+$/, message: 'Solo dígitos (COP)' } };
+const objAmountOnly = { pattern: { value: /^\d+$/, message: 'Solo dígitos (COP)' } };
 
 /** S4 Datos de Fraude (condicional) · S5 Anexos del Formulario. */
 export default function SeccionFraudeAnexos({ form, err }: Props) {
   const { control, watch } = form;
-  const w = watch();
+  const objWatch = watch();
 
-  const { options: tipoFraudeOpts } = useCollection(COLLECTION_DEFS.tipoFraude);
-  const { options: modalidadFraudeOpts } = useCollection(COLLECTION_DEFS.modalidadFraude);
+  // Cargamos los catalogos de fraude
+  const { options: cllFraudType } = useCollection(COLLECTION_DEFS.tipoFraude);
+  const { options: cllFraudModality } = useCollection(COLLECTION_DEFS.modalidadFraude);
 
   // RUL-009-01 — campos de fraude visibles y obligatorios si relacionadaFraude = Sí.
-  const esFraude = w.qd_relacionadaFraude === 'SI';
-  const reqFraude = esFraude ? { required: 'Campo requerido' } : {};
+  const blnIsFraud = objWatch.qd_relacionadaFraude === 'SI';
+  const objFraudReq = blnIsFraud ? { required: 'Campo requerido' } : {};
 
   return (
     <>
@@ -36,7 +37,7 @@ export default function SeccionFraudeAnexos({ form, err }: Props) {
           />
         </div>
 
-        {esFraude && (
+        {blnIsFraud && (
           <>
             <ZrAlert config="alert" {...({ 'hide-close': true } as object)}>
               La queja está relacionada con fraude. Complete los campos requeridos por
@@ -44,17 +45,17 @@ export default function SeccionFraudeAnexos({ form, err }: Props) {
             </ZrAlert>
             <div className="form-row cols-2">
               <ZdsSelect name="qd_tipoFraude" control={control} label="Tipo de Fraude"
-                options={tipoFraudeOpts} required rules={reqFraude} error={err('qd_tipoFraude')}
+                options={cllFraudType} required rules={objFraudReq} error={err('qd_tipoFraude')}
                 helpText="CAT-TIPO-FRAUDE (CE 019/2024)." />
               <ZdsSelect name="qd_modalidadFraude" control={control} label="Modalidad de Fraude"
-                options={modalidadFraudeOpts} required rules={reqFraude} error={err('qd_modalidadFraude')}
+                options={cllFraudModality} required rules={objFraudReq} error={err('qd_modalidadFraude')}
                 helpText="CAT-MOD-FRAUDE (CE 019/2024)." />
             </div>
             <div className="form-row cols-2">
               <ZdsInput name="qd_montoReclamado" control={control} label="Monto Reclamado (COP)"
-                required rules={{ ...reqFraude, ...soloMonto }} error={err('qd_montoReclamado')} />
+                required rules={{ ...objFraudReq, ...objAmountOnly }} error={err('qd_montoReclamado')} />
               <ZdsInput name="qd_montoReconocido" control={control} label="Monto Reconocido (COP)"
-                required rules={{ ...reqFraude, ...soloMonto }} error={err('qd_montoReconocido')} />
+                required rules={{ ...objFraudReq, ...objAmountOnly }} error={err('qd_montoReconocido')} />
             </div>
           </>
         )}
@@ -75,15 +76,15 @@ export default function SeccionFraudeAnexos({ form, err }: Props) {
             helpText="Generado por SP2-T06. Solo descarga." />
           <div className="field-wrap">
             <ZrButton config="secondary" icon="download:line"
-              disabled={!w.qd_pdfRespuestaFinal}
-              onClick={() => { if (w.qd_pdfRespuestaFinal) window.open(w.qd_pdfRespuestaFinal, '_blank'); }}>
+              disabled={!objWatch.qd_pdfRespuestaFinal}
+              onClick={() => { if (objWatch.qd_pdfRespuestaFinal) window.open(objWatch.qd_pdfRespuestaFinal, '_blank'); }}>
               Descargar PDF
             </ZrButton>
           </div>
         </div>
         <div className="form-row cols-2">
           <ZdsInput name="qd_diasProrroga" control={control} label="Prórroga (días, si aplica)"
-            rules={soloMonto} error={err('qd_diasProrroga')}
+            rules={objAmountOnly} error={err('qd_diasProrroga')}
             helpText="Solo cuando el caso viene de SP4." />
           <div />
         </div>

@@ -22,41 +22,46 @@ export default function DetalleReasignacionRespuesta() {
 
   const form = useForm<DetalleReasignacionRespuestaFormData>({ defaultValues: DEFAULTS });
   const { watch, handleSubmit, reset, formState: { errors, isSubmitted } } = form;
-  const w = watch();
+  // Tomamos una foto de los valores actuales del formulario.
+  const objWatch = watch();
 
+  // Precargamos el formulario con los datos que llegan de la tarea.
   useEffect(() => {
     if (task?.data) reset({ ...DEFAULTS, ...(task.data as Partial<DetalleReasignacionRespuestaFormData>) });
   }, [task, reset]);
 
-  const err = (name: keyof DetalleReasignacionRespuestaFormData): string | undefined => {
-    const e = errors[name];
-    if (!e || (e.type === 'required' && !isSubmitted)) return undefined;
-    return String(e.message);
+  // Atajo para leer el mensaje de error de un campo (solo tras el submit).
+  const err = (in_strName: keyof DetalleReasignacionRespuestaFormData): string | undefined => {
+    const objErr = errors[in_strName];
+    if (!objErr || (objErr.type === 'required' && !isSubmitted)) return undefined;
+    return String(objErr.message);
   };
 
   // RUL-0051-03 — SLA crítico: habilita prórroga y banner rojo si slaRestante <= 2.
-  const sla = Number.parseInt(w.qd_slaRestante ?? '', 10);
-  const slaCritico = Number.isFinite(sla) && sla <= SLA_UMBRAL_PRORROGA;
+  const intSla = Number.parseInt(objWatch.qd_slaRestante ?? '', 10);
+  const blnSlaCritical = Number.isFinite(intSla) && intSla <= SLA_UMBRAL_PRORROGA;
 
   // Datos del consumidor derivados de los campos granulares producidos por SCR-000.
-  const nombre = (w.qd_razonSocial || `${w.qd_nombres ?? ''} ${w.qd_apellidos ?? ''}`).trim();
-  const identificacion = `${w.qd_tipoIdentificacion ?? ''} ${w.qd_numeroIdentificacion ?? ''}`.trim();
+  const strName = (objWatch.qd_razonSocial || `${objWatch.qd_nombres ?? ''} ${objWatch.qd_apellidos ?? ''}`).trim();
+  const strIdentification = `${objWatch.qd_tipoIdentificacion ?? ''} ${objWatch.qd_numeroIdentificacion ?? ''}`.trim();
 
-  const uploadFiles = async (requestId: number) => {
-    for (const [docKey, file] of fileRegistry.current.entries()) {
-      const fd = new FormData();
-      fd.append('file', file);
-      await pm4.post(`/requests/${requestId}/files?data_name=${docKey}`, fd);
+  // Recorremos el registro de archivos para subir cada adjunto a PM4.
+  const uploadFiles = async (in_intRequestId: number) => {
+    for (const [strDocKey, objFile] of fileRegistry.current.entries()) {
+      const objFormData = new FormData();
+      objFormData.append('file', objFile);
+      await pm4.post(`/requests/${in_intRequestId}/files?data_name=${strDocKey}`, objFormData);
     }
   };
 
-  const enviarCon = (accion: AccionFlujoCombinado) => async (data: DetalleReasignacionRespuestaFormData) => {
+  // Envía la tarea con la acción indicada, subiendo antes los adjuntos si los hay.
+  const enviarCon = (in_strAction: AccionFlujoCombinado) => async (in_objData: DetalleReasignacionRespuestaFormData) => {
     try {
-      const requestId = task?.process_request_id;
-      if (requestId && fileRegistry.current.size > 0) await uploadFiles(requestId);
-      await completeTask({ ...data, qd_accion: accion } as unknown as Record<string, unknown>);
-    } catch (e) {
-      console.error('[DetalleReasignacionRespuesta] Error al enviar:', e);
+      const intRequestId = task?.process_request_id;
+      if (intRequestId && fileRegistry.current.size > 0) await uploadFiles(intRequestId);
+      await completeTask({ ...in_objData, qd_accion: in_strAction } as unknown as Record<string, unknown>);
+    } catch (exc) {
+      console.error('[DetalleReasignacionRespuesta] Error al enviar:', exc);
     }
   };
 
@@ -65,13 +70,13 @@ export default function DetalleReasignacionRespuesta() {
 
   // ACT-0051-07 Guardar Borrador · ACT-0051-04 Solicitar Prórroga · ACT-0051-01 Reasignar
   // (sin validación bloqueante — envían los valores actuales del formulario directamente).
-  const onGuardarBorrador = () => enviarCon('GUARDAR_BORRADOR')(w);
-  const onSolicitarProrroga = () => enviarCon('SOLICITAR_PRORROGA')(w);
-  const onReasignarQueja = () => enviarCon('CONFIRMAR_ASIGNACION')(w);
+  const onGuardarBorrador = () => enviarCon('GUARDAR_BORRADOR')(objWatch);
+  const onSolicitarProrroga = () => enviarCon('SOLICITAR_PRORROGA')(objWatch);
+  const onReasignarQueja = () => enviarCon('CONFIRMAR_ASIGNACION')(objWatch);
   // La sección de asignación pasa el snapshot fresco del formulario (incluye la fila
   // recién agregada al historial), evitando el stale closure de watch() tras setValue.
-  const onSolicitarAyuda = (data?: DetalleReasignacionRespuestaFormData) =>
-    enviarCon('AYUDA')(data ?? w);
+  const onSolicitarAyuda = (in_objData?: DetalleReasignacionRespuestaFormData) =>
+    enviarCon('AYUDA')(in_objData ?? objWatch);
 
   if (loading) {
     return <div className="screen-wrapper"><div className="screen-loading"><ZrLoader /></div></div>;
@@ -86,7 +91,8 @@ export default function DetalleReasignacionRespuesta() {
     );
   }
 
-  const puedeEnviar = !!w.qd_respuestaCliente?.trim() && !!w.qd_respuestaFavorDe;
+  // Habilita el envío solo con respuesta al cliente y destinatario del fallo definidos.
+  const blnCanSubmit = !!objWatch.qd_respuestaCliente?.trim() && !!objWatch.qd_respuestaFavorDe;
 
   return (
     <div className="screen-wrapper">
@@ -97,40 +103,40 @@ export default function DetalleReasignacionRespuesta() {
 
       <div className="screen-content">
         <InfoBar items={[
-          { label: 'Case', value: w.qd_idCasoBPM || '—' },
-          { label: 'SLA', value: w.qd_slaRestante ? `${w.qd_slaRestante} días hábiles` : '—' },
+          { label: 'Case', value: objWatch.qd_idCasoBPM || '—' },
+          { label: 'SLA', value: objWatch.qd_slaRestante ? `${objWatch.qd_slaRestante} días hábiles` : '—' },
           {
             label: 'Estado',
             value: (
-              <ZdsStatusBadge variant={estadoVariant(w.qd_estadoSS || '')}>
-                {w.qd_estadoSS || 'Sin estado'}
+              <ZdsStatusBadge variant={estadoVariant(objWatch.qd_estadoSS || '')}>
+                {objWatch.qd_estadoSS || 'Sin estado'}
               </ZdsStatusBadge>
             ),
           },
-          { label: 'SmartSupervision', value: w.qd_codigoSFC || '—' },
+          { label: 'SmartSupervision', value: objWatch.qd_codigoSFC || '—' },
         ]} />
 
         {/* RUL-0051-03 / MSG-0051-01 — banner SLA crítico. */}
-        {slaCritico && (
+        {blnSlaCritical && (
           <ZrAlert config="negative" {...({ 'hide-close': true } as object)}>
-            ⚠ El caso tiene <strong>{w.qd_slaRestante}</strong> día(s) hábil(es) restante(s). Priorice
+            ⚠ El caso tiene <strong>{objWatch.qd_slaRestante}</strong> día(s) hábil(es) restante(s). Priorice
             la gestión; puede <strong>solicitar prórroga regulatoria</strong>. {/* MSG-0051-01 */}
           </ZrAlert>
         )}
 
         <form onSubmit={onEnviar} noValidate>
-          <SeccionDetalleCaso form={form} estado={w.qd_estadoSS || ''} nombre={nombre} identificacion={identificacion} />
+          <SeccionDetalleCaso form={form} estado={objWatch.qd_estadoSS || ''} nombre={strName} identificacion={strIdentification} />
           <SeccionAsignacion form={form} err={err} onConfirmarReasignacion={onReasignarQueja} onSolicitarAyuda={onSolicitarAyuda} submitting={submitting} />
           <SeccionRespuesta
             form={form} fileRegistry={fileRegistry} err={err}
             onVistaPrevia={() => setShowVistaPrevia(true)}
             onSolicitarProrroga={onSolicitarProrroga}
-            slaCritico={slaCritico}
+            slaCritico={blnSlaCritical}
             submitting={submitting}
           />
 
           {/* RUL-0051-05 / MSG-0051-02 — bloqueo de envío si falta la respuesta. */}
-          {!puedeEnviar && (
+          {!blnCanSubmit && (
             <ZrAlert config="info" {...({ 'hide-close': true } as object)}>
               El campo <strong>Respuesta al Cliente</strong> es obligatorio para enviar. {/* MSG-0051-02 */}
             </ZrAlert>
@@ -145,7 +151,7 @@ export default function DetalleReasignacionRespuesta() {
               onClick={onGuardarBorrador}>
               Guardar Borrador
             </ZrButton>
-            <ZrButton config="positive" disabled={!puedeEnviar || submitting} loading={submitting}
+            <ZrButton config="positive" disabled={!blnCanSubmit || submitting} loading={submitting}
               onClick={() => { onEnviar(); }}>
               Enviar ▶
             </ZrButton>
@@ -160,9 +166,9 @@ export default function DetalleReasignacionRespuesta() {
             Expediente del caso
           </h3>
           <p className="subsection-note">
-            {nombre} · {identificacion} · {w.qd_productoSFC} · {w.qd_motivoSFC}
+            {strName} · {strIdentification} · {objWatch.qd_productoSFC} · {objWatch.qd_motivoSFC}
           </p>
-          <p style={{ font: 'var(--zf-cap-14)' }}>{w.qd_textoQueja || 'Sin descripción.'}</p>
+          <p style={{ font: 'var(--zf-cap-14)' }}>{objWatch.qd_textoQueja || 'Sin descripción.'}</p>
           <div z-flex="75" z-align="right:center" style={{ marginTop: 'var(--zs-100)' }}>
             <ZrButton config="secondary:s" onClick={() => setShowExpediente(false)}>Cerrar</ZrButton>
           </div>
@@ -175,9 +181,9 @@ export default function DetalleReasignacionRespuesta() {
           <h3 style={{ margin: '0 0 var(--zs-75)', font: 'var(--zf-h-20--700)', color: 'var(--z-text)' }}>
             Vista previa — carta de respuesta final
           </h3>
-          <p className="subsection-note">Destinatario: {nombre} ({w.qd_correoElectronico})</p>
+          <p className="subsection-note">Destinatario: {strName} ({objWatch.qd_correoElectronico})</p>
           <p style={{ font: 'var(--zf-cap-14)', whiteSpace: 'pre-wrap' }}>
-            {w.qd_respuestaCliente || 'Aún no se ha redactado la respuesta al cliente.'}
+            {objWatch.qd_respuestaCliente || 'Aún no se ha redactado la respuesta al cliente.'}
           </p>
           <div z-flex="75" z-align="right:center" style={{ marginTop: 'var(--zs-100)' }}>
             <ZrButton config="secondary:s" onClick={() => setShowVistaPrevia(false)}>Cerrar</ZrButton>

@@ -44,17 +44,18 @@ const MSG_BLOQUEO = 'La cotización no puede continuar por este canal y deberá 
 
 export default function SeccionCC({ form, fileRegistry }: { form: Form; fileRegistry: React.MutableRefObject<Map<string, File>> }) {
   const { control, watch } = form;
-  const w = watch();
+  const objWatch = watch();
 
-  const docKeys = [
+  // Claves PM4 de los documentos de soporte de este producto
+  const arrDocKeys = [
     'frm_cc_doc_01_nombre', 'frm_cc_doc_02_nombre', 'frm_cc_doc_03_nombre',
   ] as const;
 
-  // Opciones de agregado filtradas: solo valores >= límite por evento seleccionado
-  function opcionesAgregado(eventoField: keyof FfFlSolicitudFormData) {
-    const eventoVal = w[eventoField] as string | undefined;
-    if (!eventoVal) return OPTIONS.limiteCC;
-    return OPTIONS.limiteCC.filter((o) => Number(o.value) >= Number(eventoVal));
+  // Filtramos el agregado dejando solo valores mayores o iguales al límite por evento
+  function opcionesAgregado(in_strEventField: keyof FfFlSolicitudFormData) {
+    const strEventVal = objWatch[in_strEventField] as string | undefined;
+    if (!strEventVal) return OPTIONS.limiteCC;
+    return OPTIONS.limiteCC.filter((objOpt) => Number(objOpt.value) >= Number(strEventVal));
   }
 
   return (
@@ -88,7 +89,7 @@ export default function SeccionCC({ form, fileRegistry }: { form: Form; fileRegi
       />
 
       {/* ── DOCUMENTO DE SOPORTE ── */}
-      <DocSupportUploader form={form} fileRegistry={fileRegistry} docKeys={docKeys} />
+      <DocSupportUploader form={form} fileRegistry={fileRegistry} docKeys={arrDocKeys} />
 
       {/* ── PROPUESTA ECONÓMICA ── */}
       <div className="form-subsection form-subsection--stack">
@@ -104,17 +105,18 @@ export default function SeccionCC({ form, fileRegistry }: { form: Form; fileRegi
               </tr>
             </thead>
             <tbody>
+              {/* Pintamos las tres opciones con su límite por evento y por agregado */}
               {([
                 ['frm_cc_prop_01_evento', 'frm_cc_prop_01_agregado', 1],
                 ['frm_cc_prop_02_evento', 'frm_cc_prop_02_agregado', 2],
                 ['frm_cc_prop_03_evento', 'frm_cc_prop_03_agregado', 3],
-              ] as const).map(([eventoField, agregadoField, n]) => (
-                <tr key={eventoField}>
+              ] as const).map(([strEventField, strAggField, n]) => (
+                <tr key={strEventField}>
                   <td {...({ config: 'center' } as object)}>{n}</td>
                   <td>
                     <ZdsSelect
                       label=""
-                      name={eventoField}
+                      name={strEventField}
                       control={control}
                       options={OPTIONS.limiteCC}
                       placeholder="Seleccione"
@@ -123,9 +125,9 @@ export default function SeccionCC({ form, fileRegistry }: { form: Form; fileRegi
                   <td>
                     <ZdsSelect
                       label=""
-                      name={agregadoField}
+                      name={strAggField}
                       control={control}
-                      options={opcionesAgregado(eventoField)}
+                      options={opcionesAgregado(strEventField)}
                       placeholder="Seleccione"
                     />
                   </td>

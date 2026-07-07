@@ -42,12 +42,14 @@ export default function DocItem({
   const inputRef = useRef<HTMLInputElement>(null);
 
   if (mode === 'validation') {
-    const cargado = fileId !== null;
-    const validationClass = validacion ? validacion.toLowerCase().replace('_', '-') : 'en-revision';
+    // Marcamos el documento como cargado si tiene id de archivo.
+    const blnLoaded = fileId !== null;
+    // Derivamos la clase CSS segun el estado de validacion.
+    const strValidationCls = validacion ? validacion.toLowerCase().replace('_', '-') : 'en-revision';
     return (
-      <div className={`doc-item doc-item--validation${cargado ? ' is-loaded' : ''}`}>
+      <div className={`doc-item doc-item--validation${blnLoaded ? ' is-loaded' : ''}`}>
         {/* Badge coloreado por estado de validación */}
-        <div className={`doc-num-badge doc-num-badge--${validationClass}`}>
+        <div className={`doc-num-badge doc-num-badge--${strValidationCls}`}>
           {index}
         </div>
 
@@ -58,7 +60,7 @@ export default function DocItem({
 
         {/* Archivo + botón ver */}
         <div className="doc-file-area--validation doc-table-col-file">
-          {cargado ? (
+          {blnLoaded ? (
             <span className="file-name-chip">
               <ZrIcon icon="file-blank:line" config="xs" />
               {fileName}
@@ -69,7 +71,7 @@ export default function DocItem({
           <ZrButton
             config="secondary:s"
             icon="visibility-on:line"
-            disabled={!cargado}
+            disabled={!blnLoaded}
             onClick={onPreview}
           >
             Ver
@@ -83,8 +85,8 @@ export default function DocItem({
               config="line"
               label=""
               model={validacion || ''}
-              options={valOpciones.map((o) => ({ value: o.value, text: o.label }))}
-              onChange={(v: string | null) => onValidacion(v || '')}
+              options={valOpciones.map((in_objOpt) => ({ value: in_objOpt.value, text: in_objOpt.label }))}
+              onChange={(in_strValue: string | null) => onValidacion(in_strValue || '')}
             />
           )}
         </div>
@@ -93,14 +95,16 @@ export default function DocItem({
   }
 
   // mode === 'upload'
-  const cargado = !!state?.file || (fileId !== null && fileId !== undefined);
-  const pendingLabel = onFileChange ? 'Pendiente' : 'Sin documento';
+  // Marcamos como cargado si hay archivo en estado o id de archivo.
+  const blnLoaded = !!state?.file || (fileId !== null && fileId !== undefined);
+  // Texto por defecto cuando el documento aun no se carga.
+  const strPendingLabel = onFileChange ? 'Pendiente' : 'Sin documento';
 
   return (
-    <div className={`doc-item${cargado ? ' is-loaded' : ''}`}>
+    <div className={`doc-item${blnLoaded ? ' is-loaded' : ''}`}>
       {/* Índice */}
-      <div className={`doc-num-badge${cargado ? ' doc-num-badge--loaded' : ''}`}>
-        {cargado ? '✓' : index}
+      <div className={`doc-num-badge${blnLoaded ? ' doc-num-badge--loaded' : ''}`}>
+        {blnLoaded ? '✓' : index}
       </div>
 
       {/* Descripción */}
@@ -111,8 +115,8 @@ export default function DocItem({
 
       {/* Estado */}
       <div className="doc-status-wrap">
-        <ZdsStatusBadge variant={cargado ? 'success' : onFileChange ? 'danger' : 'neutral'}>
-          {cargado ? 'Cargado' : pendingLabel}
+        <ZdsStatusBadge variant={blnLoaded ? 'success' : onFileChange ? 'danger' : 'neutral'}>
+          {blnLoaded ? 'Cargado' : strPendingLabel}
         </ZdsStatusBadge>
       </div>
 
@@ -125,10 +129,11 @@ export default function DocItem({
               type="file"
               accept=".pdf,.png,.jpg,.jpeg"
               style={{ display: 'none' }}
-              onChange={(e) => {
-                const f = e.target.files?.[0];
-                if (f && onFileChange) onFileChange(f);
-                e.target.value = '';
+              onChange={(in_objEvent) => {
+                // Tomamos el primer archivo seleccionado y lo notificamos.
+                const objFile = in_objEvent.target.files?.[0];
+                if (objFile && onFileChange) onFileChange(objFile);
+                in_objEvent.target.value = '';
               }}
             />
             <ZrButton
@@ -137,17 +142,17 @@ export default function DocItem({
               wide
               onClick={() => inputRef.current?.click()}
             >
-              {cargado ? 'Cambiar' : 'Seleccionar archivo'}
+              {blnLoaded ? 'Cambiar' : 'Seleccionar archivo'}
             </ZrButton>
           </>
         )}
-        {cargado && (state?.file || fileName) && (
+        {blnLoaded && (state?.file || fileName) && (
           <span className="file-name-chip">
             <ZrIcon icon="file-blank:line" config="xs" />
             {state?.file?.name || fileName}
           </span>
         )}
-        {!cargado && !onFileChange && (
+        {!blnLoaded && !onFileChange && (
           <span className="file-name-empty">—</span>
         )}
       </div>
@@ -157,7 +162,7 @@ export default function DocItem({
         <ZrButton
           config="secondary:s"
           icon="visibility-on:line"
-          disabled={!cargado}
+          disabled={!blnLoaded}
           onClick={onPreview}
         >
           {onFileChange ? 'Vista previa' : 'Ver'}

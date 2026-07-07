@@ -5,7 +5,7 @@ import { useCollection } from '../../../core/useCollection';
 import type { CollectionDef } from '../../../core/useCollection';
 
 // ---------------------------------------------------------------------------
-// Types
+// Tipos
 // ---------------------------------------------------------------------------
 export interface ExportacionRow {
   frm_exportacion_pais: string;
@@ -25,7 +25,7 @@ interface Props {
 }
 
 // ---------------------------------------------------------------------------
-// Constants
+// Constantes
 // ---------------------------------------------------------------------------
 const PAISES_DEF: CollectionDef = {
   id: 36,
@@ -54,35 +54,37 @@ interface ModalProps {
 }
 
 function ExportacionModal({ initial, onClose, onAccept }: ModalProps) {
-  const isEdit = initial !== null;
+  const blnIsEdit = initial !== null;
   const { control, handleSubmit, watch, setValue, formState: { errors } } =
     useForm<ExportacionRow>({ defaultValues: initial ?? EMPTY_ROW });
 
-  const { options: paisOptions, loading: paisLoading, rawMap } = useCollection(PAISES_DEF, {});
+  const { options: cllCountries, loading: paisLoading, rawMap } = useCollection(PAISES_DEF, {});
 
-  const paisValue = watch('frm_exportacion_pais');
+  const strCountryValue = watch('frm_exportacion_pais');
 
+  // Al elegir el país, autocompletamos región y código
   useEffect(() => {
-    if (!paisValue || !rawMap[paisValue]) return;
-    const rec = rawMap[paisValue] as { data?: Record<string, string> };
-    setValue('frm_exportacion_pais_label', rec.data?.pais_reg_pais ?? '');
-    setValue('frm_exportacion_region_label', rec.data?.pais_reg_region ?? '');
-    setValue('frm_exportacion_region_codigo', rec.data?.pais_reg_codigo_region ?? '');
-  }, [paisValue, rawMap, setValue]);
+    if (!strCountryValue || !rawMap[strCountryValue]) return;
+    const objRec = rawMap[strCountryValue] as { data?: Record<string, string> };
+    setValue('frm_exportacion_pais_label', objRec.data?.pais_reg_pais ?? '');
+    setValue('frm_exportacion_region_label', objRec.data?.pais_reg_region ?? '');
+    setValue('frm_exportacion_region_codigo', objRec.data?.pais_reg_codigo_region ?? '');
+  }, [strCountryValue, rawMap, setValue]);
 
-  function onSubmit(data: ExportacionRow) {
-    const ventas = data.frm_exportacion_ventas as number;
-    const pct = data.frm_exportacion_porcentaje as number;
+  function onSubmit(in_objData: ExportacionRow) {
+    // Formateamos ventas y porcentaje antes de guardar la fila
+    const dblSales = in_objData.frm_exportacion_ventas as number;
+    const dblPct = in_objData.frm_exportacion_porcentaje as number;
     onAccept({
-      ...data,
-      frm_exportacion_ventas_formateado: ventas != null ? ventas.toLocaleString('es-CO') : '',
-      frm_exportacion_porcentaje_formateado: pct != null ? `${pct} %` : '',
+      ...in_objData,
+      frm_exportacion_ventas_formateado: dblSales != null ? dblSales.toLocaleString('es-CO') : '',
+      frm_exportacion_porcentaje_formateado: dblPct != null ? `${dblPct} %` : '',
     });
   }
 
   return (
     <ZrModal model={true} onChange={(open: boolean) => { if (!open) onClose(); }}>
-      <h3 style={{ margin: '0 0 var(--zs-100)', font: 'var(--zf-h-20)', color: 'var(--z-text)' }}>{isEdit ? 'Editar exportación' : 'Agregar exportación'}</h3>
+      <h3 style={{ margin: '0 0 var(--zs-100)', font: 'var(--zf-h-20)', color: 'var(--z-text)' }}>{blnIsEdit ? 'Editar exportación' : 'Agregar exportación'}</h3>
       <div z-flex="col:150">
             <ZdsSelect<ExportacionRow>
               label="País"
@@ -90,7 +92,7 @@ function ExportacionModal({ initial, onClose, onAccept }: ModalProps) {
               control={control}
               required
               rules={{ required: 'Campo requerido' }}
-              options={paisOptions}
+              options={cllCountries}
               loading={paisLoading}
               error={errors.frm_exportacion_pais?.message}
             />
@@ -137,28 +139,29 @@ function ExportacionModal({ initial, onClose, onAccept }: ModalProps) {
 }
 
 // ---------------------------------------------------------------------------
-// Main component
+// Componente principal
 // ---------------------------------------------------------------------------
 export default function DetalleExportaciones({ value, onChange }: Props) {
-  const [modalOpen, setModalOpen] = useState(false);
-  const [editIndex, setEditIndex] = useState<number | null>(null);
+  const [blnModalOpen, setBlnModalOpen] = useState(false);
+  const [intEditIndex, setIntEditIndex] = useState<number | null>(null);
 
-  const totalVentas = value.reduce((s, r) => s + (Number(r.frm_exportacion_ventas) || 0), 0);
-  const totalPct = value.reduce((s, r) => s + (Number(r.frm_exportacion_porcentaje) || 0), 0);
+  // Totales de la tabla
+  const dblTotalSales = value.reduce((dblAcc, objRow) => dblAcc + (Number(objRow.frm_exportacion_ventas) || 0), 0);
+  const dblTotalPct = value.reduce((dblAcc, objRow) => dblAcc + (Number(objRow.frm_exportacion_porcentaje) || 0), 0);
 
-  function handleAccept(row: ExportacionRow) {
-    if (editIndex !== null) {
-      onChange(value.map((item, i) => (i === editIndex ? row : item)));
+  function handleAccept(in_objRow: ExportacionRow) {
+    if (intEditIndex !== null) {
+      onChange(value.map((objItem, intI) => (intI === intEditIndex ? in_objRow : objItem)));
     } else {
-      onChange([...value, row]);
+      onChange([...value, in_objRow]);
     }
-    setModalOpen(false);
+    setBlnModalOpen(false);
   }
 
   return (
     <div>
       <div className="record-table-header">
-        <ZrButton config="secondary:s" icon="plus:line" onClick={() => { setEditIndex(null); setModalOpen(true); }}>AGREGAR</ZrButton>
+        <ZrButton config="secondary:s" icon="plus:line" onClick={() => { setIntEditIndex(null); setBlnModalOpen(true); }}>AGREGAR</ZrButton>
       </div>
 
       <ZrTable zebra>
@@ -176,15 +179,15 @@ export default function DetalleExportaciones({ value, onChange }: Props) {
           {value.length === 0 ? (
             <tr><td colSpan={5} className="record-empty">Sin exportaciones registradas</td></tr>
           ) : (
-            value.map((row, i) => (
-              <tr key={i}>
-                <td>{row.frm_exportacion_pais_label}</td>
-                <td>{row.frm_exportacion_region_label}</td>
-                <td>{row.frm_exportacion_ventas_formateado}</td>
-                <td>{row.frm_exportacion_porcentaje_formateado}</td>
+            value.map((objRow, intI) => (
+              <tr key={intI}>
+                <td>{objRow.frm_exportacion_pais_label}</td>
+                <td>{objRow.frm_exportacion_region_label}</td>
+                <td>{objRow.frm_exportacion_ventas_formateado}</td>
+                <td>{objRow.frm_exportacion_porcentaje_formateado}</td>
                 <td>
-                  <ZrButton config="secondary:s" icon="edit:line" onClick={() => { setEditIndex(i); setModalOpen(true); }}>Editar</ZrButton>
-                  <ZrButton config="secondary:s" icon="trash:line" onClick={() => onChange(value.filter((_, j) => j !== i))}>Eliminar</ZrButton>
+                  <ZrButton config="secondary:s" icon="edit:line" onClick={() => { setIntEditIndex(intI); setBlnModalOpen(true); }}>Editar</ZrButton>
+                  <ZrButton config="secondary:s" icon="trash:line" onClick={() => onChange(value.filter((_, intJ) => intJ !== intI))}>Eliminar</ZrButton>
                 </td>
               </tr>
             ))
@@ -194,14 +197,14 @@ export default function DetalleExportaciones({ value, onChange }: Props) {
       </ZrTable>
 
       <div style={{ textAlign: 'right', font: 'var(--zf-capt-14)', color: 'var(--z-text)', marginTop: 8 }}>
-        <span style={{ marginRight: 24 }}>Sumatoria de ventas: {totalVentas.toLocaleString('es-CO')}</span>
-        <span>Sumatoria del porcentaje de ventas: {totalPct} %</span>
+        <span style={{ marginRight: 24 }}>Sumatoria de ventas: {dblTotalSales.toLocaleString('es-CO')}</span>
+        <span>Sumatoria del porcentaje de ventas: {dblTotalPct} %</span>
       </div>
 
-      {modalOpen && (
+      {blnModalOpen && (
         <ExportacionModal
-          initial={editIndex !== null ? value[editIndex] : null}
-          onClose={() => setModalOpen(false)}
+          initial={intEditIndex !== null ? value[intEditIndex] : null}
+          onClose={() => setBlnModalOpen(false)}
           onAccept={handleAccept}
         />
       )}

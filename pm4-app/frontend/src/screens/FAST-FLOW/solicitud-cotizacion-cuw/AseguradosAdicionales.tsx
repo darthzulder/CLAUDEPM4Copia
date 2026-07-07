@@ -5,7 +5,7 @@ import { useCollection } from '../../../core/useCollection';
 import type { CollectionDef } from '../../../core/useCollection';
 
 // ---------------------------------------------------------------------------
-// Types
+// Tipos
 // ---------------------------------------------------------------------------
 export interface AseguradoAdicional {
   frm_aseg_adic_nombre: string;
@@ -23,7 +23,7 @@ interface Props {
 }
 
 // ---------------------------------------------------------------------------
-// Constants
+// Constantes
 // ---------------------------------------------------------------------------
 const NAIC_ADIC_DEF: CollectionDef = {
   id: 6,
@@ -59,7 +59,7 @@ interface ModalProps {
 }
 
 function AseguradoModal({ initial, onClose, onAccept }: ModalProps) {
-  const isEdit = initial !== null;
+  const blnIsEdit = initial !== null;
 
   const {
     control,
@@ -71,24 +71,25 @@ function AseguradoModal({ initial, onClose, onAccept }: ModalProps) {
     defaultValues: initial ?? EMPTY_ROW,
   });
 
-  const { options: naicOptions, loading: naicLoading } = useCollection(NAIC_ADIC_DEF, {});
+  const { options: cllNaic, loading: naicLoading } = useCollection(NAIC_ADIC_DEF, {});
 
-  const actividadLista = watch('frm_aseg_adic_actividad_lista');
+  const strActivityList = watch('frm_aseg_adic_actividad_lista');
 
+  // Al elegir la actividad, autocompletamos el código y el nombre NAIC
   useEffect(() => {
-    if (!actividadLista) return;
-    const match = naicOptions.find((o) => o.value === actividadLista);
-    setValue('frm_aseg_adic_codigo_naic', actividadLista);
-    setValue('frm_aseg_adic_actividad', match?.label ?? '');
-  }, [actividadLista, naicOptions, setValue]);
+    if (!strActivityList) return;
+    const objMatch = cllNaic.find((objOpt) => objOpt.value === strActivityList);
+    setValue('frm_aseg_adic_codigo_naic', strActivityList);
+    setValue('frm_aseg_adic_actividad', objMatch?.label ?? '');
+  }, [strActivityList, cllNaic, setValue]);
 
-  function onSubmit(data: AseguradoAdicional) {
-    onAccept(data);
+  function onSubmit(in_objData: AseguradoAdicional) {
+    onAccept(in_objData);
   }
 
   return (
     <ZrModal model={true} onChange={(open: boolean) => { if (!open) onClose(); }}>
-      <h3 style={{ margin: '0 0 var(--zs-100)', font: 'var(--zf-h-20)', color: 'var(--z-text)' }}>{isEdit ? 'Editar asegurado' : 'Agregar'}</h3>
+      <h3 style={{ margin: '0 0 var(--zs-100)', font: 'var(--zf-h-20)', color: 'var(--z-text)' }}>{blnIsEdit ? 'Editar asegurado' : 'Agregar'}</h3>
       <div z-flex="col:150">
             {/* 1. Nombre */}
             <ZdsInput
@@ -123,7 +124,7 @@ function AseguradoModal({ initial, onClose, onAccept }: ModalProps) {
               control={control}
               required
               rules={{ required: 'Campo requerido' }}
-              options={naicOptions}
+              options={cllNaic}
               loading={naicLoading}
               error={errors.frm_aseg_adic_actividad_lista?.message}
             />
@@ -169,35 +170,37 @@ function AseguradoModal({ initial, onClose, onAccept }: ModalProps) {
 }
 
 // ---------------------------------------------------------------------------
-// Main component
+// Componente principal
 // ---------------------------------------------------------------------------
 export default function AseguradosAdicionales({ value, onChange }: Props) {
-  const [modalOpen, setModalOpen] = useState(false);
-  const [editIndex, setEditIndex] = useState<number | null>(null);
+  const [blnModalOpen, setBlnModalOpen] = useState(false);
+  const [intEditIndex, setIntEditIndex] = useState<number | null>(null);
 
   function handleAdd() {
-    setEditIndex(null);
-    setModalOpen(true);
+    setIntEditIndex(null);
+    setBlnModalOpen(true);
   }
 
-  function handleEdit(index: number) {
-    setEditIndex(index);
-    setModalOpen(true);
+  function handleEdit(in_intIndex: number) {
+    setIntEditIndex(in_intIndex);
+    setBlnModalOpen(true);
   }
 
-  function handleDelete(index: number) {
-    const updated = value.filter((_, i) => i !== index);
-    onChange(updated);
+  function handleDelete(in_intIndex: number) {
+    const lstUpdated = value.filter((_, intI) => intI !== in_intIndex);
+    onChange(lstUpdated);
   }
 
-  function handleAccept(row: AseguradoAdicional) {
-    if (editIndex !== null) {
-      const updated = value.map((item, i) => (i === editIndex ? row : item));
-      onChange(updated);
+  function handleAccept(in_objRow: AseguradoAdicional) {
+    if (intEditIndex !== null) {
+      // Reemplazamos la fila en edición
+      const lstUpdated = value.map((objItem, intI) => (intI === intEditIndex ? in_objRow : objItem));
+      onChange(lstUpdated);
     } else {
-      onChange([...value, row]);
+      // Agregamos una fila nueva al final
+      onChange([...value, in_objRow]);
     }
-    setModalOpen(false);
+    setBlnModalOpen(false);
   }
 
   return (
@@ -225,17 +228,17 @@ export default function AseguradosAdicionales({ value, onChange }: Props) {
               <td colSpan={7} className="record-empty">Sin asegurados adicionales</td>
             </tr>
           ) : (
-            value.map((row, i) => (
-              <tr key={i}>
-                <td>{row.frm_aseg_adic_nombre}</td>
-                <td>{row.frm_aseg_adic_relacion}</td>
-                <td>{row.frm_aseg_adic_actividad}</td>
-                <td>{row.frm_aseg_adic_codigo_naic}</td>
-                <td>{row.frm_aseg_adic_actividad_asegurada}</td>
-                <td>{row.frm_aseg_adic_ingresos_operacionales}</td>
+            value.map((objRow, intI) => (
+              <tr key={intI}>
+                <td>{objRow.frm_aseg_adic_nombre}</td>
+                <td>{objRow.frm_aseg_adic_relacion}</td>
+                <td>{objRow.frm_aseg_adic_actividad}</td>
+                <td>{objRow.frm_aseg_adic_codigo_naic}</td>
+                <td>{objRow.frm_aseg_adic_actividad_asegurada}</td>
+                <td>{objRow.frm_aseg_adic_ingresos_operacionales}</td>
                 <td>
-                  <ZrButton config="secondary:s" icon="edit:line" onClick={() => handleEdit(i)}>Editar</ZrButton>
-                  <ZrButton config="secondary:s" icon="trash:line" onClick={() => handleDelete(i)}>Eliminar</ZrButton>
+                  <ZrButton config="secondary:s" icon="edit:line" onClick={() => handleEdit(intI)}>Editar</ZrButton>
+                  <ZrButton config="secondary:s" icon="trash:line" onClick={() => handleDelete(intI)}>Eliminar</ZrButton>
                 </td>
               </tr>
             ))
@@ -244,10 +247,10 @@ export default function AseguradosAdicionales({ value, onChange }: Props) {
       </table>
       </ZrTable>
 
-      {modalOpen && (
+      {blnModalOpen && (
         <AseguradoModal
-          initial={editIndex !== null ? value[editIndex] : null}
-          onClose={() => setModalOpen(false)}
+          initial={intEditIndex !== null ? value[intEditIndex] : null}
+          onClose={() => setBlnModalOpen(false)}
           onAccept={handleAccept}
         />
       )}

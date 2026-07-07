@@ -6,6 +6,7 @@ interface DocListProps {
 }
 
 export default function DocList({ mode, children }: DocListProps) {
+  // En modo validacion mostramos la tabla con cabecera de columnas.
   if (mode === 'validation') {
     return (
       <div>
@@ -22,6 +23,7 @@ export default function DocList({ mode, children }: DocListProps) {
     );
   }
 
+  // En modo carga solo apilamos las filas de documentos.
   return (
     <div z-flex="col:75">
       {children}

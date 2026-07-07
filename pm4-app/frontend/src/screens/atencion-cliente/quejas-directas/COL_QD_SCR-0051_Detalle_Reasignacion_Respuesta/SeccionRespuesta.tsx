@@ -22,15 +22,17 @@ interface Props {
 /** S8 Respuesta Técnica · S9 Soportes Internos · S10 Configuración de Respuesta. */
 export default function SeccionRespuesta({ form, fileRegistry, err, onVistaPrevia, onSolicitarProrroga, slaCritico, submitting }: Props) {
   const { control, watch } = form;
-  const w = watch();
+  // Tomamos una foto de los valores actuales del formulario.
+  const objWatch = watch();
 
   // RUL-0051-09 — "Acciones Tomadas" visible solo si la respuesta es a favor del Cliente.
-  const mostrarAcciones = w.qd_respuestaFavorDe === 'CLIENTE';
+  const blnShowActions = objWatch.qd_respuestaFavorDe === 'CLIENTE';
 
   // ACT-0051-04 — flujo de prórroga en dos pasos: primero se elige el motivo, luego se envía.
   const [modoProrroga, setModoProrroga] = useState(false);
-  const { options: motivoProrrogaOpts } = useCollection(COLLECTION_DEFS.motivoProrroga);
-  const puedeEnviarProrroga = !!w.qd_motivoProrroga;
+  // Cargamos el catálogo de motivos de prórroga.
+  const { options: cllExtensionReason } = useCollection(COLLECTION_DEFS.motivoProrroga);
+  const blnCanSendExt = !!objWatch.qd_motivoProrroga;
 
   return (
     <>
@@ -51,7 +53,7 @@ export default function SeccionRespuesta({ form, fileRegistry, err, onVistaPrevi
       {/* ── S8 · Elaboración de Respuesta Técnica (SEC-054) ── */}
       <FormSection title="Elaboración de Respuesta Técnica">
         {/* Visible solo si el Analista SAC devolvió el caso con observaciones (FLD-131, SCR-008). */}
-        {!!w.qd_observacionesSAC?.trim() && (
+        {!!objWatch.qd_observacionesSAC?.trim() && (
           <div className="form-row cols-1">
             <ZdsTextarea
               name="qd_observacionesSAC" control={control} label="Observaciones SAC" readOnly
@@ -69,7 +71,7 @@ export default function SeccionRespuesta({ form, fileRegistry, err, onVistaPrevi
           />
         </div>
 
-        {mostrarAcciones && (
+        {blnShowActions && (
           <div className="form-row cols-1">
             <ZdsTextarea
               name="qd_accionesTomadas" control={control} label="Acciones Tomadas"
@@ -104,7 +106,7 @@ export default function SeccionRespuesta({ form, fileRegistry, err, onVistaPrevi
           <div className="form-row cols-1" style={{ marginTop: 'var(--zs-75)' }}>
             <ZdsSelect
               name="qd_motivoProrroga" control={control} label="Motivo de la prórroga"
-              options={motivoProrrogaOpts} withSearch required
+              options={cllExtensionReason} withSearch required
               helpText="Catálogo CAT-MOTIVO-PRORROGA (motivo_prorr)."
             />
           </div>
@@ -126,7 +128,7 @@ export default function SeccionRespuesta({ form, fileRegistry, err, onVistaPrevi
                 Cancelar
               </ZrButton>
               <ZrButton config="positive"
-                disabled={!puedeEnviarProrroga || submitting} loading={submitting}
+                disabled={!blnCanSendExt || submitting} loading={submitting}
                 onClick={onSolicitarProrroga}>
                 Enviar Prórroga ▶
               </ZrButton>

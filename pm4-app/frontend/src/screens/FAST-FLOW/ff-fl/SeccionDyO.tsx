@@ -39,7 +39,8 @@ const REQUISITOS = [
 const MSG_BLOQUEO = 'La cotización no puede continuar por este canal y deberá gestionarse con la ayuda del asesor comercial (Case Underwriting).';
 
 export default function SeccionDyO({ form, fileRegistry }: { form: Form; fileRegistry: React.MutableRefObject<Map<string, File>> }) {
-  const docKeys = [
+  // Claves PM4 de los documentos de soporte de este producto
+  const arrDocKeys = [
     'frm_dyo_doc_01_nombre', 'frm_dyo_doc_02_nombre', 'frm_dyo_doc_03_nombre',
   ] as const;
 
@@ -73,7 +74,7 @@ export default function SeccionDyO({ form, fileRegistry }: { form: Form; fileReg
       />
 
       {/* ── DOCUMENTO DE SOPORTE ── */}
-      <DocSupportUploader form={form} fileRegistry={fileRegistry} docKeys={docKeys} />
+      <DocSupportUploader form={form} fileRegistry={fileRegistry} docKeys={arrDocKeys} />
 
       {/* ── PROPUESTA ECONÓMICA ── */}
       <PropuestaEconomicaTable

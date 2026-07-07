@@ -14,57 +14,61 @@ interface Props {
 
 export default function SeccionDetalleQueja({ form, fileRegistry }: Props) {
   const { control, watch, setValue, formState: { errors } } = form;
-  const w = watch();
+  // Tomamos una foto de los valores actuales del formulario.
+  const objWatch = watch();
 
-  const { options: seguroOpts } = useCollection(COLLECTION_DEFS.seguro);
-  const { options: detalleProductoOpts } = useCollection(COLLECTION_DEFS.detalleProducto, { qd_productoSFC: w.qd_productoSFC });
-  const { options: motivoOpts } = useCollection(COLLECTION_DEFS.motivo);
-  const { options: admisionOpts } = useCollection(COLLECTION_DEFS.admision);
-  const { options: enteOpts } = useCollection(COLLECTION_DEFS.ente);
-  const { options: tutelaOpts } = useCollection(COLLECTION_DEFS.tutela);
-  const { options: quejaExpresOpts } = useCollection(COLLECTION_DEFS.quejaExpres);
+  // Cargamos los catalogos de la seccion de detalle de la queja.
+  const { options: cllInsurance } = useCollection(COLLECTION_DEFS.seguro);
+  const { options: cllProductDetail } = useCollection(COLLECTION_DEFS.detalleProducto, { qd_productoSFC: objWatch.qd_productoSFC });
+  const { options: cllReason } = useCollection(COLLECTION_DEFS.motivo);
+  const { options: cllAdmission } = useCollection(COLLECTION_DEFS.admision);
+  const { options: cllControlEntity } = useCollection(COLLECTION_DEFS.ente);
+  const { options: cllGuardianship } = useCollection(COLLECTION_DEFS.tutela);
+  const { options: cllExpressComplaint } = useCollection(COLLECTION_DEFS.quejaExpres);
 
-  const esDefensor = w.qd_rolRadicador === 'DEFENSOR';
+  // Determinamos si el rol radicador es el Defensor.
+  const blnIsDefender = objWatch.qd_rolRadicador === 'DEFENSOR';
 
   // FLD-327 — escalamiento al Defensor computado (back): Defensor → "Sí".
   useEffect(() => {
-    setValue('qd_escalamientoDefensor', esDefensor ? 'Sí' : 'No');
-  }, [esDefensor, setValue]);
+    setValue('qd_escalamientoDefensor', blnIsDefender ? 'Sí' : 'No');
+  }, [blnIsDefender, setValue]);
 
   // FLD-324 — detalle del producto: primer código de CAT-DETALLE-PRODUCTO para el seguro elegido.
   useEffect(() => {
-    setValue('qd_detalleProducto', detalleProductoOpts[0]?.label ?? '');
-  }, [detalleProductoOpts, setValue]);
+    setValue('qd_detalleProducto', cllProductDetail[0]?.label ?? '');
+  }, [cllProductDetail, setValue]);
 
   // FLD-331 — admisión por defecto "No aplica" (rol ≠ Defensor), resuelta desde CAT-ADMISION.
   useEffect(() => {
-    if (esDefensor || w.qd_admision || admisionOpts.length === 0) return;
-    const noAplica = admisionOpts.find((o) => /no aplica/i.test(o.label));
-    if (noAplica) setValue('qd_admision', noAplica.label);
-  }, [esDefensor, w.qd_admision, admisionOpts, setValue]);
+    if (blnIsDefender || objWatch.qd_admision || cllAdmission.length === 0) return;
+    const objNotApplicable = cllAdmission.find((o) => /no aplica/i.test(o.label));
+    if (objNotApplicable) setValue('qd_admision', objNotApplicable.label);
+  }, [blnIsDefender, objWatch.qd_admision, cllAdmission, setValue]);
 
   // FLD-332 — ente de control por defecto "Otros", resuelto desde CAT-ENTE.
   useEffect(() => {
-    if (w.qd_enteControl || enteOpts.length === 0) return;
-    const otros = enteOpts.find((o) => /otros/i.test(o.label));
-    if (otros) setValue('qd_enteControl', otros.label);
-  }, [w.qd_enteControl, enteOpts, setValue]);
+    if (objWatch.qd_enteControl || cllControlEntity.length === 0) return;
+    const objOthers = cllControlEntity.find((o) => /otros/i.test(o.label));
+    if (objOthers) setValue('qd_enteControl', objOthers.label);
+  }, [objWatch.qd_enteControl, cllControlEntity, setValue]);
 
   // FLD-333 — tutela por defecto "No", resuelta desde CAT-TUTELA.
   useEffect(() => {
-    if (w.qd_tutela || tutelaOpts.length === 0) return;
-    const no = tutelaOpts.find((o) => /^\d?\.?\s*no$/i.test(o.label.trim()));
-    if (no) setValue('qd_tutela', no.label);
-  }, [w.qd_tutela, tutelaOpts, setValue]);
+    if (objWatch.qd_tutela || cllGuardianship.length === 0) return;
+    const objNo = cllGuardianship.find((o) => /^\d?\.?\s*no$/i.test(o.label.trim()));
+    if (objNo) setValue('qd_tutela', objNo.label);
+  }, [objWatch.qd_tutela, cllGuardianship, setValue]);
 
   // FLD-334 — queja exprés por defecto "No", resuelta desde CAT-EXPRES.
   useEffect(() => {
-    if (w.qd_quejaExpres || quejaExpresOpts.length === 0) return;
-    const no = quejaExpresOpts.find((o) => /^\d?\.?\s*no$/i.test(o.label.trim()));
-    if (no) setValue('qd_quejaExpres', no.label);
-  }, [w.qd_quejaExpres, quejaExpresOpts, setValue]);
+    if (objWatch.qd_quejaExpres || cllExpressComplaint.length === 0) return;
+    const objNo = cllExpressComplaint.find((o) => /^\d?\.?\s*no$/i.test(o.label.trim()));
+    if (objNo) setValue('qd_quejaExpres', objNo.label);
+  }, [objWatch.qd_quejaExpres, cllExpressComplaint, setValue]);
 
-  const err = (name: keyof CrearRecibirQuejaFormData) => errors[name]?.message;
+  // Atajo para leer el mensaje de error de un campo.
+  const err = (in_strName: keyof CrearRecibirQuejaFormData) => errors[in_strName]?.message;
 
   return (
     <FormSection title="Detalle de la Queja">
@@ -73,7 +77,7 @@ export default function SeccionDetalleQueja({ form, fileRegistry }: Props) {
           name="qd_productoSFC"
           control={control}
           label="Selecciona el seguro"
-          options={seguroOpts}
+          options={cllInsurance}
           rules={{ required: 'Campo requerido' }}
           required
           withSearch
@@ -109,7 +113,7 @@ export default function SeccionDetalleQueja({ form, fileRegistry }: Props) {
       </div>
 
       {/* RUL-000-12 — argumento visible solo si réplica = Sí */}
-      {w.qd_replica === 'SI' && (
+      {objWatch.qd_replica === 'SI' && (
         <div className="form-row cols-1">
           <ZdsTextarea
             name="qd_argumentoReplica"
@@ -125,7 +129,7 @@ export default function SeccionDetalleQueja({ form, fileRegistry }: Props) {
           name="qd_motivoSFC"
           control={control}
           label="Cuéntanos el motivo"
-          options={motivoOpts}
+          options={cllReason}
           rules={{ required: 'Campo requerido' }}
           required
           withSearch
@@ -160,12 +164,12 @@ export default function SeccionDetalleQueja({ form, fileRegistry }: Props) {
       />
 
       <div className="form-row cols-2">
-        {esDefensor ? (
+        {blnIsDefender ? (
           <ZdsSelect
             name="qd_admision"
             control={control}
             label="Admisión"
-            options={admisionOpts}
+            options={cllAdmission}
             rules={{ required: 'Campo requerido' }}
             required
             error={err('qd_admision')}

@@ -11,65 +11,68 @@ interface Props {
 
 export default function SeccionConsumidor({ form }: Props) {
   const { control, watch, setValue, formState: { errors } } = form;
-  const w = watch();
+  // Tomamos una foto de los valores actuales del formulario.
+  const objWatch = watch();
 
-  const { options: tipoIdentificacionOpts, rawMap: tipoIdRaw } = useCollection(COLLECTION_DEFS.tipoIdentificacion);
-  const { options: paisOpts } = useCollection(COLLECTION_DEFS.pais);
-  const { options: departamentoOpts } = useCollection(COLLECTION_DEFS.departamento);
-  const { options: ciudadOpts } = useCollection(COLLECTION_DEFS.ciudad, w as unknown as Record<string, unknown>);
-  const { options: condicionEspecialOpts } = useCollection(COLLECTION_DEFS.condicionEspecial);
-  const { options: lgbtiqOpts } = useCollection(COLLECTION_DEFS.lgbtiq);
-  const { options: sexoOpts } = useCollection(COLLECTION_DEFS.sexo);
-  const { options: tipoPersonaOpts } = useCollection(COLLECTION_DEFS.tipoPersona);
+  // Cargamos los catalogos de los datos del consumidor.
+  const { options: cllIdType, rawMap: dicIdType } = useCollection(COLLECTION_DEFS.tipoIdentificacion);
+  const { options: cllCountry } = useCollection(COLLECTION_DEFS.pais);
+  const { options: cllDepartment } = useCollection(COLLECTION_DEFS.departamento);
+  const { options: cllCity } = useCollection(COLLECTION_DEFS.ciudad, objWatch as unknown as Record<string, unknown>);
+  const { options: cllSpecialCond } = useCollection(COLLECTION_DEFS.condicionEspecial);
+  const { options: cllLgbtiq } = useCollection(COLLECTION_DEFS.lgbtiq);
+  const { options: cllSex } = useCollection(COLLECTION_DEFS.sexo);
+  const { options: cllPersonType } = useCollection(COLLECTION_DEFS.tipoPersona);
 
   // FLD-320 — sexo por defecto "No informa" (back, pendiente API SFC), resuelto desde CAT-SEXO.
   useEffect(() => {
-    if (w.qd_sexo || sexoOpts.length === 0) return;
-    const noInforma = sexoOpts.find((o) => /no informa/i.test(o.label));
-    if (noInforma) setValue('qd_sexo', noInforma.label);
-  }, [w.qd_sexo, sexoOpts, setValue]);
+    if (objWatch.qd_sexo || cllSex.length === 0) return;
+    const objNotReported = cllSex.find((o) => /no informa/i.test(o.label));
+    if (objNotReported) setValue('qd_sexo', objNotReported.label);
+  }, [objWatch.qd_sexo, cllSex, setValue]);
 
   // FLD-321 — LGBTIQ+ oculto, por defecto "No informa" (back), resuelto desde CAT-LGBTIQ.
   useEffect(() => {
-    if (w.qd_lgbtiq || lgbtiqOpts.length === 0) return;
-    const noInforma = lgbtiqOpts.find((o) => /no informa/i.test(o.label));
-    if (noInforma) setValue('qd_lgbtiq', noInforma.label);
-  }, [w.qd_lgbtiq, lgbtiqOpts, setValue]);
+    if (objWatch.qd_lgbtiq || cllLgbtiq.length === 0) return;
+    const objNotReported = cllLgbtiq.find((o) => /no informa/i.test(o.label));
+    if (objNotReported) setValue('qd_lgbtiq', objNotReported.label);
+  }, [objWatch.qd_lgbtiq, cllLgbtiq, setValue]);
 
   // FLD-322 — Condición especial oculta, por defecto "NINGUNA" (back), resuelto desde CAT-COND-ESP.
   useEffect(() => {
-    if (w.qd_condicionEspecial || condicionEspecialOpts.length === 0) return;
-    const ninguna = condicionEspecialOpts.find((o) => /ninguna/i.test(o.label));
-    if (ninguna) setValue('qd_condicionEspecial', ninguna.label);
-  }, [w.qd_condicionEspecial, condicionEspecialOpts, setValue]);
+    if (objWatch.qd_condicionEspecial || cllSpecialCond.length === 0) return;
+    const objNone = cllSpecialCond.find((o) => /ninguna/i.test(o.label));
+    if (objNone) setValue('qd_condicionEspecial', objNone.label);
+  }, [objWatch.qd_condicionEspecial, cllSpecialCond, setValue]);
 
   // RUL-000-02 / RUL-000-03 — el tipo de documento define el tipo de persona.
   // Se resuelve por el campo `codigo_tipo_persona` del registro de CAT-TIPO-ID
   // (1 = Natural, 2 = Jurídica), no por el código del documento.
-  const tipoIdRec = tipoIdRaw[w.qd_tipoIdentificacion ?? ''] as { data?: Record<string, unknown> } | undefined;
-  const codigoTipoPersona = String(tipoIdRec?.data?.codigo_tipo_persona ?? '');
-  const esJuridica = codigoTipoPersona === '2';
+  const objIdTypeRecord = dicIdType[objWatch.qd_tipoIdentificacion ?? ''] as { data?: Record<string, unknown> } | undefined;
+  const strPersonTypeCode = String(objIdTypeRecord?.data?.codigo_tipo_persona ?? '');
+  const blnIsLegalEntity = strPersonTypeCode === '2';
 
   // FLD-315 — tipo de persona computado (back), resuelto desde CAT-TIPO-PERSONA.
   useEffect(() => {
-    if (!codigoTipoPersona || tipoPersonaOpts.length === 0) return;
-    const tipoPersona = tipoPersonaOpts.find((o) => o.value === codigoTipoPersona);
-    if (tipoPersona) setValue('qd_tipoPersona', tipoPersona.label);
-  }, [codigoTipoPersona, tipoPersonaOpts, setValue]);
+    if (!strPersonTypeCode || cllPersonType.length === 0) return;
+    const objPersonType = cllPersonType.find((o) => o.value === strPersonTypeCode);
+    if (objPersonType) setValue('qd_tipoPersona', objPersonType.label);
+  }, [strPersonTypeCode, cllPersonType, setValue]);
 
   // RUL-000-09 — al cambiar el departamento se limpia y deshabilita la ciudad.
   useEffect(() => {
     setValue('qd_municipio', '');
-  }, [w.qd_departamento, setValue]);
+  }, [objWatch.qd_departamento, setValue]);
 
   // RUL-000-10 — país por ahora en read-only y fijado en Colombia (170)
   useEffect(() => {
-    if (LOCK_COUNTRY && w.qd_codigoPais !== DEFAULT_COUNTRY_CODE) {
+    if (LOCK_COUNTRY && objWatch.qd_codigoPais !== DEFAULT_COUNTRY_CODE) {
       setValue('qd_codigoPais', DEFAULT_COUNTRY_CODE);
     }
-  }, [w.qd_codigoPais, setValue]);
+  }, [objWatch.qd_codigoPais, setValue]);
 
-  const err = (name: keyof CrearRecibirQuejaFormData) => errors[name]?.message;
+  // Atajo para leer el mensaje de error de un campo.
+  const err = (in_strName: keyof CrearRecibirQuejaFormData) => errors[in_strName]?.message;
 
   return (
     <FormSection title="Datos del Consumidor Financiero">
@@ -78,7 +81,7 @@ export default function SeccionConsumidor({ form }: Props) {
           name="qd_tipoIdentificacion"
           control={control}
           label="Selecciona tu tipo de identificación"
-          options={tipoIdentificacionOpts}
+          options={cllIdType}
           rules={{ required: 'Campo requerido' }}
           required
           withSearch
@@ -99,7 +102,7 @@ export default function SeccionConsumidor({ form }: Props) {
       </div>
 
       {/* Persona natural (RUL-000-03) */}
-      {!esJuridica && (
+      {!blnIsLegalEntity && (
         <div className="form-row cols-2">
           <ZdsInput
             name="qd_nombres"
@@ -121,7 +124,7 @@ export default function SeccionConsumidor({ form }: Props) {
       )}
 
       {/* Persona jurídica (RUL-000-02) */}
-      {esJuridica && (
+      {blnIsLegalEntity && (
         <>
           <div className="form-row cols-1">
             <ZdsInput
@@ -187,7 +190,7 @@ export default function SeccionConsumidor({ form }: Props) {
           name="qd_codigoPais"
           control={control}
           label="País"
-          options={paisOpts}
+          options={cllCountry}
           rules={{ required: 'Campo requerido' }}
           required
           disabled={LOCK_COUNTRY}
@@ -197,7 +200,7 @@ export default function SeccionConsumidor({ form }: Props) {
           name="qd_departamento"
           control={control}
           label="Departamento"
-          options={departamentoOpts}
+          options={cllDepartment}
           rules={{ required: 'Campo requerido' }}
           required
           withSearch
@@ -207,12 +210,12 @@ export default function SeccionConsumidor({ form }: Props) {
           name="qd_municipio"
           control={control}
           label="Ciudad"
-          options={ciudadOpts}
+          options={cllCity}
           rules={{ required: 'Campo requerido' }}
           required
-          disabled={!w.qd_departamento}
+          disabled={!objWatch.qd_departamento}
           withSearch
-          placeholder={w.qd_departamento ? 'Seleccione ciudad...' : 'Seleccione primero el departamento'}
+          placeholder={objWatch.qd_departamento ? 'Seleccione ciudad...' : 'Seleccione primero el departamento'}
           error={err('qd_municipio')}
         />
       </div>

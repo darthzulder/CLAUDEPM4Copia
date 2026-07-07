@@ -23,49 +23,53 @@ interface Props {
 /** S5 Asignación · S6 Reasignación (PAN-06) · S7 Historial de Asignaciones. */
 export default function SeccionAsignacion({ form, err, onConfirmarReasignacion, onSolicitarAyuda, submitting }: Props) {
   const { control, watch, setValue } = form;
-  const w = watch();
+  // Tomamos una foto de los valores actuales del formulario.
+  const objWatch = watch();
   const [modoReasignacion, setModoReasignacion] = useState(false);
   const [snapshot, setSnapshot] = useState({ area: '', usuario: '', obs: '' });
 
   // RUL-0051-07 — bloque de reasignación visible si "¿Necesitas de otras áreas?" = Sí.
-  const mostrarReasignacion = w.qd_necesitaOtrasAreas === 'SI';
+  const blnShowReassign = objWatch.qd_necesitaOtrasAreas === 'SI';
 
   // RUL-0051-08 — máx. 4 ayudantes.
-  const historial: AsignacionHistorial[] = Array.isArray(w.qd_historialAsignaciones) ? w.qd_historialAsignaciones : [];
-  const ayudantesAlcanzado = historial.length >= MAX_AYUDANTES;
+  const lstHistory: AsignacionHistorial[] = Array.isArray(objWatch.qd_historialAsignaciones) ? objWatch.qd_historialAsignaciones : [];
+  const blnHelpersReached = lstHistory.length >= MAX_AYUDANTES;
 
   // Descarga el adjunto de un ayudante por su file_id (guardado por SCR-0052 al responder).
-  const descargarAdjunto = async (fileId: number, fileName: string) => {
-    const r = await pm4.get(`/files/${fileId}/contents`, { responseType: 'blob' });
-    const url = URL.createObjectURL(r.data as Blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = fileName;
-    a.click();
-    URL.revokeObjectURL(url);
+  const descargarAdjunto = async (in_intFileId: number, in_strFileName: string) => {
+    const objResponse = await pm4.get(`/files/${in_intFileId}/contents`, { responseType: 'blob' });
+    const strUrl = URL.createObjectURL(objResponse.data as Blob);
+    const objAnchor = document.createElement('a');
+    objAnchor.href = strUrl;
+    objAnchor.download = in_strFileName;
+    objAnchor.click();
+    URL.revokeObjectURL(strUrl);
   };
 
-  const { options: areaOpts } = useCollection(COLLECTION_DEFS.area);
-  const { options: motivoReasignacionOpts } = useCollection(COLLECTION_DEFS.motivoReasignacion);
+  // Cargamos los catalogos de área y motivo de reasignación.
+  const { options: cllArea } = useCollection(COLLECTION_DEFS.area);
+  const { options: cllReassignReason } = useCollection(COLLECTION_DEFS.motivoReasignacion);
 
   // RUL-0051-02 — usuarios filtrados por área seleccionada (asignación inicial).
-  const { options: usuariosArea } = useCollection(COLLECTION_DEFS.usuariosRole, { qd_area: w.qd_areaResponsable });
+  const { options: cllAreaUsers } = useCollection(COLLECTION_DEFS.usuariosRole, { qd_area: objWatch.qd_areaResponsable });
 
   // FLD-092 — responsables del área destino de reasignación (autocompletado).
-  const { options: usuariosAreaDestino } = useCollection(COLLECTION_DEFS.usuariosRole, { qd_area: w.qd_areaDestino });
+  const { options: cllTargetAreaUsers } = useCollection(COLLECTION_DEFS.usuariosRole, { qd_area: objWatch.qd_areaDestino });
   useEffect(() => {
-    setValue('qd_nuevoResponsable', usuariosAreaDestino[0]?.label ?? '');
-  }, [usuariosAreaDestino, setValue]);
+    setValue('qd_nuevoResponsable', cllTargetAreaUsers[0]?.label ?? '');
+  }, [cllTargetAreaUsers, setValue]);
 
+  // Guarda un snapshot de la asignación actual y entra en modo reasignación.
   const iniciarReasignacion = () => {
     setSnapshot({
-      area: w.qd_areaResponsable || '',
-      usuario: w.qd_usuarioResponsable || '',
-      obs: w.qd_observacionesAsignacion || '',
+      area: objWatch.qd_areaResponsable || '',
+      usuario: objWatch.qd_usuarioResponsable || '',
+      obs: objWatch.qd_observacionesAsignacion || '',
     });
     setModoReasignacion(true);
   };
 
+  // Restaura el snapshot y sale del modo reasignación.
   const cancelarReasignacion = () => {
     setValue('qd_areaResponsable', snapshot.area);
     setValue('qd_usuarioResponsable', snapshot.usuario);
@@ -74,36 +78,37 @@ export default function SeccionAsignacion({ form, err, onConfirmarReasignacion, 
   };
 
   // ACT-0051-03 — añade el ayudante al historial (RUL-0051-04 valida campos obligatorios).
-  const reasignacionCompleta =
-    !!w.qd_areaDestino && !!w.qd_motivoReasignacion && !!w.qd_observacionesReasignacion?.trim();
+  const blnReassignComplete =
+    !!objWatch.qd_areaDestino && !!objWatch.qd_motivoReasignacion && !!objWatch.qd_observacionesReasignacion?.trim();
 
+  // Registra la solicitud de ayuda en el historial y envía el snapshot fresco.
   const confirmarReasignacion = () => {
-    if (!reasignacionCompleta || ayudantesAlcanzado) return;
-    const fila: AsignacionHistorial = {
+    if (!blnReassignComplete || blnHelpersReached) return;
+    const objRow: AsignacionHistorial = {
       fecha: new Date().toISOString().slice(0, 10),
-      de: w.qd_responsableActual || w.qd_usuarioResponsable || '—',
-      para: w.qd_nuevoResponsable || '—',
-      motivo: motivoReasignacionOpts.find((m) => m.value === w.qd_motivoReasignacion)?.label ?? w.qd_motivoReasignacion,
-      observaciones: w.qd_observacionesReasignacion,
+      de: objWatch.qd_responsableActual || objWatch.qd_usuarioResponsable || '—',
+      para: objWatch.qd_nuevoResponsable || '—',
+      motivo: cllReassignReason.find((objOption) => objOption.value === objWatch.qd_motivoReasignacion)?.label ?? objWatch.qd_motivoReasignacion,
+      observaciones: objWatch.qd_observacionesReasignacion,
     };
-    const nuevoHistorial = [...historial, fila];
+    const lstNewHistory = [...lstHistory, objRow];
     // Número de esta ayuda (1-based) = posición de la fila recién agregada. Viaja con el
     // subproceso para que SCR-0052 sepa a qué ayuda responde (matchea el índice del historial).
-    const numeroAyuda = nuevoHistorial.length;
-    setValue('qd_historialAsignaciones', nuevoHistorial);
-    setValue('qd_numeroAyuda', numeroAyuda);
+    const intHelpNumber = lstNewHistory.length;
+    setValue('qd_historialAsignaciones', lstNewHistory);
+    setValue('qd_numeroAyuda', intHelpNumber);
     // limpiar el formulario de ayudante para el siguiente
     setValue('qd_areaDestino', '');
     setValue('qd_nuevoResponsable', '');
     setValue('qd_motivoReasignacion', '');
     setValue('qd_observacionesReasignacion', '');
-    // Submit inmediato con el snapshot fresco: watch() (w) aún no refleja los setValue
+    // Submit inmediato con el snapshot fresco: watch() (objWatch) aún no refleja los setValue
     // anteriores, por eso construimos el payload explícitamente para que PM4 persista
     // la nueva fila del historial junto con el resto de variables.
     onSolicitarAyuda({
-      ...w,
-      qd_historialAsignaciones: nuevoHistorial,
-      qd_numeroAyuda: numeroAyuda,
+      ...objWatch,
+      qd_historialAsignaciones: lstNewHistory,
+      qd_numeroAyuda: intHelpNumber,
       qd_areaDestino: '',
       qd_nuevoResponsable: '',
       qd_motivoReasignacion: '',
@@ -119,13 +124,13 @@ export default function SeccionAsignacion({ form, err, onConfirmarReasignacion, 
         <div className="form-row cols-2">
           <ZdsSelect
             name="qd_areaResponsable" control={control} label="Área responsable"
-            options={areaOpts} withSearch disabled={!modoReasignacion}
+            options={cllArea} withSearch disabled={!modoReasignacion}
             helpText="Áreas habilitadas para quejas (CAT-AREA)."
           />
           <ZdsSelect
             name="qd_usuarioResponsable" control={control} label="Usuario responsable"
-            options={usuariosArea} withSearch
-            disabled={!modoReasignacion || !w.qd_areaResponsable}
+            options={cllAreaUsers} withSearch
+            disabled={!modoReasignacion || !objWatch.qd_areaResponsable}
             helpText="Solo usuarios autorizados del área (RUL-0051-02)."
           />
         </div>
@@ -143,7 +148,7 @@ export default function SeccionAsignacion({ form, err, onConfirmarReasignacion, 
               </ZrButton>
               <ZrButton
                 config="positive" loading={submitting}
-                disabled={submitting || !w.qd_usuarioResponsable}
+                disabled={submitting || !objWatch.qd_usuarioResponsable}
                 onClick={onConfirmarReasignacion}
               >
                 Confirmar Reasignación
@@ -167,9 +172,9 @@ export default function SeccionAsignacion({ form, err, onConfirmarReasignacion, 
           />
         </div>
 
-        {mostrarReasignacion && (
+        {blnShowReassign && (
           <>
-            {ayudantesAlcanzado ? (
+            {blnHelpersReached ? (
               <ZrAlert config="alert" {...({ 'hide-close': true } as object)}>
                 Ha alcanzado el máximo de <strong>{MAX_AYUDANTES} ayudantes</strong> para este caso.
                 No puede añadir más. {/* MSG-0051-06 */}
@@ -178,20 +183,20 @@ export default function SeccionAsignacion({ form, err, onConfirmarReasignacion, 
               <>
                 <p className="subsection-note">
                   A quién quieres solicitar ayuda — puede añadir hasta {MAX_AYUDANTES} ayudantes
-                  ({historial.length}/{MAX_AYUDANTES}).
+                  ({lstHistory.length}/{MAX_AYUDANTES}).
                 </p>
                 <div className="form-row cols-2">
                   <ZdsSelect name="qd_areaDestino" control={control} label="Área destino"
-                    options={areaOpts} withSearch error={err('qd_areaDestino')}
+                    options={cllArea} withSearch error={err('qd_areaDestino')}
                     helpText="CAT-AREA." />
                   <ZdsSelect name="qd_nuevoResponsable" control={control} label="Responsable"
-                    options={w.qd_nuevoResponsable ? [{ value: w.qd_nuevoResponsable, label: w.qd_nuevoResponsable }] : []}
+                    options={objWatch.qd_nuevoResponsable ? [{ value: objWatch.qd_nuevoResponsable, label: objWatch.qd_nuevoResponsable }] : []}
                     disabled
                     helpText="Autocompletado según el área destino (CAT-USUARIOS-ROLE)." />
                 </div>
                 <div className="form-row cols-1">
                   <ZdsSelect name="qd_motivoReasignacion" control={control} label="Motivo"
-                    options={motivoReasignacionOpts} error={err('qd_motivoReasignacion')}
+                    options={cllReassignReason} error={err('qd_motivoReasignacion')}
                     helpText="CAT-MOTIVO-REASIG." />
                 </div>
                 <div className="form-row cols-1">
@@ -201,7 +206,7 @@ export default function SeccionAsignacion({ form, err, onConfirmarReasignacion, 
                 </div>
 
                 {/* RUL-0051-04 — bloquea hasta completar área, motivo y observaciones. */}
-                {!reasignacionCompleta && (
+                {!blnReassignComplete && (
                   <ZrAlert config="info" {...({ 'hide-close': true } as object)}>
                     El <strong>área destino</strong>, el <strong>motivo</strong> y las{' '}
                     <strong>observaciones</strong> son obligatorios para registrar la asignación.
@@ -211,7 +216,7 @@ export default function SeccionAsignacion({ form, err, onConfirmarReasignacion, 
 
                 <div z-flex="75" z-align="right:center" style={{ marginTop: 'var(--zs-75)' }}>
                   <ZrButton config="secondary"
-                    disabled={!reasignacionCompleta || submitting} loading={submitting}
+                    disabled={!blnReassignComplete || submitting} loading={submitting}
                     onClick={confirmarReasignacion}>
                     Confirmar
                   </ZrButton>
@@ -225,7 +230,7 @@ export default function SeccionAsignacion({ form, err, onConfirmarReasignacion, 
       {/* ── S7 · Historial de Asignaciones (SEC-053) ── */}
       {/* Visible si se está reasignando o si ya hay filas: así no desaparece al llegar al
           máximo de ayudantes (RUL-0051-08) ni al cerrar el bloque de solicitud. */}
-      {(mostrarReasignacion || historial.length > 0) && (
+      {(blnShowReassign || lstHistory.length > 0) && (
         <FormSection title="Historial de Asignaciones">
           <ZrTable zebra>
             <table>
@@ -236,29 +241,29 @@ export default function SeccionAsignacion({ form, err, onConfirmarReasignacion, 
                 </tr>
               </thead>
               <tbody>
-                {historial.length === 0 ? (
+                {lstHistory.length === 0 ? (
                   <tr><td colSpan={8} className="record-empty">Sin asignaciones previas registradas</td></tr>
                 ) : (
-                  historial.map((row, i) => (
-                    <tr key={i}>
-                      <td>{row.fecha}</td>
-                      <td>{row.de}</td>
-                      <td>{row.para}</td>
-                      <td>{row.motivo}</td>
-                      <td>{row.observaciones}</td>
+                  lstHistory.map((objRow, intIndex) => (
+                    <tr key={intIndex}>
+                      <td>{objRow.fecha}</td>
+                      <td>{objRow.de}</td>
+                      <td>{objRow.para}</td>
+                      <td>{objRow.motivo}</td>
+                      <td>{objRow.observaciones}</td>
                       <td>
-                        {row.respondio === 'si'
+                        {objRow.respondio === 'si'
                           ? <ZdsStatusBadge variant="success">✓</ZdsStatusBadge>
                           : '—'}
                       </td>
-                      <td>{row.comentario ?? '—'}</td>
+                      <td>{objRow.comentario ?? '—'}</td>
                       <td>
-                        {row.adjunto && row.adjuntoFileId
+                        {objRow.adjunto && objRow.adjuntoFileId
                           ? <ZrButton config="link:s" icon="download:line"
-                              onClick={() => descargarAdjunto(row.adjuntoFileId as number, row.adjunto as string)}>
-                              {row.adjunto}
+                              onClick={() => descargarAdjunto(objRow.adjuntoFileId as number, objRow.adjunto as string)}>
+                              {objRow.adjunto}
                             </ZrButton>
-                          : (row.adjunto || '—')}
+                          : (objRow.adjunto || '—')}
                       </td>
                     </tr>
                   ))

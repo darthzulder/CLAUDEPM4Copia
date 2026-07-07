@@ -14,71 +14,78 @@ export interface CollectionOption {
   label: string;
 }
 
-function resolvePath(obj: Record<string, unknown>, path: string): string {
+function resolvePath(in_dicObj: Record<string, unknown>, in_strPath: string): string {
+  // Recorremos el path separado por puntos para bajar por el objeto
   return String(
-    path.split('.').reduce<unknown>((acc, key) => {
-      if (acc !== null && typeof acc === 'object') {
-        return (acc as Record<string, unknown>)[key];
+    in_strPath.split('.').reduce<unknown>((in_objAcc, in_strKey) => {
+      if (in_objAcc !== null && typeof in_objAcc === 'object') {
+        return (in_objAcc as Record<string, unknown>)[in_strKey];
       }
       return undefined;
-    }, obj) ?? ''
+    }, in_dicObj) ?? ''
   );
 }
 
-function resolvePmql(template: string, values: Record<string, unknown>): string {
-  return template.replace(/\{\{(\w+)\}\}/g, (_, key) => String(values[key] ?? ''));
+function resolvePmql(in_strTemplate: string, in_dicValues: Record<string, unknown>): string {
+  // Reemplazamos cada placeholder por el valor correspondiente del form
+  return in_strTemplate.replace(/\{\{(\w+)\}\}/g, (_, in_strKey) => String(in_dicValues[in_strKey] ?? ''));
 }
 
 export function useCollection(
-  def: CollectionDef | null,
-  watchValues?: Record<string, unknown>
+  in_objDef: CollectionDef | null,
+  in_dicWatchValues?: Record<string, unknown>
 ): { options: CollectionOption[]; loading: boolean; rawMap: Record<string, Record<string, unknown>> } {
   const [options, setOptions] = useState<CollectionOption[]>([]);
   const [rawMap, setRawMap] = useState<Record<string, Record<string, unknown>>>({});
   const [loading, setLoading] = useState(false);
 
-  const dependsOnValue = def?.dependsOn ? watchValues?.[def.dependsOn] : undefined;
+  // Valor del campo del que depende esta coleccion
+  const genDependsOnValue = in_objDef?.dependsOn ? in_dicWatchValues?.[in_objDef.dependsOn] : undefined;
 
   useEffect(() => {
-    if (!def) return;
+    if (!in_objDef) return;
 
     // Si depende de otro campo y todavía no tiene valor, no cargar
-    if (def.dependsOn && !dependsOnValue) {
+    if (in_objDef.dependsOn && !genDependsOnValue) {
       setOptions([]);
       return;
     }
 
-    const params: Record<string, string> = { per_page: '500' };
+    // Armamos los parametros de la consulta a la coleccion
+    const dicParams: Record<string, string> = { per_page: '500' };
 
-    if (def.pmqlTemplate && watchValues) {
-      params.pmql = resolvePmql(def.pmqlTemplate, watchValues);
-      console.log(`[useCollection] id=${def.id} pmql=`, params.pmql);
+    // Si hay plantilla PMQL la resolvemos con los valores actuales del form
+    if (in_objDef.pmqlTemplate && in_dicWatchValues) {
+      dicParams.pmql = resolvePmql(in_objDef.pmqlTemplate, in_dicWatchValues);
+      console.log(`[useCollection] id=${in_objDef.id} pmql=`, dicParams.pmql);
     }
 
     setLoading(true);
+    // Pedimos los registros de la coleccion a PM4
     pm4
-      .get(`/collections/${def.id}/records`, { params })
-      .then((r) => {
-        const records: Record<string, unknown>[] = r.data?.data ?? [];
-        console.log(`[useCollection] id=${def.id} → ${records.length} registros`);
-        const mapped = records
-          .map((rec) => ({
-            value: resolvePath(rec, def.valueField),
-            label: resolvePath(rec, def.labelField),
-            rec,
+      .get(`/collections/${in_objDef.id}/records`, { params: dicParams })
+      .then((in_objResp) => {
+        const cllRecords: Record<string, unknown>[] = in_objResp.data?.data ?? [];
+        console.log(`[useCollection] id=${in_objDef.id} → ${cllRecords.length} registros`);
+        // Mapeamos cada registro a su value y label y descartamos los vacios
+        const cllMapped = cllRecords
+          .map((in_dicRec) => ({
+            value: resolvePath(in_dicRec, in_objDef.valueField),
+            label: resolvePath(in_dicRec, in_objDef.labelField),
+            rec: in_dicRec,
           }))
-          .filter((o) => o.value !== '' && o.label !== '');
-        setOptions(mapped.map(({ value, label }) => ({ value, label })));
-        setRawMap(Object.fromEntries(mapped.map(({ value, rec }) => [value, rec])));
+          .filter((in_objOpt) => in_objOpt.value !== '' && in_objOpt.label !== '');
+        setOptions(cllMapped.map(({ value, label }) => ({ value, label })));
+        setRawMap(Object.fromEntries(cllMapped.map(({ value, rec }) => [value, rec])));
       })
-      .catch((e) => {
-        console.error(`[useCollection] id=${def.id} error:`, e.message);
+      .catch((in_excError) => {
+        console.error(`[useCollection] id=${in_objDef.id} error:`, in_excError.message);
         setOptions([]);
         setRawMap({});
       })
       .finally(() => setLoading(false));
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [def?.id, String(dependsOnValue)]);
+  }, [in_objDef?.id, String(genDependsOnValue)]);
 
   return { options, loading, rawMap };
 }

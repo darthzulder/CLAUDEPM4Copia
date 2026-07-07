@@ -15,7 +15,7 @@ import {
 } from './variables';
 
 // ---------------------------------------------------------------------------
-// Types
+// Tipos
 // ---------------------------------------------------------------------------
 interface FormValues {
   frm_respCot_decision: DecisionValue | '';
@@ -25,29 +25,29 @@ interface FormValues {
 }
 
 // ---------------------------------------------------------------------------
-// Component
+// Componente
 // ---------------------------------------------------------------------------
 export default function OpcionesCotizacion() {
   const { task, loading, error, submitting, completeTask } = useTask();
-  const [sent, setSent] = useState(false);
-  const [activeTab, setActiveTab] = useState('');
+  const [blnSent, setBlnSent] = useState(false);
+  const [strActiveTab, setStrActiveTab] = useState('');
 
-  const data = (task?.data ?? {}) as unknown as OpcionesCotizacionData;
+  const objData = (task?.data ?? {}) as unknown as OpcionesCotizacionData;
 
   // Líneas activas según los productos seleccionados en la solicitud
-  const activeLineas = LINEAS_CONFIG.filter((l) => Boolean(data[l.prodField]));
+  const lstActiveLines = LINEAS_CONFIG.filter((objLine) => Boolean(objData[objLine.prodField]));
 
-  // Activar el primer tab disponible cuando carguen los datos
+  // Activamos el primer tab disponible cuando cargan los datos
   useEffect(() => {
-    if (activeLineas.length === 0) return;
-    if (!activeLineas.find((l) => l.key === activeTab)) {
-      setActiveTab(activeLineas[0].key);
+    if (lstActiveLines.length === 0) return;
+    if (!lstActiveLines.find((objLine) => objLine.key === strActiveTab)) {
+      setStrActiveTab(lstActiveLines[0].key);
     }
-  }, [activeLineas.map((l) => l.key).join(',')]); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [lstActiveLines.map((objLine) => objLine.key).join(',')]); // eslint-disable-line react-hooks/exhaustive-deps
 
-  // Resolver el fileId para el tab activo (solo desde output_slipCotizacion_{key})
-  const currentLinea = activeLineas.find((l) => l.key === activeTab);
-  const effectiveFileId = currentLinea ? resolveFileId(data[currentLinea.slipField]) : null;
+  // Resolvemos el fileId para el tab activo (solo desde output_slipCotizacion_{key})
+  const objCurrentLine = lstActiveLines.find((objLine) => objLine.key === strActiveTab);
+  const intEffectiveFileId = objCurrentLine ? resolveFileId(objData[objCurrentLine.slipField]) : null;
 
   const {
     control,
@@ -64,43 +64,45 @@ export default function OpcionesCotizacion() {
     },
   });
 
+  // Pre-poblamos el formulario con la decisión previa del caso
   useEffect(() => {
     if (!task?.data) return;
     reset({
-      frm_respCot_decision: (data.frm_respCot_decision as DecisionValue) || '',
-      frm_respCot_comentarios: data.frm_respCot_comentarios || '',
-      frm_respCot_motizoRechazo: data.frm_respCot_motizoRechazo || '',
-      frm_respCot_personalizacion_excepcion: data.frm_respCot_personalizacion_excepcion || '',
+      frm_respCot_decision: (objData.frm_respCot_decision as DecisionValue) || '',
+      frm_respCot_comentarios: objData.frm_respCot_comentarios || '',
+      frm_respCot_motizoRechazo: objData.frm_respCot_motizoRechazo || '',
+      frm_respCot_personalizacion_excepcion: objData.frm_respCot_personalizacion_excepcion || '',
     });
   }, [task]); // eslint-disable-line react-hooks/exhaustive-deps
 
-  const decision = watch('frm_respCot_decision');
+  const strDecision = watch('frm_respCot_decision');
 
-  async function onSubmit(values: FormValues) {
+  async function onSubmit(in_objValues: FormValues) {
     try {
-      const raw = task?.data as Record<string, unknown> ?? {};
-      const payload: Record<string, unknown> = {};
-      for (const [k, v] of Object.entries(raw)) {
-        if (!k.startsWith('_')) payload[k] = v;
+      // Copiamos los datos del caso omitiendo los campos internos (_)
+      const objRaw = task?.data as Record<string, unknown> ?? {};
+      const dicPayload: Record<string, unknown> = {};
+      for (const [strKey, objVal] of Object.entries(objRaw)) {
+        if (!strKey.startsWith('_')) dicPayload[strKey] = objVal;
       }
-      payload.frm_respCot_decision                  = values.frm_respCot_decision;
-      payload.frm_respCot_comentarios               = values.frm_respCot_comentarios;
-      payload.frm_respCot_motizoRechazo             = values.frm_respCot_motizoRechazo;
-      payload.frm_respCot_personalizacion_excepcion = values.frm_respCot_personalizacion_excepcion;
+      dicPayload.frm_respCot_decision                  = in_objValues.frm_respCot_decision;
+      dicPayload.frm_respCot_comentarios               = in_objValues.frm_respCot_comentarios;
+      dicPayload.frm_respCot_motizoRechazo             = in_objValues.frm_respCot_motizoRechazo;
+      dicPayload.frm_respCot_personalizacion_excepcion = in_objValues.frm_respCot_personalizacion_excepcion;
 
-      await completeTask(payload);
-      setSent(true);
-    } catch (err) {
-      console.error('[OpcionesCotizacion] Error al derivar:', err);
+      await completeTask(dicPayload);
+      setBlnSent(true);
+    } catch (excError) {
+      console.error('[OpcionesCotizacion] Error al derivar:', excError);
       alert('Error al derivar la tarea. Revise la consola.');
     }
   }
 
-  // ── States ──────────────────────────────────────────────────────────────
-  if (sent) {
+  // ── Estados ───────────────────────────────────────────────────────────────
+  if (blnSent) {
     return (
       <div className="screen-wrapper">
-        <ScreenHeader title={data.frm_titulo || 'VISUALIZAR SLIP Y OPCIONES DE COTIZACIÓN'} />
+        <ScreenHeader title={objData.frm_titulo || 'VISUALIZAR SLIP Y OPCIONES DE COTIZACIÓN'} />
         <div className="screen-content">
           <ResultCard variant="success" title="Decisión enviada">
             <p>
@@ -132,9 +134,10 @@ export default function OpcionesCotizacion() {
     );
   }
 
-  const titulo  = data.frm_titulo || 'VISUALIZAR SLIP Y OPCIONES DE COTIZACIÓN';
-  const numCot  = data.frm_gen_num_cotizacion;
-  const numCaso = data.frm_caso;
+  // Datos de cabecera para el encabezado
+  const strTitle  = objData.frm_titulo || 'VISUALIZAR SLIP Y OPCIONES DE COTIZACIÓN';
+  const strQuoteNum  = objData.frm_gen_num_cotizacion;
+  const strCaseNum = objData.frm_caso;
 
   return (
     <div className="screen-wrapper">
@@ -144,37 +147,37 @@ export default function OpcionesCotizacion() {
         </div>
       )}
 
-      {/* Header */}
+      {/* Cabecera */}
       <ScreenHeader
-        title={titulo}
+        title={strTitle}
         subtitle={[
-          numCot ? `Cotización # ${numCot}` : null,
-          numCaso ? `Caso # ${numCaso}` : null,
+          strQuoteNum ? `Cotización # ${strQuoteNum}` : null,
+          strCaseNum ? `Caso # ${strCaseNum}` : null,
         ]}
       />
 
-      {/* Body: PDF (izquierda) + Panel decisión (derecha) */}
+      {/* Cuerpo: PDF (izquierda) + Panel decisión (derecha) */}
       <div className="screen-body">
 
         {/* Área de slips con tabs por línea */}
         <div z-flex="col:75">
-          {activeLineas.length > 1 && (
+          {lstActiveLines.length > 1 && (
             <ZrTabs
-              model={Math.max(1, activeLineas.findIndex((l) => l.key === activeTab) + 1)}
-              onChange={(idx: number) => { const l = activeLineas[idx - 1]; if (l) setActiveTab(l.key); }}
-              {...({ tabs: activeLineas.map((l) => ({ name: l.label })) } as Record<string, unknown>)}
+              model={Math.max(1, lstActiveLines.findIndex((objLine) => objLine.key === strActiveTab) + 1)}
+              onChange={(intIdx: number) => { const objLine = lstActiveLines[intIdx - 1]; if (objLine) setStrActiveTab(objLine.key); }}
+              {...({ tabs: lstActiveLines.map((objLine) => ({ name: objLine.label })) } as Record<string, unknown>)}
             />
           )}
 
-          {effectiveFileId ? (
+          {intEffectiveFileId ? (
             <PdfViewer
-              fileId={effectiveFileId}
-              label={currentLinea ? `Slip — ${currentLinea.label}` : 'Slip de Cotización'}
+              fileId={intEffectiveFileId}
+              label={objCurrentLine ? `Slip — ${objCurrentLine.label}` : 'Slip de Cotización'}
               height={700}
             />
           ) : (
             <ZrAlert config="info" {...({ 'hide-close': true } as object)}>
-              {activeLineas.length === 0
+              {lstActiveLines.length === 0
                 ? 'No hay productos activos en este caso.'
                 : 'El slip de cotización no está disponible aún.'}
             </ZrAlert>
@@ -207,7 +210,7 @@ export default function OpcionesCotizacion() {
               label="Comentarios"
             />
 
-            {decision === 'RECHAZADA' && (
+            {strDecision === 'RECHAZADA' && (
               <ZdsTextarea
                 name="frm_respCot_motizoRechazo"
                 control={control}
@@ -218,7 +221,7 @@ export default function OpcionesCotizacion() {
               />
             )}
 
-            {decision === 'PERSONALIZACION_EXCEPCION' && (
+            {strDecision === 'PERSONALIZACION_EXCEPCION' && (
               <ZdsTextarea
                 name="frm_respCot_personalizacion_excepcion"
                 control={control}
@@ -229,11 +232,11 @@ export default function OpcionesCotizacion() {
               />
             )}
 
-            {data.frm_gen_enlace_clausulado_rc && (
+            {objData.frm_gen_enlace_clausulado_rc && (
               <ZrButton
                 config="secondary:s"
                 icon="file-blank:line"
-                href={data.frm_gen_enlace_clausulado_rc}
+                href={objData.frm_gen_enlace_clausulado_rc}
                 target="_blank"
               >
                 Ver clausulado RC

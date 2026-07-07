@@ -17,29 +17,32 @@ const TABS = [
 ] as const;
 
 export default function SeccionProductos({ form, fileRegistry }: { form: Form; fileRegistry: React.MutableRefObject<Map<string, File>> }) {
-  const w = form.watch();
+  const objWatch = form.watch();
   const [activeTab, setActiveTab] = useState('');
 
-  const activeTabs = TABS.filter((t) => w[t.field]);
-  const activeTabKeys = activeTabs.map((t) => t.key).join(',');
+  // Dejamos solo las pestañas de los productos que el usuario seleccionó
+  const lstActiveTabs = TABS.filter((objTab) => objWatch[objTab.field]);
+  const strActiveTabKeys = lstActiveTabs.map((objTab) => objTab.key).join(',');
 
+  // Si la pestaña activa ya no existe, saltamos a la primera disponible
   useEffect(() => {
-    if (activeTabs.length === 0) return;
-    if (!activeTabs.find((t) => t.key === activeTab)) {
-      setActiveTab(activeTabs[0].key);
+    if (lstActiveTabs.length === 0) return;
+    if (!lstActiveTabs.find((objTab) => objTab.key === activeTab)) {
+      setActiveTab(lstActiveTabs[0].key);
     }
-  }, [activeTabKeys]);  // eslint-disable-line react-hooks/exhaustive-deps
+  }, [strActiveTabKeys]);  // eslint-disable-line react-hooks/exhaustive-deps
 
-  if (activeTabs.length === 0) return null;
+  if (lstActiveTabs.length === 0) return null;
 
   return (
     <div className="products-card">
       <ZrTabs
-        model={Math.max(1, activeTabs.findIndex((t) => t.key === activeTab) + 1)}
-        onChange={(idx: number) => { const t = activeTabs[idx - 1]; if (t) setActiveTab(t.key); }}
-        {...({ tabs: activeTabs.map((t) => ({ name: t.label })) } as Record<string, unknown>)}
+        model={Math.max(1, lstActiveTabs.findIndex((objTab) => objTab.key === activeTab) + 1)}
+        onChange={(in_intIdx: number) => { const objTab = lstActiveTabs[in_intIdx - 1]; if (objTab) setActiveTab(objTab.key); }}
+        {...({ tabs: lstActiveTabs.map((objTab) => ({ name: objTab.label })) } as Record<string, unknown>)}
       />
 
+      {/* Mostramos la sección del producto según la pestaña activa */}
       <div className="products-tab-body">
         {activeTab === 'dyo'   && <SeccionDyO   form={form} fileRegistry={fileRegistry} />}
         {activeTab === 'cc'    && <SeccionCC    form={form} fileRegistry={fileRegistry} />}

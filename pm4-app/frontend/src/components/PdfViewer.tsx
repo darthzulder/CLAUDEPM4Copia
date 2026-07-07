@@ -31,28 +31,29 @@ export default function PdfViewer({ fileId, label, height = 640, className = '' 
       return;
     }
 
-    let active = true;
+    let blnActive = true;
     setLoading(true);
     setError(null);
 
+    // Descargamos el binario del archivo y lo exponemos como blob URL.
     pm4.get(`/files/${fileId}/contents`, { responseType: 'blob' })
-      .then((r) => {
-        if (!active) return;
+      .then((in_objResponse) => {
+        if (!blnActive) return;
         // Revocar URL anterior para liberar memoria
         if (prevUrl.current) URL.revokeObjectURL(prevUrl.current);
-        const url = URL.createObjectURL(r.data as Blob);
-        prevUrl.current = url;
-        setBlobUrl(url);
+        const strUrl = URL.createObjectURL(in_objResponse.data as Blob);
+        prevUrl.current = strUrl;
+        setBlobUrl(strUrl);
       })
-      .catch((e) => {
-        if (!active) return;
-        const msg = e.response?.data?.message ?? e.message;
-        console.error('[PdfViewer] Error al cargar archivo:', msg);
-        setError(msg);
+      .catch((in_excError) => {
+        if (!blnActive) return;
+        const strMsg = in_excError.response?.data?.message ?? in_excError.message;
+        console.error('[PdfViewer] Error al cargar archivo:', strMsg);
+        setError(strMsg);
       })
-      .finally(() => { if (active) setLoading(false); });
+      .finally(() => { if (blnActive) setLoading(false); });
 
-    return () => { active = false; };
+    return () => { blnActive = false; };
   }, [fileId]);
 
   // Cleanup al desmontar
@@ -60,14 +61,15 @@ export default function PdfViewer({ fileId, label, height = 640, className = '' 
     return () => { if (prevUrl.current) URL.revokeObjectURL(prevUrl.current); };
   }, []);
 
+  // Descarga el blob actual como archivo local mediante un enlace temporal.
   const handleDownload = () => {
     if (!blobUrl) return;
-    const a = document.createElement('a');
-    a.href = blobUrl;
-    a.download = label ?? 'documento.pdf';
-    document.body.appendChild(a);
-    a.click();
-    a.remove();
+    const objLink = document.createElement('a');
+    objLink.href = blobUrl;
+    objLink.download = label ?? 'documento.pdf';
+    document.body.appendChild(objLink);
+    objLink.click();
+    objLink.remove();
   };
 
   if (!fileId) return null;

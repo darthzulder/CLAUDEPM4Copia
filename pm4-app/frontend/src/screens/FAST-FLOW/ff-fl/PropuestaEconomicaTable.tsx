@@ -38,13 +38,14 @@ export function PropuestaEconomicaTable({
             </tr>
           </thead>
           <tbody>
-            {fields.map((field, i) => (
-              <tr key={field}>
+            {/* Recorremos cada campo para pintar una fila con su selector de límite */}
+            {fields.map((strField, i) => (
+              <tr key={strField}>
                 <td {...({ config: 'center' } as object)}>{i + 1}</td>
                 <td>
                   <ZdsSelect
                     label=""
-                    name={field}
+                    name={strField}
                     control={control}
                     options={options}
                     placeholder="Seleccione un límite"

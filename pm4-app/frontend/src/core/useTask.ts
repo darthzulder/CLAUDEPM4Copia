@@ -10,59 +10,64 @@ export interface TaskData {
 }
 
 export function useTask() {
-  const taskId    = useTaskId();
-  const caseId    = useCaseId();
-  const processId = useProcessId();
-  const eventId   = useEventId();
-  const isWebEntry = !taskId && !caseId;
+  // Resolvemos los identificadores del caso desde la URL o el entorno
+  const strTaskId    = useTaskId();
+  const strCaseId    = useCaseId();
+  const strProcessId = useProcessId();
+  const strEventId   = useEventId();
+  const isWebEntry = !strTaskId && !strCaseId;
   const [task, setTask]           = useState<TaskData | null>(null);
   const [loading, setLoading]     = useState(true);
   const [error, setError]         = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
 
   useEffect(() => {
-    if (!taskId && !caseId) {
+    // Si no hay task ni case no hay nada que cargar
+    if (!strTaskId && !strCaseId) {
       setLoading(false);
       return;
     }
 
-    if (caseId) {
+    if (strCaseId) {
       // Resolver task activo desde el case_id
-      console.log(`[useTask] Resolviendo task desde case_id=${caseId}...`);
-      pm4.get(`/cases/${caseId}/task`)
-        .then((r) => {
-          const t = r.data as TaskData;
-          console.log(`[useTask] case_id=${caseId} → task_id=${t.id}`);
-          console.log('[useTask] Variables del caso (task.data):', t.data);
-          setTask(t);
+      console.log(`[useTask] Resolviendo task desde case_id=${strCaseId}...`);
+      pm4.get(`/cases/${strCaseId}/task`)
+        .then((in_objResp) => {
+          // Guardamos la tarea que devolvio PM4
+          const objTask = in_objResp.data as TaskData;
+          console.log(`[useTask] case_id=${strCaseId} → task_id=${objTask.id}`);
+          console.log('[useTask] Variables del caso (task.data):', objTask.data);
+          setTask(objTask);
         })
-        .catch((e) => setError(e.response?.data?.message ?? e.message))
+        .catch((in_excError) => setError(in_excError.response?.data?.message ?? in_excError.message))
         .finally(() => setLoading(false));
       return;
     }
 
     // Ruta clásica: task_id directo
-    console.log(`[useTask] Cargando task_id=${taskId}...`);
-    pm4.get(`/tasks/${taskId}`, { params: { include: 'data' } })
-      .then((r) => {
-        console.log(`[useTask] task_id=${taskId} cargado`);
-        console.log('[useTask] Variables del caso (task.data):', r.data?.data);
-        setTask(r.data);
+    console.log(`[useTask] Cargando task_id=${strTaskId}...`);
+    pm4.get(`/tasks/${strTaskId}`, { params: { include: 'data' } })
+      .then((in_objResp) => {
+        console.log(`[useTask] task_id=${strTaskId} cargado`);
+        console.log('[useTask] Variables del caso (task.data):', in_objResp.data?.data);
+        setTask(in_objResp.data);
       })
-      .catch((e) => setError(e.response?.data?.message ?? e.message))
+      .catch((in_excError) => setError(in_excError.response?.data?.message ?? in_excError.message))
       .finally(() => setLoading(false));
-  }, [taskId, caseId]);
+  }, [strTaskId, strCaseId]);
 
+  // Completamos la tarea actual y derivamos el proceso al siguiente nodo
   const completeTask = useCallback(
-    async (formData: Record<string, unknown>) => {
+    async (in_dicFormData: Record<string, unknown>) => {
       if (!task?.id) throw new Error('No hay task_id resuelto');
       setSubmitting(true);
       try {
-        const payload = { status: 'COMPLETED', data: formData };
-        console.log(`[useTask] Enviando task_id=${task.id}:`, payload);
-        const response = await pm4.put(`/tasks/${task.id}`, payload);
-        console.log('[useTask] Respuesta de PM4:', response.data);
-        return response.data;
+        // Armamos el payload con el estado completado y los datos del form
+        const objPayload = { status: 'COMPLETED', data: in_dicFormData };
+        console.log(`[useTask] Enviando task_id=${task.id}:`, objPayload);
+        const objResponse = await pm4.put(`/tasks/${task.id}`, objPayload);
+        console.log('[useTask] Respuesta de PM4:', objResponse.data);
+        return objResponse.data;
       } finally {
         setSubmitting(false);
       }
@@ -70,21 +75,23 @@ export function useTask() {
     [task]
   );
 
+  // Iniciamos un proceso nuevo cuando la app entra sin task previo
   const startProcess = useCallback(
-    async (formData: Record<string, unknown>) => {
-      if (!processId) throw new Error('No hay process_id para iniciar el proceso');
+    async (in_dicFormData: Record<string, unknown>) => {
+      if (!strProcessId) throw new Error('No hay process_id para iniciar el proceso');
       setSubmitting(true);
       try {
-        const params: Record<string, string> = {};
-        if (eventId) params['event'] = eventId;
-        const response = await pm4.post(`/process_events/${processId}`, formData, { params });
-        console.log('[useTask] Proceso iniciado:', response.data);
-        return response.data as Record<string, unknown>;
+        // Pasamos el evento de arranque como parametro si existe
+        const dicParams: Record<string, string> = {};
+        if (strEventId) dicParams['event'] = strEventId;
+        const objResponse = await pm4.post(`/process_events/${strProcessId}`, in_dicFormData, { params: dicParams });
+        console.log('[useTask] Proceso iniciado:', objResponse.data);
+        return objResponse.data as Record<string, unknown>;
       } finally {
         setSubmitting(false);
       }
     },
-    [processId, eventId]
+    [strProcessId, strEventId]
   );
 
   return { task, loading, error, submitting, completeTask, startProcess, isWebEntry };

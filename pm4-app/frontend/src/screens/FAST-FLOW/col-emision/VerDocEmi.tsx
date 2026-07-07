@@ -18,7 +18,7 @@ import {
 } from './variables';
 
 // ──────────────────────────────────────────────────────────────
-// Types
+// Tipos
 // ──────────────────────────────────────────────────────────────
 interface PreviewState {
   fileId: number;
@@ -64,78 +64,83 @@ function DecisionBanner({ decision }: { decision: DecisionEmi | null }) {
 // ──────────────────────────────────────────────────────────────
 export default function VerDocEmi() {
   const { task, loading, error, submitting, completeTask } = useTask();
-  const [validaciones, setValidaciones] = useState<Record<string, ValidacionDoc>>({});
-  const [comentarios, setComentarios]   = useState('');
-  const [preview, setPreview]           = useState<PreviewState | null>(null);
-  const [infoOpen, setInfoOpen]         = useState(false);
-  const [sent, setSent]                 = useState(false);
-  const [submitError, setSubmitError]   = useState<string | null>(null);
+  const [dicValidations, setDicValidations] = useState<Record<string, ValidacionDoc>>({});
+  const [strComments, setStrComments]   = useState('');
+  const [objPreview, setObjPreview]           = useState<PreviewState | null>(null);
+  const [blnInfoOpen, setBlnInfoOpen]         = useState(false);
+  const [blnSent, setBlnSent]                 = useState(false);
+  const [strSubmitError, setStrSubmitError]   = useState<string | null>(null);
 
-  const data      = (task?.data ?? {}) as SolDocEmiData;
-  const requestId = task?.process_request_id ?? null;
-  const { files, loading: filesLoading } = useRequestFiles(requestId);
+  const objData      = (task?.data ?? {}) as SolDocEmiData;
+  const intRequestId = task?.process_request_id ?? null;
+  const { files, loading: filesLoading } = useRequestFiles(intRequestId);
 
-  const docsActivos = PRODUCTO_DOC_DEFS.filter((d) => !!data[d.productoKey]);
-  const docs        = docsActivos.length > 0 ? docsActivos : PRODUCTO_DOC_DEFS;
+  // Filtramos los documentos según los productos activos
+  const lstActiveDocs = PRODUCTO_DOC_DEFS.filter((objDoc) => !!objData[objDoc.productoKey]);
+  const lstDocs        = lstActiveDocs.length > 0 ? lstActiveDocs : PRODUCTO_DOC_DEFS;
 
-  function getValidacion(key: string): ValidacionDoc {
-    return validaciones[key] ?? 'EN_REVISION';
+  // Estado de validación de un documento (por defecto En revisión)
+  function getValidacion(in_strKey: string): ValidacionDoc {
+    return dicValidations[in_strKey] ?? 'EN_REVISION';
   }
 
-  function resolveDoc(key: string, idx: number): { fileId: number | null; fileName: string } {
-    const fromTask = resolveFileId((data as Record<string, unknown>)[key]);
-    if (fromTask) {
-      const match = files.find((f) => f.id === fromTask);
-      return { fileId: fromTask, fileName: match?.file_name ?? `Documento ${idx + 1}` };
+  // Resuelve el archivo asociado a un documento
+  function resolveDoc(in_strKey: string, in_intIdx: number): { fileId: number | null; fileName: string } {
+    const intFromTask = resolveFileId((objData as Record<string, unknown>)[in_strKey]);
+    if (intFromTask) {
+      const objMatch = files.find((f) => f.id === intFromTask);
+      return { fileId: intFromTask, fileName: objMatch?.file_name ?? `Documento ${in_intIdx + 1}` };
     }
-    const fallback = files[idx];
-    if (fallback) return { fileId: fallback.id, fileName: fallback.file_name };
+    const objFallback = files[in_intIdx];
+    if (objFallback) return { fileId: objFallback.id, fileName: objFallback.file_name };
     return { fileId: null, fileName: '' };
   }
 
-  // Decisión derivada automáticamente
-  const derivedDecision = useMemo((): DecisionEmi | null => {
-    const vals = docs.map((d) => getValidacion(d.key));
-    if (vals.some((v) => v === 'EN_REVISION')) return null;          // aún pendiente
-    return vals.every((v) => v === 'APROBADA') ? 'COMPLETO' : 'INCOMPLETO';
+  // Decisión derivada automáticamente del estado de cada documento
+  const strDerivedDecision = useMemo((): DecisionEmi | null => {
+    const lstVals = lstDocs.map((objDoc) => getValidacion(objDoc.key));
+    if (lstVals.some((strVal) => strVal === 'EN_REVISION')) return null;          // aún pendiente
+    return lstVals.every((strVal) => strVal === 'APROBADA') ? 'COMPLETO' : 'INCOMPLETO';
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [validaciones, docs]);
+  }, [dicValidations, lstDocs]);
 
   // ── Continuar ──────────────────────────────────────────────
   async function handleContinuar() {
-    if (derivedDecision === null) {
-      setSubmitError('Todos los documentos deben estar validados (Aprobada o Rechazada) antes de continuar.');
+    // Todos los documentos deben estar validados antes de avanzar
+    if (strDerivedDecision === null) {
+      setStrSubmitError('Todos los documentos deben estar validados (Aprobada o Rechazada) antes de continuar.');
       return;
     }
-    if (derivedDecision === 'INCOMPLETO' && !comentarios.trim()) {
-      setSubmitError('Debe ingresar comentarios cuando hay documentos rechazados.');
+    if (strDerivedDecision === 'INCOMPLETO' && !strComments.trim()) {
+      setStrSubmitError('Debe ingresar comentarios cuando hay documentos rechazados.');
       return;
     }
-    setSubmitError(null);
+    setStrSubmitError(null);
 
     try {
-      const { _user: _u, _request: _r, ...taskData } = (task?.data ?? {}) as Record<string, unknown>;
+      const { _user: _u, _request: _r, ...objTaskData } = (task?.data ?? {}) as Record<string, unknown>;
 
-      const validacionesOut: Record<string, string> = {};
-      for (const doc of docs) {
-        validacionesOut[`${doc.key}_validacion`] = getValidacion(doc.key);
+      // Empaquetamos la validación de cada documento
+      const dicValidationsOut: Record<string, string> = {};
+      for (const objDoc of lstDocs) {
+        dicValidationsOut[`${objDoc.key}_validacion`] = getValidacion(objDoc.key);
       }
 
       await completeTask({
-        ...taskData,
-        ...validacionesOut,
-        frm_decision_emision: derivedDecision,
-        ...(derivedDecision === 'INCOMPLETO' ? { frm_comentarios_emision: comentarios.trim() } : {}),
+        ...objTaskData,
+        ...dicValidationsOut,
+        frm_decision_emision: strDerivedDecision,
+        ...(strDerivedDecision === 'INCOMPLETO' ? { frm_comentarios_emision: strComments.trim() } : {}),
       });
-      setSent(true);
-    } catch (err) {
-      console.error('[VerDocEmi] Error al continuar:', err);
-      setSubmitError('Error al guardar la verificación. Revise la consola.');
+      setBlnSent(true);
+    } catch (excError) {
+      console.error('[VerDocEmi] Error al continuar:', excError);
+      setStrSubmitError('Error al guardar la verificación. Revise la consola.');
     }
   }
 
   // ── Estado enviado ─────────────────────────────────────────
-  if (sent) {
+  if (blnSent) {
     return (
       <div className="screen-wrapper">
         <ScreenHeader title="VERIFICACIÓN DOCUMENTOS EMISIÓN" />
@@ -171,8 +176,9 @@ export default function VerDocEmi() {
     );
   }
 
-  const numCot  = data.frm_num_cotizacion ?? data.frm_gen_num_cotizacion;
-  const numCaso = data.frm_caso;
+  // Datos de cabecera para el encabezado
+  const strQuoteNum  = objData.frm_num_cotizacion ?? objData.frm_gen_num_cotizacion;
+  const strCaseNum = objData.frm_caso;
 
   return (
     <div className="screen-wrapper">
@@ -182,13 +188,13 @@ export default function VerDocEmi() {
         </div>
       )}
 
-      {/* Header */}
+      {/* Cabecera */}
       <ScreenHeader
         title="VERIFICACIÓN DOCUMENTOS EMISIÓN"
         subtitle={[
-          numCot && `Cotización # ${numCot}`,
-          numCaso && `Caso # ${numCaso}`,
-          docsActivos.length > 0 && `${docsActivos.length} producto${docsActivos.length > 1 ? 's' : ''}`
+          strQuoteNum && `Cotización # ${strQuoteNum}`,
+          strCaseNum && `Caso # ${strCaseNum}`,
+          lstActiveDocs.length > 0 && `${lstActiveDocs.length} producto${lstActiveDocs.length > 1 ? 's' : ''}`
         ]}
       />
 
@@ -198,7 +204,7 @@ export default function VerDocEmi() {
 
           <FormSection
             title="Documentos de Emisión"
-            action={<ZrButton config="secondary:xs" icon="info:line" onClick={() => setInfoOpen(true)} />}
+            action={<ZrButton config="secondary:xs" icon="info:line" onClick={() => setBlnInfoOpen(true)} />}
             footer={
               <>
                 {/* Sección de Decisión */}
@@ -208,18 +214,18 @@ export default function VerDocEmi() {
                     Decisión
                   </div>
 
-                  <DecisionBanner decision={derivedDecision} />
+                  <DecisionBanner decision={strDerivedDecision} />
 
-                  {derivedDecision === 'INCOMPLETO' && (
+                  {strDerivedDecision === 'INCOMPLETO' && (
                     <div style={{ marginTop: '1rem' }}>
                       <ZrForm config="line">
                         <ZrTextarea
                           name="frm_comentarios_emision"
                           label="Comentarios *"
-                          model={comentarios}
-                          onChange={(v: string | null) => {
-                            setComentarios(v ?? '');
-                            setSubmitError(null);
+                          model={strComments}
+                          onChange={(strVal: string | null) => {
+                            setStrComments(strVal ?? '');
+                            setStrSubmitError(null);
                           }}
                           elastic
                           help-text="Describa las razones por las cuales los documentos están incompletos."
@@ -229,9 +235,9 @@ export default function VerDocEmi() {
                     </div>
                   )}
 
-                  {submitError && (
+                  {strSubmitError && (
                     <ZrAlert config="negative" style={{ marginTop: '0.75rem' }} {...({ 'hide-close': true } as object)}>
-                      {submitError}
+                      {strSubmitError}
                     </ZrAlert>
                   )}
                 </div>
@@ -239,7 +245,7 @@ export default function VerDocEmi() {
                 <ActionBar>
                   <ZrButton
                     config="primary:l"
-                    disabled={submitting || derivedDecision === null}
+                    disabled={submitting || strDerivedDecision === null}
                     loading={submitting}
                     onClick={handleContinuar}
                   >
@@ -250,23 +256,24 @@ export default function VerDocEmi() {
             }
           >
             <DocList mode="validation">
-              {docs.map((doc, i) => {
-                const { fileId, fileName } = resolveDoc(doc.key, i);
+              {lstDocs.map((objDoc, intI) => {
+                // Resolvemos el archivo asociado a este documento
+                const { fileId: intFileId, fileName: strFileName } = resolveDoc(objDoc.key, intI);
                 return (
                   <DocItem
-                    key={doc.key}
+                    key={objDoc.key}
                     mode="validation"
-                    index={i + 1}
-                    descripcion={doc.descripcion}
-                    fileId={fileId}
-                    fileName={fileName}
-                    validacion={getValidacion(doc.key)}
-                    onValidacion={(v) => {
-                      setValidaciones((prev) => ({ ...prev, [doc.key]: v }));
-                      setSubmitError(null);
+                    index={intI + 1}
+                    descripcion={objDoc.descripcion}
+                    fileId={intFileId}
+                    fileName={strFileName}
+                    validacion={getValidacion(objDoc.key)}
+                    onValidacion={(strVal) => {
+                      setDicValidations((objPrev) => ({ ...objPrev, [objDoc.key]: strVal }));
+                      setStrSubmitError(null);
                     }}
                     onPreview={() => {
-                      if (fileId) setPreview({ fileId, descripcion: doc.descripcion, fileName });
+                      if (intFileId) setObjPreview({ fileId: intFileId, descripcion: objDoc.descripcion, fileName: strFileName });
                     }}
                     valOpciones={VAL_OPCIONES}
                   />
@@ -280,8 +287,8 @@ export default function VerDocEmi() {
 
       {/* Modal de ayuda — criterios de verificación */}
       <ZrModal
-        model={infoOpen}
-        onChange={(v: boolean) => setInfoOpen(v)}
+        model={blnInfoOpen}
+        onChange={(v: boolean) => setBlnInfoOpen(v)}
         style={{ ['--z-modal--backdrop' as any]: 'color-mix(in srgb, var(--z-modal-backdrop) 45%, transparent)' }}
       >
         <HelpModal title="Criterios de Verificación" subtitle="Guía para validar documentos de emisión">
@@ -325,9 +332,9 @@ export default function VerDocEmi() {
 
       {/* Modal de vista previa */}
       <PreviewModal
-        isOpen={!!preview}
-        onClose={() => setPreview(null)}
-        previewDoc={preview}
+        isOpen={!!objPreview}
+        onClose={() => setObjPreview(null)}
+        previewDoc={objPreview}
       />
     </div>
   );

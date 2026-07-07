@@ -15,29 +15,31 @@ interface Props {
 const CAMPOS_CONOCIDOS = ['qd_correoElectronico', 'qd_numeroIdentificacion', 'qd_municipio'];
 
 function esCampoCorregido(
-  campo: string,
-  errors: UseFormReturn<CorregirDatosFormData>['formState']['errors'],
-  triggered: boolean,
+  in_strField: string,
+  in_objErrors: UseFormReturn<CorregirDatosFormData>['formState']['errors'],
+  in_blnTriggered: boolean,
 ): boolean {
-  if (!triggered) return false;
-  if (campo === 'qd_municipio') return !errors.qd_municipio && !errors.qd_departamento;
-  return !errors[campo as keyof CorregirDatosFormData];
+  if (!in_blnTriggered) return false;
+  if (in_strField === 'qd_municipio') return !in_objErrors.qd_municipio && !in_objErrors.qd_departamento;
+  return !in_objErrors[in_strField as keyof CorregirDatosFormData];
 }
 
 export default function SeccionErroresValidacion({ camposConError, form, triggered }: Props) {
   const { control, watch, setValue, formState: { errors } } = form;
-  const dpto = watch('qd_departamento');
+  // Observamos el departamento para filtrar los municipios.
+  const strDepartment = watch('qd_departamento');
 
-  const { options: departamentoOpts } = useCollection(COLLECTION_DEFS.departamento);
-  const { options: municipioOpts } = useCollection(COLLECTION_DEFS.municipio, { qd_departamento: dpto });
+  // Cargamos los catalogos de departamento y municipio.
+  const { options: cllDepartment } = useCollection(COLLECTION_DEFS.departamento);
+  const { options: cllCity } = useCollection(COLLECTION_DEFS.municipio, { qd_departamento: strDepartment });
 
   // Al cambiar departamento, limpiar municipio si ya no pertenece a la lista nueva
   useEffect(() => {
-    if (!dpto) return;
-    const current = form.getValues('qd_municipio');
-    if (!municipioOpts.some(m => m.value === current)) setValue('qd_municipio', '');
+    if (!strDepartment) return;
+    const strCurrent = form.getValues('qd_municipio');
+    if (!cllCity.some(objOption => objOption.value === strCurrent)) setValue('qd_municipio', '');
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [dpto, municipioOpts]);
+  }, [strDepartment, cllCity]);
 
   if (camposConError.length === 0) return null;
 
@@ -45,30 +47,31 @@ export default function SeccionErroresValidacion({ camposConError, form, trigger
     <FormSection title="Campos con Error — Corrija cada uno">
       {/* z-flex col:200 → columna con gap 200 entre bloques de error */}
       <div {...({ 'z-flex': 'col:200' } as object)}>
-        {camposConError.map((campo) => {
-          const corregido = esCampoCorregido(campo.campo, errors, triggered);
+        {camposConError.map((objField) => {
+          // Determinamos si el campo ya quedó corregido.
+          const blnFixed = esCampoCorregido(objField.campo, errors, triggered);
           return (
-            <div key={campo.campo} {...({ 'z-flex': 'col:100' } as object)}>
+            <div key={objField.campo} {...({ 'z-flex': 'col:100' } as object)}>
 
-              {corregido ? (
+              {blnFixed ? (
                 <ZrAlert config="positive" {...({ 'hide-close': true } as object)}>
-                  <strong>{campo.fldId} · {campo.etiqueta}</strong> — Campo corregido correctamente.
+                  <strong>{objField.fldId} · {objField.etiqueta}</strong> — Campo corregido correctamente.
                 </ZrAlert>
               ) : (
                 <ZrAlert config="negative" {...({ 'hide-close': true } as object)}>
-                  <strong>{campo.fldId} · {campo.etiqueta}:</strong>{' '}
-                  {campo.valorRechazado
-                    ? <>Valor rechazado: <code>"{campo.valorRechazado}"</code> — {campo.mensajeError}</>
-                    : campo.mensajeError}
+                  <strong>{objField.fldId} · {objField.etiqueta}:</strong>{' '}
+                  {objField.valorRechazado
+                    ? <>Valor rechazado: <code>"{objField.valorRechazado}"</code> — {objField.mensajeError}</>
+                    : objField.mensajeError}
                 </ZrAlert>
               )}
 
               <div className="form-row cols-2">
-                {campo.campo === 'qd_correoElectronico' && (
+                {objField.campo === 'qd_correoElectronico' && (
                   <ZdsInput
                     name="qd_correoElectronico"
                     control={control}
-                    label={campo.etiqueta}
+                    label={objField.etiqueta}
                     inputType="email"
                     rules={{
                       required: 'Campo requerido',
@@ -79,11 +82,11 @@ export default function SeccionErroresValidacion({ camposConError, form, trigger
                   />
                 )}
 
-                {campo.campo === 'qd_numeroIdentificacion' && (
+                {objField.campo === 'qd_numeroIdentificacion' && (
                   <ZdsInput
                     name="qd_numeroIdentificacion"
                     control={control}
-                    label={campo.etiqueta}
+                    label={objField.etiqueta}
                     rules={{
                       required: 'Campo requerido',
                       minLength: { value: 6, message: 'Mínimo 6 dígitos' },
@@ -95,13 +98,13 @@ export default function SeccionErroresValidacion({ camposConError, form, trigger
                   />
                 )}
 
-                {campo.campo === 'qd_municipio' && (
+                {objField.campo === 'qd_municipio' && (
                   <>
                     <ZdsSelect
                       name="qd_departamento"
                       control={control}
                       label="Departamento"
-                      options={departamentoOpts}
+                      options={cllDepartment}
                       rules={{ required: 'Campo requerido' }}
                       required
                       error={errors.qd_departamento?.message}
@@ -109,8 +112,8 @@ export default function SeccionErroresValidacion({ camposConError, form, trigger
                     <ZdsSelect
                       name="qd_municipio"
                       control={control}
-                      label={campo.etiqueta}
-                      options={municipioOpts}
+                      label={objField.etiqueta}
+                      options={cllCity}
                       rules={{ required: 'Seleccione un municipio válido para el departamento' }}
                       required
                       error={errors.qd_municipio?.message}
@@ -118,14 +121,14 @@ export default function SeccionErroresValidacion({ camposConError, form, trigger
                   </>
                 )}
 
-                {!CAMPOS_CONOCIDOS.includes(campo.campo) && (
+                {!CAMPOS_CONOCIDOS.includes(objField.campo) && (
                   <ZdsInput
-                    name={campo.campo as keyof CorregirDatosFormData}
+                    name={objField.campo as keyof CorregirDatosFormData}
                     control={control}
-                    label={campo.etiqueta}
+                    label={objField.etiqueta}
                     rules={{ required: 'Campo requerido' }}
                     required
-                    error={errors[campo.campo as keyof CorregirDatosFormData]?.message as string | undefined}
+                    error={errors[objField.campo as keyof CorregirDatosFormData]?.message as string | undefined}
                   />
                 )}
               </div>
