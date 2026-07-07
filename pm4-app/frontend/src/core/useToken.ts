@@ -30,3 +30,10 @@ export function useEventId(): string {
   const params = new URLSearchParams(window.location.search);
   return params.get('event_id') ?? import.meta.env.VITE_EVENT_ID ?? '';
 }
+
+// URL del home de tareas de ProcessMaker (frame superior), para redirigir tras
+// guardar un borrador sin completar la tarea.
+export function pm4TasksUrl(): string {
+  const base = (import.meta.env.VITE_PM4_BASE_URL ?? '').replace(/\/$/, '');
+  return `${base}/tasks`;
+}

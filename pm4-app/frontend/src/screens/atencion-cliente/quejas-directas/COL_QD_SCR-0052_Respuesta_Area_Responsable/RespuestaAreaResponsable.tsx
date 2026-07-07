@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { useTask } from '../../../../core/useTask';
+import { pm4TasksUrl } from '../../../../core/useToken';
 import { useCollection } from '../../../../core/useCollection';
 import ScreenHeader from '../../../../components/ScreenHeader';
 import FormSection from '../../../../components/FormSection';
@@ -160,10 +161,11 @@ export default function RespuestaAreaResponsable() {
 
   // ACT-0052-01 Enviar comentario (valida RUL-0052-01) · ACT-0052-02 Guardar Borrador.
   const onEnviar = handleSubmit(enviarCon('ENVIAR'));
-  // Guardar Borrador: guarda los datos del formulario y sale a la URL base (solo si se guardó bien).
+  // Guardar Borrador: guarda los datos del formulario y redirige el frame superior
+  // (fuera del iframe) al home de tareas de ProcessMaker, solo si se guardó bien.
   const onGuardarBorrador = async () => {
     const ok = await enviarCon('GUARDAR_BORRADOR')(w);
-    if (ok) window.location.href = window.location.origin;
+    if (ok) window.top!.location.href = pm4TasksUrl();
   };
 
   if (loading) {
