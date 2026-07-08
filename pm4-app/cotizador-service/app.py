@@ -12,27 +12,32 @@ print('[cotizador] tables.json cargado.', flush=True)
 
 # ── Helpers ───────────────────────────────────────────────────────────────────
 
-def cop_label(n) -> str:
-    try: n = int(float(str(n).replace(',','').replace('.',''))) if isinstance(n, str) else int(n)
-    except: return str(n)
-    parts, t = [], abs(n)
-    while t >= 1000:
-        parts.append(f'{t % 1000:03d}'); t //= 1000
-    parts.append(str(t))
-    return 'Hasta COP ' + '.'.join(reversed(parts))
+def cop_label(in_intAmount) -> str:
+    # Normalizamos el monto a entero
+    try: in_intAmount = int(float(str(in_intAmount).replace(',','').replace('.',''))) if isinstance(in_intAmount, str) else int(in_intAmount)
+    except: return str(in_intAmount)
+    # Partimos el numero en grupos de miles
+    lstParts, intTemp = [], abs(in_intAmount)
+    while intTemp >= 1000:
+        lstParts.append(f'{intTemp % 1000:03d}'); intTemp //= 1000
+    lstParts.append(str(intTemp))
+    return 'Hasta COP ' + '.'.join(reversed(lstParts))
 
-def cop_str(n) -> str:
-    try: n = int(float(str(n).replace(',','').replace('.',''))) if isinstance(n, str) else int(n)
-    except: return str(n)
-    parts, t = [], abs(n)
-    while t >= 1000:
-        parts.append(f'{t % 1000:03d}'); t //= 1000
-    parts.append(str(t))
-    return 'COP' + '.'.join(reversed(parts))
+def cop_str(in_intAmount) -> str:
+    # Normalizamos el monto a entero
+    try: in_intAmount = int(float(str(in_intAmount).replace(',','').replace('.',''))) if isinstance(in_intAmount, str) else int(in_intAmount)
+    except: return str(in_intAmount)
+    # Partimos el numero en grupos de miles
+    lstParts, intTemp = [], abs(in_intAmount)
+    while intTemp >= 1000:
+        lstParts.append(f'{intTemp % 1000:03d}'); intTemp //= 1000
+    lstParts.append(str(intTemp))
+    return 'COP' + '.'.join(reversed(lstParts))
 
-def to_int(v, d=0):
-    try: return int(float(str(v).replace(',','')))
-    except: return d
+def to_int(in_genValue, in_intDefault=0):
+    # Intentamos convertir el valor a entero y si falla devolvemos el default
+    try: return int(float(str(in_genValue).replace(',','')))
+    except: return in_intDefault
 
 SECTOR_MAP = {
     'OTROS':'Otros','COPROPIEDADES':'Copropiedades','CONSTRUCCION':'Construcción',
@@ -40,109 +45,115 @@ SECTOR_MAP = {
     'CENTROS_COMERCIALES':'Centros Comerciales',
 }
 
-def xlookup(val, search_list, result_list, default=None):
+def xlookup(in_genValue, in_lstSearch, in_lstResult, in_genDefault=None):
     """Equivalente a XLOOKUP: busca val en search_list, retorna el item correspondiente de result_list."""
+    # Buscamos el valor y devolvemos el item en la misma posicion
     try:
-        idx = [str(x) for x in search_list].index(str(val))
-        return result_list[idx]
+        intIdx = [str(genItem) for genItem in in_lstSearch].index(str(in_genValue))
+        return in_lstResult[intIdx]
     except (ValueError, IndexError):
-        return default
+        return in_genDefault
 
 # ── Cálculos por producto ────────────────────────────────────────────────────
 
-def calc_dyo(inp):
-    t = TABLES['dyo']
-    fac   = cop_label(inp.get('facturacion', 0))
-    anexo = bool(inp.get('anexo'))
-    sector = SECTOR_MAP.get(str(inp.get('sector','')), inp.get('sector','Otros'))
+def calc_dyo(in_dicInput):
+    dicTable = TABLES['dyo']
+    strBilling = cop_label(in_dicInput.get('facturacion', 0))
+    blnAnexo = bool(in_dicInput.get('anexo'))
+    strSector = SECTOR_MAP.get(str(in_dicInput.get('sector','')), in_dicInput.get('sector','Otros'))
 
     # Encontrar fila por facturación
-    row_data = next((r for r in t['matrix'] if r['fac'] == fac), None)
-    if not row_data:
+    dicRowData = next((r for r in dicTable['matrix'] if r['fac'] == strBilling), None)
+    if not dicRowData:
         return None
 
-    limites = t['limites']
-    opts = {}
-    for i, key in enumerate(['opt1','opt2','opt3']):
-        lim = to_int(inp.get(f'limite{i+1}', 0))
-        prima_a = xlookup(lim, limites, row_data['primas'])
+    lstLimits = dicTable['limites']
+    dicOptions = {}
+    # Recorremos las tres opciones de cotizacion
+    for intIdx, strKey in enumerate(['opt1','opt2','opt3']):
+        intLimit = to_int(in_dicInput.get(f'limite{intIdx+1}', 0))
+        dblPrimaA = xlookup(intLimit, lstLimits, dicRowData['primas'])
         # NC (Anexo): solo si sector=Otros y anexo=SI
         # v2: SALIDAS col C = DEDUCIBLE (no prima_b)
-        ent_limite   = None
-        ent_deducible = None
-        if sector == 'Otros' and anexo:
-            nc_entry = t['nc'].get(str(lim))
-            if nc_entry:
-                ent_limite    = nc_entry.get('limite_nc')
-                ent_deducible = nc_entry.get('deducible')
-        opts[key] = {'prima_a': prima_a, 'deducible': 0, 'ent_limite': ent_limite, 'ent_deducible': ent_deducible}
-    return opts
+        genEntLimit   = None
+        genEntDeduc = None
+        if strSector == 'Otros' and blnAnexo:
+            dicNcEntry = dicTable['nc'].get(str(intLimit))
+            if dicNcEntry:
+                genEntLimit    = dicNcEntry.get('limite_nc')
+                genEntDeduc = dicNcEntry.get('deducible')
+        dicOptions[strKey] = {'prima_a': dblPrimaA, 'deducible': 0, 'ent_limite': genEntLimit, 'ent_deducible': genEntDeduc}
+    return dicOptions
 
-def calc_cc(inp):
-    t = TABLES['cc']
-    fac      = str(to_int(inp.get('facturacion', 0)))
-    empleados = str(inp.get('empleados', '1-100'))
+def calc_cc(in_dicInput):
+    dicTable = TABLES['cc']
+    strBilling = str(to_int(in_dicInput.get('facturacion', 0)))
+    strEmployees = str(in_dicInput.get('empleados', '1-100'))
 
-    opts = {}
-    for i, key in enumerate(['opt1','opt2','opt3']):
-        ev  = cop_str(inp.get(f'limite{i+1}_evento',   0))
-        agr = cop_str(inp.get(f'limite{i+1}_agregado', 0))
-        lookup_key = f'{empleados}-{fac}-{ev}-{agr}'
-        prima      = t['primas'].get(lookup_key)
-        deducible_str = t['deducibles'].get(ev)
+    dicOptions = {}
+    # Recorremos las tres opciones de cotizacion
+    for intIdx, strKey in enumerate(['opt1','opt2','opt3']):
+        strEvent  = cop_str(in_dicInput.get(f'limite{intIdx+1}_evento',   0))
+        strAggregate = cop_str(in_dicInput.get(f'limite{intIdx+1}_agregado', 0))
+        strLookupKey = f'{strEmployees}-{strBilling}-{strEvent}-{strAggregate}'
+        dblPrima      = dicTable['primas'].get(strLookupKey)
+        strDeducible = dicTable['deducibles'].get(strEvent)
         # Deducible puede venir como "COP30.000.000" — convertir a número
-        ded = None
-        if deducible_str:
-            try: ded = float(deducible_str.replace('COP','').replace('.',''))
+        dblDeducible = None
+        if strDeducible:
+            try: dblDeducible = float(strDeducible.replace('COP','').replace('.',''))
             except: pass
-        opts[key] = {'deducible': ded, 'prima': prima}
-    return opts
+        dicOptions[strKey] = {'deducible': dblDeducible, 'prima': dblPrima}
+    return dicOptions
 
-def calc_pdysi(inp):
+def calc_pdysi(in_dicInput):
     # v2: ENTRADAS B27(fac) B28-B30(limites), SALIDAS B23-C25
-    t = TABLES['pdysi']
-    fac = str(to_int(inp.get('facturacion', 0)))
+    dicTable = TABLES['pdysi']
+    strBilling = str(to_int(in_dicInput.get('facturacion', 0)))
 
-    opts = {}
-    for i, key in enumerate(['opt1','opt2','opt3']):
-        lim = str(to_int(inp.get(f'limite{i+1}', 0)))
-        lookup_key = f'{fac}-{lim}'
-        opts[key] = {
-            'deducible': t['deducibles'].get(lookup_key),
-            'prima':     t['primas'].get(lookup_key),
+    dicOptions = {}
+    # Recorremos las tres opciones de cotizacion
+    for intIdx, strKey in enumerate(['opt1','opt2','opt3']):
+        strLimit = str(to_int(in_dicInput.get(f'limite{intIdx+1}', 0)))
+        strLookupKey = f'{strBilling}-{strLimit}'
+        dicOptions[strKey] = {
+            'deducible': dicTable['deducibles'].get(strLookupKey),
+            'prima':     dicTable['primas'].get(strLookupKey),
         }
-    return opts
+    return dicOptions
 
-def _pi_sector(actividad: str) -> str:
-    a = actividad.upper()
-    if 'ABOGAD' in a:   return 'ABOGADOS'
-    if 'CONTAD' in a:   return 'CONTADORES'
+def _pi_sector(in_strActivity: str) -> str:
+    # Deducimos el sector a partir del texto de la actividad
+    strUpper = in_strActivity.upper()
+    if 'ABOGAD' in strUpper:   return 'ABOGADOS'
+    if 'CONTAD' in strUpper:   return 'CONTADORES'
     return 'ADMINISTRADORES'
 
-def calc_pi(inp):
+def calc_pi(in_dicInput):
     # v2: 3 alternativas, cada una con limite+deducible propios
     # ENTRADAS: B35(fac) B36-B38(limites) B39(actividad) B40-B42(deducibles)
-    t        = TABLES['pi']
-    fac      = cop_label(inp.get('facturacion', 0))
-    actividad = str(inp.get('actividad', ''))
-    sector_table = t.get(_pi_sector(actividad), t.get('ADMINISTRADORES', {}))
+    dicTable        = TABLES['pi']
+    strBilling      = cop_label(in_dicInput.get('facturacion', 0))
+    strActivity = str(in_dicInput.get('actividad', ''))
+    dicSectorTable = dicTable.get(_pi_sector(strActivity), dicTable.get('ADMINISTRADORES', {}))
 
-    ded_map = TABLES.get('pi_ded_map', {}).get(_pi_sector(actividad), {})
+    dicDedMap = TABLES.get('pi_ded_map', {}).get(_pi_sector(strActivity), {})
 
-    opts = {}
-    for i, key in enumerate(['opt1','opt2','opt3']):
-        lim = to_int(inp.get(f'limite{i+1}', 0))
-        if lim == 0:
-            opts[key] = {'limite': None, 'deducible': None, 'prima': None}
+    dicOptions = {}
+    # Recorremos las tres opciones de cotizacion
+    for intIdx, strKey in enumerate(['opt1','opt2','opt3']):
+        intLimit = to_int(in_dicInput.get(f'limite{intIdx+1}', 0))
+        if intLimit == 0:
+            dicOptions[strKey] = {'limite': None, 'deducible': None, 'prima': None}
             continue
         # Deducible: usar el pasado o auto-derivar del mapeo
-        ded = to_int(inp.get(f'deducible{i+1}', 0))
-        if ded == 0:
-            ded = ded_map.get(str(lim), 0)
-        lookup_key = f'{fac}{ded}{lim}'
-        prima = sector_table.get(lookup_key)
-        opts[key] = {'limite': lim, 'deducible': ded, 'prima': prima}
-    return opts
+        intDeducible = to_int(in_dicInput.get(f'deducible{intIdx+1}', 0))
+        if intDeducible == 0:
+            intDeducible = dicDedMap.get(str(intLimit), 0)
+        strLookupKey = f'{strBilling}{intDeducible}{intLimit}'
+        dblPrima = dicSectorTable.get(strLookupKey)
+        dicOptions[strKey] = {'limite': intLimit, 'deducible': intDeducible, 'prima': dblPrima}
+    return dicOptions
 
 # ── Flask ─────────────────────────────────────────────────────────────────────
 
@@ -154,18 +165,20 @@ def health():
 
 @app.route('/calcular', methods=['POST'])
 def calcular():
+    # Leemos el payload y calculamos cada producto solicitado
     try:
-        inp = request.get_json(force=True) or {}
-        result = {}
-        if inp.get('dyo'):   result['dyo']   = calc_dyo(inp['dyo'])
-        if inp.get('cc'):    result['cc']     = calc_cc(inp['cc'])
-        if inp.get('pdysi'): result['pdysi']  = calc_pdysi(inp['pdysi'])
-        if inp.get('pi'):    result['pi']     = calc_pi(inp['pi'])
-        return jsonify({'ok': True, 'result': result})
-    except Exception as e:
+        dicInput = request.get_json(force=True) or {}
+        dicResult = {}
+        if dicInput.get('dyo'):   dicResult['dyo']   = calc_dyo(dicInput['dyo'])
+        if dicInput.get('cc'):    dicResult['cc']     = calc_cc(dicInput['cc'])
+        if dicInput.get('pdysi'): dicResult['pdysi']  = calc_pdysi(dicInput['pdysi'])
+        if dicInput.get('pi'):    dicResult['pi']     = calc_pi(dicInput['pi'])
+        return jsonify({'ok': True, 'result': dicResult})
+    except Exception as excError:
         import traceback
-        return jsonify({'ok': False, 'error': str(e), 'trace': traceback.format_exc()[-400:]}), 500
+        return jsonify({'ok': False, 'error': str(excError), 'trace': traceback.format_exc()[-400:]}), 500
 
 if __name__ == '__main__':
-    port = int(os.environ.get('PORT', 5001))
-    app.run(host='0.0.0.0', port=port)
+    # Levantamos el servidor en el puerto configurado
+    intPort = int(os.environ.get('PORT', 5001))
+    app.run(host='0.0.0.0', port=intPort)

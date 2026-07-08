@@ -1,12 +1,13 @@
 import FormSection from '../../../components/FormSection';
 import { ZrTable, ZrAlert, ZrLoader } from '../../../components/fields/ZdsFields';
-import { CotizadorResult, CotizadorInputs } from '../../../core/useCotizador';
+import { QuoterResult, QuoterInputs } from '../../../core/useCotizador';
 
 // ─── Helpers ─────────────────────────────────────────────────────────────────
 
-function cop(v: number | null | undefined): string {
-  if (v === null || v === undefined || v === 0) return '—';
-  return `$${new Intl.NumberFormat('es-CO').format(Math.round(v))}`;
+// Formateamos un valor numérico como moneda colombiana
+function cop(in_dblValue: number | null | undefined): string {
+  if (in_dblValue === null || in_dblValue === undefined || in_dblValue === 0) return '—';
+  return `$${new Intl.NumberFormat('es-CO').format(Math.round(in_dblValue))}`;
 }
 
 // ─── Spinner / error ─────────────────────────────────────────────────────────
@@ -32,10 +33,11 @@ function Estado({ loading, warmingUp, error }: { loading: boolean; warmingUp: bo
 
 // ─── Tablas por producto ─────────────────────────────────────────────────────
 
-function TablaDyO({ result, inputs }: { result: CotizadorResult; inputs: CotizadorInputs }) {
-  const d = result.dyo;
-  if (!d) return null;
-  const lims = [inputs.dyo?.limite1, inputs.dyo?.limite2, inputs.dyo?.limite3];
+function TablaDyO({ result, inputs }: { result: QuoterResult; inputs: QuoterInputs }) {
+  const objDyo = result.dyo;
+  if (!objDyo) return null;
+  // Reunimos los límites elegidos para las tres opciones
+  const arrLims = [inputs.dyo?.limite1, inputs.dyo?.limite2, inputs.dyo?.limite3];
   return (
     <div className="quote-summary-product">
       <div className="quote-summary-product-header">Seguro de Directores y Administradores (D&amp;O)</div>
@@ -50,12 +52,13 @@ function TablaDyO({ result, inputs }: { result: CotizadorResult; inputs: Cotizad
             </tr>
           </thead>
           <tbody>
-            {([d.opt1, d.opt2, d.opt3] as typeof d.opt1[]).map((o, i) => (
+            {/* Pintamos una fila por cada opción calculada */}
+            {([objDyo.opt1, objDyo.opt2, objDyo.opt3] as typeof objDyo.opt1[]).map((objOpt, i) => (
               <tr key={i}>
                 <td className="quote-summary-label">{i + 1}</td>
-                <td className="quote-summary-cell">{cop(Number(lims[i] ?? 0))}</td>
+                <td className="quote-summary-cell">{cop(Number(arrLims[i] ?? 0))}</td>
                 <td className="quote-summary-cell quote-summary-cell--muted">Todo y cada reclamo en el agregado anual</td>
-                <td className="quote-summary-cell">{cop(o.prima_a)}</td>
+                <td className="quote-summary-cell">{cop(objOpt.prima_a)}</td>
               </tr>
             ))}
           </tbody>
@@ -65,11 +68,12 @@ function TablaDyO({ result, inputs }: { result: CotizadorResult; inputs: Cotizad
   );
 }
 
-function TablaCC({ result, inputs }: { result: CotizadorResult; inputs: CotizadorInputs }) {
-  const d = result.cc;
-  if (!d) return null;
-  const evts = [inputs.cc?.limite1_evento, inputs.cc?.limite2_evento, inputs.cc?.limite3_evento];
-  const agrs = [inputs.cc?.limite1_agregado, inputs.cc?.limite2_agregado, inputs.cc?.limite3_agregado];
+function TablaCC({ result, inputs }: { result: QuoterResult; inputs: QuoterInputs }) {
+  const objCc = result.cc;
+  if (!objCc) return null;
+  // Reunimos los límites por evento y por agregado de las tres opciones
+  const arrEvts = [inputs.cc?.limite1_evento, inputs.cc?.limite2_evento, inputs.cc?.limite3_evento];
+  const arrAgrs = [inputs.cc?.limite1_agregado, inputs.cc?.limite2_agregado, inputs.cc?.limite3_agregado];
   return (
     <div className="quote-summary-product">
       <div className="quote-summary-product-header">Seguro de Crimen Comercial</div>
@@ -85,13 +89,14 @@ function TablaCC({ result, inputs }: { result: CotizadorResult; inputs: Cotizado
             </tr>
           </thead>
           <tbody>
-            {([d.opt1, d.opt2, d.opt3] as typeof d.opt1[]).map((o, i) => (
+            {/* Pintamos una fila por cada opción calculada */}
+            {([objCc.opt1, objCc.opt2, objCc.opt3] as typeof objCc.opt1[]).map((objOpt, i) => (
               <tr key={i}>
                 <td className="quote-summary-label">{i + 1}</td>
-                <td className="quote-summary-cell">{cop(Number(evts[i] ?? 0))}</td>
-                <td className="quote-summary-cell">{cop(Number(agrs[i] ?? 0))}</td>
-                <td className="quote-summary-cell">{cop(o.deducible)}</td>
-                <td className="quote-summary-cell">{cop(o.prima)}</td>
+                <td className="quote-summary-cell">{cop(Number(arrEvts[i] ?? 0))}</td>
+                <td className="quote-summary-cell">{cop(Number(arrAgrs[i] ?? 0))}</td>
+                <td className="quote-summary-cell">{cop(objOpt.deducible)}</td>
+                <td className="quote-summary-cell">{cop(objOpt.prima)}</td>
               </tr>
             ))}
           </tbody>
@@ -101,10 +106,11 @@ function TablaCC({ result, inputs }: { result: CotizadorResult; inputs: Cotizado
   );
 }
 
-function TablaPdysi({ result, inputs }: { result: CotizadorResult; inputs: CotizadorInputs }) {
-  const d = result.pdysi;
-  if (!d) return null;
-  const lims = [inputs.pdysi?.limite1, inputs.pdysi?.limite2, inputs.pdysi?.limite3];
+function TablaPdysi({ result, inputs }: { result: QuoterResult; inputs: QuoterInputs }) {
+  const objPdysi = result.pdysi;
+  if (!objPdysi) return null;
+  // Reunimos los límites elegidos para las tres opciones
+  const arrLims = [inputs.pdysi?.limite1, inputs.pdysi?.limite2, inputs.pdysi?.limite3];
   return (
     <div className="quote-summary-product">
       <div className="quote-summary-product-header">Seguro de Protección de Datos y Seguridad Informática</div>
@@ -119,12 +125,13 @@ function TablaPdysi({ result, inputs }: { result: CotizadorResult; inputs: Cotiz
             </tr>
           </thead>
           <tbody>
-            {([d.opt1, d.opt2, d.opt3] as typeof d.opt1[]).map((o, i) => (
+            {/* Pintamos una fila por cada opción calculada */}
+            {([objPdysi.opt1, objPdysi.opt2, objPdysi.opt3] as typeof objPdysi.opt1[]).map((objOpt, i) => (
               <tr key={i}>
                 <td className="quote-summary-label">{i + 1}</td>
-                <td className="quote-summary-cell">{cop(Number(lims[i] ?? 0))}</td>
+                <td className="quote-summary-cell">{cop(Number(arrLims[i] ?? 0))}</td>
                 <td className="quote-summary-cell quote-summary-cell--muted">Por reclamación (claims made)</td>
-                <td className="quote-summary-cell">{cop(o.prima)}</td>
+                <td className="quote-summary-cell">{cop(objOpt.prima)}</td>
               </tr>
             ))}
           </tbody>
@@ -134,9 +141,9 @@ function TablaPdysi({ result, inputs }: { result: CotizadorResult; inputs: Cotiz
   );
 }
 
-function TablaPi({ result }: { result: CotizadorResult }) {
-  const d = result.pi;
-  if (!d) return null;
+function TablaPi({ result }: { result: QuoterResult }) {
+  const objPi = result.pi;
+  if (!objPi) return null;
   return (
     <div className="quote-summary-product">
       <div className="quote-summary-product-header">Seguro de Responsabilidad Civil Profesional</div>
@@ -151,13 +158,14 @@ function TablaPi({ result }: { result: CotizadorResult }) {
             </tr>
           </thead>
           <tbody>
-            {([d.opt1, d.opt2, d.opt3] as typeof d.opt1[]).map((o, i) => (
-              o.limite ? (
+            {/* Pintamos solo las opciones que tienen un límite definido */}
+            {([objPi.opt1, objPi.opt2, objPi.opt3] as typeof objPi.opt1[]).map((objOpt, i) => (
+              objOpt.limite ? (
                 <tr key={i}>
                   <td className="quote-summary-label">{i + 1}</td>
-                  <td className="quote-summary-cell">{cop(o.limite)}</td>
+                  <td className="quote-summary-cell">{cop(objOpt.limite)}</td>
                   <td className="quote-summary-cell quote-summary-cell--muted">Por reclamación (claims made)</td>
-                  <td className="quote-summary-cell">{cop(o.prima)}</td>
+                  <td className="quote-summary-cell">{cop(objOpt.prima)}</td>
                 </tr>
               ) : null
             ))}
@@ -181,18 +189,19 @@ export default function SeccionResumenCotizacion({
   hasPdysi,
   hasPi,
 }: {
-  result: CotizadorResult | null;
+  result: QuoterResult | null;
   loading: boolean;
   warmingUp: boolean;
   error: string | null;
-  inputs: CotizadorInputs;
+  inputs: QuoterInputs;
   hasDyo: boolean;
   hasCc: boolean;
   hasPdysi: boolean;
   hasPi: boolean;
 }) {
-  const hasAny = hasDyo || hasCc || hasPdysi || hasPi;
-  if (!hasAny) return null;
+  // No mostramos el resumen si no hay ningún producto seleccionado
+  const blnHasAny = hasDyo || hasCc || hasPdysi || hasPi;
+  if (!blnHasAny) return null;
 
   return (
     <FormSection title="Resumen de Cotizaciones">
@@ -200,6 +209,7 @@ export default function SeccionResumenCotizacion({
 
         <Estado loading={loading} warmingUp={warmingUp} error={error} />
 
+        {/* Mostramos la tabla de cada producto cuando ya hay resultado */}
         {result && (
           <>
             {hasDyo   && <TablaDyO   result={result} inputs={inputs} />}

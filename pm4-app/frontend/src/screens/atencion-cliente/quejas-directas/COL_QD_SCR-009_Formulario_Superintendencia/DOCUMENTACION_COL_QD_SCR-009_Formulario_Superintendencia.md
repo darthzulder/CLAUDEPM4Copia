@@ -12,7 +12,7 @@
 | Evento de apertura | Respuesta aprobada + PDF generado (SP2-T06) |
 | Acción de cierre | Guardar Formulario → habilita SP3 (PAN-10) |
 | Slug / `?screen=` | `COL_QD_SCR-009_Formulario_Superintendencia` |
-| Archivos de implementación | `FormularioSuperintendencia.tsx`, `SeccionFraudeAnexos.tsx`, `variables.ts` |
+| Archivos de implementación | `FormularioSuperintendencia.tsx`, `SeccionFraudeAnexos.tsx` (config centralizada en fields/fields.ts) |
 | Versión | 1.0 — 2026-06-30 |
 
 ---
@@ -46,34 +46,34 @@ anexos. Al guardarlo completo habilita el subproceso SP3 de cierre regulatorio.
 
 | Campo (UI) | Variable | Tipo | Fuente |
 |---|---|---|---|
-| Código SFC | `qd_codigoSFC` | `ZdsInput` readOnly | FLD-140 |
-| Canal (precargado M1) | `qd_canal` | `ZdsInput` readOnly | FLD-141 |
-| Producto (precargado M1) | `qd_productoSFC` | `ZdsInput` readOnly | FLD-142 |
-| Motivo (precargado M1) | `qd_motivoSFC` | `ZdsInput` readOnly | FLD-143 |
-| Admisión (precargado M1) | `qd_admision` | `ZdsInput` readOnly | FLD-144 |
-| Ente de Control (precargado M1) | `qd_enteControl` | `ZdsInput` readOnly | FLD-145 |
+| Código SFC | `qd_strSfcCode` | `ZdsInput` readOnly | FLD-140 |
+| Canal (precargado M1) | `qd_strChannel` | `ZdsInput` readOnly | FLD-141 |
+| Producto (precargado M1) | `qd_strSfcProduct` | `ZdsInput` readOnly | FLD-142 |
+| Motivo (precargado M1) | `qd_strSfcReason` | `ZdsInput` readOnly | FLD-143 |
+| Admisión (precargado M1) | `qd_strAdmission` | `ZdsInput` readOnly | FLD-144 |
+| Ente de Control (precargado M1) | `qd_strControlEntity` | `ZdsInput` readOnly | FLD-145 |
 
 ### S2 — Datos del Consumidor — Campos SFC (SEC-029, obligatorios)
 
 | Campo (UI) | Variable | Catálogo | Fuente |
 |---|---|---|---|
-| Sexo | `qd_sexo` | CAT-SEXO | FLD-146 |
-| LGBTIQ+ | `qd_lgbtiq` | CAT-LGBTIQ ⚠ | FLD-147 |
-| Condición Especial | `qd_condicionEspecial` | CAT-COND-ESP | FLD-148 |
-| Producto Digital | `qd_productoDigital` | CAT-PROD-DIGITAL | FLD-149 |
+| Sexo | `qd_strSex` | CAT-SEXO | FLD-146 |
+| LGBTIQ+ | `qd_strLgbtiq` | CAT-LGBTIQ ⚠ | FLD-147 |
+| Condición Especial | `qd_strSpecialCondition` | CAT-COND-ESP | FLD-148 |
+| Producto Digital | `qd_strDigitalProduct` | CAT-PROD-DIGITAL | FLD-149 |
 
 ### S3 — Condición de la Queja (SEC-030, obligatorios)
 
 | Campo (UI) | Variable | Catálogo | Fuente |
 |---|---|---|---|
-| Estado de la Queja o Reclamo | `qd_estadoQueja` | CAT-ESTADO-QUEJA | FLD-150 |
-| Favorabilidad | `qd_favorabilidad` | CAT-FAVORAB | FLD-151 |
-| Aceptación | `qd_aceptacion` | CAT-ACEPTACION | FLD-152 |
-| Rectificación | `qd_rectificacion` | CAT-RECTIF | FLD-153 |
-| Desistimiento | `qd_desistimiento` | CAT-DESIST | FLD-154 |
-| Tutela | `qd_tutela` | CAT-TUTELA | FLD-155 |
-| Marcación | `qd_marcacion` | CAT-MARCACION | FLD-156 |
-| Queja Exprés | `qd_quejaExpres` | CAT-EXPRES | FLD-157 |
+| Estado de la Queja o Reclamo | `qd_strComplaintStatus` | CAT-ESTADO-QUEJA | FLD-150 |
+| Favorabilidad | `qd_strFavorability` | CAT-FAVORAB | FLD-151 |
+| Aceptación | `qd_strAcceptance` | CAT-ACEPTACION | FLD-152 |
+| Rectificación | `qd_strRectification` | CAT-RECTIF | FLD-153 |
+| Desistimiento | `qd_strWithdrawal` | CAT-DESIST | FLD-154 |
+| Tutela | `qd_strTutela` | CAT-TUTELA | FLD-155 |
+| Marcación | `qd_strMarking` | CAT-MARCACION | FLD-156 |
+| Queja Exprés | `qd_strExpressComplaint` | CAT-EXPRES | FLD-157 |
 
 > Todos los anteriores: `ZdsSelect` con `rules.required`.
 
@@ -81,26 +81,26 @@ anexos. Al guardarlo completo habilita el subproceso SP3 de cierre regulatorio.
 
 | Campo (UI) | Variable | Tipo | Obligatorio | Fuente |
 |---|---|---|---|---|
-| ¿Relacionada con Fraude? | `qd_relacionadaFraude` | `ZdsRadio` inline (SI/NO) | **Sí** | FLD-158 |
-| Tipo de Fraude | `qd_tipoFraude` | `ZdsSelect` (CAT-TIPO-FRAUDE) | Cond. (si fraude) | FLD-159 |
-| Modalidad de Fraude | `qd_modalidadFraude` | `ZdsSelect` (CAT-MOD-FRAUDE) | Cond. | FLD-160 |
-| Monto Reclamado (COP) | `qd_montoReclamado` | `ZdsInput` (dígitos) | Cond. | FLD-161 |
-| Monto Reconocido (COP) | `qd_montoReconocido` | `ZdsInput` (dígitos) | Cond. | FLD-162 |
+| ¿Relacionada con Fraude? | `qd_strFraudRelated` | `ZdsRadio` inline (SI/NO) | **Sí** | FLD-158 |
+| Tipo de Fraude | `qd_strFraudType` | `ZdsSelect` (CAT-TIPO-FRAUDE) | Cond. (si fraude) | FLD-159 |
+| Modalidad de Fraude | `qd_strFraudModality` | `ZdsSelect` (CAT-MOD-FRAUDE) | Cond. | FLD-160 |
+| Monto Reclamado (COP) | `qd_strClaimedAmount` | `ZdsInput` (dígitos) | Cond. | FLD-161 |
+| Monto Reconocido (COP) | `qd_strAcknowledgedAmount` | `ZdsInput` (dígitos) | Cond. | FLD-162 |
 
 ### S5 — Anexos del Formulario (SEC-032)
 
 | Campo (UI) | Variable | Tipo | Obligatorio | Fuente |
 |---|---|---|---|---|
-| ¿Incluye Anexos a la Queja? | `qd_incluyeAnexosQueja` | `ZdsRadio` inline | **Sí** | FLD-163 |
-| ¿Incluye Adjunto Respuesta Final? | `qd_incluyeAdjuntoRespuesta` | `ZdsRadio` inline | **Sí** | FLD-164 |
-| PDF Respuesta Final (generado) | `qd_pdfRespuestaFinal` | `ZdsInput` readOnly + `ZrButton` descarga | No | FLD-165 |
-| Prórroga (días, si aplica) | `qd_diasProrroga` | `ZdsInput` (dígitos) | No | FLD-166 |
+| ¿Incluye Anexos a la Queja? | `qd_strIncludesComplaintAnnex` | `ZdsRadio` inline | **Sí** | FLD-163 |
+| ¿Incluye Adjunto Respuesta Final? | `qd_strIncludesReplyAttach` | `ZdsRadio` inline | **Sí** | FLD-164 |
+| PDF Respuesta Final (generado) | `qd_strFinalReplyPdf` | `ZdsInput` readOnly + `ZrButton` descarga | No | FLD-165 |
+| Prórroga (días, si aplica) | `qd_strExtensionDays` | `ZdsInput` (dígitos) | No | FLD-166 |
 
 ### Metadato de flujo (no visible)
 
 | Campo | Variable | Fuente |
 |---|---|---|
-| Acción/decisión BPMN | `qd_accion` (`GUARDAR` \| `GUARDAR_BORRADOR`) | Inferido de ACT-009-01/02 (§10) |
+| Acción/decisión BPMN | `qd_strAction` (`GUARDAR` \| `GUARDAR_BORRADOR`) | Inferido de ACT-009-01/02 (§10) |
 
 ---
 
@@ -142,7 +142,7 @@ anexos. Al guardarlo completo habilita el subproceso SP3 de cierre regulatorio.
 | Precarga M1 solo lectura | `ZdsInput readOnly` en S1 | SEC-028 · RUL-009-02 |
 | 12 selects de catálogo SFC | `ZdsSelect` en grids `cols-2`/`cols-3` | SEC-029/030 |
 | Sección de fraude condicional | render por `esFraude` | SEC-031 · RUL-009-01 |
-| Descarga del PDF generado | `ZrButton icon="download:line"` (abre `qd_pdfRespuestaFinal`) | FLD-165 |
+| Descarga del PDF generado | `ZrButton icon="download:line"` (abre `qd_strFinalReplyPdf`) | FLD-165 |
 | Aviso LGBTIQ+ pendiente | `ZrAlert config="info"` permanente | MSG-009-04 |
 | Estados loading/error/submitting | `ZrLoader`, `ZrAlert`, botones `loading/disabled` | CLAUDE.md |
 
@@ -152,9 +152,9 @@ anexos. Al guardarlo completo habilita el subproceso SP3 de cierre regulatorio.
 
 | Campo Origen | Campo Dependiente | Comportamiento | Fuente |
 |---|---|---|---|
-| `qd_relacionadaFraude` | tipo/modalidad/montos de fraude | Muestra y hace obligatorios los campos de fraude si = Sí | RUL-009-01 |
+| `qd_strFraudRelated` | tipo/modalidad/montos de fraude | Muestra y hace obligatorios los campos de fraude si = Sí | RUL-009-01 |
 | 12 campos SFC + anexos | Botón "Guardar Formulario" | Habilita guardar solo si todos están completos | RUL-009-03 |
-| `qd_pdfRespuestaFinal` | Botón "Descargar PDF" | Se habilita solo si hay PDF generado | FLD-165 |
+| `qd_strFinalReplyPdf` | Botón "Descargar PDF" | Se habilita solo si hay PDF generado | FLD-165 |
 
 ---
 
@@ -171,7 +171,7 @@ anexos. Al guardarlo completo habilita el subproceso SP3 de cierre regulatorio.
   `inputType="number"` (solo text/email/tel). Se validan como enteros.
 - **PDF (FLD-165)**: se muestra el nombre en `ZdsInput readOnly` + botón que abre la URL/blob del
   PDF. El endpoint real de descarga se conectará cuando SP2-T06 entregue la referencia.
-- **`qd_accion`** (metadato): no es un FLD; se deriva del botón presionado (ACT-009-01/02).
+- **`qd_strAction`** (metadato): no es un FLD; se deriva del botón presionado (ACT-009-01/02).
 - **MSG-009-03** (éxito) lo emite el BPM tras `completeTask`; no se renderiza en la pantalla.
 
 ---
@@ -187,6 +187,6 @@ anexos. Al guardarlo completo habilita el subproceso SP3 de cierre regulatorio.
 | Mensajes (MSG-009-01..04) | 3/4 en UI | MSG-009-03 lo emite el BPM |
 | Catálogos SFC (14) | 14/14 como placeholder | Todos "Pendiente TI" / LGBTIQ crítico |
 
-**Elementos inferidos:** prefijo `qd_*`, metadato `qd_accion`, catálogos estáticos placeholder
+**Elementos inferidos:** prefijo `qd_*`, metadato `qd_strAction`, catálogos estáticos placeholder
 (incl. los sin ejemplos), montos como texto con `pattern`, descarga de PDF por URL, orden interno
 de S4/S5 en un archivo de sección separado.

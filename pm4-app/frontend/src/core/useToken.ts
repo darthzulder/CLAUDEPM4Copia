@@ -1,34 +1,44 @@
 export function useToken(): string {
-  const params = new URLSearchParams(window.location.search);
+  // Leemos los parametros de la URL del iframe
+  const objParams = new URLSearchParams(window.location.search);
+  // Devolvemos el token de la URL o el de entorno como respaldo
   return (
-    params.get('token') ??
+    objParams.get('token') ??
     import.meta.env.VITE_PM4_TOKEN ??
     ''
   );
 }
 
 export function useTaskId(): string {
-  const params = new URLSearchParams(window.location.search);
+  // Leemos los parametros de la URL del iframe
+  const objParams = new URLSearchParams(window.location.search);
+  // Devolvemos el task_id de la URL o el de entorno como respaldo
   return (
-    params.get('task_id') ??
+    objParams.get('task_id') ??
     import.meta.env.VITE_TASK_ID ??
     ''
   );
 }
 
 export function useCaseId(): string {
-  const params = new URLSearchParams(window.location.search);
-  return params.get('case_id') ?? import.meta.env.VITE_CASE_ID ?? '';
+  // Leemos los parametros de la URL del iframe
+  const objParams = new URLSearchParams(window.location.search);
+  // Devolvemos el case_id de la URL o el de entorno como respaldo
+  return objParams.get('case_id') ?? import.meta.env.VITE_CASE_ID ?? '';
 }
 
 export function useProcessId(): string {
-  const params = new URLSearchParams(window.location.search);
-  return params.get('process_id') ?? import.meta.env.VITE_PROCESS_ID ?? '';
+  // Leemos los parametros de la URL del iframe
+  const objParams = new URLSearchParams(window.location.search);
+  // Devolvemos el process_id de la URL o el de entorno como respaldo
+  return objParams.get('process_id') ?? import.meta.env.VITE_PROCESS_ID ?? '';
 }
 
 export function useEventId(): string {
-  const params = new URLSearchParams(window.location.search);
-  return params.get('event_id') ?? import.meta.env.VITE_EVENT_ID ?? '';
+  // Leemos los parametros de la URL del iframe
+  const objParams = new URLSearchParams(window.location.search);
+  // Devolvemos el event_id de la URL o el de entorno como respaldo
+  return objParams.get('event_id') ?? import.meta.env.VITE_EVENT_ID ?? '';
 }
 
 // URL del home de tareas de ProcessMaker (frame superior), para redirigir tras

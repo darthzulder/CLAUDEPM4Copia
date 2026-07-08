@@ -65,165 +65,168 @@ MAPPING = {
 }
 
 
-def norm(v):
+def norm(in_genValue):
     """Normaliza una celda a string limpio (sin .0 en enteros, trim)."""
-    if v is None:
+    if in_genValue is None:
         return ""
-    if isinstance(v, float) and v.is_integer():
-        v = int(v)
-    return str(v).strip()
+    if isinstance(in_genValue, float) and in_genValue.is_integer():
+        in_genValue = int(in_genValue)
+    return str(in_genValue).strip()
 
 
-def parse_xlsx(path):
+def parse_xlsx(in_strPath):
     """Devuelve {slug: [ (codigo, label, extra), ... ]} leyendo los bloques del xlsx."""
-    wb = openpyxl.load_workbook(path, read_only=True, data_only=True)
-    ws = wb.active
-    blocks = {}
-    current = None
-    state = "seek"  # seek(nombre) -> header -> rows
-    for row in ws.iter_rows(values_only=True):
-        b = norm(row[1]) if len(row) > 1 else ""
-        c = norm(row[2]) if len(row) > 2 else ""
-        d = norm(row[3]) if len(row) > 3 else ""
+    objWb = openpyxl.load_workbook(in_strPath, read_only=True, data_only=True)
+    objWs = objWb.active
+    dicBlocks = {}
+    strCurrent = None
+    strState = "seek"  # seek(nombre) -> header -> rows
+    # Recorremos cada fila detectando el inicio, cabecera y datos de cada bloque
+    for arrRow in objWs.iter_rows(values_only=True):
+        strB = norm(arrRow[1]) if len(arrRow) > 1 else ""
+        strC = norm(arrRow[2]) if len(arrRow) > 2 else ""
+        strD = norm(arrRow[3]) if len(arrRow) > 3 else ""
 
-        if b.lower().startswith("cat-") and not c:
+        if strB.lower().startswith("cat-") and not strC:
             # Inicio de un bloque nuevo
-            current = b.lower()
-            blocks[current] = []
-            state = "header"
+            strCurrent = strB.lower()
+            dicBlocks[strCurrent] = []
+            strState = "header"
             continue
-        if current is None:
+        if strCurrent is None:
             continue
-        if state == "header":
+        if strState == "header":
             # La fila de encabezado (codigo | label | ...). La saltamos.
-            if b.lower() in ("codigo", "código", "código"):
-                state = "rows"
+            if strB.lower() in ("codigo", "código", "código"):
+                strState = "rows"
             continue
-        if state == "rows":
-            if not b and not c:
+        if strState == "rows":
+            if not strB and not strC:
                 # Fin del bloque
-                current = None
-                state = "seek"
+                strCurrent = None
+                strState = "seek"
                 continue
-            blocks[current].append((b, c, d))
-    return blocks
+            dicBlocks[strCurrent].append((strB, strC, strD))
+    return dicBlocks
 
 
-def build_records(slug, rows, cfg):
+def build_records(in_strSlug, in_lstRows, in_dicCfg):
     """Convierte las filas del xlsx en records {campo: valor} según el mapeo."""
-    code_field, label_field = cfg["fields"]
-    extra_field = cfg.get("extra")
-    records = []
-    for code, label, extra in rows:
-        rec = {code_field: code, label_field: label}
-        if extra_field:
-            rec[extra_field] = extra
-        records.append(rec)
-    return records
+    strCodeField, strLabelField = in_dicCfg["fields"]
+    strExtraField = in_dicCfg.get("extra")
+    lstRecords = []
+    for strCode, strLabel, strExtra in in_lstRows:
+        dicRec = {strCodeField: strCode, strLabelField: strLabel}
+        if strExtraField:
+            dicRec[strExtraField] = strExtra
+        lstRecords.append(dicRec)
+    return lstRecords
 
 
-def ensure_alianza_collection(base, token, title, fields, screen_cat_id):
+def ensure_alianza_collection(in_strBase, in_strToken, in_strTitle, in_arrFields, in_strScreenCatId):
     """Crea las pantallas create/view + la colección cat-alianza. Devuelve el id."""
-    code_field, label_field = fields
-    screen_fields = [
-        {"name": code_field, "label": "Código"},
-        {"name": label_field, "label": "Alianza"},
+    strCodeField, strLabelField = in_arrFields
+    lstScreenFields = [
+        {"name": strCodeField, "label": "Código"},
+        {"name": strLabelField, "label": "Alianza"},
     ]
-    create_screen_json = generate_screen_json(title, screen_fields, is_view=False, screen_category_id=screen_cat_id)
-    c_screen = create_screen(base, token, create_screen_json)
-    view_screen_json = generate_screen_json(title, screen_fields, is_view=True, screen_category_id=screen_cat_id)
-    v_screen = create_screen(base, token, view_screen_json)
-    col = create_collection(base, token, {
-        "name": title,
-        "custom_title": title,
+    dicCreateScreenJson = generate_screen_json(in_strTitle, lstScreenFields, in_blnIsView=False, in_strScreenCatId=in_strScreenCatId)
+    dicCScreen = create_screen(in_strBase, in_strToken, dicCreateScreenJson)
+    dicViewScreenJson = generate_screen_json(in_strTitle, lstScreenFields, in_blnIsView=True, in_strScreenCatId=in_strScreenCatId)
+    dicVScreen = create_screen(in_strBase, in_strToken, dicViewScreenJson)
+    dicCol = create_collection(in_strBase, in_strToken, {
+        "name": in_strTitle,
+        "custom_title": in_strTitle,
         "description": "Catálogo de alianzas comerciales (CATALOGOS v2)",
-        "create_screen_id": str(c_screen["id"]),
-        "read_screen_id": str(v_screen["id"]),
-        "update_screen_id": str(c_screen["id"]),
+        "create_screen_id": str(dicCScreen["id"]),
+        "read_screen_id": str(dicVScreen["id"]),
+        "update_screen_id": str(dicCScreen["id"]),
         "signal_create": False,
         "signal_update": False,
         "signal_delete": False,
     })
-    return col["id"]
+    return dicCol["id"]
 
 
 def main():
-    ap = argparse.ArgumentParser(description="Migra catálogos desde CATALOGOS v2.xlsx a PM4.")
-    ap.add_argument("--dry-run", action="store_true", help="Solo parsea y muestra; no llama a la API.")
-    ap.add_argument("--commit", action="store_true", help="Ejecuta la migración real contra PM4.")
-    ap.add_argument("--only", help="Coma-separado de slugs a procesar (default: todos).")
-    args = ap.parse_args()
+    objAp = argparse.ArgumentParser(description="Migra catálogos desde CATALOGOS v2.xlsx a PM4.")
+    objAp.add_argument("--dry-run", action="store_true", help="Solo parsea y muestra; no llama a la API.")
+    objAp.add_argument("--commit", action="store_true", help="Ejecuta la migración real contra PM4.")
+    objAp.add_argument("--only", help="Coma-separado de slugs a procesar (default: todos).")
+    objArgs = objAp.parse_args()
 
-    if not args.dry_run and not args.commit:
+    if not objArgs.dry_run and not objArgs.commit:
         print("Debes pasar --dry-run o --commit."); sys.exit(1)
     if not os.path.exists(EXCEL_PATH):
         print(f"No se encontró el Excel: {EXCEL_PATH}"); sys.exit(1)
 
-    blocks = parse_xlsx(EXCEL_PATH)
-    print(f"Bloques detectados en xlsx: {len(blocks)}")
+    dicBlocks = parse_xlsx(EXCEL_PATH)
+    print(f"Bloques detectados en xlsx: {len(dicBlocks)}")
 
-    only = set(s.strip() for s in args.only.split(",")) if args.only else None
+    setOnly = set(strS.strip() for strS in objArgs.only.split(",")) if objArgs.only else None
 
     # Validación de cobertura
-    unmapped = [s for s in blocks if s not in MAPPING]
-    if unmapped:
-        print(f"[!] Bloques del xlsx SIN mapeo (se ignoran): {unmapped}")
+    lstUnmapped = [strS for strS in dicBlocks if strS not in MAPPING]
+    if lstUnmapped:
+        print(f"[!] Bloques del xlsx SIN mapeo (se ignoran): {lstUnmapped}")
 
-    base = token = None
-    screen_cat_id = "1"
-    if args.commit:
-        env = load_env(ENV_PATH)
-        base = env.get("PM4_BASE_URL")
-        token = decrypt_token(env.get("PM4_TOKEN"), env.get("IFRAME_ENCRYPTION_KEY"))
-        if not base or not token:
+    strBase = strToken = None
+    strScreenCatId = "1"
+    if objArgs.commit:
+        # Cargamos credenciales y estado actual de PM4 solo en modo commit
+        dicEnv = load_env(ENV_PATH)
+        strBase = dicEnv.get("PM4_BASE_URL")
+        strToken = decrypt_token(dicEnv.get("PM4_TOKEN"), dicEnv.get("IFRAME_ENCRYPTION_KEY"))
+        if not strBase or not strToken:
             print("Falta PM4_BASE_URL / PM4_TOKEN en .env"); sys.exit(1)
-        screen_cat_id = get_screen_category_id(base, token)
-        existing = get_existing_collections(base, token)
-        print(f"Colecciones en PM4: {len(existing)} | screen_category_id={screen_cat_id}")
+        strScreenCatId = get_screen_category_id(strBase, strToken)
+        dicExisting = get_existing_collections(strBase, strToken)
+        print(f"Colecciones en PM4: {len(dicExisting)} | screen_category_id={strScreenCatId}")
 
-    ok = 0
-    for slug, cfg in MAPPING.items():
-        if only and slug not in only:
+    intOk = 0
+    # Procesamos cada catálogo del mapeo
+    for strSlug, dicCfg in MAPPING.items():
+        if setOnly and strSlug not in setOnly:
             continue
-        if slug not in blocks:
-            print(f"[!] {slug}: no está en el xlsx, se salta.")
+        if strSlug not in dicBlocks:
+            print(f"[!] {strSlug}: no está en el xlsx, se salta.")
             continue
-        rows = blocks[slug]
-        records = build_records(slug, rows, cfg)
-        cid = cfg["collection_id"]
-        tgt = f"id={cid}" if cid else "NUEVA"
-        print(f"\n[{slug}] -> {tgt} | {len(records)} registros | campos={cfg['fields']}"
-              + (f" +{cfg['extra']}" if cfg.get("extra") else ""))
-        for r in records[:3]:
-            print(f"    ej: {r}")
-        if len(records) > 3:
-            print(f"    ... (+{len(records) - 3})")
+        lstRows = dicBlocks[strSlug]
+        lstRecords = build_records(strSlug, lstRows, dicCfg)
+        genCid = dicCfg["collection_id"]
+        strTgt = f"id={genCid}" if genCid else "NUEVA"
+        print(f"\n[{strSlug}] -> {strTgt} | {len(lstRecords)} registros | campos={dicCfg['fields']}"
+              + (f" +{dicCfg['extra']}" if dicCfg.get("extra") else ""))
+        for dicR in lstRecords[:3]:
+            print(f"    ej: {dicR}")
+        if len(lstRecords) > 3:
+            print(f"    ... (+{len(lstRecords) - 3})")
 
-        if args.dry_run:
-            ok += 1
+        if objArgs.dry_run:
+            intOk += 1
             continue
 
         try:
-            if cid is None:
+            if genCid is None:
                 print("  Creando colección nueva (pantallas + collection)...")
-                cid = ensure_alianza_collection(base, token, cfg["new_title"], cfg["fields"], screen_cat_id)
-                print(f"  Colección creada id={cid}")
+                genCid = ensure_alianza_collection(strBase, strToken, dicCfg["new_title"], dicCfg["fields"], strScreenCatId)
+                print(f"  Colección creada id={genCid}")
             else:
                 print("  Truncando registros existentes...")
-                truncate_collection(base, token, cid)
-            inserted = 0
-            for r in records:
-                create_record(base, token, cid, r)
-                inserted += 1
-            print(f"  Insertados {inserted}/{len(records)}")
-            ok += 1
-        except Exception as e:
-            print(f"  [X] ERROR en {slug}: {e}")
-            resp = getattr(e, "response", None)
-            if resp is not None:
-                print(f"      HTTP {resp.status_code}: {resp.text[:300]}")
+                truncate_collection(strBase, strToken, genCid)
+            intInserted = 0
+            for dicR in lstRecords:
+                create_record(strBase, strToken, genCid, dicR)
+                intInserted += 1
+            print(f"  Insertados {intInserted}/{len(lstRecords)}")
+            intOk += 1
+        except Exception as excError:
+            print(f"  [X] ERROR en {strSlug}: {excError}")
+            objResp = getattr(excError, "response", None)
+            if objResp is not None:
+                print(f"      HTTP {objResp.status_code}: {objResp.text[:300]}")
 
-    print(f"\n{'DRY-RUN' if args.dry_run else 'MIGRACIÓN'} completada: {ok} catálogos OK.")
+    print(f"\n{'DRY-RUN' if objArgs.dry_run else 'MIGRACIÓN'} completada: {intOk} catálogos OK.")
 
 
 if __name__ == "__main__":

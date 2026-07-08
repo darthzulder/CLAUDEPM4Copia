@@ -10,48 +10,56 @@ import {
 } from '../../../../components/fields/ZdsFields';
 import pm4 from '../../../../api/pm4Client';
 import { useCollection } from '../../../../core/useCollection';
-import { COLLECTION_DEFS, DEFAULTS, ADJUNTO_KEYS, CrearRecibirQuejaFormData, WEB_ENTRY_PROCESS_ID, WEB_ENTRY_EVENT_ID } from './variables';
+import {
+  QD, QD_COLLECTIONS,
+  SCR000_DEFAULTS as DEFAULTS, SCR000_ADJUNTO_KEYS as ADJUNTO_KEYS,
+  SCR000_WEB_ENTRY_PROCESS_ID as WEB_ENTRY_PROCESS_ID, SCR000_WEB_ENTRY_EVENT_ID as WEB_ENTRY_EVENT_ID,
+} from '../fields/fields';
+import type { CrearRecibirQuejaFormData } from '../fields/fields';
 import SeccionConsumidor from './SeccionConsumidor';
 import SeccionDetalleQueja from './SeccionDetalleQueja';
 import RecaptchaModal from '../../../../components/RecaptchaModal';
 
 // Mapea el estado SmartSupervision (FLD-338) al color del semáforo.
-function estadoVariant(estado: string): 'success' | 'danger' | 'info' | 'neutral' {
-  const e = estado.toLowerCase();
-  if (e.includes('acept') || e.includes('verde') || e.includes('ok')) return 'success';
-  if (e.includes('rechaz') || e.includes('error') || e.includes('rojo')) return 'danger';
-  if (e.includes('proceso') || e.includes('pendiente') || e.includes('amarillo')) return 'info';
+function estadoVariant(in_strStatus: string): 'success' | 'danger' | 'info' | 'neutral' {
+  const strStatus = in_strStatus.toLowerCase();
+  if (strStatus.includes('acept') || strStatus.includes('verde') || strStatus.includes('ok')) return 'success';
+  if (strStatus.includes('rechaz') || strStatus.includes('error') || strStatus.includes('rojo')) return 'danger';
+  if (strStatus.includes('proceso') || strStatus.includes('pendiente') || strStatus.includes('amarillo')) return 'info';
   return 'neutral';
 }
 
 export default function CrearRecibirQueja() {
   const { task, loading, error, submitting, completeTask, isWebEntry } = useTask();
   const fileRegistry = useRef(new Map<string, File>());
-  const [sent, setSent] = useState(false);
-  const [captchaOpen, setCaptchaOpen] = useState(false);
-  const [captchaError, setCaptchaError] = useState('');
-  const [pendingData, setPendingData] = useState<CrearRecibirQuejaFormData | null>(null);
+  const [blnSent, setBlnSent] = useState(false);
+  const [blnCaptchaOpen, setBlnCaptchaOpen] = useState(false);
+  const [strCaptchaError, setStrCaptchaError] = useState('');
+  const [objPendingData, setObjPendingData] = useState<CrearRecibirQuejaFormData | null>(null);
   // Overlay de "enviando": cubre el lapso captcha-verificado → verify + envío a PM4,
   // hasta que aparece la pantalla de éxito.
-  const [enviando, setEnviando] = useState(false);
+  const [blnSending, setBlnSending] = useState(false);
 
   const form = useForm<CrearRecibirQuejaFormData>({
     mode: 'onTouched',
     defaultValues: { ...DEFAULTS },
   });
   const { control, watch, handleSubmit, reset, formState: { errors, isSubmitted } } = form;
-  const w = watch();
+  // Tomamos una foto de los valores actuales del formulario.
+  const objWatch = watch();
 
-  const { options: tipoSolicitudOpts } = useCollection(COLLECTION_DEFS.tipoSolicitud);
-  const { options: rolOpts } = useCollection(COLLECTION_DEFS.rol);
-  const { options: instanciaOpts } = useCollection(COLLECTION_DEFS.instancia);
-  const { options: puntoRecepcionOpts } = useCollection(COLLECTION_DEFS.puntoRecepcion);
-  const { options: canalOpts } = useCollection(COLLECTION_DEFS.canal);
-  const { options: alianzaOpts } = useCollection(COLLECTION_DEFS.alianza);
+  // Cargamos los catalogos de la primera seccion del formulario.
+  const { options: cllRequestType } = useCollection(QD_COLLECTIONS.requestType);
+  const { options: cllRole } = useCollection(QD_COLLECTIONS.filerRole);
+  const { options: cllInstance } = useCollection(QD_COLLECTIONS.receptionInstance);
+  const { options: cllReceptionPoint } = useCollection(QD_COLLECTIONS.receptionPoint);
+  const { options: cllChannel } = useCollection(QD_COLLECTIONS.channel);
+  const { options: cllAlliance } = useCollection(QD_COLLECTIONS.alliance);
 
   // Empleado Zurich = rol código '3' (ver RUL-000-01). Solo este rol ve el campo Alianza.
-  const esEmpleadoZurich = String(w.qd_rolRadicador) === '3';
+  const blnIsZurichEmp = String(objWatch[QD.strFilerRole]) === '3';
 
+  // Precargamos el formulario con los datos que llegan de la tarea.
   useEffect(() => {
     if (task?.data) reset({ ...DEFAULTS, ...(task.data as Partial<CrearRecibirQuejaFormData>) });
   }, [task, reset]);
@@ -62,104 +70,107 @@ export default function CrearRecibirQueja() {
   //   Defensor del consumidor(4)                                          → Defensor del consumidor financiero (3)
   //   SFC (instancia 1) se asigna automáticamente vía la integración SFC, no aquí.
   useEffect(() => {
-    if (!w.qd_rolRadicador || instanciaOpts.length === 0) return;
-    const rol = String(w.qd_rolRadicador);
-    let codigoInstancia = '';
-    if (rol === '4') codigoInstancia = '3';
-    else if (['1', '2', '3', '5'].includes(rol)) codigoInstancia = '2';
-    const instancia = instanciaOpts.find((o) => o.value === codigoInstancia);
-    if (instancia) form.setValue('qd_instanciaRecepcion', instancia.label);
-  }, [w.qd_rolRadicador, instanciaOpts, form]);
+    if (!objWatch[QD.strFilerRole] || cllInstance.length === 0) return;
+    const strRole = String(objWatch[QD.strFilerRole]);
+    let strInstanceCode = '';
+    if (strRole === '4') strInstanceCode = '3';
+    else if (['1', '2', '3', '5'].includes(strRole)) strInstanceCode = '2';
+    const objInstance = cllInstance.find((o) => o.value === strInstanceCode);
+    if (objInstance) form.setValue(QD.strReceptionInstance, objInstance.label);
+  }, [objWatch[QD.strFilerRole], cllInstance, form]);
 
   // Punto de recepción por defecto para radicación web = "Internet" (CAT-PUNTO).
   // Ahora es un select editable, así que se precarga el código (value), no la etiqueta.
   useEffect(() => {
-    if (w.qd_puntoRecepcion || puntoRecepcionOpts.length === 0) return;
-    const internet = puntoRecepcionOpts.find((o) => /internet/i.test(o.label));
-    if (internet) form.setValue('qd_puntoRecepcion', internet.value);
-  }, [w.qd_puntoRecepcion, puntoRecepcionOpts, form]);
+    if (objWatch[QD.strReceptionPoint] || cllReceptionPoint.length === 0) return;
+    const objInternet = cllReceptionPoint.find((o) => /internet/i.test(o.label));
+    if (objInternet) form.setValue(QD.strReceptionPoint, objInternet.value);
+  }, [objWatch[QD.strReceptionPoint], cllReceptionPoint, form]);
 
   // La alianza solo aplica al rol Empleado Zurich; al cambiar a otro rol se limpia.
   useEffect(() => {
-    if (!esEmpleadoZurich && w.qd_alianza) form.setValue('qd_alianza', '');
-  }, [esEmpleadoZurich, w.qd_alianza, form]);
+    if (!blnIsZurichEmp && objWatch[QD.strAlliance]) form.setValue(QD.strAlliance, '');
+  }, [blnIsZurichEmp, objWatch[QD.strAlliance], form]);
 
-  const uploadFiles = async (requestId: number) => {
-    for (const [docKey, file] of fileRegistry.current.entries()) {
-      const fd = new FormData();
-      fd.append('file', file);
-      await pm4.post(`/requests/${requestId}/files?data_name=${docKey}`, fd);
+  // Recorremos el registro de archivos para subir cada adjunto a PM4.
+  const uploadFiles = async (in_intRequestId: number) => {
+    for (const [strDocKey, objFile] of fileRegistry.current.entries()) {
+      const objFormData = new FormData();
+      objFormData.append('file', objFile);
+      await pm4.post(`/requests/${in_intRequestId}/files?data_name=${strDocKey}`, objFormData);
     }
   };
 
   // Paso 1 — el submit valida el formulario (react-hook-form) y, si es válido,
   // abre el modal de captcha. El envío real NO ocurre hasta pasar la validación.
-  const requestCaptcha = (data: CrearRecibirQuejaFormData) => {
-    setCaptchaError('');
-    setPendingData(data);
-    setCaptchaOpen(true);
+  const requestCaptcha = (in_objData: CrearRecibirQuejaFormData) => {
+    setStrCaptchaError('');
+    setObjPendingData(in_objData);
+    setBlnCaptchaOpen(true);
   };
 
-  const sendToPm4 = async (data: CrearRecibirQuejaFormData) => {
+  // Envía la solicitud a PM4, ya sea como web entry o completando la tarea.
+  const sendToPm4 = async (in_objData: CrearRecibirQuejaFormData) => {
     try {
       if (isWebEntry) {
-        const result = await pm4.post<Record<string, unknown>>(
+        const objResult = await pm4.post<Record<string, unknown>>(
           `/process_events/${WEB_ENTRY_PROCESS_ID}`,
-          data,
+          in_objData,
           { params: { event: WEB_ENTRY_EVENT_ID } },
         );
-        const newRequestId = (result.data?.request_id ?? result.data?.id) as number | undefined;
-        if (newRequestId && fileRegistry.current.size > 0) {
-          await uploadFiles(newRequestId);
+        const intNewRequestId = (objResult.data?.request_id ?? objResult.data?.id) as number | undefined;
+        if (intNewRequestId && fileRegistry.current.size > 0) {
+          await uploadFiles(intNewRequestId);
         }
-        setSent(true);
+        setBlnSent(true);
       } else {
-        const requestId = task?.process_request_id;
-        if (requestId && fileRegistry.current.size > 0) {
-          await uploadFiles(requestId);
+        const intRequestId = task?.process_request_id;
+        if (intRequestId && fileRegistry.current.size > 0) {
+          await uploadFiles(intRequestId);
         }
-        await completeTask(data as unknown as Record<string, unknown>);
-        setSent(true);
+        await completeTask(in_objData as unknown as Record<string, unknown>);
+        setBlnSent(true);
       }
-    } catch (err) {
-      console.error('[CrearRecibirQueja] Error al enviar:', err);
-      setCaptchaError('Ocurrió un error al radicar la solicitud. Intenta nuevamente.');
+    } catch (exc) {
+      console.error('[CrearRecibirQueja] Error al enviar:', exc);
+      setStrCaptchaError('Ocurrió un error al radicar la solicitud. Intenta nuevamente.');
     }
   };
 
   // Paso 2 — el usuario resolvió el checkbox "No soy un robot": verificamos el
   // token contra Google (backend) y recién ahí enviamos a PM4.
-  const handleCaptchaVerified = async (token: string) => {
-    setCaptchaOpen(false);
-    const data = pendingData;
-    if (!data) return;
-    setPendingData(null);
-    setEnviando(true);
+  const handleCaptchaVerified = async (in_strToken: string) => {
+    setBlnCaptchaOpen(false);
+    const objData = objPendingData;
+    if (!objData) return;
+    setObjPendingData(null);
+    setBlnSending(true);
     try {
-      const { data: v } = await pm4.post<{ success: boolean }>('/recaptcha/verify', { token });
-      if (!v?.success) {
-        setCaptchaError('No pudimos validar la seguridad. Vuelve a intentarlo.');
-        setEnviando(false);
+      const { data: objVerify } = await pm4.post<{ success: boolean }>('/recaptcha/verify', { token: in_strToken });
+      if (!objVerify?.success) {
+        setStrCaptchaError('No pudimos validar la seguridad. Vuelve a intentarlo.');
+        setBlnSending(false);
         return;
       }
     } catch {
-      setCaptchaError('No pudimos validar la seguridad. Vuelve a intentarlo.');
-      setEnviando(false);
+      setStrCaptchaError('No pudimos validar la seguridad. Vuelve a intentarlo.');
+      setBlnSending(false);
       return;
     }
-    await sendToPm4({ ...data, qd_captcha: true });
-    // En éxito, sendToPm4 pone sent=true y se muestra la pantalla de confirmación;
+    await sendToPm4({ ...objData, [QD.blnCaptcha]: true });
+    // En éxito, sendToPm4 pone blnSent=true y se muestra la pantalla de confirmación;
     // si falló, quitamos el overlay para que el usuario vea el form y el error.
-    setEnviando(false);
+    setBlnSending(false);
   };
 
+  // Reinicia el formulario y limpia los adjuntos cargados.
   const limpiarFormulario = () => {
     reset({ ...DEFAULTS });
     fileRegistry.current.clear();
-    ADJUNTO_KEYS.forEach((k) => form.setValue(k, ''));
+    ADJUNTO_KEYS.forEach((strKey) => form.setValue(strKey, ''));
   };
 
-  if (sent) {
+  if (blnSent) {
     return (
       <div className="screen-wrapper">
         <ScreenHeader title="Radicación de PQRS" />
@@ -183,14 +194,18 @@ export default function CrearRecibirQueja() {
     );
   }
 
-  const err = (name: keyof CrearRecibirQuejaFormData) => errors[name]?.message;
-  const puedeEnviar = !!w.qd_autorizacionDatos;
-  const tieneEstadoSFC = !!w.qd_estadoSmartSupervision || !!w.qd_fechaRadicacionSFC;
-  const tieneResponsable = !!w.qd_rolResponsable || !!w.qd_responsable;
+  // Atajo para leer el mensaje de error de un campo.
+  const err = (in_strName: keyof CrearRecibirQuejaFormData) => errors[in_strName]?.message;
+  // Habilita el envío solo si el usuario autorizó el tratamiento de datos.
+  const blnCanSubmit = !!objWatch[QD.blnDataAuth];
+  // Indica si el caso ya tiene estado ante la SFC.
+  const blnHasSfcStatus = !!objWatch[QD.strSmartSupStatus] || !!objWatch[QD.strSfcFilingDate];
+  // Indica si el caso ya tiene responsable asignado.
+  const blnHasAssignee = !!objWatch[QD.strAssigneeRole] || !!objWatch[QD.strAssignee];
 
   return (
     <div className="screen-wrapper">
-      {enviando && (
+      {blnSending && (
         <div className="loading-overlay">
           <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 'var(--zs-100)' }}>
             <ZrLoader />
@@ -218,27 +233,27 @@ export default function CrearRecibirQueja() {
               validación de seguridad (captcha) antes de radicar.
             </ZrAlert>
             <div className="form-row cols-2">
-              <ZdsSelect name="qd_tipoSolicitud" control={control} label="¿A qué está asociado tu comentario?"
-                options={tipoSolicitudOpts} rules={{ required: 'Campo requerido' }} required
-                error={err('qd_tipoSolicitud')} />
-              <ZdsSelect name="qd_rolRadicador" control={control} label="Selecciona tu rol"
-                options={rolOpts} rules={{ required: 'Campo requerido' }} required
-                error={err('qd_rolRadicador')} />
+              <ZdsSelect name={QD.strRequestType} control={control} label="¿A qué está asociado tu comentario?"
+                options={cllRequestType} rules={{ required: 'Campo requerido' }} required
+                error={err(QD.strRequestType)} />
+              <ZdsSelect name={QD.strFilerRole} control={control} label="Selecciona tu rol"
+                options={cllRole} rules={{ required: 'Campo requerido' }} required
+                error={err(QD.strFilerRole)} />
             </div>
             <div className="form-row cols-2">
-              <ZdsSelect name="qd_canal" control={control} label="Canal"
-                options={canalOpts} rules={{ required: 'Campo requerido' }} required
-                error={err('qd_canal')} />
-              <ZdsSelect name="qd_puntoRecepcion" control={control} label="Punto de Recepción"
-                options={puntoRecepcionOpts} rules={{ required: 'Campo requerido' }} required
-                error={err('qd_puntoRecepcion')} />
+              <ZdsSelect name={QD.strChannel} control={control} label="Canal"
+                options={cllChannel} rules={{ required: 'Campo requerido' }} required
+                error={err(QD.strChannel)} />
+              <ZdsSelect name={QD.strReceptionPoint} control={control} label="Punto de Recepción"
+                options={cllReceptionPoint} rules={{ required: 'Campo requerido' }} required
+                error={err(QD.strReceptionPoint)} />
             </div>
             <div className="form-row cols-2">
-              <ZdsInput name="qd_instanciaRecepcion" control={control} label="Instancia de Recepción" readOnly
+              <ZdsInput name={QD.strReceptionInstance} control={control} label="Instancia de Recepción" readOnly
                 helpText="Asignada automáticamente según el rol (CAT-INSTANCIA)." />
-              {esEmpleadoZurich ? (
-                <ZdsSelect name="qd_alianza" control={control} label="Alianza"
-                  options={alianzaOpts} error={err('qd_alianza')} />
+              {blnIsZurichEmp ? (
+                <ZdsSelect name={QD.strAlliance} control={control} label="Alianza"
+                  options={cllAlliance} error={err(QD.strAlliance)} />
               ) : (
                 <div />
               )}
@@ -254,53 +269,53 @@ export default function CrearRecibirQueja() {
           {/* ── S4: Autorización y Envío ── */}
           <FormSection title="Autorización y Envío">
             <div className="form-row cols-1">
-              <ZdsCheckboxField name="qd_autorizacionDatos" control={control}
+              <ZdsCheckboxField name={QD.blnDataAuth} control={control}
                 label="Autorizo el tratamiento de mis datos personales conforme a la política de privacidad." />
             </div>
-            {isSubmitted && !w.qd_autorizacionDatos && (
+            {isSubmitted && !objWatch[QD.blnDataAuth] && (
               <ZrAlert config="alert" {...({ 'hide-close': true } as object)}>
                 Debe aceptar el tratamiento de datos personales para poder radicar su solicitud. (MSG-000-04)
               </ZrAlert>
             )}
             {/* FLD-336 — validación de seguridad: reCAPTCHA v2 (checkbox) en un modal
                 que se abre al presionar "Enviar PQRS". Ver RecaptchaModal más abajo. */}
-            {captchaError && (
+            {strCaptchaError && (
               <ZrAlert config="negative" {...({ 'hide-close': true } as object)}>
-                {captchaError}
+                {strCaptchaError}
               </ZrAlert>
             )}
             <div className="form-row cols-2">
-              <ZdsInput name="qd_correoCopia" control={control} label="¿Quieres enviar copia de la respuesta a otro correo?"
+              <ZdsInput name={QD.strCcEmail} control={control} label="¿Quieres enviar copia de la respuesta a otro correo?"
                 inputType="email"
                 rules={{ pattern: { value: /^[^\s@]+@[^\s@]+\.[^\s@]+$/, message: 'Formato esperado: usuario@dominio.com' } }}
-                error={err('qd_correoCopia')} />
+                error={err(QD.strCcEmail)} />
               <div />
             </div>
           </FormSection>
 
           {/* ── S5: Estado ante la SFC (post-radicación) ── */}
-          {tieneEstadoSFC && (
+          {blnHasSfcStatus && (
             <FormSection title="Estado ante la SFC">
               <div className="form-row cols-2">
                 <div className="zds-field-wrap">
                   <span className="info-bar-label">Estado SmartSupervision</span>
                   <div style={{ marginTop: 'var(--zs-50)' }}>
-                    <ZdsStatusBadge variant={estadoVariant(w.qd_estadoSmartSupervision || '')}>
-                      {w.qd_estadoSmartSupervision || 'Sin estado'}
+                    <ZdsStatusBadge variant={estadoVariant(objWatch[QD.strSmartSupStatus] || '')}>
+                      {objWatch[QD.strSmartSupStatus] || 'Sin estado'}
                     </ZdsStatusBadge>
                   </div>
                 </div>
-                <ZdsInput name="qd_fechaRadicacionSFC" control={control} label="Fecha y hora radicación SFC" readOnly />
+                <ZdsInput name={QD.strSfcFilingDate} control={control} label="Fecha y hora radicación SFC" readOnly />
               </div>
             </FormSection>
           )}
 
           {/* ── S6: Responsable Asignado (post-radicación) ── */}
-          {tieneResponsable && (
+          {blnHasAssignee && (
             <FormSection title="Responsable Asignado">
               <div className="form-row cols-2">
-                <ZdsInput name="qd_rolResponsable" control={control} label="Rol (Grupo)" readOnly />
-                <ZdsInput name="qd_responsable" control={control} label="Responsable" readOnly />
+                <ZdsInput name={QD.strAssigneeRole} control={control} label="Rol (Grupo)" readOnly />
+                <ZdsInput name={QD.strAssignee} control={control} label="Responsable" readOnly />
               </div>
             </FormSection>
           )}
@@ -313,7 +328,7 @@ export default function CrearRecibirQueja() {
               config="positive"
               onClick={() => handleSubmit(requestCaptcha)()}
               loading={submitting}
-              disabled={submitting || !puedeEnviar}
+              disabled={submitting || !blnCanSubmit}
             >
               Enviar PQRS
             </ZrButton>
@@ -321,9 +336,9 @@ export default function CrearRecibirQueja() {
         </form>
 
         <RecaptchaModal
-          open={captchaOpen}
+          open={blnCaptchaOpen}
           onVerified={handleCaptchaVerified}
-          onClose={() => { setCaptchaOpen(false); setPendingData(null); }}
+          onClose={() => { setBlnCaptchaOpen(false); setObjPendingData(null); }}
         />
       </div>
     </div>

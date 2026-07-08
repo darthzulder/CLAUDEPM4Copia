@@ -30,17 +30,17 @@ interface TiaValue {
 const SCRIPT_OBTENER_CLIENTE = 50;
 
 // ---------------------------------------------------------------------------
-// Helpers
+// Utilidades
 // ---------------------------------------------------------------------------
 function fieldError(
-  err: FieldError | undefined,
-  value: unknown,
-  isSubmitted: boolean
+  in_objErr: FieldError | undefined,
+  in_objValue: unknown,
+  in_blnSubmitted: boolean
 ): string | undefined {
-  if (!err) return undefined;
-  const isEmpty = value === '' || value === null || value === undefined;
-  if (err.type === 'required' && isEmpty) return isSubmitted ? String(err.message) : undefined;
-  return String(err.message);
+  if (!in_objErr) return undefined;
+  const blnIsEmpty = in_objValue === '' || in_objValue === null || in_objValue === undefined;
+  if (in_objErr.type === 'required' && blnIsEmpty) return in_blnSubmitted ? String(in_objErr.message) : undefined;
+  return String(in_objErr.message);
 }
 
 // ---------------------------------------------------------------------------
@@ -54,18 +54,19 @@ const ROW_IDS_VALORES = [
   'aseguradores_Deducibles_Opc_05',
 ];
 
-function formatCOP(n: number | null | undefined): string {
-  if (n == null) return '';
-  return n.toLocaleString('es-CO');
+function formatCOP(in_dblValue: number | null | undefined): string {
+  if (in_dblValue == null) return '';
+  return in_dblValue.toLocaleString('es-CO');
 }
 
-function mapValoresToPm4(valores: ValorDeducible[], moneda: string): Record<string, unknown>[] {
-  return valores.map((v, i) => {
-    const filled = v.frm_valores_limite_asegurado !== '' && v.frm_valores_limite_asegurado != null;
-    if (!filled) {
+function mapValoresToPm4(in_lstValues: ValorDeducible[], in_strCurrency: string): Record<string, unknown>[] {
+  return in_lstValues.map((objValue, intI) => {
+    // Las opciones sin límite asegurado se envían en blanco
+    const blnFilled = objValue.frm_valores_limite_asegurado !== '' && objValue.frm_valores_limite_asegurado != null;
+    if (!blnFilled) {
       return {
-        row_id: ROW_IDS_VALORES[i],
-        frm_valores_opcion: v.frm_valores_opcion,
+        row_id: ROW_IDS_VALORES[intI],
+        frm_valores_opcion: objValue.frm_valores_opcion,
         frm_cot_moneda_dup_vad: null,
         frm_valores_limite_asegurado: null,
         frm_valores_deducible_porcentaje: null,
@@ -80,29 +81,29 @@ function mapValoresToPm4(valores: ValorDeducible[], moneda: string): Record<stri
       };
     }
 
-    const limite = v.frm_valores_limite_asegurado as number;
-    const pct = v.frm_valores_deducible_porcentaje as number;
-    const factor = v.frm_valores_deducible_minimo_factor || null;
-    const esValor = factor === 'VALOR';
-    const esSmmlv = factor === 'SMMLV';
-    const minValor = esValor && v.frm_valores_deducible_minimo !== '' ? v.frm_valores_deducible_minimo as number : null;
-    const minSmmlv = esSmmlv && v.frm_valores_deducible_minimo_smmlv !== '' ? v.frm_valores_deducible_minimo_smmlv as number : null;
+    const dblLimit = objValue.frm_valores_limite_asegurado as number;
+    const dblPct = objValue.frm_valores_deducible_porcentaje as number;
+    const strFactor = objValue.frm_valores_deducible_minimo_factor || null;
+    const blnIsValor = strFactor === 'VALOR';
+    const blnIsSmmlv = strFactor === 'SMMLV';
+    const dblMinValor = blnIsValor && objValue.frm_valores_deducible_minimo !== '' ? objValue.frm_valores_deducible_minimo as number : null;
+    const dblMinSmmlv = blnIsSmmlv && objValue.frm_valores_deducible_minimo_smmlv !== '' ? objValue.frm_valores_deducible_minimo_smmlv as number : null;
 
     return {
-      row_id: ROW_IDS_VALORES[i],
-      frm_valores_opcion: v.frm_valores_opcion,
-      frm_cot_moneda_dup_vad: moneda,
-      frm_valores_limite_asegurado: limite,
-      frm_valores_deducible_porcentaje: pct,
-      frm_valores_deducible_minimo_factor: factor,
-      frm_valores_deducible_minimo: minValor,
-      frm_valores_deducible_minimo_smmlv: esSmmlv ? String(minSmmlv ?? '0') : '0',
+      row_id: ROW_IDS_VALORES[intI],
+      frm_valores_opcion: objValue.frm_valores_opcion,
+      frm_cot_moneda_dup_vad: in_strCurrency,
+      frm_valores_limite_asegurado: dblLimit,
+      frm_valores_deducible_porcentaje: dblPct,
+      frm_valores_deducible_minimo_factor: strFactor,
+      frm_valores_deducible_minimo: dblMinValor,
+      frm_valores_deducible_minimo_smmlv: blnIsSmmlv ? String(dblMinSmmlv ?? '0') : '0',
       frm_valor_asegurado_control_procede: false,
-      frm_valores_limite_asegurado_formateado: formatCOP(limite),
-      frm_valores_deducible_porcentaje_formateado: `${pct} %`,
-      frm_valores_deducible_minimo_formateado: minValor != null ? formatCOP(minValor) : null,
-      frm_valores_deducible_minimo_smmlv_formateado: minSmmlv != null ? formatCOP(minSmmlv) : null,
-      ...(i === 0 && { control_opcion_1_frm_valores_asegurados_deducibles: 'NO' }),
+      frm_valores_limite_asegurado_formateado: formatCOP(dblLimit),
+      frm_valores_deducible_porcentaje_formateado: `${dblPct} %`,
+      frm_valores_deducible_minimo_formateado: dblMinValor != null ? formatCOP(dblMinValor) : null,
+      frm_valores_deducible_minimo_smmlv_formateado: dblMinSmmlv != null ? formatCOP(dblMinSmmlv) : null,
+      ...(intI === 0 && { control_opcion_1_frm_valores_asegurados_deducibles: 'NO' }),
       control_opcion_rellenar_valores_asegurados_deducibles: null,
       control_opciones_consecutivas_frm_valores_asegurados_deducibles: 'NO',
     };
@@ -110,52 +111,53 @@ function mapValoresToPm4(valores: ValorDeducible[], moneda: string): Record<stri
 }
 
 async function consultarCliente(
-  tipoDoc: string,
-  numDoc: string,
-  tokenTia: string,
-  scriptId: number = SCRIPT_OBTENER_CLIENTE
+  in_strTipoDoc: string,
+  in_strNumDoc: string,
+  in_strTokenTia: string,
+  in_intScriptId: number = SCRIPT_OBTENER_CLIENTE
 ): Promise<{ value: TiaValue | null }> {
-  const url = `/scripts/${scriptId}/execute`;
-  const dataObj = {
-    frm_tomador_tipoDoc: tipoDoc,
-    frm_tomador_numDoc: numDoc,
-    respuesta_token_tia: tokenTia,
+  const strUrl = `/scripts/${in_intScriptId}/execute`;
+  const objDataObj = {
+    frm_tomador_tipoDoc: in_strTipoDoc,
+    frm_tomador_numDoc: in_strNumDoc,
+    respuesta_token_tia: in_strTokenTia,
   };
-  const body = { data: JSON.stringify(dataObj), config: JSON.stringify({}), sync: true };
-  console.log(`[watcher] POST /api${url} → data:`, dataObj);
-  const res = await pm4.post(url, body);
-  console.log(`[watcher] Respuesta (${res.status}):`, res.data);
+  const objBody = { data: JSON.stringify(objDataObj), config: JSON.stringify({}), sync: true };
+  console.log(`[watcher] POST /api${strUrl} → data:`, objDataObj);
+  const objRes = await pm4.post(strUrl, objBody);
+  console.log(`[watcher] Respuesta (${objRes.status}):`, objRes.data);
   // PM4 puede devolver { output: {...} } o el objeto directamente
-  const raw = res.data as Record<string, unknown>;
-  const tiaRaw = (raw?.output as Record<string, unknown> | undefined) ?? raw;
-  return tiaRaw as { value: TiaValue | null };
+  const objRaw = objRes.data as Record<string, unknown>;
+  const objTiaRaw = (objRaw?.output as Record<string, unknown> | undefined) ?? objRaw;
+  return objTiaRaw as { value: TiaValue | null };
 }
 
 function mapTiaFields(
-  value: TiaValue,
-  prefix: 'frm_tom' | 'frm_aseg',
-  form: Form
+  in_objValue: TiaValue,
+  in_strPrefix: 'frm_tom' | 'frm_aseg',
+  in_objForm: Form
 ) {
-  const cap = (s: string) =>
-    s.split(' ').map(p => p.charAt(0).toUpperCase() + p.slice(1).toLowerCase()).join(' ');
+  // Capitaliza cada palabra del nombre
+  const cap = (in_strText: string) =>
+    in_strText.split(' ').map(strPart => strPart.charAt(0).toUpperCase() + strPart.slice(1).toLowerCase()).join(' ');
 
-  if (value.name) form.setValue(`${prefix}_nombres_completos` as keyof SolicitudCotizacionFormData, cap(value.name) as never);
+  if (in_objValue.name) in_objForm.setValue(`${in_strPrefix}_nombres_completos` as keyof SolicitudCotizacionFormData, cap(in_objValue.name) as never);
 
-  const addr = value.addresses?.[0];
-  if (addr) {
-    const parts = [addr.street, addr.city, addr.country].filter(Boolean);
-    form.setValue(`${prefix}_direccion` as keyof SolicitudCotizacionFormData, (parts.join(', ') || 'Sin datos') as never);
+  const objAddr = in_objValue.addresses?.[0];
+  if (objAddr) {
+    const lstParts = [objAddr.street, objAddr.city, objAddr.country].filter(Boolean);
+    in_objForm.setValue(`${in_strPrefix}_direccion` as keyof SolicitudCotizacionFormData, (lstParts.join(', ') || 'Sin datos') as never);
   }
 
-  if (value.birthDate) form.setValue(`${prefix}_fecha_constitucion` as keyof SolicitudCotizacionFormData, value.birthDate as never);
+  if (in_objValue.birthDate) in_objForm.setValue(`${in_strPrefix}_fecha_constitucion` as keyof SolicitudCotizacionFormData, in_objValue.birthDate as never);
 
-  const email = value.contactInfo?.find(i => i.contactInfoType === 'E-MAIL')?.contactInfoDetail;
-  if (email) form.setValue(`${prefix}_correo_facturacion` as keyof SolicitudCotizacionFormData, email as never);
+  const strEmail = in_objValue.contactInfo?.find(objInfo => objInfo.contactInfoType === 'E-MAIL')?.contactInfoDetail;
+  if (strEmail) in_objForm.setValue(`${in_strPrefix}_correo_facturacion` as keyof SolicitudCotizacionFormData, strEmail as never);
 
-  const pt = (value.partyType ?? '').toUpperCase().trim();
-  const tipoEmpresa = ['GOVERNMENT', 'PUBLIC'].includes(pt) ? 'PUBLICA'
-    : ['MIXED', 'MIXTA'].includes(pt) ? 'MIXTA' : 'PRIVADA';
-  form.setValue(`${prefix}_tipo_empresa` as keyof SolicitudCotizacionFormData, tipoEmpresa as never);
+  const strPt = (in_objValue.partyType ?? '').toUpperCase().trim();
+  const strTipoEmpresa = ['GOVERNMENT', 'PUBLIC'].includes(strPt) ? 'PUBLICA'
+    : ['MIXED', 'MIXTA'].includes(strPt) ? 'MIXTA' : 'PRIVADA';
+  in_objForm.setValue(`${in_strPrefix}_tipo_empresa` as keyof SolicitudCotizacionFormData, strTipoEmpresa as never);
 }
 
 // ---------------------------------------------------------------------------
@@ -182,13 +184,14 @@ function TiaBanner({ status, onCrearCliente }: { status: TiaStatus; onCrearClien
 // ---------------------------------------------------------------------------
 function InfoGeneral({ form }: { form: Form }) {
   const { control, formState: { errors, isSubmitted }, watch } = form;
-  const w = watch();
-  const fe = (n: keyof SolicitudCotizacionFormData) =>
-    fieldError(errors[n] as FieldError | undefined, w[n], isSubmitted);
+  const objWatch = watch();
+  const fe = (in_strName: keyof SolicitudCotizacionFormData) =>
+    fieldError(errors[in_strName] as FieldError | undefined, objWatch[in_strName], isSubmitted);
 
-  const { options: intermediarios, loading: loadingInt } = useCollection(COLLECTION_DEFS.intermediarios);
-  const { options: comerciales, loading: loadingCom } = useCollection(COLLECTION_DEFS.comerciales);
-  const { options: suscriptores, loading: loadingSus } = useCollection(COLLECTION_DEFS.suscriptores, {});
+  // Catálogos de intermediarios, comerciales y suscriptores
+  const { options: cllIntermediaries, loading: loadingInt } = useCollection(COLLECTION_DEFS.intermediarios);
+  const { options: cllComerciales, loading: loadingCom } = useCollection(COLLECTION_DEFS.comerciales);
+  const { options: cllSuscriptores, loading: loadingSus } = useCollection(COLLECTION_DEFS.suscriptores, {});
 
   return (
     <FormSection title="Información General">
@@ -211,12 +214,12 @@ function InfoGeneral({ form }: { form: Form }) {
       </div>
 
       <div className="form-row cols-2">
-        <ZdsSelect label="Intermediario principal" name="frm_gen_intermediario_principal" control={control} rules={{ required: 'Campo requerido' }} options={intermediarios} loading={loadingInt} required error={fe('frm_gen_intermediario_principal')} />
-        <ZdsSelect label="Comercial" name="frm_gen_comercial_id" control={control} options={comerciales} loading={loadingCom} />
+        <ZdsSelect label="Intermediario principal" name="frm_gen_intermediario_principal" control={control} rules={{ required: 'Campo requerido' }} options={cllIntermediaries} loading={loadingInt} required error={fe('frm_gen_intermediario_principal')} />
+        <ZdsSelect label="Comercial" name="frm_gen_comercial_id" control={control} options={cllComerciales} loading={loadingCom} />
       </div>
 
       <div className="form-row cols-2">
-        <ZdsSelect label="Suscriptor asignado" name="frm_gen_suscriptor_asignado_id" control={control} rules={{ required: 'Campo requerido' }} options={suscriptores} loading={loadingSus} required error={fe('frm_gen_suscriptor_asignado_id')} />
+        <ZdsSelect label="Suscriptor asignado" name="frm_gen_suscriptor_asignado_id" control={control} rules={{ required: 'Campo requerido' }} options={cllSuscriptores} loading={loadingSus} required error={fe('frm_gen_suscriptor_asignado_id')} />
         <ZdsInput label="Correo suscriptor (TEST)" name="frm_gen_suscriptor_asignado_correo_test" control={control} rules={{ pattern: { value: /^[^\s@]+@[^\s@]+\.[^\s@]+$/, message: 'Correo inválido' } }} inputType="email" helpText="Ambiente de pruebas" error={fe('frm_gen_suscriptor_asignado_correo_test')} />
       </div>
 
@@ -228,13 +231,13 @@ function InfoGeneral({ form }: { form: Form }) {
 
       <div className="form-row cols-3">
         <ZdsSelect label="Coaseguro requerido" name="frm_gen_coaseguro_requerido" control={control} options={OPTIONS.siNo} />
-        {w.frm_gen_coaseguro_requerido === 'SI' && <ZdsSelect label="Tipo de coaseguro" name="frm_gen_tipo_coaseguro" control={control} options={OPTIONS.tipoCoaseguro} />}
-        {w.frm_gen_coaseguro_requerido === 'SI' && <ZdsInput label="Participación solicitada (%)" name="frm_gen_participacion_solicitado_pct" control={control} rules={{ min: { value: 0, message: '>= 0' }, max: { value: 100, message: '<= 100' } }} />}
+        {objWatch.frm_gen_coaseguro_requerido === 'SI' && <ZdsSelect label="Tipo de coaseguro" name="frm_gen_tipo_coaseguro" control={control} options={OPTIONS.tipoCoaseguro} />}
+        {objWatch.frm_gen_coaseguro_requerido === 'SI' && <ZdsInput label="Participación solicitada (%)" name="frm_gen_participacion_solicitado_pct" control={control} rules={{ min: { value: 0, message: '>= 0' }, max: { value: 100, message: '<= 100' } }} />}
       </div>
 
       <div className="form-row cols-3">
         <ZdsSelect label="Reaseguro requerido" name="frm_gen_reaseguro_requerido" control={control} options={OPTIONS.siNo} />
-        {w.frm_gen_reaseguro_requerido === 'SI' && <ZdsSelect label="Tipo de reaseguro" name="frm_gen_tipo_reaseguro" control={control} options={OPTIONS.tipoReaseguro} />}
+        {objWatch.frm_gen_reaseguro_requerido === 'SI' && <ZdsSelect label="Tipo de reaseguro" name="frm_gen_tipo_reaseguro" control={control} options={OPTIONS.tipoReaseguro} />}
         <ZdsInput label="Nro. de póliza actual" name="frm_gen_numero_poliza" control={control} helpText="Solo para renovaciones" />
       </div>
 
@@ -260,18 +263,18 @@ function InfoTomador({
   onCrearCliente: () => void;
 }) {
   const { control, formState: { errors, isSubmitted }, watch } = form;
-  const w = watch();
-  const fe = (n: keyof SolicitudCotizacionFormData) =>
-    fieldError(errors[n] as FieldError | undefined, w[n], isSubmitted);
+  const objWatch = watch();
+  const fe = (in_strName: keyof SolicitudCotizacionFormData) =>
+    fieldError(errors[in_strName] as FieldError | undefined, objWatch[in_strName], isSubmitted);
 
-  const { options: departamentos, loading: loadingDep } = useCollection(COLLECTION_DEFS.departamentos);
-  const { options: municipios, loading: loadingMun } = useCollection(
+  const { options: cllDepartments, loading: loadingDep } = useCollection(COLLECTION_DEFS.departamentos);
+  const { options: cllMunicipios, loading: loadingMun } = useCollection(
     COLLECTION_DEFS.municipiosTomador,
-    { frm_tom_departamento: w.frm_tom_departamento }
+    { frm_tom_departamento: objWatch.frm_tom_departamento }
   );
 
-  const locked = tiaStatus === 'found';
-  const showFields = tiaStatus === 'found' || tiaStatus === 'createNew';
+  const blnLocked = tiaStatus === 'found';
+  const blnShowFields = tiaStatus === 'found' || tiaStatus === 'createNew';
 
   return (
     <FormSection title="Información del Tomador">
@@ -287,23 +290,23 @@ function InfoTomador({
 
       <TiaBanner status={tiaStatus} onCrearCliente={onCrearCliente} />
 
-      {showFields && (
+      {blnShowFields && (
         <>
           <div className="form-row cols-2">
-            <ZdsInput label="Nombre / Razón social" name="frm_tom_nombres_completos" control={control} rules={{ required: 'Campo requerido' }} required error={fe('frm_tom_nombres_completos')} readOnly={locked} />
-            <ZdsSelect label="Tipo de empresa" name="frm_tom_tipo_empresa" control={control} options={OPTIONS.tipoEmpresa} disabled={locked} />
+            <ZdsInput label="Nombre / Razón social" name="frm_tom_nombres_completos" control={control} rules={{ required: 'Campo requerido' }} required error={fe('frm_tom_nombres_completos')} readOnly={blnLocked} />
+            <ZdsSelect label="Tipo de empresa" name="frm_tom_tipo_empresa" control={control} options={OPTIONS.tipoEmpresa} disabled={blnLocked} />
           </div>
 
           <div className="form-row cols-3">
-            <ZdsDate label="Fecha de constitución" name="frm_tom_fecha_constitucion" control={control} readOnly={locked} />
-            <ZdsInput label="Teléfono" name="frm_tom_telefono" control={control} rules={{ pattern: { value: /^\d{7,12}$/, message: 'Teléfono inválido' } }} error={fe('frm_tom_telefono')} readOnly={locked} />
-            <ZdsInput label="Correo para facturación" name="frm_tom_correo_facturacion" control={control} rules={{ pattern: { value: /^[^\s@]+@[^\s@]+\.[^\s@]+$/, message: 'Correo inválido' } }} inputType="email" error={fe('frm_tom_correo_facturacion')} readOnly={locked} />
+            <ZdsDate label="Fecha de constitución" name="frm_tom_fecha_constitucion" control={control} readOnly={blnLocked} />
+            <ZdsInput label="Teléfono" name="frm_tom_telefono" control={control} rules={{ pattern: { value: /^\d{7,12}$/, message: 'Teléfono inválido' } }} error={fe('frm_tom_telefono')} readOnly={blnLocked} />
+            <ZdsInput label="Correo para facturación" name="frm_tom_correo_facturacion" control={control} rules={{ pattern: { value: /^[^\s@]+@[^\s@]+\.[^\s@]+$/, message: 'Correo inválido' } }} inputType="email" error={fe('frm_tom_correo_facturacion')} readOnly={blnLocked} />
           </div>
 
           <div className="form-row cols-3">
-            <ZdsSelect label="Departamento" name="frm_tom_departamento" control={control} options={departamentos} loading={loadingDep} disabled={locked} />
-            <ZdsSelect label="Municipio" name="frm_tom_municipio" control={control} options={municipios} loading={loadingMun} placeholder={w.frm_tom_departamento ? 'Seleccione...' : 'Seleccione un departamento primero'} disabled={locked} />
-            <ZdsInput label="Dirección" name="frm_tom_direccion" control={control} rules={{ required: 'Campo requerido' }} required error={fe('frm_tom_direccion')} readOnly={locked} />
+            <ZdsSelect label="Departamento" name="frm_tom_departamento" control={control} options={cllDepartments} loading={loadingDep} disabled={blnLocked} />
+            <ZdsSelect label="Municipio" name="frm_tom_municipio" control={control} options={cllMunicipios} loading={loadingMun} placeholder={objWatch.frm_tom_departamento ? 'Seleccione...' : 'Seleccione un departamento primero'} disabled={blnLocked} />
+            <ZdsInput label="Dirección" name="frm_tom_direccion" control={control} rules={{ required: 'Campo requerido' }} required error={fe('frm_tom_direccion')} readOnly={blnLocked} />
           </div>
 
           <div className="form-row cols-1">
@@ -328,9 +331,9 @@ function SubInfoAsegurado({
   onExportacionesChange: (list: ExportacionRow[]) => void;
 }) {
   const { formState: { errors, isSubmitted }, watch } = form;
-  const w = watch();
-  const fe = (n: keyof SolicitudCotizacionFormData) =>
-    fieldError(errors[n] as FieldError | undefined, w[n], isSubmitted);
+  const objWatch = watch();
+  const fe = (in_strName: keyof SolicitudCotizacionFormData) =>
+    fieldError(errors[in_strName] as FieldError | undefined, objWatch[in_strName], isSubmitted);
 
   return (
     <FormSection title="Información del Asegurado">
@@ -343,7 +346,7 @@ function SubInfoAsegurado({
         <ZdsSelect label="Realiza exportaciones" name="frm_aseg_realiza_exportaciones_flag" control={form.control} rules={{ required: 'Campo requerido' }} options={OPTIONS.siNo} required error={fe('frm_aseg_realiza_exportaciones_flag')} />
       </div>
 
-      {w.frm_aseg_realiza_exportaciones_flag === 'SI' && (
+      {objWatch.frm_aseg_realiza_exportaciones_flag === 'SI' && (
         <div className="form-subsection">
           <div className="form-subsection-title">Detalle de exportaciones</div>
           <DetalleExportaciones value={exportaciones} onChange={onExportacionesChange} />
@@ -368,18 +371,18 @@ function InfoAsegurado({
   onCrearCliente: () => void;
 }) {
   const { control, formState: { errors, isSubmitted }, watch } = form;
-  const w = watch();
-  const fe = (n: keyof SolicitudCotizacionFormData) =>
-    fieldError(errors[n] as FieldError | undefined, w[n], isSubmitted);
+  const objWatch = watch();
+  const fe = (in_strName: keyof SolicitudCotizacionFormData) =>
+    fieldError(errors[in_strName] as FieldError | undefined, objWatch[in_strName], isSubmitted);
 
-  const { options: departamentos, loading: loadingDep } = useCollection(COLLECTION_DEFS.departamentos);
-  const { options: municipios, loading: loadingMun } = useCollection(
+  const { options: cllDepartments, loading: loadingDep } = useCollection(COLLECTION_DEFS.departamentos);
+  const { options: cllMunicipios, loading: loadingMun } = useCollection(
     COLLECTION_DEFS.municipiosAsegurado,
-    { frm_aseg_departamento: w.frm_aseg_departamento }
+    { frm_aseg_departamento: objWatch.frm_aseg_departamento }
   );
 
-  const locked = tiaStatus === 'found';
-  const showFields = tiaStatus === 'found' || tiaStatus === 'createNew';
+  const blnLocked = tiaStatus === 'found';
+  const blnShowFields = tiaStatus === 'found' || tiaStatus === 'createNew';
 
   return (
     <FormSection title="Datos del Asegurado">
@@ -395,23 +398,23 @@ function InfoAsegurado({
 
       <TiaBanner status={tiaStatus} onCrearCliente={onCrearCliente} />
 
-      {showFields && (
+      {blnShowFields && (
         <>
           <div className="form-row cols-2">
-            <ZdsInput label="Nombre / Razón social" name="frm_aseg_nombres_completos" control={control} rules={{ required: 'Campo requerido' }} required error={fe('frm_aseg_nombres_completos')} readOnly={locked} />
-            <ZdsSelect label="Tipo de empresa" name="frm_aseg_tipo_empresa" control={control} options={OPTIONS.tipoEmpresa} disabled={locked} />
+            <ZdsInput label="Nombre / Razón social" name="frm_aseg_nombres_completos" control={control} rules={{ required: 'Campo requerido' }} required error={fe('frm_aseg_nombres_completos')} readOnly={blnLocked} />
+            <ZdsSelect label="Tipo de empresa" name="frm_aseg_tipo_empresa" control={control} options={OPTIONS.tipoEmpresa} disabled={blnLocked} />
           </div>
 
           <div className="form-row cols-3">
-            <ZdsDate label="Fecha de constitución" name="frm_aseg_fecha_constitucion" control={control} readOnly={locked} />
-            <ZdsInput label="Teléfono" name="frm_aseg_telefono" control={control} rules={{ pattern: { value: /^\d{7,12}$/, message: 'Teléfono inválido' } }} error={fe('frm_aseg_telefono')} readOnly={locked} />
-            <ZdsInput label="Correo para facturación" name="frm_aseg_correo_facturacion" control={control} rules={{ pattern: { value: /^[^\s@]+@[^\s@]+\.[^\s@]+$/, message: 'Correo inválido' } }} inputType="email" error={fe('frm_aseg_correo_facturacion')} readOnly={locked} />
+            <ZdsDate label="Fecha de constitución" name="frm_aseg_fecha_constitucion" control={control} readOnly={blnLocked} />
+            <ZdsInput label="Teléfono" name="frm_aseg_telefono" control={control} rules={{ pattern: { value: /^\d{7,12}$/, message: 'Teléfono inválido' } }} error={fe('frm_aseg_telefono')} readOnly={blnLocked} />
+            <ZdsInput label="Correo para facturación" name="frm_aseg_correo_facturacion" control={control} rules={{ pattern: { value: /^[^\s@]+@[^\s@]+\.[^\s@]+$/, message: 'Correo inválido' } }} inputType="email" error={fe('frm_aseg_correo_facturacion')} readOnly={blnLocked} />
           </div>
 
           <div className="form-row cols-3">
-            <ZdsSelect label="Departamento" name="frm_aseg_departamento" control={control} options={departamentos} loading={loadingDep} disabled={locked} />
-            <ZdsSelect label="Municipio" name="frm_aseg_municipio" control={control} options={municipios} loading={loadingMun} placeholder={w.frm_aseg_departamento ? 'Seleccione...' : 'Seleccione un departamento primero'} disabled={locked} />
-            <ZdsInput label="Dirección" name="frm_aseg_direccion" control={control} rules={{ required: 'Campo requerido' }} required error={fe('frm_aseg_direccion')} readOnly={locked} />
+            <ZdsSelect label="Departamento" name="frm_aseg_departamento" control={control} options={cllDepartments} loading={loadingDep} disabled={blnLocked} />
+            <ZdsSelect label="Municipio" name="frm_aseg_municipio" control={control} options={cllMunicipios} loading={loadingMun} placeholder={objWatch.frm_aseg_departamento ? 'Seleccione...' : 'Seleccione un departamento primero'} disabled={blnLocked} />
+            <ZdsInput label="Dirección" name="frm_aseg_direccion" control={control} rules={{ required: 'Campo requerido' }} required error={fe('frm_aseg_direccion')} readOnly={blnLocked} />
           </div>
 
           <div className="form-row cols-1">
@@ -428,32 +431,33 @@ function InfoAsegurado({
 // ---------------------------------------------------------------------------
 function DatosCotizacion({ form }: { form: Form }) {
   const { control, formState: { errors, isSubmitted }, watch, setValue } = form;
-  const w = watch();
-  const fe = (n: keyof SolicitudCotizacionFormData) =>
-    fieldError(errors[n] as FieldError | undefined, w[n], isSubmitted);
+  const objWatch = watch();
+  const fe = (in_strName: keyof SolicitudCotizacionFormData) =>
+    fieldError(errors[in_strName] as FieldError | undefined, objWatch[in_strName], isSubmitted);
 
-  const { options: naicOptions, loading: loadingNaic } = useCollection(
+  const { options: cllNaic, loading: loadingNaic } = useCollection(
     COLLECTION_DEFS.actividadNaic,
     {}  // PMQL estático "CO", watchValues vacío para activarlo
   );
 
-  // Auto-fill código y nombre al seleccionar la actividad NAIC
+  // Autocompletamos código y nombre al seleccionar la actividad NAIC
   useEffect(() => {
-    if (!w.frm_cot_actividad_naic) return;
-    setValue('frm_cot_codigo_naic', w.frm_cot_actividad_naic);
-    const opt = naicOptions.find(o => o.value === w.frm_cot_actividad_naic);
-    if (opt) setValue('frm_cot_nombre_ciiu', opt.label);
+    if (!objWatch.frm_cot_actividad_naic) return;
+    setValue('frm_cot_codigo_naic', objWatch.frm_cot_actividad_naic);
+    const objOpt = cllNaic.find(objItem => objItem.value === objWatch.frm_cot_actividad_naic);
+    if (objOpt) setValue('frm_cot_nombre_ciiu', objOpt.label);
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [w.frm_cot_actividad_naic]);
+  }, [objWatch.frm_cot_actividad_naic]);
 
+  // Calculamos el fin de vigencia automáticamente (365 días)
   useEffect(() => {
-    if (!w.frm_cot_fecha_inicio_vigencia) return;
-    const d = new Date(w.frm_cot_fecha_inicio_vigencia);
-    d.setFullYear(d.getFullYear() + 1);
-    d.setDate(d.getDate() - 1);
-    setValue('frm_cot_fecha_fin_vigencia', d.toISOString().split('T')[0]);
+    if (!objWatch.frm_cot_fecha_inicio_vigencia) return;
+    const datEnd = new Date(objWatch.frm_cot_fecha_inicio_vigencia);
+    datEnd.setFullYear(datEnd.getFullYear() + 1);
+    datEnd.setDate(datEnd.getDate() - 1);
+    setValue('frm_cot_fecha_fin_vigencia', datEnd.toISOString().split('T')[0]);
     setValue('frm_cot_dias_inicio_fin_vigencia', 365);
-  }, [w.frm_cot_fecha_inicio_vigencia, setValue]);
+  }, [objWatch.frm_cot_fecha_inicio_vigencia, setValue]);
 
   return (
     <FormSection title="Datos de la Cotización">
@@ -464,7 +468,7 @@ function DatosCotizacion({ form }: { form: Form }) {
       </div>
 
       <div className="form-row cols-1">
-        <ZdsSelect label="Actividad del asegurado principal (NAIC)" name="frm_cot_actividad_naic" control={control} rules={{ required: 'Campo requerido' }} options={naicOptions} loading={loadingNaic} required error={fe('frm_cot_actividad_naic')} />
+        <ZdsSelect label="Actividad del asegurado principal (NAIC)" name="frm_cot_actividad_naic" control={control} rules={{ required: 'Campo requerido' }} options={cllNaic} loading={loadingNaic} required error={fe('frm_cot_actividad_naic')} />
       </div>
 
       <div className="form-row cols-3">
@@ -484,7 +488,7 @@ function DatosCotizacion({ form }: { form: Form }) {
         <ZdsSelect label="Siniestralidad" name="frm_cot_siniestralidad_flag" control={control} options={OPTIONS.siNo} />
       </div>
 
-      {w.frm_cot_siniestralidad_flag === 'SI' && (
+      {objWatch.frm_cot_siniestralidad_flag === 'SI' && (
         <div className="form-row cols-2">
           <ZdsDate label="Siniestralidad reportada desde" name="frm_cot_siniestralidad_fecha_desde" control={control} />
           <ZdsDate label="Siniestralidad reportada hasta" name="frm_cot_siniestralidad_fecha_hasta" control={control} />
@@ -499,9 +503,9 @@ function DatosCotizacion({ form }: { form: Form }) {
 // ---------------------------------------------------------------------------
 function PlanPago({ form }: { form: Form }) {
   const { formState: { errors, isSubmitted }, watch } = form;
-  const w = watch();
-  const fe = (n: keyof SolicitudCotizacionFormData) =>
-    fieldError(errors[n] as FieldError | undefined, w[n], isSubmitted);
+  const objWatch = watch();
+  const fe = (in_strName: keyof SolicitudCotizacionFormData) =>
+    fieldError(errors[in_strName] as FieldError | undefined, objWatch[in_strName], isSubmitted);
 
   return (
     <FormSection title="Plan de Pago">
@@ -522,15 +526,15 @@ function PlanPago({ form }: { form: Form }) {
 // ---------------------------------------------------------------------------
 function RevisionMora({ form }: { form: Form }) {
   const { formState: { errors, isSubmitted }, watch } = form;
-  const w = watch();
-  const fe = (n: keyof SolicitudCotizacionFormData) =>
-    fieldError(errors[n] as FieldError | undefined, w[n], isSubmitted);
+  const objWatch = watch();
+  const fe = (in_strName: keyof SolicitudCotizacionFormData) =>
+    fieldError(errors[in_strName] as FieldError | undefined, objWatch[in_strName], isSubmitted);
 
   return (
     <FormSection title="Revisión Mora">
       <div className="form-row cols-2">
         <ZdsSelect label="¿El cliente se encuentra en mora?" name="frm_revision_mora_cliente_mora" control={form.control} rules={{ required: 'Campo requerido' }} options={OPTIONS.clienteMora} required error={fe('frm_revision_mora_cliente_mora')} />
-        {w.frm_revision_mora_cliente_mora === 'SI' && (
+        {objWatch.frm_revision_mora_cliente_mora === 'SI' && (
           <ZdsSelect label="Decisión" name="frm_revision_mora_decision" control={form.control} rules={{ required: 'Campo requerido' }} options={OPTIONS.decisionMora} required error={fe('frm_revision_mora_decision')} />
         )}
       </div>
@@ -547,12 +551,12 @@ function RevisionMora({ form }: { form: Form }) {
 export default function SolicitudCotizacionCuw() {
   const { task, loading, error, submitting, completeTask } = useTask();
 
-  const [sent, setSent] = useState(false);
-  const [tomadorTia, setTomadorTia] = useState<TiaStatus>('idle');
-  const [aseguradoTia, setAseguradoTia] = useState<TiaStatus>('idle');
-  const [aseguradosAdicionales, setAseguradosAdicionales] = useState<AseguradoAdicional[]>([]);
-  const [valoresDeducibles, setValoresDeducibles] = useState<ValorDeducible[]>(INITIAL_VALORES);
-  const [exportaciones, setExportaciones] = useState<ExportacionRow[]>([]);
+  const [blnSent, setBlnSent] = useState(false);
+  const [strTomadorTia, setStrTomadorTia] = useState<TiaStatus>('idle');
+  const [strAseguradoTia, setStrAseguradoTia] = useState<TiaStatus>('idle');
+  const [lstAseguradosAdicionales, setLstAseguradosAdicionales] = useState<AseguradoAdicional[]>([]);
+  const [lstValoresDeducibles, setLstValoresDeducibles] = useState<ValorDeducible[]>(INITIAL_VALORES);
+  const [lstExportaciones, setLstExportaciones] = useState<ExportacionRow[]>([]);
 
   const form = useForm<SolicitudCotizacionFormData>({
     mode: 'onChange',
@@ -577,86 +581,88 @@ export default function SolicitudCotizacionCuw() {
     },
   });
 
+  // Pre-poblamos el formulario y las tablas con los datos del caso
   useEffect(() => {
     if (!task?.data) return;
-    const d = task.data as Partial<SolicitudCotizacionFormData> & {
+    const objData = task.data as Partial<SolicitudCotizacionFormData> & {
       frm_lista_asegurados_adicionales?: AseguradoAdicional[];
       frm_valores_asegurados_deducibles?: ValorDeducible[];
       frm_lista_detalle_exportaciones?: ExportacionRow[];
     };
-    Object.entries(d).forEach(([key, val]) => {
-      if (val !== null && val !== undefined) {
-        form.setValue(key as keyof SolicitudCotizacionFormData, val as never);
+    Object.entries(objData).forEach(([strKey, objVal]) => {
+      if (objVal !== null && objVal !== undefined) {
+        form.setValue(strKey as keyof SolicitudCotizacionFormData, objVal as never);
       }
     });
-    if (Array.isArray(d.frm_lista_asegurados_adicionales)) {
-      setAseguradosAdicionales(d.frm_lista_asegurados_adicionales);
+    if (Array.isArray(objData.frm_lista_asegurados_adicionales)) {
+      setLstAseguradosAdicionales(objData.frm_lista_asegurados_adicionales);
     }
-    if (Array.isArray(d.frm_valores_asegurados_deducibles) && d.frm_valores_asegurados_deducibles.length === 5) {
-      setValoresDeducibles(d.frm_valores_asegurados_deducibles);
+    if (Array.isArray(objData.frm_valores_asegurados_deducibles) && objData.frm_valores_asegurados_deducibles.length === 5) {
+      setLstValoresDeducibles(objData.frm_valores_asegurados_deducibles);
     }
-    if (Array.isArray(d.frm_lista_detalle_exportaciones)) {
-      setExportaciones(d.frm_lista_detalle_exportaciones);
+    if (Array.isArray(objData.frm_lista_detalle_exportaciones)) {
+      setLstExportaciones(objData.frm_lista_detalle_exportaciones);
     }
   }, [task, form]);
 
-  // Al cambiar el número de documento, limpiar el estado TIA para poder consultar otro
-  const tomDoc = form.watch('frm_tom_num_documento');
-  const asegDoc = form.watch('frm_aseg_num_documento');
+  // Al cambiar el número de documento, limpiamos el estado TIA para poder consultar otro
+  const strTomDoc = form.watch('frm_tom_num_documento');
+  const strAsegDoc = form.watch('frm_aseg_num_documento');
   useEffect(() => {
-    setTomadorTia('idle');
-  }, [tomDoc]);
+    setStrTomadorTia('idle');
+  }, [strTomDoc]);
   useEffect(() => {
-    setAseguradoTia('idle');
-  }, [asegDoc]);
+    setStrAseguradoTia('idle');
+  }, [strAsegDoc]);
 
-  const handleConsultar = async (prefix: 'frm_tom' | 'frm_aseg', setStatus: (s: TiaStatus) => void) => {
-    const tipoDoc = form.getValues(`${prefix}_tipo_documento` as keyof SolicitudCotizacionFormData) as string ?? '';
-    const numDoc = form.getValues(`${prefix}_num_documento` as keyof SolicitudCotizacionFormData) as string ?? '';
-    const tokenTia = (form.getValues as (k: string) => string)('respuesta_token_tia') ?? '';
+  const handleConsultar = async (in_strPrefix: 'frm_tom' | 'frm_aseg', in_setStatus: (s: TiaStatus) => void) => {
+    const strTipoDoc = form.getValues(`${in_strPrefix}_tipo_documento` as keyof SolicitudCotizacionFormData) as string ?? '';
+    const strNumDoc = form.getValues(`${in_strPrefix}_num_documento` as keyof SolicitudCotizacionFormData) as string ?? '';
+    const strTokenTia = (form.getValues as (k: string) => string)('respuesta_token_tia') ?? '';
 
-    if (!numDoc) { alert('Ingrese el número de documento primero.'); return; }
-    if (!tokenTia) console.warn('[watcher] respuesta_token_tia está vacío');
+    if (!strNumDoc) { alert('Ingrese el número de documento primero.'); return; }
+    if (!strTokenTia) console.warn('[watcher] respuesta_token_tia está vacío');
 
-    setStatus('loading');
+    in_setStatus('loading');
     try {
-      const result = await consultarCliente(tipoDoc, numDoc, tokenTia);
-      if (result?.value === null || result?.value === undefined) {
-        setStatus('notFound');
+      const objResult = await consultarCliente(strTipoDoc, strNumDoc, strTokenTia);
+      if (objResult?.value === null || objResult?.value === undefined) {
+        in_setStatus('notFound');
       } else {
-        mapTiaFields(result.value, prefix, form);
-        setStatus('found');
+        mapTiaFields(objResult.value, in_strPrefix, form);
+        in_setStatus('found');
       }
-    } catch (e) {
-      console.error('[watcher] Error consultando cliente:', e);
-      setStatus('idle');
-      alert(`Error al consultar cliente: ${(e as Error).message}`);
+    } catch (excError) {
+      console.error('[watcher] Error consultando cliente:', excError);
+      in_setStatus('idle');
+      alert(`Error al consultar cliente: ${(excError as Error).message}`);
     }
   };
 
-  const onSubmit = async (data: SolicitudCotizacionFormData) => {
+  const onSubmit = async (in_objData: SolicitudCotizacionFormData) => {
     try {
-      const raw = data as unknown as Record<string, unknown>;
-      const payload: Record<string, unknown> = {};
-      for (const [k, v] of Object.entries(raw)) {
-        if (!k.startsWith('_')) payload[k] = v;
+      // Copiamos los datos omitiendo los campos internos (_) y adjuntamos las tablas
+      const objRaw = in_objData as unknown as Record<string, unknown>;
+      const dicPayload: Record<string, unknown> = {};
+      for (const [strKey, objVal] of Object.entries(objRaw)) {
+        if (!strKey.startsWith('_')) dicPayload[strKey] = objVal;
       }
-      payload.frm_lista_asegurados_adicionales = aseguradosAdicionales;
-      payload.frm_valores_asegurados_deducibles = mapValoresToPm4(valoresDeducibles, data.frm_cot_moneda ?? 'COP');
-      payload.frm_lista_detalle_exportaciones = exportaciones;
-      console.log('[submit] Enviando a PM4:', payload);
-      await completeTask(payload);
-      setSent(true);
-    } catch (e) {
-      console.error('[submit] Error PM4:', e);
-      alert(`Error al enviar: ${(e as Error).message}`);
+      dicPayload.frm_lista_asegurados_adicionales = lstAseguradosAdicionales;
+      dicPayload.frm_valores_asegurados_deducibles = mapValoresToPm4(lstValoresDeducibles, in_objData.frm_cot_moneda ?? 'COP');
+      dicPayload.frm_lista_detalle_exportaciones = lstExportaciones;
+      console.log('[submit] Enviando a PM4:', dicPayload);
+      await completeTask(dicPayload);
+      setBlnSent(true);
+    } catch (excError) {
+      console.error('[submit] Error PM4:', excError);
+      alert(`Error al enviar: ${(excError as Error).message}`);
     }
   };
 
   if (loading) return <div className="screen-loading"><ZrLoader /></div>;
   if (error) return <ZrAlert config="negative" {...({ 'hide-close': true } as object)}>Error cargando la tarea: {error}</ZrAlert>;
 
-  if (sent) {
+  if (blnSent) {
     return (
       <div className="screen-wrapper">
         <ScreenHeader title="Solicitud de Cotización CUW" />
@@ -672,17 +678,18 @@ export default function SolicitudCotizacionCuw() {
     );
   }
 
-  const cotizacion = form.watch('frm_num_cotizacion_cuw_col') ?? task?.process_request_id ?? '—';
-  const caso = form.watch('frm_caso_cuw_col') ?? '—';
-  const tomadorEsAsegurado = form.watch('frm_tom_asegurado_es_tomador_flag');
+  // Datos de cabecera para el encabezado
+  const strQuote = form.watch('frm_num_cotizacion_cuw_col') ?? task?.process_request_id ?? '—';
+  const strCaso = form.watch('frm_caso_cuw_col') ?? '—';
+  const strTomadorEsAsegurado = form.watch('frm_tom_asegurado_es_tomador_flag');
 
   return (
     <div className="screen-wrapper">
       <ScreenHeader
         title="Solicitud de Cotización CUW"
         subtitle={[
-          cotizacion ? `Cotización # ${cotizacion}` : null,
-          caso ? `Caso # ${caso}` : null,
+          strQuote ? `Cotización # ${strQuote}` : null,
+          strCaso ? `Caso # ${strCaso}` : null,
         ]}
       />
 
@@ -692,30 +699,30 @@ export default function SolicitudCotizacionCuw() {
 
           <InfoTomador
             form={form}
-            tiaStatus={tomadorTia}
-            onConsultar={() => handleConsultar('frm_tom', setTomadorTia)}
-            onCrearCliente={() => setTomadorTia('createNew')}
+            tiaStatus={strTomadorTia}
+            onConsultar={() => handleConsultar('frm_tom', setStrTomadorTia)}
+            onCrearCliente={() => setStrTomadorTia('createNew')}
           />
 
-          <SubInfoAsegurado form={form} exportaciones={exportaciones} onExportacionesChange={setExportaciones} />
+          <SubInfoAsegurado form={form} exportaciones={lstExportaciones} onExportacionesChange={setLstExportaciones} />
 
-          {tomadorEsAsegurado !== 'SI' && (
+          {strTomadorEsAsegurado !== 'SI' && (
             <InfoAsegurado
               form={form}
-              tiaStatus={aseguradoTia}
-              onConsultar={() => handleConsultar('frm_aseg', setAseguradoTia)}
-              onCrearCliente={() => setAseguradoTia('createNew')}
+              tiaStatus={strAseguradoTia}
+              onConsultar={() => handleConsultar('frm_aseg', setStrAseguradoTia)}
+              onCrearCliente={() => setStrAseguradoTia('createNew')}
             />
           )}
 
           <FormSection title="Asegurados Adicionales">
-            <AseguradosAdicionales value={aseguradosAdicionales} onChange={setAseguradosAdicionales} />
+            <AseguradosAdicionales value={lstAseguradosAdicionales} onChange={setLstAseguradosAdicionales} />
           </FormSection>
 
           <DatosCotizacion form={form} />
 
           <FormSection title="Valores Asegurados y Deducibles">
-            <ValoresDeducibles value={valoresDeducibles} onChange={setValoresDeducibles} />
+            <ValoresDeducibles value={lstValoresDeducibles} onChange={setLstValoresDeducibles} />
           </FormSection>
 
           <PlanPago form={form} />

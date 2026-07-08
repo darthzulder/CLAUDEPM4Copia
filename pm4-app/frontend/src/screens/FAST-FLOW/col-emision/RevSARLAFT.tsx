@@ -18,7 +18,7 @@ import {
 } from './variables';
 
 // ──────────────────────────────────────────────────────────────
-// Types
+// Tipos
 // ──────────────────────────────────────────────────────────────
 interface PreviewState {
   fileId: number;
@@ -32,50 +32,52 @@ interface PreviewState {
 // ──────────────────────────────────────────────────────────────
 export default function RevSARLAFT() {
   const { task, loading, error, submitting, completeTask } = useTask();
-  const [preview, setPreview]   = useState<PreviewState | null>(null);
-  const [infoOpen, setInfoOpen] = useState(false);
-  const [sent, setSent]         = useState(false);
+  const [objPreview, setObjPreview]   = useState<PreviewState | null>(null);
+  const [blnInfoOpen, setBlnInfoOpen] = useState(false);
+  const [blnSent, setBlnSent]         = useState(false);
 
-  const data      = (task?.data ?? {}) as DocSarlaftData;
-  const requestId = task?.process_request_id ?? null;
-  const { files, loading: filesLoading } = useRequestFiles(requestId);
+  const objData      = (task?.data ?? {}) as DocSarlaftData;
+  const intRequestId = task?.process_request_id ?? null;
+  const { files, loading: filesLoading } = useRequestFiles(intRequestId);
 
-  const rawPerfil = data.frm_sarlaft_perfil as string | undefined;
-  const perfil: SarlaftPerfil | null =
-    rawPerfil === 'SIMPLIFICADO' || rawPerfil === 'ESTANDAR' || rawPerfil === 'INTENSIFICADO'
-      ? rawPerfil
+  // Normalizamos el perfil SARLAFT recibido en la tarea
+  const strRawProfile = objData.frm_sarlaft_perfil as string | undefined;
+  const strProfile: SarlaftPerfil | null =
+    strRawProfile === 'SIMPLIFICADO' || strRawProfile === 'ESTANDAR' || strRawProfile === 'INTENSIFICADO'
+      ? strRawProfile
       : null;
 
-  const docs = DOCS_POR_PERFIL[perfil ?? 'INTENSIFICADO'];
+  // Documentos requeridos segun el perfil
+  const lstDocs = DOCS_POR_PERFIL[strProfile ?? 'INTENSIFICADO'];
 
   // Resuelve el file_id para cada documento:
   // 1.° intenta la variable de proceso (task.data[doc.key])
   // 2.° cae a la posición en la lista de archivos del request
-  function resolveDoc(key: string, idx: number): { fileId: number | null; fileName: string } {
-    const fromTask = resolveFileId((data as Record<string, unknown>)[key]);
-    if (fromTask) {
-      const match = files.find((f) => f.id === fromTask);
-      return { fileId: fromTask, fileName: match?.file_name ?? `Documento ${idx + 1}` };
+  function resolveDoc(in_strKey: string, in_intIdx: number): { fileId: number | null; fileName: string } {
+    const intFromTask = resolveFileId((objData as Record<string, unknown>)[in_strKey]);
+    if (intFromTask) {
+      const objMatch = files.find((f) => f.id === intFromTask);
+      return { fileId: intFromTask, fileName: objMatch?.file_name ?? `Documento ${in_intIdx + 1}` };
     }
-    const fallback = files[idx];
-    if (fallback) return { fileId: fallback.id, fileName: fallback.file_name };
+    const objFallback = files[in_intIdx];
+    if (objFallback) return { fileId: objFallback.id, fileName: objFallback.file_name };
     return { fileId: null, fileName: '' };
   }
 
   // ── Confirmar verificación ─────────────────────────────────
   async function handleVerificado() {
     try {
-      const { _user: _u, _request: _r, ...taskData } = (task?.data ?? {}) as Record<string, unknown>;
-      await completeTask({ ...taskData });
-      setSent(true);
-    } catch (err) {
-      console.error('[RevSARLAFT] Error al confirmar:', err);
+      const { _user: _u, _request: _r, ...objTaskData } = (task?.data ?? {}) as Record<string, unknown>;
+      await completeTask({ ...objTaskData });
+      setBlnSent(true);
+    } catch (excError) {
+      console.error('[RevSARLAFT] Error al confirmar:', excError);
       alert('Error al confirmar la verificación. Revise la consola.');
     }
   }
 
   // ── Estado enviado ─────────────────────────────────────────
-  if (sent) {
+  if (blnSent) {
     return (
       <div className="screen-wrapper">
         <ScreenHeader title="VERIFICAR DOCUMENTOS SARLAFT" />
@@ -111,8 +113,9 @@ export default function RevSARLAFT() {
     );
   }
 
-  const numCot  = data.frm_num_cotizacion ?? data.frm_gen_num_cotizacion;
-  const numCaso = data.frm_caso;
+  // Datos de cabecera para el encabezado
+  const strQuoteNum  = objData.frm_num_cotizacion ?? objData.frm_gen_num_cotizacion;
+  const strCaseNum = objData.frm_caso;
 
   return (
     <div className="screen-wrapper">
@@ -122,13 +125,13 @@ export default function RevSARLAFT() {
         </div>
       )}
 
-      {/* Header */}
+      {/* Cabecera */}
       <ScreenHeader
         title="VERIFICAR DOCUMENTOS SARLAFT"
         subtitle={[
-          numCot && `Cotización # ${numCot}`,
-          numCaso && `Caso # ${numCaso}`,
-          perfil && `Perfil: ${perfil.charAt(0) + perfil.slice(1).toLowerCase()}`
+          strQuoteNum && `Cotización # ${strQuoteNum}`,
+          strCaseNum && `Caso # ${strCaseNum}`,
+          strProfile && `Perfil: ${strProfile.charAt(0) + strProfile.slice(1).toLowerCase()}`
         ]}
       />
 
@@ -138,7 +141,7 @@ export default function RevSARLAFT() {
 
           <FormSection
             title="Documentos SARLAFT Cargados"
-            action={<ZrButton config="secondary:xs" icon="info:line" onClick={() => setInfoOpen(true)} />}
+            action={<ZrButton config="secondary:xs" icon="info:line" onClick={() => setBlnInfoOpen(true)} />}
             footer={
               <ActionBar>
                 <ZrButton
@@ -152,26 +155,27 @@ export default function RevSARLAFT() {
               </ActionBar>
             }
           >
-            {!perfil && (
+            {!strProfile && (
               <ZrAlert config="info" {...({ 'hide-close': true } as object)}>
                 No se detectó perfil SARLAFT en la tarea. Se muestran todos los documentos posibles.
               </ZrAlert>
             )}
 
             <DocList mode="upload">
-              {docs.map((doc, i) => {
-                const { fileId, fileName } = resolveDoc(doc.key, i);
+              {lstDocs.map((objDoc, intI) => {
+                // Resolvemos el archivo asociado a este documento
+                const { fileId: intFileId, fileName: strFileName } = resolveDoc(objDoc.key, intI);
                 return (
                   <DocItem
-                    key={doc.key}
+                    key={objDoc.key}
                     mode="upload"
-                    index={i + 1}
-                    descripcion={doc.descripcion}
-                    vigencia={doc.vigencia}
-                    fileId={fileId}
-                    fileName={fileName}
+                    index={intI + 1}
+                    descripcion={objDoc.descripcion}
+                    vigencia={objDoc.vigencia}
+                    fileId={intFileId}
+                    fileName={strFileName}
                     onPreview={() => {
-                      if (fileId) setPreview({ fileId, descripcion: doc.descripcion, fileName });
+                      if (intFileId) setObjPreview({ fileId: intFileId, descripcion: objDoc.descripcion, fileName: strFileName });
                     }}
                   />
                 );
@@ -189,16 +193,16 @@ export default function RevSARLAFT() {
       </div>
 
       {/* Modal de ayuda */}
-      <ZrModal model={infoOpen} onChange={(v: boolean) => setInfoOpen(v)} style={{ ['--z-modal--backdrop' as any]: 'color-mix(in srgb, var(--z-modal-backdrop) 45%, transparent)' }}>
+      <ZrModal model={blnInfoOpen} onChange={(v: boolean) => setBlnInfoOpen(v)} style={{ ['--z-modal--backdrop' as any]: 'color-mix(in srgb, var(--z-modal-backdrop) 45%, transparent)' }}>
         <HelpModal title="Directrices SARLAFT" subtitle="Documentos requeridos según el perfil del tomador">
-          {DIRECTRICES.map(({ perfil: p, label, docs: dList }) => (
-            <ZrCard key={p} {...({ config: 'grid' } as object)}>
+          {DIRECTRICES.map(({ perfil: strProfileItem, label: strLabel, docs: lstDocItems }) => (
+            <ZrCard key={strProfileItem} {...({ config: 'grid' } as object)}>
               <div z-flex="75" z-align="left:center">
-                <strong>{label}</strong>
-                {perfil === p && <ZdsStatusBadge variant="info">Activo</ZdsStatusBadge>}
+                <strong>{strLabel}</strong>
+                {strProfile === strProfileItem && <ZdsStatusBadge variant="info">Activo</ZdsStatusBadge>}
               </div>
               <ol>
-                {dList.map((doc, i) => <li key={i}>{doc}</li>)}
+                {lstDocItems.map((strDoc, intI) => <li key={intI}>{strDoc}</li>)}
               </ol>
             </ZrCard>
           ))}
@@ -207,9 +211,9 @@ export default function RevSARLAFT() {
 
       {/* Modal de vista previa — ZrModal (ZDS) + PdfViewer */}
       <PreviewModal
-        isOpen={!!preview}
-        onClose={() => setPreview(null)}
-        previewDoc={preview}
+        isOpen={!!objPreview}
+        onClose={() => setObjPreview(null)}
+        previewDoc={objPreview}
       />
     </div>
   );

@@ -9,29 +9,31 @@ type TaskData = EstadoCorreoData & Record<string, unknown>;
 
 export default function EstadoCorreo() {
   const { task, loading, error, submitting, completeTask } = useTask();
-  const [sent, setSent] = useState(false);
-  const [showConfirm, setShowConfirm] = useState(false);
+  const [blnSent, setBlnSent] = useState(false);
+  const [blnShowConfirm, setBlnShowConfirm] = useState(false);
 
-  const data = (task?.data ?? {}) as TaskData;
-  const esExito = String(data.email_respuesta_envio ?? '') === '200';
+  const objData = (task?.data ?? {}) as TaskData;
+  // El envío fue exitoso cuando el código de respuesta es 200
+  const blnIsSuccess = String(objData.email_respuesta_envio ?? '') === '200';
 
   async function handleConfirm() {
-    setShowConfirm(false);
+    setBlnShowConfirm(false);
     try {
-      const raw = task?.data as Record<string, unknown> ?? {};
-      const payload: Record<string, unknown> = {};
-      for (const [k, v] of Object.entries(raw)) {
-        if (!k.startsWith('_')) payload[k] = v;
+      // Copiamos los datos del caso omitiendo los campos internos (_)
+      const objRaw = task?.data as Record<string, unknown> ?? {};
+      const dicPayload: Record<string, unknown> = {};
+      for (const [strKey, objVal] of Object.entries(objRaw)) {
+        if (!strKey.startsWith('_')) dicPayload[strKey] = objVal;
       }
-      await completeTask(payload);
-      setSent(true);
-    } catch (e) {
-      console.error('[EstadoCorreo] Error al continuar:', e);
+      await completeTask(dicPayload);
+      setBlnSent(true);
+    } catch (excError) {
+      console.error('[EstadoCorreo] Error al continuar:', excError);
       alert('Error al avanzar la tarea. Revise la consola.');
     }
   }
 
-  // ── Loading / Error ──────────────────────────────────────────────────────
+  // ── Carga / error ────────────────────────────────────────────────────────
   if (loading) {
     return (
       <div className="screen-wrapper">
@@ -48,15 +50,15 @@ export default function EstadoCorreo() {
     );
   }
 
-  // ── Sent ─────────────────────────────────────────────────────────────────
-  if (sent) {
+  // ── Estado enviado ───────────────────────────────────────────────────────
+  if (blnSent) {
     return (
       <div className="screen-wrapper">
         <ScreenHeader
           title="Estado de correo electrónico"
           subtitle={[
-            data.frm_gen_num_cotizacion && `Cotización # ${data.frm_gen_num_cotizacion}`,
-            data.frm_caso && `Caso # ${data.frm_caso}`
+            objData.frm_gen_num_cotizacion && `Cotización # ${objData.frm_gen_num_cotizacion}`,
+            objData.frm_caso && `Caso # ${objData.frm_caso}`
           ]}
         />
         <div className="email-status-content">
@@ -80,22 +82,22 @@ export default function EstadoCorreo() {
       <ScreenHeader
         title="Estado de correo electrónico"
         subtitle={[
-          data.frm_gen_num_cotizacion && `Cotización # ${data.frm_gen_num_cotizacion}`,
-          data.frm_caso && `Caso # ${data.frm_caso}`
+          objData.frm_gen_num_cotizacion && `Cotización # ${objData.frm_gen_num_cotizacion}`,
+          objData.frm_caso && `Caso # ${objData.frm_caso}`
         ]}
       />
 
       <div className="email-status-content">
-        {esExito ? (
+        {blnIsSuccess ? (
           <ResultCard variant="success" title="Envío de correo completado">
             <p>
               La <strong>notificación por correo electrónico</strong> de{' '}
-              <strong>{data.email_titulo_envio || '—'}</strong> se ha enviado correctamente.
+              <strong>{objData.email_titulo_envio || '—'}</strong> se ha enviado correctamente.
             </p>
-            {data.email_correos_exitosos && (
+            {objData.email_correos_exitosos && (
               <>
                 <p><strong>Correos enviados a:</strong></p>
-                <div className="email-status-badge">{data.email_correos_exitosos}</div>
+                <div className="email-status-badge">{objData.email_correos_exitosos}</div>
               </>
             )}
             <p className="email-status-note">
@@ -108,18 +110,18 @@ export default function EstadoCorreo() {
             <p>
               Se produjo un <strong>error</strong> al intentar enviar las notificaciones
               por correo electrónico de{' '}
-              <strong>{data.email_titulo_envio || '—'}</strong>.
+              <strong>{objData.email_titulo_envio || '—'}</strong>.
             </p>
-            {data.email_correos_fallidos && (
+            {objData.email_correos_fallidos && (
               <>
                 <p><strong>Correos con error:</strong></p>
-                <div className="email-status-badge email-status-badge--error">{data.email_correos_fallidos}</div>
+                <div className="email-status-badge email-status-badge--error">{objData.email_correos_fallidos}</div>
               </>
             )}
-            {data.email_correos_exitosos && (
+            {objData.email_correos_exitosos && (
               <>
                 <p><strong>Enviados correctamente:</strong></p>
-                <div className="email-status-badge">{data.email_correos_exitosos}</div>
+                <div className="email-status-badge">{objData.email_correos_exitosos}</div>
               </>
             )}
             <p className="email-status-note">
@@ -134,7 +136,7 @@ export default function EstadoCorreo() {
             icon="arrow-long-right:line"
             disabled={submitting}
             loading={submitting}
-            onClick={() => setShowConfirm(true)}
+            onClick={() => setBlnShowConfirm(true)}
           >
             CONTINUAR
           </ZrButton>
@@ -142,8 +144,8 @@ export default function EstadoCorreo() {
       </div>
 
       {/* Modal de confirmación */}
-      {showConfirm && (
-        <ZrModal model={showConfirm} onChange={(open: boolean) => setShowConfirm(open)}>
+      {blnShowConfirm && (
+        <ZrModal model={blnShowConfirm} onChange={(open: boolean) => setBlnShowConfirm(open)}>
           <h3 style={{ margin: '0 0 var(--zs-75)', font: 'var(--zf-h-20--700)', color: 'var(--z-text)' }}>
             ¿Estás seguro de continuar?
           </h3>
@@ -154,7 +156,7 @@ export default function EstadoCorreo() {
             Una vez confirmado, no podrá realizar cambios adicionales.
           </p>
           <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 'var(--zs-75)' }}>
-            <ZrButton config="secondary" onClick={() => setShowConfirm(false)}>Cancelar</ZrButton>
+            <ZrButton config="secondary" onClick={() => setBlnShowConfirm(false)}>Cancelar</ZrButton>
             <ZrButton config="primary:l" onClick={handleConfirm}>Sí, continuar</ZrButton>
           </div>
         </ZrModal>

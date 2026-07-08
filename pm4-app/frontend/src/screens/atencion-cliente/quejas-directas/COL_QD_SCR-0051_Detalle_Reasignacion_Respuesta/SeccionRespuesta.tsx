@@ -5,9 +5,10 @@ import DocSupportUploader from '../../../../components/DocSupportUploader';
 import { ZdsSelect, ZdsTextarea, ZdsInput, ZrAlert, ZrButton } from '../../../../components/fields/ZdsFields';
 import { useCollection } from '../../../../core/useCollection';
 import {
-  OPTIONS, ADJUNTO_KEYS, MAX_SOPORTES, COLLECTION_DEFS,
-  type DetalleReasignacionRespuestaFormData,
-} from './variables';
+  QD, QD_COLLECTIONS, SCR0051_OPTIONS_FAVOR as OPTIONS_FAVOR,
+  SCR0051_ADJUNTO_KEYS as ADJUNTO_KEYS, SCR0051_MAX_SOPORTES as MAX_SOPORTES,
+} from '../fields/fields';
+import type { DetalleReasignacionRespuestaFormData } from '../fields/fields';
 
 interface Props {
   form: UseFormReturn<DetalleReasignacionRespuestaFormData>;
@@ -22,15 +23,17 @@ interface Props {
 /** S8 Respuesta Técnica · S9 Soportes Internos · S10 Configuración de Respuesta. */
 export default function SeccionRespuesta({ form, fileRegistry, err, onVistaPrevia, onSolicitarProrroga, slaCritico, submitting }: Props) {
   const { control, watch } = form;
-  const w = watch();
+  // Tomamos una foto de los valores actuales del formulario.
+  const objWatch = watch();
 
   // RUL-0051-09 — "Acciones Tomadas" visible solo si la respuesta es a favor del Cliente.
-  const mostrarAcciones = w.qd_respuestaFavorDe === 'CLIENTE';
+  const blnShowActions = objWatch[QD.strReplyFavorOf] === 'CLIENTE';
 
   // ACT-0051-04 — flujo de prórroga en dos pasos: primero se elige el motivo, luego se envía.
-  const [modoProrroga, setModoProrroga] = useState(false);
-  const { options: motivoProrrogaOpts } = useCollection(COLLECTION_DEFS.motivoProrroga);
-  const puedeEnviarProrroga = !!w.qd_motivoProrroga;
+  const [blnExtensionMode, setBlnExtensionMode] = useState(false);
+  // Cargamos el catálogo de motivos de prórroga.
+  const { options: cllExtensionReason } = useCollection(QD_COLLECTIONS.extensionReason);
+  const blnCanSendExt = !!objWatch[QD.strExtensionReason];
 
   return (
     <>
@@ -39,9 +42,9 @@ export default function SeccionRespuesta({ form, fileRegistry, err, onVistaPrevi
       <FormSection title="Configuración de Respuesta">
         <div className="form-row cols-2">
           <ZdsSelect
-            name="qd_respuestaFavorDe" control={control} label="Respuesta a favor de"
-            options={OPTIONS.favor} required
-            rules={{ required: 'Campo requerido' }} error={err('qd_respuestaFavorDe')}
+            name={QD.strReplyFavorOf} control={control} label="Respuesta a favor de"
+            options={OPTIONS_FAVOR} required
+            rules={{ required: 'Campo requerido' }} error={err(QD.strReplyFavorOf)}
             helpText="⚠ Pendiente catálogo (CAT-FAVOR). Indica a quién favorece la resolución."
           />
           <div />
@@ -51,10 +54,10 @@ export default function SeccionRespuesta({ form, fileRegistry, err, onVistaPrevi
       {/* ── S8 · Elaboración de Respuesta Técnica (SEC-054) ── */}
       <FormSection title="Elaboración de Respuesta Técnica">
         {/* Visible solo si el Analista SAC devolvió el caso con observaciones (FLD-131, SCR-008). */}
-        {!!w.qd_observacionesSAC?.trim() && (
+        {!!objWatch[QD.strSacRemarks]?.trim() && (
           <div className="form-row cols-1">
             <ZdsTextarea
-              name="qd_observacionesSAC" control={control} label="Observaciones SAC" readOnly
+              name={QD.strSacRemarks} control={control} label="Observaciones SAC" readOnly
               helpText="Devuelto por el Analista SAC en la revisión de respuesta."
             />
           </div>
@@ -62,17 +65,17 @@ export default function SeccionRespuesta({ form, fileRegistry, err, onVistaPrevi
 
         <div className="form-row cols-1">
           <ZdsTextarea
-            name="qd_respuestaCliente" control={control} label="Respuesta al Cliente (borrador)"
+            name={QD.strClientResponse} control={control} label="Respuesta al Cliente (borrador)"
             required maxLength={5000}
-            rules={{ required: 'Campo requerido' }} error={err('qd_respuestaCliente')}
+            rules={{ required: 'Campo requerido' }} error={err(QD.strClientResponse)}
             helpText="Este texto irá en la carta PDF de respuesta final (RUL-0051-05)."
           />
         </div>
 
-        {mostrarAcciones && (
+        {blnShowActions && (
           <div className="form-row cols-1">
             <ZdsTextarea
-              name="qd_accionesTomadas" control={control} label="Acciones Tomadas"
+              name={QD.strActionsTaken} control={control} label="Acciones Tomadas"
               maxLength={2000}
               helpText="Visible porque la respuesta es a favor del Cliente (RUL-0051-09)."
             />
@@ -80,7 +83,7 @@ export default function SeccionRespuesta({ form, fileRegistry, err, onVistaPrevi
         )}
 
         <div className="form-row cols-1">
-          <ZdsInput name="qd_reconocimiento" control={control} label="¿Reconocimiento al cliente?" readOnly
+          <ZdsInput name={QD.strAcknowledgment} control={control} label="¿Reconocimiento al cliente?" readOnly
             helpText="Se calcula en el back — solo lectura." />
         </div>
       </FormSection>
@@ -100,11 +103,11 @@ export default function SeccionRespuesta({ form, fileRegistry, err, onVistaPrevi
         />
         {/* ACT-0051-04 — al pedir prórroga se muestra el motivo (CAT-MOTIVO-PRORROGA); el
             botón Enviar aparece recién con el motivo elegido y hace submit SOLICITAR_PRORROGA. */}
-        {modoProrroga && (
+        {blnExtensionMode && (
           <div className="form-row cols-1" style={{ marginTop: 'var(--zs-75)' }}>
             <ZdsSelect
-              name="qd_motivoProrroga" control={control} label="Motivo de la prórroga"
-              options={motivoProrrogaOpts} withSearch required
+              name={QD.strExtensionReason} control={control} label="Motivo de la prórroga"
+              options={cllExtensionReason} withSearch required
               helpText="Catálogo CAT-MOTIVO-PRORROGA (motivo_prorr)."
             />
           </div>
@@ -114,19 +117,19 @@ export default function SeccionRespuesta({ form, fileRegistry, err, onVistaPrevi
           <ZrButton config="secondary" onClick={onVistaPrevia}>
             Vista Previa Respuesta Final
           </ZrButton>
-          {!modoProrroga ? (
+          {!blnExtensionMode ? (
             <ZrButton config="secondary"
               disabled={!slaCritico || submitting}
-              onClick={() => setModoProrroga(true)}>
+              onClick={() => setBlnExtensionMode(true)}>
               Solicitar Prórroga Regulatoria
             </ZrButton>
           ) : (
             <>
-              <ZrButton config="secondary" disabled={submitting} onClick={() => setModoProrroga(false)}>
+              <ZrButton config="secondary" disabled={submitting} onClick={() => setBlnExtensionMode(false)}>
                 Cancelar
               </ZrButton>
               <ZrButton config="positive"
-                disabled={!puedeEnviarProrroga || submitting} loading={submitting}
+                disabled={!blnCanSendExt || submitting} loading={submitting}
                 onClick={onSolicitarProrroga}>
                 Enviar Prórroga ▶
               </ZrButton>

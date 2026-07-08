@@ -12,7 +12,7 @@
 | Evento de apertura | SmartSupervision devuelve HTTP 400 **funcional** |
 | Acción de cierre | "Corregir y Reenviar" → SP1-T02 (reenvío M2) |
 | Slug / `?screen=` | `COL_QD_SCR-003_Correccion_Error_Funcional` |
-| Archivos de implementación | `CorreccionErrorFuncional.tsx`, `variables.ts` |
+| Archivos de implementación | `CorreccionErrorFuncional.tsx` (config centralizada en `fields/fields.ts`) |
 | Versión | 1.0 — 2026-06-30 |
 
 > **Nota de nomenclatura:** el SLUG solicitado fue `COL_QD_Corrección_Error_Funcional`. Se
@@ -56,31 +56,31 @@ anteriores (solo lectura) y un modal con el log completo del rechazo.
 
 | Campo (UI) | Variable | Tipo | Obligatorio | Fuente |
 |---|---|---|---|---|
-| Código de Error SFC | `qd_codigoErrorSFC` | `ZdsInput` readOnly | No | Anexo02 > SCR-003 > FLD-040 |
-| Campo Afectado | `qd_campoAfectado` | `ZdsInput` readOnly | No | Anexo02 > SCR-003 > FLD-041 |
-| Valor Rechazado | `qd_valorRechazado` | `ZdsInput` readOnly | No | Anexo02 > SCR-003 > FLD-042 |
-| Mensaje de Error SFC | `qd_mensajeErrorSFC` | `ZdsTextarea` readOnly | No | Anexo02 > SCR-003 > FLD-043 |
-| Intento N.° actual (M1/M2) | `qd_numeroIntentoM1M2` | `ZdsInput` readOnly | No | Anexo02 > SCR-003 > FLD-044 |
-| Fecha/Hora del rechazo | `qd_fechaRechazo` | `ZdsInput` readOnly | No | Anexo02 > SCR-003 > FLD-045 |
+| Código de Error SFC | `qd_strSfcErrorCode` | `ZdsInput` readOnly | No | Anexo02 > SCR-003 > FLD-040 |
+| Campo Afectado | `qd_strAffectedField` | `ZdsInput` readOnly | No | Anexo02 > SCR-003 > FLD-041 |
+| Valor Rechazado | `qd_strRejectedValue` | `ZdsInput` readOnly | No | Anexo02 > SCR-003 > FLD-042 |
+| Mensaje de Error SFC | `qd_strSfcErrorMessage` | `ZdsTextarea` readOnly | No | Anexo02 > SCR-003 > FLD-043 |
+| Intento N.° actual (M1/M2) | `qd_strM1M2AttemptNum` | `ZdsInput` readOnly | No | Anexo02 > SCR-003 > FLD-044 |
+| Fecha/Hora del rechazo | `qd_strRejectionDate` | `ZdsInput` readOnly | No | Anexo02 > SCR-003 > FLD-045 |
 
 ### S2 — Campo a Corregir (SEC-009, editable)
 
 | Campo (UI) | Variable | Tipo | Obligatorio | Fuente |
 |---|---|---|---|---|
-| Campo específico en corrección | `qd_campoCorreccion` | `ZdsInput` (texto) | **Sí** | Anexo02 > SCR-003 > FLD-046 |
-| Justificación de la corrección | `qd_justificacionCorreccion` | `ZdsTextarea` | No | Anexo02 > SCR-003 > FLD-047 |
+| Campo específico en corrección | `qd_strFieldCorrection` | `ZdsInput` (texto) | **Sí** | Anexo02 > SCR-003 > FLD-046 |
+| Justificación de la corrección | `qd_strCorrectionJustif` | `ZdsTextarea` | No | Anexo02 > SCR-003 > FLD-047 |
 
 ### S3 — Historial de Intentos (SEC-010, solo lectura)
 
 | Campo (UI) | Variable | Tipo | Obligatorio | Fuente |
 |---|---|---|---|---|
-| Historial de intentos anteriores | `qd_historialIntentos` | Tabla `ZrTable` (Intento \| Fecha \| Campo afectado \| Código error) | No | Anexo02 > SCR-003 > FLD-048 |
+| Historial de intentos anteriores | `qd_lstAttemptHistory` | Tabla `ZrTable` (Intento \| Fecha \| Campo afectado \| Código error) | No | Anexo02 > SCR-003 > FLD-048 |
 
 ### Metadato de flujo (no visible)
 
 | Campo | Variable | Tipo | Fuente |
 |---|---|---|---|
-| Acción/decisión BPMN | `qd_accion` | `'CORREGIR_REENVIAR' \| 'ESCALAR_SOPORTE'` | Inferido de ACT-003-01 / ACT-003-02 (ver §10) |
+| Acción/decisión BPMN | `qd_strAction` | `'CORREGIR_REENVIAR' \| 'ESCALAR_SOPORTE'` | Inferido de ACT-003-01 / ACT-003-02 (ver §10) |
 
 ---
 
@@ -88,9 +88,9 @@ anteriores (solo lectura) y un modal con el log completo del rechazo.
 
 | Validación | Comportamiento implementado | Fuente |
 |---|---|---|
-| Campo de corrección obligatorio | `rules={{ required }}` en `qd_campoCorreccion`; error tras submit | Anexo02 > SCR-003 > FLD-046 (Oblig. Sí) |
+| Campo de corrección obligatorio | `rules={{ required }}` en `qd_strFieldCorrection`; error tras submit | Anexo02 > SCR-003 > FLD-046 (Oblig. Sí) |
 | Campo debe ser **modificado** antes de reenviar | `campoModificado = correccion !== '' && correccion !== valorRechazado`; botón "Corregir y Reenviar" deshabilitado mientras sea falso | Anexo02 > SCR-003 > RUL-003-01 · Matrices > 2. Directrices fila 29 |
-| Sugerencia por múltiples intentos | Si `qd_numeroIntentoM1M2 >= 3` (`UMBRAL_INTENTOS`) se muestra alerta de advertencia sugiriendo escalar | Anexo02 > SCR-003 > RUL-003-02 |
+| Sugerencia por múltiples intentos | Si `qd_strM1M2AttemptNum >= 3` (`UMBRAL_INTENTOS`) se muestra alerta de advertencia sugiriendo escalar | Anexo02 > SCR-003 > RUL-003-02 |
 | Justificación máx. 2000 caracteres | `maxLength={2000}` en textarea | Suposición (límite estándar del proyecto; ver §10) |
 
 ---
@@ -100,7 +100,7 @@ anteriores (solo lectura) y un modal con el log completo del rechazo.
 | Mensaje | Condición | Implementación | Fuente |
 |---|---|---|---|
 | MSG-003-01 "Sin corrección" | El campo señalado no fue modificado | `ZrAlert config="info"` en S2 + botón de reenvío deshabilitado (`!campoModificado`) | Anexo02 > 06_Mensajes > MSG-003-01 |
-| MSG-003-02 "Múltiples intentos" | `qd_numeroIntentoM1M2 >= 3` | `ZrAlert config="alert"` en S1 | Anexo02 > 06_Mensajes > MSG-003-02 |
+| MSG-003-02 "Múltiples intentos" | `qd_strM1M2AttemptNum >= 3` | `ZrAlert config="alert"` en S1 | Anexo02 > 06_Mensajes > MSG-003-02 |
 | MSG-003-03 "Reenvío iniciado" | Tras reenviar con éxito | **No implementado en UI** — lo emite el BPM al avanzar a SP1-T02 tras `completeTask`. Ver §10 | Anexo02 > 06_Mensajes > MSG-003-03 |
 
 ---
@@ -122,7 +122,7 @@ anteriores (solo lectura) y un modal con el log completo del rechazo.
 | Panel de error con acento rojo | `FormSection color="var(--z-red)"` (igual que SCR-004) | Anexo02 > SCR-003 > tipo "Panel de error" |
 | Banner de error 400 funcional | `ZrAlert config="negative"` con código de intento | Anexo02 > SCR-003 (contexto/criterio de aceptación) |
 | "Ver Log Completo" abre modal | `ACT-003-03`: `ZrButton config="link"` → `ZrModal` con todos los campos read-only del rechazo | Anexo02 > SCR-003 > ACT-003-03 |
-| Etiqueta dinámica del campo a corregir | Label `Corrección — {qd_campoAfectado}` si llega el nombre del campo | Anexo02 > SCR-003 > FLD-046 (Control "Dinámico") |
+| Etiqueta dinámica del campo a corregir | Label `Corrección — {qd_strAffectedField}` si llega el nombre del campo | Anexo02 > SCR-003 > FLD-046 (Control "Dinámico") |
 | Historial vacío | Fila `.record-empty` "Sin intentos anteriores registrados" | Patrón del proyecto (shared.css) |
 | Estados loading/error/submitting | `ZrLoader`, `ZrAlert`, botones con `loading`/`disabled` desde `useTask()` | CLAUDE.md (convención) |
 
@@ -132,9 +132,9 @@ anteriores (solo lectura) y un modal con el log completo del rechazo.
 
 | Campo Origen | Campo Dependiente | Comportamiento | Fuente |
 |---|---|---|---|
-| `qd_valorRechazado` | `qd_campoCorreccion` | Habilita "Corregir y Reenviar" solo si la corrección difiere del valor rechazado | Anexo02 > SCR-003 > RUL-003-01 |
-| `qd_numeroIntentoM1M2` | Alerta MSG-003-02 | Muestra advertencia de escalamiento si `>= 3` | Anexo02 > SCR-003 > RUL-003-02 |
-| `qd_campoAfectado` | Label de `qd_campoCorreccion` | El nombre del campo afectado titula el control de corrección | Anexo02 > SCR-003 > FLD-046 |
+| `qd_strRejectedValue` | `qd_strFieldCorrection` | Habilita "Corregir y Reenviar" solo si la corrección difiere del valor rechazado | Anexo02 > SCR-003 > RUL-003-01 |
+| `qd_strM1M2AttemptNum` | Alerta MSG-003-02 | Muestra advertencia de escalamiento si `>= 3` | Anexo02 > SCR-003 > RUL-003-02 |
+| `qd_strAffectedField` | Label de `qd_strFieldCorrection` | El nombre del campo afectado titula el control de corrección | Anexo02 > SCR-003 > FLD-046 |
 
 ---
 
@@ -153,9 +153,9 @@ anteriores (solo lectura) y un modal con el log completo del rechazo.
   modificación; se asumió "valor de corrección no vacío y distinto del valor rechazado original".
 - **`maxLength=2000`** en la justificación: límite estándar del proyecto, no especificado en el insumo.
 - **MSG-003-03** (éxito de reenvío) lo emite el BPM tras avanzar a SP1-T02; no se renderiza en esta pantalla.
-- **`qd_accion`** (metadato CORREGIR_REENVIAR / ESCALAR_SOPORTE): no es un FLD del insumo; se
+- **`qd_strAction`** (metadato CORREGIR_REENVIAR / ESCALAR_SOPORTE): no es un FLD del insumo; se
   deriva del botón presionado para informar la decisión al BPM (ACT-003-01 / ACT-003-02).
-- **Historial (FLD-048)** se lee de `task.data.qd_historialIntentos` como arreglo de objetos
+- **Historial (FLD-048)** se lee de `task.data.qd_lstAttemptHistory` como arreglo de objetos
   `{intento, fecha, campoAfectado, codigoError}`; la forma exacta del arreglo se confirmará con TI.
 
 ---
@@ -171,5 +171,5 @@ anteriores (solo lectura) y un modal con el log completo del rechazo.
 | Secciones (SEC-008/009/010) | 3/3 (100%) | Panel error / Campo a corregir / Historial |
 
 **Elementos inferidos (sin respaldo literal en el insumo):** prefijo `qd_*` (antes `ef_*`), metadato
-`qd_accion`, definición operativa de "campo modificado", `maxLength=2000`, render del historial
+`qd_strAction`, definición operativa de "campo modificado", `maxLength=2000`, render del historial
 como tabla `ZrTable`, etiqueta dinámica del campo a corregir.

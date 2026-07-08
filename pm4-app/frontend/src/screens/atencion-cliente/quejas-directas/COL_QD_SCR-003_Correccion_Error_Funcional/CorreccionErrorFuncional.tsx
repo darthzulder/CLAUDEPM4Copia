@@ -8,52 +8,54 @@ import {
   ZdsInput, ZdsTextarea,
   ZrButton, ZrAlert, ZrModal, ZrLoader, ZrTable,
 } from '../../../../components/fields/ZdsFields';
-import {
-  DEFAULTS, UMBRAL_INTENTOS,
-  CorreccionErrorFuncionalFormData, AccionErrorFuncional,
-} from './variables';
+import { QD, SCR003_DEFAULTS as DEFAULTS, SCR003_UMBRAL_INTENTOS as UMBRAL_INTENTOS } from '../fields/fields';
+import type { CorreccionErrorFuncionalFormData, AccionErrorFuncional } from '../fields/fields';
 
 export default function CorreccionErrorFuncional() {
   const { task, loading, error, submitting, completeTask } = useTask();
-  const [showLog, setShowLog] = useState(false);
+  const [blnShowLog, setBlnShowLog] = useState(false);
 
   const form = useForm<CorreccionErrorFuncionalFormData>({ defaultValues: DEFAULTS });
   const { control, watch, handleSubmit, reset, formState: { errors, isSubmitted } } = form;
-  const w = watch();
+  // Tomamos una foto de los valores actuales del formulario.
+  const objWatch = watch();
 
+  // Precargamos el formulario con los datos que llegan de la tarea.
   useEffect(() => {
     if (task?.data) {
       reset({ ...DEFAULTS, ...(task.data as Partial<CorreccionErrorFuncionalFormData>) });
     }
   }, [task, reset]);
 
-  const err = (name: keyof CorreccionErrorFuncionalFormData): string | undefined => {
-    const e = errors[name];
-    if (!e || (e.type === 'required' && !isSubmitted)) return undefined;
-    return String(e.message);
+  // Atajo para leer el mensaje de error de un campo (solo tras el submit).
+  const err = (in_strName: keyof CorreccionErrorFuncionalFormData): string | undefined => {
+    const objErr = errors[in_strName];
+    if (!objErr || (objErr.type === 'required' && !isSubmitted)) return undefined;
+    return String(objErr.message);
   };
 
   // RUL-003-01 (🔴 BLOQUEA): el campo señalado debe MODIFICARSE antes de reenviar.
   // "Modificado" = no vacío y distinto del valor rechazado original (FLD-042).
-  const correccion = (w.qd_campoCorreccion ?? '').trim();
-  const valorOriginal = (w.qd_valorRechazado ?? '').trim();
-  const campoModificado = correccion !== '' && correccion !== valorOriginal;
+  const strCorrection = (objWatch[QD.strFieldCorrection] ?? '').trim();
+  const strOriginalValue = (objWatch[QD.strRejectedValue] ?? '').trim();
+  const blnFieldModified = strCorrection !== '' && strCorrection !== strOriginalValue;
 
   // RUL-003-02 (info): a partir de UMBRAL_INTENTOS sugerir escalamiento técnico.
-  const intentos = Number.parseInt(w.qd_numeroIntentoM1M2 ?? '', 10);
-  const multiplesIntentos = Number.isFinite(intentos) && intentos >= UMBRAL_INTENTOS;
+  const intAttempts = Number.parseInt(objWatch[QD.strM1M2AttemptNum] ?? '', 10);
+  const blnMultipleAttempts = Number.isFinite(intAttempts) && intAttempts >= UMBRAL_INTENTOS;
 
-  const historial = Array.isArray(w.qd_historialIntentos) ? w.qd_historialIntentos : [];
+  // Lista de intentos previos del caso.
+  const lstHistory = Array.isArray(objWatch[QD.lstAttemptHistory]) ? objWatch[QD.lstAttemptHistory] : [];
 
   // ACT-003-02 — escalar a soporte técnico (siempre disponible; no requiere corrección).
   const onEscalar = () =>
-    completeTask({ ...w, qd_accion: 'ESCALAR_SOPORTE' as AccionErrorFuncional } as unknown as Record<string, unknown>)
-      .catch((e) => console.error('[CorreccionErrorFuncional] Error al escalar:', e));
+    completeTask({ ...objWatch, [QD.strAction]: 'ESCALAR_SOPORTE' as AccionErrorFuncional } as unknown as Record<string, unknown>)
+      .catch((exc) => console.error('[CorreccionErrorFuncional] Error al escalar:', exc));
 
   // ACT-003-01 — corregir y reenviar (valida campo obligatorio + modificación).
-  const onReenviar = handleSubmit((data) =>
-    completeTask({ ...data, qd_accion: 'CORREGIR_REENVIAR' as AccionErrorFuncional } as unknown as Record<string, unknown>)
-      .catch((e) => console.error('[CorreccionErrorFuncional] Error al reenviar:', e)),
+  const onReenviar = handleSubmit((in_objData) =>
+    completeTask({ ...in_objData, [QD.strAction]: 'CORREGIR_REENVIAR' as AccionErrorFuncional } as unknown as Record<string, unknown>)
+      .catch((exc) => console.error('[CorreccionErrorFuncional] Error al reenviar:', exc)),
   );
 
   if (loading) {
@@ -84,7 +86,7 @@ export default function CorreccionErrorFuncional() {
             title="Panel de Error SmartSupervision"
             color="var(--z-red)"
             action={
-              <ZrButton config="link" icon="file-text:line" onClick={() => setShowLog(true)}>
+              <ZrButton config="link" icon="file-text:line" onClick={() => setBlnShowLog(true)}>
                 Ver Log Completo
               </ZrButton>
             }
@@ -93,23 +95,23 @@ export default function CorreccionErrorFuncional() {
               SmartSupervision <strong>rechazó la radicación (HTTP 400 funcional)</strong> por datos
               inválidos. Corrija únicamente el campo señalado y reenvíe — no es necesario navegar por
               el formulario completo.
-              {w.qd_numeroIntentoM1M2 && <> Intento actual <strong>#{w.qd_numeroIntentoM1M2}</strong>.</>}
+              {objWatch[QD.strM1M2AttemptNum] && <> Intento actual <strong>#{objWatch[QD.strM1M2AttemptNum]}</strong>.</>}
             </ZrAlert>
 
             <div className="form-row cols-3">
-              <ZdsInput name="qd_codigoErrorSFC" control={control} label="Código de Error SFC" readOnly />
-              <ZdsInput name="qd_campoAfectado" control={control} label="Campo Afectado" readOnly />
-              <ZdsInput name="qd_valorRechazado" control={control} label="Valor Rechazado" readOnly />
+              <ZdsInput name={QD.strSfcErrorCode} control={control} label="Código de Error SFC" readOnly />
+              <ZdsInput name={QD.strAffectedField} control={control} label="Campo Afectado" readOnly />
+              <ZdsInput name={QD.strRejectedValue} control={control} label="Valor Rechazado" readOnly />
             </div>
 
             <div className="form-row cols-2">
-              <ZdsInput name="qd_numeroIntentoM1M2" control={control} label="Intento N.° actual (M1/M2)" readOnly />
-              <ZdsInput name="qd_fechaRechazo" control={control} label="Fecha/Hora del rechazo" readOnly />
+              <ZdsInput name={QD.strM1M2AttemptNum} control={control} label="Intento N.° actual (M1/M2)" readOnly />
+              <ZdsInput name={QD.strRejectionDate} control={control} label="Fecha/Hora del rechazo" readOnly />
             </div>
 
             <div className="form-row cols-1">
               <ZdsTextarea
-                name="qd_mensajeErrorSFC"
+                name={QD.strSfcErrorMessage}
                 control={control}
                 label="Mensaje de Error SFC"
                 readOnly
@@ -118,9 +120,9 @@ export default function CorreccionErrorFuncional() {
             </div>
 
             {/* RUL-003-02 / MSG-003-02 — múltiples intentos: sugerir escalamiento. */}
-            {multiplesIntentos && (
+            {blnMultipleAttempts && (
               <ZrAlert config="alert" {...({ 'hide-close': true } as object)}>
-                Ha intentado <strong>{w.qd_numeroIntentoM1M2}</strong> veces. Si el problema persiste,
+                Ha intentado <strong>{objWatch[QD.strM1M2AttemptNum]}</strong> veces. Si el problema persiste,
                 considere <strong>escalar a soporte técnico</strong>. {/* MSG-003-02 */}
               </ZrAlert>
             )}
@@ -130,19 +132,19 @@ export default function CorreccionErrorFuncional() {
           <FormSection title="Campo a Corregir">
             <div className="form-row cols-1">
               <ZdsInput
-                name="qd_campoCorreccion"
+                name={QD.strFieldCorrection}
                 control={control}
-                label={w.qd_campoAfectado ? `Corrección — ${w.qd_campoAfectado}` : 'Campo específico en corrección'}
+                label={objWatch[QD.strAffectedField] ? `Corrección — ${objWatch[QD.strAffectedField]}` : 'Campo específico en corrección'}
                 required
                 rules={{ required: 'Campo requerido' }}
-                error={err('qd_campoCorreccion')}
+                error={err(QD.strFieldCorrection)}
                 helpText="Edite solo el campo señalado por SmartSupervision. No el formulario completo."
               />
             </div>
 
             <div className="form-row cols-1">
               <ZdsTextarea
-                name="qd_justificacionCorreccion"
+                name={QD.strCorrectionJustif}
                 control={control}
                 label="Justificación de la corrección"
                 maxLength={2000}
@@ -151,7 +153,7 @@ export default function CorreccionErrorFuncional() {
             </div>
 
             {/* RUL-003-01 / MSG-003-01 — bloquea reenvío si el campo no fue modificado. */}
-            {!campoModificado && (
+            {!blnFieldModified && (
               <ZrAlert config="info" {...({ 'hide-close': true } as object)}>
                 Debe <strong>modificar el campo señalado</strong> antes de reenviar a
                 SmartSupervision. {/* MSG-003-01 */}
@@ -172,17 +174,17 @@ export default function CorreccionErrorFuncional() {
                   </tr>
                 </thead>
                 <tbody>
-                  {historial.length === 0 ? (
+                  {lstHistory.length === 0 ? (
                     <tr>
                       <td colSpan={4} className="record-empty">Sin intentos anteriores registrados</td>
                     </tr>
                   ) : (
-                    historial.map((row, i) => (
-                      <tr key={i}>
-                        <td>{row.intento}</td>
-                        <td>{row.fecha}</td>
-                        <td>{row.campoAfectado}</td>
-                        <td>{row.codigoError}</td>
+                    lstHistory.map((objRow, intIndex) => (
+                      <tr key={intIndex}>
+                        <td>{objRow.intento}</td>
+                        <td>{objRow.fecha}</td>
+                        <td>{objRow.campoAfectado}</td>
+                        <td>{objRow.codigoError}</td>
                       </tr>
                     ))
                   )}
@@ -204,7 +206,7 @@ export default function CorreccionErrorFuncional() {
             <ZrButton
               config="positive"
               loading={submitting}
-              disabled={submitting || !campoModificado}
+              disabled={submitting || !blnFieldModified}
               onClick={() => { onReenviar(); }}
             >
               Corregir y Reenviar ▶
@@ -214,18 +216,18 @@ export default function CorreccionErrorFuncional() {
       </div>
 
       {/* ACT-003-03 · Ver Log Completo */}
-      {showLog && (
-        <ZrModal model={showLog} onChange={(open: boolean) => setShowLog(open)}>
+      {blnShowLog && (
+        <ZrModal model={blnShowLog} onChange={(open: boolean) => setBlnShowLog(open)}>
           <h3 style={{ margin: '0 0 var(--zs-75)', font: 'var(--zf-h-20--700)', color: 'var(--z-text)' }}>
             Log completo del rechazo funcional
           </h3>
-          <ZdsInput name="qd_codigoErrorSFC" control={control} label="Código de Error SFC" readOnly />
-          <ZdsInput name="qd_campoAfectado" control={control} label="Campo Afectado" readOnly />
-          <ZdsInput name="qd_valorRechazado" control={control} label="Valor Rechazado" readOnly />
-          <ZdsTextarea name="qd_mensajeErrorSFC" control={control} label="Mensaje de Error SFC" readOnly />
-          <ZdsInput name="qd_fechaRechazo" control={control} label="Fecha/Hora del rechazo" readOnly />
+          <ZdsInput name={QD.strSfcErrorCode} control={control} label="Código de Error SFC" readOnly />
+          <ZdsInput name={QD.strAffectedField} control={control} label="Campo Afectado" readOnly />
+          <ZdsInput name={QD.strRejectedValue} control={control} label="Valor Rechazado" readOnly />
+          <ZdsTextarea name={QD.strSfcErrorMessage} control={control} label="Mensaje de Error SFC" readOnly />
+          <ZdsInput name={QD.strRejectionDate} control={control} label="Fecha/Hora del rechazo" readOnly />
           <div z-flex="75" z-align="right:center" style={{ marginTop: 'var(--zs-100)' }}>
-            <ZrButton config="secondary:s" onClick={() => setShowLog(false)}>Cerrar</ZrButton>
+            <ZrButton config="secondary:s" onClick={() => setBlnShowLog(false)}>Cerrar</ZrButton>
           </div>
         </ZrModal>
       )}

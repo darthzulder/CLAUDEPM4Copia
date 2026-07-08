@@ -10,21 +10,21 @@ import ScreenHeader from '../../../components/ScreenHeader';
 import { type NotaCoberturaData } from './variables';
 
 // ──────────────────────────────────────────────────────────────
-// Helpers
+// Utilidades
 // ──────────────────────────────────────────────────────────────
-function formatBytes(bytes: number): string {
-  if (bytes < 1024) return `${bytes} B`;
-  if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(1)} KB`;
-  return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
+function formatBytes(in_intBytes: number): string {
+  if (in_intBytes < 1024) return `${in_intBytes} B`;
+  if (in_intBytes < 1024 * 1024) return `${(in_intBytes / 1024).toFixed(1)} KB`;
+  return `${(in_intBytes / (1024 * 1024)).toFixed(1)} MB`;
 }
 
-function formatDate(iso: string): string {
+function formatDate(in_strIso: string): string {
   try {
-    return new Date(iso).toLocaleDateString('es-CO', {
+    return new Date(in_strIso).toLocaleDateString('es-CO', {
       day: '2-digit', month: 'short', year: 'numeric',
     });
   } catch {
-    return iso;
+    return in_strIso;
   }
 }
 
@@ -32,10 +32,10 @@ function formatDate(iso: string): string {
 // Tarjeta de un documento individual
 // ──────────────────────────────────────────────────────────────
 function DocumentCard({ file }: { file: Pm4File }) {
-  const [open, setOpen] = useState(false);
+  const [blnOpen, setBlnOpen] = useState(false);
 
   return (
-    <div className={`doc-card${open ? ' is-open' : ''}`}>
+    <div className={`doc-card${blnOpen ? ' is-open' : ''}`}>
       <div className="doc-card-header">
         <ZrIcon icon="file-blank:line" config="l" />
         <div className="doc-info">
@@ -47,15 +47,15 @@ function DocumentCard({ file }: { file: Pm4File }) {
         <div className="doc-actions">
           <ZrButton
             config="secondary:s"
-            icon={open ? 'visibility-off:line' : 'visibility-on:line'}
-            onClick={() => setOpen((v) => !v)}
+            icon={blnOpen ? 'visibility-off:line' : 'visibility-on:line'}
+            onClick={() => setBlnOpen((blnPrev) => !blnPrev)}
           >
-            {open ? 'Ocultar' : 'Ver PDF'}
+            {blnOpen ? 'Ocultar' : 'Ver PDF'}
           </ZrButton>
         </div>
       </div>
 
-      {open && (
+      {blnOpen && (
         <div className="doc-viewer">
           <PdfViewer fileId={file.id} label={file.file_name} height={640} />
         </div>
@@ -69,28 +69,28 @@ function DocumentCard({ file }: { file: Pm4File }) {
 // ──────────────────────────────────────────────────────────────
 export default function VisualizarDocumentos() {
   const { task, loading, error, submitting, completeTask } = useTask();
-  const [sent, setSent] = useState(false);
+  const [blnSent, setBlnSent] = useState(false);
 
-  const data = (task?.data ?? {}) as NotaCoberturaData;
-  const requestId = task?.process_request_id ?? null;
-  const { files, loading: filesLoading, error: filesError } = useRequestFiles(requestId);
+  const objData = (task?.data ?? {}) as NotaCoberturaData;
+  const intRequestId = task?.process_request_id ?? null;
+  const { files, loading: filesLoading, error: filesError } = useRequestFiles(intRequestId);
 
   async function handleContinuar() {
     try {
-      const { _user: _u, _request: _r, ...taskData } = (task?.data ?? {}) as Record<string, unknown>;
-      await completeTask({ ...taskData });
-      setSent(true);
-    } catch (err) {
-      console.error('[VisualizarDocumentos] Error al derivar:', err);
+      const { _user: _u, _request: _r, ...objTaskData } = (task?.data ?? {}) as Record<string, unknown>;
+      await completeTask({ ...objTaskData });
+      setBlnSent(true);
+    } catch (excError) {
+      console.error('[VisualizarDocumentos] Error al derivar:', excError);
       alert('Error al continuar. Revise la consola.');
     }
   }
 
   // ── Estados de carga/error ───────────────────────────────────
-  if (sent) {
+  if (blnSent) {
     return (
       <div className="screen-wrapper">
-        <ScreenHeader title={data.frm_titulo || 'VISUALIZAR DOCUMENTOS DE SALIDA'} />
+        <ScreenHeader title={objData.frm_titulo || 'VISUALIZAR DOCUMENTOS DE SALIDA'} />
         <div className="screen-content">
           <ResultCard variant="success" title="Tarea derivada">
             <p>
@@ -122,9 +122,10 @@ export default function VisualizarDocumentos() {
     );
   }
 
-  const titulo  = data.frm_titulo || 'VISUALIZAR DOCUMENTOS DE SALIDA';
-  const numCot  = data.frm_num_cotizacion ?? data.frm_gen_num_cotizacion;
-  const numCaso = data.frm_caso;
+  // Datos de cabecera para el encabezado
+  const strTitle  = objData.frm_titulo || 'VISUALIZAR DOCUMENTOS DE SALIDA';
+  const strQuoteNum  = objData.frm_num_cotizacion ?? objData.frm_gen_num_cotizacion;
+  const strCaseNum = objData.frm_caso;
 
   return (
     <div className="screen-wrapper">
@@ -134,12 +135,12 @@ export default function VisualizarDocumentos() {
         </div>
       )}
 
-      {/* Header */}
+      {/* Cabecera */}
       <ScreenHeader
-        title={titulo}
+        title={strTitle}
         subtitle={[
-          numCot ? `Cotización # ${numCot}` : null,
-          numCaso ? `Caso # ${numCaso}` : null,
+          strQuoteNum ? `Cotización # ${strQuoteNum}` : null,
+          strCaseNum ? `Caso # ${strCaseNum}` : null,
         ]}
       />
 
@@ -181,8 +182,8 @@ export default function VisualizarDocumentos() {
 
           {!filesLoading && files.length > 0 && (
             <div z-flex="col:75">
-              {files.map((file) => (
-                <DocumentCard key={file.id} file={file} />
+              {files.map((objFile) => (
+                <DocumentCard key={objFile.id} file={objFile} />
               ))}
             </div>
           )}

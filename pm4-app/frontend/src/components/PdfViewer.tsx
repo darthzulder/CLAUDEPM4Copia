@@ -20,39 +20,40 @@ interface Props {
  * Ruta backend usada: GET /api/files/{fileId}/contents
  */
 export default function PdfViewer({ fileId, label, height = 640, className = '' }: Props) {
-  const [blobUrl, setBlobUrl] = useState<string | null>(null);
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
+  const [strBlobUrl, setStrBlobUrl] = useState<string | null>(null);
+  const [blnLoading, setBlnLoading] = useState(false);
+  const [strError, setStrError] = useState<string | null>(null);
   const prevUrl = useRef<string | null>(null);
 
   useEffect(() => {
     if (!fileId) {
-      setBlobUrl(null);
+      setStrBlobUrl(null);
       return;
     }
 
-    let active = true;
-    setLoading(true);
-    setError(null);
+    let blnActive = true;
+    setBlnLoading(true);
+    setStrError(null);
 
+    // Descargamos el binario del archivo y lo exponemos como blob URL.
     pm4.get(`/files/${fileId}/contents`, { responseType: 'blob' })
-      .then((r) => {
-        if (!active) return;
+      .then((in_objResponse) => {
+        if (!blnActive) return;
         // Revocar URL anterior para liberar memoria
         if (prevUrl.current) URL.revokeObjectURL(prevUrl.current);
-        const url = URL.createObjectURL(r.data as Blob);
-        prevUrl.current = url;
-        setBlobUrl(url);
+        const strUrl = URL.createObjectURL(in_objResponse.data as Blob);
+        prevUrl.current = strUrl;
+        setStrBlobUrl(strUrl);
       })
-      .catch((e) => {
-        if (!active) return;
-        const msg = e.response?.data?.message ?? e.message;
-        console.error('[PdfViewer] Error al cargar archivo:', msg);
-        setError(msg);
+      .catch((in_excError) => {
+        if (!blnActive) return;
+        const strMsg = in_excError.response?.data?.message ?? in_excError.message;
+        console.error('[PdfViewer] Error al cargar archivo:', strMsg);
+        setStrError(strMsg);
       })
-      .finally(() => { if (active) setLoading(false); });
+      .finally(() => { if (blnActive) setBlnLoading(false); });
 
-    return () => { active = false; };
+    return () => { blnActive = false; };
   }, [fileId]);
 
   // Cleanup al desmontar
@@ -60,14 +61,15 @@ export default function PdfViewer({ fileId, label, height = 640, className = '' 
     return () => { if (prevUrl.current) URL.revokeObjectURL(prevUrl.current); };
   }, []);
 
+  // Descarga el blob actual como archivo local mediante un enlace temporal.
   const handleDownload = () => {
-    if (!blobUrl) return;
-    const a = document.createElement('a');
-    a.href = blobUrl;
-    a.download = label ?? 'documento.pdf';
-    document.body.appendChild(a);
-    a.click();
-    a.remove();
+    if (!strBlobUrl) return;
+    const objLink = document.createElement('a');
+    objLink.href = strBlobUrl;
+    objLink.download = label ?? 'documento.pdf';
+    document.body.appendChild(objLink);
+    objLink.click();
+    objLink.remove();
   };
 
   if (!fileId) return null;
@@ -76,23 +78,23 @@ export default function PdfViewer({ fileId, label, height = 640, className = '' 
     <div className={`pdf-viewer ${className}`}>
       {label && <div className="pdf-viewer-label">{label}</div>}
 
-      {loading && (
+      {blnLoading && (
         <div className="pdf-viewer-state">
           <ZrLoader style={{ ['--z-loader--size' as never]: '20px' }} />
           <span>Cargando documento…</span>
         </div>
       )}
 
-      {error && !loading && (
+      {strError && !blnLoading && (
         <div className="pdf-viewer-state pdf-viewer-error">
-          No se pudo cargar el documento: {error}
+          No se pudo cargar el documento: {strError}
         </div>
       )}
 
-      {blobUrl && !loading && (
+      {strBlobUrl && !blnLoading && (
         <>
           <iframe
-            src={blobUrl}
+            src={strBlobUrl}
             title={label ?? 'Documento'}
             style={{ width: '100%', height, border: 'none', borderRadius: 4 }}
           />

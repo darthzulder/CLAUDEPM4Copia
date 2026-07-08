@@ -11,32 +11,33 @@ import { UseFormReturn, FieldValues } from 'react-hook-form';
  *   // Llamar clearDraft() al hacer submit exitoso.
  */
 export function useFormDraft<T extends FieldValues>(
-  storageKey: string | null,
+  in_strStorageKey: string | null,
   form: UseFormReturn<T>,
-  debounceMs = 600,
+  in_intDebounceMs = 600,
 ) {
-  const timerRef  = useRef<ReturnType<typeof setTimeout> | null>(null);
-  const activeRef = useRef(false); // evita guardar valores por defecto antes del restore
+  const objTimerRef  = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const objActiveRef = useRef(false); // evita guardar valores por defecto antes del restore
 
   // Auto-save: escucha cambios en el formulario una vez que el draft fue restaurado
   useEffect(() => {
-    if (!storageKey) return;
-    const sub = form.watch((values) => {
-      if (!activeRef.current) return;
-      if (timerRef.current) clearTimeout(timerRef.current);
-      timerRef.current = setTimeout(() => {
+    if (!in_strStorageKey) return;
+    const objSub = form.watch((in_dicValues) => {
+      if (!objActiveRef.current) return;
+      if (objTimerRef.current) clearTimeout(objTimerRef.current);
+      // Guardamos el borrador tras una pausa para no escribir en cada tecla
+      objTimerRef.current = setTimeout(() => {
         try {
-          localStorage.setItem(storageKey, JSON.stringify(values));
+          localStorage.setItem(in_strStorageKey, JSON.stringify(in_dicValues));
         } catch {
           // localStorage lleno u otro error — no es crítico
         }
-      }, debounceMs);
+      }, in_intDebounceMs);
     });
     return () => {
-      sub.unsubscribe();
-      if (timerRef.current) clearTimeout(timerRef.current);
+      objSub.unsubscribe();
+      if (objTimerRef.current) clearTimeout(objTimerRef.current);
     };
-  }, [storageKey, form, debounceMs]); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [in_strStorageKey, form, in_intDebounceMs]); // eslint-disable-line react-hooks/exhaustive-deps
 
   /**
    * Aplica el draft guardado sobre los valores actuales del form.
@@ -45,32 +46,34 @@ export function useFormDraft<T extends FieldValues>(
    * @param taskData  Si se pasa, los campos que existen en taskData (no nulos)
    *                  tienen prioridad y NO se sobreescriben con el draft.
    */
-  function restore(taskData?: Record<string, unknown>) {
-    if (activeRef.current) return; // ya restaurado
-    activeRef.current = true;
-    if (!storageKey) return;
-    const raw = localStorage.getItem(storageKey);
-    if (!raw) return;
+  function restore(in_dicTaskData?: Record<string, unknown>) {
+    if (objActiveRef.current) return; // ya restaurado
+    objActiveRef.current = true;
+    if (!in_strStorageKey) return;
+    // Leemos el borrador guardado en localStorage
+    const strRaw = localStorage.getItem(in_strStorageKey);
+    if (!strRaw) return;
     try {
-      const draft = JSON.parse(raw) as Partial<T>;
-      for (const [k, v] of Object.entries(draft)) {
-        if (v === undefined) continue;
+      // Recorremos cada campo del borrador y lo aplicamos al form
+      const dicDraft = JSON.parse(strRaw) as Partial<T>;
+      for (const [strKey, genValue] of Object.entries(dicDraft)) {
+        if (genValue === undefined) continue;
         // Si task.data ya tiene un valor para este campo, lo respetamos
-        if (taskData) {
-          const existing = taskData[k];
-          if (existing !== null && existing !== undefined && existing !== '') continue;
+        if (in_dicTaskData) {
+          const genExisting = in_dicTaskData[strKey];
+          if (genExisting !== null && genExisting !== undefined && genExisting !== '') continue;
         }
-        form.setValue(k as Parameters<typeof form.setValue>[0], v as never, { shouldDirty: false });
+        form.setValue(strKey as Parameters<typeof form.setValue>[0], genValue as never, { shouldDirty: false });
       }
     } catch {
-      localStorage.removeItem(storageKey);
+      localStorage.removeItem(in_strStorageKey);
     }
   }
 
   /** Elimina el draft del localStorage. Llamar al completar la tarea. */
   function clearDraft() {
-    if (storageKey) localStorage.removeItem(storageKey);
-    activeRef.current = false;
+    if (in_strStorageKey) localStorage.removeItem(in_strStorageKey);
+    objActiveRef.current = false;
   }
 
   return { restore, clearDraft };

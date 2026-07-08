@@ -6,22 +6,23 @@ import ScreenHeader from '../../../components/ScreenHeader';
 import { RESPUESTA_VALUES, type RespuestaCotizacionData } from './variables';
 
 // ---------------------------------------------------------------------------
-// Helpers
+// Utilidades
 // ---------------------------------------------------------------------------
-function getBlock(d: RespuestaCotizacionData): {
+function getBlock(in_objData: RespuestaCotizacionData): {
   variant: 'info' | 'on-hold' | 'error';
   icon: string;
   title: string;
   message: string;
 } | null {
-  const respuesta = d.frm_respuesta_cotizacion;
-  const lrFlag    = d.frm_control_desde_optalitix_loss_ratio_calculado_flag;
-  const conoceRC  = d.frm_conoceValorSumaRC;
-  const lrValue   = Number(d.frm_valorRC_lossRatio_calculado ?? 0);
+  const strResponse = in_objData.frm_respuesta_cotizacion;
+  const strLrFlag    = in_objData.frm_control_desde_optalitix_loss_ratio_calculado_flag;
+  const strKnowsRC  = in_objData.frm_conoceValorSumaRC;
+  const dblLrValue   = Number(in_objData.frm_valorRC_lossRatio_calculado ?? 0);
 
+  // La oportunidad se deriva a Case Underwriting
   if (
-    respuesta === RESPUESTA_VALUES.REQUIERE_CASEUW &&
-    String(lrFlag).toUpperCase() === 'NO'
+    strResponse === RESPUESTA_VALUES.REQUIERE_CASEUW &&
+    String(strLrFlag).toUpperCase() === 'NO'
   ) {
     return {
       variant: 'info',
@@ -32,7 +33,8 @@ function getBlock(d: RespuestaCotizacionData): {
     };
   }
 
-  if (respuesta === RESPUESTA_VALUES.INTERMEDIARIO) {
+  // La cotización queda en espera por revisión de Compliance
+  if (strResponse === RESPUESTA_VALUES.INTERMEDIARIO) {
     return {
       variant: 'on-hold',
       icon: '⏸',
@@ -41,7 +43,8 @@ function getBlock(d: RespuestaCotizacionData): {
     };
   }
 
-  if (respuesta === RESPUESTA_VALUES.ON_HOLD) {
+  // El intermediario no está autorizado para gestionar la cotización
+  if (strResponse === RESPUESTA_VALUES.ON_HOLD) {
     return {
       variant: 'info',
       icon: '🔒',
@@ -51,7 +54,8 @@ function getBlock(d: RespuestaCotizacionData): {
     };
   }
 
-  if (String(conoceRC).toUpperCase() === 'NO' && lrValue > 20) {
+  // Se superó el límite de loss ratio permitido
+  if (String(strKnowsRC).toUpperCase() === 'NO' && dblLrValue > 20) {
     return {
       variant: 'error',
       icon: '⚠️',
@@ -65,7 +69,7 @@ function getBlock(d: RespuestaCotizacionData): {
 }
 
 // ---------------------------------------------------------------------------
-// Confirm modal
+// Modal de confirmación
 // ---------------------------------------------------------------------------
 interface ConfirmProps {
   onConfirm: () => void;
@@ -85,23 +89,24 @@ function ConfirmModal({ onConfirm, onCancel }: ConfirmProps) {
 }
 
 // ---------------------------------------------------------------------------
-// Screen
+// Pantalla
 // ---------------------------------------------------------------------------
 export default function RespuestaCotizacion() {
   const { task, loading, error, submitting, completeTask } = useTask();
-  const [confirmOpen, setConfirmOpen] = useState(false);
-  const [sent, setSent] = useState(false);
+  const [blnConfirmOpen, setBlnConfirmOpen] = useState(false);
+  const [blnSent, setBlnSent] = useState(false);
 
-  const data = (task?.data ?? {}) as unknown as RespuestaCotizacionData;
-  const block = task ? getBlock(data) : null;
+  const objData = (task?.data ?? {}) as unknown as RespuestaCotizacionData;
+  // Determinamos el bloque de resultado a mostrar
+  const objBlock = task ? getBlock(objData) : null;
 
   async function handleConfirm() {
-    setConfirmOpen(false);
+    setBlnConfirmOpen(false);
     try {
       await completeTask({});
-      setSent(true);
-    } catch (err) {
-      console.error('[RespuestaCotizacion] Error al completar tarea:', err);
+      setBlnSent(true);
+    } catch (excError) {
+      console.error('[RespuestaCotizacion] Error al completar tarea:', excError);
       alert('Error al finalizar la cotización. Revise la consola.');
     }
   }
@@ -125,10 +130,10 @@ export default function RespuestaCotizacion() {
     );
   }
 
-  if (sent) {
+  if (blnSent) {
     return (
       <div className="screen-wrapper">
-        <ScreenHeader title={data.frm_titulo || 'RESULTADO DE LA COTIZACIÓN'} />
+        <ScreenHeader title={objData.frm_titulo || 'RESULTADO DE LA COTIZACIÓN'} />
         <div className="screen-content">
           <ResultCard variant="success" title="Tarea finalizada">
             <p>
@@ -141,9 +146,10 @@ export default function RespuestaCotizacion() {
     );
   }
 
-  const titulo = data.frm_titulo || 'RESULTADO DE LA COTIZACIÓN';
-  const numCot = data.frm_gen_num_cotizacion;
-  const numCaso = data.frm_caso;
+  // Datos de cabecera para el encabezado
+  const strTitle = objData.frm_titulo || 'RESULTADO DE LA COTIZACIÓN';
+  const strQuoteNum = objData.frm_gen_num_cotizacion;
+  const strCaseNum = objData.frm_caso;
 
   return (
     <div className="screen-wrapper">
@@ -153,23 +159,23 @@ export default function RespuestaCotizacion() {
         </div>
       )}
 
-      {/* Header */}
+      {/* Cabecera */}
       <ScreenHeader
-        title={titulo}
+        title={strTitle}
         subtitle={[
-          numCot ? `Cotización # ${numCot}` : null,
-          numCaso ? `Caso # ${numCaso}` : null,
+          strQuoteNum ? `Cotización # ${strQuoteNum}` : null,
+          strCaseNum ? `Caso # ${strCaseNum}` : null,
         ]}
       />
 
-      {/* Content */}
+      {/* Contenido */}
       <div className="result-content">
-        {block ? (
+        {objBlock ? (
           <ResultCard
-            variant={block.variant === 'on-hold' ? 'warning' : block.variant === 'error' ? 'error' : 'info'}
-            title={block.title}
+            variant={objBlock.variant === 'on-hold' ? 'warning' : objBlock.variant === 'error' ? 'error' : 'info'}
+            title={objBlock.title}
           >
-            <p>{block.message}</p>
+            <p>{objBlock.message}</p>
           </ResultCard>
         ) : (
           <ResultCard variant="info" title="Resultado de cotización">
@@ -182,17 +188,17 @@ export default function RespuestaCotizacion() {
             config="primary:l"
             disabled={submitting}
             loading={submitting}
-            onClick={() => setConfirmOpen(true)}
+            onClick={() => setBlnConfirmOpen(true)}
           >
             FINALIZAR
           </ZrButton>
         </div>
       </div>
 
-      {confirmOpen && (
+      {blnConfirmOpen && (
         <ConfirmModal
           onConfirm={handleConfirm}
-          onCancel={() => setConfirmOpen(false)}
+          onCancel={() => setBlnConfirmOpen(false)}
         />
       )}
     </div>

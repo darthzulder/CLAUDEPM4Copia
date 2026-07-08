@@ -9,7 +9,7 @@
 | Proceso             | Gestión de Quejas Directas — Subproceso 3: Cierre Regulatorio M3   |
 | Rol responsable     | Gestor de Experiencia / Backoffice SFC                             |
 | Versión insumos     | Anexo02 v2.0 / Matrices v2.0 / Anexo03 v1.0                       |
-| Archivos de impl.   | `variables.ts`, `CierreM3.tsx`, `SeccionEstadoCierre.tsx`          |
+| Archivos de impl.   | `CierreM3.tsx`, `SeccionEstadoCierre.tsx` (config centralizada en fields/fields.ts) |
 | Estilos             | `frontend/src/shared.css` — sección `COL_QD_cierre-m3` (línea ~1769) |
 
 ---
@@ -43,9 +43,9 @@ Pantalla de cierre regulatorio Momento 3. Permite al Gestor de Experiencia / Bac
 
 | Campo UI                       | Variable             | Tipo         | Obligatorio | Fuente                               |
 |--------------------------------|----------------------|--------------|-------------|--------------------------------------|
-| Estado del envío a SFC         | `qd_estadoCierreM3`     | display/badge | No (solo lectura) | Anexo02 > SCR-010 > FLD-010-01  |
-| Intentos de envío              | `qd_intentosCierreM3`   | display       | No (solo lectura) | Anexo02 > SCR-010 > FLD-010-02  |
-| Último error registrado        | `qd_ultimoError`        | display       | No (condicional) | Anexo02 > SCR-010 > FLD-010-03 |
+| Estado del envío a SFC         | `qd_strM3ClosureStatus`     | display/badge | No (solo lectura) | Anexo02 > SCR-010 > FLD-010-01  |
+| Intentos de envío              | `qd_strM3ClosureAttempts`   | display       | No (solo lectura) | Anexo02 > SCR-010 > FLD-010-02  |
+| Último error registrado        | `qd_strLastError`        | display       | No (condicional) | Anexo02 > SCR-010 > FLD-010-03 |
 
 > Los campos de la Sección 1 son solo lectura; se pre-populan desde `task.data` en PM4. El estado usa badge de color con configuración: Pendiente=azul, Enviando=amarillo, Rechazado(400)=rojo, Aceptado(200)=verde.
 
@@ -53,30 +53,30 @@ Pantalla de cierre regulatorio Momento 3. Permite al Gestor de Experiencia / Bac
 
 | Campo UI                    | Variable             | Tipo     | Obligatorio | Fuente                               |
 |-----------------------------|----------------------|----------|-------------|--------------------------------------|
-| Código SFC / Radicado       | `qd_codigoSFC`          | text     | Sí          | Anexo02 > SCR-010 > FLD-010-04       |
-| Estado de la Queja          | `qd_estadoQueja`        | select   | Sí          | Anexo02 > SCR-010 > FLD-010-05       |
-| Fecha de Actualización      | `qd_fechaActualizacion` | date     | Sí          | Anexo02 > SCR-010 > FLD-010-06       |
-| Fecha de Cierre             | `qd_fechaCierre`        | date     | Sí          | Anexo02 > SCR-010 > FLD-010-07       |
-| Favorabilidad               | `qd_favorabilidad`      | select   | Sí          | Anexo02 > SCR-010 > FLD-010-08       |
-| Aceptación                  | `qd_aceptacion`         | select   | Sí          | Anexo02 > SCR-010 > FLD-010-09       |
-| Marcación                   | `qd_marcacion`          | select   | Sí          | Anexo02 > SCR-010 > FLD-010-10       |
-| Queja Exprés                | `qd_quejaExpres`        | select   | Sí          | Anexo02 > SCR-010 > FLD-010-11       |
+| Código SFC / Radicado       | `qd_strSfcCode`          | text     | Sí          | Anexo02 > SCR-010 > FLD-010-04       |
+| Estado de la Queja          | `qd_strComplaintStatus`        | select   | Sí          | Anexo02 > SCR-010 > FLD-010-05       |
+| Fecha de Actualización      | `qd_strUpdateDate` | date     | Sí          | Anexo02 > SCR-010 > FLD-010-06       |
+| Fecha de Cierre             | `qd_strClosureDate`        | date     | Sí          | Anexo02 > SCR-010 > FLD-010-07       |
+| Favorabilidad               | `qd_strFavorability`      | select   | Sí          | Anexo02 > SCR-010 > FLD-010-08       |
+| Aceptación                  | `qd_strAcceptance`         | select   | Sí          | Anexo02 > SCR-010 > FLD-010-09       |
+| Marcación                   | `qd_strMarking`          | select   | Sí          | Anexo02 > SCR-010 > FLD-010-10       |
+| Queja Exprés                | `qd_strExpressComplaint`        | select   | Sí          | Anexo02 > SCR-010 > FLD-010-11       |
 
 ### Sección 3 — Adjunto Respuesta Final (SEC-033)
 
 | Campo UI                          | Variable                | Tipo     | Obligatorio | Fuente                          |
 |-----------------------------------|-------------------------|----------|-------------|---------------------------------|
-| ¿Se adjunta PDF?                  | `qd_adjuntoRespuestaFinal` | radio    | Sí          | Anexo02 > SCR-010 > FLD-010-12  |
-| PDF Respuesta Final               | `qd_pdfRespuestaFinal`     | file     | Condicional | Anexo02 > SCR-010 > FLD-010-13  |
+| ¿Se adjunta PDF?                  | `qd_strFinalReplyAttach` | radio    | Sí          | Anexo02 > SCR-010 > FLD-010-12  |
+| PDF Respuesta Final               | `qd_strFinalReplyPdf`     | file     | Condicional | Anexo02 > SCR-010 > FLD-010-13  |
 
 ### Sección 4 — Datos de Fraude (SEC-034, condicional)
 
 | Campo UI                    | Variable          | Tipo   | Obligatorio | Fuente                          |
 |-----------------------------|-------------------|--------|-------------|---------------------------------|
-| ¿Relacionada con fraude?    | `qd_relacionadaFraude` | radio  | No          | Anexo02 > SCR-010 > FLD-010-14  |
-| Tipo de Fraude              | `qd_tipoFraude`      | text   | Condicional | Anexo02 > SCR-010 > FLD-010-15  |
-| Monto Reclamado (COP)       | `qd_montoReclamado`  | text   | Condicional | Anexo02 > SCR-010 > FLD-010-16  |
-| Monto Reconocido (COP)      | `qd_montoReconocido` | text   | No          | Anexo02 > SCR-010 > FLD-010-17  |
+| ¿Relacionada con fraude?    | `qd_strFraudRelated` | radio  | No          | Anexo02 > SCR-010 > FLD-010-14  |
+| Tipo de Fraude              | `qd_strFraudType`      | text   | Condicional | Anexo02 > SCR-010 > FLD-010-15  |
+| Monto Reclamado (COP)       | `qd_strClaimedAmount`  | text   | Condicional | Anexo02 > SCR-010 > FLD-010-16  |
+| Monto Reconocido (COP)      | `qd_strAcknowledgedAmount` | text   | No          | Anexo02 > SCR-010 > FLD-010-17  |
 
 ---
 
@@ -84,13 +84,13 @@ Pantalla de cierre regulatorio Momento 3. Permite al Gestor de Experiencia / Bac
 
 | Validación                             | Comportamiento implementado                                                                 | Fuente                         |
 |----------------------------------------|---------------------------------------------------------------------------------------------|--------------------------------|
-| RUL-010-01: fechas coinciden           | `qd_fechaActualizacion === qd_fechaCierre`; si no, muestra `ZrAlert` negativo y bloquea envío    | Anexo02 > SCR-010 > RUL-010-01 |
+| RUL-010-01: fechas coinciden           | `qd_strUpdateDate === qd_strClosureDate`; si no, muestra `ZrAlert` negativo y bloquea envío    | Anexo02 > SCR-010 > RUL-010-01 |
 | RUL-010-02: nomenclatura PDF           | Regex `/^[^_]+_[^_]+_RESP_FINAL_SFC_\d+\.pdf$/i`; helper verde/rojo bajo el input         | Anexo02 > SCR-010 > RUL-010-02 |
 | RUL-010-03: envío habilitado           | `puedeEnviar = fechasCoinciden && pdfValido && todosCompletos`; botón `disabled` si false  | Anexo02 > SCR-010 > RUL-010-03 |
 | Campos obligatorios Sec. 2             | `rules={{ required: 'Campo requerido' }}` en todos los campos de SEC-032                   | Anexo02 > SCR-010 > 03_Campos  |
-| Adjunto PDF obligatorio si `SI`        | `qd_adjuntoRespuestaFinal === 'SI'` muestra el file input; `qd_pdfRespuestaFinal` incluido en `puedeEnviar` | Inferido de RUL-010-02 |
-| Datos fraude obligatorios si `SI`      | `qd_tipoFraude` y `qd_montoReclamado` con `required` cuando `qd_relacionadaFraude === 'SI'`         | Anexo02 > SCR-010 > FLD-010-15/16 |
-| Máximo `qd_codigoSFC`                     | `maxLength: 100`                                                                            | Suposición (no en insumo)      |
+| Adjunto PDF obligatorio si `SI`        | `qd_strFinalReplyAttach === 'SI'` muestra el file input; `qd_strFinalReplyPdf` incluido en `puedeEnviar` | Inferido de RUL-010-02 |
+| Datos fraude obligatorios si `SI`      | `qd_strFraudType` y `qd_strClaimedAmount` con `required` cuando `qd_strFraudRelated === 'SI'`         | Anexo02 > SCR-010 > FLD-010-15/16 |
+| Máximo `qd_strSfcCode`                     | `maxLength: 100`                                                                            | Suposición (no en insumo)      |
 | Formato montos                         | `pattern: /^\d+(\.\d{1,2})?$/` — solo números con decimales opcionales                    | Suposición                     |
 
 ---
@@ -99,10 +99,10 @@ Pantalla de cierre regulatorio Momento 3. Permite al Gestor de Experiencia / Bac
 
 | Mensaje                                                                               | Condición                                   | Implementación          | Fuente                         |
 |---------------------------------------------------------------------------------------|---------------------------------------------|-------------------------|--------------------------------|
-| "La Fecha de Actualización debe coincidir con la Fecha de Cierre (RUL-010-01)"       | `qd_fechaActualizacion !== qd_fechaCierre`         | `ZrAlert config="negative"` | Anexo02 > SCR-010 > MSG-010-01 |
+| "La Fecha de Actualización debe coincidir con la Fecha de Cierre (RUL-010-01)"       | `qd_strUpdateDate !== qd_strClosureDate`         | `ZrAlert config="negative"` | Anexo02 > SCR-010 > MSG-010-01 |
 | "✗ Nomenclatura inválida. Formato esperado: ENTIDAD_NRO_RESP_FINAL_SFC_NNNNN.pdf"   | PDF adjunto con nombre inválido             | `.cierre-m3--validacion-error` helper | Anexo02 > SCR-010 > MSG-010-02 |
 | "✓ Nomenclatura correcta: {nombre.pdf}"                                               | PDF adjunto con nombre válido               | `.cierre-m3--validacion-ok` helper | Inferido               |
-| "Envío rechazado por SFC. Revise el error indicado…"                                  | `qd_estadoCierreM3 === 'Rechazado (400)'`      | `ZrAlert config="negative"` | Anexo02 > SCR-010 > MSG-010-03 |
+| "Envío rechazado por SFC. Revise el error indicado…"                                  | `qd_strM3ClosureStatus === 'Rechazado (400)'`      | `ZrAlert config="negative"` | Anexo02 > SCR-010 > MSG-010-03 |
 | "Campo requerido"                                                                     | Campos obligatorios vacíos al submit        | `ZdsField error={err(...)}` | react-hook-form              |
 
 ---
@@ -111,8 +111,8 @@ Pantalla de cierre regulatorio Momento 3. Permite al Gestor de Experiencia / Bac
 
 | Regla     | Implementación                                                                                                      | Fuente                         |
 |-----------|---------------------------------------------------------------------------------------------------------------------|--------------------------------|
-| RUL-010-01 | `const fechasCoinciden = !w.qd_fechaActualizacion \|\| !w.qd_fechaCierre \|\| w.qd_fechaActualizacion === w.qd_fechaCierre`   | Anexo02 > SCR-010 > 05_Reglas  |
-| RUL-010-02 | `const pdfValido = !w.qd_pdfRespuestaFinal \|\| REGEX_NOMENCLATURA_PDF.test(w.qd_pdfRespuestaFinal)`                    | Anexo02 > SCR-010 > 05_Reglas  |
+| RUL-010-01 | `const fechasCoinciden = !w.qd_strUpdateDate \|\| !w.qd_strClosureDate \|\| w.qd_strUpdateDate === w.qd_strClosureDate`   | Anexo02 > SCR-010 > 05_Reglas  |
+| RUL-010-02 | `const pdfValido = !w.qd_strFinalReplyPdf \|\| REGEX_NOMENCLATURA_PDF.test(w.qd_strFinalReplyPdf)`                    | Anexo02 > SCR-010 > 05_Reglas  |
 | RUL-010-03 | `const puedeEnviar = fechasCoinciden && pdfValido && todosCompletos`; botón `disabled={!puedeEnviar}`             | Anexo02 > SCR-010 > 05_Reglas  |
 
 ---
@@ -123,10 +123,10 @@ Pantalla de cierre regulatorio Momento 3. Permite al Gestor de Experiencia / Bac
 |---------------------------------------------------|-----------------------------------------------------------------------------|------------------------------|
 | Sección 1 solo lectura                            | `SeccionEstadoCierre` muestra badges y texto, sin inputs editables          | Anexo02 > SCR-010 > SEC-031  |
 | Estado del envío con badge de color               | `STATUS_CONFIG` en `SeccionEstadoCierre.tsx` con inline style               | Anexo02 > SCR-010 > FLD-010-01 |
-| Error SFC visible en panel rojo                   | `.ultimo-error-panel` / `.ultimo-error-texto`; solo renderiza si `qd_ultimoError` | Anexo02 > SCR-010 > FLD-010-03 |
+| Error SFC visible en panel rojo                   | `.ultimo-error-panel` / `.ultimo-error-texto`; solo renderiza si `qd_strLastError` | Anexo02 > SCR-010 > FLD-010-03 |
 | Botón cambia etiqueta si rechazado                | `esRechazado ? 'Reenviar Cierre (corrección) ▶' : 'Enviar a SmartSupervision ▶'` | Anexo02 > SCR-010 > ACT-010-01 |
-| File input aparece solo si `qd_adjuntoRespuestaFinal === 'SI'` | render condicional en JSX                                   | Anexo02 > SCR-010 > SEC-033  |
-| Sección fraude aparece siempre, campos condicionales | `qd_relacionadaFraude === 'SI'` muestra `qd_tipoFraude`, `qd_montoReclamado`, `qd_montoReconocido` | Anexo02 > SCR-010 > SEC-034 |
+| File input aparece solo si `qd_strFinalReplyAttach === 'SI'` | render condicional en JSX                                   | Anexo02 > SCR-010 > SEC-033  |
+| Sección fraude aparece siempre, campos condicionales | `qd_strFraudRelated === 'SI'` muestra `qd_strFraudType`, `qd_strClaimedAmount`, `qd_strAcknowledgedAmount` | Anexo02 > SCR-010 > SEC-034 |
 | Upload de archivo antes de `completeTask`         | `fileRegistry` + `pm4.post(/requests/{id}/files)` en `onSubmit`             | CLAUDE.md — patrón subida     |
 | Pre-población desde PM4                           | `reset(task.data as Partial<CierreM3FormData>)` en `useEffect`              | CLAUDE.md — flujo datos       |
 
@@ -136,23 +136,23 @@ Pantalla de cierre regulatorio Momento 3. Permite al Gestor de Experiencia / Bac
 
 | Campo Origen          | Campo Dependiente              | Comportamiento                                               | Fuente                          |
 |-----------------------|--------------------------------|--------------------------------------------------------------|---------------------------------|
-| `qd_fechaActualizacion`  | `qd_fechaCierre`                  | Deben ser iguales (RUL-010-01); alerta si difieren           | Anexo02 > SCR-010 > 05_Reglas  |
-| `qd_adjuntoRespuestaFinal` | `qd_pdfRespuestaFinal` (file)   | File input visible solo si valor = `'SI'`                    | Anexo02 > SCR-010 > SEC-033    |
-| `qd_relacionadaFraude`   | `qd_tipoFraude`, `qd_montoReclamado`, `qd_montoReconocido` | Campos visibles y `qd_tipoFraude`/`qd_montoReclamado` requeridos si = `'SI'` | Anexo02 > SCR-010 > SEC-034 |
-| `qd_estadoCierreM3`      | Botón de envío (label)         | Label cambia a "Reenviar…" cuando = `'Rechazado (400)'`      | Anexo02 > SCR-010 > ACT-010-01 |
-| `qd_estadoCierreM3`      | Alerta estado rechazado        | `ZrAlert` negativo visible cuando = `'Rechazado (400)'`      | Anexo02 > SCR-010 > MSG-010-03 |
+| `qd_strUpdateDate`  | `qd_strClosureDate`                  | Deben ser iguales (RUL-010-01); alerta si difieren           | Anexo02 > SCR-010 > 05_Reglas  |
+| `qd_strFinalReplyAttach` | `qd_strFinalReplyPdf` (file)   | File input visible solo si valor = `'SI'`                    | Anexo02 > SCR-010 > SEC-033    |
+| `qd_strFraudRelated`   | `qd_strFraudType`, `qd_strClaimedAmount`, `qd_strAcknowledgedAmount` | Campos visibles y `qd_strFraudType`/`qd_strClaimedAmount` requeridos si = `'SI'` | Anexo02 > SCR-010 > SEC-034 |
+| `qd_strM3ClosureStatus`      | Botón de envío (label)         | Label cambia a "Reenviar…" cuando = `'Rechazado (400)'`      | Anexo02 > SCR-010 > ACT-010-01 |
+| `qd_strM3ClosureStatus`      | Alerta estado rechazado        | `ZrAlert` negativo visible cuando = `'Rechazado (400)'`      | Anexo02 > SCR-010 > MSG-010-03 |
 
 ---
 
 ## 10. Suposiciones Realizadas
 
 1. **Regex nomenclatura PDF**: `/^[^_]+_[^_]+_RESP_FINAL_SFC_\d+\.pdf$/i` derivada del patrón textual de los insumos (`ENTIDAD_NRO_RESP_FINAL_SFC_NNNNN.pdf`). No se proporcionó regex exacta en los insumos.
-2. **Catálogos de `qd_estadoQueja`**: `CERRADA_CF`, `CERRADA_ENTIDAD`, `DESISTIDA`, `RECTIFICADA` tomados de los valores encontrados en `07_Catalogs` de Anexo02. Marcados como *Pendiente TI* — se deben confirmar con el equipo de TI Zurich.
-3. **Catálogos de `qd_favorabilidad`, `qd_aceptacion`, `qd_marcacion`, `qd_quejaExpres`**: implementados como listas estáticas numeradas según los valores vistos en el Anexo02. Deben confirmarse como catálogos fijos o dinámicos.
-4. **`maxLength: 100` para `qd_codigoSFC`**: no especificado en insumos; suposición conservadora.
+2. **Catálogos de `qd_strComplaintStatus`**: `CERRADA_CF`, `CERRADA_ENTIDAD`, `DESISTIDA`, `RECTIFICADA` tomados de los valores encontrados en `07_Catalogs` de Anexo02. Marcados como *Pendiente TI* — se deben confirmar con el equipo de TI Zurich.
+3. **Catálogos de `qd_strFavorability`, `qd_strAcceptance`, `qd_strMarking`, `qd_strExpressComplaint`**: implementados como listas estáticas numeradas según los valores vistos en el Anexo02. Deben confirmarse como catálogos fijos o dinámicos.
+4. **`maxLength: 100` para `qd_strSfcCode`**: no especificado en insumos; suposición conservadora.
 5. **Validación de montos**: regex `^\d+(\.\d{1,2})?$` — formato numérico básico, no definido en insumos.
-6. **Sección 4 siempre visible**: los insumos indican que los campos de fraude son opcionales; se optó por mostrar la sección siempre y activar campos solo si `qd_relacionadaFraude === 'SI'`.
-7. **`qd_adjuntoRespuestaFinal` requerido en `puedeEnviar`**: si el usuario elige `'NO'`, se considera informado y válido. El envío puede continuar sin PDF adjunto.
+6. **Sección 4 siempre visible**: los insumos indican que los campos de fraude son opcionales; se optó por mostrar la sección siempre y activar campos solo si `qd_strFraudRelated === 'SI'`.
+7. **`qd_strFinalReplyAttach` requerido en `puedeEnviar`**: si el usuario elige `'NO'`, se considera informado y válido. El envío puede continuar sin PDF adjunto.
 8. **Estilos en `shared.css`**: todos los estilos específicos de la pantalla se centralizaron en `frontend/src/shared.css` (sección `COL_QD_cierre-m3`), siguiendo la regla DRY de CLAUDE.md (sin `styles.css` local).
 9. **Rol**: "Gestor de Experiencia / Backoffice SFC" inferido de las matrices SP3-T01/T04/T08. Los insumos pueden especificar variaciones por subtarea.
 
@@ -171,6 +171,6 @@ Pantalla de cierre regulatorio Momento 3. Permite al Gestor de Experiencia / Bac
 
 **Elementos inferidos (sin respaldo explícito en insumos):**
 - Regex de nomenclatura PDF (derivada del patrón textual)
-- `maxLength` de `qd_codigoSFC`
+- `maxLength` de `qd_strSfcCode`
 - Validación de formato de montos
 - Texto del helper de validación OK ("✓ Nomenclatura correcta…")

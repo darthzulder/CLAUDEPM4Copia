@@ -12,7 +12,7 @@
 | Evento de apertura | Caso asignado a la bandeja del área |
 | Acción de cierre | Enviar comentario → continúa SP2-T02 |
 | Slug / `?screen=` | `COL_QD_SCR-0052_Respuesta_Area_Responsable` |
-| Archivos de implementación | `RespuestaAreaResponsable.tsx`, `variables.ts` |
+| Archivos de implementación | `RespuestaAreaResponsable.tsx` (config centralizada en fields/fields.ts) |
 | Versión | 1.0 — 2026-06-30 |
 
 > **Nota de nomenclatura:** el SLUG solicitado (`COL_QD_Respuesta_Area_Responsable`) se normalizó a
@@ -51,49 +51,49 @@ de soporte opcional**, que quedan en el historial del caso. El cierre es "Enviar
 
 | Campo (UI) | Variable | Tipo | Fuente |
 |---|---|---|---|
-| Nombre del Consumidor | (derivado de `qd_nombres` + `qd_apellidos` / `qd_razonSocial`) | `ZdsInput` readOnly | FLD-066 |
-| Tipo y N.° de Identificación | (derivado de `qd_tipoIdentificacion` + `qd_numeroIdentificacion`) | `ZdsInput` readOnly | FLD-067 |
-| Correo Electrónico | `qd_correoElectronico` | `ZdsInput` readOnly | FLD-068 |
-| Tipo de Persona | `qd_tipoPersona` | `ZdsInput` readOnly | FLD-069 |
+| Nombre del Consumidor | (derivado de `qd_strFirstName` + `qd_strLastName` / `qd_strCompanyName`) | `ZdsInput` readOnly | FLD-066 |
+| Tipo y N.° de Identificación | (derivado de `qd_strIdType` + `qd_strIdNumber`) | `ZdsInput` readOnly | FLD-067 |
+| Correo Electrónico | `qd_strEmail` | `ZdsInput` readOnly | FLD-068 |
+| Tipo de Persona | `qd_strPersonType` | `ZdsInput` readOnly | FLD-069 |
 
 ### S2 — Clasificación Regulatoria (SEC-060, solo lectura)
 
 | Campo (UI) | Variable | Tipo | Fuente |
 |---|---|---|---|
-| Canal de Recepción | `qd_canal` | `ZdsInput` readOnly | FLD-070 |
-| Producto SFC | `qd_productoSFC` | `ZdsInput` readOnly | FLD-071 |
-| Motivo SFC | `qd_motivoSFC` | `ZdsInput` readOnly | FLD-072 |
-| Instancia / Punto de Recepción | `qd_instanciaRecepcion` | `ZdsInput` readOnly | FLD-073 |
-| Admisión | `qd_admision` | `ZdsInput` readOnly | FLD-074 |
-| Ente de Control | `qd_enteControl` | `ZdsInput` readOnly | FLD-075 |
+| Canal de Recepción | `qd_strChannel` | `ZdsInput` readOnly | FLD-070 |
+| Producto SFC | `qd_strSfcProduct` | `ZdsInput` readOnly | FLD-071 |
+| Motivo SFC | `qd_strSfcReason` | `ZdsInput` readOnly | FLD-072 |
+| Instancia / Punto de Recepción | `qd_strReceptionInstance` | `ZdsInput` readOnly | FLD-073 |
+| Admisión | `qd_strAdmission` | `ZdsInput` readOnly | FLD-074 |
+| Ente de Control | `qd_strControlEntity` | `ZdsInput` readOnly | FLD-075 |
 
 ### S3 — Descripción de la Queja (SEC-061, solo lectura)
 
 | Campo (UI) | Variable | Tipo | Fuente |
 |---|---|---|---|
-| Asunto de la Queja | `qd_motivoSFC` | `ZdsInput` readOnly | FLD-076 |
-| Descripción / Texto de la Queja | `qd_textoQueja` | `ZdsTextarea` readOnly | FLD-077 |
+| Asunto de la Queja | `qd_strSfcReason` | `ZdsInput` readOnly | FLD-076 |
+| Descripción / Texto de la Queja | `qd_strComplaintText` | `ZdsTextarea` readOnly | FLD-077 |
 
 ### S4 — Datos de la Asignación (SEC-057, solo lectura)
 
 | Campo (UI) | Variable | Tipo | Fuente |
 |---|---|---|---|
-| Área | `qd_areaResponsable` | `ZdsInput` readOnly | FLD-351 |
-| Responsable | `qd_usuarioResponsable` | `ZdsInput` readOnly | FLD-352 |
-| Observaciones | `qd_observacionesAsignacion` | `ZdsTextarea` readOnly | FLD-353 |
+| Área | `qd_strAssigneeArea` | `ZdsInput` readOnly | FLD-351 |
+| Responsable | `qd_strAssigneeUser` | `ZdsInput` readOnly | FLD-352 |
+| Observaciones | `qd_strAssignmentRemarks` | `ZdsTextarea` readOnly | FLD-353 |
 
 ### S5 — Comentario y Adjunto (SEC-058, editable)
 
 | Campo (UI) | Variable | Tipo | Obligatorio | Fuente |
 |---|---|---|---|---|
-| Comentario | `qd_comentarioArea` | `ZdsTextarea` | **Sí** | FLD-354 |
-| Adjuntar archivo | `qd_adjuntoArea` | `ZdsFileInput` (máx 10 MB) | No | FLD-355 |
+| Comentario | `qd_strAreaComment` | `ZdsTextarea` | **Sí** | FLD-354 |
+| Adjuntar archivo | `qd_strAreaAttach` | `ZdsFileInput` (máx 10 MB) | No | FLD-355 |
 
 ### Metadato de flujo (no visible)
 
 | Campo | Variable | Fuente |
 |---|---|---|
-| Acción/decisión BPMN | `qd_accion` (`ENVIAR` \| `GUARDAR_BORRADOR`) | Inferido de ACT-0052-01/02 (§10) |
+| Acción/decisión BPMN | `qd_strAction` (`ENVIAR` \| `GUARDAR_BORRADOR`) | Inferido de ACT-0052-01/02 (§10) |
 
 ---
 
@@ -101,7 +101,7 @@ de soporte opcional**, que quedan en el historial del caso. El cierre es "Enviar
 
 | Validación | Comportamiento implementado | Fuente |
 |---|---|---|
-| Comentario obligatorio | `rules.required` en `qd_comentarioArea`; "Enviar comentario" deshabilitado si vacío | RUL-0052-01 · MSG-0052-01 · FLD-354 |
+| Comentario obligatorio | `rules.required` en `qd_strAreaComment`; "Enviar comentario" deshabilitado si vacío | RUL-0052-01 · MSG-0052-01 · FLD-354 |
 | Tipo/tamaño de adjunto | `ZdsFileInput` valida extensión (PDF/DOC/DOCX/XLS/XLSX/JPG/PNG) y ≤ 10 MB | FLD-355 |
 
 ---
@@ -110,7 +110,7 @@ de soporte opcional**, que quedan en el historial del caso. El cierre es "Enviar
 
 | Mensaje | Condición | Implementación | Fuente |
 |---|---|---|---|
-| MSG-0052-01 Comentario obligatorio | `qd_comentarioArea` vacío | `ZrAlert config="info"` en S5 + botón "Enviar" deshabilitado | 06_Mensajes > MSG-0052-01 |
+| MSG-0052-01 Comentario obligatorio | `qd_strAreaComment` vacío | `ZrAlert config="info"` en S5 + botón "Enviar" deshabilitado | 06_Mensajes > MSG-0052-01 |
 | MSG-0052-02 Comentario enviado | Tras enviar | **No en UI** — lo emite el BPM tras `completeTask` | 06_Mensajes > MSG-0052-02 |
 
 ---
@@ -129,7 +129,7 @@ de soporte opcional**, que quedan en el historial del caso. El cierre es "Enviar
 |---|---|---|
 | Expediente solo lectura (S1-S4) | `ZdsInput`/`ZdsTextarea` con `readOnly` | SEC-057..061 |
 | Adjunto de soporte único | `ZdsFileInput` + `fileRegistry` (upload en `onSubmit`) | FLD-355 · CLAUDE.md (patrón de subida) |
-| Guardar borrador | `completeTask` con `qd_accion='GUARDAR_BORRADOR'` (sin validación bloqueante) | ACT-0052-02 |
+| Guardar borrador | `completeTask` con `qd_strAction='GUARDAR_BORRADOR'` (sin validación bloqueante) | ACT-0052-02 |
 | Volver | `ZrButton config="link"` → `window.history.back()` | ACT-0052-03 |
 | Estados loading/error/submitting | `ZrLoader`, `ZrAlert`, botones `loading/disabled` | CLAUDE.md |
 
@@ -139,7 +139,7 @@ de soporte opcional**, que quedan en el historial del caso. El cierre es "Enviar
 
 | Campo Origen | Campo Dependiente | Comportamiento | Fuente |
 |---|---|---|---|
-| `qd_comentarioArea` | Botón "Enviar comentario" | Habilita el envío solo si el comentario no está vacío | RUL-0052-01 |
+| `qd_strAreaComment` | Botón "Enviar comentario" | Habilita el envío solo si el comentario no está vacío | RUL-0052-01 |
 
 ---
 
@@ -148,10 +148,10 @@ de soporte opcional**, que quedan en el historial del caso. El cierre es "Enviar
 - **Slug normalizado** (ver §1).
 - **Nombres `data_name` (`qd_*`)** provisionales — Anexo03 no tiene variables para SP2-T02 (tarea
   de Usuario, no automatizada). Se actualizarán con el diccionario final.
-- **`qd_accion`** (metadato): no es un FLD; se deriva del botón presionado (ACT-0052-01/02) para
+- **`qd_strAction`** (metadato): no es un FLD; se deriva del botón presionado (ACT-0052-01/02) para
   informar la decisión al BPM.
 - **`maxLength=2000`** en el comentario: límite estándar del proyecto, no especificado en el insumo.
-- **Adjunto único con `data_name=qd_adjuntoArea`**: se sube vía `POST /requests/{id}/files` al
+- **Adjunto único con `data_name=qd_strAreaAttach`**: se sube vía `POST /requests/{id}/files` al
   enviar (patrón estándar del proyecto). El insumo (FLD-355) permite PDF/DOCX/XLSX/JPG/PNG, máx 10 MB.
 - **MSG-0052-02** (éxito) lo emite el BPM tras `completeTask`; no se renderiza en la pantalla.
 - **"Guardar Borrador"** completa la tarea con la acción de borrador; si el flujo BPMN real
@@ -170,5 +170,5 @@ de soporte opcional**, que quedan en el historial del caso. El cierre es "Enviar
 | Mensajes (MSG-0052-01/02) | 1/2 en UI | MSG-0052-02 lo emite el BPM |
 | Catálogos | N/A | La pantalla no usa catálogos |
 
-**Elementos inferidos:** prefijo `qd_*`, metadato `qd_accion`, `maxLength=2000`, comportamiento de
+**Elementos inferidos:** prefijo `qd_*`, metadato `qd_strAction`, `maxLength=2000`, comportamiento de
 "Guardar Borrador" como `completeTask`.

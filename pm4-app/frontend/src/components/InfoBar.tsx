@@ -13,10 +13,11 @@ interface InfoBarProps {
 export default function InfoBar({ items }: InfoBarProps) {
   return (
     <div className="info-bar">
-      {items.map((item, idx) => (
-        <div className="info-bar-item" key={idx}>
-          <span className="info-bar-label">{item.label}</span>
-          <span className="info-bar-value">{item.value ?? '—'}</span>
+      {/* Recorremos los items para pintar cada par etiqueta/valor. */}
+      {items.map((in_objItem, in_intIdx) => (
+        <div className="info-bar-item" key={in_intIdx}>
+          <span className="info-bar-label">{in_objItem.label}</span>
+          <span className="info-bar-value">{in_objItem.value ?? '—'}</span>
         </div>
       ))}
     </div>

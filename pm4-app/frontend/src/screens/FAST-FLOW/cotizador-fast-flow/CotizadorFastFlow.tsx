@@ -15,14 +15,14 @@ import { OPTIONS, COLLECTION_DEFS, CotizadorFormData, CONSULTAR_CLIENTE_SCRIPT_I
 // Campos requeridos vacíos no se marcan en rojo hasta el primer intento de submit.
 // ---------------------------------------------------------------------------
 function fieldError(
-  err: FieldError | undefined,
-  value: unknown,
-  isSubmitted: boolean
+  in_objErr: FieldError | undefined,
+  in_objValue: unknown,
+  in_blnSubmitted: boolean
 ): string | undefined {
-  if (!err) return undefined;
-  const isEmpty = value === '' || value === null || value === undefined;
-  if (err.type === 'required' && isEmpty) return isSubmitted ? String(err.message) : undefined;
-  return String(err.message);
+  if (!in_objErr) return undefined;
+  const blnIsEmpty = in_objValue === '' || in_objValue === null || in_objValue === undefined;
+  if (in_objErr.type === 'required' && blnIsEmpty) return in_blnSubmitted ? String(in_objErr.message) : undefined;
+  return String(in_objErr.message);
 }
 
 // ---------------------------------------------------------------------------
@@ -30,18 +30,19 @@ function fieldError(
 // ---------------------------------------------------------------------------
 function InfoGeneral({ form }: { form: ReturnType<typeof useForm<CotizadorFormData>> }) {
   const { control, formState: { errors, isSubmitted }, watch } = form;
-  const w = watch();
+  const objWatch = watch();
 
-  const { options: intermediarios, loading: loadingInt } = useCollection(
+  // Cargamos los catálogos de intermediarios y sus correos
+  const { options: cllIntermediaries, loading: loadingInt } = useCollection(
     COLLECTION_DEFS.intermediarios
   );
-  const { options: correos, loading: loadingCorreos } = useCollection(
+  const { options: cllEmails, loading: loadingCorreos } = useCollection(
     COLLECTION_DEFS.correosIntermediari,
-    { frm_gen_intermediario_principal: w.frm_gen_intermediario_principal }
+    { frm_gen_intermediario_principal: objWatch.frm_gen_intermediario_principal }
   );
 
-  const fe = (name: keyof CotizadorFormData) =>
-    fieldError(errors[name] as FieldError | undefined, w[name], isSubmitted);
+  const fe = (in_strName: keyof CotizadorFormData) =>
+    fieldError(errors[in_strName] as FieldError | undefined, objWatch[in_strName], isSubmitted);
 
   return (
     <FormSection title="Información General">
@@ -90,7 +91,7 @@ function InfoGeneral({ form }: { form: ReturnType<typeof useForm<CotizadorFormDa
           name="frm_gen_intermediario_principal"
           control={control}
           rules={{ required: 'Campo requerido' }}
-          options={intermediarios}
+          options={cllIntermediaries}
           loading={loadingInt}
           required
           error={fe('frm_gen_intermediario_principal')}
@@ -100,9 +101,9 @@ function InfoGeneral({ form }: { form: ReturnType<typeof useForm<CotizadorFormDa
           name="frm_gen_intermediario_principal_correo_test"
           control={control}
           rules={{ required: 'Campo requerido' }}
-          options={correos}
+          options={cllEmails}
           loading={loadingCorreos}
-          placeholder={w.frm_gen_intermediario_principal ? 'Seleccione...' : 'Seleccione un intermediario primero'}
+          placeholder={objWatch.frm_gen_intermediario_principal ? 'Seleccione...' : 'Seleccione un intermediario primero'}
           required
           error={fe('frm_gen_intermediario_principal_correo_test')}
         />
@@ -152,11 +153,11 @@ function InfoTomador({
   tiaFilledFields: Set<string>;
 }) {
   const { control, formState: { errors, isSubmitted }, watch } = form;
-  const w = watch();
-  const fromTia = (f: keyof CotizadorFormData) => tiaFilledFields.has(f);
+  const objWatch = watch();
+  const fromTia = (in_strField: keyof CotizadorFormData) => tiaFilledFields.has(in_strField);
 
-  const fe = (name: keyof CotizadorFormData) =>
-    fieldError(errors[name] as FieldError | undefined, w[name], isSubmitted);
+  const fe = (in_strName: keyof CotizadorFormData) =>
+    fieldError(errors[in_strName] as FieldError | undefined, objWatch[in_strName], isSubmitted);
 
   return (
     <FormSection title="">
@@ -269,25 +270,25 @@ function InfoTomador({
 // ---------------------------------------------------------------------------
 function DatosCotizacion({ form }: { form: ReturnType<typeof useForm<CotizadorFormData>> }) {
   const { control, formState: { errors, isSubmitted }, watch, setValue } = form;
-  const w = watch();
+  const objWatch = watch();
 
-  const { options: naicOptions, loading: loadingNaic } = useCollection(
+  const { options: cllNaic, loading: loadingNaic } = useCollection(
     COLLECTION_DEFS.naic,
-    { frm_gen_pais: w.frm_gen_pais }
+    { frm_gen_pais: objWatch.frm_gen_pais }
   );
 
-  const fe = (name: keyof CotizadorFormData) =>
-    fieldError(errors[name] as FieldError | undefined, w[name], isSubmitted);
+  const fe = (in_strName: keyof CotizadorFormData) =>
+    fieldError(errors[in_strName] as FieldError | undefined, objWatch[in_strName], isSubmitted);
 
-  // Calcula fin de vigencia automáticamente (365 días)
+  // Calculamos el fin de vigencia automáticamente (365 días)
   useEffect(() => {
-    if (!w.frm_cot_fecha_inicio_vigencia) return;
-    const d = new Date(w.frm_cot_fecha_inicio_vigencia);
-    d.setFullYear(d.getFullYear() + 1);
-    d.setDate(d.getDate() - 1);
-    setValue('frm_cot_fecha_fin_vigencia', d.toISOString().split('T')[0]);
+    if (!objWatch.frm_cot_fecha_inicio_vigencia) return;
+    const datEnd = new Date(objWatch.frm_cot_fecha_inicio_vigencia);
+    datEnd.setFullYear(datEnd.getFullYear() + 1);
+    datEnd.setDate(datEnd.getDate() - 1);
+    setValue('frm_cot_fecha_fin_vigencia', datEnd.toISOString().split('T')[0]);
     setValue('frm_cot_dias_inicio_fin_vigencia', 365);
-  }, [w.frm_cot_fecha_inicio_vigencia, setValue]);
+  }, [objWatch.frm_cot_fecha_inicio_vigencia, setValue]);
 
   return (
     <FormSection title="Datos de la Cotización">
@@ -351,7 +352,7 @@ function DatosCotizacion({ form }: { form: ReturnType<typeof useForm<CotizadorFo
           name="frm_cot_actividad_naic"
           control={control}
           rules={{ required: 'Campo requerido' }}
-          options={naicOptions}
+          options={cllNaic}
           loading={loadingNaic}
           required
           error={fe('frm_cot_actividad_naic')}
@@ -387,10 +388,10 @@ function DatosCotizacion({ form }: { form: ReturnType<typeof useForm<CotizadorFo
 // ---------------------------------------------------------------------------
 function PropuestaEconomica({ form }: { form: ReturnType<typeof useForm<CotizadorFormData>> }) {
   const { control, formState: { errors, isSubmitted }, watch } = form;
-  const w = watch();
+  const objWatch = watch();
 
-  const fe = (name: keyof CotizadorFormData) =>
-    fieldError(errors[name] as FieldError | undefined, w[name], isSubmitted);
+  const fe = (in_strName: keyof CotizadorFormData) =>
+    fieldError(errors[in_strName] as FieldError | undefined, objWatch[in_strName], isSubmitted);
 
   return (
     <FormSection title="Propuesta Económica">
@@ -423,10 +424,10 @@ function PropuestaEconomica({ form }: { form: ReturnType<typeof useForm<Cotizado
 // ---------------------------------------------------------------------------
 function PlanPago({ form }: { form: ReturnType<typeof useForm<CotizadorFormData>> }) {
   const { formState: { errors, isSubmitted }, watch } = form;
-  const w = watch();
+  const objWatch = watch();
 
-  const fe = (name: keyof CotizadorFormData) =>
-    fieldError(errors[name] as FieldError | undefined, w[name], isSubmitted);
+  const fe = (in_strName: keyof CotizadorFormData) =>
+    fieldError(errors[in_strName] as FieldError | undefined, objWatch[in_strName], isSubmitted);
 
   return (
     <FormSection title="Plan de Pago">
@@ -479,9 +480,9 @@ function PlanPago({ form }: { form: ReturnType<typeof useForm<CotizadorFormData>
 // ---------------------------------------------------------------------------
 export default function CotizadorFastFlow() {
   const { task, loading, error, submitting, completeTask } = useTask();
-  const [sent, setSent] = useState(false);
-  const [consultarLoading, setConsultarLoading] = useState(false);
-  const [tiaFilledFields, setTiaFilledFields] = useState<Set<string>>(new Set());
+  const [blnSent, setBlnSent] = useState(false);
+  const [blnConsultarLoading, setBlnConsultarLoading] = useState(false);
+  const [lstTiaFields, setLstTiaFields] = useState<Set<string>>(new Set());
 
   const form = useForm<CotizadorFormData>({
     mode: 'onChange',
@@ -500,54 +501,56 @@ export default function CotizadorFastFlow() {
     },
   });
 
-  // Carga variables del caso cuando la tarea está lista
+  // Cargamos las variables del caso cuando la tarea está lista
   useEffect(() => {
     if (!task?.data) return;
-    const d = task.data as Partial<CotizadorFormData>;
-    Object.entries(d).forEach(([key, val]) => {
-      if (val !== null && val !== undefined) {
-        form.setValue(key as keyof CotizadorFormData, val as never);
+    const objData = task.data as Partial<CotizadorFormData>;
+    Object.entries(objData).forEach(([strKey, objVal]) => {
+      if (objVal !== null && objVal !== undefined) {
+        form.setValue(strKey as keyof CotizadorFormData, objVal as never);
       }
     });
   }, [task, form]);
 
-  const onSubmit = async (data: CotizadorFormData) => {
+  const onSubmit = async (in_objData: CotizadorFormData) => {
     try {
-      await completeTask(data as unknown as Record<string, unknown>);
-      setSent(true);
-    } catch (e) {
-      alert(`Error al enviar: ${(e as Error).message}`);
+      await completeTask(in_objData as unknown as Record<string, unknown>);
+      setBlnSent(true);
+    } catch (excError) {
+      alert(`Error al enviar: ${(excError as Error).message}`);
     }
   };
 
   const handleConsultarCliente = async () => {
-    const numDoc = form.getValues('frm_tomador_numDoc');
-    if (!numDoc) { alert('Ingrese el número de documento primero.'); return; }
+    const strNumDoc = form.getValues('frm_tomador_numDoc');
+    if (!strNumDoc) { alert('Ingrese el número de documento primero.'); return; }
 
-    setConsultarLoading(true);
+    setBlnConsultarLoading(true);
     try {
-      const res = await pm4.post(`/scripts/${CONSULTAR_CLIENTE_SCRIPT_ID}/execute`, {
-        data:   JSON.stringify({ frm_tomador_tipoDoc: 'NIT', frm_tomador_numDoc: numDoc }),
+      // Consultamos el cliente en TIA por número de documento
+      const objRes = await pm4.post(`/scripts/${CONSULTAR_CLIENTE_SCRIPT_ID}/execute`, {
+        data:   JSON.stringify({ frm_tomador_tipoDoc: 'NIT', frm_tomador_numDoc: strNumDoc }),
         config: JSON.stringify({}),
         sync:   true,
       });
 
-      const output = res.data?.output ?? res.data ?? {};
-      const tia = (output as Record<string, unknown>)['value'] ?? output;
-      const mapped = parseClienteTia(tia);
+      const objOutput = objRes.data?.output ?? objRes.data ?? {};
+      const objTia = (objOutput as Record<string, unknown>)['value'] ?? objOutput;
+      const objMapped = parseClienteTia(objTia);
 
-      const keys = Object.keys(mapped);
-      for (const [dest, val] of Object.entries(mapped) as Array<[keyof CotizadorFormData, string]>) {
-        form.setValue(dest, val as never, { shouldDirty: true });
+      // Volcamos los campos reconocidos al formulario
+      const lstKeys = Object.keys(objMapped);
+      for (const [strDest, strVal] of Object.entries(objMapped) as Array<[keyof CotizadorFormData, string]>) {
+        form.setValue(strDest, strVal as never, { shouldDirty: true });
       }
-      setTiaFilledFields(new Set(keys));
+      setLstTiaFields(new Set(lstKeys));
 
-      if (!keys.length) alert('TIA respondió pero sin campos reconocibles.');
-    } catch (err: unknown) {
-      const e = err as { response?: { status: number; data: unknown }; message: string };
-      alert(`Error consultando TIA (${e.response?.status ?? 'red'}): ${JSON.stringify(e.response?.data ?? e.message)}`);
+      if (!lstKeys.length) alert('TIA respondió pero sin campos reconocibles.');
+    } catch (excError: unknown) {
+      const objErr = excError as { response?: { status: number; data: unknown }; message: string };
+      alert(`Error consultando TIA (${objErr.response?.status ?? 'red'}): ${JSON.stringify(objErr.response?.data ?? objErr.message)}`);
     } finally {
-      setConsultarLoading(false);
+      setBlnConsultarLoading(false);
     }
   };
 
@@ -563,7 +566,7 @@ export default function CotizadorFastFlow() {
     return <ZrAlert config="negative" {...({ 'hide-close': true } as object)}>Error cargando la tarea: {error}</ZrAlert>;
   }
 
-  if (sent) {
+  if (blnSent) {
     return (
       <div className="screen-wrapper">
         <ScreenHeader title="Cotizador Fast Flow" />
@@ -579,20 +582,21 @@ export default function CotizadorFastFlow() {
     );
   }
 
-  const caseNumber = form.watch('frm_caso') ?? task?.process_request_id ?? '—';
-  const cotizacion = form.watch('frm_gen_num_cotizacion') ?? '—';
+  // Datos de cabecera para el encabezado
+  const strCaseNumber = form.watch('frm_caso') ?? task?.process_request_id ?? '—';
+  const strQuote = form.watch('frm_gen_num_cotizacion') ?? '—';
 
   return (
     <div className="screen-wrapper">
       <ScreenHeader
         title="Cotizador Fast Flow"
-        subtitle={[`Cotización # ${cotizacion}`, `Caso # ${caseNumber}`]}
+        subtitle={[`Cotización # ${strQuote}`, `Caso # ${strCaseNumber}`]}
       />
 
       <div className="screen-content">
         <form onSubmit={form.handleSubmit(onSubmit)} noValidate>
           <InfoGeneral form={form} />
-          <InfoTomador form={form} onConsultarCliente={handleConsultarCliente} consultarLoading={consultarLoading} tiaFilledFields={tiaFilledFields} />
+          <InfoTomador form={form} onConsultarCliente={handleConsultarCliente} consultarLoading={blnConsultarLoading} tiaFilledFields={lstTiaFields} />
           <DatosCotizacion form={form} />
           <PropuestaEconomica form={form} />
           <PlanPago form={form} />

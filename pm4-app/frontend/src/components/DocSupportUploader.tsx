@@ -25,49 +25,51 @@ export default function DocSupportUploader<T extends FieldValues>({
   max = 3,
 }: DocSupportUploaderProps<T>) {
   const { watch, setValue, setError, clearErrors, control, formState: { errors } } = form;
-  const w = watch();
-  const [numDocs, setNumDocs] = useState(1);
-  const limit = Math.min(max, docKeys.length);
+  // Valores actuales del formulario para poder desplazar los slots.
+  const objWatch = watch();
+  const [intNumDocs, setIntNumDocs] = useState(1);
+  // Tope real de documentos, acotado por la cantidad de claves disponibles.
+  const intLimit = Math.min(max, docKeys.length);
 
-  const handleRemoveSlot = (indexToDelete: number) => {
-    // Shift subsequent fields up
-    for (let i = indexToDelete; i < numDocs - 1; i++) {
-      const currentKey = docKeys[i];
-      const nextKey = docKeys[i + 1];
-      const nextVal = (w as Record<string, unknown>)[nextKey as string];
+  const handleRemoveSlot = (in_intIdxDelete: number) => {
+    // Desplazamos hacia arriba los campos posteriores al eliminado.
+    for (let intI = in_intIdxDelete; intI < intNumDocs - 1; intI++) {
+      const strCurrentKey = docKeys[intI];
+      const strNextKey = docKeys[intI + 1];
+      const objNextVal = (objWatch as Record<string, unknown>)[strNextKey as string];
 
-      // Shift form state values
-      if (nextVal) {
-        setValue(currentKey, nextVal as never);
+      // Desplazamos el valor del formulario.
+      if (objNextVal) {
+        setValue(strCurrentKey, objNextVal as never);
       } else {
-        setValue(currentKey, '' as never);
+        setValue(strCurrentKey, '' as never);
       }
 
-      // Shift file registry
-      const nextFile = fileRegistry.current.get(nextKey as string);
-      if (nextFile) {
-        fileRegistry.current.set(currentKey as string, nextFile);
+      // Desplazamos el archivo en el registro.
+      const objNextFile = fileRegistry.current.get(strNextKey as string);
+      if (objNextFile) {
+        fileRegistry.current.set(strCurrentKey as string, objNextFile);
       } else {
-        fileRegistry.current.delete(currentKey as string);
+        fileRegistry.current.delete(strCurrentKey as string);
       }
 
-      // Shift errors
-      const nextError = (errors as Record<string, any>)[nextKey]?.message;
-      if (nextError) {
-        setError(currentKey, { type: 'manual', message: nextError } as never);
+      // Desplazamos el mensaje de error.
+      const strNextError = (errors as Record<string, any>)[strNextKey]?.message;
+      if (strNextError) {
+        setError(strCurrentKey, { type: 'manual', message: strNextError } as never);
       } else {
-        clearErrors(currentKey);
+        clearErrors(strCurrentKey);
       }
     }
 
-    // Clear the last slot
-    const lastKey = docKeys[numDocs - 1];
-    setValue(lastKey, '' as never);
-    fileRegistry.current.delete(lastKey as string);
-    clearErrors(lastKey);
+    // Limpiamos el ultimo slot.
+    const strLastKey = docKeys[intNumDocs - 1];
+    setValue(strLastKey, '' as never);
+    fileRegistry.current.delete(strLastKey as string);
+    clearErrors(strLastKey);
 
-    // Decrement count
-    setNumDocs((n) => Math.max(1, n - 1));
+    // Reducimos el contador de documentos.
+    setIntNumDocs((n) => Math.max(1, n - 1));
   };
 
   return (
@@ -75,11 +77,11 @@ export default function DocSupportUploader<T extends FieldValues>({
       <div className="form-subsection-title">{title}</div>
       <p className="subsection-intro">{intro}</p>
       <div z-flex="col:75">
-        {docKeys.slice(0, numDocs).map((docKey, i) => {
-          const errorMsg = (errors as Record<string, any>)[docKey]?.message;
+        {docKeys.slice(0, intNumDocs).map((docKey, in_intIdx) => {
+          const strErrorMsg = (errors as Record<string, any>)[docKey]?.message;
           return (
             <div key={docKey} className="doc-row">
-              <span className="doc-row-label">Documento {i + 1}</span>
+              <span className="doc-row-label">Documento {in_intIdx + 1}</span>
               <ZdsFileInput
                 control={control}
                 name={docKey}
@@ -87,16 +89,16 @@ export default function DocSupportUploader<T extends FieldValues>({
                 setValue={setValue}
                 setError={setError}
                 clearErrors={clearErrors}
-                error={errorMsg}
+                error={strErrorMsg}
                 allowedExtensions={['pdf', 'doc', 'docx', 'jpg', 'jpeg', 'png']}
                 maxSizeMb={5}
                 errorMessage="Solo se permiten archivos pdf, jpg, png o docx, máx 5 MB (MSG-000-06)"
               />
-              {numDocs > 1 && (
+              {intNumDocs > 1 && (
                 <ZrButton
                   config="secondary:s"
                   icon="trash:line"
-                  onClick={() => handleRemoveSlot(i)}
+                  onClick={() => handleRemoveSlot(in_intIdx)}
                   {...({ title: 'Eliminar documento' } as Record<string, unknown>)}
                 />
               )}
@@ -104,10 +106,10 @@ export default function DocSupportUploader<T extends FieldValues>({
           );
         })}
       </div>
-      {numDocs < limit && (
+      {intNumDocs < intLimit && (
         <ZrButton
           config="secondary"
-          onClick={() => setNumDocs((n) => n + 1)}
+          onClick={() => setIntNumDocs((n) => n + 1)}
           style={{ marginTop: 'var(--zs-75)' }}
           icon="plus:line"
         >

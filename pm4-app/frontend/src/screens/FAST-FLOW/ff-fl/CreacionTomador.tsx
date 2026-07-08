@@ -5,37 +5,42 @@ import { OPTIONS, DEPARTAMENTOS, CIUDADES_POR_DEPTO, FfFlSolicitudFormData } fro
 
 type Form = ReturnType<typeof useForm<FfFlSolicitudFormData>>;
 
+// Construimos el mensaje de error visible según el estado del campo
 function fe(
-  err: FieldError | undefined,
-  value: unknown,
+  in_objErr: FieldError | undefined,
+  in_objValue: unknown,
   isSubmitted: boolean
 ): string | undefined {
-  if (!err) return undefined;
-  const empty = value === '' || value === null || value === undefined;
-  if (err.type === 'required' && empty) return isSubmitted ? String(err.message) : undefined;
-  return String(err.message);
+  if (!in_objErr) return undefined;
+  const blnEmpty = in_objValue === '' || in_objValue === null || in_objValue === undefined;
+  if (in_objErr.type === 'required' && blnEmpty) return isSubmitted ? String(in_objErr.message) : undefined;
+  return String(in_objErr.message);
 }
 
 const TIPOS_EMPRESA_BLOQUEADOS = new Set(['ESTATAL', 'ENTIDAD_PUBLICA', 'EXTRANJERA']);
 
 export default function CreacionTomador({ form }: { form: Form }) {
-  const [open, setOpen] = useState(true);
+  const [blnOpen, setBlnOpen] = useState(true);
   const { register, control, formState: { errors, isSubmitted }, watch, setValue } = form;
-  const w = watch();
+  const objWatch = watch();
 
-  const empresaBloqueada = TIPOS_EMPRESA_BLOQUEADOS.has(w.frm_cre_tipo_empresa ?? '');
+  // Detectamos si el tipo de empresa seleccionado está bloqueado para este canal
+  const blnCompanyBlocked = TIPOS_EMPRESA_BLOQUEADOS.has(objWatch.frm_cre_tipo_empresa ?? '');
 
-  const ciudadesCre = useMemo(
-    () => CIUDADES_POR_DEPTO[w.frm_cre_departamento ?? ''] ?? [],
-    [w.frm_cre_departamento]
+  // Calculamos las ciudades disponibles según el departamento elegido
+  const lstCitiesCre = useMemo(
+    () => CIUDADES_POR_DEPTO[objWatch.frm_cre_departamento ?? ''] ?? [],
+    [objWatch.frm_cre_departamento]
   );
 
+  // Reiniciamos la ciudad cada vez que cambia el departamento
   useEffect(() => {
     setValue('frm_cre_ciudad', '');
-  }, [w.frm_cre_departamento, setValue]);
+  }, [objWatch.frm_cre_departamento, setValue]);
 
-  const err = (name: keyof FfFlSolicitudFormData) =>
-    fe(errors[name] as FieldError | undefined, w[name], isSubmitted);
+  // Resolvemos el error de un campo puntual del formulario
+  const err = (in_strName: keyof FfFlSolicitudFormData) =>
+    fe(errors[in_strName] as FieldError | undefined, objWatch[in_strName], isSubmitted);
 
   return (
     <div>
@@ -43,7 +48,7 @@ export default function CreacionTomador({ form }: { form: Form }) {
         config="secondary"
         wide
         icon="alert-triangle:line"
-        onClick={() => setOpen(!open)}
+        onClick={() => setBlnOpen(!blnOpen)}
         style={{
           ['--z-button--bg' as any]:    'var(--zc-lemon-20)',
           ['--z-button--color' as any]: 'var(--zc-lemon-aa)',
@@ -51,12 +56,13 @@ export default function CreacionTomador({ form }: { form: Form }) {
           marginBottom: 'var(--zs-75)',
         }}
       >
-        {open ? '▾' : '▸'} Creación de tomador — Persona Jurídica
+        {blnOpen ? '▾' : '▸'} Creación de tomador — Persona Jurídica
         <span style={{ font: 'var(--zf-capt-12)', marginLeft: 'var(--zs-50)' }}>(completar si TIA no encontró el tomador)</span>
       </ZrButton>
 
-      {open && (
+      {blnOpen && (
         <div className="policyholder-create-body">
+          {/* Datos básicos de la compañía */}
           <div className="form-row cols-3">
             <ZdsInput
               control={control}
@@ -93,6 +99,7 @@ export default function CreacionTomador({ form }: { form: Form }) {
             />
           </div>
 
+          {/* Tipo de empresa y fechas del documento */}
           <div className="form-row cols-3">
             <ZdsSelect
               label="Tipo de empresa"
@@ -107,7 +114,8 @@ export default function CreacionTomador({ form }: { form: Form }) {
             <ZdsDate control={control} name="frm_cre_fecha_expedicion" label="Fecha de expedición del documento" />
           </div>
 
-          {empresaBloqueada && (
+          {/* Avisamos cuando el tipo de empresa no puede cotizarse por este canal */}
+          {blnCompanyBlocked && (
             <ZrAlert config="negative" style={{ marginTop: 'var(--zs-75)', marginBottom: 0 }} {...({ 'hide-close': true } as object)}>
               El tipo de empresa seleccionado no puede cotizarse por este canal, por favor verifique la información.
               La cotización deberá gestionarse con la ayuda del asesor comercial (Case Underwriting).
@@ -129,6 +137,7 @@ export default function CreacionTomador({ form }: { form: Form }) {
             />
           </div>
 
+          {/* Datos del representante legal */}
           <div className="form-subsection-title form-subsection-title--spaced">Representante legal</div>
           <div className="form-row cols-3">
             <ZdsInput
@@ -156,6 +165,7 @@ export default function CreacionTomador({ form }: { form: Form }) {
             />
           </div>
 
+          {/* Datos de dirección del tomador */}
           <div className="form-subsection-title form-subsection-title--spaced">Dirección</div>
           <div className="form-row cols-1">
             <ZdsInput
@@ -186,8 +196,8 @@ export default function CreacionTomador({ form }: { form: Form }) {
               name="frm_cre_ciudad"
               control={control}
               rules={{ required: 'Campo requerido' }}
-              options={ciudadesCre}
-              placeholder={w.frm_cre_departamento ? 'Seleccione...' : 'Seleccione departamento primero'}
+              options={lstCitiesCre}
+              placeholder={objWatch.frm_cre_departamento ? 'Seleccione...' : 'Seleccione departamento primero'}
               required
               error={err('frm_cre_ciudad')}
             />
@@ -204,6 +214,7 @@ export default function CreacionTomador({ form }: { form: Form }) {
             />
           </div>
 
+          {/* Campo oculto: el tercero se crea siempre en estado Activo */}
           <input type="hidden" {...register('frm_cre_estado_tercero')} defaultValue="Activo" />
         </div>
       )}

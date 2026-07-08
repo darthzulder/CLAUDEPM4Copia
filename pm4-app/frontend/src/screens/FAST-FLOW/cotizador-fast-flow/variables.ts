@@ -131,39 +131,42 @@ export const WATCHERS = {
 // ---------------------------------------------------------------------------
 export const CONSULTAR_CLIENTE_SCRIPT_ID = 56;
 
-export function parseClienteTia(rawOutput: unknown): Partial<CotizadorFormData> {
-  const tia = ((rawOutput as Record<string, unknown> | null | undefined) ?? {}) as Record<string, unknown>;
+export function parseClienteTia(in_objRaw: unknown): Partial<CotizadorFormData> {
+  const objTia = ((in_objRaw as Record<string, unknown> | null | undefined) ?? {}) as Record<string, unknown>;
 
-  const flex: Record<string, unknown> = {};
-  const flexAttrs = tia['flexAttributes'] as Array<{ attributeName: string; attributeValue: unknown }> | undefined;
-  if (Array.isArray(flexAttrs)) {
-    for (const attr of flexAttrs) flex[attr.attributeName] = attr.attributeValue;
+  // Aplanamos los atributos flexibles en un diccionario
+  const dicFlex: Record<string, unknown> = {};
+  const lstFlexAttrs = objTia['flexAttributes'] as Array<{ attributeName: string; attributeValue: unknown }> | undefined;
+  if (Array.isArray(lstFlexAttrs)) {
+    for (const objAttr of lstFlexAttrs) dicFlex[objAttr.attributeName] = objAttr.attributeValue;
   }
 
-  const tomadorNombre = (() => {
-    if (tia['partyType'] === 'INSTITUTION') return tia['name'] as string | null;
-    const parts = [flex['FIRST_NAME'], flex['SECOND_NAME'], flex['FIRST_SURNAME'], flex['SECOND_SURNAME']].filter(Boolean);
-    return parts.length ? parts.join(' ') : (tia['name'] as string | null);
+  // Armamos el nombre del tomador según sea institución o persona
+  const strHolderName = (() => {
+    if (objTia['partyType'] === 'INSTITUTION') return objTia['name'] as string | null;
+    const lstParts = [dicFlex['FIRST_NAME'], dicFlex['SECOND_NAME'], dicFlex['FIRST_SURNAME'], dicFlex['SECOND_SURNAME']].filter(Boolean);
+    return lstParts.length ? lstParts.join(' ') : (objTia['name'] as string | null);
   })();
 
-  const addresses = tia['addresses'] as Array<Record<string, unknown>> | undefined;
-  const mainAddr = addresses?.find(a => a['addressType'] === 'address') ?? {};
+  const lstAddresses = objTia['addresses'] as Array<Record<string, unknown>> | undefined;
+  const objMainAddr = lstAddresses?.find(objAddr => objAddr['addressType'] === 'address') ?? {};
 
-  const direccion = (() => {
-    const street = mainAddr['street'] as string | null;
-    if (street) return street;
-    const parts = [
-      flex['TYPE_VIA'], flex['NO_VIA'], '#',
-      flex['TYPE_VIA2'], flex['NO_VIA2'], flex['PLACA'], flex['DETAILS_ADDRESS'],
+  // Preferimos la calle directa; si no, componemos la dirección con los flex
+  const strAddress = (() => {
+    const strStreet = objMainAddr['street'] as string | null;
+    if (strStreet) return strStreet;
+    const lstParts = [
+      dicFlex['TYPE_VIA'], dicFlex['NO_VIA'], '#',
+      dicFlex['TYPE_VIA2'], dicFlex['NO_VIA2'], dicFlex['PLACA'], dicFlex['DETAILS_ADDRESS'],
     ].filter(v => v !== null && v !== undefined && v !== '');
-    return parts.length > 2 ? parts.join(' ') : null;
+    return lstParts.length > 2 ? lstParts.join(' ') : null;
   })();
 
-  const result: Partial<CotizadorFormData> = {};
-  if (tomadorNombre)     result.frm_tomador_tomador            = tomadorNombre;
-  if (direccion)         result.frm_tomador_direccion           = direccion;
-  if (flex['WEB_EMAIL']) result.frm_tomador_correo_facturacion  = String(flex['WEB_EMAIL']);
-  return result;
+  const objResult: Partial<CotizadorFormData> = {};
+  if (strHolderName)        objResult.frm_tomador_tomador            = strHolderName;
+  if (strAddress)           objResult.frm_tomador_direccion           = strAddress;
+  if (dicFlex['WEB_EMAIL']) objResult.frm_tomador_correo_facturacion  = String(dicFlex['WEB_EMAIL']);
+  return objResult;
 }
 
 // ---------------------------------------------------------------------------

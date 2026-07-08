@@ -49,15 +49,17 @@ const MOTIVOS_RECHAZO = [
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 
-function cop(v: unknown): string {
-  const n = parseFloat(String(v));
-  if (!v || isNaN(n)) return '—';
-  return `$${new Intl.NumberFormat('es-CO').format(n)}`;
+// Formateamos un valor como moneda colombiana
+function cop(in_objValue: unknown): string {
+  const dblNum = parseFloat(String(in_objValue));
+  if (!in_objValue || isNaN(dblNum)) return '—';
+  return `$${new Intl.NumberFormat('es-CO').format(dblNum)}`;
 }
 
-function td(data: Record<string, unknown>, key: string): unknown {
-  const v = data[key];
-  return v !== null && v !== undefined && v !== '' ? v : null;
+// Devolvemos el valor del dato solo si no viene vacío
+function td(in_objData: Record<string, unknown>, in_strKey: string): unknown {
+  const objVal = in_objData[in_strKey];
+  return objVal !== null && objVal !== undefined && objVal !== '' ? objVal : null;
 }
 
 // ─── Radio de selección de opción ─────────────────────────────────────────────
@@ -118,7 +120,7 @@ function CardFooter({ form, ncField }: { form: Form; ncField: keyof CotizFfFlFor
 // ─── Tarjeta D&O ──────────────────────────────────────────────────────────────
 
 function TarjetaDyO({ form, data, mostrarAnexo }: { form: Form; data: Record<string, unknown>; mostrarAnexo: boolean }) {
-  const w = form.watch();
+  const objWatch = form.watch();
 
   return (
     <FormSection
@@ -139,6 +141,7 @@ function TarjetaDyO({ form, data, mostrarAnexo }: { form: Form; data: Record<str
               </tr>
             </thead>
             <tbody>
+              {/* Pintamos las tres opciones, cada una con sus coberturas A y B */}
               {(['1','2','3'] as const).map((n) => (
                 <Fragment key={n}>
                   <tr>
@@ -160,6 +163,7 @@ function TarjetaDyO({ form, data, mostrarAnexo }: { form: Form; data: Record<str
           </table>
         </ZrTable>
 
+        {/* Anexo de cobertura a la entidad (solo para el sector "Otros") */}
         {mostrarAnexo && (
           <div style={{ marginTop: 'var(--zs-100)' }}>
             <div className="subsection-title">Anexo de cobertura a la entidad</div>
@@ -179,15 +183,16 @@ function TarjetaDyO({ form, data, mostrarAnexo }: { form: Form; data: Record<str
                 </thead>
                 <tbody>
                   {(['1','2','3'] as const).map((n) => {
-                    const isAuto = w.cot_dyo_opcion === n;
+                    // Resaltamos la fila que coincide con la opción principal elegida
+                    const blnIsAuto = objWatch.cot_dyo_opcion === n;
                     return (
-                      <tr key={n} style={isAuto ? { background: 'var(--zc-blue-sky-10)' } : undefined}>
+                      <tr key={n} style={blnIsAuto ? { background: 'var(--zc-blue-sky-10)' } : undefined}>
                         <td {...({ config: 'center' } as object)}>{n}</td>
                         <td>{cop(td(data, `cot_dyo_ent${n}_limite`))}</td>
                         <td>Todo y cada reclamo en el agregado anual</td>
                         <td>{cop(td(data, `cot_dyo_ent${n}_deducible`))}</td>
                         <td {...({ config: 'center' } as object)}>
-                          <input type="radio" checked={isAuto} disabled readOnly aria-label="Opción seleccionada automáticamente" />
+                          <input type="radio" checked={blnIsAuto} disabled readOnly aria-label="Opción seleccionada automáticamente" />
                         </td>
                       </tr>
                     );
@@ -223,6 +228,7 @@ function TarjetaCC({ form, data }: { form: Form; data: Record<string, unknown> }
               </tr>
             </thead>
             <tbody>
+              {/* Pintamos una fila por cada opción de cotización */}
               {(['1','2','3'] as const).map((n) => (
                 <tr key={n}>
                   <td {...({ config: 'center' } as object)}>{n}</td>
@@ -270,6 +276,7 @@ function TarjetaGenerica({
               </tr>
             </thead>
             <tbody>
+              {/* Pintamos una fila por cada opción de cotización */}
               {(['1','2','3'] as const).map((n) => (
                 <tr key={n}>
                   <td {...({ config: 'center' } as object)}>{n}</td>
@@ -298,8 +305,8 @@ function SeccionDecision({
   submitting: boolean;
 }) {
   const { control, watch, setValue, setError, clearErrors, formState: { errors } } = form;
-  const w = watch();
-  const decision = w.cot_decision;
+  const objWatch = watch();
+  const strDecision = objWatch.cot_decision;
 
   return (
     <FormSection
@@ -313,11 +320,11 @@ function SeccionDecision({
             <ZrButton
               config="primary:l"
               icon="arrow-long-right:line"
-              disabled={submitting || !decision}
+              disabled={submitting || !strDecision}
               loading={submitting}
               onClick={onEnviar}
             >
-              {submitting ? 'Enviando...' : decision === 'PERSONALIZACION' ? 'CONFIRMAR' : 'ENVIAR'}
+              {submitting ? 'Enviando...' : strDecision === 'PERSONALIZACION' ? 'CONFIRMAR' : 'ENVIAR'}
             </ZrButton>
           </ActionBar>
         </>
@@ -336,7 +343,8 @@ function SeccionDecision({
             />
           </div>
 
-          {decision === 'RECHAZADA' && (
+          {/* Campos extra cuando la cotización es rechazada */}
+          {strDecision === 'RECHAZADA' && (
             <>
               <div className="form-row cols-2">
                 <ZdsSelect
@@ -361,7 +369,8 @@ function SeccionDecision({
             </>
           )}
 
-          {decision === 'PERSONALIZACION' && (
+          {/* Campo extra cuando se requiere personalización o excepción */}
+          {strDecision === 'PERSONALIZACION' && (
             <div className="form-row cols-1">
               <ZdsTextarea
                 control={control}
@@ -374,7 +383,8 @@ function SeccionDecision({
             </div>
           )}
 
-          {decision === 'APROBADA' && (
+          {/* Campos extra cuando la cotización es aprobada */}
+          {strDecision === 'APROBADA' && (
             <>
               <div className="form-row cols-2">
                 <ZdsInput
@@ -427,46 +437,50 @@ function SeccionDecision({
 
 export default function CotizacionFfFl() {
   const { task, loading, error, submitting, completeTask } = useTask();
-  const [submitError, setSubmitError] = useState('');
-  const [sent, setSent] = useState(false);
-  const [personalizacionConfirmada, setPersonalizacionConfirmada] = useState(false);
+  const [strSubmitError, setStrSubmitError] = useState('');
+  const [blnSent, setBlnSent] = useState(false);
+  const [blnCustomConfirmed, setBlnCustomConfirmed] = useState(false);
 
-  const taskData = (task?.data ?? {}) as Record<string, any>;
+  const dicTaskData = (task?.data ?? {}) as Record<string, any>;
 
-  const [slipTab, setSlipTab] = useState('');
+  const [strSlipTab, setStrSlipTab] = useState('');
 
-  const requestId = task?.process_request_id ?? null;
-  const { files } = useRequestFiles(requestId);
+  const intRequestId = task?.process_request_id ?? null;
+  const { files } = useRequestFiles(intRequestId);
 
-  const hasDyo      = Boolean(taskData.frm_gen_prod_dyo);
-  const hasCc       = Boolean(taskData.frm_gen_prod_cc);
-  const hasPdysi    = Boolean(taskData.frm_gen_prod_pdysi);
-  const hasPi       = Boolean(taskData.frm_gen_prod_pi);
-  const mostrarAnexo = hasDyo && taskData.frm_tom_sector === 'OTROS';
+  // Detectamos qué productos vienen en el caso
+  const blnHasDyo      = Boolean(dicTaskData.frm_gen_prod_dyo);
+  const blnHasCc       = Boolean(dicTaskData.frm_gen_prod_cc);
+  const blnHasPdysi    = Boolean(dicTaskData.frm_gen_prod_pdysi);
+  const blnHasPi       = Boolean(dicTaskData.frm_gen_prod_pi);
+  const blnShowAnexo = blnHasDyo && dicTaskData.frm_tom_sector === 'OTROS';
 
-  const slipLineas = [
-    hasDyo   ? { key: 'dyo',   label: 'D&O',                     field: 'output_slipCotizacion_dyo'   } : null,
-    hasCc    ? { key: 'cc',    label: 'Crimen Comercial',          field: 'output_slipCotizacion_cc'    } : null,
-    hasPdysi ? { key: 'pdysi', label: 'Protección de Datos y SI',  field: 'output_slipCotizacion_pdysi' } : null,
-    hasPi    ? { key: 'pi',    label: 'Seg. Profesional',          field: 'output_slipCotizacion_pi'    } : null,
-  ].filter((l): l is NonNullable<typeof l> => l !== null);
+  // Armamos las líneas del slip solo con los productos presentes
+  const lstSlipLines = [
+    blnHasDyo   ? { key: 'dyo',   label: 'D&O',                     field: 'output_slipCotizacion_dyo'   } : null,
+    blnHasCc    ? { key: 'cc',    label: 'Crimen Comercial',          field: 'output_slipCotizacion_cc'    } : null,
+    blnHasPdysi ? { key: 'pdysi', label: 'Protección de Datos y SI',  field: 'output_slipCotizacion_pdysi' } : null,
+    blnHasPi    ? { key: 'pi',    label: 'Seg. Profesional',          field: 'output_slipCotizacion_pi'    } : null,
+  ].filter((objLine): objLine is NonNullable<typeof objLine> => objLine !== null);
 
+  // Si la pestaña activa del slip ya no existe, saltamos a la primera
   useEffect(() => {
-    if (slipLineas.length > 0 && !slipLineas.find((l) => l.key === slipTab)) {
-      setSlipTab(slipLineas[0].key);
+    if (lstSlipLines.length > 0 && !lstSlipLines.find((objLine) => objLine.key === strSlipTab)) {
+      setStrSlipTab(lstSlipLines[0].key);
     }
-  }, [slipLineas.map((l) => l.key).join(',')]); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [lstSlipLines.map((objLine) => objLine.key).join(',')]); // eslint-disable-line react-hooks/exhaustive-deps
 
-  const currentSlipLinea = slipLineas.find((l) => l.key === slipTab);
-  const effectiveSlipId = (() => {
-    if (!currentSlipLinea) return null;
-    const fromVar = resolveFileId(taskData[currentSlipLinea.field]);
-    if (fromVar) return fromVar;
+  const objCurrentSlipLine = lstSlipLines.find((objLine) => objLine.key === strSlipTab);
+  // Resolvemos el id del archivo de slip a mostrar
+  const intEffectiveSlipId = (() => {
+    if (!objCurrentSlipLine) return null;
+    const intFromVar = resolveFileId(dicTaskData[objCurrentSlipLine.field]);
+    if (intFromVar) return intFromVar;
     // Fallback: buscar por nombre de archivo en el File Manager
-    const match = files.find((f) =>
-      f.file_name.toLowerCase().includes('slipcotizacion_' + currentSlipLinea.key)
+    const objMatch = files.find((objFile) =>
+      objFile.file_name.toLowerCase().includes('slipcotizacion_' + objCurrentSlipLine.key)
     );
-    return match?.id ?? null;
+    return objMatch?.id ?? null;
   })();
 
   const form = useForm<CotizFfFlFormData>({
@@ -479,55 +493,57 @@ export default function CotizacionFfFl() {
     },
   });
 
-  const w = form.watch();
+  const objWatch = form.watch();
 
   // Pre-fill correo facturación y comisión desde la solicitud
   useEffect(() => {
     if (!task) return;
-    const correo = String(taskData.frm_tom_correo_facturacion ?? taskData.frm_cre_correo_facturacion ?? '');
-    if (correo) form.setValue('cot_correo_facturacion', correo);
-    form.setValue('cot_comision', Number(taskData.frm_cot_comision ?? 20));
+    const strCorreo = String(dicTaskData.frm_tom_correo_facturacion ?? dicTaskData.frm_cre_correo_facturacion ?? '');
+    if (strCorreo) form.setValue('cot_correo_facturacion', strCorreo);
+    form.setValue('cot_comision', Number(dicTaskData.frm_cot_comision ?? 20));
   }, [task]);  // eslint-disable-line react-hooks/exhaustive-deps
 
   // Regla 21%: 2+ notas de cobertura + orden en firme cargada
   useEffect(() => {
-    if (w.cot_decision !== 'APROBADA') return;
-    const ncCount = [w.cot_dyo_enviar_nc, w.cot_cc_enviar_nc, w.cot_pdysi_enviar_nc, w.cot_pi_enviar_nc].filter(Boolean).length;
-    const base = Number(taskData.frm_cot_comision ?? 20);
-    form.setValue('cot_comision', ncCount >= 2 && w.cot_orden_firme_nombre ? 21 : base);
-  }, [w.cot_dyo_enviar_nc, w.cot_cc_enviar_nc, w.cot_pdysi_enviar_nc, w.cot_pi_enviar_nc, w.cot_orden_firme_nombre, w.cot_decision]); // eslint-disable-line react-hooks/exhaustive-deps
+    if (objWatch.cot_decision !== 'APROBADA') return;
+    const intNcCount = [objWatch.cot_dyo_enviar_nc, objWatch.cot_cc_enviar_nc, objWatch.cot_pdysi_enviar_nc, objWatch.cot_pi_enviar_nc].filter(Boolean).length;
+    const dblBase = Number(dicTaskData.frm_cot_comision ?? 20);
+    form.setValue('cot_comision', intNcCount >= 2 && objWatch.cot_orden_firme_nombre ? 21 : dblBase);
+  }, [objWatch.cot_dyo_enviar_nc, objWatch.cot_cc_enviar_nc, objWatch.cot_pdysi_enviar_nc, objWatch.cot_pi_enviar_nc, objWatch.cot_orden_firme_nombre, objWatch.cot_decision]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const handleEnviar = async () => {
-    setSubmitError('');
-    const data = form.getValues();
-    const decision = data.cot_decision;
+    setStrSubmitError('');
+    const objData = form.getValues();
+    const strDecision = objData.cot_decision;
 
-    if (!decision) { setSubmitError('Seleccione una decisión para continuar.'); return; }
+    if (!strDecision) { setStrSubmitError('Seleccione una decisión para continuar.'); return; }
 
-    if (decision === 'PERSONALIZACION') {
-      setPersonalizacionConfirmada(true);
+    if (strDecision === 'PERSONALIZACION') {
+      setBlnCustomConfirmed(true);
       return;
     }
 
-    if (decision === 'APROBADA') {
-      if (hasDyo   && !data.cot_dyo_opcion)   { setSubmitError('D&O: Debe seleccionar una opción de cotización.'); return; }
-      if (hasCc    && !data.cot_cc_opcion)    { setSubmitError('Crimen Comercial: Debe seleccionar una opción de cotización.'); return; }
-      if (hasPdysi && !data.cot_pdysi_opcion) { setSubmitError('Protección de Datos y SI: Debe seleccionar una opción de cotización.'); return; }
-      if (hasPi    && !data.cot_pi_opcion)    { setSubmitError('Seg. Profesional: Debe seleccionar una opción de cotización.'); return; }
-      if (!data.cot_correo_facturacion)        { setSubmitError('Ingrese el correo para facturación.'); return; }
-      if (!data.cot_orden_firme_nombre)        { setSubmitError('Cargue la orden en firme.'); return; }
+    // Validamos la selección de opción y los datos obligatorios cuando se aprueba
+    if (strDecision === 'APROBADA') {
+      if (blnHasDyo   && !objData.cot_dyo_opcion)   { setStrSubmitError('D&O: Debe seleccionar una opción de cotización.'); return; }
+      if (blnHasCc    && !objData.cot_cc_opcion)    { setStrSubmitError('Crimen Comercial: Debe seleccionar una opción de cotización.'); return; }
+      if (blnHasPdysi && !objData.cot_pdysi_opcion) { setStrSubmitError('Protección de Datos y SI: Debe seleccionar una opción de cotización.'); return; }
+      if (blnHasPi    && !objData.cot_pi_opcion)    { setStrSubmitError('Seg. Profesional: Debe seleccionar una opción de cotización.'); return; }
+      if (!objData.cot_correo_facturacion)        { setStrSubmitError('Ingrese el correo para facturación.'); return; }
+      if (!objData.cot_orden_firme_nombre)        { setStrSubmitError('Cargue la orden en firme.'); return; }
     }
 
-    if (decision === 'RECHAZADA') {
-      if (!data.cot_motivo_rechazo)           { setSubmitError('Seleccione el motivo del rechazo.'); return; }
-      if (!data.cot_comentarios?.trim())       { setSubmitError('Ingrese los comentarios del rechazo.'); return; }
+    // Validamos motivo y comentarios cuando se rechaza
+    if (strDecision === 'RECHAZADA') {
+      if (!objData.cot_motivo_rechazo)           { setStrSubmitError('Seleccione el motivo del rechazo.'); return; }
+      if (!objData.cot_comentarios?.trim())       { setStrSubmitError('Ingrese los comentarios del rechazo.'); return; }
     }
 
     try {
-      await completeTask({ ...taskData, ...data });
-      setSent(true);
-    } catch (e) {
-      setSubmitError((e as Error).message ?? 'Error desconocido al enviar');
+      await completeTask({ ...dicTaskData, ...objData });
+      setBlnSent(true);
+    } catch (excError) {
+      setStrSubmitError((excError as Error).message ?? 'Error desconocido al enviar');
     }
   };
 
@@ -536,10 +552,10 @@ export default function CotizacionFfFl() {
   if (error)   return <ZrAlert config="negative" {...({ 'hide-close': true } as object)}>Error cargando la tarea: {error}</ZrAlert>;
 
   // ── Pantalla: Personalización confirmada ────────────────────────────────────
-  if (personalizacionConfirmada) {
+  if (blnCustomConfirmed) {
     return (
       <div className="screen-wrapper">
-        <ScreenHeader title="Cotizador Fast Flow — Líneas Financieras" subtitle={[`Cotización # ${String(taskData.frm_gen_num_cotizacion ?? '—')}`]} />
+        <ScreenHeader title="Cotizador Fast Flow — Líneas Financieras" subtitle={[`Cotización # ${String(dicTaskData.frm_gen_num_cotizacion ?? '—')}`]} />
         <div className="screen-content">
           <ResultCard variant="warning" title="Requiere Personalización / Excepción">
             <p>
@@ -553,24 +569,24 @@ export default function CotizacionFfFl() {
   }
 
   // ── Pantalla: Enviado ───────────────────────────────────────────────────────
-  if (sent) {
-    const dec = w.cot_decision;
+  if (blnSent) {
+    const strDec = objWatch.cot_decision;
     return (
       <div className="screen-wrapper">
-        <ScreenHeader title="Cotizador Fast Flow — Líneas Financieras" subtitle={[`Cotización # ${String(taskData.frm_gen_num_cotizacion ?? '—')}`]} />
+        <ScreenHeader title="Cotizador Fast Flow — Líneas Financieras" subtitle={[`Cotización # ${String(dicTaskData.frm_gen_num_cotizacion ?? '—')}`]} />
         <div className="screen-content">
           <ResultCard
             variant="success"
             title={
-              dec === 'NUEVA_VERSION' ? 'Generando nueva versión…' :
-              dec === 'RECHAZADA'     ? 'Cotización rechazada' :
+              strDec === 'NUEVA_VERSION' ? 'Generando nueva versión…' :
+              strDec === 'RECHAZADA'     ? 'Cotización rechazada' :
               'Cotización procesada'
             }
           >
             <p>
-              {dec === 'NUEVA_VERSION'
+              {strDec === 'NUEVA_VERSION'
                 ? 'La cotización volverá al Cotizador FF para ser modificada.'
-                : dec === 'RECHAZADA'
+                : strDec === 'RECHAZADA'
                 ? 'Se ha registrado el rechazo. El proceso continúa automáticamente.'
                 : 'Las notas de cobertura serán enviadas al intermediario. Un momento…'}
             </p>
@@ -585,20 +601,20 @@ export default function CotizacionFfFl() {
     <div className="screen-wrapper">
       <ScreenHeader
         title="Cotizador Fast Flow — Líneas Financieras"
-        subtitle={[`Cotización # ${String(taskData.frm_gen_num_cotizacion ?? '—')}`]}
+        subtitle={[`Cotización # ${String(dicTaskData.frm_gen_num_cotizacion ?? '—')}`]}
       />
       <div className="screen-content">
 
         {/* Barra de info del tomador */}
         <InfoBar
           items={[
-            { label: 'Tomador', value: taskData.frm_tom_tomador },
-            { label: 'NIT', value: taskData.frm_tom_nit },
-            { label: 'Intermediario', value: taskData.frm_gen_intermediario },
+            { label: 'Tomador', value: dicTaskData.frm_tom_tomador },
+            { label: 'NIT', value: dicTaskData.frm_tom_nit },
+            { label: 'Intermediario', value: dicTaskData.frm_gen_intermediario },
             {
               label: 'Vigencia',
-              value: taskData.frm_cot_inicio_vigencia || taskData.frm_cot_fin_vigencia
-                ? `${taskData.frm_cot_inicio_vigencia ?? '—'} — ${taskData.frm_cot_fin_vigencia ?? '—'}`
+              value: dicTaskData.frm_cot_inicio_vigencia || dicTaskData.frm_cot_fin_vigencia
+                ? `${dicTaskData.frm_cot_inicio_vigencia ?? '—'} — ${dicTaskData.frm_cot_fin_vigencia ?? '—'}`
                 : null
             }
           ]}
@@ -607,19 +623,19 @@ export default function CotizacionFfFl() {
         {/* Slip de Cotización */}
         <div className="section-title">Slip de Cotización</div>
         <FormSection title="Slip de Cotización">
-            {slipLineas.length > 1 && (
+            {lstSlipLines.length > 1 && (
               <div className="slip-tabs">
                 <ZrTabs
-                  model={Math.max(1, slipLineas.findIndex((l) => l.key === slipTab) + 1)}
-                  onChange={(idx: number) => { const l = slipLineas[idx - 1]; if (l) setSlipTab(l.key); }}
-                  {...({ tabs: slipLineas.map((l) => ({ name: l.label })) } as Record<string, unknown>)}
+                  model={Math.max(1, lstSlipLines.findIndex((objLine) => objLine.key === strSlipTab) + 1)}
+                  onChange={(in_intIdx: number) => { const objLine = lstSlipLines[in_intIdx - 1]; if (objLine) setStrSlipTab(objLine.key); }}
+                  {...({ tabs: lstSlipLines.map((objLine) => ({ name: objLine.label })) } as Record<string, unknown>)}
                 />
               </div>
             )}
-            {effectiveSlipId ? (
+            {intEffectiveSlipId ? (
               <PdfViewer
-                fileId={effectiveSlipId}
-                label={currentSlipLinea ? `Slip — ${currentSlipLinea.label}` : 'Slip de Cotización'}
+                fileId={intEffectiveSlipId}
+                label={objCurrentSlipLine ? `Slip — ${objCurrentSlipLine.label}` : 'Slip de Cotización'}
                 height={700}
               />
             ) : (
@@ -632,20 +648,21 @@ export default function CotizacionFfFl() {
 
         <div className="section-title">Resumen de Cotizaciones</div>
 
-        {hasDyo   && <TarjetaDyO form={form} data={taskData} mostrarAnexo={mostrarAnexo} />}
-        {hasCc    && <TarjetaCC  form={form} data={taskData} />}
-        {hasPdysi && (
+        {/* Mostramos la tarjeta de cada producto presente en el caso */}
+        {blnHasDyo   && <TarjetaDyO form={form} data={dicTaskData} mostrarAnexo={blnShowAnexo} />}
+        {blnHasCc    && <TarjetaCC  form={form} data={dicTaskData} />}
+        {blnHasPdysi && (
           <TarjetaGenerica
-            form={form} data={taskData}
+            form={form} data={dicTaskData}
             titulo="Seguro de Protección de Datos y Seguridad Informática"
             prefix="pdysi"
             opcionField="cot_pdysi_opcion"
             ncField="cot_pdysi_enviar_nc"
           />
         )}
-        {hasPi && (
+        {blnHasPi && (
           <TarjetaGenerica
-            form={form} data={taskData}
+            form={form} data={dicTaskData}
             titulo="Seguro de Responsabilidad Civil Profesional"
             prefix="pi"
             opcionField="cot_pi_opcion"
@@ -656,7 +673,7 @@ export default function CotizacionFfFl() {
         <SeccionDecision
           form={form}
           onEnviar={handleEnviar}
-          submitError={submitError}
+          submitError={strSubmitError}
           submitting={submitting}
         />
       </div>

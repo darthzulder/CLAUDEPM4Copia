@@ -5,7 +5,8 @@ import FormSection from '../../../../components/FormSection';
 import DocSupportUploader from '../../../../components/DocSupportUploader';
 import { ZdsInput, ZdsSelect, ZdsRadio, ZdsTextarea } from '../../../../components/fields/ZdsFields';
 import { useCollection } from '../../../../core/useCollection';
-import { COLLECTION_DEFS, OPTIONS, ADJUNTO_KEYS, CrearRecibirQuejaFormData } from './variables';
+import { QD, QD_COLLECTIONS, OPTIONS_SI_NO, SCR000_ADJUNTO_KEYS as ADJUNTO_KEYS } from '../fields/fields';
+import type { CrearRecibirQuejaFormData } from '../fields/fields';
 
 interface Props {
   form: UseFormReturn<CrearRecibirQuejaFormData>;
@@ -14,73 +15,81 @@ interface Props {
 
 export default function SeccionDetalleQueja({ form, fileRegistry }: Props) {
   const { control, watch, setValue, formState: { errors } } = form;
-  const w = watch();
+  // Tomamos una foto de los valores actuales del formulario.
+  const objWatch = watch();
 
-  const { options: seguroOpts } = useCollection(COLLECTION_DEFS.seguro);
-  const { options: detalleProductoOpts } = useCollection(COLLECTION_DEFS.detalleProducto, { qd_productoSFC: w.qd_productoSFC });
-  const { options: motivoOpts } = useCollection(COLLECTION_DEFS.motivo);
-  const { options: admisionOpts } = useCollection(COLLECTION_DEFS.admision);
-  const { options: enteOpts } = useCollection(COLLECTION_DEFS.ente);
-  const { options: tutelaOpts } = useCollection(COLLECTION_DEFS.tutela);
-  const { options: quejaExpresOpts } = useCollection(COLLECTION_DEFS.quejaExpres);
+  // Cargamos los catalogos de la seccion de detalle de la queja.
+  const { options: cllInsurance } = useCollection(QD_COLLECTIONS.sfcProduct);
+  // Shim de dependencia: la clave 'qd_productoSFC' es una convención interna que NO
+  // coincide con el dependsOn:'qd_seguro' de esta colección (bug preexistente,
+  // preservado — ver fields/MAPEO_qd_old_new.md #3). Solo se renombra la lectura
+  // del campo real.
+  const { options: cllProductDetail } = useCollection(QD_COLLECTIONS.productDetail, { qd_productoSFC: objWatch[QD.strSfcProduct] });
+  const { options: cllReason } = useCollection(QD_COLLECTIONS.sfcReason);
+  const { options: cllAdmission } = useCollection(QD_COLLECTIONS.admission);
+  const { options: cllControlEntity } = useCollection(QD_COLLECTIONS.controlEntity);
+  const { options: cllGuardianship } = useCollection(QD_COLLECTIONS.tutela);
+  const { options: cllExpressComplaint } = useCollection(QD_COLLECTIONS.expressComplaint);
 
-  const esDefensor = w.qd_rolRadicador === 'DEFENSOR';
+  // Determinamos si el rol radicador es el Defensor.
+  const blnIsDefender = objWatch[QD.strFilerRole] === 'DEFENSOR';
 
   // FLD-327 — escalamiento al Defensor computado (back): Defensor → "Sí".
   useEffect(() => {
-    setValue('qd_escalamientoDefensor', esDefensor ? 'Sí' : 'No');
-  }, [esDefensor, setValue]);
+    setValue(QD.strOmbudsmanEscalation, blnIsDefender ? 'Sí' : 'No');
+  }, [blnIsDefender, setValue]);
 
   // FLD-324 — detalle del producto: primer código de CAT-DETALLE-PRODUCTO para el seguro elegido.
   useEffect(() => {
-    setValue('qd_detalleProducto', detalleProductoOpts[0]?.label ?? '');
-  }, [detalleProductoOpts, setValue]);
+    setValue(QD.strProductDetail, cllProductDetail[0]?.label ?? '');
+  }, [cllProductDetail, setValue]);
 
   // FLD-331 — admisión por defecto "No aplica" (rol ≠ Defensor), resuelta desde CAT-ADMISION.
   useEffect(() => {
-    if (esDefensor || w.qd_admision || admisionOpts.length === 0) return;
-    const noAplica = admisionOpts.find((o) => /no aplica/i.test(o.label));
-    if (noAplica) setValue('qd_admision', noAplica.label);
-  }, [esDefensor, w.qd_admision, admisionOpts, setValue]);
+    if (blnIsDefender || objWatch[QD.strAdmission] || cllAdmission.length === 0) return;
+    const objNotApplicable = cllAdmission.find((o) => /no aplica/i.test(o.label));
+    if (objNotApplicable) setValue(QD.strAdmission, objNotApplicable.label);
+  }, [blnIsDefender, objWatch[QD.strAdmission], cllAdmission, setValue]);
 
   // FLD-332 — ente de control por defecto "Otros", resuelto desde CAT-ENTE.
   useEffect(() => {
-    if (w.qd_enteControl || enteOpts.length === 0) return;
-    const otros = enteOpts.find((o) => /otros/i.test(o.label));
-    if (otros) setValue('qd_enteControl', otros.label);
-  }, [w.qd_enteControl, enteOpts, setValue]);
+    if (objWatch[QD.strControlEntity] || cllControlEntity.length === 0) return;
+    const objOthers = cllControlEntity.find((o) => /otros/i.test(o.label));
+    if (objOthers) setValue(QD.strControlEntity, objOthers.label);
+  }, [objWatch[QD.strControlEntity], cllControlEntity, setValue]);
 
   // FLD-333 — tutela por defecto "No", resuelta desde CAT-TUTELA.
   useEffect(() => {
-    if (w.qd_tutela || tutelaOpts.length === 0) return;
-    const no = tutelaOpts.find((o) => /^\d?\.?\s*no$/i.test(o.label.trim()));
-    if (no) setValue('qd_tutela', no.label);
-  }, [w.qd_tutela, tutelaOpts, setValue]);
+    if (objWatch[QD.strTutela] || cllGuardianship.length === 0) return;
+    const objNo = cllGuardianship.find((o) => /^\d?\.?\s*no$/i.test(o.label.trim()));
+    if (objNo) setValue(QD.strTutela, objNo.label);
+  }, [objWatch[QD.strTutela], cllGuardianship, setValue]);
 
   // FLD-334 — queja exprés por defecto "No", resuelta desde CAT-EXPRES.
   useEffect(() => {
-    if (w.qd_quejaExpres || quejaExpresOpts.length === 0) return;
-    const no = quejaExpresOpts.find((o) => /^\d?\.?\s*no$/i.test(o.label.trim()));
-    if (no) setValue('qd_quejaExpres', no.label);
-  }, [w.qd_quejaExpres, quejaExpresOpts, setValue]);
+    if (objWatch[QD.strExpressComplaint] || cllExpressComplaint.length === 0) return;
+    const objNo = cllExpressComplaint.find((o) => /^\d?\.?\s*no$/i.test(o.label.trim()));
+    if (objNo) setValue(QD.strExpressComplaint, objNo.label);
+  }, [objWatch[QD.strExpressComplaint], cllExpressComplaint, setValue]);
 
-  const err = (name: keyof CrearRecibirQuejaFormData) => errors[name]?.message;
+  // Atajo para leer el mensaje de error de un campo.
+  const err = (in_strName: keyof CrearRecibirQuejaFormData) => errors[in_strName]?.message;
 
   return (
     <FormSection title="Detalle de la Queja">
       <div className="form-row cols-2">
         <ZdsSelect
-          name="qd_productoSFC"
+          name={QD.strSfcProduct}
           control={control}
           label="Selecciona el seguro"
-          options={seguroOpts}
+          options={cllInsurance}
           rules={{ required: 'Campo requerido' }}
           required
           withSearch
-          error={err('qd_productoSFC')}
+          error={err(QD.strSfcProduct)}
         />
         <ZdsInput
-          name="qd_detalleProducto"
+          name={QD.strProductDetail}
           control={control}
           label="Detalle del producto"
           readOnly
@@ -90,17 +99,17 @@ export default function SeccionDetalleQueja({ form, fileRegistry }: Props) {
 
       <div className="form-row cols-2">
         <ZdsRadio
-          name="qd_replica"
+          name={QD.strReply}
           control={control}
           label="¿Ya habías radicado previamente la misma queja o es una reconsideración?"
-          options={OPTIONS.replica}
+          options={OPTIONS_SI_NO}
           rules={{ required: 'Campo requerido' }}
           required
           inline
-          error={err('qd_replica')}
+          error={err(QD.strReply)}
         />
         <ZdsInput
-          name="qd_escalamientoDefensor"
+          name={QD.strOmbudsmanEscalation}
           control={control}
           label="Escalamiento al Defensor del Consumidor"
           readOnly
@@ -109,10 +118,10 @@ export default function SeccionDetalleQueja({ form, fileRegistry }: Props) {
       </div>
 
       {/* RUL-000-12 — argumento visible solo si réplica = Sí */}
-      {w.qd_replica === 'SI' && (
+      {objWatch[QD.strReply] === 'SI' && (
         <div className="form-row cols-1">
           <ZdsTextarea
-            name="qd_argumentoReplica"
+            name={QD.strReplyArgument}
             control={control}
             label="Argumento de la réplica"
             maxLength={2000}
@@ -122,20 +131,20 @@ export default function SeccionDetalleQueja({ form, fileRegistry }: Props) {
 
       <div className="form-row cols-1">
         <ZdsSelect
-          name="qd_motivoSFC"
+          name={QD.strSfcReason}
           control={control}
           label="Cuéntanos el motivo"
-          options={motivoOpts}
+          options={cllReason}
           rules={{ required: 'Campo requerido' }}
           required
           withSearch
-          error={err('qd_motivoSFC')}
+          error={err(QD.strSfcReason)}
         />
       </div>
 
       <div className="form-row cols-1">
         <ZdsTextarea
-          name="qd_textoQueja"
+          name={QD.strComplaintText}
           control={control}
           label="Ingresa el detalle"
           rules={{
@@ -145,7 +154,7 @@ export default function SeccionDetalleQueja({ form, fileRegistry }: Props) {
           }}
           required
           maxLength={2000}
-          error={err('qd_textoQueja')}
+          error={err(QD.strComplaintText)}
         />
       </div>
 
@@ -160,19 +169,19 @@ export default function SeccionDetalleQueja({ form, fileRegistry }: Props) {
       />
 
       <div className="form-row cols-2">
-        {esDefensor ? (
+        {blnIsDefender ? (
           <ZdsSelect
-            name="qd_admision"
+            name={QD.strAdmission}
             control={control}
             label="Admisión"
-            options={admisionOpts}
+            options={cllAdmission}
             rules={{ required: 'Campo requerido' }}
             required
-            error={err('qd_admision')}
+            error={err(QD.strAdmission)}
           />
         ) : (
           <ZdsInput
-            name="qd_admision"
+            name={QD.strAdmission}
             control={control}
             label="Admisión"
             readOnly
@@ -180,7 +189,7 @@ export default function SeccionDetalleQueja({ form, fileRegistry }: Props) {
           />
         )}
         <ZdsInput
-          name="qd_enteControl"
+          name={QD.strControlEntity}
           control={control}
           label="Ente de control"
           readOnly
@@ -190,14 +199,14 @@ export default function SeccionDetalleQueja({ form, fileRegistry }: Props) {
 
       <div className="form-row cols-2">
         <ZdsInput
-          name="qd_tutela"
+          name={QD.strTutela}
           control={control}
           label="Tutela"
           readOnly
           helpText="Asignada por el sistema (CAT-TUTELA, por defecto: No)."
         />
         <ZdsInput
-          name="qd_quejaExpres"
+          name={QD.strExpressComplaint}
           control={control}
           label="Queja Exprés"
           readOnly

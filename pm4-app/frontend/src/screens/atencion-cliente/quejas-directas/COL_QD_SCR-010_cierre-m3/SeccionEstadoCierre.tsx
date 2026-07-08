@@ -12,7 +12,8 @@ const STATUS_CONFIG: Record<string, { bg: string; color: string }> = {
 };
 
 export default function SeccionEstadoCierre({ estadoCierreM3, intentosCierreM3, ultimoError }: Props) {
-  const cfg = STATUS_CONFIG[estadoCierreM3] ?? { bg: '#f3f4f6', color: '#6b7280' };
+  // Resolvemos el estilo del badge segun el estado del envio
+  const objStatusCfg = STATUS_CONFIG[estadoCierreM3] ?? { bg: '#f3f4f6', color: '#6b7280' };
 
   return (
     <div className="estado-cierre-grid">
@@ -21,7 +22,7 @@ export default function SeccionEstadoCierre({ estadoCierreM3, intentosCierreM3, 
         <div>
           <span
             className="estado-badge"
-            style={{ background: cfg.bg, color: cfg.color }}
+            style={{ background: objStatusCfg.bg, color: objStatusCfg.color }}
           >
             {estadoCierreM3 || 'Pendiente'}
           </span>

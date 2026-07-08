@@ -26,18 +26,21 @@ const SINO = [
   { value: 'no', text: 'No' },
 ] as const;
 
-const flex = (v: string) => ({ ['z-flex' as never]: v } as object);
+// Atajo para inyectar el primitivo de layout z-flex como prop suelta.
+const flex = (in_strFlex: string) => ({ ['z-flex' as never]: in_strFlex } as object);
 
 export default function DsCatalog() {
+  // Formulario de muestra con un valor por defecto para cada tipo de campo.
   const { control } = useForm({
     defaultValues: {
       txt: 'Texto de ejemplo', sel: 'b', rad: 'a', fec: '', area: 'Comentario…',
       chk: true, seg: 'si', step: 2, cal: '',
     },
   });
-  const [tab, setTab] = useState(1);
-  const [modal, setModal] = useState(false);
-  const [drawer, setDrawer] = useState(false);
+  // Estado local de la demo: pestaña activa y visibilidad de los overlays.
+  const [intTab, setIntTab] = useState(1);
+  const [blnModal, setBlnModal] = useState(false);
+  const [blnDrawer, setBlnDrawer] = useState(false);
 
   return (
     <div className="screen-wrapper">
@@ -121,8 +124,8 @@ export default function DsCatalog() {
         {/* ── Pestañas ────────────────────────────────────────── */}
         <FormSection title="Pestañas (Tabs)">
           <ZrTabs
-            model={tab}
-            onChange={(idx: number) => setTab(idx)}
+            model={intTab}
+            onChange={(in_intIdx: number) => setIntTab(in_intIdx)}
             {...({ tabs: [{ name: 'Resumen' }, { name: 'Detalle' }, { name: 'Historial' }] } as Record<string, unknown>)}
           >
             <div slot="tab-1">Contenido de Resumen.</div>
@@ -160,27 +163,29 @@ export default function DsCatalog() {
         {/* ── Overlays ────────────────────────────────────────── */}
         <FormSection title="Overlays">
           <div {...flex('100')} style={{ flexWrap: 'wrap' }}>
-            <ZrButton config="primary" onClick={() => setModal(true)}>Abrir modal</ZrButton>
-            <ZrButton config="secondary" icon="menu:line" onClick={() => setDrawer(true)}>Abrir sidebar</ZrButton>
+            <ZrButton config="primary" onClick={() => setBlnModal(true)}>Abrir modal</ZrButton>
+            <ZrButton config="secondary" icon="menu:line" onClick={() => setBlnDrawer(true)}>Abrir sidebar</ZrButton>
           </div>
         </FormSection>
 
-        {modal && (
-          <ZrModal model={modal} onChange={(v: boolean) => setModal(v)}>
+        {/* Modal montado solo cuando está abierto para reiniciar su estado al cerrar. */}
+        {blnModal && (
+          <ZrModal model={blnModal} onChange={(in_blnOpen: boolean) => setBlnModal(in_blnOpen)}>
             <div style={{ padding: 'var(--zs-200)' }}>
               <h3 style={{ marginTop: 0 }}>Modal de ejemplo</h3>
               <p className="subsection-intro">Diálogo centrado con backdrop.</p>
               <div {...flex('75')} style={{ justifyContent: 'flex-end' }}>
-                <ZrButton config="secondary" onClick={() => setModal(false)}>Cerrar</ZrButton>
+                <ZrButton config="secondary" onClick={() => setBlnModal(false)}>Cerrar</ZrButton>
               </div>
             </div>
           </ZrModal>
         )}
 
-        <ZrSidebar config="right" model={drawer} onChange={(v: boolean) => setDrawer(v)}>
+        {/* Panel lateral siempre montado; su visibilidad la controla el modelo. */}
+        <ZrSidebar config="right" model={blnDrawer} onChange={(in_blnOpen: boolean) => setBlnDrawer(in_blnOpen)}>
           <h3 style={{ marginTop: 0 }}>Sidebar de ejemplo</h3>
           <p className="subsection-intro">Panel lateral deslizable.</p>
-          <ZrButton config="link" onClick={() => setDrawer(false)}>Cerrar</ZrButton>
+          <ZrButton config="link" onClick={() => setBlnDrawer(false)}>Cerrar</ZrButton>
         </ZrSidebar>
       </div>
     </div>

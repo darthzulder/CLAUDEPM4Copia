@@ -7,28 +7,30 @@ interface ScreenHeaderProps {
 }
 
 export default function ScreenHeader({ title, subtitle }: ScreenHeaderProps) {
-  let subtitleContent: React.ReactNode = null;
+  let objSubtitleNode: React.ReactNode = null;
 
+  // Construimos el subtitulo segun venga como lista, texto o nodo.
   if (subtitle) {
     if (Array.isArray(subtitle)) {
-      const activeSpans = subtitle.filter(Boolean);
-      if (activeSpans.length > 0) {
-        subtitleContent = (
+      // Filtramos los valores vacios de la lista de subtitulos.
+      const lstActiveSpans = subtitle.filter(Boolean);
+      if (lstActiveSpans.length > 0) {
+        objSubtitleNode = (
           <div className="subtitle">
-            {activeSpans.map((text, idx) => (
-              <span key={idx}>{text}</span>
+            {lstActiveSpans.map((in_genText, in_intIdx) => (
+              <span key={in_intIdx}>{in_genText}</span>
             ))}
           </div>
         );
       }
     } else if (typeof subtitle === 'string') {
-      subtitleContent = (
+      objSubtitleNode = (
         <div className="subtitle">
           <span>{subtitle}</span>
         </div>
       );
     } else {
-      subtitleContent = subtitle;
+      objSubtitleNode = subtitle;
     }
   }
 
@@ -36,7 +38,7 @@ export default function ScreenHeader({ title, subtitle }: ScreenHeaderProps) {
     <div className="screen-header">
       <div className="title-block">
         <h1>{title}</h1>
-        {subtitleContent}
+        {objSubtitleNode}
       </div>
       <img src={zurichLogo} alt="Zurich" className="header-logo" />
     </div>

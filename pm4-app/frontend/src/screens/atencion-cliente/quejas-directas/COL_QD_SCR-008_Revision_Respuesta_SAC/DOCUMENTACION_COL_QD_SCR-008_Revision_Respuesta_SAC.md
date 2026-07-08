@@ -12,7 +12,7 @@
 | Evento de apertura | El área envía el borrador para revisión |
 | Acción de cierre | Aprobar → SP2-T06 (PDF) · Devolver → SP2-T05 (PAN-07) |
 | Slug / `?screen=` | `COL_QD_SCR-008_Revision_Respuesta_SAC` |
-| Archivos de implementación | `RevisionRespuestaSac.tsx`, `variables.ts` |
+| Archivos de implementación | `RevisionRespuestaSac.tsx` (config centralizada en fields/fields.ts) |
 | Versión | 1.0 — 2026-06-30 |
 
 > **Nota de nomenclatura:** el SLUG solicitado (`COL_QD_Revisión_Respuesta_SAC`, con tilde) se
@@ -51,32 +51,32 @@ vista previa de la carta final. Las observaciones son obligatorias solo para dev
 
 | Campo (UI) | Variable | Tipo | Fuente |
 |---|---|---|---|
-| ID Caso / Código SFC | `qd_codigoSFC` | `ZdsInput` readOnly | FLD-120 |
-| SLA: Días hábiles restantes | `qd_slaRestante` | `ZdsInput` readOnly | FLD-121 |
-| Versión bajo revisión | `qd_versionRevision` | `ZdsInput` readOnly | FLD-122 |
-| Área Responsable | `qd_areaResponsable` | `ZdsInput` readOnly | FLD-123 |
-| Fecha de elaboración del borrador | `qd_fechaElaboracion` | `ZdsInput` readOnly | FLD-124 |
+| ID Caso / Código SFC | `qd_strSfcCode` | `ZdsInput` readOnly | FLD-120 |
+| SLA: Días hábiles restantes | `qd_strSlaAssigned` | `ZdsInput` readOnly | FLD-121 |
+| Versión bajo revisión | `qd_strRevisionVersion` | `ZdsInput` readOnly | FLD-122 |
+| Área Responsable | `qd_strAssigneeArea` | `ZdsInput` readOnly | FLD-123 |
+| Fecha de elaboración del borrador | `qd_strDraftDate` | `ZdsInput` readOnly | FLD-124 |
 
 ### S2 — Respuesta del Área (SEC-026, solo lectura)
 
 | Campo (UI) | Variable | Tipo | Fuente |
 |---|---|---|---|
-| Respuesta al Cliente | `qd_respuestaCliente` | `ZdsTextarea` readOnly | FLD-127 |
-| Acciones Tomadas | `qd_accionesTomadas` | `ZdsTextarea` readOnly | FLD-128 |
-| ¿Reconocimiento al cliente? | `qd_reconocimiento` | `ZdsInput` readOnly | FLD-129 |
-| Soportes internos adjuntos | `qd_adjuntosSoporte` | Lista de `.file-name-chip` (solo visualización) | FLD-130 |
+| Respuesta al Cliente | `qd_strClientResponse` | `ZdsTextarea` readOnly | FLD-127 |
+| Acciones Tomadas | `qd_strActionsTaken` | `ZdsTextarea` readOnly | FLD-128 |
+| ¿Reconocimiento al cliente? | `qd_strAcknowledgment` | `ZdsInput` readOnly | FLD-129 |
+| Soportes internos adjuntos | `qd_lstSupportAttach` | Lista de `.file-name-chip` (solo visualización) | FLD-130 |
 
 ### S3 — Decisión del Analista SAC (SEC-027)
 
 | Campo (UI) | Variable | Tipo | Obligatorio | Fuente |
 |---|---|---|---|---|
-| Observaciones SAC | `qd_observacionesSAC` | `ZdsTextarea` | Condicional (al devolver) | FLD-131 |
+| Observaciones SAC | `qd_strSacRemarks` | `ZdsTextarea` | Condicional (al devolver) | FLD-131 |
 
 ### Metadato de flujo (no visible)
 
 | Campo | Variable | Fuente |
 |---|---|---|
-| Acción/decisión BPMN | `qd_accion` (`APROBAR` \| `DEVOLVER` \| `REASIGNAR`) | Inferido de ACT-008-01/02/03 (§10) |
+| Acción/decisión BPMN | `qd_strAction` (`APROBAR` \| `DEVOLVER` \| `REASIGNAR`) | Inferido de ACT-008-01/02/03 (§10) |
 
 ---
 
@@ -116,7 +116,7 @@ vista previa de la carta final. Las observaciones son obligatorias solo para dev
 | Contexto y respuesta solo lectura | `ZdsInput`/`ZdsTextarea` con `readOnly` | SEC-025/026 |
 | Lista de soportes (solo visualización) | `z-flex="col:50"` de `.file-name-chip`; nota si vacío | FLD-130 |
 | Devolver como acción destructiva | `ZrButton config="negative"` | ACT-008-02 (tipo Destructiva) |
-| Reasignar caso | `completeTask` con `qd_accion='REASIGNAR'` | ACT-008-03 |
+| Reasignar caso | `completeTask` con `qd_strAction='REASIGNAR'` | ACT-008-03 |
 | Vista Previa Respuesta Final | `ZrModal` con la respuesta al cliente | ACT-008-04 |
 | Estados loading/error/submitting | `ZrLoader`, `ZrAlert`, botones `loading/disabled` | CLAUDE.md |
 
@@ -126,8 +126,8 @@ vista previa de la carta final. Las observaciones son obligatorias solo para dev
 
 | Campo Origen | Campo Dependiente | Comportamiento | Fuente |
 |---|---|---|---|
-| `qd_observacionesSAC` | Botón "Devolver con Observaciones" | Habilita el devolver solo si hay observaciones | RUL-008-01 |
-| `qd_slaRestante` | Banner SLA | Muestra banner rojo si ≤ 3 | RUL-008-02 |
+| `qd_strSacRemarks` | Botón "Devolver con Observaciones" | Habilita el devolver solo si hay observaciones | RUL-008-01 |
+| `qd_strSlaAssigned` | Banner SLA | Muestra banner rojo si ≤ 3 | RUL-008-02 |
 
 ---
 
@@ -136,14 +136,14 @@ vista previa de la carta final. Las observaciones son obligatorias solo para dev
 - **Slug normalizado** (ver §1).
 - **Nombres `data_name` (`qd_*`)** provisionales — Anexo03 no tiene variables para SP2-T04 (tarea
   de Usuario). Se actualizarán con el diccionario final.
-- **`qd_accion`** (metadato): no es un FLD; se deriva del botón presionado (ACT-008-01/02/03) para
+- **`qd_strAction`** (metadato): no es un FLD; se deriva del botón presionado (ACT-008-01/02/03) para
   informar la decisión al BPM.
 - **`maxLength=2000`** en observaciones: límite estándar del proyecto, no especificado en el insumo.
 - **FLD-130 soportes como `.file-name-chip`**: el insumo pide "lista de adjuntos, solo
   visualización". Se renderiza como lista de chips de nombre (clase existente en `shared.css`), sin
   descarga/preview (no especificado). Estructura esperada: arreglo de `{ nombre }`.
 - **Reasignar (ACT-008-03)** abre PAN-06 en el mockup; aquí se implementó como `completeTask` con
-  `qd_accion='REASIGNAR'` (el enrutamiento a PAN-06/SP2-T03 lo resuelve el BPM). Si debe abrir un
+  `qd_strAction='REASIGNAR'` (el enrutamiento a PAN-06/SP2-T03 lo resuelve el BPM). Si debe abrir un
   modal in-situ, se ajustará.
 - **Vista Previa (ACT-008-04)**: modal informativo con el texto de respuesta (placeholder hasta
   integrar el generador de PDF real).
@@ -162,5 +162,5 @@ vista previa de la carta final. Las observaciones son obligatorias solo para dev
 | Mensajes (MSG-008-01..04) | 2/4 en UI | MSG-008-03/04 los emite el BPM |
 | Catálogos | N/A | La pantalla no usa catálogos |
 
-**Elementos inferidos:** prefijo `qd_*`, metadato `qd_accion`, `maxLength=2000`, render de soportes
+**Elementos inferidos:** prefijo `qd_*`, metadato `qd_strAction`, `maxLength=2000`, render de soportes
 como chips, "Reasignar"/"Vista Previa" resueltos por BPM/modal placeholder.

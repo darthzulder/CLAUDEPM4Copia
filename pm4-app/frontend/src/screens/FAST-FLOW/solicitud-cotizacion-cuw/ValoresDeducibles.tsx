@@ -3,7 +3,7 @@ import { useForm } from 'react-hook-form';
 import { ZdsInput, ZdsSelect, ZrModal, ZrButton, ZrTable } from '../../../components/fields/ZdsFields';
 
 // ---------------------------------------------------------------------------
-// Types
+// Tipos
 // ---------------------------------------------------------------------------
 export interface ValorDeducible {
   frm_valores_opcion: string;
@@ -14,8 +14,8 @@ export interface ValorDeducible {
   frm_valores_deducible_minimo_smmlv: number | '';
 }
 
-export const INITIAL_VALORES: ValorDeducible[] = [1, 2, 3, 4, 5].map((n) => ({
-  frm_valores_opcion: `Opción ${n}`,
+export const INITIAL_VALORES: ValorDeducible[] = [1, 2, 3, 4, 5].map((intN) => ({
+  frm_valores_opcion: `Opción ${intN}`,
   frm_valores_limite_asegurado: '',
   frm_valores_deducible_porcentaje: '',
   frm_valores_deducible_minimo_factor: '' as '',
@@ -29,7 +29,7 @@ interface Props {
 }
 
 // ---------------------------------------------------------------------------
-// Constants
+// Constantes
 // ---------------------------------------------------------------------------
 const FACTOR_OPTIONS = [
   { value: 'VALOR', label: 'Valor' },
@@ -55,17 +55,17 @@ function ValorDeducibleModal({ initial, onClose, onSave }: ModalProps) {
     defaultValues: initial,
   });
 
-  const factor = watch('frm_valores_deducible_minimo_factor');
+  const strFactor = watch('frm_valores_deducible_minimo_factor');
 
-  function onSubmit(data: ValorDeducible) {
-    onSave(data);
+  function onSubmit(in_objData: ValorDeducible) {
+    onSave(in_objData);
   }
 
   return (
     <ZrModal model={true} onChange={(open: boolean) => { if (!open) onClose(); }}>
       <h3 style={{ margin: '0 0 var(--zs-100)', font: 'var(--zf-h-20)', color: 'var(--z-text)' }}>Editar registro</h3>
       <div z-flex="col:150">
-            {/* Row 1: Límite asegurado | Deducible % */}
+            {/* Fila 1: Límite asegurado | Deducible % */}
             <div className="form-row cols-2">
               <ZdsInput
                 label="Límite asegurado"
@@ -95,7 +95,7 @@ function ValorDeducibleModal({ initial, onClose, onSave }: ModalProps) {
               />
             </div>
 
-            {/* Row 2: Factor | Campo condicional */}
+            {/* Fila 2: Factor | Campo condicional */}
             <div className="form-row cols-2">
               <ZdsSelect
                 label="Factor de cálculo de deducible mínimo"
@@ -106,7 +106,7 @@ function ValorDeducibleModal({ initial, onClose, onSave }: ModalProps) {
                 options={FACTOR_OPTIONS}
                 error={errors.frm_valores_deducible_minimo_factor?.message}
               />
-              {factor === 'VALOR' && (
+              {strFactor === 'VALOR' && (
                 <ZdsInput
                   label="Deducible mínimo (Valor)"
                   required
@@ -120,7 +120,7 @@ function ValorDeducibleModal({ initial, onClose, onSave }: ModalProps) {
                   error={errors.frm_valores_deducible_minimo?.message}
                 />
               )}
-              {factor === 'SMMLV' && (
+              {strFactor === 'SMMLV' && (
                 <ZdsInput
                   label="Deducible mínimo SMMLV"
                   required
@@ -145,21 +145,22 @@ function ValorDeducibleModal({ initial, onClose, onSave }: ModalProps) {
 }
 
 // ---------------------------------------------------------------------------
-// Main component
+// Componente principal
 // ---------------------------------------------------------------------------
 export default function ValoresDeducibles({ value, onChange }: Props) {
-  const [editIndex, setEditIndex] = useState<number | null>(null);
+  const [intEditIndex, setIntEditIndex] = useState<number | null>(null);
 
-  const showValidationMsg = value[0]?.frm_valores_limite_asegurado === '';
+  // Mostramos el aviso mientras no haya al menos una opción con valor
+  const blnShowValidation = value[0]?.frm_valores_limite_asegurado === '';
 
-  function handleEdit(index: number) {
-    setEditIndex(index);
+  function handleEdit(in_intIndex: number) {
+    setIntEditIndex(in_intIndex);
   }
 
-  function handleSave(row: ValorDeducible) {
-    const updated = value.map((item, i) => (i === editIndex ? row : item));
-    onChange(updated);
-    setEditIndex(null);
+  function handleSave(in_objRow: ValorDeducible) {
+    const lstUpdated = value.map((objItem, intI) => (intI === intEditIndex ? in_objRow : objItem));
+    onChange(lstUpdated);
+    setIntEditIndex(null);
   }
 
   return (
@@ -178,16 +179,16 @@ export default function ValoresDeducibles({ value, onChange }: Props) {
           </tr>
         </thead>
         <tbody>
-          {value.map((row, i) => (
-            <tr key={i}>
-              <td className="col-opcion">{row.frm_valores_opcion}</td>
-              <td>{row.frm_valores_limite_asegurado !== '' ? row.frm_valores_limite_asegurado : ''}</td>
-              <td>{row.frm_valores_deducible_porcentaje !== '' ? row.frm_valores_deducible_porcentaje : ''}</td>
-              <td>{row.frm_valores_deducible_minimo_factor}</td>
-              <td>{row.frm_valores_deducible_minimo !== '' ? row.frm_valores_deducible_minimo : ''}</td>
-              <td>{row.frm_valores_deducible_minimo_smmlv !== '' ? row.frm_valores_deducible_minimo_smmlv : ''}</td>
+          {value.map((objRow, intI) => (
+            <tr key={intI}>
+              <td className="col-opcion">{objRow.frm_valores_opcion}</td>
+              <td>{objRow.frm_valores_limite_asegurado !== '' ? objRow.frm_valores_limite_asegurado : ''}</td>
+              <td>{objRow.frm_valores_deducible_porcentaje !== '' ? objRow.frm_valores_deducible_porcentaje : ''}</td>
+              <td>{objRow.frm_valores_deducible_minimo_factor}</td>
+              <td>{objRow.frm_valores_deducible_minimo !== '' ? objRow.frm_valores_deducible_minimo : ''}</td>
+              <td>{objRow.frm_valores_deducible_minimo_smmlv !== '' ? objRow.frm_valores_deducible_minimo_smmlv : ''}</td>
               <td>
-                <ZrButton config="secondary:s" icon="edit:line" onClick={() => handleEdit(i)}>Editar</ZrButton>
+                <ZrButton config="secondary:s" icon="edit:line" onClick={() => handleEdit(intI)}>Editar</ZrButton>
               </td>
             </tr>
           ))}
@@ -195,16 +196,16 @@ export default function ValoresDeducibles({ value, onChange }: Props) {
       </table>
       </ZrTable>
 
-      {showValidationMsg && (
+      {blnShowValidation && (
         <div className="record-validation-msg">
           Para continuar, debe ingresar al menos una opción de <strong>valor asegurado</strong>.
         </div>
       )}
 
-      {editIndex !== null && (
+      {intEditIndex !== null && (
         <ValorDeducibleModal
-          initial={value[editIndex]}
-          onClose={() => setEditIndex(null)}
+          initial={value[intEditIndex]}
+          onClose={() => setIntEditIndex(null)}
           onSave={handleSave}
         />
       )}

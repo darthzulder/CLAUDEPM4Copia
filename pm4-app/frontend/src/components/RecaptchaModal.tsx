@@ -22,30 +22,32 @@ declare global {
 
 // Carga api.js una sola vez (idempotente entre montajes) y resuelve cuando
 // grecaptcha.render está disponible.
-let loader: Promise<void> | null = null;
+let objLoader: Promise<void> | null = null;
 function loadRecaptcha(): Promise<void> {
   if (window.grecaptcha?.render) return Promise.resolve();
-  if (loader) return loader;
-  loader = new Promise<void>((resolve, reject) => {
+  if (objLoader) return objLoader;
+  objLoader = new Promise<void>((resolve, reject) => {
+    // Esperamos a que grecaptcha.render este disponible o expiramos.
     const done = () => {
-      const start = Date.now();
-      const iv = setInterval(() => {
-        if (window.grecaptcha?.render) { clearInterval(iv); resolve(); }
-        else if (Date.now() - start > 10000) { clearInterval(iv); reject(new Error('reCAPTCHA no respondió a tiempo')); }
+      const tspStart = Date.now();
+      const intInterval = setInterval(() => {
+        if (window.grecaptcha?.render) { clearInterval(intInterval); resolve(); }
+        else if (Date.now() - tspStart > 10000) { clearInterval(intInterval); reject(new Error('reCAPTCHA no respondió a tiempo')); }
       }, 50);
     };
-    let s = document.getElementById(SCRIPT_ID) as HTMLScriptElement | null;
-    if (s) { done(); return; }
-    s = document.createElement('script');
-    s.id = SCRIPT_ID;
-    s.src = 'https://www.google.com/recaptcha/api.js?render=explicit';
-    s.async = true;
-    s.defer = true;
-    s.onload = done;
-    s.onerror = () => { loader = null; reject(new Error('No se pudo cargar reCAPTCHA')); };
-    document.head.appendChild(s);
+    // Reutilizamos el script si ya esta en el DOM, si no lo inyectamos.
+    let objScript = document.getElementById(SCRIPT_ID) as HTMLScriptElement | null;
+    if (objScript) { done(); return; }
+    objScript = document.createElement('script');
+    objScript.id = SCRIPT_ID;
+    objScript.src = 'https://www.google.com/recaptcha/api.js?render=explicit';
+    objScript.async = true;
+    objScript.defer = true;
+    objScript.onload = done;
+    objScript.onerror = () => { objLoader = null; reject(new Error('No se pudo cargar reCAPTCHA')); };
+    document.head.appendChild(objScript);
   });
-  return loader;
+  return objLoader;
 }
 
 interface Props {
@@ -60,15 +62,15 @@ export default function RecaptchaModal({ open, onVerified, onClose }: Props) {
   // Ref al callback para no re-ejecutar el effect (ni re-renderizar el widget) al cambiarlo.
   const onVerifiedRef = useRef(onVerified);
   onVerifiedRef.current = onVerified;
-  const [status, setStatus] = useState<'loading' | 'ready' | 'error'>('loading');
+  const [strStatus, setStrStatus] = useState<'loading' | 'ready' | 'error'>('loading');
 
   // Google a veces emite "reCAPTCHA Timeout (d)" como unhandledrejection interno
   // (bug conocido del script; el token ya se consumió, es inofensivo). Lo silenciamos
   // de forma acotada para no ensuciar la consola en producción.
   useEffect(() => {
-    const onRejection = (e: PromiseRejectionEvent) => {
-      const msg = String(e?.reason?.message ?? e?.reason ?? '');
-      if (/recaptcha/i.test(msg) && /timeout/i.test(msg)) e.preventDefault();
+    const onRejection = (in_objEvent: PromiseRejectionEvent) => {
+      const strMsg = String(in_objEvent?.reason?.message ?? in_objEvent?.reason ?? '');
+      if (/recaptcha/i.test(strMsg) && /timeout/i.test(strMsg)) in_objEvent.preventDefault();
     };
     window.addEventListener('unhandledrejection', onRejection);
     return () => window.removeEventListener('unhandledrejection', onRejection);
@@ -86,39 +88,39 @@ export default function RecaptchaModal({ open, onVerified, onClose }: Props) {
       return;
     }
 
-    if (!SITE_KEY) { setStatus('error'); return; }
+    if (!SITE_KEY) { setStrStatus('error'); return; }
 
-    let cancelled = false;
-    setStatus('loading');
+    let blnCancelled = false;
+    setStrStatus('loading');
     loadRecaptcha()
       .then(() => {
-        if (cancelled || !containerRef.current || widgetIdRef.current !== null) return;
+        if (blnCancelled || !containerRef.current || widgetIdRef.current !== null) return;
         try {
           widgetIdRef.current = window.grecaptcha.render(containerRef.current, {
             sitekey: SITE_KEY,
-            callback: (token: string) => onVerifiedRef.current(token),
+            callback: (in_strToken: string) => onVerifiedRef.current(in_strToken),
             'expired-callback': () => {
               if (widgetIdRef.current !== null) window.grecaptcha.reset(widgetIdRef.current);
             },
           });
-          setStatus('ready');
-        } catch (e) {
-          console.error('[recaptcha] grecaptcha.render() falló:', e);
-          if (!cancelled) setStatus('error');
+          setStrStatus('ready');
+        } catch (in_excError) {
+          console.error('[recaptcha] grecaptcha.render() falló:', in_excError);
+          if (!blnCancelled) setStrStatus('error');
         }
       })
-      .catch((e) => {
-        console.error('[recaptcha] no se pudo cargar api.js:', e);
-        if (!cancelled) setStatus('error');
+      .catch((in_excError) => {
+        console.error('[recaptcha] no se pudo cargar api.js:', in_excError);
+        if (!blnCancelled) setStrStatus('error');
       });
 
-    return () => { cancelled = true; };
+    return () => { blnCancelled = true; };
   }, [open]);
 
   if (!open) return null;
 
   return (
-    <ZrModal model={open} onChange={(v: boolean) => { if (!v) onClose(); }}>
+    <ZrModal model={open} onChange={(in_blnOpen: boolean) => { if (!in_blnOpen) onClose(); }}>
       <h3 style={{ margin: '0 0 var(--zs-75)', font: 'var(--zf-h-20--700)', color: 'var(--z-text)' }}>
         Validación de seguridad
       </h3>
@@ -127,8 +129,8 @@ export default function RecaptchaModal({ open, onVerified, onClose }: Props) {
       </p>
 
       <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', minHeight: '78px' }}>
-        {status === 'loading' && <ZrLoader />}
-        {status === 'error' && (
+        {strStatus === 'loading' && <ZrLoader />}
+        {strStatus === 'error' && (
           <ZrAlert config="negative" {...({ 'hide-close': true } as object)}>
             No se pudo cargar la validación de seguridad. Verifica tu conexión e inténtalo de nuevo.
           </ZrAlert>

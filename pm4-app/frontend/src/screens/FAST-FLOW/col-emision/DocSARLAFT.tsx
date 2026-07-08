@@ -18,7 +18,7 @@ import {
 } from './variables';
 
 // ──────────────────────────────────────────────────────────────
-// Types
+// Tipos
 // ──────────────────────────────────────────────────────────────
 interface RowState {
   file: File | null;
@@ -37,79 +37,83 @@ interface PreviewDoc {
 // ──────────────────────────────────────────────────────────────
 export default function DocSARLAFT() {
   const { task, loading, error, submitting, completeTask } = useTask();
-  const [rowStates, setRowStates]       = useState<Record<string, RowState>>({});
-  const [previewDoc, setPreviewDoc]     = useState<PreviewDoc | null>(null);
-  const [infoOpen, setInfoOpen]         = useState(false);
-  const [sent, setSent]                 = useState(false);
-  const [validationError, setValidationError] = useState<string | null>(null);
+  const [dicRowStates, setDicRowStates]       = useState<Record<string, RowState>>({});
+  const [objPreviewDoc, setObjPreviewDoc]     = useState<PreviewDoc | null>(null);
+  const [blnInfoOpen, setBlnInfoOpen]         = useState(false);
+  const [blnSent, setBlnSent]                 = useState(false);
+  const [strValidationError, setStrValidationError] = useState<string | null>(null);
 
-  const data      = (task?.data ?? {}) as DocSarlaftData;
-  const requestId = task?.process_request_id ?? null;
+  const objData      = (task?.data ?? {}) as DocSarlaftData;
+  const intRequestId = task?.process_request_id ?? null;
 
-  const rawPerfil = data.frm_sarlaft_perfil as string | undefined;
-  const perfil: SarlaftPerfil | null =
-    rawPerfil === 'SIMPLIFICADO' || rawPerfil === 'ESTANDAR' || rawPerfil === 'INTENSIFICADO'
-      ? rawPerfil
+  // Normalizamos el perfil SARLAFT recibido en la tarea
+  const strRawProfile = objData.frm_sarlaft_perfil as string | undefined;
+  const strProfile: SarlaftPerfil | null =
+    strRawProfile === 'SIMPLIFICADO' || strRawProfile === 'ESTANDAR' || strRawProfile === 'INTENSIFICADO'
+      ? strRawProfile
       : null;
 
-  const docs = DOCS_POR_PERFIL[perfil ?? 'INTENSIFICADO'];
+  // Documentos requeridos segun el perfil
+  const lstDocs = DOCS_POR_PERFIL[strProfile ?? 'INTENSIFICADO'];
 
   // ── Cambio de archivo ──────────────────────────────────────
-  const handleFileChange = useCallback((key: string, file: File) => {
-    const blobUrl = URL.createObjectURL(file);
-    setRowStates((prev) => {
-      if (prev[key]?.blobUrl) URL.revokeObjectURL(prev[key].blobUrl!);
-      return { ...prev, [key]: { file, blobUrl } };
+  const handleFileChange = useCallback((in_strKey: string, in_objFile: File) => {
+    const strBlobUrl = URL.createObjectURL(in_objFile);
+    setDicRowStates((objPrev) => {
+      if (objPrev[in_strKey]?.blobUrl) URL.revokeObjectURL(objPrev[in_strKey].blobUrl!);
+      return { ...objPrev, [in_strKey]: { file: in_objFile, blobUrl: strBlobUrl } };
     });
-    setValidationError(null);
+    setStrValidationError(null);
   }, []);
 
   // ── Abrir modal de preview ─────────────────────────────────
-  const handlePreview = useCallback((key: string) => {
-    const row = rowStates[key];
-    if (!row?.blobUrl || !row.file) return;
-    const doc = docs.find((d) => d.key === key);
-    setPreviewDoc({
-      descripcion: doc?.descripcion ?? key,
-      fileName: row.file.name,
-      blobUrl: row.blobUrl,
+  const handlePreview = useCallback((in_strKey: string) => {
+    const objRow = dicRowStates[in_strKey];
+    if (!objRow?.blobUrl || !objRow.file) return;
+    const objDoc = lstDocs.find((objItem) => objItem.key === in_strKey);
+    setObjPreviewDoc({
+      descripcion: objDoc?.descripcion ?? in_strKey,
+      fileName: objRow.file.name,
+      blobUrl: objRow.blobUrl,
     });
-  }, [rowStates, docs]);
+  }, [dicRowStates, lstDocs]);
 
   // ── Enviar ─────────────────────────────────────────────────
   async function handleEnviar() {
-    const pendientes = docs.filter((d) => !rowStates[d.key]?.file);
-    if (pendientes.length > 0) {
-      setValidationError(
-        `Debe cargar todos los documentos requeridos. Pendiente${pendientes.length > 1 ? 's' : ''}: ${pendientes
-          .map((d) => d.descripcion)
+    // Validamos que no queden documentos pendientes de cargar
+    const lstPending = lstDocs.filter((objDoc) => !dicRowStates[objDoc.key]?.file);
+    if (lstPending.length > 0) {
+      setStrValidationError(
+        `Debe cargar todos los documentos requeridos. Pendiente${lstPending.length > 1 ? 's' : ''}: ${lstPending
+          .map((objDoc) => objDoc.descripcion)
           .join(', ')}.`
       );
       return;
     }
-    setValidationError(null);
+    setStrValidationError(null);
 
     try {
-      if (requestId) {
-        for (const doc of docs) {
-          const file = rowStates[doc.key]?.file;
-          if (!file) continue;
-          const fd = new FormData();
-          fd.append('file', file);
-          await pm4.post(`/requests/${requestId}/files?data_name=${doc.key}`, fd);
+      // Subimos cada archivo al request antes de completar la tarea
+      if (intRequestId) {
+        for (const objDoc of lstDocs) {
+          const objFile = dicRowStates[objDoc.key]?.file;
+          if (!objFile) continue;
+          const objFormData = new FormData();
+          objFormData.append('file', objFile);
+          await pm4.post(`/requests/${intRequestId}/files?data_name=${objDoc.key}`, objFormData);
         }
       }
-      const { _user: _u, _request: _r, ...taskData } = (task?.data ?? {}) as Record<string, unknown>;
-      await completeTask({ ...taskData });
-      setSent(true);
-    } catch (err) {
-      console.error('[DocSARLAFT] Error al enviar:', err);
+      const { _user: _u, _request: _r, ...objTaskData } = (task?.data ?? {}) as Record<string, unknown>;
+      await completeTask({ ...objTaskData });
+      setBlnSent(true);
+    } catch (excError) {
+      console.error('[DocSARLAFT] Error al enviar:', excError);
       alert('Error al enviar los documentos. Revise la consola.');
     }
   }
 
   // ── Estado enviado ─────────────────────────────────────────
-  if (sent) {
+  if (blnSent) {
     return (
       <div className="screen-wrapper">
         <ScreenHeader title="SOLICITUD DE DOCUMENTOS SARLAFT" />
@@ -145,8 +149,9 @@ export default function DocSARLAFT() {
     );
   }
 
-  const numCot  = data.frm_num_cotizacion ?? data.frm_gen_num_cotizacion;
-  const numCaso = data.frm_caso;
+  // Datos de cabecera para el encabezado
+  const strQuoteNum  = objData.frm_num_cotizacion ?? objData.frm_gen_num_cotizacion;
+  const strCaseNum = objData.frm_caso;
 
   return (
     <div className="screen-wrapper">
@@ -156,13 +161,13 @@ export default function DocSARLAFT() {
         </div>
       )}
 
-      {/* Header */}
+      {/* Cabecera */}
       <ScreenHeader
         title="SOLICITUD DE DOCUMENTOS SARLAFT"
         subtitle={[
-          numCot && `Cotización # ${numCot}`,
-          numCaso && `Caso # ${numCaso}`,
-          perfil && `Perfil: ${perfil.charAt(0) + perfil.slice(1).toLowerCase()}`
+          strQuoteNum && `Cotización # ${strQuoteNum}`,
+          strCaseNum && `Caso # ${strCaseNum}`,
+          strProfile && `Perfil: ${strProfile.charAt(0) + strProfile.slice(1).toLowerCase()}`
         ]}
       />
 
@@ -172,7 +177,7 @@ export default function DocSARLAFT() {
 
           <FormSection
             title="Documentos Requeridos"
-            action={<ZrButton config="secondary:xs" icon="info:line" onClick={() => setInfoOpen(true)} />}
+            action={<ZrButton config="secondary:xs" icon="info:line" onClick={() => setBlnInfoOpen(true)} />}
             footer={
               <ActionBar>
                 <ZrButton
@@ -186,30 +191,30 @@ export default function DocSARLAFT() {
               </ActionBar>
             }
           >
-            {!perfil && (
+            {!strProfile && (
               <ZrAlert config="info" {...({ 'hide-close': true } as object)}>
                 No se detectó perfil SARLAFT en la tarea. Se muestran todos los documentos posibles.
               </ZrAlert>
             )}
 
             <DocList mode="upload">
-              {docs.map((doc, i) => (
+              {lstDocs.map((objDoc, intI) => (
                 <DocItem
-                  key={doc.key}
+                  key={objDoc.key}
                   mode="upload"
-                  index={i + 1}
-                  descripcion={doc.descripcion}
-                  vigencia={doc.vigencia}
-                  state={rowStates[doc.key] ?? { file: null, blobUrl: null }}
-                  onFileChange={(f) => handleFileChange(doc.key, f)}
-                  onPreview={() => handlePreview(doc.key)}
+                  index={intI + 1}
+                  descripcion={objDoc.descripcion}
+                  vigencia={objDoc.vigencia}
+                  state={dicRowStates[objDoc.key] ?? { file: null, blobUrl: null }}
+                  onFileChange={(f) => handleFileChange(objDoc.key, f)}
+                  onPreview={() => handlePreview(objDoc.key)}
                 />
               ))}
             </DocList>
 
-            {validationError && (
+            {strValidationError && (
               <ZrAlert config="negative" {...({ 'hide-close': true } as object)}>
-                {validationError}
+                {strValidationError}
               </ZrAlert>
             )}
           </FormSection>
@@ -218,16 +223,16 @@ export default function DocSARLAFT() {
       </div>
 
       {/* Modal de ayuda */}
-      <ZrModal model={infoOpen} onChange={(v: boolean) => setInfoOpen(v)} style={{ ['--z-modal--backdrop' as any]: 'color-mix(in srgb, var(--z-modal-backdrop) 45%, transparent)' }}>
+      <ZrModal model={blnInfoOpen} onChange={(v: boolean) => setBlnInfoOpen(v)} style={{ ['--z-modal--backdrop' as any]: 'color-mix(in srgb, var(--z-modal-backdrop) 45%, transparent)' }}>
         <HelpModal title="Directrices SARLAFT" subtitle="Documentos requeridos según el perfil del tomador">
-          {DIRECTRICES.map(({ perfil: p, label, docs: dList }) => (
-            <ZrCard key={p} {...({ config: 'grid' } as object)}>
+          {DIRECTRICES.map(({ perfil: strProfileItem, label: strLabel, docs: lstDocItems }) => (
+            <ZrCard key={strProfileItem} {...({ config: 'grid' } as object)}>
               <div z-flex="75" z-align="left:center">
-                <strong>{label}</strong>
-                {perfil === p && <ZdsStatusBadge variant="info">Activo</ZdsStatusBadge>}
+                <strong>{strLabel}</strong>
+                {strProfile === strProfileItem && <ZdsStatusBadge variant="info">Activo</ZdsStatusBadge>}
               </div>
               <ol>
-                {dList.map((doc, i) => <li key={i}>{doc}</li>)}
+                {lstDocItems.map((strDoc, intI) => <li key={intI}>{strDoc}</li>)}
               </ol>
             </ZrCard>
           ))}
@@ -236,9 +241,9 @@ export default function DocSARLAFT() {
 
       {/* Modal de vista previa — ZrModal (ZDS) */}
       <PreviewModal
-        isOpen={!!previewDoc}
-        onClose={() => setPreviewDoc(null)}
-        previewDoc={previewDoc}
+        isOpen={!!objPreviewDoc}
+        onClose={() => setObjPreviewDoc(null)}
+        previewDoc={objPreviewDoc}
       />
     </div>
   );
