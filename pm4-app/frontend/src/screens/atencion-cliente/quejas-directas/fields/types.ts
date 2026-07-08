@@ -57,17 +57,22 @@ export interface CampoConError {
 export type EstadoCasoDashboard = 'Abierta' | 'Cerrada' | 'Vencida' | 'Cancelada';
 
 // SCR-013 — una fila de la tabla consolidada del dashboard (ya mapeada desde el request PM4).
+// NOTA: es un modelo de presentación DERIVADO (mezcla el id de sistema del request, valores
+// crudos de campos PM4 y valores COMPUTADOS en el cliente como diasRestantes/estado) — no es
+// un conjunto de variables PM4 reales, así que sus miembros NO llevan el prefijo `qd_` ni el
+// prefijo de tipo RPA, igual que el resto de tipos de fila de este archivo (AsignacionHistorial,
+// RespuestaAyuda, SoporteAdjunto, CampoConError).
 export interface CasoDashboard {
-  qd_id:               number;               // request id (clave estable)
-  qd_numeroCaso:       string;                // # Caso (código SFC o case_number)
-  qd_tipoSolicitud:    string;                // Tipo (CÓDIGO de la colección qd_tipoSolicitud)
-  qd_fechaCreacion:    string;                // Creación (formateada)
-  qd_fechaVencimiento: string;                // Vencimiento (formateada o '—')
-  qd_diasRestantes:    number;                // Días hábiles restantes; < 0 = días de mora
-  qd_estado:           EstadoCasoDashboard;   // Estado operativo
-  qd_areaResponsable:  string;                // Área responsable (CÓDIGO de la colección qd_area)
-  qd_responsable:      string;                // Responsable asignado
-  qd_descripcion:      string;                // Descripción / Motivo (detalle en modal)
+  id:               number;               // request id (clave estable)
+  numeroCaso:       string;                // # Caso (código SFC o case_number)
+  tipoSolicitud:    string;                // Tipo (CÓDIGO de la colección qd_tipoSolicitud)
+  fechaCreacion:    string;                // Creación (formateada)
+  fechaVencimiento: string;                // Vencimiento (formateada o '—')
+  diasRestantes:    number;                // Días hábiles restantes; < 0 = días de mora
+  estado:           EstadoCasoDashboard;   // Estado operativo
+  areaResponsable:  string;                // Área responsable (CÓDIGO de la colección qd_area)
+  responsable:      string;                // Responsable asignado
+  descripcion:      string;                // Descripción / Motivo (detalle en modal)
 }
 
 // SCR-013 — forma cruda de un caso devuelto por GET /api/1.0/requests?include=data.

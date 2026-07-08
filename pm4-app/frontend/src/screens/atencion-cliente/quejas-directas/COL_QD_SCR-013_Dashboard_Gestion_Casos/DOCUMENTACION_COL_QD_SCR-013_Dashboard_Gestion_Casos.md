@@ -11,7 +11,7 @@
 | Rol | Supervisor / Jefe SAC |
 | Versión mockup | Anexo02 v3.0 (HTML) |
 | Slug / carpeta | `COL_QD_SCR-013_Dashboard_Gestion_Casos` |
-| Archivos de implementación | `DashboardGestionCasos.tsx`, `TablaCasos.tsx`, `DetalleCasoModal.tsx`, `useCasosDashboard.ts`, `variables.ts`, estilos en `shared.css` (bloque *dashboard-gestion-casos*), + ruta backend `GET /api/requests` en `backend/src/routes/pm4.routes.ts` |
+| Archivos de implementación | `DashboardGestionCasos.tsx`, `TablaCasos.tsx`, `DetalleCasoModal.tsx`, `useCasosDashboard.ts`, `dashboardHelpers.ts` (config centralizada en `fields/fields.ts` + `fields/types.ts`), estilos en `shared.css` (bloque *dashboard-gestion-casos*), + ruta backend `GET /api/requests` en `backend/src/routes/pm4.routes.ts` |
 
 > ⚠️ **Nota crítica de trazabilidad.** Esta pantalla **no tiene especificación formal en los insumos Excel**:
 > - `Anexo02_Mockups_TOBE_QuejaDirectas_v3_0.xlsx` **no tiene hoja `SCR-013`** (las hojas dedicadas terminan en `SCR-012`) y `01_Pantallas` **no lista PAN-13** (llega hasta SCR-012).
@@ -49,7 +49,7 @@ El modal de detalle es solo lectura con un único botón "Cerrar".
 |---|---|---|
 | `Anexo02_Mockups_TOBE_QuejaDirectas_v3_0.html` | Bloque `SCR-013` (líneas ~1396–1619) | **Fuente única de estructura**: alerta, top bar, KPIs, filtros, tabla, paginación y modal de detalle. |
 | API PM4 `GET /api/1.0/requests?include=data` | — | **Fuente de datos** de los casos (proceso 31). Lógica de paginado + PMQL + auto-recuperación replicada del script PHP entregado por el usuario. |
-| `screens/…/COL_QD_SCR-000_CrearRecibirQueja/variables.ts` | — | Nombres canónicos de campos `qd_*` que viven en `request.data` (mapeo de columnas). |
+| `screens/…/quejas-directas/fields/fields.ts` | Registro `QD` | Nombres canónicos de campos `qd_*` que viven en `request.data` (mapeo de columnas). |
 | `Anexo02_Mockups_TOBE_QuejaDirectas_v3_0.xlsx` | `01_Pantallas`, hojas `SCR-*` | Verificación de ausencia: **no hay SCR-013**. Confirma que la pantalla es mockup-only. |
 | `Matrices_Maduracion_TO-BE_QuejaDirectas_v3.0.xlsx` | `1. Tareas`, `4. Pantallas` | Verificación de ausencia de PAN-13 y del significado real de `P01-T09` (encuesta de satisfacción). |
 | `core/collections.ts` | `GLOBAL_COLLECTIONS` | Referencia de colecciones existentes (`qd_tipoSolicitud` id 18, `qd_estadoQueja` id 42, `qd_area` id 35) como posible origen futuro de los filtros. |
@@ -62,10 +62,10 @@ El modal de detalle es solo lectura con un único botón "Cerrar".
 
 | KPI (UI) | Variable / cálculo | Tipo | Fuente |
 |---|---|---|---|
-| Casos abiertos | `calcularKpis().abiertos` = casos con `qd_estado='Abierta'` | derivado | HTML SCR-013 (`.kpi-card`, "Casos abiertos") |
-| Próximos a vencer | `porVencer` = abiertos con `0 ≤ qd_diasRestantes ≤ 3` | derivado | HTML SCR-013 (`.kpi-card.kpi-warn`) |
-| Vencidos | `vencidos` = `qd_estado='Vencida'` o abierto con `qd_diasRestantes<0` | derivado | HTML SCR-013 (`.kpi-card.kpi-danger`) |
-| Cerrados | `cerrados` = `qd_estado='Cerrada'` | derivado | HTML SCR-013 (`.kpi-card.kpi-ok`) |
+| Casos abiertos | `calcularKpis().abiertos` = casos con `estado='Abierta'` | derivado | HTML SCR-013 (`.kpi-card`, "Casos abiertos") |
+| Próximos a vencer | `porVencer` = abiertos con `0 ≤ diasRestantes ≤ 3` | derivado | HTML SCR-013 (`.kpi-card.kpi-warn`) |
+| Vencidos | `vencidos` = `estado='Vencida'` o abierto con `diasRestantes<0` | derivado | HTML SCR-013 (`.kpi-card.kpi-danger`) |
+| Cerrados | `cerrados` = `estado='Cerrada'` | derivado | HTML SCR-013 (`.kpi-card.kpi-ok`) |
 
 ### 4.2 Filtros
 
@@ -76,36 +76,40 @@ El modal de detalle es solo lectura con un único botón "Cerrar".
 | Área responsable | `filtroArea` | select **colección** `qd_area` (id 35) | No | HTML SCR-013 + `collections.ts` |
 | Buscar por caso o responsable | `filtroBuscar` | texto (`ZdsInput`, icono `search`) | No | HTML SCR-013 (`input placeholder="Buscar por caso…"`) |
 
-> Tipo y Área se conectan a colecciones PM4: el `value` del filtro es el **código** de la colección y coincide con el código almacenado en `request.data.qd_tipoSolicitud` / `qd_areaResponsable`. La tabla y el modal resuelven código → descripción con el mapa de la colección. **Estado** es un valor operativo derivado de `request.status` + SLA (no un catálogo), por eso queda estático.
+> Tipo y Área se conectan a colecciones PM4: el `value` del filtro es el **código** de la colección y coincide con el código almacenado en `request.data.qd_strRequestType` / `qd_strAssigneeArea` (`QD.strRequestType` / `QD.strAssigneeArea`). La tabla y el modal resuelven código → descripción con el mapa de la colección. **Estado** es un valor operativo derivado de `request.status` + SLA (no un catálogo), por eso queda estático.
 
 ### 4.3 Tabla de casos (`CasoDashboard`)
 
+> `CasoDashboard` es un modelo de presentación derivado (mezcla el id de sistema del request y
+> valores computados en el cliente), no un conjunto de variables PM4 — por eso sus miembros NO
+> llevan el prefijo `qd_` (ver `fields/types.ts`).
+
 | Columna (UI) | Variable | Tipo | Fuente |
 |---|---|---|---|
-| # Caso | `qd_numeroCaso` | string | HTML SCR-013 (`th # Caso`) |
-| Tipo | `qd_tipoSolicitud` | string | HTML SCR-013 (`th Tipo`) |
-| Creación | `qd_fechaCreacion` | string | HTML SCR-013 (`th Creación`) |
-| Vencimiento | `qd_fechaVencimiento` | string | HTML SCR-013 (`th Vencimiento`) |
-| Días restantes | `qd_diasRestantes` → `diasRestantesTexto()` (solo texto) | number → texto | HTML SCR-013 (`th Días`) + solicitud del usuario |
-| Estado | `qd_estado` → `estadoVariante()` (`ZdsStatusBadge`) | enum | HTML SCR-013 (`th Estado`, `.pill-*`) |
-| Área | `qd_areaResponsable` | string | HTML SCR-013 (`th Área`) |
-| Responsable | `qd_responsable` | string | HTML SCR-013 (`th Responsable`) |
+| # Caso | `numeroCaso` | string | HTML SCR-013 (`th # Caso`) |
+| Tipo | `tipoSolicitud` | string | HTML SCR-013 (`th Tipo`) |
+| Creación | `fechaCreacion` | string | HTML SCR-013 (`th Creación`) |
+| Vencimiento | `fechaVencimiento` | string | HTML SCR-013 (`th Vencimiento`) |
+| Días restantes | `diasRestantes` → `diasRestantesTexto()` (solo texto) | number → texto | HTML SCR-013 (`th Días`) + solicitud del usuario |
+| Estado | `estado` → `estadoVariante()` (`ZdsStatusBadge`) | enum | HTML SCR-013 (`th Estado`, `.pill-*`) |
+| Área | `areaResponsable` | string | HTML SCR-013 (`th Área`) |
+| Responsable | `responsable` | string | HTML SCR-013 (`th Responsable`) |
 | Acción | botón "Ver" → modal | acción | HTML SCR-013 (`th Acción`, `btn-link` Ver) |
 
 ### 4.4 Modal de detalle (`DetalleCasoModal`)
 
 | Campo (UI) | Variable | Fuente |
 |---|---|---|
-| Título "Caso #N — Tipo" | `qd_numeroCaso` + `qd_tipoSolicitud` | HTML modal (`#cm-title`) |
-| Subtítulo "Área · Responsable: N" | `qd_areaResponsable` + `qd_responsable` | HTML modal (`#cm-sub`) |
-| Estado | `qd_estado` (badge DS) | HTML modal (`#cm-estado`) |
-| Tipo de solicitud | `qd_tipoSolicitud` | HTML modal (`#cm-tipo`) |
-| Fecha de creación | `qd_fechaCreacion` | HTML modal (`#cm-creacion`) |
-| Fecha de vencimiento | `qd_fechaVencimiento` | HTML modal (`#cm-vencimiento`) |
-| Días restantes | `qd_diasRestantes` → `diasRestantesTexto()` (solo texto) | HTML modal (`#cm-dias`) |
-| Área responsable | `qd_areaResponsable` | HTML modal (`#cm-area`) |
-| Responsable asignado | `qd_responsable` | HTML modal (`#cm-responsable`) |
-| Descripción / Motivo | `qd_descripcion` | HTML modal (`#cm-descripcion`) |
+| Título "Caso #N — Tipo" | `numeroCaso` + `tipoSolicitud` | HTML modal (`#cm-title`) |
+| Subtítulo "Área · Responsable: N" | `areaResponsable` + `responsable` | HTML modal (`#cm-sub`) |
+| Estado | `estado` (badge DS) | HTML modal (`#cm-estado`) |
+| Tipo de solicitud | `tipoSolicitud` | HTML modal (`#cm-tipo`) |
+| Fecha de creación | `fechaCreacion` | HTML modal (`#cm-creacion`) |
+| Fecha de vencimiento | `fechaVencimiento` | HTML modal (`#cm-vencimiento`) |
+| Días restantes | `diasRestantes` → `diasRestantesTexto()` (solo texto) | HTML modal (`#cm-dias`) |
+| Área responsable | `areaResponsable` | HTML modal (`#cm-area`) |
+| Responsable asignado | `responsable` | HTML modal (`#cm-responsable`) |
+| Descripción / Motivo | `descripcion` | HTML modal (`#cm-descripcion`) |
 
 ---
 
@@ -131,7 +135,7 @@ El modal de detalle es solo lectura con un único botón "Cerrar".
 
 | Regla | Implementación | Fuente |
 |---|---|---|
-| Cálculo de días restantes | `calcularDiasRestantes()`: `(created_at + qd_slaRestante días) − hoy`, redondeado hacia arriba. Fallback a `qd_fechaVencimiento − hoy`; si no, 0. | Solicitud del usuario |
+| Cálculo de días restantes | `calcularDiasRestantes()`: `(created_at + qd_strSlaAssigned días) − hoy`, redondeado hacia arriba. Fallback a `qd_fechaVencimiento − hoy`; si no, 0. | Solicitud del usuario |
 | Texto de días restantes | `diasRestantesTexto()`: `N días` / `1 día`; `Vence hoy` (0); `N días de mora` (negativo); `—` para Cerrada/Cancelada. Solo texto, sin ícono. | Solicitud del usuario |
 | Píldora de estado por estado del caso | `estadoVariante()`: Abierta→info, Cerrada→success, Vencida→danger, Cancelada→neutral | HTML SCR-013 (`.pill-open/.pill-closed/.pill-overdue/.pill-cancelled`) |
 | "Próximos a vencer" = SLA ≤ 3 días hábiles | `SLA_UMBRAL_PROXIMO = 3` | Suposición (§10) — el mockup no fija el umbral numérico |
@@ -155,8 +159,8 @@ El modal de detalle es solo lectura con un único botón "Cerrar".
 
 | Campo Origen | Campo Dependiente | Comportamiento | Fuente |
 |---|---|---|---|
-| `qd_estado` + `qd_diasRestantes` | Columna "Días" (badge) | El color/etiqueta del semáforo se deriva de ambos | `diasBadge()` — HTML SCR-013 |
-| `qd_estado` | Columna "Estado" (píldora) | La variante de `ZdsStatusBadge` se deriva del estado | `estadoVariante()` — HTML SCR-013 |
+| `estado` + `diasRestantes` | Columna "Días" (badge) | El color/etiqueta del semáforo se deriva de ambos | `diasBadge()` — HTML SCR-013 |
+| `estado` | Columna "Estado" (píldora) | La variante de `ZdsStatusBadge` se deriva del estado | `estadoVariante()` — HTML SCR-013 |
 | Filtros aplicados | KPIs | **No dependen**: los KPIs se calculan sobre la lista completa (no la filtrada), como en el mockup (KPIs globales). | Decisión de diseño (§10) |
 
 ---
@@ -164,8 +168,8 @@ El modal de detalle es solo lectura con un único botón "Cerrar".
 ## 10. Suposiciones Realizadas
 
 1. **Pantalla mockup-only.** PAN-13 no está en Anexo02.xlsx ni en Matrices; toda la estructura se tomó del HTML. `P01-T09` (encuesta de satisfacción) se conserva como identificador del prompt, aunque no corresponde funcionalmente a un dashboard.
-2. **Nombres de variables `qd_*`.** No hay `data_name` oficiales; se usan nombres descriptivos con prefijo `qd_` siguiendo la convención del proceso QD. Se actualizarán cuando TI los entregue.
-3. **Origen y mapeo de datos.** Los casos salen de `GET /api/1.0/requests?include=data` filtrando `process_id = 31` (mismo default que el Web Entry de SCR-000, `VITE_QD_PROCESS_ID` para override). Cada `request` se mapea a `CasoDashboard`: `qd_numeroCaso` ← `data.qd_codigoSFC || case_number || id`; `qd_diasRestantes` ← `data.qd_slaRestante` o estimado desde `data.qd_fechaVencimiento`; `qd_estado` derivado de `request.status` (COMPLETED→Cerrada, CANCELED→Cancelada, ACTIVE con mora→Vencida, resto→Abierta); `qd_responsable` ← `data.qd_responsable || qd_rolResponsable`; `qd_descripcion` ← `data.qd_textoQueja`. Estos nombres de campo se infieren de SCR-000/SCR-008/SCR-0051; **confirmar con TI** los `data_name` reales de vencimiento/SLA/estado. Fallback a `SAMPLE_CASES` solo en dev cuando la API no devuelve casos.
+2. **Nombres de variables `qd_*`.** Los 143 campos del proceso QD ya tienen nombre canónico en el registro `QD` (`fields/fields.ts`, nomenclatura Zurich RPA, coordinada con la migración de PM4 — ver `fields/MAPEO_qd_old_new.md`). La única excepción es `qd_fechaVencimiento`: no forma parte de esos 143 campos migrados y su `data_name` real sigue pendiente de confirmar con TI, por lo que se referencia literal.
+3. **Origen y mapeo de datos.** Los casos salen de `GET /api/1.0/requests?include=data` filtrando `process_id = 31` (mismo default que el Web Entry de SCR-000, `VITE_QD_PROCESS_ID` para override). Cada `request` se mapea a `CasoDashboard` (`mapRequestToCaso`): `numeroCaso` ← `data.qd_strSfcCode || case_number || id`; `diasRestantes` ← `data.qd_strSlaAssigned` (interpretado como plazo en días desde la creación) o estimado desde `data.qd_fechaVencimiento`; `estado` derivado de `request.status` (COMPLETED→Cerrada, CANCELED→Cancelada, ACTIVE con mora→Vencida, resto→Abierta); `responsable` ← `data.qd_strAssignee || qd_strAssigneeRole`; `descripcion` ← `data.qd_strComplaintText`. Fallback a `SAMPLE_CASES` solo en dev cuando la API no devuelve casos.
 4. **KPIs derivados de la lista completa.** El mockup muestra KPIs globales (12/3/5/20) distintos a las 8 filas visibles; se implementan como conteos derivados de la lista cargada para garantizar consistencia (los números del mockup son datos de ejemplo).
 5. **Umbral "Próximos a vencer" = 3 días hábiles.** El mockup no fija el número; se alineó con el umbral crítico de SLA usado en SCR-008 (`SLA_UMBRAL_CRITICO = 3`).
 6. **Filtros por colección (Tipo y Área).** Se conectan a `qd_tipoSolicitud` (id 18) y `qd_area` (id 35) vía `useCollection`; el `value` del filtro es el código y coincide con el código guardado en `request.data`. **Estado** queda estático porque es un valor operativo (derivado de `request.status` + SLA), no un catálogo. Si se quisiera un catálogo de estado (`qd_estadoQueja` id 42), habría que redefinir el significado de las píldoras/KPIs.

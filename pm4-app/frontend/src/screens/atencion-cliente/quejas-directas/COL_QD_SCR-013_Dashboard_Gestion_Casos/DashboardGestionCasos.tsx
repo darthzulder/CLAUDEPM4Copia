@@ -65,10 +65,10 @@ export default function DashboardGestionCasos() {
   const filtrados = useMemo(() => {
     const q = aplicados.filtroBuscar.trim().toLowerCase();
     return casos.filter((c) => {
-      if (aplicados.filtroTipo && c.qd_tipoSolicitud !== aplicados.filtroTipo) return false;
-      if (aplicados.filtroEstado && c.qd_estado !== aplicados.filtroEstado) return false;
-      if (aplicados.filtroArea && c.qd_areaResponsable !== aplicados.filtroArea) return false;
-      if (q && !`${c.qd_numeroCaso} ${c.qd_responsable} ${tipo.map[c.qd_tipoSolicitud] ?? c.qd_tipoSolicitud}`.toLowerCase().includes(q)) return false;
+      if (aplicados.filtroTipo && c.tipoSolicitud !== aplicados.filtroTipo) return false;
+      if (aplicados.filtroEstado && c.estado !== aplicados.filtroEstado) return false;
+      if (aplicados.filtroArea && c.areaResponsable !== aplicados.filtroArea) return false;
+      if (q && !`${c.numeroCaso} ${c.responsable} ${tipo.map[c.tipoSolicitud] ?? c.tipoSolicitud}`.toLowerCase().includes(q)) return false;
       return true;
     });
   }, [casos, aplicados, tipo.map]);

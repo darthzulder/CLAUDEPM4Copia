@@ -59,16 +59,16 @@ export function mapRequestToCaso(in_objRequest: RequestRaw): CasoDashboard {
   const intDias = calcularDiasRestantes(objData, in_objRequest.created_at);
   const strVenc = str('qd_fechaVencimiento');
   return {
-    qd_id: in_objRequest.id,
-    qd_numeroCaso: str(QD.strSfcCode) || String(in_objRequest.case_number ?? in_objRequest.id ?? ''),
-    qd_tipoSolicitud: str(QD.strRequestType),
-    qd_fechaCreacion: formatFecha(in_objRequest.created_at),
-    qd_fechaVencimiento: strVenc ? formatFecha(strVenc) : '—',
-    qd_diasRestantes: intDias,
-    qd_estado: estadoDeRequest(in_objRequest.status, intDias),
-    qd_areaResponsable: str(QD.strAssigneeArea),
-    qd_responsable: str(QD.strAssignee) || str(QD.strAssigneeRole),
-    qd_descripcion: str(QD.strComplaintText),
+    id: in_objRequest.id,
+    numeroCaso: str(QD.strSfcCode) || String(in_objRequest.case_number ?? in_objRequest.id ?? ''),
+    tipoSolicitud: str(QD.strRequestType),
+    fechaCreacion: formatFecha(in_objRequest.created_at),
+    fechaVencimiento: strVenc ? formatFecha(strVenc) : '—',
+    diasRestantes: intDias,
+    estado: estadoDeRequest(in_objRequest.status, intDias),
+    areaResponsable: str(QD.strAssigneeArea),
+    responsable: str(QD.strAssignee) || str(QD.strAssigneeRole),
+    descripcion: str(QD.strComplaintText),
   };
 }
 
@@ -88,8 +88,8 @@ export function estadoVariante(in_strEstado: EstadoCasoDashboard): 'success' | '
 
 // Columna "Días restantes": solo texto. Para casos cerrados/cancelados no aplica ("—").
 export function diasRestantesTexto(in_objCaso: CasoDashboard): string {
-  if (in_objCaso.qd_estado === 'Cerrada' || in_objCaso.qd_estado === 'Cancelada') return '—';
-  const intN = in_objCaso.qd_diasRestantes;
+  if (in_objCaso.estado === 'Cerrada' || in_objCaso.estado === 'Cancelada') return '—';
+  const intN = in_objCaso.diasRestantes;
   const plural = (in_intX: number) => `${in_intX} ${in_intX === 1 ? 'día' : 'días'}`;
   if (intN > 0) return plural(intN);
   if (intN === 0) return 'Vence hoy';
@@ -99,10 +99,10 @@ export function diasRestantesTexto(in_objCaso: CasoDashboard): string {
 // KPIs derivados de la lista completa de casos (siempre consistentes con los datos).
 export function calcularKpis(in_lstCasos: CasoDashboard[]): KpisDashboard {
   return {
-    abiertos:  in_lstCasos.filter((c) => c.qd_estado === 'Abierta').length,
-    porVencer: in_lstCasos.filter((c) => c.qd_estado === 'Abierta' && c.qd_diasRestantes >= 0 && c.qd_diasRestantes <= SCR013_SLA_UMBRAL_PROXIMO).length,
-    vencidos:  in_lstCasos.filter((c) => c.qd_estado === 'Vencida' || (c.qd_estado === 'Abierta' && c.qd_diasRestantes < 0)).length,
-    cerrados:  in_lstCasos.filter((c) => c.qd_estado === 'Cerrada').length,
+    abiertos:  in_lstCasos.filter((c) => c.estado === 'Abierta').length,
+    porVencer: in_lstCasos.filter((c) => c.estado === 'Abierta' && c.diasRestantes >= 0 && c.diasRestantes <= SCR013_SLA_UMBRAL_PROXIMO).length,
+    vencidos:  in_lstCasos.filter((c) => c.estado === 'Vencida' || (c.estado === 'Abierta' && c.diasRestantes < 0)).length,
+    cerrados:  in_lstCasos.filter((c) => c.estado === 'Cerrada').length,
   };
 }
 
@@ -117,15 +117,15 @@ export function casosToCSV(
 ): string {
   const lstHeaders = ['# Caso', 'Tipo', 'Creación', 'Vencimiento', 'Días restantes', 'Estado', 'Área', 'Responsable', 'Descripción'];
   const lstFilas = in_lstCasos.map((c) => [
-    c.qd_numeroCaso,
-    in_dicTipoMap[c.qd_tipoSolicitud] ?? c.qd_tipoSolicitud,
-    c.qd_fechaCreacion,
-    c.qd_fechaVencimiento,
-    String(c.qd_diasRestantes),
-    c.qd_estado,
-    in_dicAreaMap[c.qd_areaResponsable] ?? c.qd_areaResponsable,
-    c.qd_responsable,
-    c.qd_descripcion,
+    c.numeroCaso,
+    in_dicTipoMap[c.tipoSolicitud] ?? c.tipoSolicitud,
+    c.fechaCreacion,
+    c.fechaVencimiento,
+    String(c.diasRestantes),
+    c.estado,
+    in_dicAreaMap[c.areaResponsable] ?? c.areaResponsable,
+    c.responsable,
+    c.descripcion,
   ]);
   const esc = (in_strV: string) => `"${String(in_strV).replace(/"/g, '""')}"`;
   return [lstHeaders, ...lstFilas].map((lstFila) => lstFila.map(esc).join(',')).join('\r\n');
@@ -138,12 +138,12 @@ export function casosToCSV(
 // colección no coincidirán con estos datos de ejemplo — es esperado en dev.
 // ---------------------------------------------------------------------------
 export const SAMPLE_CASES: CasoDashboard[] = [
-  { qd_id: 1, qd_numeroCaso: '001', qd_tipoSolicitud: 'Queja', qd_fechaCreacion: '10 abr. 2024', qd_fechaVencimiento: '15 abr. 2024', qd_diasRestantes: 1, qd_estado: 'Abierta', qd_areaResponsable: 'Siniestros Autos', qd_responsable: 'Laura González', qd_descripcion: 'Cliente reporta demora en la liquidación de siniestro de vehículo. Solicita respuesta urgente antes del vencimiento regulatorio.' },
-  { qd_id: 2, qd_numeroCaso: '002', qd_tipoSolicitud: 'Petición', qd_fechaCreacion: '15 abr. 2024', qd_fechaVencimiento: '18 abr. 2024', qd_diasRestantes: 3, qd_estado: 'Cerrada', qd_areaResponsable: '—', qd_responsable: 'María Pérez', qd_descripcion: 'Solicitud de actualización de datos de póliza resuelta satisfactoriamente dentro del plazo SLA.' },
-  { qd_id: 3, qd_numeroCaso: '003', qd_tipoSolicitud: 'Derecho de petición', qd_fechaCreacion: '20 mar. 2024', qd_fechaVencimiento: '20 abr. 2024', qd_diasRestantes: -3, qd_estado: 'Vencida', qd_areaResponsable: 'Siniestros Autos', qd_responsable: 'Juan Martínez', qd_descripcion: 'Derecho de petición por negación de cobertura. Caso excedió el plazo SFC. Requiere atención inmediata y posible escalamiento.' },
-  { qd_id: 4, qd_numeroCaso: '004', qd_tipoSolicitud: 'Petición', qd_fechaCreacion: '5 abr. 2024', qd_fechaVencimiento: '20 abr. 2024', qd_diasRestantes: 5, qd_estado: 'Cancelada', qd_areaResponsable: 'Siniestros Autos', qd_responsable: 'Ana Ruiz', qd_descripcion: 'Solicitud cancelada a petición del cliente. El asegurado retiró la solicitud voluntariamente antes del cierre.' },
-  { qd_id: 5, qd_numeroCaso: '005', qd_tipoSolicitud: 'Queja', qd_fechaCreacion: '28 mar. 2024', qd_fechaVencimiento: '15 abr. 2024', qd_diasRestantes: 2, qd_estado: 'Abierta', qd_areaResponsable: 'Siniestros Autos', qd_responsable: 'Carla Torres', qd_descripcion: 'Queja por atención deficiente en el proceso de inspección del vehículo. Cliente exige compensación y disculpa formal.' },
-  { qd_id: 6, qd_numeroCaso: '006', qd_tipoSolicitud: 'Queja', qd_fechaCreacion: '2 may. 2024', qd_fechaVencimiento: '17 may. 2024', qd_diasRestantes: 8, qd_estado: 'Abierta', qd_areaResponsable: 'Siniestros Vida', qd_responsable: 'Pedro Ramírez', qd_descripcion: 'Queja por retraso en el pago de indemnización por fallecimiento. Beneficiarios solicitan respuesta urgente.' },
-  { qd_id: 7, qd_numeroCaso: '007', qd_tipoSolicitud: 'Reclamo', qd_fechaCreacion: '18 abr. 2024', qd_fechaVencimiento: '3 may. 2024', qd_diasRestantes: -2, qd_estado: 'Vencida', qd_areaResponsable: 'Pagos y Cobros', qd_responsable: 'Sandra Molina', qd_descripcion: 'Reclamo por cobro indebido de prima adicional. SLA vencido. Área de Pagos debe emitir respuesta de manera inmediata.' },
-  { qd_id: 8, qd_numeroCaso: '008', qd_tipoSolicitud: 'Petición', qd_fechaCreacion: '30 abr. 2024', qd_fechaVencimiento: '15 may. 2024', qd_diasRestantes: 4, qd_estado: 'Abierta', qd_areaResponsable: 'SAC', qd_responsable: 'Diego Herrera', qd_descripcion: 'Petición de información sobre cobertura de póliza de hogar. Cliente requiere aclaración de condiciones contractuales.' },
+  { id: 1, numeroCaso: '001', tipoSolicitud: 'Queja', fechaCreacion: '10 abr. 2024', fechaVencimiento: '15 abr. 2024', diasRestantes: 1, estado: 'Abierta', areaResponsable: 'Siniestros Autos', responsable: 'Laura González', descripcion: 'Cliente reporta demora en la liquidación de siniestro de vehículo. Solicita respuesta urgente antes del vencimiento regulatorio.' },
+  { id: 2, numeroCaso: '002', tipoSolicitud: 'Petición', fechaCreacion: '15 abr. 2024', fechaVencimiento: '18 abr. 2024', diasRestantes: 3, estado: 'Cerrada', areaResponsable: '—', responsable: 'María Pérez', descripcion: 'Solicitud de actualización de datos de póliza resuelta satisfactoriamente dentro del plazo SLA.' },
+  { id: 3, numeroCaso: '003', tipoSolicitud: 'Derecho de petición', fechaCreacion: '20 mar. 2024', fechaVencimiento: '20 abr. 2024', diasRestantes: -3, estado: 'Vencida', areaResponsable: 'Siniestros Autos', responsable: 'Juan Martínez', descripcion: 'Derecho de petición por negación de cobertura. Caso excedió el plazo SFC. Requiere atención inmediata y posible escalamiento.' },
+  { id: 4, numeroCaso: '004', tipoSolicitud: 'Petición', fechaCreacion: '5 abr. 2024', fechaVencimiento: '20 abr. 2024', diasRestantes: 5, estado: 'Cancelada', areaResponsable: 'Siniestros Autos', responsable: 'Ana Ruiz', descripcion: 'Solicitud cancelada a petición del cliente. El asegurado retiró la solicitud voluntariamente antes del cierre.' },
+  { id: 5, numeroCaso: '005', tipoSolicitud: 'Queja', fechaCreacion: '28 mar. 2024', fechaVencimiento: '15 abr. 2024', diasRestantes: 2, estado: 'Abierta', areaResponsable: 'Siniestros Autos', responsable: 'Carla Torres', descripcion: 'Queja por atención deficiente en el proceso de inspección del vehículo. Cliente exige compensación y disculpa formal.' },
+  { id: 6, numeroCaso: '006', tipoSolicitud: 'Queja', fechaCreacion: '2 may. 2024', fechaVencimiento: '17 may. 2024', diasRestantes: 8, estado: 'Abierta', areaResponsable: 'Siniestros Vida', responsable: 'Pedro Ramírez', descripcion: 'Queja por retraso en el pago de indemnización por fallecimiento. Beneficiarios solicitan respuesta urgente.' },
+  { id: 7, numeroCaso: '007', tipoSolicitud: 'Reclamo', fechaCreacion: '18 abr. 2024', fechaVencimiento: '3 may. 2024', diasRestantes: -2, estado: 'Vencida', areaResponsable: 'Pagos y Cobros', responsable: 'Sandra Molina', descripcion: 'Reclamo por cobro indebido de prima adicional. SLA vencido. Área de Pagos debe emitir respuesta de manera inmediata.' },
+  { id: 8, numeroCaso: '008', tipoSolicitud: 'Petición', fechaCreacion: '30 abr. 2024', fechaVencimiento: '15 may. 2024', diasRestantes: 4, estado: 'Abierta', areaResponsable: 'SAC', responsable: 'Diego Herrera', descripcion: 'Petición de información sobre cobertura de póliza de hogar. Cliente requiere aclaración de condiciones contractuales.' },
 ];

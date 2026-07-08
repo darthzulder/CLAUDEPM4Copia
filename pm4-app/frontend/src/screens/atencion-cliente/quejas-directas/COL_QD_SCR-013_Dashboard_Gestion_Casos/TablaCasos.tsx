@@ -37,17 +37,17 @@ export default function TablaCasos({ casos, tipoMap, areaMap, onVer }: TablaCaso
         </thead>
         <tbody>
           {casos.map((c) => (
-            <tr key={c.qd_id}>
-                <td><strong>{c.qd_numeroCaso}</strong></td>
-                <td>{(tipoMap[c.qd_tipoSolicitud] ?? c.qd_tipoSolicitud) || '—'}</td>
-                <td>{c.qd_fechaCreacion}</td>
-                <td>{c.qd_fechaVencimiento}</td>
+            <tr key={c.id}>
+                <td><strong>{c.numeroCaso}</strong></td>
+                <td>{(tipoMap[c.tipoSolicitud] ?? c.tipoSolicitud) || '—'}</td>
+                <td>{c.fechaCreacion}</td>
+                <td>{c.fechaVencimiento}</td>
                 <td>{diasRestantesTexto(c)}</td>
                 <td>
-                  <ZdsStatusBadge variant={estadoVariante(c.qd_estado)}>{c.qd_estado}</ZdsStatusBadge>
+                  <ZdsStatusBadge variant={estadoVariante(c.estado)}>{c.estado}</ZdsStatusBadge>
                 </td>
-                <td>{(areaMap[c.qd_areaResponsable] ?? c.qd_areaResponsable) || '—'}</td>
-                <td>{c.qd_responsable || '—'}</td>
+                <td>{(areaMap[c.areaResponsable] ?? c.areaResponsable) || '—'}</td>
+                <td>{c.responsable || '—'}</td>
                 <td {...({ config: 'center' } as object)}>
                   <ZrButton config="secondary:s" onClick={() => onVer(c)}>Ver</ZrButton>
                 </td>

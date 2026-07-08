@@ -15,26 +15,26 @@ interface DetalleCasoModalProps {
  * resumido. Tipo y Área se resuelven de código a descripción vía las colecciones.
  */
 export default function DetalleCasoModal({ caso, tipoMap, areaMap, onClose }: DetalleCasoModalProps) {
-  const tipo = (tipoMap[caso.qd_tipoSolicitud] ?? caso.qd_tipoSolicitud) || '—';
-  const area = (areaMap[caso.qd_areaResponsable] ?? caso.qd_areaResponsable) || '—';
+  const tipo = (tipoMap[caso.tipoSolicitud] ?? caso.tipoSolicitud) || '—';
+  const area = (areaMap[caso.areaResponsable] ?? caso.areaResponsable) || '—';
 
   return (
     <ZrModal model onChange={(open: boolean) => { if (!open) onClose(); }}>
       <div className="section-spacer">
         <h3 style={{ margin: '0 0 var(--zs-25)', font: 'var(--zf-h-20)', fontWeight: 700, color: 'var(--z-text)' }}>
-          Caso #{caso.qd_numeroCaso} — {tipo}
+          Caso #{caso.numeroCaso} — {tipo}
         </h3>
         <p className="subsection-note" style={{ margin: 0 }}>
-          {area} · Responsable: {caso.qd_responsable || '—'}
+          {area} · Responsable: {caso.responsable || '—'}
         </p>
       </div>
 
       <InfoBar
         items={[
-          { label: 'Estado', value: <ZdsStatusBadge variant={estadoVariante(caso.qd_estado)}>{caso.qd_estado}</ZdsStatusBadge> },
+          { label: 'Estado', value: <ZdsStatusBadge variant={estadoVariante(caso.estado)}>{caso.estado}</ZdsStatusBadge> },
           { label: 'Tipo de solicitud', value: tipo },
-          { label: 'Fecha de creación', value: caso.qd_fechaCreacion },
-          { label: 'Fecha de vencimiento', value: caso.qd_fechaVencimiento },
+          { label: 'Fecha de creación', value: caso.fechaCreacion },
+          { label: 'Fecha de vencimiento', value: caso.fechaVencimiento },
           { label: 'Días restantes', value: diasRestantesTexto(caso) },
           { label: 'Área responsable', value: area },
         ]}
@@ -43,7 +43,7 @@ export default function DetalleCasoModal({ caso, tipoMap, areaMap, onClose }: De
       <div className="field-wrap" style={{ marginTop: 'var(--zs-100)' }}>
         <span className="form-label">Descripción / Motivo</span>
         <p style={{ margin: '4px 0 0', font: 'var(--zf-capt-14)', color: 'var(--z-text)', whiteSpace: 'pre-wrap' }}>
-          {caso.qd_descripcion || 'Sin descripción registrada.'}
+          {caso.descripcion || 'Sin descripción registrada.'}
         </p>
       </div>
 
