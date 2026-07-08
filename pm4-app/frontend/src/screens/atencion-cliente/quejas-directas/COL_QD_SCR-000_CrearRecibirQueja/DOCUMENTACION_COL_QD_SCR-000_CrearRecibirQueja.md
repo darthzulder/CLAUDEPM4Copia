@@ -49,7 +49,10 @@ Catálogos implementados como **colecciones dinámicas PM4** (no listas estátic
 | CAT-MPIO | `qd_strCity` (15, depende de `qd_strDepartment`) | `qd_strCity` |
 | CAT-COND-ESP | `qd_strSpecialCondition` (24) | `qd_strSpecialCondition` |
 | CAT-PRODUCTO-SFC | `qd_strSfcProduct` (16) | `qd_strSfcProduct` |
-| CAT-MOTIVO-SFC | `qd_strSfcReason` (17) | `qd_strSfcReason` |
+| cat_matriz_motivos (momento) | `qd_matrizInteraccion` (45, `distinct`, depende de tipo solicitud + producto) | `qd_strInteraction` |
+| cat_matriz_motivos (servicio) | `qd_matrizServicio` (45, `distinct`, + momento) | `qd_strServiceProvided` |
+| cat_matriz_motivos (motivo) | `qd_matrizMotivo` (45, `distinct`, + servicio) | `qd_strSfcReason` |
+| CAT-MOTIVO-SFC *(legacy id 17)* | `qd_strSfcReason` (17, ya no lo usa SCR-000; sí SCR-002/0051/0052 en modo display) | `qd_strSfcReason` |
 | CAT-ADMISION | `qd_strAdmission` (21) | `qd_strAdmission` |
 
 ---
@@ -97,11 +100,14 @@ Catálogos implementados como **colecciones dinámicas PM4** (no listas estátic
 | Campo (UI) | Variable | Tipo | Obligatorio | Fuente |
 |---|---|---|---|---|
 | Selecciona el seguro | `qd_strSfcProduct` | Select (CAT-PRODUCTO-SFC) con búsqueda | Sí | Anexo02 > SCR-000 > FLD-323 (fila 39) |
+| Ingrese la placa | `qd_strPlate` | Texto, visible solo si producto = "Autos" | Sí (si Autos) | Anexo02 > FormularioCreaciónPQRS #25 — "Si la pregunta 24 es = Autos" |
 | Detalle del producto | `qd_strProductDetail` | Texto, solo lectura (back) | Sí | Anexo02 > SCR-000 > FLD-324 (fila 40) |
 | ¿Ya habías radicado / es reconsideración? | `qd_strReply` | Radio Sí/No | Sí | Anexo02 > SCR-000 > FLD-325 (fila 41) — Réplica SFC |
 | Argumento de la réplica | `qd_strReplyArgument` | Textarea (máx 2000) | No (visible si réplica=Sí) | Anexo02 > SCR-000 > FLD-326 (fila 42) |
 | Escalamiento al Defensor del Consumidor | `qd_strOmbudsmanEscalation` | Texto, solo lectura (computado) | Sí | Anexo02 > SCR-000 > FLD-327 (fila 43) |
-| Cuéntanos el motivo | `qd_strSfcReason` | Select (CAT-MOTIVO-SFC) con búsqueda | Sí | Anexo02 > SCR-000 > FLD-328 (fila 44) — "crítico: condiciona fraude en M3" |
+| Selecciona el momento | `qd_strInteraction` | Select (`cat_matriz_motivos.interaccion`, cascada), deshabilitado hasta elegir seguro | Sí | Anexo02 > FormularioCreaciónPQRS #30 — "columna interaccion" |
+| Selecciona el servicio | `qd_strServiceProvided` | Select (`cat_matriz_motivos.servicioPrestado`), visible solo si momento = "Asistencias" | Sí (si Asistencias) | Anexo02 > FormularioCreaciónPQRS #31 — "columna servicioPrestado" |
+| Cuéntanos el motivo | `qd_strSfcReason` | Select (`cat_matriz_motivos.motivo`, cascada), deshabilitado hasta completar momento/servicio | Sí | Anexo02 > SCR-000 > FLD-328 (fila 44) — "crítico: condiciona fraude en M3" |
 | Ingresa el detalle | `qd_strComplaintText` | Textarea (50–2000) | Sí | Anexo02 > SCR-000 > FLD-329 (fila 45) |
 | Ingresa archivos adjuntos | `qd_strAttach01…05` | Upload multi (máx 5) | Sí | Anexo02 > SCR-000 > FLD-330 (fila 46) — "pdf, jpg, png, docx. Máx 5 MB" |
 | Admisión | `qd_strAdmission` | Select (si Defensor) / solo lectura | Sí | Anexo02 > SCR-000 > FLD-331 (fila 47) |
@@ -185,6 +191,8 @@ Catálogos implementados como **colecciones dinámicas PM4** (no listas estátic
 | Campos de persona natural vs. jurídica alternados | Render condicional `esJuridica` (NIT) | Anexo02 > 05_Reglas RUL-000-02/03 (filas 37–38) |
 | Ciudad deshabilitada hasta seleccionar Departamento | `disabled={!w.qd_strDepartment}` + placeholder dinámico | Anexo02 > 05_Reglas RUL-000-09 (fila 39); SCR-000 FLD-318 |
 | Argumento de réplica visible solo si réplica = Sí | Render condicional `w.qd_strReply === 'SI'` | Anexo02 > 05_Reglas RUL-000-12 (fila 42); SCR-000 FLD-326 |
+| Placa visible solo si producto = "Autos" | Render condicional `blnIsAutos` (label del seguro) + limpieza al salir de Autos | Anexo02 > FormularioCreaciónPQRS #25 |
+| Servicio visible solo si momento = "Asistencias"; momento/motivo deshabilitados en cascada | Render condicional `blnIsAsistencias` + `disabled` encadenado en momento/servicio/motivo | Anexo02 > FormularioCreaciónPQRS #30/#31/#32 |
 | Estado SmartSupervision como semáforo de color | `ZdsStatusBadge` + `estadoVariant()` (success/danger/info/neutral) | Anexo02 > SCR-000 FLD-338 (fila 54) — "Color tipo semáforo" |
 | Botón "Enviar PQRS" (primaria) habilitado solo con autorización + captcha | `disabled={... || !puedeEnviar}` | Anexo02 > 04_Acciones > **ACT-000-01** (fila 36) — condición de habilitación |
 | Botón "Limpiar Formulario" (secundaria) | `limpiarFormulario()` → `reset(DEFAULTS)` + limpia adjuntos | Anexo02 > 04_Acciones > **ACT-000-02** (fila 37) |
@@ -204,6 +212,10 @@ Catálogos implementados como **colecciones dinámicas PM4** (no listas estátic
 | `qd_strIdType` | `qd_strPersonType` + bloque de campos (Natural vs. Jurídica) | NIT → Jurídica (Razón Social + contacto); resto → Natural (Nombres/Apellidos) | Anexo02 > 05_Reglas RUL-000-02/03 (filas 37–38); FLD-315 |
 | `qd_strDepartment` | `qd_strCity` | Al cambiar departamento se limpia la ciudad y se recarga el catálogo (colección 15, `dependsOn: qd_strDepartment`); ciudad deshabilitada sin departamento | Anexo02 > 05_Reglas RUL-000-09 (fila 39); FLD-317/318 |
 | `qd_strReply` (= Sí) | `qd_strReplyArgument` | Muestra el campo de argumento | Anexo02 > 05_Reglas RUL-000-12 (fila 42); FLD-325/326 |
+| `qd_strSfcProduct` (= "Autos") | `qd_strPlate` | Muestra el campo de placa; fuera de Autos se oculta y limpia | Anexo02 > FormularioCreaciónPQRS #25 |
+| `qd_strRequestType` + `qd_strSfcProduct` | `qd_strInteraction` | Cascada `cat_matriz_motivos` (id 45): carga los momentos (`interaccion`) filtrando por tipo de solicitud + producto; al cambiar cualquiera se limpia el momento | Anexo02 > FormularioCreaciónPQRS #30 |
+| `qd_strInteraction` (= "Asistencias") | `qd_strServiceProvided` | Muestra el servicio y carga sus opciones (`servicioPrestado`) filtradas por la cadena; otros momentos lo ocultan/limpian | Anexo02 > FormularioCreaciónPQRS #31 |
+| `qd_strRequestType` → `qd_strSfcProduct` → `qd_strInteraction` → `qd_strServiceProvided` | `qd_strSfcReason` | El motivo se filtra por toda la cadena (`cat_matriz_motivos.motivo`); deshabilitado hasta completar momento (y servicio si Asistencias); cambiar cualquier eslabón lo limpia | Anexo02 > FormularioCreaciónPQRS #32 |
 | `qd_strSfcReason` | Campos de fraude (Tipo/Modalidad/Montos) | Condiciona obligatoriedad de fraude — **efecto fuera de esta pantalla** (SCR-009/SCR-010) | Anexo02 > SCR-000 FLD-328 (fila 44) |
 
 ---
@@ -231,6 +243,8 @@ Catálogos implementados como **colecciones dinámicas PM4** (no listas estátic
 10. **Defaults de campos de back.** Valores `DEFAULTS` (sexo, lgbtiq, admisión, ente de control, tutela, queja exprés, dirección) se precargan en el front como placeholder mientras la API SFC / TI confirma las listas; varios catálogos están marcados "Pendiente TI" en `07_Catalogs`.
 
 11. **Banner informativo (S1).** El texto del `ZrAlert` informativo es redacción propia derivada de la historia de usuario y el criterio de aceptación de SCR-000; no es una cadena literal del insumo.
+
+12. **Cascada `cat_matriz_motivos` (id 45).** Los campos momento (`qd_strInteraction`), servicio (`qd_strServiceProvided`) y motivo (`qd_strSfcReason`) se alimentan de una única colección PM4 nueva (id **45**) con la cadena tipo de solicitud → producto → momento → servicio → motivo. Supuestos a confirmar en PM4: (a) columnas `data.tipoSolicitud`, `data.productoZurich`, `data.interaccion`, `data.servicioPrestado`, `data.motivo` (camelCase); (b) el motivo se guarda como **texto** (`data.motivo` sirve de value y label), no como código — antes `qd_strSfcReason` almacenaba el código de CAT-MOTIVO-SFC (id 17); (c) las filas de momentos distintos de "Asistencias" deben traer `servicioPrestado` vacío para que el filtro del motivo (`data.servicioPrestado = ""`) devuelva resultados. Detección de "Autos" (placa) y "Asistencias" (servicio) por coincidencia del *label* del catálogo (regex `/autos/i`, `/asistencias/i`).
 
 ---
 

@@ -166,8 +166,28 @@ Ver la sección **Informe de impacto** para el detalle de qué sí cambia dentro
 | SCR-0052 | qd_adjuntoArea | qd_strAreaAttach | string |
 | SCR-0052 | qd_respuestasAyuda | qd_lstHelpResponses | array |
 
-**Total: 143 campos.** (El inventario previo de 154 incluía ~11 claves de
+**Total: 143 campos** (renombrados). (El inventario previo de 154 incluía ~11 claves de
 `GLOBAL_COLLECTIONS` sin campo PM4 propio — ver "Fuera de alcance" abajo.)
+
+## Campos NUEVOS (sin equivalente OLD) — SCR-000
+
+Agregados tras el refactor de nomenclatura, alineando SCR-000 con la pestaña
+`FormularioCreaciónPQRS` del Anexo02 v3.0. **No son renombres**: son variables de
+proceso PM4 nuevas que el proceso P01 debe crear/emitir.
+
+| Screen | NEW | Tipo | Origen |
+|---|---|---|---|
+| SCR-000 | qd_strPlate | string | #25 — placa del vehículo (solo producto = "Autos") |
+| SCR-000 | qd_strInteraction | string | #30 — momento/interacción (`cat_matriz_motivos.interaccion`) |
+| SCR-000 | qd_strServiceProvided | string | #31 — servicio (`cat_matriz_motivos.servicioPrestado`, solo si momento = "Asistencias") |
+
+**Colección nueva `cat_matriz_motivos` (id 45)** en `core/collections.ts`
+(`qd_matrizInteraccion` / `qd_matrizServicio` / `qd_matrizMotivo`): matriz de cascada
+tipo solicitud → producto → momento → servicio → motivo. Reapunta el motivo
+(`qd_strSfcReason`) de la colección legacy id 17 a esta matriz **solo en SCR-000**
+(SCR-002/0051/0052 siguen con id 17 en modo display). ⚠ `qd_strSfcReason` pasa a
+almacenar el **texto** del motivo (`data.motivo`), no el código — confirmar con la
+integración SFC si se requiere el código.
 
 ## Casos especiales de traducción
 
@@ -273,6 +293,8 @@ gateways/scripts/SFC ya mencionados en el plan.
 ## Checklist para la migración PM4 (fuera de este repo)
 
 - [ ] Renombrar las 143 variables de proceso del subproceso P01 (Quejas Directas) según la tabla.
+- [ ] Crear las 3 variables de proceso NUEVAS de SCR-000 (`qd_strPlate`, `qd_strInteraction`, `qd_strServiceProvided`).
+- [ ] Crear la colección `cat_matriz_motivos` (id 45) con columnas `tipoSolicitud`, `productoZurich`, `interaccion`, `servicioPrestado`, `motivo`; las filas no-"Asistencias" deben traer `servicioPrestado` vacío.
 - [ ] Actualizar expresiones de gateway BPMN que referencien estos nombres.
 - [ ] Actualizar scripts/watchers (incl. el validador que genera `qd_errores_json.campo`).
 - [ ] Actualizar la integración SFC/SmartSupervision (las "variables de back": `qd_strSmartSupStatus`, `qd_strSfcFilingDate`, `qd_strAssigneeRole`, `qd_strAssignee`, etc.).

@@ -25,7 +25,12 @@ export default function SeccionDetalleQueja({ form, fileRegistry }: Props) {
   // preservado — ver fields/MAPEO_qd_old_new.md #3). Solo se renombra la lectura
   // del campo real.
   const { options: cllProductDetail } = useCollection(QD_COLLECTIONS.productDetail, { qd_productoSFC: objWatch[QD.strSfcProduct] });
-  const { options: cllReason } = useCollection(QD_COLLECTIONS.sfcReason);
+  // Cascada cat_matriz_motivos (id 45): momento (interacción) → servicio → motivo.
+  // Cada colección resuelve su dependsOn contra el objWatch real del formulario.
+  const objFormValues = objWatch as unknown as Record<string, unknown>;
+  const { options: cllInteraction } = useCollection(QD_COLLECTIONS.matrixInteraction, objFormValues);
+  const { options: cllService } = useCollection(QD_COLLECTIONS.matrixService, objFormValues);
+  const { options: cllReason } = useCollection(QD_COLLECTIONS.matrixReason, objFormValues);
   const { options: cllAdmission } = useCollection(QD_COLLECTIONS.admission);
   const { options: cllControlEntity } = useCollection(QD_COLLECTIONS.controlEntity);
   const { options: cllGuardianship } = useCollection(QD_COLLECTIONS.tutela);
@@ -33,6 +38,36 @@ export default function SeccionDetalleQueja({ form, fileRegistry }: Props) {
 
   // Determinamos si el rol radicador es el Defensor.
   const blnIsDefender = objWatch[QD.strFilerRole] === 'DEFENSOR';
+
+  // Placa: solo aplica cuando el producto seleccionado es "Autos" (Anexo02 #25).
+  // El seguro se guarda por código, así que resolvemos el nombre desde el catálogo.
+  const objSelectedInsurance = cllInsurance.find((o) => o.value === objWatch[QD.strSfcProduct]);
+  const blnIsAutos = /autos/i.test(objSelectedInsurance?.label ?? '');
+
+  // Servicio: solo aplica cuando el momento (interacción) es "Asistencias" (Anexo02 #31).
+  const blnIsAsistencias = /asistencias/i.test(objWatch[QD.strInteraction] ?? '');
+
+  // RUL cascada — al cambiar un eslabón aguas arriba se limpia lo de aguas abajo para
+  // forzar la reselección coherente (mismo patrón que ciudad↔departamento en S2).
+  // Producto → momento.
+  useEffect(() => {
+    setValue(QD.strInteraction, '');
+  }, [objWatch[QD.strRequestType], objWatch[QD.strSfcProduct], setValue]);
+
+  // Momento → servicio.
+  useEffect(() => {
+    setValue(QD.strServiceProvided, '');
+  }, [objWatch[QD.strInteraction], setValue]);
+
+  // Cualquier eslabón de la cadena → motivo.
+  useEffect(() => {
+    setValue(QD.strSfcReason, '');
+  }, [objWatch[QD.strRequestType], objWatch[QD.strSfcProduct], objWatch[QD.strInteraction], objWatch[QD.strServiceProvided], setValue]);
+
+  // Placa fuera de "Autos" no debe conservar valor.
+  useEffect(() => {
+    if (!blnIsAutos && objWatch[QD.strPlate]) setValue(QD.strPlate, '');
+  }, [blnIsAutos, objWatch[QD.strPlate], setValue]);
 
   // FLD-327 — escalamiento al Defensor computado (back): Defensor → "Sí".
   useEffect(() => {
@@ -97,6 +132,52 @@ export default function SeccionDetalleQueja({ form, fileRegistry }: Props) {
         />
       </div>
 
+      {/* Anexo02 #25 — placa: solo si el producto seleccionado es "Autos" */}
+      {blnIsAutos && (
+        <div className="form-row cols-2">
+          <ZdsInput
+            name={QD.strPlate}
+            control={control}
+            label="Ingrese la placa"
+            rules={{ required: 'Campo requerido' }}
+            required
+            error={err(QD.strPlate)}
+          />
+          <div />
+        </div>
+      )}
+
+      {/* Anexo02 #30/#31 — cascada cat_matriz_motivos: momento y (si aplica) servicio.
+          El servicio solo aparece cuando el momento es "Asistencias". */}
+      <div className="form-row cols-2">
+        <ZdsSelect
+          name={QD.strInteraction}
+          control={control}
+          label="Selecciona el momento"
+          options={cllInteraction}
+          rules={{ required: 'Campo requerido' }}
+          required
+          withSearch
+          disabled={!objWatch[QD.strSfcProduct]}
+          placeholder={objWatch[QD.strSfcProduct] ? 'Seleccione el momento...' : 'Seleccione primero el seguro'}
+          error={err(QD.strInteraction)}
+        />
+        {blnIsAsistencias ? (
+          <ZdsSelect
+            name={QD.strServiceProvided}
+            control={control}
+            label="Selecciona el servicio"
+            options={cllService}
+            rules={{ required: 'Campo requerido' }}
+            required
+            withSearch
+            error={err(QD.strServiceProvided)}
+          />
+        ) : (
+          <div />
+        )}
+      </div>
+
       <div className="form-row cols-2">
         <ZdsRadio
           name={QD.strReply}
@@ -138,6 +219,8 @@ export default function SeccionDetalleQueja({ form, fileRegistry }: Props) {
           rules={{ required: 'Campo requerido' }}
           required
           withSearch
+          disabled={!objWatch[QD.strInteraction] || (blnIsAsistencias && !objWatch[QD.strServiceProvided])}
+          placeholder={objWatch[QD.strInteraction] ? 'Seleccione el motivo...' : 'Complete primero el momento'}
           error={err(QD.strSfcReason)}
         />
       </div>

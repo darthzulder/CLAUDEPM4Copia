@@ -5,8 +5,9 @@ export interface CollectionDef {
   id: number;
   labelField: string;        // dotted path en el record: 'data.frm_nombre_entidad' | 'id'
   valueField: string;        // dotted path en el record: 'id' | 'data.frm_codigo'
-  dependsOn?: string;        // nombre del campo del form que dispara recarga
+  dependsOn?: string | string[]; // campo(s) del form que disparan recarga; si son varios se exigen TODOS con valor
   pmqlTemplate?: string;     // PMQL con placeholders {{field_name}} resueltos con el valor del form
+  distinct?: boolean;        // deduplica las opciones por `value` (p. ej. columnas de una matriz con filas repetidas)
 }
 
 export interface CollectionOption {
@@ -39,15 +40,21 @@ export function useCollection(
   const [rawMap, setRawMap] = useState<Record<string, Record<string, unknown>>>({});
   const [loading, setLoading] = useState(false);
 
-  // Valor del campo del que depende esta coleccion
-  const genDependsOnValue = in_objDef?.dependsOn ? in_dicWatchValues?.[in_objDef.dependsOn] : undefined;
+  // Campos de los que depende esta coleccion (uno o varios) y sus valores actuales.
+  const arrDependsOn = in_objDef?.dependsOn
+    ? (Array.isArray(in_objDef.dependsOn) ? in_objDef.dependsOn : [in_objDef.dependsOn])
+    : [];
+  const arrDependsValues = arrDependsOn.map((in_strField) => in_dicWatchValues?.[in_strField]);
+  // Clave estable para el arreglo de deps del effect (recarga al cambiar cualquiera).
+  const strDependsKey = arrDependsValues.map((in_genVal) => String(in_genVal ?? '')).join('|');
 
   useEffect(() => {
     if (!in_objDef) return;
 
-    // Si depende de otro campo y todavía no tiene valor, no cargar
-    if (in_objDef.dependsOn && !genDependsOnValue) {
+    // Si depende de otro(s) campo(s) y alguno todavía no tiene valor, no cargar (cascada).
+    if (arrDependsOn.length > 0 && arrDependsValues.some((in_genVal) => !in_genVal)) {
       setOptions([]);
+      setRawMap({});
       return;
     }
 
@@ -68,13 +75,20 @@ export function useCollection(
         const cllRecords: Record<string, unknown>[] = in_objResp.data?.data ?? [];
         console.log(`[useCollection] id=${in_objDef.id} → ${cllRecords.length} registros`);
         // Mapeamos cada registro a su value y label y descartamos los vacios
-        const cllMapped = cllRecords
+        let cllMapped = cllRecords
           .map((in_dicRec) => ({
             value: resolvePath(in_dicRec, in_objDef.valueField),
             label: resolvePath(in_dicRec, in_objDef.labelField),
             rec: in_dicRec,
           }))
           .filter((in_objOpt) => in_objOpt.value !== '' && in_objOpt.label !== '');
+        // `distinct`: una columna de una matriz (p. ej. `interaccion`) se repite en muchas
+        // filas; nos quedamos con la primera aparición de cada `value`.
+        if (in_objDef.distinct) {
+          const setSeen = new Set<string>();
+          cllMapped = cllMapped.filter((in_objOpt) =>
+            setSeen.has(in_objOpt.value) ? false : (setSeen.add(in_objOpt.value), true));
+        }
         setOptions(cllMapped.map(({ value, label }) => ({ value, label })));
         setRawMap(Object.fromEntries(cllMapped.map(({ value, rec }) => [value, rec])));
       })
@@ -85,7 +99,7 @@ export function useCollection(
       })
       .finally(() => setLoading(false));
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [in_objDef?.id, String(genDependsOnValue)]);
+  }, [in_objDef?.id, strDependsKey]);
 
   return { options, loading, rawMap };
 }

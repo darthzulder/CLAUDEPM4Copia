@@ -54,10 +54,13 @@ export const QD = {
 
   // ── SCR-000 · S3 Detalle de la Queja ──────────────────────────────────────
   strSfcProduct: 'qd_strSfcProduct',                   // FLD-323 · antes qd_productoSFC
+  strPlate: 'qd_strPlate',                             // Anexo02 #25 (nuevo) · placa del vehículo (solo producto = Autos)
   strProductDetail: 'qd_strProductDetail',             // FLD-324 · antes qd_detalleProducto (back)
   strReply: 'qd_strReply',                             // FLD-325 · antes qd_replica
   strReplyArgument: 'qd_strReplyArgument',             // FLD-326 · antes qd_argumentoReplica
   strOmbudsmanEscalation: 'qd_strOmbudsmanEscalation', // FLD-327 · antes qd_escalamientoDefensor
+  strInteraction: 'qd_strInteraction',                 // Anexo02 #30 (nuevo) · momento/interacción (cat_matriz_motivos.interaccion)
+  strServiceProvided: 'qd_strServiceProvided',         // Anexo02 #31 (nuevo) · servicio (cat_matriz_motivos.servicioPrestado; solo si momento = Asistencias)
   strSfcReason: 'qd_strSfcReason',                     // FLD-328 · antes qd_motivoSFC
   strComplaintText: 'qd_strComplaintText',             // FLD-329 · antes qd_textoQueja
   strAttach01: 'qd_strAttach01',                       // FLD-330 · antes qd_adjunto_01
@@ -239,10 +242,13 @@ export interface QdFields {
   qd_strLgbtiq: string;
   qd_strSpecialCondition: string;
   qd_strSfcProduct: string;
+  qd_strPlate: string;
   qd_strProductDetail: string;
   qd_strReply: string;
   qd_strReplyArgument: string;
   qd_strOmbudsmanEscalation: string;
+  qd_strInteraction: string;
+  qd_strServiceProvided: string;
   qd_strSfcReason: string;
   qd_strComplaintText: string;
   qd_strAttach01: string;
@@ -406,7 +412,11 @@ export const QD_COLLECTIONS = {
   lgbtiq: GLOBAL_COLLECTIONS.qd_lgbtiq,
   sfcProduct: GLOBAL_COLLECTIONS.qd_seguro,
   productDetail: GLOBAL_COLLECTIONS.qd_detalleProducto,
-  sfcReason: GLOBAL_COLLECTIONS.qd_motivo,
+  sfcReason: GLOBAL_COLLECTIONS.qd_motivo, // Legacy (id 17) — usado por SCR-002/0051/0052 en modo display.
+  // Cascada cat_matriz_motivos (id 45) para SCR-000: momento → servicio → motivo.
+  matrixInteraction: GLOBAL_COLLECTIONS.qd_matrizInteraccion,
+  matrixService: GLOBAL_COLLECTIONS.qd_matrizServicio,
+  matrixReason: GLOBAL_COLLECTIONS.qd_matrizMotivo,
   admission: GLOBAL_COLLECTIONS.qd_admision,
   sex: GLOBAL_COLLECTIONS.qd_sexo,
   controlEntity: GLOBAL_COLLECTIONS.qd_ente,
@@ -477,9 +487,10 @@ export type CrearRecibirQuejaFormData = Pick<QdFields,
   | typeof QD.strCompanyName | typeof QD.strContactFirstName | typeof QD.strContactLastName
   | typeof QD.strPhone | typeof QD.strEmail | typeof QD.strPersonType | typeof QD.strCountryCode
   | typeof QD.strDepartment | typeof QD.strCity | typeof QD.strAddress | typeof QD.strSex
-  | typeof QD.strLgbtiq | typeof QD.strSpecialCondition | typeof QD.strSfcProduct
+  | typeof QD.strLgbtiq | typeof QD.strSpecialCondition | typeof QD.strSfcProduct | typeof QD.strPlate
   | typeof QD.strProductDetail | typeof QD.strReply | typeof QD.strReplyArgument
-  | typeof QD.strOmbudsmanEscalation | typeof QD.strSfcReason | typeof QD.strComplaintText
+  | typeof QD.strOmbudsmanEscalation | typeof QD.strInteraction | typeof QD.strServiceProvided
+  | typeof QD.strSfcReason | typeof QD.strComplaintText
   | typeof QD.strAttach01 | typeof QD.strAttach02 | typeof QD.strAttach03 | typeof QD.strAttach04 | typeof QD.strAttach05
   | typeof QD.strAdmission | typeof QD.strControlEntity | typeof QD.strTutela | typeof QD.strExpressComplaint
   | typeof QD.blnDataAuth | typeof QD.blnCaptcha | typeof QD.strCcEmail
@@ -490,6 +501,9 @@ export const SCR000_DEFAULTS = {
   ...QD_GLOBAL_DEFAULTS,
   [QD.strCountryCode]: DEFAULT_COUNTRY_CODE, // RUL-000-10
   [QD.strReply]: 'NO',
+  [QD.strPlate]: '',          // Anexo02 #25 — solo se llena si producto = Autos
+  [QD.strInteraction]: '',    // Anexo02 #30 — cascada cat_matriz_motivos
+  [QD.strServiceProvided]: '', // Anexo02 #31 — cascada cat_matriz_motivos (Asistencias)
 } as const;
 
 // ═══════════════════════════════════════════════════════════════════════════

@@ -315,4 +315,46 @@ export const GLOBAL_COLLECTIONS = {
     labelField: 'data.alianza',
     valueField: 'data.codigo',
   } satisfies CollectionDef,
+
+  // ── cat_matriz_motivos (id 45) — matriz de cascada de SCR-000 ────────────────
+  // Una sola colección con la cadena de dependencia:
+  //   tipoSolicitud → productoZurich → interaccion (momento) → servicioPrestado
+  //   (servicio) → motivo.
+  // Cada dropdown lee UNA columna distinta de la MISMA colección, filtrando por lo
+  // ya elegido aguas arriba (PMQL con varios placeholders) y deduplicando (`distinct`),
+  // porque la columna se repite en muchas filas de la matriz.
+  // Columnas confirmadas (camelCase, bajo data.*): tipoSolicitud, productoZurich,
+  // interaccion, servicioPrestado, motivo.
+  qd_matrizInteraccion: {
+    id: 45,
+    labelField: 'data.interaccion',
+    valueField: 'data.interaccion',
+    distinct: true,
+    dependsOn: ['qd_strRequestType', 'qd_strSfcProduct'],
+    pmqlTemplate:
+      'data.tipoSolicitud = "{{qd_strRequestType}}" AND data.productoZurich = "{{qd_strSfcProduct}}"',
+  } satisfies CollectionDef,
+
+  qd_matrizServicio: {
+    id: 45,
+    labelField: 'data.servicioPrestado',
+    valueField: 'data.servicioPrestado',
+    distinct: true,
+    dependsOn: ['qd_strRequestType', 'qd_strSfcProduct', 'qd_strInteraction'],
+    pmqlTemplate:
+      'data.tipoSolicitud = "{{qd_strRequestType}}" AND data.productoZurich = "{{qd_strSfcProduct}}" AND data.interaccion = "{{qd_strInteraction}}"',
+  } satisfies CollectionDef,
+
+  // El servicio solo aplica cuando interaccion = "Asistencias"; para el resto de
+  // momentos `qd_strServiceProvided` va vacío y el filtro resuelve a "" (las filas
+  // no-Asistencias de la matriz deben traer servicioPrestado vacío).
+  qd_matrizMotivo: {
+    id: 45,
+    labelField: 'data.motivo',
+    valueField: 'data.motivo',
+    distinct: true,
+    dependsOn: ['qd_strRequestType', 'qd_strSfcProduct', 'qd_strInteraction', 'qd_strServiceProvided'],
+    pmqlTemplate:
+      'data.tipoSolicitud = "{{qd_strRequestType}}" AND data.productoZurich = "{{qd_strSfcProduct}}" AND data.interaccion = "{{qd_strInteraction}}" AND data.servicioPrestado = "{{qd_strServiceProvided}}"',
+  } satisfies CollectionDef,
 } as const;
