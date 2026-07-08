@@ -13,6 +13,7 @@ LocalFiles/
 #graph.html
 #GRAPH_REPORT.md
 #.graphify/
+graphify-out/cache/
 
 # Node/JavaScript/TypeScript
 node_modules/
