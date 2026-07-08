@@ -4,7 +4,11 @@ import { useTask } from '../../../../core/useTask';
 import FormSection from '../../../../components/FormSection';
 import { ZdsInput, ZdsSelect, ZdsDate, ZdsRadio, ZdsFileInput, ZrButton, ZrAlert } from '../../../../components/fields/ZdsFields';
 import { useCollection } from '../../../../core/useCollection';
-import { OPTIONS, COLLECTION_DEFS, REGEX_NOMENCLATURA_PDF, CierreM3FormData } from './variables';
+import {
+  QD, QD_COLLECTIONS, OPTIONS_SI_NO,
+  SCR010_REGEX_NOMENCLATURA_PDF as REGEX_NOMENCLATURA_PDF,
+} from '../campos/fields';
+import type { CierreM3FormData } from '../campos/fields';
 import SeccionEstadoCierre from './SeccionEstadoCierre';
 import zurichLogo from '../../../../resources/zurich/ZurichLogo_Horz_White_CMYK_no_R.png';
 import pm4 from '../../../../api/pm4Client';
@@ -17,23 +21,23 @@ export default function CierreM3() {
   // Inicializamos el formulario con los valores por defecto
   const { control, watch, handleSubmit, reset, setValue, setError, clearErrors, formState: { errors, isSubmitted } } = useForm<CierreM3FormData>({
     defaultValues: {
-      qd_estadoCierreM3: '', qd_intentosCierreM3: '0', qd_ultimoError: '',
-      qd_codigoSFC: '', qd_estadoQueja: '', qd_fechaActualizacion: '', qd_fechaCierre: '',
-      qd_favorabilidad: '', qd_aceptacion: '', qd_marcacion: '', qd_quejaExpres: '',
-      qd_pdfRespuestaFinal: '', qd_validacionNomenclatura: '', qd_adjuntoRespuestaFinal: '',
-      qd_relacionadaFraude: '', qd_tipoFraude: '', qd_montoReclamado: '', qd_montoReconocido: '',
+      [QD.strM3ClosureStatus]: '', [QD.strM3ClosureAttempts]: '0', [QD.strLastError]: '',
+      [QD.strSfcCode]: '', [QD.strComplaintStatus]: '', [QD.strUpdateDate]: '', [QD.strClosureDate]: '',
+      [QD.strFavorability]: '', [QD.strAcceptance]: '', [QD.strMarking]: '', [QD.strExpressComplaint]: '',
+      [QD.strFinalReplyPdf]: '', [QD.strNamingValidation]: '', [QD.strFinalReplyAttach]: '',
+      [QD.strFraudRelated]: '', [QD.strFraudType]: '', [QD.strClaimedAmount]: '', [QD.strAcknowledgedAmount]: '',
     },
   });
 
   const objWatch = watch();
 
   // Cargamos los catalogos de las listas desplegables
-  const { options: cllComplaintStatus } = useCollection(COLLECTION_DEFS.estadoQueja);
-  const { options: cllFavorability } = useCollection(COLLECTION_DEFS.favorabilidad);
-  const { options: cllAcceptance } = useCollection(COLLECTION_DEFS.aceptacion);
-  const { options: cllMarking } = useCollection(COLLECTION_DEFS.marcacion);
-  const { options: cllExpressComplaint } = useCollection(COLLECTION_DEFS.quejaExpres);
-  const { options: cllFraudType } = useCollection(COLLECTION_DEFS.tipoFraude);
+  const { options: cllComplaintStatus } = useCollection(QD_COLLECTIONS.complaintStatus);
+  const { options: cllFavorability } = useCollection(QD_COLLECTIONS.favorability);
+  const { options: cllAcceptance } = useCollection(QD_COLLECTIONS.acceptance);
+  const { options: cllMarking } = useCollection(QD_COLLECTIONS.marking);
+  const { options: cllExpressComplaint } = useCollection(QD_COLLECTIONS.expressComplaint);
+  const { options: cllFraudType } = useCollection(QD_COLLECTIONS.fraudType);
 
   // Pre-poblamos el formulario con los datos del caso
   useEffect(() => {
@@ -41,18 +45,18 @@ export default function CierreM3() {
   }, [task, reset]);
 
   // RUL-010-01: fechaActualizacion debe coincidir con fechaCierre
-  const blnDatesMatch = !objWatch.qd_fechaActualizacion || !objWatch.qd_fechaCierre || objWatch.qd_fechaActualizacion === objWatch.qd_fechaCierre;
+  const blnDatesMatch = !objWatch[QD.strUpdateDate] || !objWatch[QD.strClosureDate] || objWatch[QD.strUpdateDate] === objWatch[QD.strClosureDate];
   // RUL-010-02: PDF con nomenclatura correcta si se adjunta
-  const blnPdfValid = !objWatch.qd_pdfRespuestaFinal || REGEX_NOMENCLATURA_PDF.test(objWatch.qd_pdfRespuestaFinal);
+  const blnPdfValid = !objWatch[QD.strFinalReplyPdf] || REGEX_NOMENCLATURA_PDF.test(objWatch[QD.strFinalReplyPdf]);
   // RUL-010-03: todos los obligatorios completos + reglas anteriores
   const arrRequiredFields: (keyof CierreM3FormData)[] = [
-    'qd_codigoSFC', 'qd_estadoQueja', 'qd_fechaActualizacion', 'qd_fechaCierre',
-    'qd_favorabilidad', 'qd_aceptacion', 'qd_marcacion', 'qd_quejaExpres', 'qd_adjuntoRespuestaFinal',
+    QD.strSfcCode, QD.strComplaintStatus, QD.strUpdateDate, QD.strClosureDate,
+    QD.strFavorability, QD.strAcceptance, QD.strMarking, QD.strExpressComplaint, QD.strFinalReplyAttach,
   ];
   const blnAllComplete = arrRequiredFields.every(strField => !!objWatch[strField]);
   const blnCanSubmit = blnDatesMatch && blnPdfValid && blnAllComplete;
 
-  const blnRejected = objWatch.qd_estadoCierreM3 === 'Rechazado (400)';
+  const blnRejected = objWatch[QD.strM3ClosureStatus] === 'Rechazado (400)';
 
   const err = (in_strField: keyof CierreM3FormData) => {
     // Ocultamos el error de requerido hasta que se intente enviar
@@ -115,18 +119,18 @@ export default function CierreM3() {
         {/* Sección 1 — Estado del envío a SFC */}
         <FormSection title="Estado del Envío a SmartSupervision (SFC)">
           <SeccionEstadoCierre
-            estadoCierreM3={objWatch.qd_estadoCierreM3}
-            intentosCierreM3={objWatch.qd_intentosCierreM3}
-            ultimoError={objWatch.qd_ultimoError}
+            estadoCierreM3={objWatch[QD.strM3ClosureStatus]}
+            intentosCierreM3={objWatch[QD.strM3ClosureAttempts]}
+            ultimoError={objWatch[QD.strLastError]}
           />
           <div className="form-row cols-1">
             <ZdsInput
-              name="qd_codigoSFC"
+              name={QD.strSfcCode}
               control={control}
               label="Código SFC / Número de Radicado"
               rules={{ required: 'Campo requerido', maxLength: { value: 100, message: 'Máximo 100 caracteres' } }}
               required
-              error={err('qd_codigoSFC')}
+              error={err(QD.strSfcCode)}
             />
           </div>
           {blnRejected && (
@@ -140,32 +144,32 @@ export default function CierreM3() {
         <FormSection title="Datos de Cierre Regulatorio">
           <div className="form-row cols-1">
             <ZdsSelect
-              name="qd_estadoQueja"
+              name={QD.strComplaintStatus}
               control={control}
               label="Estado de la Queja"
               options={cllComplaintStatus}
               rules={{ required: 'Campo requerido' }}
               required
-              error={err('qd_estadoQueja')}
+              error={err(QD.strComplaintStatus)}
             />
           </div>
 
           <div className="form-row cols-2">
             <ZdsDate
-              name="qd_fechaActualizacion"
+              name={QD.strUpdateDate}
               control={control}
               label="Fecha de Actualización"
               rules={{ required: 'Campo requerido' }}
               required
-              error={err('qd_fechaActualizacion')}
+              error={err(QD.strUpdateDate)}
             />
             <ZdsDate
-              name="qd_fechaCierre"
+              name={QD.strClosureDate}
               control={control}
               label="Fecha de Cierre"
               rules={{ required: 'Campo requerido' }}
               required
-              error={err('qd_fechaCierre')}
+              error={err(QD.strClosureDate)}
             />
           </div>
 
@@ -177,43 +181,43 @@ export default function CierreM3() {
 
           <div className="form-row cols-2">
             <ZdsSelect
-              name="qd_favorabilidad"
+              name={QD.strFavorability}
               control={control}
               label="Favorabilidad"
               options={cllFavorability}
               rules={{ required: 'Campo requerido' }}
               required
-              error={err('qd_favorabilidad')}
+              error={err(QD.strFavorability)}
             />
             <ZdsSelect
-              name="qd_aceptacion"
+              name={QD.strAcceptance}
               control={control}
               label="Aceptación"
               options={cllAcceptance}
               rules={{ required: 'Campo requerido' }}
               required
-              error={err('qd_aceptacion')}
+              error={err(QD.strAcceptance)}
             />
           </div>
 
           <div className="form-row cols-2">
             <ZdsSelect
-              name="qd_marcacion"
+              name={QD.strMarking}
               control={control}
               label="Marcación"
               options={cllMarking}
               rules={{ required: 'Campo requerido' }}
               required
-              error={err('qd_marcacion')}
+              error={err(QD.strMarking)}
             />
             <ZdsSelect
-              name="qd_quejaExpres"
+              name={QD.strExpressComplaint}
               control={control}
               label="Queja Exprés"
               options={cllExpressComplaint}
               rules={{ required: 'Campo requerido' }}
               required
-              error={err('qd_quejaExpres')}
+              error={err(QD.strExpressComplaint)}
             />
           </div>
         </FormSection>
@@ -222,21 +226,21 @@ export default function CierreM3() {
         <FormSection title="Adjunto Respuesta Final al Consumidor">
           <div className="form-row cols-1">
             <ZdsRadio
-              name="qd_adjuntoRespuestaFinal"
+              name={QD.strFinalReplyAttach}
               control={control}
               label="¿Se adjunta PDF de respuesta final?"
-              options={OPTIONS.adjuntoRespuestaFinal}
+              options={OPTIONS_SI_NO}
               rules={{ required: 'Campo requerido' }}
               required
-              error={err('qd_adjuntoRespuestaFinal')}
+              error={err(QD.strFinalReplyAttach)}
             />
           </div>
 
-          {objWatch.qd_adjuntoRespuestaFinal === 'SI' && (
+          {objWatch[QD.strFinalReplyAttach] === 'SI' && (
             <div className="form-row cols-1">
               <ZdsFileInput
                 control={control}
-                name="qd_pdfRespuestaFinal"
+                name={QD.strFinalReplyPdf}
                 label="PDF Respuesta Final"
                 fileRegistry={dicFileRegistry}
                 setValue={setValue}
@@ -246,10 +250,10 @@ export default function CierreM3() {
                 maxSizeMb={5}
                 errorMessage="Solo se permiten archivos PDF, máx 5 MB"
               />
-              {objWatch.qd_pdfRespuestaFinal && (
+              {objWatch[QD.strFinalReplyPdf] && (
                 <p className={`cierre-m3--form-helper ${blnPdfValid ? 'cierre-m3--validacion-ok' : 'cierre-m3--validacion-error'}`}>
                   {blnPdfValid
-                    ? `✓ Nomenclatura correcta: ${objWatch.qd_pdfRespuestaFinal}`
+                    ? `✓ Nomenclatura correcta: ${objWatch[QD.strFinalReplyPdf]}`
                     : `✗ Nomenclatura inválida. Formato esperado: ENTIDAD_NRO_RESP_FINAL_SFC_NNNNN.pdf`}
                 </p>
               )}
@@ -261,42 +265,42 @@ export default function CierreM3() {
         <FormSection title="Datos de Fraude">
           <div className="form-row cols-1">
             <ZdsRadio
-              name="qd_relacionadaFraude"
+              name={QD.strFraudRelated}
               control={control}
               label="¿Queja relacionada con fraude?"
-              options={OPTIONS.siNo}
-              error={err('qd_relacionadaFraude')}
+              options={OPTIONS_SI_NO}
+              error={err(QD.strFraudRelated)}
             />
           </div>
 
-          {objWatch.qd_relacionadaFraude === 'SI' && (
+          {objWatch[QD.strFraudRelated] === 'SI' && (
             <>
               <div className="form-row cols-1">
                 <ZdsSelect
-                  name="qd_tipoFraude"
+                  name={QD.strFraudType}
                   control={control}
                   label="Tipo de Fraude"
                   options={cllFraudType}
                   rules={{ required: 'Campo requerido' }}
                   required
-                  error={err('qd_tipoFraude')}
+                  error={err(QD.strFraudType)}
                 />
               </div>
               <div className="form-row cols-2">
                 <ZdsInput
-                  name="qd_montoReclamado"
+                  name={QD.strClaimedAmount}
                   control={control}
                   label="Monto Reclamado (COP)"
                   rules={{ required: 'Campo requerido', pattern: { value: /^\d+(\.\d{1,2})?$/, message: 'Solo números (ej: 1500000)' } }}
                   required
-                  error={err('qd_montoReclamado')}
+                  error={err(QD.strClaimedAmount)}
                 />
                 <ZdsInput
-                  name="qd_montoReconocido"
+                  name={QD.strAcknowledgedAmount}
                   control={control}
                   label="Monto Reconocido (COP)"
                   rules={{ pattern: { value: /^\d+(\.\d{1,2})?$/, message: 'Solo números (ej: 1500000)' } }}
-                  error={err('qd_montoReconocido')}
+                  error={err(QD.strAcknowledgedAmount)}
                 />
               </div>
             </>

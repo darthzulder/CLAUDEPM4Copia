@@ -10,11 +10,9 @@ import {
   ZrButton, ZrAlert, ZrLoader,
 } from '../../../../components/fields/ZdsFields';
 import pm4 from '../../../../api/pm4Client';
-import {
-  DEFAULTS, ADJUNTO_KEY, MAX_ADJUNTO_MB, COLLECTION_DEFS,
-  type RespuestaAreaResponsableFormData, type AccionRespuestaArea, type RespuestaAyuda,
-} from './variables';
-import type { AsignacionHistorial } from '../COL_QD_SCR-0051_Detalle_Reasignacion_Respuesta/variables';
+import { QD, QD_COLLECTIONS, SCR0052_DEFAULTS as DEFAULTS, SCR0052_MAX_ADJUNTO_MB as MAX_ADJUNTO_MB } from '../campos/fields';
+import type { RespuestaAreaResponsableFormData, AccionRespuestaArea } from '../campos/fields';
+import type { AsignacionHistorial, RespuestaAyuda } from '../campos/types';
 
 export default function RespuestaAreaResponsable() {
   const { task, loading, error, submitting, completeTask } = useTask();
@@ -40,33 +38,33 @@ export default function RespuestaAreaResponsable() {
   };
 
   // RUL-0052-01 (🔴 BLOQUEA): el comentario es obligatorio para enviar.
-  const blnCanSubmit = !!objWatch.qd_comentarioArea?.trim();
+  const blnCanSubmit = !!objWatch[QD.strAreaComment]?.trim();
 
   // Datos del consumidor derivados de los campos granulares producidos por SCR-000.
-  const strName = (objWatch.qd_razonSocial || `${objWatch.qd_nombres ?? ''} ${objWatch.qd_apellidos ?? ''}`).trim();
-  const strIdentification = `${objWatch.qd_tipoIdentificacion ?? ''} ${objWatch.qd_numeroIdentificacion ?? ''}`.trim();
+  const strName = (objWatch[QD.strCompanyName] || `${objWatch[QD.strFirstName] ?? ''} ${objWatch[QD.strLastName] ?? ''}`).trim();
+  const strIdentification = `${objWatch[QD.strIdType] ?? ''} ${objWatch[QD.strIdNumber] ?? ''}`.trim();
 
   // Solicitud de ayuda específica (fila del historial que originó este subproceso, SCR-0051).
-  // Se matchea por qd_numeroAyuda (1-based) → índice del historial.
-  const intHelpNumber = Number(objWatch.qd_numeroAyuda) || 0;
-  const lstHistory: AsignacionHistorial[] = Array.isArray(objWatch.qd_historialAsignaciones) ? objWatch.qd_historialAsignaciones : [];
+  // Se matchea por qd_intHelpNumber (1-based) → índice del historial.
+  const intHelpNumber = Number(objWatch[QD.intHelpNumber]) || 0;
+  const lstHistory: AsignacionHistorial[] = Array.isArray(objWatch[QD.lstAssignHistory]) ? objWatch[QD.lstAssignHistory] : [];
   const objRequest = lstHistory[intHelpNumber - 1];
 
   // Estos campos guardan el CÓDIGO en PM4; resolvemos su descripción vía catálogo para mostrar.
-  const { options: cllChannel } = useCollection(COLLECTION_DEFS.canal);
-  const { options: cllProduct } = useCollection(COLLECTION_DEFS.producto);
-  const { options: cllReason } = useCollection(COLLECTION_DEFS.motivo);
-  const { options: cllAdmission } = useCollection(COLLECTION_DEFS.admision);
+  const { options: cllChannel } = useCollection(QD_COLLECTIONS.channel);
+  const { options: cllProduct } = useCollection(QD_COLLECTIONS.sfcProduct);
+  const { options: cllReason } = useCollection(QD_COLLECTIONS.sfcReason);
+  const { options: cllAdmission } = useCollection(QD_COLLECTIONS.admission);
 
   // Resuelve la descripción de un código contra su catálogo.
   const desc = (in_lstOptions: { value: string; label: string }[], in_strCode: string | undefined): string => {
     if (!in_strCode) return '—';
     return in_lstOptions.find((o) => o.value === in_strCode)?.label ?? in_strCode;
   };
-  const strChannelDesc = desc(cllChannel, objWatch.qd_canal);
-  const strProductDesc = desc(cllProduct, objWatch.qd_productoSFC);
-  const strReasonDesc = desc(cllReason, objWatch.qd_motivoSFC);
-  const strAdmissionDesc = desc(cllAdmission, objWatch.qd_admision);
+  const strChannelDesc = desc(cllChannel, objWatch[QD.strChannel]);
+  const strProductDesc = desc(cllProduct, objWatch[QD.strSfcProduct]);
+  const strReasonDesc = desc(cllReason, objWatch[QD.strSfcReason]);
+  const strAdmissionDesc = desc(cllAdmission, objWatch[QD.strAdmission]);
 
   // Sube cada archivo y devuelve un mapa docKey → file_id (fileUploadId de PM4),
   // para poder guardar el id del adjunto en el historial y descargarlo luego.
@@ -82,26 +80,26 @@ export default function RespuestaAreaResponsable() {
     return dicIds;
   };
 
-  // Registra la respuesta del ayudante en el array diferenciado (qd_respuestasAyuda) y
-  // completa la fila correspondiente del historial (qd_historialAsignaciones), matcheando
-  // por qd_numeroAyuda (1-based) → índice del array. Solo se aplica al ENVIAR definitivo.
+  // Registra la respuesta del ayudante en el array diferenciado (qd_lstHelpResponses) y
+  // completa la fila correspondiente del historial (qd_lstAssignHistory), matcheando
+  // por qd_intHelpNumber (1-based) → índice del array. Solo se aplica al ENVIAR definitivo.
   //
   // IMPORTANTE: este subproceso arrancó con un SNAPSHOT del historial del momento en que se
   // pidió la ayuda. Si después se pidieron más ayudas, ese snapshot está desactualizado y
   // escribirlo de vuelta borraría las ayudas posteriores. Por eso releemos el estado FRESCO
   // del request padre y fusionamos la respuesta sobre esa versión antes de guardar.
   const registrarRespuesta = async (in_objData: RespuestaAreaResponsableFormData, in_intAttachFileId?: number) => {
-    const intNumber = Number(in_objData.qd_numeroAyuda) || 0;
+    const intNumber = Number(in_objData[QD.intHelpNumber]) || 0;
     const intIndex = intNumber - 1;
-    const strResponder = in_objData.qd_usuarioResponsable || in_objData.qd_areaResponsable || '—';
+    const strResponder = in_objData[QD.strAssigneeUser] || in_objData[QD.strAssigneeArea] || '—';
     const strDate = new Date().toISOString().slice(0, 10);
-    const strAttachment = in_objData.qd_adjuntoArea || '';
+    const strAttachment = in_objData[QD.strAreaAttach] || '';
 
     // Partimos del snapshot local como fallback.
-    let lstAssignHistory: AsignacionHistorial[] = Array.isArray(in_objData.qd_historialAsignaciones)
-      ? [...in_objData.qd_historialAsignaciones] : [];
-    let lstResponses: RespuestaAyuda[] = Array.isArray(in_objData.qd_respuestasAyuda)
-      ? [...in_objData.qd_respuestasAyuda] : [];
+    let lstAssignHistory: AsignacionHistorial[] = Array.isArray(in_objData[QD.lstAssignHistory])
+      ? [...in_objData[QD.lstAssignHistory]] : [];
+    let lstResponses: RespuestaAyuda[] = Array.isArray(in_objData[QD.lstHelpResponses])
+      ? [...in_objData[QD.lstHelpResponses]] : [];
 
     // Releer el request padre para tener el historial completo y actualizado.
     const objParentData = task?.data as Record<string, unknown> | undefined;
@@ -113,8 +111,10 @@ export default function RespuestaAreaResponsable() {
         // include=data es obligatorio: sin él PM4 no devuelve las variables del caso.
         const objResponse = await pm4.get(`/requests/${intParentRequestId}`, { params: { include: 'data' } });
         const objFresh = (objResponse.data?.data ?? objResponse.data ?? {}) as Record<string, unknown>;
-        if (Array.isArray(objFresh.qd_historialAsignaciones)) lstAssignHistory = [...objFresh.qd_historialAsignaciones];
-        if (Array.isArray(objFresh.qd_respuestasAyuda)) lstResponses = [...objFresh.qd_respuestasAyuda];
+        const genFreshHistory = objFresh[QD.lstAssignHistory];
+        const genFreshResponses = objFresh[QD.lstHelpResponses];
+        if (Array.isArray(genFreshHistory)) lstAssignHistory = [...genFreshHistory];
+        if (Array.isArray(genFreshResponses)) lstResponses = [...genFreshResponses];
         console.log(`[RespuestaAreaResponsable] Historial padre (req ${intParentRequestId}): ${lstAssignHistory.length} filas`, lstAssignHistory);
       } catch (exc) {
         console.warn('[RespuestaAreaResponsable] No se pudo leer el request padre; se usa el snapshot local:', exc);
@@ -126,18 +126,18 @@ export default function RespuestaAreaResponsable() {
       lstAssignHistory[intIndex] = {
         ...lstAssignHistory[intIndex],
         respondio: 'si', // marca que el ayudante ya respondió (SCR-0051 lo pinta con un check verde)
-        comentario: in_objData.qd_comentarioArea,
+        comentario: in_objData[QD.strAreaComment],
         adjunto: strAttachment, // nombre real del archivo ('' si no adjuntó) → SCR-0051 lo enlaza para descarga
         adjuntoFileId: in_intAttachFileId, // file_id en PM4 para descarga exacta
       };
     }
 
     // Registramos la respuesta en el array diferenciado por número de ayuda.
-    const objNewResponse: RespuestaAyuda = { numero: intNumber, fecha: strDate, respondio: strResponder, comentario: in_objData.qd_comentarioArea, adjunto: strAttachment, adjuntoFileId: in_intAttachFileId };
+    const objNewResponse: RespuestaAyuda = { numero: intNumber, fecha: strDate, respondio: strResponder, comentario: in_objData[QD.strAreaComment], adjunto: strAttachment, adjuntoFileId: in_intAttachFileId };
     if (intIndex >= 0) lstResponses[intIndex] = objNewResponse;
     else lstResponses.push(objNewResponse);
 
-    return { qd_historialAsignaciones: lstAssignHistory, qd_respuestasAyuda: lstResponses };
+    return { [QD.lstAssignHistory]: lstAssignHistory, [QD.lstHelpResponses]: lstResponses };
   };
 
   // Sube adjuntos, registra la respuesta si aplica y completa la tarea.
@@ -147,8 +147,8 @@ export default function RespuestaAreaResponsable() {
       const intRequestId = task?.process_request_id;
       let dicUploadedIds: Record<string, number> = {};
       if (intRequestId && fileRegistry.current.size > 0) dicUploadedIds = await uploadFiles(intRequestId);
-      const objExtra = in_strAction === 'ENVIAR' ? await registrarRespuesta(in_objData, dicUploadedIds[ADJUNTO_KEY]) : {};
-      await completeTask({ ...in_objData, ...objExtra, qd_accion: in_strAction } as unknown as Record<string, unknown>);
+      const objExtra = in_strAction === 'ENVIAR' ? await registrarRespuesta(in_objData, dicUploadedIds[QD.strAreaAttach]) : {};
+      await completeTask({ ...in_objData, ...objExtra, [QD.strAction]: in_strAction } as unknown as Record<string, unknown>);
       return true;
     } catch (exc) {
       // No tragar el error: si la tarea no se completa, PM4 no cierra el iframe.
@@ -205,9 +205,9 @@ export default function RespuestaAreaResponsable() {
               </div>
             </div>
             <div className="form-row cols-2">
-              <ZdsInput name="qd_correoElectronico" control={control} label="Correo Electrónico" readOnly
+              <ZdsInput name={QD.strEmail} control={control} label="Correo Electrónico" readOnly
                 helpText="Destino del correo de respuesta final." />
-              <ZdsInput name="qd_tipoPersona" control={control} label="Tipo de Persona" readOnly />
+              <ZdsInput name={QD.strPersonType} control={control} label="Tipo de Persona" readOnly />
             </div>
           </FormSection>
 
@@ -229,12 +229,12 @@ export default function RespuestaAreaResponsable() {
               </div>
             </div>
             <div className="form-row cols-3">
-              <ZdsInput name="qd_instanciaRecepcion" control={control} label="Instancia de Recepción" readOnly />
+              <ZdsInput name={QD.strReceptionInstance} control={control} label="Instancia de Recepción" readOnly />
               <div className="zds-field-wrap">
                 <span className="info-bar-label">Admisión</span>
                 <div className="info-bar-value" style={{ marginTop: 'var(--zs-50)' }}>{strAdmissionDesc}</div>
               </div>
-              <ZdsInput name="qd_enteControl" control={control} label="Ente de Control" readOnly />
+              <ZdsInput name={QD.strControlEntity} control={control} label="Ente de Control" readOnly />
             </div>
           </FormSection>
 
@@ -247,7 +247,7 @@ export default function RespuestaAreaResponsable() {
               </div>
             </div>
             <div className="form-row cols-1">
-              <ZdsTextarea name="qd_textoQueja" control={control} label="Descripción / Texto de la Queja" readOnly />
+              <ZdsTextarea name={QD.strComplaintText} control={control} label="Descripción / Texto de la Queja" readOnly />
             </div>
           </FormSection>
 
@@ -283,18 +283,18 @@ export default function RespuestaAreaResponsable() {
           <FormSection title="Comentario y Adjunto">
             <div className="form-row cols-1">
               <ZdsTextarea
-                name="qd_comentarioArea" control={control} label="Comentario"
+                name={QD.strAreaComment} control={control} label="Comentario"
                 required maxLength={2000}
-                rules={{ required: 'Campo requerido' }} error={err('qd_comentarioArea')}
+                rules={{ required: 'Campo requerido' }} error={err(QD.strAreaComment)}
                 helpText="Comentario visible en el historial del caso."
               />
             </div>
             <div className="form-row cols-1">
               <ZdsFileInput
-                control={control} name={ADJUNTO_KEY} label="Adjuntar archivo"
+                control={control} name={QD.strAreaAttach} label="Adjuntar archivo"
                 fileRegistry={fileRegistry}
                 setValue={setValue} setError={setError} clearErrors={clearErrors}
-                error={err('qd_adjuntoArea')}
+                error={err(QD.strAreaAttach)}
                 allowedExtensions={['pdf', 'doc', 'docx', 'xls', 'xlsx', 'jpg', 'jpeg', 'png']}
                 maxSizeMb={MAX_ADJUNTO_MB}
                 errorMessage={`Solo se permiten archivos PDF, DOCX, XLSX, JPG o PNG, máx ${MAX_ADJUNTO_MB} MB`}

@@ -6,10 +6,8 @@ import InfoBar from '../../../../components/InfoBar';
 import { ActionBar } from '../../../../components/ActionBar';
 import { ZrButton, ZrAlert, ZrModal, ZrLoader, ZdsStatusBadge } from '../../../../components/fields/ZdsFields';
 import pm4 from '../../../../api/pm4Client';
-import {
-  DEFAULTS, SLA_UMBRAL_PRORROGA,
-  type DetalleReasignacionRespuestaFormData, type AccionFlujoCombinado,
-} from './variables';
+import { QD, SCR0051_DEFAULTS as DEFAULTS, SCR0051_SLA_UMBRAL_PRORROGA as SLA_UMBRAL_PRORROGA } from '../campos/fields';
+import type { DetalleReasignacionRespuestaFormData, AccionFlujoCombinado } from '../campos/fields';
 import SeccionDetalleCaso, { estadoVariant } from './SeccionDetalleCaso';
 import SeccionAsignacion from './SeccionAsignacion';
 import SeccionRespuesta from './SeccionRespuesta';
@@ -38,12 +36,12 @@ export default function DetalleReasignacionRespuesta() {
   };
 
   // RUL-0051-03 — SLA crítico: habilita prórroga y banner rojo si slaRestante <= 2.
-  const intSla = Number.parseInt(objWatch.qd_slaRestante ?? '', 10);
+  const intSla = Number.parseInt(objWatch[QD.strSlaRemaining] ?? '', 10);
   const blnSlaCritical = Number.isFinite(intSla) && intSla <= SLA_UMBRAL_PRORROGA;
 
   // Datos del consumidor derivados de los campos granulares producidos por SCR-000.
-  const strName = (objWatch.qd_razonSocial || `${objWatch.qd_nombres ?? ''} ${objWatch.qd_apellidos ?? ''}`).trim();
-  const strIdentification = `${objWatch.qd_tipoIdentificacion ?? ''} ${objWatch.qd_numeroIdentificacion ?? ''}`.trim();
+  const strName = (objWatch[QD.strCompanyName] || `${objWatch[QD.strFirstName] ?? ''} ${objWatch[QD.strLastName] ?? ''}`).trim();
+  const strIdentification = `${objWatch[QD.strIdType] ?? ''} ${objWatch[QD.strIdNumber] ?? ''}`.trim();
 
   // Recorremos el registro de archivos para subir cada adjunto a PM4.
   const uploadFiles = async (in_intRequestId: number) => {
@@ -59,7 +57,7 @@ export default function DetalleReasignacionRespuesta() {
     try {
       const intRequestId = task?.process_request_id;
       if (intRequestId && fileRegistry.current.size > 0) await uploadFiles(intRequestId);
-      await completeTask({ ...in_objData, qd_accion: in_strAction } as unknown as Record<string, unknown>);
+      await completeTask({ ...in_objData, [QD.strAction]: in_strAction } as unknown as Record<string, unknown>);
     } catch (exc) {
       console.error('[DetalleReasignacionRespuesta] Error al enviar:', exc);
     }
@@ -92,7 +90,7 @@ export default function DetalleReasignacionRespuesta() {
   }
 
   // Habilita el envío solo con respuesta al cliente y destinatario del fallo definidos.
-  const blnCanSubmit = !!objWatch.qd_respuestaCliente?.trim() && !!objWatch.qd_respuestaFavorDe;
+  const blnCanSubmit = !!objWatch[QD.strClientResponse]?.trim() && !!objWatch[QD.strReplyFavorOf];
 
   return (
     <div className="screen-wrapper">
@@ -103,29 +101,29 @@ export default function DetalleReasignacionRespuesta() {
 
       <div className="screen-content">
         <InfoBar items={[
-          { label: 'Case', value: objWatch.qd_idCasoBPM || '—' },
-          { label: 'SLA', value: objWatch.qd_slaRestante ? `${objWatch.qd_slaRestante} días hábiles` : '—' },
+          { label: 'Case', value: objWatch[QD.strBpmCaseId] || '—' },
+          { label: 'SLA', value: objWatch[QD.strSlaRemaining] ? `${objWatch[QD.strSlaRemaining]} días hábiles` : '—' },
           {
             label: 'Estado',
             value: (
-              <ZdsStatusBadge variant={estadoVariant(objWatch.qd_estadoSS || '')}>
-                {objWatch.qd_estadoSS || 'Sin estado'}
+              <ZdsStatusBadge variant={estadoVariant(objWatch[QD.strSsStatus] || '')}>
+                {objWatch[QD.strSsStatus] || 'Sin estado'}
               </ZdsStatusBadge>
             ),
           },
-          { label: 'SmartSupervision', value: objWatch.qd_codigoSFC || '—' },
+          { label: 'SmartSupervision', value: objWatch[QD.strSfcCode] || '—' },
         ]} />
 
         {/* RUL-0051-03 / MSG-0051-01 — banner SLA crítico. */}
         {blnSlaCritical && (
           <ZrAlert config="negative" {...({ 'hide-close': true } as object)}>
-            ⚠ El caso tiene <strong>{objWatch.qd_slaRestante}</strong> día(s) hábil(es) restante(s). Priorice
+            ⚠ El caso tiene <strong>{objWatch[QD.strSlaRemaining]}</strong> día(s) hábil(es) restante(s). Priorice
             la gestión; puede <strong>solicitar prórroga regulatoria</strong>. {/* MSG-0051-01 */}
           </ZrAlert>
         )}
 
         <form onSubmit={onEnviar} noValidate>
-          <SeccionDetalleCaso form={form} estado={objWatch.qd_estadoSS || ''} nombre={strName} identificacion={strIdentification} />
+          <SeccionDetalleCaso form={form} estado={objWatch[QD.strSsStatus] || ''} nombre={strName} identificacion={strIdentification} />
           <SeccionAsignacion form={form} err={err} onConfirmarReasignacion={onReasignarQueja} onSolicitarAyuda={onSolicitarAyuda} submitting={submitting} />
           <SeccionRespuesta
             form={form} fileRegistry={fileRegistry} err={err}
@@ -166,9 +164,9 @@ export default function DetalleReasignacionRespuesta() {
             Expediente del caso
           </h3>
           <p className="subsection-note">
-            {strName} · {strIdentification} · {objWatch.qd_productoSFC} · {objWatch.qd_motivoSFC}
+            {strName} · {strIdentification} · {objWatch[QD.strSfcProduct]} · {objWatch[QD.strSfcReason]}
           </p>
-          <p style={{ font: 'var(--zf-cap-14)' }}>{objWatch.qd_textoQueja || 'Sin descripción.'}</p>
+          <p style={{ font: 'var(--zf-cap-14)' }}>{objWatch[QD.strComplaintText] || 'Sin descripción.'}</p>
           <div z-flex="75" z-align="right:center" style={{ marginTop: 'var(--zs-100)' }}>
             <ZrButton config="secondary:s" onClick={() => setBlnShowExpediente(false)}>Cerrar</ZrButton>
           </div>
@@ -181,9 +179,9 @@ export default function DetalleReasignacionRespuesta() {
           <h3 style={{ margin: '0 0 var(--zs-75)', font: 'var(--zf-h-20--700)', color: 'var(--z-text)' }}>
             Vista previa — carta de respuesta final
           </h3>
-          <p className="subsection-note">Destinatario: {strName} ({objWatch.qd_correoElectronico})</p>
+          <p className="subsection-note">Destinatario: {strName} ({objWatch[QD.strEmail]})</p>
           <p style={{ font: 'var(--zf-cap-14)', whiteSpace: 'pre-wrap' }}>
-            {objWatch.qd_respuestaCliente || 'Aún no se ha redactado la respuesta al cliente.'}
+            {objWatch[QD.strClientResponse] || 'Aún no se ha redactado la respuesta al cliente.'}
           </p>
           <div z-flex="75" z-align="right:center" style={{ marginTop: 'var(--zs-100)' }}>
             <ZrButton config="secondary:s" onClick={() => setBlnShowPreview(false)}>Cerrar</ZrButton>

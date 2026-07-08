@@ -9,9 +9,12 @@ import {
   ZdsInput, ZdsSelect, ZrButton, ZrAlert, ZrLoader,
 } from '../../../../components/fields/ZdsFields';
 import {
-  DEFAULTS, OPTIONS, COLLECTION_DEFS, CAMPOS_SFC_OBLIGATORIOS, CAMPOS_FRAUDE,
-  type FormularioSuperintendenciaFormData, type AccionFormularioSFC,
-} from './variables';
+  QD, QD_COLLECTIONS, SCR009_DEFAULTS as DEFAULTS,
+  SCR009_OPTIONS_LGBTIQ as OPTIONS_LGBTIQ,
+  SCR009_CAMPOS_SFC_OBLIGATORIOS as CAMPOS_SFC_OBLIGATORIOS,
+  SCR009_CAMPOS_FRAUDE as CAMPOS_FRAUDE,
+} from '../campos/fields';
+import type { FormularioSuperintendenciaFormData, AccionFormularioSFC } from '../campos/fields';
 import SeccionFraudeAnexos from './SeccionFraudeAnexos';
 
 export default function FormularioSuperintendencia() {
@@ -24,17 +27,17 @@ export default function FormularioSuperintendencia() {
   const objWatch = watch();
 
   // Cargamos los catalogos de las listas desplegables
-  const { options: cllSex } = useCollection(COLLECTION_DEFS.sexo);
-  const { options: cllSpecialCond } = useCollection(COLLECTION_DEFS.condicionEspecial);
-  const { options: cllDigitalProduct } = useCollection(COLLECTION_DEFS.productoDigital);
-  const { options: cllComplaintStatus } = useCollection(COLLECTION_DEFS.estadoQueja);
-  const { options: cllFavorability } = useCollection(COLLECTION_DEFS.favorabilidad);
-  const { options: cllAcceptance } = useCollection(COLLECTION_DEFS.aceptacion);
-  const { options: cllRectification } = useCollection(COLLECTION_DEFS.rectificacion);
-  const { options: cllWithdrawal } = useCollection(COLLECTION_DEFS.desistimiento);
-  const { options: cllTutela } = useCollection(COLLECTION_DEFS.tutela);
-  const { options: cllMarking } = useCollection(COLLECTION_DEFS.marcacion);
-  const { options: cllExpressComplaint } = useCollection(COLLECTION_DEFS.quejaExpres);
+  const { options: cllSex } = useCollection(QD_COLLECTIONS.sex);
+  const { options: cllSpecialCond } = useCollection(QD_COLLECTIONS.specialCondition);
+  const { options: cllDigitalProduct } = useCollection(QD_COLLECTIONS.digitalProduct);
+  const { options: cllComplaintStatus } = useCollection(QD_COLLECTIONS.complaintStatus);
+  const { options: cllFavorability } = useCollection(QD_COLLECTIONS.favorability);
+  const { options: cllAcceptance } = useCollection(QD_COLLECTIONS.acceptance);
+  const { options: cllRectification } = useCollection(QD_COLLECTIONS.rectification);
+  const { options: cllWithdrawal } = useCollection(QD_COLLECTIONS.withdrawal);
+  const { options: cllTutela } = useCollection(QD_COLLECTIONS.tutela);
+  const { options: cllMarking } = useCollection(QD_COLLECTIONS.marking);
+  const { options: cllExpressComplaint } = useCollection(QD_COLLECTIONS.expressComplaint);
 
   // Pre-poblamos el formulario con los datos del caso
   useEffect(() => {
@@ -50,14 +53,14 @@ export default function FormularioSuperintendencia() {
 
   // RUL-009-03 — todos los campos SFC obligatorios completos; RUL-009-01 — fraude si aplica.
   const blnSfcComplete = CAMPOS_SFC_OBLIGATORIOS.every((strField) => !!(objWatch[strField] as string)?.trim());
-  const blnFraudComplete = objWatch.qd_relacionadaFraude !== 'SI'
+  const blnFraudComplete = objWatch[QD.strFraudRelated] !== 'SI'
     || CAMPOS_FRAUDE.every((strField) => !!(objWatch[strField] as string)?.trim());
-  const blnAnnexesComplete = !!objWatch.qd_incluyeAnexosQueja && !!objWatch.qd_incluyeAdjuntoRespuesta;
+  const blnAnnexesComplete = !!objWatch[QD.strIncludesComplaintAnnex] && !!objWatch[QD.strIncludesReplyAttach];
   const blnCanSave = blnSfcComplete && blnFraudComplete && blnAnnexesComplete;
 
   // Enviamos la tarea con la accion seleccionada
   const enviarCon = (in_strAction: AccionFormularioSFC) => (in_objData: FormularioSuperintendenciaFormData) =>
-    completeTask({ ...in_objData, qd_accion: in_strAction } as unknown as Record<string, unknown>)
+    completeTask({ ...in_objData, [QD.strAction]: in_strAction } as unknown as Record<string, unknown>)
       .catch((excError) => console.error('[FormularioSuperintendencia] Error al enviar:', excError));
 
   const onGuardar = handleSubmit(enviarCon('GUARDAR'));         // ACT-009-01
@@ -92,32 +95,32 @@ export default function FormularioSuperintendencia() {
           {/* ── S1 · Datos Precargados M1 (SEC-028, solo lectura — RUL-009-02) ── */}
           <FormSection title="Datos Precargados M1">
             <div className="form-row cols-3">
-              <ZdsInput name="qd_codigoSFC" control={control} label="Código SFC" readOnly />
-              <ZdsInput name="qd_canal" control={control} label="Canal (precargado M1)" readOnly />
-              <ZdsInput name="qd_productoSFC" control={control} label="Producto (precargado M1)" readOnly />
+              <ZdsInput name={QD.strSfcCode} control={control} label="Código SFC" readOnly />
+              <ZdsInput name={QD.strChannel} control={control} label="Canal (precargado M1)" readOnly />
+              <ZdsInput name={QD.strSfcProduct} control={control} label="Producto (precargado M1)" readOnly />
             </div>
             <div className="form-row cols-3">
-              <ZdsInput name="qd_motivoSFC" control={control} label="Motivo (precargado M1)" readOnly />
-              <ZdsInput name="qd_admision" control={control} label="Admisión (precargado M1)" readOnly />
-              <ZdsInput name="qd_enteControl" control={control} label="Ente de Control (precargado M1)" readOnly />
+              <ZdsInput name={QD.strSfcReason} control={control} label="Motivo (precargado M1)" readOnly />
+              <ZdsInput name={QD.strAdmission} control={control} label="Admisión (precargado M1)" readOnly />
+              <ZdsInput name={QD.strControlEntity} control={control} label="Ente de Control (precargado M1)" readOnly />
             </div>
           </FormSection>
 
           {/* ── S2 · Datos del Consumidor — Campos SFC (SEC-029) ── */}
           <FormSection title="Datos del Consumidor — Campos SFC">
             <div className="form-row cols-2">
-              <ZdsSelect name="qd_sexo" control={control} label="Sexo"
-                options={cllSex} required rules={objReq} error={err('qd_sexo')} helpText="CAT-SEXO." />
-              <ZdsSelect name="qd_lgbtiq" control={control} label="LGBTIQ+"
-                options={OPTIONS.lgbtiq} required rules={objReq} error={err('qd_lgbtiq')}
+              <ZdsSelect name={QD.strSex} control={control} label="Sexo"
+                options={cllSex} required rules={objReq} error={err(QD.strSex)} helpText="CAT-SEXO." />
+              <ZdsSelect name={QD.strLgbtiq} control={control} label="LGBTIQ+"
+                options={OPTIONS_LGBTIQ} required rules={objReq} error={err(QD.strLgbtiq)}
                 helpText="CAT-LGBTIQ ⚠ pendiente confirmación con TI (CE 019/2024)." />
             </div>
             <div className="form-row cols-2">
-              <ZdsSelect name="qd_condicionEspecial" control={control} label="Condición Especial"
-                options={cllSpecialCond} required rules={objReq} error={err('qd_condicionEspecial')}
+              <ZdsSelect name={QD.strSpecialCondition} control={control} label="Condición Especial"
+                options={cllSpecialCond} required rules={objReq} error={err(QD.strSpecialCondition)}
                 helpText="CAT-COND-ESP." />
-              <ZdsSelect name="qd_productoDigital" control={control} label="Producto Digital"
-                options={cllDigitalProduct} required rules={objReq} error={err('qd_productoDigital')}
+              <ZdsSelect name={QD.strDigitalProduct} control={control} label="Producto Digital"
+                options={cllDigitalProduct} required rules={objReq} error={err(QD.strDigitalProduct)}
                 helpText="CAT-PROD-DIGITAL." />
             </div>
             {/* MSG-009-04 — catálogo LGBTIQ+ pendiente. */}
@@ -130,26 +133,26 @@ export default function FormularioSuperintendencia() {
           {/* ── S3 · Condición de la Queja (SEC-030) ── */}
           <FormSection title="Condición de la Queja">
             <div className="form-row cols-3">
-              <ZdsSelect name="qd_estadoQueja" control={control} label="Estado de la Queja o Reclamo"
-                options={cllComplaintStatus} required rules={objReq} error={err('qd_estadoQueja')} helpText="CAT-ESTADO-QUEJA." />
-              <ZdsSelect name="qd_favorabilidad" control={control} label="Favorabilidad"
-                options={cllFavorability} required rules={objReq} error={err('qd_favorabilidad')} helpText="CAT-FAVORAB." />
-              <ZdsSelect name="qd_aceptacion" control={control} label="Aceptación"
-                options={cllAcceptance} required rules={objReq} error={err('qd_aceptacion')} helpText="CAT-ACEPTACION." />
+              <ZdsSelect name={QD.strComplaintStatus} control={control} label="Estado de la Queja o Reclamo"
+                options={cllComplaintStatus} required rules={objReq} error={err(QD.strComplaintStatus)} helpText="CAT-ESTADO-QUEJA." />
+              <ZdsSelect name={QD.strFavorability} control={control} label="Favorabilidad"
+                options={cllFavorability} required rules={objReq} error={err(QD.strFavorability)} helpText="CAT-FAVORAB." />
+              <ZdsSelect name={QD.strAcceptance} control={control} label="Aceptación"
+                options={cllAcceptance} required rules={objReq} error={err(QD.strAcceptance)} helpText="CAT-ACEPTACION." />
             </div>
             <div className="form-row cols-3">
-              <ZdsSelect name="qd_rectificacion" control={control} label="Rectificación"
-                options={cllRectification} required rules={objReq} error={err('qd_rectificacion')} helpText="CAT-RECTIF." />
-              <ZdsSelect name="qd_desistimiento" control={control} label="Desistimiento"
-                options={cllWithdrawal} required rules={objReq} error={err('qd_desistimiento')} helpText="CAT-DESIST." />
-              <ZdsSelect name="qd_tutela" control={control} label="Tutela"
-                options={cllTutela} required rules={objReq} error={err('qd_tutela')} helpText="CAT-TUTELA." />
+              <ZdsSelect name={QD.strRectification} control={control} label="Rectificación"
+                options={cllRectification} required rules={objReq} error={err(QD.strRectification)} helpText="CAT-RECTIF." />
+              <ZdsSelect name={QD.strWithdrawal} control={control} label="Desistimiento"
+                options={cllWithdrawal} required rules={objReq} error={err(QD.strWithdrawal)} helpText="CAT-DESIST." />
+              <ZdsSelect name={QD.strTutela} control={control} label="Tutela"
+                options={cllTutela} required rules={objReq} error={err(QD.strTutela)} helpText="CAT-TUTELA." />
             </div>
             <div className="form-row cols-3">
-              <ZdsSelect name="qd_marcacion" control={control} label="Marcación"
-                options={cllMarking} required rules={objReq} error={err('qd_marcacion')} helpText="CAT-MARCACION." />
-              <ZdsSelect name="qd_quejaExpres" control={control} label="Queja Exprés"
-                options={cllExpressComplaint} required rules={objReq} error={err('qd_quejaExpres')} helpText="CAT-EXPRES." />
+              <ZdsSelect name={QD.strMarking} control={control} label="Marcación"
+                options={cllMarking} required rules={objReq} error={err(QD.strMarking)} helpText="CAT-MARCACION." />
+              <ZdsSelect name={QD.strExpressComplaint} control={control} label="Queja Exprés"
+                options={cllExpressComplaint} required rules={objReq} error={err(QD.strExpressComplaint)} helpText="CAT-EXPRES." />
               <div />
             </div>
           </FormSection>

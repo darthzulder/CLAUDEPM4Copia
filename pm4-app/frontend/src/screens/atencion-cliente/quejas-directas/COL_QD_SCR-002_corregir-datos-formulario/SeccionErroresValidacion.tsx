@@ -3,8 +3,9 @@ import type { UseFormReturn } from 'react-hook-form';
 import { ZdsInput, ZdsSelect, ZrAlert } from '../../../../components/fields/ZdsFields';
 import FormSection from '../../../../components/FormSection';
 import { useCollection } from '../../../../core/useCollection';
-import type { CampoConError, CorregirDatosFormData } from './variables';
-import { COLLECTION_DEFS } from './variables';
+import type { CampoConError } from '../campos/types';
+import type { CorregirDatosFormData } from '../campos/fields';
+import { QD, QD_COLLECTIONS } from '../campos/fields';
 
 interface Props {
   camposConError: CampoConError[];
@@ -12,7 +13,7 @@ interface Props {
   triggered: boolean;
 }
 
-const CAMPOS_CONOCIDOS = ['qd_correoElectronico', 'qd_numeroIdentificacion', 'qd_municipio'];
+const CAMPOS_CONOCIDOS: string[] = [QD.strEmail, QD.strIdNumber, QD.strCity];
 
 function esCampoCorregido(
   in_strField: string,
@@ -20,24 +21,24 @@ function esCampoCorregido(
   in_blnTriggered: boolean,
 ): boolean {
   if (!in_blnTriggered) return false;
-  if (in_strField === 'qd_municipio') return !in_objErrors.qd_municipio && !in_objErrors.qd_departamento;
+  if (in_strField === QD.strCity) return !in_objErrors[QD.strCity] && !in_objErrors[QD.strDepartment];
   return !in_objErrors[in_strField as keyof CorregirDatosFormData];
 }
 
 export default function SeccionErroresValidacion({ camposConError, form, triggered }: Props) {
   const { control, watch, setValue, formState: { errors } } = form;
   // Observamos el departamento para filtrar los municipios.
-  const strDepartment = watch('qd_departamento');
+  const strDepartment = watch(QD.strDepartment);
 
   // Cargamos los catalogos de departamento y municipio.
-  const { options: cllDepartment } = useCollection(COLLECTION_DEFS.departamento);
-  const { options: cllCity } = useCollection(COLLECTION_DEFS.municipio, { qd_departamento: strDepartment });
+  const { options: cllDepartment } = useCollection(QD_COLLECTIONS.department);
+  const { options: cllCity } = useCollection(QD_COLLECTIONS.city, { [QD.strDepartment]: strDepartment });
 
   // Al cambiar departamento, limpiar municipio si ya no pertenece a la lista nueva
   useEffect(() => {
     if (!strDepartment) return;
-    const strCurrent = form.getValues('qd_municipio');
-    if (!cllCity.some(objOption => objOption.value === strCurrent)) setValue('qd_municipio', '');
+    const strCurrent = form.getValues(QD.strCity);
+    if (!cllCity.some(objOption => objOption.value === strCurrent)) setValue(QD.strCity, '');
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [strDepartment, cllCity]);
 
@@ -67,9 +68,9 @@ export default function SeccionErroresValidacion({ camposConError, form, trigger
               )}
 
               <div className="form-row cols-2">
-                {objField.campo === 'qd_correoElectronico' && (
+                {objField.campo === QD.strEmail && (
                   <ZdsInput
-                    name="qd_correoElectronico"
+                    name={QD.strEmail}
                     control={control}
                     label={objField.etiqueta}
                     inputType="email"
@@ -78,13 +79,13 @@ export default function SeccionErroresValidacion({ camposConError, form, trigger
                       pattern: { value: /^[^\s@]+@[^\s@]+\.[^\s@]+$/, message: 'Formato inválido. Ingrese: nombre@dominio.com' },
                     }}
                     required
-                    error={errors.qd_correoElectronico?.message}
+                    error={errors[QD.strEmail]?.message}
                   />
                 )}
 
-                {objField.campo === 'qd_numeroIdentificacion' && (
+                {objField.campo === QD.strIdNumber && (
                   <ZdsInput
-                    name="qd_numeroIdentificacion"
+                    name={QD.strIdNumber}
                     control={control}
                     label={objField.etiqueta}
                     rules={{
@@ -94,29 +95,29 @@ export default function SeccionErroresValidacion({ camposConError, form, trigger
                       pattern: { value: /^\d+$/, message: 'Solo dígitos, sin espacios ni separadores' },
                     }}
                     required
-                    error={errors.qd_numeroIdentificacion?.message}
+                    error={errors[QD.strIdNumber]?.message}
                   />
                 )}
 
-                {objField.campo === 'qd_municipio' && (
+                {objField.campo === QD.strCity && (
                   <>
                     <ZdsSelect
-                      name="qd_departamento"
+                      name={QD.strDepartment}
                       control={control}
                       label="Departamento"
                       options={cllDepartment}
                       rules={{ required: 'Campo requerido' }}
                       required
-                      error={errors.qd_departamento?.message}
+                      error={errors[QD.strDepartment]?.message}
                     />
                     <ZdsSelect
-                      name="qd_municipio"
+                      name={QD.strCity}
                       control={control}
                       label={objField.etiqueta}
                       options={cllCity}
                       rules={{ required: 'Seleccione un municipio válido para el departamento' }}
                       required
-                      error={errors.qd_municipio?.message}
+                      error={errors[QD.strCity]?.message}
                     />
                   </>
                 )}

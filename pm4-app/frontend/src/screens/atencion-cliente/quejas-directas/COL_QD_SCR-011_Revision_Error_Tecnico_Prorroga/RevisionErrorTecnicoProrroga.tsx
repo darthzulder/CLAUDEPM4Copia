@@ -8,10 +8,8 @@ import {
   ZdsInput, ZdsTextarea,
   ZrButton, ZrAlert, ZrLoader,
 } from '../../../../components/fields/ZdsFields';
-import {
-  DEFAULTS,
-  type RevisionErrorTecnicoProrrogaFormData, type AccionErrorTecnicoProrroga,
-} from './variables';
+import { QD, SCR011_DEFAULTS as DEFAULTS } from '../campos/fields';
+import type { RevisionErrorTecnicoProrrogaFormData, AccionErrorTecnicoProrroga } from '../campos/fields';
 
 export default function RevisionErrorTecnicoProrroga() {
   // Cargamos la tarea y su estado desde PM4
@@ -35,11 +33,11 @@ export default function RevisionErrorTecnicoProrroga() {
   };
 
   // RUL-011-01 (🔴 BLOQUEA): causa raíz y corrección obligatorias para autorizar.
-  const blnCanAuthorize = !!objWatch.qd_causaRaizProrroga?.trim() && !!objWatch.qd_correccionProrroga?.trim();
+  const blnCanAuthorize = !!objWatch[QD.strExtRootCause]?.trim() && !!objWatch[QD.strExtCorrection]?.trim();
 
   // Enviamos la tarea con la accion seleccionada
   const enviarCon = (in_strAction: AccionErrorTecnicoProrroga) => (in_objData: RevisionErrorTecnicoProrrogaFormData) =>
-    completeTask({ ...in_objData, qd_accion: in_strAction } as unknown as Record<string, unknown>)
+    completeTask({ ...in_objData, [QD.strAction]: in_strAction } as unknown as Record<string, unknown>)
       .catch((excError) => console.error('[RevisionErrorTecnicoProrroga] Error al enviar:', excError));
 
   // ACT-011-01 Autorizar Reenvío (valida RUL-011-01).
@@ -75,22 +73,22 @@ export default function RevisionErrorTecnicoProrroga() {
             <ZrAlert config="negative" {...({ 'hide-close': true } as object)}>
               El envío de la <strong>solicitud de prórroga</strong> a SmartSupervision falló por un
               error técnico. Revise el detalle, registre la corrección y autorice el reenvío.
-              {objWatch.qd_intentoProrroga && <> — Intento de prórroga <strong>#{objWatch.qd_intentoProrroga}</strong>.</>}
+              {objWatch[QD.strExtAttempt] && <> — Intento de prórroga <strong>#{objWatch[QD.strExtAttempt]}</strong>.</>}
             </ZrAlert>
 
             <div className="form-row cols-3">
-              <ZdsInput name="qd_codigoHTTPProrroga" control={control} label="Código HTTP prórroga" readOnly />
-              <ZdsInput name="qd_tipoErrorProrroga" control={control} label="Tipo de Error" readOnly />
-              <ZdsInput name="qd_intentoProrroga" control={control} label="Número de intento prórroga" readOnly />
+              <ZdsInput name={QD.strExtHttpCode} control={control} label="Código HTTP prórroga" readOnly />
+              <ZdsInput name={QD.strExtErrorType} control={control} label="Tipo de Error" readOnly />
+              <ZdsInput name={QD.strExtAttempt} control={control} label="Número de intento prórroga" readOnly />
             </div>
 
             <div className="form-row cols-1">
-              <ZdsTextarea name="qd_mensajeTecnicoProrroga" control={control} label="Mensaje técnico de la API" readOnly
+              <ZdsTextarea name={QD.strExtTechMessage} control={control} label="Mensaje técnico de la API" readOnly
                 helpText="Stack trace o mensaje técnico completo devuelto por la API — solo lectura." />
             </div>
 
             <div className="form-row cols-1">
-              <ZdsTextarea name="qd_payloadProrroga" control={control} label="Payload de prórroga enviado" readOnly
+              <ZdsTextarea name={QD.strExtPayload} control={control} label="Payload de prórroga enviado" readOnly
                 helpText="JSON del payload de prórroga del intento fallido — solo lectura." />
             </div>
           </FormSection>
@@ -99,18 +97,18 @@ export default function RevisionErrorTecnicoProrroga() {
           <FormSection title="Registro de Corrección — Prórroga">
             <div className="form-row cols-1">
               <ZdsTextarea
-                name="qd_causaRaizProrroga" control={control} label="Causa Raíz"
+                name={QD.strExtRootCause} control={control} label="Causa Raíz"
                 required maxLength={2000}
                 rules={{ required: 'Campo requerido', maxLength: { value: 2000, message: 'Máximo 2000 caracteres' } }}
-                error={err('qd_causaRaizProrroga')}
+                error={err(QD.strExtRootCause)}
               />
             </div>
             <div className="form-row cols-1">
               <ZdsTextarea
-                name="qd_correccionProrroga" control={control} label="Corrección Aplicada"
+                name={QD.strExtCorrection} control={control} label="Corrección Aplicada"
                 required maxLength={2000}
                 rules={{ required: 'Campo requerido', maxLength: { value: 2000, message: 'Máximo 2000 caracteres' } }}
-                error={err('qd_correccionProrroga')}
+                error={err(QD.strExtCorrection)}
               />
             </div>
 

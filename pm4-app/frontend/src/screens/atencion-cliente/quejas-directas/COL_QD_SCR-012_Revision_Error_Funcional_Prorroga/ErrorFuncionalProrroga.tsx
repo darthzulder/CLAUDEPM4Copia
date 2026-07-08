@@ -9,10 +9,8 @@ import {
   ZdsInput, ZdsTextarea, ZdsSelect, ZdsDate,
   ZrButton, ZrAlert, ZrLoader,
 } from '../../../../components/fields/ZdsFields';
-import {
-  DEFAULTS, COLLECTION_DEFS,
-  type ErrorFuncionalProrrogaFormData, type AccionErrorFuncionalProrroga,
-} from './variables';
+import { QD, QD_COLLECTIONS, SCR012_DEFAULTS as DEFAULTS } from '../campos/fields';
+import type { ErrorFuncionalProrrogaFormData, AccionErrorFuncionalProrroga } from '../campos/fields';
 
 // Fecha de hoy (ISO YYYY-MM-DD) para el mínimo del calendario y la validación RUL-012-01.
 const hoyISO = () => new Date().toISOString().slice(0, 10);
@@ -28,7 +26,7 @@ export default function ErrorFuncionalProrroga() {
   const objWatch = watch();
 
   // Cargamos el catalogo de motivos de prorroga
-  const { options: cllExtensionReason } = useCollection(COLLECTION_DEFS.motivoProrroga);
+  const { options: cllExtensionReason } = useCollection(QD_COLLECTIONS.extensionReason);
 
   // Pre-poblamos el formulario con los datos del caso
   useEffect(() => {
@@ -43,16 +41,16 @@ export default function ErrorFuncionalProrroga() {
   };
 
   // RUL-012-01 — nueva fecha límite debe ser posterior a hoy.
-  const blnValidDate = !!objWatch.qd_nuevaFechaLimite && objWatch.qd_nuevaFechaLimite > strToday;
+  const blnValidDate = !!objWatch[QD.strNewDeadline] && objWatch[QD.strNewDeadline] > strToday;
 
   // Habilitamos el reenvio solo si todos los campos obligatorios estan completos
   const blnCanResend =
-    !!objWatch.qd_motivoProrroga && blnValidDate
-    && !!objWatch.qd_contadorProrroga?.trim() && !!objWatch.qd_justificacionProrroga?.trim();
+    !!objWatch[QD.strExtensionReason] && blnValidDate
+    && !!objWatch[QD.strExtensionCounter]?.trim() && !!objWatch[QD.strExtensionJustif]?.trim();
 
   // Enviamos la tarea con la accion seleccionada
   const enviarCon = (in_strAction: AccionErrorFuncionalProrroga) => (in_objData: ErrorFuncionalProrrogaFormData) =>
-    completeTask({ ...in_objData, qd_accion: in_strAction } as unknown as Record<string, unknown>)
+    completeTask({ ...in_objData, [QD.strAction]: in_strAction } as unknown as Record<string, unknown>)
       .catch((excError) => console.error('[ErrorFuncionalProrroga] Error al enviar:', excError));
 
   const onReenviar = handleSubmit(enviarCon('REENVIAR'));       // ACT-012-01
@@ -86,16 +84,16 @@ export default function ErrorFuncionalProrroga() {
             <ZrAlert config="negative" {...({ 'hide-close': true } as object)}>
               SmartSupervision <strong>rechazó la solicitud de prórroga (HTTP 400 funcional)</strong>.
               Corrija los campos señalados y reenvíe.
-              {objWatch.qd_intentoActualProrroga && <> — Intento actual <strong>#{objWatch.qd_intentoActualProrroga}</strong>.</>}
+              {objWatch[QD.strExtCurrentAttempt] && <> — Intento actual <strong>#{objWatch[QD.strExtCurrentAttempt]}</strong>.</>}
             </ZrAlert>
 
             <div className="form-row cols-3">
-              <ZdsInput name="qd_codigoErrorProrroga" control={control} label="Código de Error SFC Prórroga" readOnly />
-              <ZdsInput name="qd_campoAfectadoProrroga" control={control} label="Campo Afectado" readOnly />
-              <ZdsInput name="qd_intentoActualProrroga" control={control} label="Intento N.° actual" readOnly />
+              <ZdsInput name={QD.strExtErrorCode} control={control} label="Código de Error SFC Prórroga" readOnly />
+              <ZdsInput name={QD.strExtAffectedField} control={control} label="Campo Afectado" readOnly />
+              <ZdsInput name={QD.strExtCurrentAttempt} control={control} label="Intento N.° actual" readOnly />
             </div>
             <div className="form-row cols-1">
-              <ZdsTextarea name="qd_mensajeErrorProrroga" control={control} label="Mensaje de Error SFC" readOnly
+              <ZdsTextarea name={QD.strExtErrorMessage} control={control} label="Mensaje de Error SFC" readOnly
                 helpText="Mensaje literal devuelto por SmartSupervision — solo lectura." />
             </div>
           </FormSection>
@@ -103,37 +101,37 @@ export default function ErrorFuncionalProrroga() {
           {/* ── S2 · Campos de Prórroga a Corregir (SEC-040, editable) ── */}
           <FormSection title="Campos de Prórroga a Corregir">
             <div className="form-row cols-2">
-              <ZdsSelect name="qd_motivoProrroga" control={control} label="Motivo de Prórroga"
+              <ZdsSelect name={QD.strExtensionReason} control={control} label="Motivo de Prórroga"
                 options={cllExtensionReason} required rules={{ required: 'Campo requerido' }}
-                error={err('qd_motivoProrroga')}
+                error={err(QD.strExtensionReason)}
                 helpText="Motivo aceptado por SmartSupervision (CAT-MOTIVO-PRORR)." />
-              <ZdsDate name="qd_nuevaFechaLimite" control={control} label="Nueva Fecha Límite"
+              <ZdsDate name={QD.strNewDeadline} control={control} label="Nueva Fecha Límite"
                 min={strToday} required
                 rules={{
                   required: 'Campo requerido',
                   validate: (in_strValue: string) => (in_strValue && in_strValue > strToday) || 'La fecha debe ser posterior a hoy',
                 }}
-                error={err('qd_nuevaFechaLimite')}
+                error={err(QD.strNewDeadline)}
                 helpText="Nueva fecha de respuesta solicitada (posterior a hoy)." />
             </div>
             <div className="form-row cols-2">
-              <ZdsInput name="qd_contadorProrroga" control={control} label="Contador de Prórroga"
+              <ZdsInput name={QD.strExtensionCounter} control={control} label="Contador de Prórroga"
                 required
                 rules={{ required: 'Campo requerido', pattern: { value: /^\d+$/, message: 'Solo dígitos' } }}
-                error={err('qd_contadorProrroga')}
+                error={err(QD.strExtensionCounter)}
                 helpText="N.° de prórroga (1, 2, ...)." />
               <div />
             </div>
             <div className="form-row cols-1">
-              <ZdsTextarea name="qd_justificacionProrroga" control={control} label="Justificación"
+              <ZdsTextarea name={QD.strExtensionJustif} control={control} label="Justificación"
                 required maxLength={2000}
                 rules={{ required: 'Campo requerido', maxLength: { value: 2000, message: 'Máximo 2000 caracteres' } }}
-                error={err('qd_justificacionProrroga')}
+                error={err(QD.strExtensionJustif)}
                 helpText="Justificación de la necesidad de prórroga." />
             </div>
 
             {/* RUL-012-01 / MSG-012-01 — fecha posterior a hoy. */}
-            {!!objWatch.qd_nuevaFechaLimite && !blnValidDate && (
+            {!!objWatch[QD.strNewDeadline] && !blnValidDate && (
               <ZrAlert config="negative" {...({ 'hide-close': true } as object)}>
                 La nueva fecha límite debe ser <strong>posterior a la fecha actual</strong>. {/* MSG-012-01 */}
               </ZrAlert>

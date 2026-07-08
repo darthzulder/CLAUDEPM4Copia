@@ -11,7 +11,7 @@
 | Rol responsable | **Analista Técnico** (RESPONSABLE) |
 | Versión insumos | Anexo02 v3.0 · Matrices v3.0 · Anexo03 v2.0 |
 | Slug / carpeta | `COL_QD_Revision_Error_Tecnico_API` |
-| Archivos de implementación | `RevisionErrorTecnicoApi.tsx`, `variables.ts`, registro en `App.tsx` |
+| Archivos de implementación | `RevisionErrorTecnicoApi.tsx`, registro en `App.tsx` (config centralizada en `campos/fields.ts`) |
 
 ---
 
@@ -63,26 +63,26 @@ Fuente: `Anexo02 > 10_Trazabilidad_BPMN > SCR-004 (fila 9)`.
 
 | Campo (UI) | Variable (implementada) | Variable lógica insumo | Tipo | Obligatorio | Fuente |
 |---|---|---|---|---|---|
-| Código HTTP | `qd_codigoHTTP` | `codigoHTTP` | Texto / readOnly | No | `Anexo02 > SCR-004 > FLD-050 (03_Campos fila 43)` · alim. `Anexo03 > 06_Variables_Salida > codigoHTTP_M1M2 (fila 48)` |
-| Tipo de Error | `qd_tipoError` | `tipoError` | Texto / readOnly | No | `Anexo02 > SCR-004 > FLD-051 (fila 44)` · alim. `Anexo03 > 06_Variables_Salida > tipoError_M1M2 (fila 53/59)` |
-| Número de Intento Acumulado | `qd_numeroIntento` | `numeroIntento` | Texto (Número) / readOnly | No | `Anexo02 > SCR-004 > FLD-055 (fila 48)` · alim. `Anexo03 > numeroIntento (06 fila 54)` |
-| Endpoint Invocado | `qd_endpointInvocado` | `endpointInvocado` | Texto / readOnly | No | `Anexo02 > SCR-004 > FLD-053 (fila 46)` · alim. `Anexo03 > endpointAPI (05 fila 84)` |
-| Mensaje Técnico de la API | `qd_mensajeTecnicoAPI` | `mensajeTecnicoAPI` | Área de texto / readOnly | No | `Anexo02 > SCR-004 > FLD-052 (fila 45)` · alim. `Anexo03 > mensajeErrorAPI (06 fila 51)` |
-| Payload Enviado (JSON) | `qd_payloadEnviado` | `payloadEnviado` | Área de texto (editable si requiere ajuste) | No | `Anexo02 > SCR-004 > FLD-054 (fila 47)` · alim. `Anexo03 > payloadEnviado (05 fila 95)` |
+| Código HTTP | `qd_strHttpCode` | `codigoHTTP` | Texto / readOnly | No | `Anexo02 > SCR-004 > FLD-050 (03_Campos fila 43)` · alim. `Anexo03 > 06_Variables_Salida > codigoHTTP_M1M2 (fila 48)` |
+| Tipo de Error | `qd_strErrorType` | `tipoError` | Texto / readOnly | No | `Anexo02 > SCR-004 > FLD-051 (fila 44)` · alim. `Anexo03 > 06_Variables_Salida > tipoError_M1M2 (fila 53/59)` |
+| Número de Intento Acumulado | `qd_strAttemptNum` | `numeroIntento` | Texto (Número) / readOnly | No | `Anexo02 > SCR-004 > FLD-055 (fila 48)` · alim. `Anexo03 > numeroIntento (06 fila 54)` |
+| Endpoint Invocado | `qd_strEndpointCalled` | `endpointInvocado` | Texto / readOnly | No | `Anexo02 > SCR-004 > FLD-053 (fila 46)` · alim. `Anexo03 > endpointAPI (05 fila 84)` |
+| Mensaje Técnico de la API | `qd_strApiTechMessage` | `mensajeTecnicoAPI` | Área de texto / readOnly | No | `Anexo02 > SCR-004 > FLD-052 (fila 45)` · alim. `Anexo03 > mensajeErrorAPI (06 fila 51)` |
+| Payload Enviado (JSON) | `qd_strPayloadSent` | `payloadEnviado` | Área de texto (editable si requiere ajuste) | No | `Anexo02 > SCR-004 > FLD-054 (fila 47)` · alim. `Anexo03 > payloadEnviado (05 fila 95)` |
 
 ### S2 — Registro de Corrección Técnica *(editable — `SEC-012`, siempre visible)*
 
 | Campo (UI) | Variable (implementada) | Variable lógica insumo | Tipo | Obligatorio | Fuente |
 |---|---|---|---|---|---|
-| Causa Raíz Identificada | `qd_causaRaiz` | `causaRaiz` | Área de texto | **Sí** | `Anexo02 > SCR-004 > FLD-056 (03_Campos fila 49)` |
-| Corrección Aplicada | `qd_correccionAplicada` | `correccionAplicada` | Área de texto | **Sí** | `Anexo02 > SCR-004 > FLD-057 (fila 50)` |
-| ¿Requiere ajuste en payload? | `qd_requiereAjustePayload` | `requiereAjustePayload` | Radio Sí/No | **Sí** | `Anexo02 > SCR-004 > FLD-058 (fila 51)` |
+| Causa Raíz Identificada | `qd_strRootCause` | `causaRaiz` | Área de texto | **Sí** | `Anexo02 > SCR-004 > FLD-056 (03_Campos fila 49)` |
+| Corrección Aplicada | `qd_strCorrectionApplied` | `correccionAplicada` | Área de texto | **Sí** | `Anexo02 > SCR-004 > FLD-057 (fila 50)` |
+| ¿Requiere ajuste en payload? | `qd_strPayloadAdjustNeeded` | `requiereAjustePayload` | Radio Sí/No | **Sí** | `Anexo02 > SCR-004 > FLD-058 (fila 51)` |
 
 ### Metadato de flujo (no visible)
 
 | Campo | Variable | Uso | Fuente |
 |---|---|---|---|
-| Acción seleccionada | `qd_accion` (`AUTORIZAR_REENVIO` / `ESCALAR_PROVEEDOR`) | Distingue ACT-004-01 de ACT-004-02 al completar la tarea. | `Anexo02 > SCR-004 > 04_Acciones` (inferido — ver §10) |
+| Acción seleccionada | `qd_strAction` (`AUTORIZAR_REENVIO` / `ESCALAR_PROVEEDOR`) | Distingue ACT-004-01 de ACT-004-02 al completar la tarea. | `Anexo02 > SCR-004 > 04_Acciones` (inferido — ver §10) |
 
 > **Nota de nomenclatura:** los `data_name` definitivos de PM4 aún no se entregan (CLAUDE.md). Se usan
 > nombres con prefijo `qd_` (unificado con las pantallas QD hermanas; antes `et_`, Error Técnico). El mapeo a la **variable lógica** del
@@ -130,8 +130,8 @@ Fuente: `Anexo02 > 10_Trazabilidad_BPMN > SCR-004 (fila 9)`.
 | Sección S1 con identidad de "error" | `FormSection color="var(--z-red)"` + `ZrAlert config="negative"` con nº de intento. | Inferido del tono de error (ver §10) |
 | Payload editable solo si "Requiere ajuste = Sí" | `readOnly={!ajustaPayload}`; alerta que indica editar el payload superior. | Deriva de FLD-058 + criterio "reenvío del **payload corregido**" (`Anexo02 > SCR-004 > Criterio de Aceptación`) |
 | "Ver Log Completo" (ACT-004-03, Link) | `ZrButton config="link"` en el header de S1 abre `ZrModal` con endpoint + mensaje técnico + payload (solo lectura). | `Anexo02 > SCR-004 > 04_Acciones > ACT-004-03` |
-| "Autorizar Reenvío" (ACT-004-01, Primaria) | `ZrButton config="positive:s"`, deshabilitado por RUL-004-01; `completeTask` con `qd_accion='AUTORIZAR_REENVIO'`. | `Anexo02 > SCR-004 > ACT-004-01` |
-| "Escalar a Proveedor" (ACT-004-02, Secundaria, Siempre) | `ZrButton config="secondary:s"`; `completeTask` con `qd_accion='ESCALAR_PROVEEDOR'` **sin** exigir la validación de S2 (condición "Siempre"). | `Anexo02 > SCR-004 > ACT-004-02` |
+| "Autorizar Reenvío" (ACT-004-01, Primaria) | `ZrButton config="positive:s"`, deshabilitado por RUL-004-01; `completeTask` con `qd_strAction='AUTORIZAR_REENVIO'`. | `Anexo02 > SCR-004 > ACT-004-01` |
+| "Escalar a Proveedor" (ACT-004-02, Secundaria, Siempre) | `ZrButton config="secondary:s"`; `completeTask` con `qd_strAction='ESCALAR_PROVEEDOR'` **sin** exigir la validación de S2 (condición "Siempre"). | `Anexo02 > SCR-004 > ACT-004-02` |
 | Aviso permanente cuando faltan datos | `ZrAlert config="info"` con el texto de MSG-004-01. | `Anexo02 > 06_Mensajes > MSG-004-01` |
 | Prepoblación desde PM4 | `useTask` → `reset({...DEFAULTS, ...task.data})`. | CLAUDE.md (flujo de datos PM4) |
 
@@ -141,9 +141,9 @@ Fuente: `Anexo02 > 10_Trazabilidad_BPMN > SCR-004 (fila 9)`.
 
 | Campo Origen | Campo Dependiente | Comportamiento | Fuente |
 |---|---|---|---|
-| `qd_requiereAjustePayload` = `SI` | `qd_payloadEnviado` | El payload pasa de solo lectura a **editable** y se muestra alerta. | FLD-058 + Criterio de Aceptación (`Anexo02 > SCR-004`) |
-| `qd_causaRaiz` + `qd_correccionAplicada` (no vacíos) | Botón "Autorizar Reenvío" | Habilita/deshabilita la acción primaria. | `Anexo02 > 05_Reglas > RUL-004-01` |
-| `qd_numeroIntento` | Texto del `ZrAlert` de S1 | Muestra "Intento acumulado #N" si hay valor. | Inferido de FLD-055 (ver §10) |
+| `qd_strPayloadAdjustNeeded` = `SI` | `qd_strPayloadSent` | El payload pasa de solo lectura a **editable** y se muestra alerta. | FLD-058 + Criterio de Aceptación (`Anexo02 > SCR-004`) |
+| `qd_strRootCause` + `qd_strCorrectionApplied` (no vacíos) | Botón "Autorizar Reenvío" | Habilita/deshabilita la acción primaria. | `Anexo02 > 05_Reglas > RUL-004-01` |
+| `qd_strAttemptNum` | Texto del `ZrAlert` de S1 | Muestra "Intento acumulado #N" si hay valor. | Inferido de FLD-055 (ver §10) |
 
 ---
 
@@ -152,8 +152,8 @@ Fuente: `Anexo02 > 10_Trazabilidad_BPMN > SCR-004 (fila 9)`.
 1. **Nombres de variable (`qd_*`).** Los `data_name` de PM4 no se han entregado; se usan nombres
    con prefijo `qd_` (unificado con las pantallas QD hermanas; antes `et_`), mapeados 1:1 a la
    variable lógica de `03_Campos`. Se actualizarán cuando TI entregue el diccionario. *(CLAUDE.md)*
-2. **`qd_accion` (metadato).** El mockup define dos botones de cierre (ACT-004-01/02) pero no un campo
-   que distinga la decisión en `task.data`. Se infiere un campo `qd_accion` para que el BPM sepa qué
+2. **`qd_strAction` (metadato).** El mockup define dos botones de cierre (ACT-004-01/02) pero no un campo
+   que distinga la decisión en `task.data`. Se infiere un campo `qd_strAction` para que el BPM sepa qué
    ruta tomar. *(deriva de `04_Acciones`)*
 3. **Payload editable con FLD-058 = Sí.** El criterio de aceptación exige "reenvío del **payload
    corregido**"; se interpreta que marcar "¿Requiere ajuste en payload? = Sí" habilita la edición del
@@ -183,7 +183,7 @@ Fuente: `Anexo02 > 10_Trazabilidad_BPMN > SCR-004 (fila 9)`.
 | Catálogos | **N/A** | SCR-004 no referencia catálogos. |
 | Permisos | Respetado a nivel funcional | Pantalla de uso exclusivo del Analista Técnico (`08_Permisos`). |
 
-**Elementos inferidos** (sin respaldo literal en insumos): `qd_accion`, edición condicional del payload,
+**Elementos inferidos** (sin respaldo literal en insumos): `qd_strAction`, edición condicional del payload,
 límites `maxLength`, identidad visual de error, modal de "Ver Log Completo", indicador de intento en la
 alerta. Todos detallados en §10.
 

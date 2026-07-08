@@ -10,7 +10,7 @@
 | **Subproceso** | — (tarea del proceso principal P01) |
 | **Rol responsable** | Gestor de Experiencia |
 | **Versión insumo** | Anexo02_Mockups_TOBE_QuejaDirectas_v2_0 |
-| **Archivos de implementación** | `CorregirDatosFormulario.tsx`, `SeccionErroresValidacion.tsx`, `variables.ts` |
+| **Archivos de implementación** | `CorregirDatosFormulario.tsx`, `SeccionErroresValidacion.tsx` (config centralizada en `campos/fields.ts`) |
 | **Slug en App.tsx** | `COL_QD-corregir-datos-formulario` |
 
 ---
@@ -37,25 +37,25 @@ Pantalla de corrección preventiva activada cuando la tarea **P01-T06** (Validac
 
 | Campo (UI) | Variable BPM | Tipo | Obligatorio | Fuente |
 |---|---|---|---|---|
-| Número de Caso | `qd_idCasoBPM` | `ZdsInput` readOnly | — | Anexo02 HTML > SCR-002 > FLD-030 |
-| Canal de Recepción | `qd_canal` | `ZdsInput` readOnly | — | Anexo02 HTML > SCR-002 > FLD-031 |
-| SLA Restante | `qd_slaRestante` | `ZdsInput` readOnly | — | Anexo02 HTML > SCR-002 > FLD-032 |
+| Número de Caso | `qd_strBpmCaseId` | `ZdsInput` readOnly | — | Anexo02 HTML > SCR-002 > FLD-030 |
+| Canal de Recepción | `qd_strChannel` | `ZdsInput` readOnly | — | Anexo02 HTML > SCR-002 > FLD-031 |
+| SLA Restante | `qd_strSlaRemaining` | `ZdsInput` readOnly | — | Anexo02 HTML > SCR-002 > FLD-032 |
 
 ### Sección: Campos con Error (dinámica — renderiza solo los campos indicados por el BPM)
 
 | Campo (UI) | Variable BPM | Tipo | Obligatorio | Reglas de validación | Fuente |
 |---|---|---|---|---|---|
-| Correo Electrónico | `qd_correoElectronico` | `ZdsInput` email | Sí | RFC 5321: `/^[^\s@]+@[^\s@]+\.[^\s@]+$/` | Anexo02 HTML > SCR-002 > FLD-007 |
-| Número de Identificación | `qd_numeroIdentificacion` | `ZdsInput` | Sí | Solo dígitos `/^\d+$/`; mín 6, máx 15 | Anexo02 HTML > SCR-002 > FLD-006 |
-| Departamento | `qd_departamento` | `ZdsSelect` | Sí (cuando municipio está en error) | Catálogo estático Colombia | Anexo02 HTML > SCR-002 > FLD-010 (relacionado con FLD-011) |
-| Municipio | `qd_municipio` | `ZdsSelect` cascading | Sí | Lista filtrada por departamento | Anexo02 HTML > SCR-002 > FLD-011 |
+| Correo Electrónico | `qd_strEmail` | `ZdsInput` email | Sí | RFC 5321: `/^[^\s@]+@[^\s@]+\.[^\s@]+$/` | Anexo02 HTML > SCR-002 > FLD-007 |
+| Número de Identificación | `qd_strIdNumber` | `ZdsInput` | Sí | Solo dígitos `/^\d+$/`; mín 6, máx 15 | Anexo02 HTML > SCR-002 > FLD-006 |
+| Departamento | `qd_strDepartment` | `ZdsSelect` | Sí (cuando municipio está en error) | Catálogo estático Colombia | Anexo02 HTML > SCR-002 > FLD-010 (relacionado con FLD-011) |
+| Municipio | `qd_strCity` | `ZdsSelect` cascading | Sí | Lista filtrada por departamento | Anexo02 HTML > SCR-002 > FLD-011 |
 | Campo genérico | `{campo}` | `ZdsInput` | Sí | `required` | Fallback para errores no tipados en el frontend |
 
 ### Metadata inyectada por el BPM
 
 | Variable BPM | Tipo | Descripción | Fuente |
 |---|---|---|---|
-| `qd_errores_json` | `string` (JSON) | Array de `CampoConError[]` con los campos rechazados por P01-T06 | Inferido — no encontrado explícitamente en insumos disponibles |
+| `qd_strErrorsJson` | `string` (JSON) | Array de `CampoConError[]` con los campos rechazados por P01-T06 | Inferido — no encontrado explícitamente en insumos disponibles |
 
 ---
 
@@ -65,7 +65,7 @@ Pantalla de corrección preventiva activada cuando la tarea **P01-T06** (Validac
 |---|---|---|
 | Correo electrónico — formato RFC 5321 | Pattern `/^[^\s@]+@[^\s@]+\.[^\s@]+$/`; mensaje: "Formato inválido. Ingrese: nombre@dominio.com" | Anexo02 HTML > SCR-002 (error 1 del mockup) |
 | Número de identificación — solo dígitos | Pattern `/^\d+$/`; minLength 6, maxLength 15; sin espacios | Anexo02 HTML > SCR-002 (error 2 del mockup) |
-| Municipio — pertenencia al departamento | Options de `ZdsSelect` filtradas dinámicamente por `qd_departamento`; al cambiar depto, se limpia el municipio | Anexo02 HTML > SCR-002 (error 3 del mockup) |
+| Municipio — pertenencia al departamento | Options de `ZdsSelect` filtradas dinámicamente por `qd_strDepartment`; al cambiar depto, se limpia el municipio | Anexo02 HTML > SCR-002 (error 3 del mockup) |
 | RUL-002-01 — botón habilitado solo con 0 errores | `canSubmit = triggered && pendingErrors === 0`; button `disabled={!canSubmit}` | Anexo02 HTML > SCR-002 (alerta principal y botón deshabilitado) |
 | Modo onChange | `useForm({ mode: 'onChange' })` — errores se actualizan en tiempo real al escribir | Convención del proyecto (CLAUDE.md) |
 | Trigger inicial | `trigger(fieldsToTrigger)` después de `reset()` para mostrar errores desde el primer render | Inferido — comportamiento esperado en pantalla de corrección |
@@ -89,7 +89,7 @@ Pantalla de corrección preventiva activada cuando la tarea **P01-T06** (Validac
 | Regla | Implementación | Fuente |
 |---|---|---|
 | RUL-002-01: Botón "Guardar Correcciones" habilitado solo cuando contador = 0 | `disabled={!canSubmit}` donde `canSubmit = triggered && pendingErrors === 0 && !submitting` | Anexo02 HTML > SCR-002 |
-| Municipio debe pertenecer al departamento seleccionado | `useEffect` en `SeccionErroresValidacion` limpia `qd_municipio` al cambiar `qd_departamento` | Anexo02 HTML > SCR-002 (error 3) |
+| Municipio debe pertenecer al departamento seleccionado | `useEffect` en `SeccionErroresValidacion` limpia `qd_strCity` al cambiar `qd_strDepartment` | Anexo02 HTML > SCR-002 (error 3) |
 | Re-ejecución automática de P01-T06 al guardar | Documentado en alerta de aviso; el BPM implementa la re-ejecución en el backend | Anexo02 HTML > SCR-002 (alerta warning) |
 | Solo lectura de campos FLD-030..032 | `readOnly` en `ZdsInput`; ninguna regla de validación sobre ellos | Anexo02 HTML > SCR-002 (nota "No editable en corrección") |
 | Canal de Recepción no editable en corrección | FLD-031 renderizado como `readOnly` | Anexo02 HTML > SCR-002 > FLD-031 |
@@ -113,8 +113,8 @@ Pantalla de corrección preventiva activada cuando la tarea **P01-T06** (Validac
 
 | Campo Origen | Campo Dependiente | Comportamiento | Fuente |
 |---|---|---|---|
-| `qd_departamento` | `qd_municipio` | Al cambiar departamento, opciones de municipio se filtran; si el valor actual de municipio no está en la nueva lista, se limpia automáticamente | Anexo02 HTML > SCR-002 (error 3 — cascada depto/municipio) |
-| `qd_errores_json` | Campos renderizados en `SeccionErroresValidacion` | El JSON determina qué campos se muestran para corrección | Inferido — diseño dinámico de la pantalla |
+| `qd_strDepartment` | `qd_strCity` | Al cambiar departamento, opciones de municipio se filtran; si el valor actual de municipio no está en la nueva lista, se limpia automáticamente | Anexo02 HTML > SCR-002 (error 3 — cascada depto/municipio) |
+| `qd_strErrorsJson` | Campos renderizados en `SeccionErroresValidacion` | El JSON determina qué campos se muestran para corrección | Inferido — diseño dinámico de la pantalla |
 
 ---
 
@@ -122,7 +122,7 @@ Pantalla de corrección preventiva activada cuando la tarea **P01-T06** (Validac
 
 | Suposición | Motivo |
 |---|---|
-| El BPM inyecta los errores como `qd_errores_json` (JSON string de `CampoConError[]`) | No hay nombre canónico de variable en los insumos disponibles; el diseño JSON es una suposición del equipo frontend para hacer la lista de errores dinámica |
+| El BPM inyecta los errores como `qd_strErrorsJson` (JSON string de `CampoConError[]`) | No hay nombre canónico de variable en los insumos disponibles; el diseño JSON es una suposición del equipo frontend para hacer la lista de errores dinámica |
 | `CampoConError` incluye `fldId`, `etiqueta`, `valorRechazado`, `mensajeError` | Estructura mínima para que el frontend pueda mostrar el contexto del error sin hardcodear etiquetas |
 | Catálogos de departamentos y municipios son estáticos (placeholder) | El `07_Catalogs` no fue analizado del Excel; se reutilizaron los mismos datos de `recibir-queja/variables.ts` |
 | `ERRORES_EJEMPLO` como fallback de desarrollo | Para renderizar la pantalla sin `task_id`, se usan los 3 errores del mockup como ejemplo |
@@ -148,7 +148,7 @@ Pantalla de corrección preventiva activada cuando la tarea **P01-T06** (Validac
 
 ### Elementos inferidos (no respaldados explícitamente en insumos)
 
-- Nombre de variable `qd_errores_json` y estructura `CampoConError`
+- Nombre de variable `qd_strErrorsJson` y estructura `CampoConError`
 - Mecanismo de trigger de validación inicial con delay
 - Fallback `ERRORES_EJEMPLO` para desarrollo
 - Clases CSS `.error-field-block` y `.error-field-block--sep`

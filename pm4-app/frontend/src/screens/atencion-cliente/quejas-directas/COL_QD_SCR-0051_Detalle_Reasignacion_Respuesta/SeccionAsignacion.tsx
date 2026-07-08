@@ -7,10 +7,9 @@ import {
 } from '../../../../components/fields/ZdsFields';
 import { useCollection } from '../../../../core/useCollection';
 import pm4 from '../../../../api/pm4Client';
-import {
-  OPTIONS, COLLECTION_DEFS, MAX_AYUDANTES,
-  type DetalleReasignacionRespuestaFormData, type AsignacionHistorial,
-} from './variables';
+import { QD, QD_COLLECTIONS, OPTIONS_SI_NO, SCR0051_MAX_AYUDANTES as MAX_AYUDANTES } from '../campos/fields';
+import type { DetalleReasignacionRespuestaFormData } from '../campos/fields';
+import type { AsignacionHistorial } from '../campos/types';
 
 interface Props {
   form: UseFormReturn<DetalleReasignacionRespuestaFormData>;
@@ -29,10 +28,10 @@ export default function SeccionAsignacion({ form, err, onConfirmarReasignacion, 
   const [objSnapshot, setObjSnapshot] = useState({ area: '', usuario: '', obs: '' });
 
   // RUL-0051-07 — bloque de reasignación visible si "¿Necesitas de otras áreas?" = Sí.
-  const blnShowReassign = objWatch.qd_necesitaOtrasAreas === 'SI';
+  const blnShowReassign = objWatch[QD.strNeedsOtherAreas] === 'SI';
 
   // RUL-0051-08 — máx. 4 ayudantes.
-  const lstHistory: AsignacionHistorial[] = Array.isArray(objWatch.qd_historialAsignaciones) ? objWatch.qd_historialAsignaciones : [];
+  const lstHistory: AsignacionHistorial[] = Array.isArray(objWatch[QD.lstAssignHistory]) ? objWatch[QD.lstAssignHistory] : [];
   const blnHelpersReached = lstHistory.length >= MAX_AYUDANTES;
 
   // Descarga el adjunto de un ayudante por su file_id (guardado por SCR-0052 al responder).
@@ -47,72 +46,74 @@ export default function SeccionAsignacion({ form, err, onConfirmarReasignacion, 
   };
 
   // Cargamos los catalogos de área y motivo de reasignación.
-  const { options: cllArea } = useCollection(COLLECTION_DEFS.area);
-  const { options: cllReassignReason } = useCollection(COLLECTION_DEFS.motivoReasignacion);
+  const { options: cllArea } = useCollection(QD_COLLECTIONS.area);
+  const { options: cllReassignReason } = useCollection(QD_COLLECTIONS.reassignReason);
 
   // RUL-0051-02 — usuarios filtrados por área seleccionada (asignación inicial).
-  const { options: cllAreaUsers } = useCollection(COLLECTION_DEFS.usuariosRole, { qd_area: objWatch.qd_areaResponsable });
+  // Shim de dependencia: 'qd_area' es una convención interna (no un campo PM4 real,
+  // ver campos/MAPEO_qd_old_new.md #2) — coincide con el dependsOn sin cambios.
+  const { options: cllAreaUsers } = useCollection(QD_COLLECTIONS.areaUsers, { qd_area: objWatch[QD.strAssigneeArea] });
 
   // FLD-092 — responsables del área destino de reasignación (autocompletado).
-  const { options: cllTargetAreaUsers } = useCollection(COLLECTION_DEFS.usuariosRole, { qd_area: objWatch.qd_areaDestino });
+  const { options: cllTargetAreaUsers } = useCollection(QD_COLLECTIONS.areaUsers, { qd_area: objWatch[QD.strTargetArea] });
   useEffect(() => {
-    setValue('qd_nuevoResponsable', cllTargetAreaUsers[0]?.label ?? '');
+    setValue(QD.strNewAssignee, cllTargetAreaUsers[0]?.label ?? '');
   }, [cllTargetAreaUsers, setValue]);
 
   // Guarda un snapshot de la asignación actual y entra en modo reasignación.
   const iniciarReasignacion = () => {
     setObjSnapshot({
-      area: objWatch.qd_areaResponsable || '',
-      usuario: objWatch.qd_usuarioResponsable || '',
-      obs: objWatch.qd_observacionesAsignacion || '',
+      area: objWatch[QD.strAssigneeArea] || '',
+      usuario: objWatch[QD.strAssigneeUser] || '',
+      obs: objWatch[QD.strAssignmentRemarks] || '',
     });
     setBlnReassignMode(true);
   };
 
   // Restaura el snapshot y sale del modo reasignación.
   const cancelarReasignacion = () => {
-    setValue('qd_areaResponsable', objSnapshot.area);
-    setValue('qd_usuarioResponsable', objSnapshot.usuario);
-    setValue('qd_observacionesAsignacion', objSnapshot.obs);
+    setValue(QD.strAssigneeArea, objSnapshot.area);
+    setValue(QD.strAssigneeUser, objSnapshot.usuario);
+    setValue(QD.strAssignmentRemarks, objSnapshot.obs);
     setBlnReassignMode(false);
   };
 
   // ACT-0051-03 — añade el ayudante al historial (RUL-0051-04 valida campos obligatorios).
   const blnReassignComplete =
-    !!objWatch.qd_areaDestino && !!objWatch.qd_motivoReasignacion && !!objWatch.qd_observacionesReasignacion?.trim();
+    !!objWatch[QD.strTargetArea] && !!objWatch[QD.strReassignReason] && !!objWatch[QD.strReassignRemarks]?.trim();
 
   // Registra la solicitud de ayuda en el historial y envía el snapshot fresco.
   const confirmarReasignacion = () => {
     if (!blnReassignComplete || blnHelpersReached) return;
     const objRow: AsignacionHistorial = {
       fecha: new Date().toISOString().slice(0, 10),
-      de: objWatch.qd_responsableActual || objWatch.qd_usuarioResponsable || '—',
-      para: objWatch.qd_nuevoResponsable || '—',
-      motivo: cllReassignReason.find((objOption) => objOption.value === objWatch.qd_motivoReasignacion)?.label ?? objWatch.qd_motivoReasignacion,
-      observaciones: objWatch.qd_observacionesReasignacion,
+      de: objWatch[QD.strCurrentAssignee] || objWatch[QD.strAssigneeUser] || '—',
+      para: objWatch[QD.strNewAssignee] || '—',
+      motivo: cllReassignReason.find((objOption) => objOption.value === objWatch[QD.strReassignReason])?.label ?? objWatch[QD.strReassignReason],
+      observaciones: objWatch[QD.strReassignRemarks],
     };
     const lstNewHistory = [...lstHistory, objRow];
     // Número de esta ayuda (1-based) = posición de la fila recién agregada. Viaja con el
     // subproceso para que SCR-0052 sepa a qué ayuda responde (matchea el índice del historial).
     const intHelpNumber = lstNewHistory.length;
-    setValue('qd_historialAsignaciones', lstNewHistory);
-    setValue('qd_numeroAyuda', intHelpNumber);
+    setValue(QD.lstAssignHistory, lstNewHistory);
+    setValue(QD.intHelpNumber, intHelpNumber);
     // limpiar el formulario de ayudante para el siguiente
-    setValue('qd_areaDestino', '');
-    setValue('qd_nuevoResponsable', '');
-    setValue('qd_motivoReasignacion', '');
-    setValue('qd_observacionesReasignacion', '');
+    setValue(QD.strTargetArea, '');
+    setValue(QD.strNewAssignee, '');
+    setValue(QD.strReassignReason, '');
+    setValue(QD.strReassignRemarks, '');
     // Submit inmediato con el snapshot fresco: watch() (objWatch) aún no refleja los setValue
     // anteriores, por eso construimos el payload explícitamente para que PM4 persista
     // la nueva fila del historial junto con el resto de variables.
     onSolicitarAyuda({
       ...objWatch,
-      qd_historialAsignaciones: lstNewHistory,
-      qd_numeroAyuda: intHelpNumber,
-      qd_areaDestino: '',
-      qd_nuevoResponsable: '',
-      qd_motivoReasignacion: '',
-      qd_observacionesReasignacion: '',
+      [QD.lstAssignHistory]: lstNewHistory,
+      [QD.intHelpNumber]: intHelpNumber,
+      [QD.strTargetArea]: '',
+      [QD.strNewAssignee]: '',
+      [QD.strReassignReason]: '',
+      [QD.strReassignRemarks]: '',
     });
   };
 
@@ -123,20 +124,20 @@ export default function SeccionAsignacion({ form, err, onConfirmarReasignacion, 
       <FormSection title="Asignación de Responsable">
         <div className="form-row cols-2">
           <ZdsSelect
-            name="qd_areaResponsable" control={control} label="Área responsable"
+            name={QD.strAssigneeArea} control={control} label="Área responsable"
             options={cllArea} withSearch disabled={!blnReassignMode}
             helpText="Áreas habilitadas para quejas (CAT-AREA)."
           />
           <ZdsSelect
-            name="qd_usuarioResponsable" control={control} label="Usuario responsable"
+            name={QD.strAssigneeUser} control={control} label="Usuario responsable"
             options={cllAreaUsers} withSearch
-            disabled={!blnReassignMode || !objWatch.qd_areaResponsable}
+            disabled={!blnReassignMode || !objWatch[QD.strAssigneeArea]}
             helpText="Solo usuarios autorizados del área (RUL-0051-02)."
           />
         </div>
         {blnReassignMode && (
           <div className="form-row cols-1">
-            <ZdsTextarea name="qd_observacionesAsignacion" control={control}
+            <ZdsTextarea name={QD.strAssignmentRemarks} control={control}
               label="Comentario de reasignación" maxLength={2000} />
           </div>
         )}
@@ -148,7 +149,7 @@ export default function SeccionAsignacion({ form, err, onConfirmarReasignacion, 
               </ZrButton>
               <ZrButton
                 config="positive" loading={submitting}
-                disabled={submitting || !objWatch.qd_usuarioResponsable}
+                disabled={submitting || !objWatch[QD.strAssigneeUser]}
                 onClick={onConfirmarReasignacion}
               >
                 Confirmar Reasignación
@@ -166,9 +167,9 @@ export default function SeccionAsignacion({ form, err, onConfirmarReasignacion, 
       <FormSection title="">
         <div className="form-row cols-1">
           <ZdsRadio
-            name="qd_necesitaOtrasAreas" control={control}
+            name={QD.strNeedsOtherAreas} control={control}
             label="¿Necesitas de otras áreas para dar respuesta completa?"
-            options={OPTIONS.sino} inline
+            options={OPTIONS_SI_NO} inline
           />
         </div>
 
@@ -186,21 +187,21 @@ export default function SeccionAsignacion({ form, err, onConfirmarReasignacion, 
                   ({lstHistory.length}/{MAX_AYUDANTES}).
                 </p>
                 <div className="form-row cols-2">
-                  <ZdsSelect name="qd_areaDestino" control={control} label="Área destino"
-                    options={cllArea} withSearch error={err('qd_areaDestino')}
+                  <ZdsSelect name={QD.strTargetArea} control={control} label="Área destino"
+                    options={cllArea} withSearch error={err(QD.strTargetArea)}
                     helpText="CAT-AREA." />
-                  <ZdsSelect name="qd_nuevoResponsable" control={control} label="Responsable"
-                    options={objWatch.qd_nuevoResponsable ? [{ value: objWatch.qd_nuevoResponsable, label: objWatch.qd_nuevoResponsable }] : []}
+                  <ZdsSelect name={QD.strNewAssignee} control={control} label="Responsable"
+                    options={objWatch[QD.strNewAssignee] ? [{ value: objWatch[QD.strNewAssignee], label: objWatch[QD.strNewAssignee] }] : []}
                     disabled
                     helpText="Autocompletado según el área destino (CAT-USUARIOS-ROLE)." />
                 </div>
                 <div className="form-row cols-1">
-                  <ZdsSelect name="qd_motivoReasignacion" control={control} label="Motivo"
-                    options={cllReassignReason} error={err('qd_motivoReasignacion')}
+                  <ZdsSelect name={QD.strReassignReason} control={control} label="Motivo"
+                    options={cllReassignReason} error={err(QD.strReassignReason)}
                     helpText="CAT-MOTIVO-REASIG." />
                 </div>
                 <div className="form-row cols-1">
-                  <ZdsTextarea name="qd_observacionesReasignacion" control={control}
+                  <ZdsTextarea name={QD.strReassignRemarks} control={control}
                     label="Observaciones (justificación)" maxLength={2000}
                     helpText="Obligatorio (RUL-0051-04). Queda en el historial para auditoría." />
                 </div>

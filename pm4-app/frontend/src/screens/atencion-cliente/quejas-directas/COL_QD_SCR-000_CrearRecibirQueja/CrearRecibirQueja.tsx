@@ -10,7 +10,12 @@ import {
 } from '../../../../components/fields/ZdsFields';
 import pm4 from '../../../../api/pm4Client';
 import { useCollection } from '../../../../core/useCollection';
-import { COLLECTION_DEFS, DEFAULTS, ADJUNTO_KEYS, CrearRecibirQuejaFormData, WEB_ENTRY_PROCESS_ID, WEB_ENTRY_EVENT_ID } from './variables';
+import {
+  QD, QD_COLLECTIONS,
+  SCR000_DEFAULTS as DEFAULTS, SCR000_ADJUNTO_KEYS as ADJUNTO_KEYS,
+  SCR000_WEB_ENTRY_PROCESS_ID as WEB_ENTRY_PROCESS_ID, SCR000_WEB_ENTRY_EVENT_ID as WEB_ENTRY_EVENT_ID,
+} from '../campos/fields';
+import type { CrearRecibirQuejaFormData } from '../campos/fields';
 import SeccionConsumidor from './SeccionConsumidor';
 import SeccionDetalleQueja from './SeccionDetalleQueja';
 import RecaptchaModal from '../../../../components/RecaptchaModal';
@@ -44,15 +49,15 @@ export default function CrearRecibirQueja() {
   const objWatch = watch();
 
   // Cargamos los catalogos de la primera seccion del formulario.
-  const { options: cllRequestType } = useCollection(COLLECTION_DEFS.tipoSolicitud);
-  const { options: cllRole } = useCollection(COLLECTION_DEFS.rol);
-  const { options: cllInstance } = useCollection(COLLECTION_DEFS.instancia);
-  const { options: cllReceptionPoint } = useCollection(COLLECTION_DEFS.puntoRecepcion);
-  const { options: cllChannel } = useCollection(COLLECTION_DEFS.canal);
-  const { options: cllAlliance } = useCollection(COLLECTION_DEFS.alianza);
+  const { options: cllRequestType } = useCollection(QD_COLLECTIONS.requestType);
+  const { options: cllRole } = useCollection(QD_COLLECTIONS.filerRole);
+  const { options: cllInstance } = useCollection(QD_COLLECTIONS.receptionInstance);
+  const { options: cllReceptionPoint } = useCollection(QD_COLLECTIONS.receptionPoint);
+  const { options: cllChannel } = useCollection(QD_COLLECTIONS.channel);
+  const { options: cllAlliance } = useCollection(QD_COLLECTIONS.alliance);
 
   // Empleado Zurich = rol código '3' (ver RUL-000-01). Solo este rol ve el campo Alianza.
-  const blnIsZurichEmp = String(objWatch.qd_rolRadicador) === '3';
+  const blnIsZurichEmp = String(objWatch[QD.strFilerRole]) === '3';
 
   // Precargamos el formulario con los datos que llegan de la tarea.
   useEffect(() => {
@@ -65,27 +70,27 @@ export default function CrearRecibirQueja() {
   //   Defensor del consumidor(4)                                          → Defensor del consumidor financiero (3)
   //   SFC (instancia 1) se asigna automáticamente vía la integración SFC, no aquí.
   useEffect(() => {
-    if (!objWatch.qd_rolRadicador || cllInstance.length === 0) return;
-    const strRole = String(objWatch.qd_rolRadicador);
+    if (!objWatch[QD.strFilerRole] || cllInstance.length === 0) return;
+    const strRole = String(objWatch[QD.strFilerRole]);
     let strInstanceCode = '';
     if (strRole === '4') strInstanceCode = '3';
     else if (['1', '2', '3', '5'].includes(strRole)) strInstanceCode = '2';
     const objInstance = cllInstance.find((o) => o.value === strInstanceCode);
-    if (objInstance) form.setValue('qd_instanciaRecepcion', objInstance.label);
-  }, [objWatch.qd_rolRadicador, cllInstance, form]);
+    if (objInstance) form.setValue(QD.strReceptionInstance, objInstance.label);
+  }, [objWatch[QD.strFilerRole], cllInstance, form]);
 
   // Punto de recepción por defecto para radicación web = "Internet" (CAT-PUNTO).
   // Ahora es un select editable, así que se precarga el código (value), no la etiqueta.
   useEffect(() => {
-    if (objWatch.qd_puntoRecepcion || cllReceptionPoint.length === 0) return;
+    if (objWatch[QD.strReceptionPoint] || cllReceptionPoint.length === 0) return;
     const objInternet = cllReceptionPoint.find((o) => /internet/i.test(o.label));
-    if (objInternet) form.setValue('qd_puntoRecepcion', objInternet.value);
-  }, [objWatch.qd_puntoRecepcion, cllReceptionPoint, form]);
+    if (objInternet) form.setValue(QD.strReceptionPoint, objInternet.value);
+  }, [objWatch[QD.strReceptionPoint], cllReceptionPoint, form]);
 
   // La alianza solo aplica al rol Empleado Zurich; al cambiar a otro rol se limpia.
   useEffect(() => {
-    if (!blnIsZurichEmp && objWatch.qd_alianza) form.setValue('qd_alianza', '');
-  }, [blnIsZurichEmp, objWatch.qd_alianza, form]);
+    if (!blnIsZurichEmp && objWatch[QD.strAlliance]) form.setValue(QD.strAlliance, '');
+  }, [blnIsZurichEmp, objWatch[QD.strAlliance], form]);
 
   // Recorremos el registro de archivos para subir cada adjunto a PM4.
   const uploadFiles = async (in_intRequestId: number) => {
@@ -152,7 +157,7 @@ export default function CrearRecibirQueja() {
       setBlnSending(false);
       return;
     }
-    await sendToPm4({ ...objData, qd_captcha: true });
+    await sendToPm4({ ...objData, [QD.blnCaptcha]: true });
     // En éxito, sendToPm4 pone blnSent=true y se muestra la pantalla de confirmación;
     // si falló, quitamos el overlay para que el usuario vea el form y el error.
     setBlnSending(false);
@@ -192,11 +197,11 @@ export default function CrearRecibirQueja() {
   // Atajo para leer el mensaje de error de un campo.
   const err = (in_strName: keyof CrearRecibirQuejaFormData) => errors[in_strName]?.message;
   // Habilita el envío solo si el usuario autorizó el tratamiento de datos.
-  const blnCanSubmit = !!objWatch.qd_autorizacionDatos;
+  const blnCanSubmit = !!objWatch[QD.blnDataAuth];
   // Indica si el caso ya tiene estado ante la SFC.
-  const blnHasSfcStatus = !!objWatch.qd_estadoSmartSupervision || !!objWatch.qd_fechaRadicacionSFC;
+  const blnHasSfcStatus = !!objWatch[QD.strSmartSupStatus] || !!objWatch[QD.strSfcFilingDate];
   // Indica si el caso ya tiene responsable asignado.
-  const blnHasAssignee = !!objWatch.qd_rolResponsable || !!objWatch.qd_responsable;
+  const blnHasAssignee = !!objWatch[QD.strAssigneeRole] || !!objWatch[QD.strAssignee];
 
   return (
     <div className="screen-wrapper">
@@ -228,27 +233,27 @@ export default function CrearRecibirQueja() {
               validación de seguridad (captcha) antes de radicar.
             </ZrAlert>
             <div className="form-row cols-2">
-              <ZdsSelect name="qd_tipoSolicitud" control={control} label="¿A qué está asociado tu comentario?"
+              <ZdsSelect name={QD.strRequestType} control={control} label="¿A qué está asociado tu comentario?"
                 options={cllRequestType} rules={{ required: 'Campo requerido' }} required
-                error={err('qd_tipoSolicitud')} />
-              <ZdsSelect name="qd_rolRadicador" control={control} label="Selecciona tu rol"
+                error={err(QD.strRequestType)} />
+              <ZdsSelect name={QD.strFilerRole} control={control} label="Selecciona tu rol"
                 options={cllRole} rules={{ required: 'Campo requerido' }} required
-                error={err('qd_rolRadicador')} />
+                error={err(QD.strFilerRole)} />
             </div>
             <div className="form-row cols-2">
-              <ZdsSelect name="qd_canal" control={control} label="Canal"
+              <ZdsSelect name={QD.strChannel} control={control} label="Canal"
                 options={cllChannel} rules={{ required: 'Campo requerido' }} required
-                error={err('qd_canal')} />
-              <ZdsSelect name="qd_puntoRecepcion" control={control} label="Punto de Recepción"
+                error={err(QD.strChannel)} />
+              <ZdsSelect name={QD.strReceptionPoint} control={control} label="Punto de Recepción"
                 options={cllReceptionPoint} rules={{ required: 'Campo requerido' }} required
-                error={err('qd_puntoRecepcion')} />
+                error={err(QD.strReceptionPoint)} />
             </div>
             <div className="form-row cols-2">
-              <ZdsInput name="qd_instanciaRecepcion" control={control} label="Instancia de Recepción" readOnly
+              <ZdsInput name={QD.strReceptionInstance} control={control} label="Instancia de Recepción" readOnly
                 helpText="Asignada automáticamente según el rol (CAT-INSTANCIA)." />
               {blnIsZurichEmp ? (
-                <ZdsSelect name="qd_alianza" control={control} label="Alianza"
-                  options={cllAlliance} error={err('qd_alianza')} />
+                <ZdsSelect name={QD.strAlliance} control={control} label="Alianza"
+                  options={cllAlliance} error={err(QD.strAlliance)} />
               ) : (
                 <div />
               )}
@@ -264,10 +269,10 @@ export default function CrearRecibirQueja() {
           {/* ── S4: Autorización y Envío ── */}
           <FormSection title="Autorización y Envío">
             <div className="form-row cols-1">
-              <ZdsCheckboxField name="qd_autorizacionDatos" control={control}
+              <ZdsCheckboxField name={QD.blnDataAuth} control={control}
                 label="Autorizo el tratamiento de mis datos personales conforme a la política de privacidad." />
             </div>
-            {isSubmitted && !objWatch.qd_autorizacionDatos && (
+            {isSubmitted && !objWatch[QD.blnDataAuth] && (
               <ZrAlert config="alert" {...({ 'hide-close': true } as object)}>
                 Debe aceptar el tratamiento de datos personales para poder radicar su solicitud. (MSG-000-04)
               </ZrAlert>
@@ -280,10 +285,10 @@ export default function CrearRecibirQueja() {
               </ZrAlert>
             )}
             <div className="form-row cols-2">
-              <ZdsInput name="qd_correoCopia" control={control} label="¿Quieres enviar copia de la respuesta a otro correo?"
+              <ZdsInput name={QD.strCcEmail} control={control} label="¿Quieres enviar copia de la respuesta a otro correo?"
                 inputType="email"
                 rules={{ pattern: { value: /^[^\s@]+@[^\s@]+\.[^\s@]+$/, message: 'Formato esperado: usuario@dominio.com' } }}
-                error={err('qd_correoCopia')} />
+                error={err(QD.strCcEmail)} />
               <div />
             </div>
           </FormSection>
@@ -295,12 +300,12 @@ export default function CrearRecibirQueja() {
                 <div className="zds-field-wrap">
                   <span className="info-bar-label">Estado SmartSupervision</span>
                   <div style={{ marginTop: 'var(--zs-50)' }}>
-                    <ZdsStatusBadge variant={estadoVariant(objWatch.qd_estadoSmartSupervision || '')}>
-                      {objWatch.qd_estadoSmartSupervision || 'Sin estado'}
+                    <ZdsStatusBadge variant={estadoVariant(objWatch[QD.strSmartSupStatus] || '')}>
+                      {objWatch[QD.strSmartSupStatus] || 'Sin estado'}
                     </ZdsStatusBadge>
                   </div>
                 </div>
-                <ZdsInput name="qd_fechaRadicacionSFC" control={control} label="Fecha y hora radicación SFC" readOnly />
+                <ZdsInput name={QD.strSfcFilingDate} control={control} label="Fecha y hora radicación SFC" readOnly />
               </div>
             </FormSection>
           )}
@@ -309,8 +314,8 @@ export default function CrearRecibirQueja() {
           {blnHasAssignee && (
             <FormSection title="Responsable Asignado">
               <div className="form-row cols-2">
-                <ZdsInput name="qd_rolResponsable" control={control} label="Rol (Grupo)" readOnly />
-                <ZdsInput name="qd_responsable" control={control} label="Responsable" readOnly />
+                <ZdsInput name={QD.strAssigneeRole} control={control} label="Rol (Grupo)" readOnly />
+                <ZdsInput name={QD.strAssignee} control={control} label="Responsable" readOnly />
               </div>
             </FormSection>
           )}

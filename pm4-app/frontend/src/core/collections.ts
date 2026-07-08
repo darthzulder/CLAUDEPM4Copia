@@ -137,8 +137,10 @@ export const GLOBAL_COLLECTIONS = {
     id: 15,
     labelField: 'data.nombre_municipio',
     valueField: 'data.codigo_municipio',
-    dependsOn: 'qd_departamento',
-    pmqlTemplate: 'data.codigo_departamento = "{{qd_departamento}}"',
+    // dependsOn/pmqlTemplate referencian el campo real qd_strDepartment (ver
+    // campos/MAPEO_qd_old_new.md #1) — se llama con el objWatch real, no un shim.
+    dependsOn: 'qd_strDepartment',
+    pmqlTemplate: 'data.codigo_departamento = "{{qd_strDepartment}}"',
   } satisfies CollectionDef,
 
   qd_condicionEspecial: {

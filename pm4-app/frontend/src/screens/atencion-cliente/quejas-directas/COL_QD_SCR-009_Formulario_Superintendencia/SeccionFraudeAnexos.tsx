@@ -2,7 +2,8 @@ import type { UseFormReturn } from 'react-hook-form';
 import FormSection from '../../../../components/FormSection';
 import { ZdsSelect, ZdsInput, ZdsRadio, ZrButton, ZrAlert } from '../../../../components/fields/ZdsFields';
 import { useCollection } from '../../../../core/useCollection';
-import { OPTIONS, COLLECTION_DEFS, type FormularioSuperintendenciaFormData } from './variables';
+import { QD, QD_COLLECTIONS, OPTIONS_SI_NO } from '../campos/fields';
+import type { FormularioSuperintendenciaFormData } from '../campos/fields';
 
 interface Props {
   form: UseFormReturn<FormularioSuperintendenciaFormData>;
@@ -18,11 +19,11 @@ export default function SeccionFraudeAnexos({ form, err }: Props) {
   const objWatch = watch();
 
   // Cargamos los catalogos de fraude
-  const { options: cllFraudType } = useCollection(COLLECTION_DEFS.tipoFraude);
-  const { options: cllFraudModality } = useCollection(COLLECTION_DEFS.modalidadFraude);
+  const { options: cllFraudType } = useCollection(QD_COLLECTIONS.fraudType);
+  const { options: cllFraudModality } = useCollection(QD_COLLECTIONS.fraudModality);
 
   // RUL-009-01 — campos de fraude visibles y obligatorios si relacionadaFraude = Sí.
-  const blnIsFraud = objWatch.qd_relacionadaFraude === 'SI';
+  const blnIsFraud = objWatch[QD.strFraudRelated] === 'SI';
   const objFraudReq = blnIsFraud ? { required: 'Campo requerido' } : {};
 
   return (
@@ -31,9 +32,9 @@ export default function SeccionFraudeAnexos({ form, err }: Props) {
       <FormSection title="Datos de Fraude CE-019-2024">
         <div className="form-row cols-1">
           <ZdsRadio
-            name="qd_relacionadaFraude" control={control} label="¿Relacionada con Fraude?"
-            options={OPTIONS.sino} inline required
-            rules={{ required: 'Campo requerido' }} error={err('qd_relacionadaFraude')}
+            name={QD.strFraudRelated} control={control} label="¿Relacionada con Fraude?"
+            options={OPTIONS_SI_NO} inline required
+            rules={{ required: 'Campo requerido' }} error={err(QD.strFraudRelated)}
           />
         </div>
 
@@ -44,18 +45,18 @@ export default function SeccionFraudeAnexos({ form, err }: Props) {
               <strong> CE 019/2024</strong>: Tipo, Modalidad y Montos. {/* MSG-009-01 */}
             </ZrAlert>
             <div className="form-row cols-2">
-              <ZdsSelect name="qd_tipoFraude" control={control} label="Tipo de Fraude"
-                options={cllFraudType} required rules={objFraudReq} error={err('qd_tipoFraude')}
+              <ZdsSelect name={QD.strFraudType} control={control} label="Tipo de Fraude"
+                options={cllFraudType} required rules={objFraudReq} error={err(QD.strFraudType)}
                 helpText="CAT-TIPO-FRAUDE (CE 019/2024)." />
-              <ZdsSelect name="qd_modalidadFraude" control={control} label="Modalidad de Fraude"
-                options={cllFraudModality} required rules={objFraudReq} error={err('qd_modalidadFraude')}
+              <ZdsSelect name={QD.strFraudModality} control={control} label="Modalidad de Fraude"
+                options={cllFraudModality} required rules={objFraudReq} error={err(QD.strFraudModality)}
                 helpText="CAT-MOD-FRAUDE (CE 019/2024)." />
             </div>
             <div className="form-row cols-2">
-              <ZdsInput name="qd_montoReclamado" control={control} label="Monto Reclamado (COP)"
-                required rules={{ ...objFraudReq, ...objAmountOnly }} error={err('qd_montoReclamado')} />
-              <ZdsInput name="qd_montoReconocido" control={control} label="Monto Reconocido (COP)"
-                required rules={{ ...objFraudReq, ...objAmountOnly }} error={err('qd_montoReconocido')} />
+              <ZdsInput name={QD.strClaimedAmount} control={control} label="Monto Reclamado (COP)"
+                required rules={{ ...objFraudReq, ...objAmountOnly }} error={err(QD.strClaimedAmount)} />
+              <ZdsInput name={QD.strAcknowledgedAmount} control={control} label="Monto Reconocido (COP)"
+                required rules={{ ...objFraudReq, ...objAmountOnly }} error={err(QD.strAcknowledgedAmount)} />
             </div>
           </>
         )}
@@ -64,27 +65,27 @@ export default function SeccionFraudeAnexos({ form, err }: Props) {
       {/* ── S5 · Anexos del Formulario (SEC-032) ── */}
       <FormSection title="Anexos del Formulario">
         <div className="form-row cols-2">
-          <ZdsRadio name="qd_incluyeAnexosQueja" control={control} label="¿Incluye Anexos a la Queja?"
-            options={OPTIONS.sino} inline required
-            rules={{ required: 'Campo requerido' }} error={err('qd_incluyeAnexosQueja')} />
-          <ZdsRadio name="qd_incluyeAdjuntoRespuesta" control={control} label="¿Incluye Adjunto Respuesta Final?"
-            options={OPTIONS.sino} inline required
-            rules={{ required: 'Campo requerido' }} error={err('qd_incluyeAdjuntoRespuesta')} />
+          <ZdsRadio name={QD.strIncludesComplaintAnnex} control={control} label="¿Incluye Anexos a la Queja?"
+            options={OPTIONS_SI_NO} inline required
+            rules={{ required: 'Campo requerido' }} error={err(QD.strIncludesComplaintAnnex)} />
+          <ZdsRadio name={QD.strIncludesReplyAttach} control={control} label="¿Incluye Adjunto Respuesta Final?"
+            options={OPTIONS_SI_NO} inline required
+            rules={{ required: 'Campo requerido' }} error={err(QD.strIncludesReplyAttach)} />
         </div>
         <div className="form-row cols-2 row-align-bottom">
-          <ZdsInput name="qd_pdfRespuestaFinal" control={control} label="PDF Respuesta Final (generado)" readOnly
+          <ZdsInput name={QD.strFinalReplyPdf} control={control} label="PDF Respuesta Final (generado)" readOnly
             helpText="Generado por SP2-T06. Solo descarga." />
           <div className="field-wrap">
             <ZrButton config="secondary" icon="download:line"
-              disabled={!objWatch.qd_pdfRespuestaFinal}
-              onClick={() => { if (objWatch.qd_pdfRespuestaFinal) window.open(objWatch.qd_pdfRespuestaFinal, '_blank'); }}>
+              disabled={!objWatch[QD.strFinalReplyPdf]}
+              onClick={() => { if (objWatch[QD.strFinalReplyPdf]) window.open(objWatch[QD.strFinalReplyPdf], '_blank'); }}>
               Descargar PDF
             </ZrButton>
           </div>
         </div>
         <div className="form-row cols-2">
-          <ZdsInput name="qd_diasProrroga" control={control} label="Prórroga (días, si aplica)"
-            rules={objAmountOnly} error={err('qd_diasProrroga')}
+          <ZdsInput name={QD.strExtensionDays} control={control} label="Prórroga (días, si aplica)"
+            rules={objAmountOnly} error={err(QD.strExtensionDays)}
             helpText="Solo cuando el caso viene de SP4." />
           <div />
         </div>

@@ -12,7 +12,7 @@
 | Evento de apertura | SP4-T01 falla técnicamente → escala |
 | Acción de cierre | Autorizar Reenvío Prórroga → SP4-T01 |
 | Slug / `?screen=` | `COL_QD_SCR-011_Revision_Error_Tecnico_Prorroga` |
-| Archivos de implementación | `RevisionErrorTecnicoProrroga.tsx`, `variables.ts` |
+| Archivos de implementación | `RevisionErrorTecnicoProrroga.tsx` (config centralizada en campos/fields.ts) |
 | Versión | 1.0 — 2026-06-30 |
 
 > Es el análogo, para el flujo de **prórroga (SP4)**, de SCR-004 (error técnico de radicación).
@@ -49,24 +49,24 @@ raíz** y la **corrección aplicada** (obligatorias) y **autoriza el reenvío** 
 
 | Campo (UI) | Variable | Tipo | Fuente |
 |---|---|---|---|
-| Código HTTP prórroga | `qd_codigoHTTPProrroga` | `ZdsInput` readOnly | FLD-190 |
-| Tipo de Error | `qd_tipoErrorProrroga` | `ZdsInput` readOnly | FLD-191 |
-| Mensaje técnico de la API | `qd_mensajeTecnicoProrroga` | `ZdsTextarea` readOnly | FLD-192 |
-| Payload de prórroga enviado | `qd_payloadProrroga` | `ZdsTextarea` readOnly | FLD-193 |
-| Número de intento prórroga | `qd_intentoProrroga` | `ZdsInput` readOnly | FLD-194 |
+| Código HTTP prórroga | `qd_strExtHttpCode` | `ZdsInput` readOnly | FLD-190 |
+| Tipo de Error | `qd_strExtErrorType` | `ZdsInput` readOnly | FLD-191 |
+| Mensaje técnico de la API | `qd_strExtTechMessage` | `ZdsTextarea` readOnly | FLD-192 |
+| Payload de prórroga enviado | `qd_strExtPayload` | `ZdsTextarea` readOnly | FLD-193 |
+| Número de intento prórroga | `qd_strExtAttempt` | `ZdsInput` readOnly | FLD-194 |
 
 ### S2 — Registro de Corrección — Prórroga (SEC-038, editable)
 
 | Campo (UI) | Variable | Tipo | Obligatorio | Fuente |
 |---|---|---|---|---|
-| Causa Raíz | `qd_causaRaizProrroga` | `ZdsTextarea` | **Sí** | FLD-195 |
-| Corrección Aplicada | `qd_correccionProrroga` | `ZdsTextarea` | **Sí** | FLD-196 |
+| Causa Raíz | `qd_strExtRootCause` | `ZdsTextarea` | **Sí** | FLD-195 |
+| Corrección Aplicada | `qd_strExtCorrection` | `ZdsTextarea` | **Sí** | FLD-196 |
 
 ### Metadato de flujo (no visible)
 
 | Campo | Variable | Fuente |
 |---|---|---|
-| Acción/decisión BPMN | `qd_accion` (`AUTORIZAR_REENVIO` \| `ESCALAR_PROVEEDOR`) | Inferido de ACT-011-01/02 (§10) |
+| Acción/decisión BPMN | `qd_strAction` (`AUTORIZAR_REENVIO` \| `ESCALAR_PROVEEDOR`) | Inferido de ACT-011-01/02 (§10) |
 
 ---
 
@@ -103,7 +103,7 @@ raíz** y la **corrección aplicada** (obligatorias) y **autoriza el reenvío** 
 |---|---|---|
 | Panel de error con acento rojo | `FormSection color="var(--z-red)"` (igual que SCR-004) | Tipo "análisis técnico" |
 | Banner de error técnico de prórroga | `ZrAlert config="negative"` con número de intento | Contexto SCR-011 |
-| Escalar a proveedor | `completeTask` con `qd_accion='ESCALAR_PROVEEDOR'` | ACT-011-02 |
+| Escalar a proveedor | `completeTask` con `qd_strAction='ESCALAR_PROVEEDOR'` | ACT-011-02 |
 | Estados loading/error/submitting | `ZrLoader`, `ZrAlert`, botones `loading/disabled` | CLAUDE.md |
 
 ---
@@ -112,7 +112,7 @@ raíz** y la **corrección aplicada** (obligatorias) y **autoriza el reenvío** 
 
 | Campo Origen | Campo Dependiente | Comportamiento | Fuente |
 |---|---|---|---|
-| `qd_causaRaizProrroga` + `qd_correccionProrroga` | Botón "Autorizar Reenvío Prórroga" | Habilita autorizar solo si ambos están completos | RUL-011-01 |
+| `qd_strExtRootCause` + `qd_strExtCorrection` | Botón "Autorizar Reenvío Prórroga" | Habilita autorizar solo si ambos están completos | RUL-011-01 |
 
 ---
 
@@ -122,7 +122,7 @@ raíz** y la **corrección aplicada** (obligatorias) y **autoriza el reenvío** 
   con código SCR consistente con las hermanas.
 - **Nombres `data_name` (`qd_*`)** provisionales — Anexo03 no tiene variables para SP4-T05 (tarea
   de Usuario). Se actualizarán con el diccionario final.
-- **`qd_accion`** (metadato): no es un FLD; se deriva del botón presionado (ACT-011-01/02).
+- **`qd_strAction`** (metadato): no es un FLD; se deriva del botón presionado (ACT-011-01/02).
 - **`maxLength=2000`** en causa/corrección: límite estándar del proyecto, no especificado en el insumo.
 - **MSG-011-02** (éxito) lo emite el BPM tras `completeTask`; no se renderiza en la pantalla.
 - **No hay "Ver Log Completo"** en el insumo de SCR-011 (a diferencia de SCR-004): el mensaje
@@ -141,4 +141,4 @@ raíz** y la **corrección aplicada** (obligatorias) y **autoriza el reenvío** 
 | Mensajes (MSG-011-01/02) | 1/2 en UI | MSG-011-02 lo emite el BPM |
 | Catálogos | N/A | La pantalla no usa catálogos |
 
-**Elementos inferidos:** prefijo `qd_*`, metadato `qd_accion`, `maxLength=2000`.
+**Elementos inferidos:** prefijo `qd_*`, metadato `qd_strAction`, `maxLength=2000`.

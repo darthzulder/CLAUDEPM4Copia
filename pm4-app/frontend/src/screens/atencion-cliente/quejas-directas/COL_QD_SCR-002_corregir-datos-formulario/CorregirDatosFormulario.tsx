@@ -6,7 +6,9 @@ import InfoBar from '../../../../components/InfoBar';
 import ScreenHeader from '../../../../components/ScreenHeader';
 import { ZdsInput, ZrAlert, ZrButton, ZrLoader } from '../../../../components/fields/ZdsFields';
 import { useTask } from '../../../../core/useTask';
-import { ERRORES_EJEMPLO, type CampoConError, type CorregirDatosFormData } from './variables';
+import { QD, SCR002_ERRORES_EJEMPLO as ERRORES_EJEMPLO } from '../campos/fields';
+import type { CorregirDatosFormData } from '../campos/fields';
+import type { CampoConError } from '../campos/types';
 import SeccionErroresValidacion from './SeccionErroresValidacion';
 
 function parsearErrores(in_objErrorsJson: unknown): CampoConError[] {
@@ -25,16 +27,16 @@ export default function CorregirDatosFormulario() {
   // Tomamos una foto de los valores actuales del formulario.
   const objWatch = watch();
 
-  // Error list: proveniente de qd_errores_json (BPM) o del fallback de desarrollo
+  // Error list: proveniente de qd_strErrorsJson (BPM) o del fallback de desarrollo
   const lstFieldsWithError = useMemo<CampoConError[]>(() => {
-    const lstParsed = parsearErrores(objWatch.qd_errores_json);
+    const lstParsed = parsearErrores(objWatch[QD.strErrorsJson]);
     return lstParsed.length > 0 ? lstParsed : ERRORES_EJEMPLO;
-  }, [objWatch.qd_errores_json]);
+  }, [objWatch[QD.strErrorsJson]]);
 
   // Nombres de campos que deben quedar sin error antes de habilitar el envío
   const lstErrorFieldNames = useMemo((): Array<keyof CorregirDatosFormData> => {
     const objNames = new Set(lstFieldsWithError.map(objErr => objErr.campo as keyof CorregirDatosFormData));
-    if (objNames.has('qd_municipio')) objNames.add('qd_departamento');
+    if (objNames.has(QD.strCity)) objNames.add(QD.strDepartment);
     return Array.from(objNames);
   }, [lstFieldsWithError]);
 
@@ -52,15 +54,15 @@ export default function CorregirDatosFormulario() {
     if (objData) reset(objData);
 
     // Obtener nombres de error directamente de task.data para no depender de watch()
-    const objErrJson = objData?.qd_errores_json;
+    const objErrJson = objData?.[QD.strErrorsJson];
     const lstParsedFields = parsearErrores(objErrJson);
     const lstFieldsToTrigger: Array<keyof CorregirDatosFormData> =
       lstParsedFields.length > 0
         ? lstParsedFields.map(objErr => objErr.campo as keyof CorregirDatosFormData)
         : ERRORES_EJEMPLO.map(objErr => objErr.campo as keyof CorregirDatosFormData);
-    if (lstParsedFields.some(objErr => objErr.campo === 'qd_municipio') ||
-        ERRORES_EJEMPLO.some(objErr => objErr.campo === 'qd_municipio')) {
-      lstFieldsToTrigger.push('qd_departamento');
+    if (lstParsedFields.some(objErr => objErr.campo === QD.strCity) ||
+        ERRORES_EJEMPLO.some(objErr => objErr.campo === QD.strCity)) {
+      lstFieldsToTrigger.push(QD.strDepartment);
     }
 
     const tspTimer = setTimeout(async () => {
@@ -97,8 +99,8 @@ export default function CorregirDatosFormulario() {
 
       <div className="screen-content">
         <InfoBar items={[
-          { label: 'Caso',              value: objWatch.qd_idCasoBPM || '—' },
-          { label: 'SLA Restante',      value: objWatch.qd_slaRestante || '—' },
+          { label: 'Caso',              value: objWatch[QD.strBpmCaseId] || '—' },
+          { label: 'SLA Restante',      value: objWatch[QD.strSlaRemaining] || '—' },
           { label: 'Estado',            value: 'En corrección preventiva' },
           { label: 'Errores pendientes', value: `${intPendingErrors} de ${lstFieldsWithError.length}` },
         ]} />
@@ -120,9 +122,9 @@ export default function CorregirDatosFormulario() {
           {/* Datos del Caso — solo lectura */}
           <FormSection title="Datos del Caso">
             <div className="form-row cols-3">
-              <ZdsInput name="qd_idCasoBPM"      control={control} label="Número de Caso"      readOnly />
-              <ZdsInput name="qd_canal"          control={control} label="Canal de Recepción"  readOnly />
-              <ZdsInput name="qd_slaRestante"    control={control} label="SLA Restante"         readOnly />
+              <ZdsInput name={QD.strBpmCaseId}   control={control} label="Número de Caso"      readOnly />
+              <ZdsInput name={QD.strChannel}     control={control} label="Canal de Recepción"  readOnly />
+              <ZdsInput name={QD.strSlaRemaining} control={control} label="SLA Restante"        readOnly />
             </div>
           </FormSection>
 

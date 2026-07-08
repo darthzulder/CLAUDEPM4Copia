@@ -5,7 +5,7 @@
 **Proceso:** P01 — Gestión de Quejas Directas (ACZ-QD-001)
 **Rol responsable:** Consumidor Financiero (Cliente / Intermediario / Empleado Zurich / Defensor del Consumidor)
 **Versión del diseño:** TO-BE v3.0
-**Archivos de implementación:** `CrearRecibirQueja.tsx`, `SeccionConsumidor.tsx`, `SeccionDetalleQueja.tsx`, `variables.ts`, `errorHelper.ts`
+**Archivos de implementación:** `CrearRecibirQueja.tsx`, `SeccionConsumidor.tsx`, `SeccionDetalleQueja.tsx`, `errorHelper.ts` (config centralizada en `campos/fields.ts`)
 
 > ⚠️ **Nota de nomenclatura.** La carpeta y la pantalla implementada corresponden a **SCR-000 (PQRS Autoservicio / P01-T00)** del insumo v3.0 — campos FLD-300…FLD-341, reglas RUL-000-*, mensajes MSG-000-*. **No** es la SCR-001 (Crear/Recibir Queja, P01-T01, rol Gestor de Experiencia). Ver [Suposiciones realizadas](#suposiciones-realizadas).
 
@@ -41,16 +41,16 @@ Catálogos implementados como **colecciones dinámicas PM4** (no listas estátic
 
 | Catálogo (insumo) | Colección PM4 (id) | Campo |
 |---|---|---|
-| CAT-TIPO-SOLIC-PQRS | `qd_tipoSolicitud` (43) | `qd_tipoSolicitud` |
-| CAT-ROL-RADICADOR | `qd_rolRadicador` (39) | `qd_rolRadicador` |
-| CAT-TIPO-ID | `qd_tipoIdentificacion` (11) | `qd_tipoIdentificacion` |
-| CAT-PAIS | `qd_codigoPais` (13) | `qd_codigoPais` |
-| CAT-DPTO | `qd_departamento` (14) | `qd_departamento` |
-| CAT-MPIO | `qd_municipio` (15, depende de `qd_departamento`) | `qd_municipio` |
-| CAT-COND-ESP | `qd_condicionEspecial` (24) | `qd_condicionEspecial` |
-| CAT-PRODUCTO-SFC | `qd_productoSFC` (16) | `qd_productoSFC` |
-| CAT-MOTIVO-SFC | `qd_motivoSFC` (17) | `qd_motivoSFC` |
-| CAT-ADMISION | `qd_admision` (21) | `qd_admision` |
+| CAT-TIPO-SOLIC-PQRS | `qd_strRequestType` (43) | `qd_strRequestType` |
+| CAT-ROL-RADICADOR | `qd_strFilerRole` (39) | `qd_strFilerRole` |
+| CAT-TIPO-ID | `qd_strIdType` (11) | `qd_strIdType` |
+| CAT-PAIS | `qd_strCountryCode` (13) | `qd_strCountryCode` |
+| CAT-DPTO | `qd_strDepartment` (14) | `qd_strDepartment` |
+| CAT-MPIO | `qd_strCity` (15, depende de `qd_strDepartment`) | `qd_strCity` |
+| CAT-COND-ESP | `qd_strSpecialCondition` (24) | `qd_strSpecialCondition` |
+| CAT-PRODUCTO-SFC | `qd_strSfcProduct` (16) | `qd_strSfcProduct` |
+| CAT-MOTIVO-SFC | `qd_strSfcReason` (17) | `qd_strSfcReason` |
+| CAT-ADMISION | `qd_strAdmission` (21) | `qd_strAdmission` |
 
 ---
 
@@ -58,73 +58,73 @@ Catálogos implementados como **colecciones dinámicas PM4** (no listas estátic
 
 **S1 — Tipo de Solicitud y Rol** (`CrearRecibirQueja.tsx`):
 
-> **Nota:** `qd_idCasoBPM` (FLD-300) y `qd_fechaCreacion` (FLD-301) se retiraron del formulario:
+> **Nota:** `qd_strBpmCaseId` (FLD-300) y `qd_fechaCreacion` (FLD-301) se retiraron del formulario:
 > el caso y su timestamp los genera y captura el BPM al radicar, no el usuario en la creación.
 
 | Campo (UI) | Variable | Tipo | Obligatorio | Fuente |
 |---|---|---|---|---|
-| ¿A qué está asociado tu comentario? | `qd_tipoSolicitud` | Select (CAT-TIPO-SOLIC-PQRS) | Sí | Anexo02 > SCR-000 > FLD-302 (fila 18) |
-| Selecciona tu rol | `qd_rolRadicador` | Select (CAT-ROL-RADICADOR) | Sí | Anexo02 > SCR-000 > FLD-303 (fila 19) — "Determina instancia y punto de recepción" |
-| Canal | `qd_canal` | Select (CAT-CANAL) | Sí | Requerimiento — colección `qd_canal` (id 10) |
-| Punto de Recepción | `qd_puntoRecepcion` | Select (CAT-PUNTO), default "Internet" | Sí | Anexo02 > SCR-000 > FLD-304 (fila 20) — ahora editable |
-| Instancia de Recepción | `qd_instanciaRecepcion` | Texto, solo lectura (computado de rol) | Sí | Anexo02 > SCR-000 > FLD-305 (fila 21) |
-| Alianza | `qd_alianza` | Select (CAT-ALIANZA), visible solo si rol = Empleado Zurich | No | Requerimiento — colección `qd_alianza` (id 44) |
+| ¿A qué está asociado tu comentario? | `qd_strRequestType` | Select (CAT-TIPO-SOLIC-PQRS) | Sí | Anexo02 > SCR-000 > FLD-302 (fila 18) |
+| Selecciona tu rol | `qd_strFilerRole` | Select (CAT-ROL-RADICADOR) | Sí | Anexo02 > SCR-000 > FLD-303 (fila 19) — "Determina instancia y punto de recepción" |
+| Canal | `qd_strChannel` | Select (CAT-CANAL) | Sí | Requerimiento — colección `qd_strChannel` (id 10) |
+| Punto de Recepción | `qd_strReceptionPoint` | Select (CAT-PUNTO), default "Internet" | Sí | Anexo02 > SCR-000 > FLD-304 (fila 20) — ahora editable |
+| Instancia de Recepción | `qd_strReceptionInstance` | Texto, solo lectura (computado de rol) | Sí | Anexo02 > SCR-000 > FLD-305 (fila 21) |
+| Alianza | `qd_strAlliance` | Select (CAT-ALIANZA), visible solo si rol = Empleado Zurich | No | Requerimiento — colección `qd_strAlliance` (id 44) |
 
 **S2 — Datos del Consumidor Financiero** (`SeccionConsumidor.tsx`):
 
 | Campo (UI) | Variable | Tipo | Obligatorio | Fuente |
 |---|---|---|---|---|
-| Tipo de identificación | `qd_tipoIdentificacion` | Select (CAT-TIPO-ID) con búsqueda | Sí | Anexo02 > SCR-000 > FLD-306 (fila 22) |
-| Número de identificación | `qd_numeroIdentificacion` | Texto (alfanumérico 5–15) | Sí | Anexo02 > SCR-000 > FLD-307 (fila 23) |
-| ¿Cuáles son tus nombres? | `qd_nombres` | Texto, solo letras | Sí (si Natural) | Anexo02 > SCR-000 > FLD-308 (fila 24) |
-| ¿Cuáles son tus apellidos? | `qd_apellidos` | Texto, solo letras | Sí (si Natural) | Anexo02 > SCR-000 > FLD-309 (fila 25) |
-| Razón social | `qd_razonSocial` | Texto | Sí (si Jurídica/NIT) | Anexo02 > SCR-000 > FLD-310 (fila 26) |
-| Nombres persona de contacto | `qd_nombresContacto` | Texto, solo letras | Sí (si Jurídica) | Anexo02 > SCR-000 > FLD-311 (fila 27) |
-| Apellidos persona de contacto | `qd_apellidosContacto` | Texto, solo letras | Sí (si Jurídica) | Anexo02 > SCR-000 > FLD-312 (fila 28) |
-| Celular | `qd_telefono` | Tel (10 dígitos) | Sí | Anexo02 > SCR-000 > FLD-313 (fila 29) |
-| Correo electrónico | `qd_correoElectronico` | Email | Sí | Anexo02 > SCR-000 > FLD-314 (fila 30) |
-| Tipo de persona | `qd_tipoPersona` | Texto, solo lectura (computado) | Sí | Anexo02 > SCR-000 > FLD-315 (fila 31) |
-| País | `qd_codigoPais` | Select (CAT-PAIS), default `170` | Sí | Anexo02 > SCR-000 > FLD-316 (fila 32) |
-| Departamento | `qd_departamento` | Select (CAT-DPTO) con búsqueda | Sí | Anexo02 > SCR-000 > FLD-317 (fila 33) |
-| Ciudad | `qd_municipio` | Select (CAT-MPIO), dependiente | Sí | Anexo02 > SCR-000 > FLD-318 (fila 34) |
-| Dirección | `qd_direccion` | Variable de back, **oculta** (no se muestra) | — | Anexo02 > SCR-000 > FLD-319 (fila 35) — "default vacío, pendiente API SFC" |
-| Sexo | `qd_sexo` | Variable de back, **oculta** (no se muestra), default "No informa" | — | Anexo02 > SCR-000 > FLD-320 (fila 36) |
-| LGBTIQ+ | `qd_lgbtiq` | Variable de back, oculta | — | Anexo02 > SCR-000 > FLD-321 (fila 37) — catálogo pendiente TI |
-| Condición especial | `qd_condicionEspecial` | Select (CAT-COND-ESP) | Sí | Anexo02 > SCR-000 > FLD-322 (fila 38) |
+| Tipo de identificación | `qd_strIdType` | Select (CAT-TIPO-ID) con búsqueda | Sí | Anexo02 > SCR-000 > FLD-306 (fila 22) |
+| Número de identificación | `qd_strIdNumber` | Texto (alfanumérico 5–15) | Sí | Anexo02 > SCR-000 > FLD-307 (fila 23) |
+| ¿Cuáles son tus nombres? | `qd_strFirstName` | Texto, solo letras | Sí (si Natural) | Anexo02 > SCR-000 > FLD-308 (fila 24) |
+| ¿Cuáles son tus apellidos? | `qd_strLastName` | Texto, solo letras | Sí (si Natural) | Anexo02 > SCR-000 > FLD-309 (fila 25) |
+| Razón social | `qd_strCompanyName` | Texto | Sí (si Jurídica/NIT) | Anexo02 > SCR-000 > FLD-310 (fila 26) |
+| Nombres persona de contacto | `qd_strContactFirstName` | Texto, solo letras | Sí (si Jurídica) | Anexo02 > SCR-000 > FLD-311 (fila 27) |
+| Apellidos persona de contacto | `qd_strContactLastName` | Texto, solo letras | Sí (si Jurídica) | Anexo02 > SCR-000 > FLD-312 (fila 28) |
+| Celular | `qd_strPhone` | Tel (10 dígitos) | Sí | Anexo02 > SCR-000 > FLD-313 (fila 29) |
+| Correo electrónico | `qd_strEmail` | Email | Sí | Anexo02 > SCR-000 > FLD-314 (fila 30) |
+| Tipo de persona | `qd_strPersonType` | Texto, solo lectura (computado) | Sí | Anexo02 > SCR-000 > FLD-315 (fila 31) |
+| País | `qd_strCountryCode` | Select (CAT-PAIS), default `170` | Sí | Anexo02 > SCR-000 > FLD-316 (fila 32) |
+| Departamento | `qd_strDepartment` | Select (CAT-DPTO) con búsqueda | Sí | Anexo02 > SCR-000 > FLD-317 (fila 33) |
+| Ciudad | `qd_strCity` | Select (CAT-MPIO), dependiente | Sí | Anexo02 > SCR-000 > FLD-318 (fila 34) |
+| Dirección | `qd_strAddress` | Variable de back, **oculta** (no se muestra) | — | Anexo02 > SCR-000 > FLD-319 (fila 35) — "default vacío, pendiente API SFC" |
+| Sexo | `qd_strSex` | Variable de back, **oculta** (no se muestra), default "No informa" | — | Anexo02 > SCR-000 > FLD-320 (fila 36) |
+| LGBTIQ+ | `qd_strLgbtiq` | Variable de back, oculta | — | Anexo02 > SCR-000 > FLD-321 (fila 37) — catálogo pendiente TI |
+| Condición especial | `qd_strSpecialCondition` | Select (CAT-COND-ESP) | Sí | Anexo02 > SCR-000 > FLD-322 (fila 38) |
 
 **S3 — Detalle de la Queja** (`SeccionDetalleQueja.tsx`):
 
 | Campo (UI) | Variable | Tipo | Obligatorio | Fuente |
 |---|---|---|---|---|
-| Selecciona el seguro | `qd_productoSFC` | Select (CAT-PRODUCTO-SFC) con búsqueda | Sí | Anexo02 > SCR-000 > FLD-323 (fila 39) |
-| Detalle del producto | `qd_detalleProducto` | Texto, solo lectura (back) | Sí | Anexo02 > SCR-000 > FLD-324 (fila 40) |
-| ¿Ya habías radicado / es reconsideración? | `qd_replica` | Radio Sí/No | Sí | Anexo02 > SCR-000 > FLD-325 (fila 41) — Réplica SFC |
-| Argumento de la réplica | `qd_argumentoReplica` | Textarea (máx 2000) | No (visible si réplica=Sí) | Anexo02 > SCR-000 > FLD-326 (fila 42) |
-| Escalamiento al Defensor del Consumidor | `qd_escalamientoDefensor` | Texto, solo lectura (computado) | Sí | Anexo02 > SCR-000 > FLD-327 (fila 43) |
-| Cuéntanos el motivo | `qd_motivoSFC` | Select (CAT-MOTIVO-SFC) con búsqueda | Sí | Anexo02 > SCR-000 > FLD-328 (fila 44) — "crítico: condiciona fraude en M3" |
-| Ingresa el detalle | `qd_textoQueja` | Textarea (50–2000) | Sí | Anexo02 > SCR-000 > FLD-329 (fila 45) |
-| Ingresa archivos adjuntos | `qd_adjunto_01…05` | Upload multi (máx 5) | Sí | Anexo02 > SCR-000 > FLD-330 (fila 46) — "pdf, jpg, png, docx. Máx 5 MB" |
-| Admisión | `qd_admision` | Select (si Defensor) / solo lectura | Sí | Anexo02 > SCR-000 > FLD-331 (fila 47) |
-| Ente de control | `qd_enteControl` | Texto, solo lectura (back), default "Otros" | Sí | Anexo02 > SCR-000 > FLD-332 (fila 48) |
-| Tutela | `qd_tutela` | Texto, solo lectura (back), default "No" | Sí | Anexo02 > SCR-000 > FLD-333 (fila 49) |
-| Queja Exprés | `qd_quejaExpres` | Texto, solo lectura (back), default "No" | Sí | Anexo02 > SCR-000 > FLD-334 (fila 50) |
+| Selecciona el seguro | `qd_strSfcProduct` | Select (CAT-PRODUCTO-SFC) con búsqueda | Sí | Anexo02 > SCR-000 > FLD-323 (fila 39) |
+| Detalle del producto | `qd_strProductDetail` | Texto, solo lectura (back) | Sí | Anexo02 > SCR-000 > FLD-324 (fila 40) |
+| ¿Ya habías radicado / es reconsideración? | `qd_strReply` | Radio Sí/No | Sí | Anexo02 > SCR-000 > FLD-325 (fila 41) — Réplica SFC |
+| Argumento de la réplica | `qd_strReplyArgument` | Textarea (máx 2000) | No (visible si réplica=Sí) | Anexo02 > SCR-000 > FLD-326 (fila 42) |
+| Escalamiento al Defensor del Consumidor | `qd_strOmbudsmanEscalation` | Texto, solo lectura (computado) | Sí | Anexo02 > SCR-000 > FLD-327 (fila 43) |
+| Cuéntanos el motivo | `qd_strSfcReason` | Select (CAT-MOTIVO-SFC) con búsqueda | Sí | Anexo02 > SCR-000 > FLD-328 (fila 44) — "crítico: condiciona fraude en M3" |
+| Ingresa el detalle | `qd_strComplaintText` | Textarea (50–2000) | Sí | Anexo02 > SCR-000 > FLD-329 (fila 45) |
+| Ingresa archivos adjuntos | `qd_strAttach01…05` | Upload multi (máx 5) | Sí | Anexo02 > SCR-000 > FLD-330 (fila 46) — "pdf, jpg, png, docx. Máx 5 MB" |
+| Admisión | `qd_strAdmission` | Select (si Defensor) / solo lectura | Sí | Anexo02 > SCR-000 > FLD-331 (fila 47) |
+| Ente de control | `qd_strControlEntity` | Texto, solo lectura (back), default "Otros" | Sí | Anexo02 > SCR-000 > FLD-332 (fila 48) |
+| Tutela | `qd_strTutela` | Texto, solo lectura (back), default "No" | Sí | Anexo02 > SCR-000 > FLD-333 (fila 49) |
+| Queja Exprés | `qd_strExpressComplaint` | Texto, solo lectura (back), default "No" | Sí | Anexo02 > SCR-000 > FLD-334 (fila 50) |
 
 **S4 — Autorización y Envío** (`CrearRecibirQueja.tsx`):
 
 | Campo (UI) | Variable | Tipo | Obligatorio | Fuente |
 |---|---|---|---|---|
-| Autorización de tratamiento de datos | `qd_autorizacionDatos` | Checkbox | Sí | Anexo02 > SCR-000 > FLD-335 (fila 51) |
-| Captcha (validación de seguridad) | `qd_captcha` | Checkbox (placeholder de captcha) | Sí | Anexo02 > SCR-000 > FLD-336 (fila 52) |
-| ¿Enviar copia de la respuesta a otro correo? | `qd_correoCopia` | Email | No | Anexo02 > SCR-000 > FLD-337 (fila 53) |
+| Autorización de tratamiento de datos | `qd_blnDataAuth` | Checkbox | Sí | Anexo02 > SCR-000 > FLD-335 (fila 51) |
+| Captcha (validación de seguridad) | `qd_blnCaptcha` | Checkbox (placeholder de captcha) | Sí | Anexo02 > SCR-000 > FLD-336 (fila 52) |
+| ¿Enviar copia de la respuesta a otro correo? | `qd_strCcEmail` | Email | No | Anexo02 > SCR-000 > FLD-337 (fila 53) |
 
 **S5 — Estado ante la SFC** y **S6 — Responsable Asignado** (post-radicación, solo lectura, render condicional):
 
 | Campo (UI) | Variable | Tipo | Obligatorio | Fuente |
 |---|---|---|---|---|
-| Estado SmartSupervision | `qd_estadoSmartSupervision` | Semáforo (`ZdsStatusBadge`) | No | Anexo02 > SCR-000 > FLD-338 (fila 54) |
-| Fecha y hora radicación SFC | `qd_fechaRadicacionSFC` | Texto, solo lectura | No | Anexo02 > SCR-000 > FLD-339 (fila 55) |
-| Rol (Grupo) | `qd_rolResponsable` | Texto, solo lectura | No | Anexo02 > SCR-000 > FLD-340 (fila 56) |
-| Responsable | `qd_responsable` | Texto, solo lectura | No | Anexo02 > SCR-000 > FLD-341 (fila 57) |
+| Estado SmartSupervision | `qd_strSmartSupStatus` | Semáforo (`ZdsStatusBadge`) | No | Anexo02 > SCR-000 > FLD-338 (fila 54) |
+| Fecha y hora radicación SFC | `qd_strSfcFilingDate` | Texto, solo lectura | No | Anexo02 > SCR-000 > FLD-339 (fila 55) |
+| Rol (Grupo) | `qd_strAssigneeRole` | Texto, solo lectura | No | Anexo02 > SCR-000 > FLD-340 (fila 56) |
+| Responsable | `qd_strAssignee` | Texto, solo lectura | No | Anexo02 > SCR-000 > FLD-341 (fila 57) |
 
 ---
 
@@ -132,16 +132,16 @@ Catálogos implementados como **colecciones dinámicas PM4** (no listas estátic
 
 | Validación | Comportamiento implementado | Fuente |
 |---|---|---|
-| Celular = exactamente 10 dígitos | `pattern` `/^\d{10}$/` en `qd_telefono` | Anexo02 > 05_Reglas > **RUL-000-04** (fila 39) → MSG-000-01 |
-| Correo con formato válido | `pattern` `/^[^\s@]+@[^\s@]+\.[^\s@]+$/` en `qd_correoElectronico` | Anexo02 > 05_Reglas > **RUL-000-05** (fila 40) → MSG-000-02 |
-| Detalle 50–2000 caracteres | `minLength 50` + `maxLength 2000` en `qd_textoQueja` | Anexo02 > 05_Reglas > **RUL-000-06** (fila 41) → MSG-000-03 |
+| Celular = exactamente 10 dígitos | `pattern` `/^\d{10}$/` en `qd_strPhone` | Anexo02 > 05_Reglas > **RUL-000-04** (fila 39) → MSG-000-01 |
+| Correo con formato válido | `pattern` `/^[^\s@]+@[^\s@]+\.[^\s@]+$/` en `qd_strEmail` | Anexo02 > 05_Reglas > **RUL-000-05** (fila 40) → MSG-000-02 |
+| Detalle 50–2000 caracteres | `minLength 50` + `maxLength 2000` en `qd_strComplaintText` | Anexo02 > 05_Reglas > **RUL-000-06** (fila 41) → MSG-000-03 |
 | Autorización de datos obligatoria | Botón Enviar deshabilitado (`puedeEnviar`) + alerta si submit sin marcar | Anexo02 > 05_Reglas > **RUL-000-07** (fila 42) → MSG-000-04 |
 | Captcha obligatorio | Botón Enviar deshabilitado (`puedeEnviar`) + alerta si submit sin marcar | Anexo02 > 05_Reglas > **RUL-000-08** (fila 43) → MSG-000-05 |
-| Número de identificación según tipo doc | `pattern` `/^[A-Za-z0-9]{5,15}$/` en `qd_numeroIdentificacion` | Anexo02 > 05_Reglas > **RUL-000-13** (fila 43) → MSG-000-07 |
+| Número de identificación según tipo doc | `pattern` `/^[A-Za-z0-9]{5,15}$/` en `qd_strIdNumber` | Anexo02 > 05_Reglas > **RUL-000-13** (fila 43) → MSG-000-07 |
 | Nombres/Apellidos solo letras | `pattern` `/^[A-Za-zÀ-ÿ\s]+$/` en nombres, apellidos y contacto | Anexo02 > SCR-000 FLD-308/309/311/312 ("Solo letras") |
-| Correo de copia (opcional) con formato | `pattern` de email en `qd_correoCopia` (sin `required`) | Anexo02 > SCR-000 > FLD-337 (fila 53) |
+| Correo de copia (opcional) con formato | `pattern` de email en `qd_strCcEmail` (sin `required`) | Anexo02 > SCR-000 > FLD-337 (fila 53) |
 | Campos obligatorios restantes | `required` en selects/radios obligatorios de S1–S3 | Anexo02 > SCR-000 (columna Oblig. = Sí) |
-| Argumento de réplica máx. 2000 | `maxLength 2000` en `qd_argumentoReplica` | Anexo02 > SCR-000 > FLD-326 (fila 42) |
+| Argumento de réplica máx. 2000 | `maxLength 2000` en `qd_strReplyArgument` | Anexo02 > SCR-000 > FLD-326 (fila 42) |
 > **Comportamiento de visualización de errores (UX):** Se utiliza la opción `mode: 'onTouched'` de React Hook Form nativa. Esto evita marcar en rojo campos vacíos que el usuario aún no ha enfocado y desenfocado, y recién empieza a validar conforme interactúa con ellos o cuando intenta enviar el formulario.
 
 ---
@@ -150,12 +150,12 @@ Catálogos implementados como **colecciones dinámicas PM4** (no listas estátic
 
 | Mensaje | Condición | Implementación | Fuente |
 |---|---|---|---|
-| "Debe contener exactamente 10 dígitos (MSG-000-01)" | Celular ≠ 10 dígitos | Mensaje del `pattern` de `qd_telefono` | Anexo02 > 06_Mensajes > **MSG-000-01** (fila 51) |
-| "Formato esperado: usuario@dominio.com (MSG-000-02)" | Correo inválido | Mensaje del `pattern` de `qd_correoElectronico` | Anexo02 > 06_Mensajes > **MSG-000-02** (fila 52) |
-| "Mínimo 50 / Máximo 2000 caracteres (MSG-000-03)" | Detalle fuera de rango | Mensajes de `minLength`/`maxLength` de `qd_textoQueja` | Anexo02 > 06_Mensajes > **MSG-000-03** (fila 53) |
+| "Debe contener exactamente 10 dígitos (MSG-000-01)" | Celular ≠ 10 dígitos | Mensaje del `pattern` de `qd_strPhone` | Anexo02 > 06_Mensajes > **MSG-000-01** (fila 51) |
+| "Formato esperado: usuario@dominio.com (MSG-000-02)" | Correo inválido | Mensaje del `pattern` de `qd_strEmail` | Anexo02 > 06_Mensajes > **MSG-000-02** (fila 52) |
+| "Mínimo 50 / Máximo 2000 caracteres (MSG-000-03)" | Detalle fuera de rango | Mensajes de `minLength`/`maxLength` de `qd_strComplaintText` | Anexo02 > 06_Mensajes > **MSG-000-03** (fila 53) |
 | "Debe aceptar el tratamiento de datos… (MSG-000-04)" | Autorización sin marcar al enviar | `ZrAlert config="alert"` condicional | Anexo02 > 06_Mensajes > **MSG-000-04** (fila 54) |
 | "Debe completar la validación de seguridad (captcha)… (MSG-000-05)" | Captcha sin marcar al enviar | `ZrAlert config="negative"` condicional | Anexo02 > 06_Mensajes > **MSG-000-05** (fila 55) |
-| "Verifica el formato según el tipo de documento (MSG-000-07)" | Identificación con formato inválido | Mensaje del `pattern` de `qd_numeroIdentificacion` | Anexo02 > 06_Mensajes > **MSG-000-07** (fila 57) |
+| "Verifica el formato según el tipo de documento (MSG-000-07)" | Identificación con formato inválido | Mensaje del `pattern` de `qd_strIdNumber` | Anexo02 > 06_Mensajes > **MSG-000-07** (fila 57) |
 | (No implementado en frontend) "Solo se permiten archivos pdf, jpg, png o docx, máx 5 MB (MSG-000-06)" | Archivo no permitido o > 5 MB | Delegado a `DocSupportUploader` (no verificado en este código) | Anexo02 > 06_Mensajes > **MSG-000-06** (fila 56); RUL-000-11 |
 | (No aplica en frontend) "Su solicitud fue radicada exitosamente. Número de caso: [ID]… (MSG-000-08)" | PQRS radicada | Pantalla muestra `ZrAlert` de éxito propio ("Tu solicitud fue radicada exitosamente…") tras enviar | Anexo02 > 06_Mensajes > **MSG-000-08** (fila 58) |
 
@@ -165,14 +165,14 @@ Catálogos implementados como **colecciones dinámicas PM4** (no listas estátic
 
 | Regla | Implementación | Fuente |
 |---|---|---|
-| El rol determina instancia y punto de recepción | `useEffect` sobre `qd_rolRadicador`: Defensor → instancia "1. Defensor del Consumidor Financiero", resto → "2. Entidad vigilada"; punto siempre "2. Virtual" | Anexo02 > 05_Reglas > **RUL-000-01** (fila 36); SCR-000 FLD-303/304/305 |
-| Tipo de documento define el tipo de persona | `esJuridica = tipoIdentificacion === 'NIT'`; `useEffect` fija `qd_tipoPersona` = Jurídica/Natural | Anexo02 > 05_Reglas > **RUL-000-02 / RUL-000-03** (filas 37–38); FLD-315 |
-| País precargado a Colombia (`170`) | `DEFAULTS.qd_codigoPais = '170'` | Anexo02 > 05_Reglas > **RUL-000-10** (fila 40); FLD-316 |
-| El correo es el destino de la respuesta final → obligatorio y validado | `required` + `pattern` en `qd_correoElectronico` | Anexo02 > SCR-000 FLD-314; Matrices > 2. Directrices fila 3 (P01-T01, 🟠 Control) |
+| El rol determina instancia y punto de recepción | `useEffect` sobre `qd_strFilerRole`: Defensor → instancia "1. Defensor del Consumidor Financiero", resto → "2. Entidad vigilada"; punto siempre "2. Virtual" | Anexo02 > 05_Reglas > **RUL-000-01** (fila 36); SCR-000 FLD-303/304/305 |
+| Tipo de documento define el tipo de persona | `esJuridica = tipoIdentificacion === 'NIT'`; `useEffect` fija `qd_strPersonType` = Jurídica/Natural | Anexo02 > 05_Reglas > **RUL-000-02 / RUL-000-03** (filas 37–38); FLD-315 |
+| País precargado a Colombia (`170`) | `DEFAULTS.qd_strCountryCode = '170'` | Anexo02 > 05_Reglas > **RUL-000-10** (fila 40); FLD-316 |
+| El correo es el destino de la respuesta final → obligatorio y validado | `required` + `pattern` en `qd_strEmail` | Anexo02 > SCR-000 FLD-314; Matrices > 2. Directrices fila 3 (P01-T01, 🟠 Control) |
 | Admisión editable solo si rol = Defensor | Render condicional: `ZdsSelect` si Defensor, `ZdsInput` readonly si no; default "No aplica" | Anexo02 > 05_Reglas > RUL-000-01 (fila 36); SCR-000 FLD-331 |
 | Escalamiento al Defensor computado | `useEffect`: Defensor → "Sí", resto → "No" (readonly) | Anexo02 > SCR-000 > FLD-327 (fila 43) |
-| Campos regulatorios asignados por back (defaults) | `DEFAULTS`: `qd_enteControl='Otros'`, `qd_tutela='No'`, `qd_quejaExpres='No'`, `qd_sexo='No aplica'`, `qd_lgbtiq='No aplica'`, `qd_direccion=''`, `qd_admision='No aplica'` | Anexo02 > SCR-000 FLD-319/320/321/331/332/333/334 (filas 35–52) |
-| Motivo SFC condiciona campos de fraude en M3 | `qd_motivoSFC` obligatorio (la activación de fraude ocurre en SCR-009/SCR-010, fuera de esta pantalla) | Anexo02 > SCR-000 > FLD-328 (fila 44) |
+| Campos regulatorios asignados por back (defaults) | `DEFAULTS`: `qd_strControlEntity='Otros'`, `qd_strTutela='No'`, `qd_strExpressComplaint='No'`, `qd_strSex='No aplica'`, `qd_strLgbtiq='No aplica'`, `qd_strAddress=''`, `qd_strAdmission='No aplica'` | Anexo02 > SCR-000 FLD-319/320/321/331/332/333/334 (filas 35–52) |
+| Motivo SFC condiciona campos de fraude en M3 | `qd_strSfcReason` obligatorio (la activación de fraude ocurre en SCR-009/SCR-010, fuera de esta pantalla) | Anexo02 > SCR-000 > FLD-328 (fila 44) |
 
 ---
 
@@ -183,8 +183,8 @@ Catálogos implementados como **colecciones dinámicas PM4** (no listas estátic
 | S1–S4 siempre visibles | `FormSection` × 4 | Anexo02 > 02_Secciones SEC-041…SEC-044 (filas 45–48) — "Visible: Siempre" |
 | S5 (Estado SFC) y S6 (Responsable) visibles solo tras radicación | Render condicional `tieneEstadoSFC` / `tieneResponsable` | Anexo02 > 02_Secciones SEC-045/SEC-046 (filas 49–50) — "Visible tras la radicación/asignación" |
 | Campos de persona natural vs. jurídica alternados | Render condicional `esJuridica` (NIT) | Anexo02 > 05_Reglas RUL-000-02/03 (filas 37–38) |
-| Ciudad deshabilitada hasta seleccionar Departamento | `disabled={!w.qd_departamento}` + placeholder dinámico | Anexo02 > 05_Reglas RUL-000-09 (fila 39); SCR-000 FLD-318 |
-| Argumento de réplica visible solo si réplica = Sí | Render condicional `w.qd_replica === 'SI'` | Anexo02 > 05_Reglas RUL-000-12 (fila 42); SCR-000 FLD-326 |
+| Ciudad deshabilitada hasta seleccionar Departamento | `disabled={!w.qd_strDepartment}` + placeholder dinámico | Anexo02 > 05_Reglas RUL-000-09 (fila 39); SCR-000 FLD-318 |
+| Argumento de réplica visible solo si réplica = Sí | Render condicional `w.qd_strReply === 'SI'` | Anexo02 > 05_Reglas RUL-000-12 (fila 42); SCR-000 FLD-326 |
 | Estado SmartSupervision como semáforo de color | `ZdsStatusBadge` + `estadoVariant()` (success/danger/info/neutral) | Anexo02 > SCR-000 FLD-338 (fila 54) — "Color tipo semáforo" |
 | Botón "Enviar PQRS" (primaria) habilitado solo con autorización + captcha | `disabled={... || !puedeEnviar}` | Anexo02 > 04_Acciones > **ACT-000-01** (fila 36) — condición de habilitación |
 | Botón "Limpiar Formulario" (secundaria) | `limpiarFormulario()` → `reset(DEFAULTS)` + limpia adjuntos | Anexo02 > 04_Acciones > **ACT-000-02** (fila 37) |
@@ -199,12 +199,12 @@ Catálogos implementados como **colecciones dinámicas PM4** (no listas estátic
 
 | Campo Origen | Campo Dependiente | Comportamiento | Fuente |
 |---|---|---|---|
-| `qd_rolRadicador` | `qd_instanciaRecepcion`, `qd_puntoRecepcion`, `qd_admision` | Defensor → instancia "Defensor" y Admisión editable; resto → "Entidad vigilada" y Admisión "No aplica". Punto = "Virtual" | Anexo02 > 05_Reglas RUL-000-01 (fila 36); FLD-303/304/305/331 |
-| `qd_rolRadicador` | `qd_escalamientoDefensor` | Defensor → "Sí"; resto → "No" | Anexo02 > SCR-000 FLD-327 (fila 43) |
-| `qd_tipoIdentificacion` | `qd_tipoPersona` + bloque de campos (Natural vs. Jurídica) | NIT → Jurídica (Razón Social + contacto); resto → Natural (Nombres/Apellidos) | Anexo02 > 05_Reglas RUL-000-02/03 (filas 37–38); FLD-315 |
-| `qd_departamento` | `qd_municipio` | Al cambiar departamento se limpia la ciudad y se recarga el catálogo (colección 15, `dependsOn: qd_departamento`); ciudad deshabilitada sin departamento | Anexo02 > 05_Reglas RUL-000-09 (fila 39); FLD-317/318 |
-| `qd_replica` (= Sí) | `qd_argumentoReplica` | Muestra el campo de argumento | Anexo02 > 05_Reglas RUL-000-12 (fila 42); FLD-325/326 |
-| `qd_motivoSFC` | Campos de fraude (Tipo/Modalidad/Montos) | Condiciona obligatoriedad de fraude — **efecto fuera de esta pantalla** (SCR-009/SCR-010) | Anexo02 > SCR-000 FLD-328 (fila 44) |
+| `qd_strFilerRole` | `qd_strReceptionInstance`, `qd_strReceptionPoint`, `qd_strAdmission` | Defensor → instancia "Defensor" y Admisión editable; resto → "Entidad vigilada" y Admisión "No aplica". Punto = "Virtual" | Anexo02 > 05_Reglas RUL-000-01 (fila 36); FLD-303/304/305/331 |
+| `qd_strFilerRole` | `qd_strOmbudsmanEscalation` | Defensor → "Sí"; resto → "No" | Anexo02 > SCR-000 FLD-327 (fila 43) |
+| `qd_strIdType` | `qd_strPersonType` + bloque de campos (Natural vs. Jurídica) | NIT → Jurídica (Razón Social + contacto); resto → Natural (Nombres/Apellidos) | Anexo02 > 05_Reglas RUL-000-02/03 (filas 37–38); FLD-315 |
+| `qd_strDepartment` | `qd_strCity` | Al cambiar departamento se limpia la ciudad y se recarga el catálogo (colección 15, `dependsOn: qd_strDepartment`); ciudad deshabilitada sin departamento | Anexo02 > 05_Reglas RUL-000-09 (fila 39); FLD-317/318 |
+| `qd_strReply` (= Sí) | `qd_strReplyArgument` | Muestra el campo de argumento | Anexo02 > 05_Reglas RUL-000-12 (fila 42); FLD-325/326 |
+| `qd_strSfcReason` | Campos de fraude (Tipo/Modalidad/Montos) | Condiciona obligatoriedad de fraude — **efecto fuera de esta pantalla** (SCR-009/SCR-010) | Anexo02 > SCR-000 FLD-328 (fila 44) |
 
 ---
 

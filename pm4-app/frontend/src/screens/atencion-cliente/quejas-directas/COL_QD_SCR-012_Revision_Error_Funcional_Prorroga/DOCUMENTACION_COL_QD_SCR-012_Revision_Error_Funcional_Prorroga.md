@@ -12,7 +12,7 @@
 | Evento de apertura | SmartSupervision rechaza prórroga HTTP 400 funcional |
 | Acción de cierre | Reenviar Prórroga → SP4-T01 |
 | Slug / `?screen=` | `COL_QD_SCR-012_Revision_Error_Funcional_Prorroga` |
-| Archivos de implementación | `ErrorFuncionalProrroga.tsx`, `variables.ts` |
+| Archivos de implementación | `ErrorFuncionalProrroga.tsx` (config centralizada en campos/fields.ts) |
 | Versión | 1.0 — 2026-06-30 |
 
 > Es el análogo, para el flujo de **prórroga (SP4)**, de SCR-003 (corrección error funcional de radicación).
@@ -47,25 +47,25 @@ contador y justificación) para **reenviar** (vuelve a SP4-T01) o **cancelar** l
 
 | Campo (UI) | Variable | Tipo | Fuente |
 |---|---|---|---|
-| Código de Error SFC Prórroga | `qd_codigoErrorProrroga` | `ZdsInput` readOnly | FLD-200 |
-| Campo Afectado | `qd_campoAfectadoProrroga` | `ZdsInput` readOnly | FLD-201 |
-| Mensaje de Error SFC | `qd_mensajeErrorProrroga` | `ZdsTextarea` readOnly | FLD-202 |
-| Intento N.° actual | `qd_intentoActualProrroga` | `ZdsInput` readOnly | FLD-203 |
+| Código de Error SFC Prórroga | `qd_strExtErrorCode` | `ZdsInput` readOnly | FLD-200 |
+| Campo Afectado | `qd_strExtAffectedField` | `ZdsInput` readOnly | FLD-201 |
+| Mensaje de Error SFC | `qd_strExtErrorMessage` | `ZdsTextarea` readOnly | FLD-202 |
+| Intento N.° actual | `qd_strExtCurrentAttempt` | `ZdsInput` readOnly | FLD-203 |
 
 ### S2 — Campos de Prórroga a Corregir (SEC-040, editable)
 
 | Campo (UI) | Variable | Tipo | Obligatorio | Fuente |
 |---|---|---|---|---|
-| Motivo de Prórroga | `qd_motivoProrroga` | `ZdsSelect` (CAT-MOTIVO-PRORR) | **Sí** | FLD-204 |
-| Nueva Fecha Límite | `qd_nuevaFechaLimite` | `ZdsDate` (`min=hoy`) | **Sí** | FLD-205 |
-| Contador de Prórroga | `qd_contadorProrroga` | `ZdsInput` (dígitos) | **Sí** | FLD-206 |
-| Justificación | `qd_justificacionProrroga` | `ZdsTextarea` | **Sí** | FLD-207 |
+| Motivo de Prórroga | `qd_strExtensionReason` | `ZdsSelect` (CAT-MOTIVO-PRORR) | **Sí** | FLD-204 |
+| Nueva Fecha Límite | `qd_strNewDeadline` | `ZdsDate` (`min=hoy`) | **Sí** | FLD-205 |
+| Contador de Prórroga | `qd_strExtensionCounter` | `ZdsInput` (dígitos) | **Sí** | FLD-206 |
+| Justificación | `qd_strExtensionJustif` | `ZdsTextarea` | **Sí** | FLD-207 |
 
 ### Metadato de flujo (no visible)
 
 | Campo | Variable | Fuente |
 |---|---|---|
-| Acción/decisión BPMN | `qd_accion` (`REENVIAR` \| `CANCELAR`) | Inferido de ACT-012-01/02 (§10) |
+| Acción/decisión BPMN | `qd_strAction` (`REENVIAR` \| `CANCELAR`) | Inferido de ACT-012-01/02 (§10) |
 
 ---
 
@@ -104,7 +104,7 @@ contador y justificación) para **reenviar** (vuelve a SP4-T01) o **cancelar** l
 |---|---|---|
 | Panel de error con acento rojo | `FormSection color="var(--z-red)"` | Tipo "corrección" |
 | Banner de error 400 de prórroga | `ZrAlert config="negative"` con número de intento | Contexto SCR-012 |
-| Cancelar prórroga (destructiva) | `ZrButton config="negative"` → `completeTask` con `qd_accion='CANCELAR'` | ACT-012-02 |
+| Cancelar prórroga (destructiva) | `ZrButton config="negative"` → `completeTask` con `qd_strAction='CANCELAR'` | ACT-012-02 |
 | Estados loading/error/submitting | `ZrLoader`, `ZrAlert`, botones `loading/disabled` | CLAUDE.md |
 
 ---
@@ -113,7 +113,7 @@ contador y justificación) para **reenviar** (vuelve a SP4-T01) o **cancelar** l
 
 | Campo Origen | Campo Dependiente | Comportamiento | Fuente |
 |---|---|---|---|
-| `qd_nuevaFechaLimite` | Botón "Reenviar Prórroga" + alerta | Bloquea reenvío si la fecha no es posterior a hoy | RUL-012-01 |
+| `qd_strNewDeadline` | Botón "Reenviar Prórroga" + alerta | Bloquea reenvío si la fecha no es posterior a hoy | RUL-012-01 |
 | motivo + fecha + contador + justificación | Botón "Reenviar Prórroga" | Habilita reenviar solo si todos están completos y la fecha es válida | ACT-012-01 |
 
 ---
@@ -131,7 +131,7 @@ contador y justificación) para **reenviar** (vuelve a SP4-T01) o **cancelar** l
   cliente de la validación RUL-012-01.
 - **Contador de Prórroga** como `ZdsInput` de texto con `pattern` de dígitos (la fachada no expone
   `inputType="number"`). El insumo también pide "validar contra catálogo SFC" — pendiente de catálogo.
-- **`qd_accion`** (metadato): no es un FLD; se deriva del botón presionado (ACT-012-01/02).
+- **`qd_strAction`** (metadato): no es un FLD; se deriva del botón presionado (ACT-012-01/02).
 - **MSG-012-02** (éxito) lo emite el BPM tras `completeTask`; no se renderiza en la pantalla.
 
 ---
@@ -147,5 +147,5 @@ contador y justificación) para **reenviar** (vuelve a SP4-T01) o **cancelar** l
 | Mensajes (MSG-012-01/02) | 1/2 en UI | MSG-012-02 lo emite el BPM |
 | Catálogos (CAT-MOTIVO-PRORR) | 1/1 como placeholder | Pendiente TI |
 
-**Elementos inferidos:** prefijo `qd_*`, metadato `qd_accion`, catálogo de motivo placeholder,
+**Elementos inferidos:** prefijo `qd_*`, metadato `qd_strAction`, catálogo de motivo placeholder,
 contador como texto con `pattern`, `maxLength=2000`, cálculo de "hoy" en cliente.
