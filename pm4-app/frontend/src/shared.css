@@ -1274,34 +1274,6 @@ z-table :is(th, td)[config*="right"] {
 .kpi-card--danger .kpi-card-value { color: var(--z-red); }
 .kpi-card--ok     .kpi-card-value { color: var(--z-green); }
 
-/* ── Columna "Días": punto-semáforo + texto ── */
-.days-badge {
-  display: inline-flex;
-  align-items: center;
-  gap: var(--zs-50);
-  font: var(--zf-capt-12--700);
-  color: var(--z-text);
-  white-space: nowrap;
-}
-
-.days-dot {
-  flex-shrink: 0;
-  width: 18px;
-  height: 18px;
-  border-radius: 50%;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  font: var(--zf-capt-12--700);
-  font-size: 10px;
-  color: var(--zg-white);
-}
-
-.days-dot--danger  { background: var(--z-red); }
-.days-dot--warn    { background: var(--z-orange); }
-.days-dot--ok      { background: var(--z-green); }
-.days-dot--neutral { background: var(--z-muted); }
-
 /* ── Paginación de la tabla de casos ── */
 .dashboard-pagination {
   display: flex;

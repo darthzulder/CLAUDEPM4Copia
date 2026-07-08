@@ -1,6 +1,6 @@
 import { ZrModal, ZrButton, ZdsStatusBadge } from '../../../../components/fields/ZdsFields';
 import InfoBar from '../../../../components/InfoBar';
-import { diasBadge, estadoVariante, type CasoDashboard } from './variables';
+import { diasRestantesTexto, estadoVariante, type CasoDashboard } from './variables';
 
 interface DetalleCasoModalProps {
   caso: CasoDashboard;
@@ -14,7 +14,6 @@ interface DetalleCasoModalProps {
  * resumido. Tipo y Área se resuelven de código a descripción vía las colecciones.
  */
 export default function DetalleCasoModal({ caso, tipoMap, areaMap, onClose }: DetalleCasoModalProps) {
-  const dias = diasBadge(caso);
   const tipo = (tipoMap[caso.qd_tipoSolicitud] ?? caso.qd_tipoSolicitud) || '—';
   const area = (areaMap[caso.qd_areaResponsable] ?? caso.qd_areaResponsable) || '—';
 
@@ -35,15 +34,7 @@ export default function DetalleCasoModal({ caso, tipoMap, areaMap, onClose }: De
           { label: 'Tipo de solicitud', value: tipo },
           { label: 'Fecha de creación', value: caso.qd_fechaCreacion },
           { label: 'Fecha de vencimiento', value: caso.qd_fechaVencimiento },
-          {
-            label: 'Días restantes / SLA',
-            value: (
-              <span className="days-badge">
-                <span className={`days-dot days-dot--${dias.variante}`}>{dias.dot}</span>
-                {dias.texto}
-              </span>
-            ),
-          },
+          { label: 'Días restantes', value: diasRestantesTexto(caso) },
           { label: 'Área responsable', value: area },
         ]}
       />

@@ -97,13 +97,19 @@ function formatFecha(iso?: string): string {
   return new Date(t).toLocaleDateString('es-CO', { day: '2-digit', month: 'short', year: 'numeric' });
 }
 
-// Días hábiles restantes: prioriza qd_slaRestante; si no, lo estima desde la fecha de
-// vencimiento vs. hoy. 0 si no hay ninguna referencia.
-function calcularDiasRestantes(d: Record<string, unknown>): number {
+// Días restantes = (fecha de inicio + qd_slaRestante) − hoy.
+// qd_slaRestante se interpreta como el plazo en días desde la creación del caso; la fecha
+// límite es created_at + qd_slaRestante días y los restantes se cuentan contra hoy.
+// Fallbacks: si falta el SLA o la fecha de inicio, usa qd_fechaVencimiento − hoy; si no, 0.
+function calcularDiasRestantes(d: Record<string, unknown>, createdAt?: string): number {
   const slaRaw = d.qd_slaRestante;
-  if (slaRaw !== undefined && slaRaw !== null && slaRaw !== '') {
+  const startT = createdAt ? Date.parse(createdAt) : Number.NaN;
+  if (slaRaw !== undefined && slaRaw !== null && slaRaw !== '' && !Number.isNaN(startT)) {
     const sla = Number(slaRaw);
-    if (Number.isFinite(sla)) return sla;
+    if (Number.isFinite(sla)) {
+      const deadline = startT + sla * 86_400_000;
+      return Math.ceil((deadline - Date.now()) / 86_400_000);
+    }
   }
   const venc = d.qd_fechaVencimiento;
   if (venc) {
@@ -124,7 +130,7 @@ function estadoDeRequest(status: string | undefined, diasRestantes: number): Est
 export function mapRequestToCaso(r: RequestRaw): CasoDashboard {
   const d = r.data ?? {};
   const str = (k: string) => (d[k] === undefined || d[k] === null ? '' : String(d[k]));
-  const dias = calcularDiasRestantes(d);
+  const dias = calcularDiasRestantes(d, r.created_at);
   const venc = str('qd_fechaVencimiento');
   return {
     qd_id: r.id,
@@ -154,35 +160,14 @@ export function estadoVariante(estado: EstadoCaso): 'success' | 'danger' | 'info
   }
 }
 
-export type DiasVariante = 'danger' | 'warn' | 'ok' | 'neutral';
-
-export interface DiasBadge {
-  variante: DiasVariante; // color del punto (.days-dot--*)
-  dot: string;            // contenido del punto (número o ✓)
-  texto: string;          // etiqueta a la derecha del punto
-}
-
-// Columna "Días": punto de color + texto, derivados del estado y los días restantes.
-export function diasBadge(c: CasoDashboard): DiasBadge {
-  const abs = Math.abs(c.qd_diasRestantes);
-  const plural = (n: number) => `${n} ${n === 1 ? 'día' : 'días'}`;
-
-  if (c.qd_estado === 'Cancelada') {
-    return { variante: 'neutral', dot: String(abs), texto: 'Cancelada' };
-  }
-  if (c.qd_estado === 'Cerrada') {
-    return { variante: 'ok', dot: '✓', texto: c.qd_diasRestantes >= 0 ? plural(abs) : 'Cerrada' };
-  }
-  if (c.qd_estado === 'Vencida' || c.qd_diasRestantes < 0) {
-    return { variante: 'danger', dot: String(abs), texto: 'Vencida' };
-  }
-  if (c.qd_diasRestantes <= 1) {
-    return { variante: 'danger', dot: String(c.qd_diasRestantes), texto: plural(c.qd_diasRestantes) };
-  }
-  if (c.qd_diasRestantes <= SLA_UMBRAL_PROXIMO) {
-    return { variante: 'warn', dot: String(c.qd_diasRestantes), texto: plural(c.qd_diasRestantes) };
-  }
-  return { variante: 'ok', dot: String(c.qd_diasRestantes), texto: plural(c.qd_diasRestantes) };
+// Columna "Días restantes": solo texto. Para casos cerrados/cancelados no aplica ("—").
+export function diasRestantesTexto(c: CasoDashboard): string {
+  if (c.qd_estado === 'Cerrada' || c.qd_estado === 'Cancelada') return '—';
+  const n = c.qd_diasRestantes;
+  const plural = (x: number) => `${x} ${x === 1 ? 'día' : 'días'}`;
+  if (n > 0) return plural(n);
+  if (n === 0) return 'Vence hoy';
+  return `${plural(Math.abs(n))} de mora`;
 }
 
 export interface KpisDashboard {

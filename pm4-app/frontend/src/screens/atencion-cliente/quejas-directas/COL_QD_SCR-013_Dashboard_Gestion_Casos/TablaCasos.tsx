@@ -1,5 +1,5 @@
 import { ZrTable, ZrButton, ZdsStatusBadge } from '../../../../components/fields/ZdsFields';
-import { diasBadge, estadoVariante, type CasoDashboard } from './variables';
+import { diasRestantesTexto, estadoVariante, type CasoDashboard } from './variables';
 
 interface TablaCasosProps {
   casos: CasoDashboard[];
@@ -27,7 +27,7 @@ export default function TablaCasos({ casos, tipoMap, areaMap, onVer }: TablaCaso
             <th>Tipo</th>
             <th>Creación</th>
             <th>Vencimiento</th>
-            <th>Días</th>
+            <th>Días restantes</th>
             <th>Estado</th>
             <th>Área</th>
             <th>Responsable</th>
@@ -35,20 +35,13 @@ export default function TablaCasos({ casos, tipoMap, areaMap, onVer }: TablaCaso
           </tr>
         </thead>
         <tbody>
-          {casos.map((c) => {
-            const dias = diasBadge(c);
-            return (
-              <tr key={c.qd_id}>
+          {casos.map((c) => (
+            <tr key={c.qd_id}>
                 <td><strong>{c.qd_numeroCaso}</strong></td>
                 <td>{(tipoMap[c.qd_tipoSolicitud] ?? c.qd_tipoSolicitud) || '—'}</td>
                 <td>{c.qd_fechaCreacion}</td>
                 <td>{c.qd_fechaVencimiento}</td>
-                <td>
-                  <span className="days-badge">
-                    <span className={`days-dot days-dot--${dias.variante}`}>{dias.dot}</span>
-                    {dias.texto}
-                  </span>
-                </td>
+                <td>{diasRestantesTexto(c)}</td>
                 <td>
                   <ZdsStatusBadge variant={estadoVariante(c.qd_estado)}>{c.qd_estado}</ZdsStatusBadge>
                 </td>
@@ -58,8 +51,7 @@ export default function TablaCasos({ casos, tipoMap, areaMap, onVer }: TablaCaso
                   <ZrButton config="secondary:s" onClick={() => onVer(c)}>Ver</ZrButton>
                 </td>
               </tr>
-            );
-          })}
+          ))}
         </tbody>
       </table>
     </ZrTable>

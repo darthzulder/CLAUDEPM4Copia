@@ -86,7 +86,7 @@ El modal de detalle es solo lectura con un único botón "Cerrar".
 | Tipo | `qd_tipoSolicitud` | string | HTML SCR-013 (`th Tipo`) |
 | Creación | `qd_fechaCreacion` | string | HTML SCR-013 (`th Creación`) |
 | Vencimiento | `qd_fechaVencimiento` | string | HTML SCR-013 (`th Vencimiento`) |
-| Días | `qd_diasRestantes` → `diasBadge()` | number → badge | HTML SCR-013 (`th Días`, `.days-badge/.days-dot`) |
+| Días restantes | `qd_diasRestantes` → `diasRestantesTexto()` (solo texto) | number → texto | HTML SCR-013 (`th Días`) + solicitud del usuario |
 | Estado | `qd_estado` → `estadoVariante()` (`ZdsStatusBadge`) | enum | HTML SCR-013 (`th Estado`, `.pill-*`) |
 | Área | `qd_areaResponsable` | string | HTML SCR-013 (`th Área`) |
 | Responsable | `qd_responsable` | string | HTML SCR-013 (`th Responsable`) |
@@ -102,7 +102,7 @@ El modal de detalle es solo lectura con un único botón "Cerrar".
 | Tipo de solicitud | `qd_tipoSolicitud` | HTML modal (`#cm-tipo`) |
 | Fecha de creación | `qd_fechaCreacion` | HTML modal (`#cm-creacion`) |
 | Fecha de vencimiento | `qd_fechaVencimiento` | HTML modal (`#cm-vencimiento`) |
-| Días restantes / SLA | `qd_diasRestantes` → `diasBadge()` | HTML modal (`#cm-dias`) |
+| Días restantes | `qd_diasRestantes` → `diasRestantesTexto()` (solo texto) | HTML modal (`#cm-dias`) |
 | Área responsable | `qd_areaResponsable` | HTML modal (`#cm-area`) |
 | Responsable asignado | `qd_responsable` | HTML modal (`#cm-responsable`) |
 | Descripción / Motivo | `qd_descripcion` | HTML modal (`#cm-descripcion`) |
@@ -131,7 +131,8 @@ El modal de detalle es solo lectura con un único botón "Cerrar".
 
 | Regla | Implementación | Fuente |
 |---|---|---|
-| Semáforo de días (rojo/naranja/verde/gris) | `diasBadge()`: vencido/≤1 → `danger`; ≤3 → `warn`; resto → `ok`; cancelada → `neutral`; cerrada → `ok (✓)`. | HTML SCR-013 (`.dd-red/.dd-orange/.dd-green/.dd-grey`) + inferencia de umbrales |
+| Cálculo de días restantes | `calcularDiasRestantes()`: `(created_at + qd_slaRestante días) − hoy`, redondeado hacia arriba. Fallback a `qd_fechaVencimiento − hoy`; si no, 0. | Solicitud del usuario |
+| Texto de días restantes | `diasRestantesTexto()`: `N días` / `1 día`; `Vence hoy` (0); `N días de mora` (negativo); `—` para Cerrada/Cancelada. Solo texto, sin ícono. | Solicitud del usuario |
 | Píldora de estado por estado del caso | `estadoVariante()`: Abierta→info, Cerrada→success, Vencida→danger, Cancelada→neutral | HTML SCR-013 (`.pill-open/.pill-closed/.pill-overdue/.pill-cancelled`) |
 | "Próximos a vencer" = SLA ≤ 3 días hábiles | `SLA_UMBRAL_PROXIMO = 3` | Suposición (§10) — el mockup no fija el umbral numérico |
 
@@ -201,12 +202,11 @@ El modal de detalle es solo lectura con un único botón "Cerrar".
 | Sección "Filtros" | `FormSection` | Componente propio |
 | Tabla de casos | `ZrTable` + `<table>` | Componente DS |
 | Píldora de estado | `ZdsStatusBadge variant=…` | Wrapper DS |
-| Semáforo de días | `.days-badge` / `.days-dot--{danger,warn,ok,neutral}` | **Dominio tokenizado** (sin componente en DS) |
+| Días restantes | Texto plano (`diasRestantesTexto`) en la celda | Sin componente ni CSS (texto) |
 | Botón "Ver" | `ZrButton config="secondary:s"` | DS |
 | Paginación | `.dashboard-pagination` + `ZrButton` | Layout dominio + DS |
 | Modal de detalle | `ZrModal` + `InfoBar` + `ZdsStatusBadge` | Componentes DS / propios |
 
 **Quedó como dominio tokenizado y por qué:**
 - **KPI cards** (`.kpi-*`): el DS 0.8.1 no expone un componente de KPI/estadística; se construyó con tokens (`--zg-white`, `--z-card-border`, `--z-card-shadow`, `--zf-h-28`, `--z-orange/red/green`).
-- **Days badge** (`.days-badge`/`.days-dot--*`): el punto-semáforo con número/✓ no tiene equivalente en el DS; tokenizado con `--z-red/orange/green/muted` y tipografía `--zf-capt-12--700`.
 - **Layout `.dashboard-toolbar` / `.dashboard-pagination`**: patrones `space-between` no expresables con `z-flex`/`z-align` (que no ofrecen "between"); clases nombradas por componente, con tokens de espaciado.
