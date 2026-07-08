@@ -52,7 +52,7 @@ vista previa de la carta final. Las observaciones son obligatorias solo para dev
 | Campo (UI) | Variable | Tipo | Fuente |
 |---|---|---|---|
 | ID Caso / Código SFC | `qd_strSfcCode` | `ZdsInput` readOnly | FLD-120 |
-| SLA: Días hábiles restantes | `qd_strSlaRemaining` | `ZdsInput` readOnly | FLD-121 |
+| SLA: Días hábiles restantes | `qd_strSlaAssigned` | `ZdsInput` readOnly | FLD-121 |
 | Versión bajo revisión | `qd_strRevisionVersion` | `ZdsInput` readOnly | FLD-122 |
 | Área Responsable | `qd_strAssigneeArea` | `ZdsInput` readOnly | FLD-123 |
 | Fecha de elaboración del borrador | `qd_strDraftDate` | `ZdsInput` readOnly | FLD-124 |
@@ -127,7 +127,7 @@ vista previa de la carta final. Las observaciones son obligatorias solo para dev
 | Campo Origen | Campo Dependiente | Comportamiento | Fuente |
 |---|---|---|---|
 | `qd_strSacRemarks` | Botón "Devolver con Observaciones" | Habilita el devolver solo si hay observaciones | RUL-008-01 |
-| `qd_strSlaRemaining` | Banner SLA | Muestra banner rojo si ≤ 3 | RUL-008-02 |
+| `qd_strSlaAssigned` | Banner SLA | Muestra banner rojo si ≤ 3 | RUL-008-02 |
 
 ---
 

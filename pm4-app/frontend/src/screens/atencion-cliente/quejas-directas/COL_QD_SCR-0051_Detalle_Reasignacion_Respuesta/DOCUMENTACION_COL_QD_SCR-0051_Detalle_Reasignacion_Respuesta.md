@@ -55,7 +55,7 @@ borrador y solicitar prórroga regulatoria cuando el SLA es crítico.
 | Campo (UI) | Variable | Tipo | Fuente |
 |---|---|---|---|
 | Case | `qd_strBpmCaseId` | `InfoBar` | FLD-300 en SCR-000 (unificado con SCR-002) |
-| SLA | `qd_strSlaRemaining` | `InfoBar` ("N días hábiles") | Inferido de RUL-0051-03 (§10), unificado con SCR-002/008 |
+| SLA | `qd_strSlaAssigned` | `InfoBar` ("N días hábiles") | Inferido de RUL-0051-03 (§10), unificado con SCR-002/008 |
 | Estado | `qd_strSsStatus` | `InfoBar` + `ZdsStatusBadge` (`estadoVariant()`) | FLD-079 |
 | SmartSupervision | `qd_strSfcCode` | `InfoBar` | FLD-120/140/173 en SCR-008/009/010 |
 
@@ -93,7 +93,7 @@ borrador y solicitar prórroga regulatoria cuando el SLA es crítico.
 | Estado SmartSupervision | `qd_strSsStatus` | `ZdsStatusBadge` (semáforo) | FLD-079 |
 | Intentos M1/M2 | `qd_strM1M2Attempts` | `ZdsInput` readOnly | FLD-080 |
 | Fecha/Hora radicación SFC | `qd_strFilingDate` | `ZdsInput` readOnly | FLD-081 |
-| Días hábiles SLA restantes | `qd_strSlaRemaining` | (sistema, alimenta RUL-0051-03) | Inferido de RUL-0051-03 (§10) |
+| Días hábiles SLA restantes | `qd_strSlaAssigned` | (sistema, alimenta RUL-0051-03) | Inferido de RUL-0051-03 (§10) |
 
 ### S5 — Asignación de Responsable (SEC-051, condicional) — `SeccionAsignacion.tsx`
 
@@ -216,7 +216,7 @@ borrador y solicitar prórroga regulatoria cuando el SLA es crítico.
 | `qd_strNeedsOtherAreas` | S6 + S7 | Muestra/oculta reasignación e historial | RUL-0051-07 |
 | `qd_strReplyFavorOf` | `qd_strActionsTaken` | Muestra "Acciones Tomadas" si = Cliente | RUL-0051-09 |
 | `qd_blnHasAssignee` | S5 + botón "Confirmar Asignación" | Oculta asignación si ya hay responsable | RUL-0051-01 |
-| `qd_strSlaRemaining` | banner SLA + "Solicitar Prórroga" | Habilita si ≤ 2 | RUL-0051-03 |
+| `qd_strSlaAssigned` | banner SLA + "Solicitar Prórroga" | Habilita si ≤ 2 | RUL-0051-03 |
 | `qd_lstAssignHistory` | formulario de ayudante | Oculta al llegar a 4 | RUL-0051-08 |
 
 ---
@@ -231,7 +231,7 @@ borrador y solicitar prórroga regulatoria cuando el SLA es crítico.
   `useCollection` cuando se entreguen los IDs.
 - **`qd_strNeedsOtherAreas`** (toggle SI/NO): no es un FLD del insumo; se añadió como control de UI
   para implementar la condición textual de RUL-0051-07 ("¿Necesitas de otras áreas?").
-- **`qd_strSlaRemaining`**: no hay FLD explícito, pero RUL-0051-03 referencia `slaRestante`. Se añadió
+- **`qd_strSlaAssigned`**: no hay FLD explícito, pero RUL-0051-03 referencia `slaRestante`. Se añadió
   como campo de sistema (solo lectura) que alimenta el banner y la habilitación de prórroga.
 - **`qd_strBpmCaseId` / `qd_strSfcCode` en la cabecera**: no son FLD propios de SCR-0051; se añadieron
   para mostrar "Case", "Estado" y "SmartSupervision" en la cabecera (pedido del usuario, jul-2026),
@@ -275,6 +275,6 @@ borrador y solicitar prórroga regulatoria cuando el SLA es crítico.
 | Mensajes (MSG-0051-01..06) | 4/6 en UI | MSG-0051-04/05 los emite el BPM |
 | Catálogos (CAT-AREA/USUARIOS/MOTIVO/FAVOR) | 4/4 como placeholder | Pendiente colección PM4 |
 
-**Elementos inferidos:** prefijo `qd_*`, `qd_strAction`, `qd_strNeedsOtherAreas`, `qd_strSlaRemaining`,
+**Elementos inferidos:** prefijo `qd_*`, `qd_strAction`, `qd_strNeedsOtherAreas`, `qd_strSlaAssigned`,
 `qd_blnHasAssignee`, catálogos estáticos placeholder, FLD-092 como select disabled, límites
 `maxLength`, modales de vista previa/expediente como placeholder.

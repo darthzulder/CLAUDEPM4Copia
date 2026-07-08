@@ -100,7 +100,7 @@ export default function CorregirDatosFormulario() {
       <div className="screen-content">
         <InfoBar items={[
           { label: 'Caso',              value: objWatch[QD.strBpmCaseId] || '—' },
-          { label: 'SLA Restante',      value: objWatch[QD.strSlaRemaining] || '—' },
+          { label: 'SLA Restante',      value: objWatch[QD.strSlaAssigned] || '—' },
           { label: 'Estado',            value: 'En corrección preventiva' },
           { label: 'Errores pendientes', value: `${intPendingErrors} de ${lstFieldsWithError.length}` },
         ]} />
@@ -124,7 +124,7 @@ export default function CorregirDatosFormulario() {
             <div className="form-row cols-3">
               <ZdsInput name={QD.strBpmCaseId}   control={control} label="Número de Caso"      readOnly />
               <ZdsInput name={QD.strChannel}     control={control} label="Canal de Recepción"  readOnly />
-              <ZdsInput name={QD.strSlaRemaining} control={control} label="SLA Restante"        readOnly />
+              <ZdsInput name={QD.strSlaAssigned} control={control} label="SLA Restante"        readOnly />
             </div>
           </FormSection>
 

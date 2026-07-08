@@ -39,7 +39,7 @@ Pantalla de corrección preventiva activada cuando la tarea **P01-T06** (Validac
 |---|---|---|---|---|
 | Número de Caso | `qd_strBpmCaseId` | `ZdsInput` readOnly | — | Anexo02 HTML > SCR-002 > FLD-030 |
 | Canal de Recepción | `qd_strChannel` | `ZdsInput` readOnly | — | Anexo02 HTML > SCR-002 > FLD-031 |
-| SLA Restante | `qd_strSlaRemaining` | `ZdsInput` readOnly | — | Anexo02 HTML > SCR-002 > FLD-032 |
+| SLA Restante | `qd_strSlaAssigned` | `ZdsInput` readOnly | — | Anexo02 HTML > SCR-002 > FLD-032 |
 
 ### Sección: Campos con Error (dinámica — renderiza solo los campos indicados por el BPM)
 

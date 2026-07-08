@@ -69,7 +69,7 @@ Ver la sección **Informe de impacto** para el detalle de qué sí cambia dentro
 | SCR-000 | qd_rolResponsable | qd_strAssigneeRole | string |
 | SCR-000 | qd_responsable | qd_strAssignee | string |
 | SCR-002, 0051 | qd_idCasoBPM | qd_strBpmCaseId | string |
-| SCR-002, 008, 0051 | qd_slaRestante | qd_strSlaRemaining | string |
+| SCR-002, 008, 0051 | qd_slaRestante | qd_strSlaAssigned | string ⚠ corrección semántica: el campo es el SLA asignado, no el restante |
 | SCR-002 | qd_errores_json | qd_strErrorsJson | string ⚠ ver informe |
 | SCR-003 | qd_codigoErrorSFC | qd_strSfcErrorCode | string |
 | SCR-003 | qd_campoAfectado | qd_strAffectedField | string |

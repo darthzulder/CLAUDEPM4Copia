@@ -36,7 +36,7 @@ export default function DetalleReasignacionRespuesta() {
   };
 
   // RUL-0051-03 — SLA crítico: habilita prórroga y banner rojo si slaRestante <= 2.
-  const intSla = Number.parseInt(objWatch[QD.strSlaRemaining] ?? '', 10);
+  const intSla = Number.parseInt(objWatch[QD.strSlaAssigned] ?? '', 10);
   const blnSlaCritical = Number.isFinite(intSla) && intSla <= SLA_UMBRAL_PRORROGA;
 
   // Datos del consumidor derivados de los campos granulares producidos por SCR-000.
@@ -102,7 +102,7 @@ export default function DetalleReasignacionRespuesta() {
       <div className="screen-content">
         <InfoBar items={[
           { label: 'Case', value: objWatch[QD.strBpmCaseId] || '—' },
-          { label: 'SLA', value: objWatch[QD.strSlaRemaining] ? `${objWatch[QD.strSlaRemaining]} días hábiles` : '—' },
+          { label: 'SLA', value: objWatch[QD.strSlaAssigned] ? `${objWatch[QD.strSlaAssigned]} días hábiles` : '—' },
           {
             label: 'Estado',
             value: (
@@ -117,7 +117,7 @@ export default function DetalleReasignacionRespuesta() {
         {/* RUL-0051-03 / MSG-0051-01 — banner SLA crítico. */}
         {blnSlaCritical && (
           <ZrAlert config="negative" {...({ 'hide-close': true } as object)}>
-            ⚠ El caso tiene <strong>{objWatch[QD.strSlaRemaining]}</strong> día(s) hábil(es) restante(s). Priorice
+            ⚠ El caso tiene <strong>{objWatch[QD.strSlaAssigned]}</strong> día(s) hábil(es) restante(s). Priorice
             la gestión; puede <strong>solicitar prórroga regulatoria</strong>. {/* MSG-0051-01 */}
           </ZrAlert>
         )}

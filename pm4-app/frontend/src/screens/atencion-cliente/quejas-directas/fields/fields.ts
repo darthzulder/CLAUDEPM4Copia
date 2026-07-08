@@ -82,7 +82,7 @@ export const QD = {
 
   // ── SCR-002 · Corrección de Datos (encabezado + metadata) ─────────────────
   strBpmCaseId: 'qd_strBpmCaseId',                     // antes qd_idCasoBPM
-  strSlaRemaining: 'qd_strSlaRemaining',               // antes qd_slaRestante
+  strSlaAssigned: 'qd_strSlaAssigned',               // antes qd_slaRestante (corregido: el campo es el SLA asignado, no el restante)
   strErrorsJson: 'qd_strErrorsJson',                   // antes qd_errores_json — ⚠ ver informe (script BPM debe emitir nombres nuevos)
 
   // ── SCR-003 · Corrección Error Funcional M1/M2 ────────────────────────────
@@ -263,7 +263,7 @@ export interface QdFields {
 
   // SCR-002
   qd_strBpmCaseId: string;
-  qd_strSlaRemaining: string;
+  qd_strSlaAssigned: string;
   qd_strErrorsJson: string;
 
   // SCR-003
@@ -496,7 +496,7 @@ export const SCR000_DEFAULTS = {
 // ═══════════════════════════════════════════════════════════════════════════
 
 export type CorregirDatosFormData = Pick<QdFields,
-  | typeof QD.strBpmCaseId | typeof QD.strChannel | typeof QD.strSlaRemaining
+  | typeof QD.strBpmCaseId | typeof QD.strChannel | typeof QD.strSlaAssigned
   | typeof QD.strFirstName | typeof QD.strLastName | typeof QD.strCompanyName
   | typeof QD.strIdType | typeof QD.strIdNumber | typeof QD.strEmail | typeof QD.strPersonType
   | typeof QD.strCountryCode | typeof QD.strDepartment | typeof QD.strCity
@@ -582,7 +582,7 @@ export const SCR008_SLA_UMBRAL_CRITICO = 3; // RUL-008-02 (slaRestante <= 3)
 export type AccionRevisionSAC = 'APROBAR' | 'DEVOLVER' | 'REASIGNAR';
 
 export type RevisionRespuestaSacFormData = Omit<Pick<QdFields,
-  | typeof QD.strSfcCode | typeof QD.strSlaRemaining | typeof QD.strRevisionVersion
+  | typeof QD.strSfcCode | typeof QD.strSlaAssigned | typeof QD.strRevisionVersion
   | typeof QD.strAssigneeArea | typeof QD.strDraftDate
   | typeof QD.strClientResponse | typeof QD.strActionsTaken | typeof QD.strAcknowledgment | typeof QD.lstSupportAttach
   | typeof QD.strSacRemarks | typeof QD.strAction
@@ -738,7 +738,7 @@ export type DetalleReasignacionRespuestaFormData = Omit<Pick<QdFields,
   | typeof QD.strChannel | typeof QD.strSfcProduct | typeof QD.strSfcReason
   | typeof QD.strReceptionInstance | typeof QD.strReceptionPoint | typeof QD.strAdmission | typeof QD.strControlEntity
   | typeof QD.strComplaintText
-  | typeof QD.strSsStatus | typeof QD.strM1M2Attempts | typeof QD.strFilingDate | typeof QD.strSlaRemaining
+  | typeof QD.strSsStatus | typeof QD.strM1M2Attempts | typeof QD.strFilingDate | typeof QD.strSlaAssigned
   | typeof QD.blnHasAssignee | typeof QD.strAssigneeArea | typeof QD.strAssigneeUser | typeof QD.strAssignmentRemarks
   | typeof QD.strNeedsOtherAreas | typeof QD.strCurrentAssignee | typeof QD.strTargetArea | typeof QD.strNewAssignee
   | typeof QD.strReassignReason | typeof QD.strReassignRemarks

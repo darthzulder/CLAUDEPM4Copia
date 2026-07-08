@@ -37,7 +37,7 @@ export default function RevisionRespuestaSac() {
   };
 
   // RUL-008-02 — SLA crítico: banner rojo si slaRestante <= 3.
-  const intSla = Number.parseInt(objWatch[QD.strSlaRemaining] ?? '', 10);
+  const intSla = Number.parseInt(objWatch[QD.strSlaAssigned] ?? '', 10);
   const blnSlaCritical = Number.isFinite(intSla) && intSla <= SLA_UMBRAL_CRITICO;
 
   // RUL-008-01 — observaciones obligatorias para devolver.
@@ -88,7 +88,7 @@ export default function RevisionRespuestaSac() {
         {/* RUL-008-02 / MSG-008-02 — banner SLA crítico. */}
         {blnSlaCritical && (
           <ZrAlert config="negative" {...({ 'hide-close': true } as object)}>
-            ⚠ El caso tiene <strong>{objWatch[QD.strSlaRemaining]}</strong> día(s) hábil(es). Priorice la
+            ⚠ El caso tiene <strong>{objWatch[QD.strSlaAssigned]}</strong> día(s) hábil(es). Priorice la
             revisión. {/* MSG-008-02 */}
           </ZrAlert>
         )}
@@ -99,7 +99,7 @@ export default function RevisionRespuestaSac() {
           <FormSection title="Contexto del Caso">
             <div className="form-row cols-3">
               <ZdsInput name={QD.strSfcCode} control={control} label="ID Caso / Código SFC" readOnly />
-              <ZdsInput name={QD.strSlaRemaining} control={control} label="SLA: Días hábiles restantes" readOnly />
+              <ZdsInput name={QD.strSlaAssigned} control={control} label="SLA: Días hábiles restantes" readOnly />
               <ZdsInput name={QD.strRevisionVersion} control={control} label="Versión bajo revisión" readOnly />
             </div>
             <div className="form-row cols-2">
