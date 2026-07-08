@@ -17,6 +17,7 @@
 import { GLOBAL_COLLECTIONS } from '../../../../core/collections';
 import type {
   IntentoHistorial, SoporteAdjunto, AsignacionHistorial, RespuestaAyuda, CampoConError,
+  FiltrosDashboard,
 } from './types';
 
 // ═══════════════════════════════════════════════════════════════════════════
@@ -796,4 +797,35 @@ export const SCR0052_DEFAULTS: Partial<RespuestaAreaResponsableFormData> = {
   [QD.lstAssignHistory]: [],
   [QD.lstHelpResponses]: [],
   [QD.strAction]: 'ENVIAR',
+};
+
+// ═══════════════════════════════════════════════════════════════════════════
+// SCR-013 — Dashboard — Gestión de Casos
+// ═══════════════════════════════════════════════════════════════════════════
+
+// Umbral de días hábiles para clasificar un caso abierto como "Próximo a vencer" (KPI warn).
+export const SCR013_SLA_UMBRAL_PROXIMO = 3;
+
+// Tamaño de página de la tabla de casos (mockup muestra 8 filas por página).
+export const SCR013_PAGE_SIZE = 8;
+
+// Proceso PM4 de Gestión de Quejas Directas (mismo default que el Web Entry de SCR-000).
+export const SCR013_PROCESS_ID = SCR000_WEB_ENTRY_PROCESS_ID;
+
+// Opciones estáticas del filtro Estado. Estado es un valor OPERATIVO derivado de
+// request.status + SLA (no un catálogo); por eso no viene de una colección. Tipo y
+// Área sí usan colecciones (QD_COLLECTIONS.requestType / QD_COLLECTIONS.area).
+export const SCR013_OPTIONS_ESTADO = [
+  { value: '', label: 'Todos' },
+  { value: 'Abierta', label: 'Abierta' },
+  { value: 'Cerrada', label: 'Cerrada' },
+  { value: 'Vencida', label: 'Vencida' },
+  { value: 'Cancelada', label: 'Cancelada' },
+] as const;
+
+export const SCR013_FILTROS_DEFAULT: FiltrosDashboard = {
+  filtroTipo: '',
+  filtroEstado: '',
+  filtroArea: '',
+  filtroBuscar: '',
 };

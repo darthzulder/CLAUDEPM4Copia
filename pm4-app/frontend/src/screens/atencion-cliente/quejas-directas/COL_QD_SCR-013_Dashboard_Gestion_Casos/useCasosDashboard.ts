@@ -1,6 +1,8 @@
 import { useEffect, useState } from 'react';
 import pm4 from '../../../../api/pm4Client';
-import { QD_PROCESS_ID, mapRequestToCaso, type CasoDashboard, type RequestRaw } from './variables';
+import { SCR013_PROCESS_ID } from '../fields/fields';
+import type { CasoDashboard, RequestRaw } from '../fields/types';
+import { mapRequestToCaso } from './dashboardHelpers';
 
 interface RequestsResponse {
   data?: RequestRaw[];
@@ -19,56 +21,56 @@ export function useCasosDashboard() {
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    let cancelled = false;
+    let blnCancelled = false;
 
     async function fetchAll() {
       setLoading(true);
       setError(null);
       try {
-        const acumulados: RequestRaw[] = [];
-        let page = 1;
-        let lastPage = 1;
-        let skipPmql = false;
+        const lstAcumulados: RequestRaw[] = [];
+        let intPage = 1;
+        let intLastPage = 1;
+        let blnSkipPmql = false;
 
         do {
-          const baseParams: Record<string, unknown> = {
-            include: 'data', per_page: 100, page, type: 'all',
+          const dicBaseParams: Record<string, unknown> = {
+            include: 'data', per_page: 100, page: intPage, type: 'all',
           };
-          const params = skipPmql ? baseParams : { ...baseParams, pmql: `process_id = ${QD_PROCESS_ID}` };
+          const dicParams = blnSkipPmql ? dicBaseParams : { ...dicBaseParams, pmql: `process_id = ${SCR013_PROCESS_ID}` };
 
-          let resp;
+          let objResp;
           try {
-            resp = await pm4.get<RequestsResponse>('/requests', { params });
-          } catch (e) {
+            objResp = await pm4.get<RequestsResponse>('/requests', { params: dicParams });
+          } catch (exc) {
             // Auto-recuperación: si el PMQL falla, reintenta sin él (filtro en cliente).
-            if (!skipPmql) {
-              skipPmql = true;
-              resp = await pm4.get<RequestsResponse>('/requests', { params: baseParams });
+            if (!blnSkipPmql) {
+              blnSkipPmql = true;
+              objResp = await pm4.get<RequestsResponse>('/requests', { params: dicBaseParams });
             } else {
-              throw e;
+              throw exc;
             }
           }
 
-          const body = resp.data ?? {};
-          for (const r of body.data ?? []) {
-            if (skipPmql && String(r.process_id) !== String(QD_PROCESS_ID)) continue;
-            acumulados.push(r);
+          const objBody = objResp.data ?? {};
+          for (const objRequest of objBody.data ?? []) {
+            if (blnSkipPmql && String(objRequest.process_id) !== String(SCR013_PROCESS_ID)) continue;
+            lstAcumulados.push(objRequest);
           }
-          lastPage = body.meta?.last_page ?? 1;
-          page += 1;
-        } while (page <= lastPage);
+          intLastPage = objBody.meta?.last_page ?? 1;
+          intPage += 1;
+        } while (intPage <= intLastPage);
 
-        if (!cancelled) setCasos(acumulados.map(mapRequestToCaso));
-      } catch (e) {
-        const err = e as { response?: { data?: { message?: string } }; message?: string };
-        if (!cancelled) setError(err.response?.data?.message ?? err.message ?? 'Error desconocido');
+        if (!blnCancelled) setCasos(lstAcumulados.map(mapRequestToCaso));
+      } catch (exc) {
+        const objErr = exc as { response?: { data?: { message?: string } }; message?: string };
+        if (!blnCancelled) setError(objErr.response?.data?.message ?? objErr.message ?? 'Error desconocido');
       } finally {
-        if (!cancelled) setLoading(false);
+        if (!blnCancelled) setLoading(false);
       }
     }
 
     fetchAll();
-    return () => { cancelled = true; };
+    return () => { blnCancelled = true; };
   }, []);
 
   return { casos, loading, error };

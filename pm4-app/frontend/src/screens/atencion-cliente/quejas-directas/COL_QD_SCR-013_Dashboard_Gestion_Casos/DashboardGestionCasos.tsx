@@ -7,11 +7,12 @@ import { ZdsSelect, ZdsInput, ZrButton, ZrAlert, ZrLoader } from '../../../../co
 import TablaCasos from './TablaCasos';
 import DetalleCasoModal from './DetalleCasoModal';
 import { useCasosDashboard } from './useCasosDashboard';
+import { SAMPLE_CASES, calcularKpis, casosToCSV } from './dashboardHelpers';
 import {
-  OPTIONS, FILTROS_DEFAULT, PAGE_SIZE, SAMPLE_CASES, COLLECTION_DEFS,
-  calcularKpis, casosToCSV,
-  type CasoDashboard, type FiltrosDashboard,
-} from './variables';
+  QD_COLLECTIONS, SCR013_OPTIONS_ESTADO as OPTIONS_ESTADO,
+  SCR013_FILTROS_DEFAULT as FILTROS_DEFAULT, SCR013_PAGE_SIZE as PAGE_SIZE,
+} from '../fields/fields';
+import type { CasoDashboard, FiltrosDashboard } from '../fields/types';
 
 // Colección de opciones → {options con "Todos", map código→label}.
 function useFilterCatalog(def: Parameters<typeof useCollection>[0], todos: string) {
@@ -45,8 +46,8 @@ export default function DashboardGestionCasos() {
   const { casos: casosApi, loading, error } = useCasosDashboard();
 
   // Filtros catalogados desde colecciones PM4 (Tipo id 18, Área id 35). Estado es operativo.
-  const tipo = useFilterCatalog(COLLECTION_DEFS.tipoSolicitud, 'Todos');
-  const area = useFilterCatalog(COLLECTION_DEFS.area, 'Todas');
+  const tipo = useFilterCatalog(QD_COLLECTIONS.requestType, 'Todos');
+  const area = useFilterCatalog(QD_COLLECTIONS.area, 'Todas');
 
   const { control, watch, reset } = useForm<FiltrosDashboard>({ defaultValues: FILTROS_DEFAULT });
   const draft = watch();
@@ -142,7 +143,7 @@ export default function DashboardGestionCasos() {
         <FormSection title="Filtros">
           <div className="form-row cols-4">
             <ZdsSelect name="filtroTipo" control={control} label="Tipo de solicitud" options={tipo.options} withSearch />
-            <ZdsSelect name="filtroEstado" control={control} label="Estado" options={OPTIONS.estado} />
+            <ZdsSelect name="filtroEstado" control={control} label="Estado" options={OPTIONS_ESTADO} />
             <ZdsSelect name="filtroArea" control={control} label="Área responsable" options={area.options} withSearch />
             <ZdsInput name="filtroBuscar" control={control} label="Buscar por caso o responsable" icon="search:line" />
           </div>

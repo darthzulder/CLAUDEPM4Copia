@@ -51,3 +51,48 @@ export interface CampoConError {
   valorRechazado: string;  // valor original que fue rechazado por la validación preventiva
   mensajeError: string;    // descripción del error para el gestor
 }
+
+// SCR-013 — estado operativo del caso en el dashboard (derivado de request.status + SLA,
+// no es un catálogo PM4).
+export type EstadoCasoDashboard = 'Abierta' | 'Cerrada' | 'Vencida' | 'Cancelada';
+
+// SCR-013 — una fila de la tabla consolidada del dashboard (ya mapeada desde el request PM4).
+export interface CasoDashboard {
+  qd_id:               number;               // request id (clave estable)
+  qd_numeroCaso:       string;                // # Caso (código SFC o case_number)
+  qd_tipoSolicitud:    string;                // Tipo (CÓDIGO de la colección qd_tipoSolicitud)
+  qd_fechaCreacion:    string;                // Creación (formateada)
+  qd_fechaVencimiento: string;                // Vencimiento (formateada o '—')
+  qd_diasRestantes:    number;                // Días hábiles restantes; < 0 = días de mora
+  qd_estado:           EstadoCasoDashboard;   // Estado operativo
+  qd_areaResponsable:  string;                // Área responsable (CÓDIGO de la colección qd_area)
+  qd_responsable:      string;                // Responsable asignado
+  qd_descripcion:      string;                // Descripción / Motivo (detalle en modal)
+}
+
+// SCR-013 — forma cruda de un caso devuelto por GET /api/1.0/requests?include=data.
+export interface RequestRaw {
+  id: number;
+  case_number?: number | string;
+  process_id?: number | string;
+  status?: string;
+  created_at?: string;
+  updated_at?: string;
+  data?: Record<string, unknown>;
+}
+
+// SCR-013 — filtros de la barra superior (draft en el form; se aplican con "Aplicar filtros").
+export interface FiltrosDashboard {
+  filtroTipo:   string;
+  filtroEstado: string;
+  filtroArea:   string;
+  filtroBuscar: string;
+}
+
+// SCR-013 — KPIs de SLA derivados de la lista completa de casos.
+export interface KpisDashboard {
+  abiertos:  number;
+  porVencer: number;
+  vencidos:  number;
+  cerrados:  number;
+}

@@ -1,5 +1,6 @@
 import { ZrTable, ZrButton, ZdsStatusBadge } from '../../../../components/fields/ZdsFields';
-import { diasRestantesTexto, estadoVariante, type CasoDashboard } from './variables';
+import { diasRestantesTexto, estadoVariante } from './dashboardHelpers';
+import type { CasoDashboard } from '../fields/types';
 
 interface TablaCasosProps {
   casos: CasoDashboard[];
