@@ -10,9 +10,9 @@ import {
   ZrButton, ZrAlert, ZrLoader,
 } from '../../../../components/fields/ZdsFields';
 import pm4 from '../../../../api/pm4Client';
-import { QD, QD_COLLECTIONS, SCR0052_DEFAULTS as DEFAULTS, SCR0052_MAX_ADJUNTO_MB as MAX_ADJUNTO_MB } from '../campos/fields';
-import type { RespuestaAreaResponsableFormData, AccionRespuestaArea } from '../campos/fields';
-import type { AsignacionHistorial, RespuestaAyuda } from '../campos/types';
+import { QD, QD_COLLECTIONS, SCR0052_DEFAULTS as DEFAULTS, SCR0052_MAX_ADJUNTO_MB as MAX_ADJUNTO_MB } from '../fields/fields';
+import type { RespuestaAreaResponsableFormData, AccionRespuestaArea } from '../fields/fields';
+import type { AsignacionHistorial, RespuestaAyuda } from '../fields/types';
 
 export default function RespuestaAreaResponsable() {
   const { task, loading, error, submitting, completeTask } = useTask();

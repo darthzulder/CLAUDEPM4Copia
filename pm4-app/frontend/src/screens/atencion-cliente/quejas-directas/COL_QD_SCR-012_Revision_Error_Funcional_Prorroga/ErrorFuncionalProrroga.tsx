@@ -9,8 +9,8 @@ import {
   ZdsInput, ZdsTextarea, ZdsSelect, ZdsDate,
   ZrButton, ZrAlert, ZrLoader,
 } from '../../../../components/fields/ZdsFields';
-import { QD, QD_COLLECTIONS, SCR012_DEFAULTS as DEFAULTS } from '../campos/fields';
-import type { ErrorFuncionalProrrogaFormData, AccionErrorFuncionalProrroga } from '../campos/fields';
+import { QD, QD_COLLECTIONS, SCR012_DEFAULTS as DEFAULTS } from '../fields/fields';
+import type { ErrorFuncionalProrrogaFormData, AccionErrorFuncionalProrroga } from '../fields/fields';
 
 // Fecha de hoy (ISO YYYY-MM-DD) para el mínimo del calendario y la validación RUL-012-01.
 const hoyISO = () => new Date().toISOString().slice(0, 10);

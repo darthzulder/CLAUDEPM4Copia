@@ -6,9 +6,9 @@ import InfoBar from '../../../../components/InfoBar';
 import ScreenHeader from '../../../../components/ScreenHeader';
 import { ZdsInput, ZrAlert, ZrButton, ZrLoader } from '../../../../components/fields/ZdsFields';
 import { useTask } from '../../../../core/useTask';
-import { QD, SCR002_ERRORES_EJEMPLO as ERRORES_EJEMPLO } from '../campos/fields';
-import type { CorregirDatosFormData } from '../campos/fields';
-import type { CampoConError } from '../campos/types';
+import { QD, SCR002_ERRORES_EJEMPLO as ERRORES_EJEMPLO } from '../fields/fields';
+import type { CorregirDatosFormData } from '../fields/fields';
+import type { CampoConError } from '../fields/types';
 import SeccionErroresValidacion from './SeccionErroresValidacion';
 
 function parsearErrores(in_objErrorsJson: unknown): CampoConError[] {

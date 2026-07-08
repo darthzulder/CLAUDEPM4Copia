@@ -2,7 +2,7 @@
 // proceso P01 — Gestión de Quejas Directas. ÚNICA fuente de verdad: reemplaza
 // los `variables.ts` por pantalla (eliminados) — nombres físicos `qd_*`, tipos
 // de formulario, catálogos, opciones estáticas y valores por defecto viven
-// TODOS aquí. Ver campos/MAPEO_qd_old_new.md para el mapeo completo old→new y
+// TODOS aquí. Ver fields/MAPEO_qd_old_new.md para el mapeo completo old→new y
 // el informe de impacto de PMQL/colecciones.
 //
 // Nomenclatura Zurich RPA: `qd_` (marca de proyecto) + prefijo de tipo

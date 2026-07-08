@@ -9,7 +9,7 @@
 | Proceso             | Gestión de Quejas Directas — Subproceso 3: Cierre Regulatorio M3   |
 | Rol responsable     | Gestor de Experiencia / Backoffice SFC                             |
 | Versión insumos     | Anexo02 v2.0 / Matrices v2.0 / Anexo03 v1.0                       |
-| Archivos de impl.   | `CierreM3.tsx`, `SeccionEstadoCierre.tsx` (config centralizada en campos/fields.ts) |
+| Archivos de impl.   | `CierreM3.tsx`, `SeccionEstadoCierre.tsx` (config centralizada en fields/fields.ts) |
 | Estilos             | `frontend/src/shared.css` — sección `COL_QD_cierre-m3` (línea ~1769) |
 
 ---

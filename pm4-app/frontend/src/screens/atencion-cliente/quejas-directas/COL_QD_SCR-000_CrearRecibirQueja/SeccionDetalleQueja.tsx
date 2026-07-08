@@ -5,8 +5,8 @@ import FormSection from '../../../../components/FormSection';
 import DocSupportUploader from '../../../../components/DocSupportUploader';
 import { ZdsInput, ZdsSelect, ZdsRadio, ZdsTextarea } from '../../../../components/fields/ZdsFields';
 import { useCollection } from '../../../../core/useCollection';
-import { QD, QD_COLLECTIONS, OPTIONS_SI_NO, SCR000_ADJUNTO_KEYS as ADJUNTO_KEYS } from '../campos/fields';
-import type { CrearRecibirQuejaFormData } from '../campos/fields';
+import { QD, QD_COLLECTIONS, OPTIONS_SI_NO, SCR000_ADJUNTO_KEYS as ADJUNTO_KEYS } from '../fields/fields';
+import type { CrearRecibirQuejaFormData } from '../fields/fields';
 
 interface Props {
   form: UseFormReturn<CrearRecibirQuejaFormData>;
@@ -22,7 +22,7 @@ export default function SeccionDetalleQueja({ form, fileRegistry }: Props) {
   const { options: cllInsurance } = useCollection(QD_COLLECTIONS.sfcProduct);
   // Shim de dependencia: la clave 'qd_productoSFC' es una convención interna que NO
   // coincide con el dependsOn:'qd_seguro' de esta colección (bug preexistente,
-  // preservado — ver campos/MAPEO_qd_old_new.md #3). Solo se renombra la lectura
+  // preservado — ver fields/MAPEO_qd_old_new.md #3). Solo se renombra la lectura
   // del campo real.
   const { options: cllProductDetail } = useCollection(QD_COLLECTIONS.productDetail, { qd_productoSFC: objWatch[QD.strSfcProduct] });
   const { options: cllReason } = useCollection(QD_COLLECTIONS.sfcReason);

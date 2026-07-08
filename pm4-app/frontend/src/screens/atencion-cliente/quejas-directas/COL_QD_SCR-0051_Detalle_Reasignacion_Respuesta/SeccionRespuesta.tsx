@@ -7,8 +7,8 @@ import { useCollection } from '../../../../core/useCollection';
 import {
   QD, QD_COLLECTIONS, SCR0051_OPTIONS_FAVOR as OPTIONS_FAVOR,
   SCR0051_ADJUNTO_KEYS as ADJUNTO_KEYS, SCR0051_MAX_SOPORTES as MAX_SOPORTES,
-} from '../campos/fields';
-import type { DetalleReasignacionRespuestaFormData } from '../campos/fields';
+} from '../fields/fields';
+import type { DetalleReasignacionRespuestaFormData } from '../fields/fields';
 
 interface Props {
   form: UseFormReturn<DetalleReasignacionRespuestaFormData>;

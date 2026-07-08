@@ -2,8 +2,8 @@ import type { UseFormReturn } from 'react-hook-form';
 import FormSection from '../../../../components/FormSection';
 import { ZdsInput, ZdsTextarea, ZdsStatusBadge } from '../../../../components/fields/ZdsFields';
 import { useCollection } from '../../../../core/useCollection';
-import { QD, QD_COLLECTIONS } from '../campos/fields';
-import type { DetalleReasignacionRespuestaFormData } from '../campos/fields';
+import { QD, QD_COLLECTIONS } from '../fields/fields';
+import type { DetalleReasignacionRespuestaFormData } from '../fields/fields';
 
 // Mapea el estado SmartSupervision (FLD-079) al color del semáforo.
 export function estadoVariant(in_strStatus: string): 'success' | 'danger' | 'info' | 'neutral' {

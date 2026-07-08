@@ -12,7 +12,7 @@
 | Evento de apertura | Respuesta aprobada + PDF generado (SP2-T06) |
 | Acción de cierre | Guardar Formulario → habilita SP3 (PAN-10) |
 | Slug / `?screen=` | `COL_QD_SCR-009_Formulario_Superintendencia` |
-| Archivos de implementación | `FormularioSuperintendencia.tsx`, `SeccionFraudeAnexos.tsx` (config centralizada en campos/fields.ts) |
+| Archivos de implementación | `FormularioSuperintendencia.tsx`, `SeccionFraudeAnexos.tsx` (config centralizada en fields/fields.ts) |
 | Versión | 1.0 — 2026-06-30 |
 
 ---

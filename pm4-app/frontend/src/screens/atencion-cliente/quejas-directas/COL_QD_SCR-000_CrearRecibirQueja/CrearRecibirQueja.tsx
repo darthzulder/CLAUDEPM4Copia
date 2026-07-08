@@ -14,8 +14,8 @@ import {
   QD, QD_COLLECTIONS,
   SCR000_DEFAULTS as DEFAULTS, SCR000_ADJUNTO_KEYS as ADJUNTO_KEYS,
   SCR000_WEB_ENTRY_PROCESS_ID as WEB_ENTRY_PROCESS_ID, SCR000_WEB_ENTRY_EVENT_ID as WEB_ENTRY_EVENT_ID,
-} from '../campos/fields';
-import type { CrearRecibirQuejaFormData } from '../campos/fields';
+} from '../fields/fields';
+import type { CrearRecibirQuejaFormData } from '../fields/fields';
 import SeccionConsumidor from './SeccionConsumidor';
 import SeccionDetalleQueja from './SeccionDetalleQueja';
 import RecaptchaModal from '../../../../components/RecaptchaModal';

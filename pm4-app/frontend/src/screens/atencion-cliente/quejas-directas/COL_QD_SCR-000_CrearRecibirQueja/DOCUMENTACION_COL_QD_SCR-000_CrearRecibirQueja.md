@@ -5,7 +5,7 @@
 **Proceso:** P01 — Gestión de Quejas Directas (ACZ-QD-001)
 **Rol responsable:** Consumidor Financiero (Cliente / Intermediario / Empleado Zurich / Defensor del Consumidor)
 **Versión del diseño:** TO-BE v3.0
-**Archivos de implementación:** `CrearRecibirQueja.tsx`, `SeccionConsumidor.tsx`, `SeccionDetalleQueja.tsx`, `errorHelper.ts` (config centralizada en `campos/fields.ts`)
+**Archivos de implementación:** `CrearRecibirQueja.tsx`, `SeccionConsumidor.tsx`, `SeccionDetalleQueja.tsx`, `errorHelper.ts` (config centralizada en `fields/fields.ts`)
 
 > ⚠️ **Nota de nomenclatura.** La carpeta y la pantalla implementada corresponden a **SCR-000 (PQRS Autoservicio / P01-T00)** del insumo v3.0 — campos FLD-300…FLD-341, reglas RUL-000-*, mensajes MSG-000-*. **No** es la SCR-001 (Crear/Recibir Queja, P01-T01, rol Gestor de Experiencia). Ver [Suposiciones realizadas](#suposiciones-realizadas).
 

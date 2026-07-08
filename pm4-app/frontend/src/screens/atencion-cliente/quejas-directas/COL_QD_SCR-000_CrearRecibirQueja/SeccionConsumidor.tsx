@@ -3,8 +3,8 @@ import type { UseFormReturn } from 'react-hook-form';
 import FormSection from '../../../../components/FormSection';
 import { ZdsInput, ZdsSelect } from '../../../../components/fields/ZdsFields';
 import { useCollection } from '../../../../core/useCollection';
-import { QD, QD_COLLECTIONS, LOCK_COUNTRY, DEFAULT_COUNTRY_CODE } from '../campos/fields';
-import type { CrearRecibirQuejaFormData } from '../campos/fields';
+import { QD, QD_COLLECTIONS, LOCK_COUNTRY, DEFAULT_COUNTRY_CODE } from '../fields/fields';
+import type { CrearRecibirQuejaFormData } from '../fields/fields';
 
 interface Props {
   form: UseFormReturn<CrearRecibirQuejaFormData>;

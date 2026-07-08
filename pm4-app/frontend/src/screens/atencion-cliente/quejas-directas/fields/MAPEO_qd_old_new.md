@@ -4,7 +4,7 @@ Entregable para coordinar la migración de PM4 (variables de proceso, gateways, 
 integración SFC/SmartSupervision) en **lockstep** con este frontend. El frontend con los
 nombres NEW **no pre-pobla ni guarda** contra un PM4 que siga emitiendo/esperando OLD.
 
-Fuente de verdad de los nombres NEW: [`campos/fields.ts`](./fields.ts) (registro `QD`).
+Fuente de verdad de los nombres NEW: [`fields/fields.ts`](./fields.ts) (registro `QD`).
 No editar esta tabla sin editar `fields.ts` en el mismo commit.
 
 ## Alcance de esta migración

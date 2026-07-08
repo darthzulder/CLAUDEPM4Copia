@@ -7,8 +7,8 @@ import { useCollection } from '../../../../core/useCollection';
 import {
   QD, QD_COLLECTIONS, OPTIONS_SI_NO,
   SCR010_REGEX_NOMENCLATURA_PDF as REGEX_NOMENCLATURA_PDF,
-} from '../campos/fields';
-import type { CierreM3FormData } from '../campos/fields';
+} from '../fields/fields';
+import type { CierreM3FormData } from '../fields/fields';
 import SeccionEstadoCierre from './SeccionEstadoCierre';
 import zurichLogo from '../../../../resources/zurich/ZurichLogo_Horz_White_CMYK_no_R.png';
 import pm4 from '../../../../api/pm4Client';

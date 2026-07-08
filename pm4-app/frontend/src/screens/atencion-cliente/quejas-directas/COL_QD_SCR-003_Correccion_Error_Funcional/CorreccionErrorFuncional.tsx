@@ -8,8 +8,8 @@ import {
   ZdsInput, ZdsTextarea,
   ZrButton, ZrAlert, ZrModal, ZrLoader, ZrTable,
 } from '../../../../components/fields/ZdsFields';
-import { QD, SCR003_DEFAULTS as DEFAULTS, SCR003_UMBRAL_INTENTOS as UMBRAL_INTENTOS } from '../campos/fields';
-import type { CorreccionErrorFuncionalFormData, AccionErrorFuncional } from '../campos/fields';
+import { QD, SCR003_DEFAULTS as DEFAULTS, SCR003_UMBRAL_INTENTOS as UMBRAL_INTENTOS } from '../fields/fields';
+import type { CorreccionErrorFuncionalFormData, AccionErrorFuncional } from '../fields/fields';
 
 export default function CorreccionErrorFuncional() {
   const { task, loading, error, submitting, completeTask } = useTask();

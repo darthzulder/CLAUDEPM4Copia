@@ -8,8 +8,8 @@ import {
   ZdsInput, ZdsTextarea, ZdsRadio,
   ZrButton, ZrAlert, ZrModal, ZrLoader,
 } from '../../../../components/fields/ZdsFields';
-import { QD, SCR004_DEFAULTS as DEFAULTS, OPTIONS_SI_NO } from '../campos/fields';
-import type { RevisionErrorTecnicoApiFormData, AccionErrorTecnico } from '../campos/fields';
+import { QD, SCR004_DEFAULTS as DEFAULTS, OPTIONS_SI_NO } from '../fields/fields';
+import type { RevisionErrorTecnicoApiFormData, AccionErrorTecnico } from '../fields/fields';
 
 export default function RevisionErrorTecnicoApi() {
   const { task, loading, error, submitting, completeTask } = useTask();

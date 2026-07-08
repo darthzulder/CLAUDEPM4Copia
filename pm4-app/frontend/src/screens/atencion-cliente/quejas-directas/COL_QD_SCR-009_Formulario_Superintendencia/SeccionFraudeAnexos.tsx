@@ -2,8 +2,8 @@ import type { UseFormReturn } from 'react-hook-form';
 import FormSection from '../../../../components/FormSection';
 import { ZdsSelect, ZdsInput, ZdsRadio, ZrButton, ZrAlert } from '../../../../components/fields/ZdsFields';
 import { useCollection } from '../../../../core/useCollection';
-import { QD, QD_COLLECTIONS, OPTIONS_SI_NO } from '../campos/fields';
-import type { FormularioSuperintendenciaFormData } from '../campos/fields';
+import { QD, QD_COLLECTIONS, OPTIONS_SI_NO } from '../fields/fields';
+import type { FormularioSuperintendenciaFormData } from '../fields/fields';
 
 interface Props {
   form: UseFormReturn<FormularioSuperintendenciaFormData>;

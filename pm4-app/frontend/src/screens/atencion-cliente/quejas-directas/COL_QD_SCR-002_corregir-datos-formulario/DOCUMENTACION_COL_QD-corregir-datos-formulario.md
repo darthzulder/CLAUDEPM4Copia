@@ -10,7 +10,7 @@
 | **Subproceso** | — (tarea del proceso principal P01) |
 | **Rol responsable** | Gestor de Experiencia |
 | **Versión insumo** | Anexo02_Mockups_TOBE_QuejaDirectas_v2_0 |
-| **Archivos de implementación** | `CorregirDatosFormulario.tsx`, `SeccionErroresValidacion.tsx` (config centralizada en `campos/fields.ts`) |
+| **Archivos de implementación** | `CorregirDatosFormulario.tsx`, `SeccionErroresValidacion.tsx` (config centralizada en `fields/fields.ts`) |
 | **Slug en App.tsx** | `COL_QD-corregir-datos-formulario` |
 
 ---

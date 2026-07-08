@@ -12,7 +12,7 @@
 | Evento de apertura | SmartSupervision rechaza prórroga HTTP 400 funcional |
 | Acción de cierre | Reenviar Prórroga → SP4-T01 |
 | Slug / `?screen=` | `COL_QD_SCR-012_Revision_Error_Funcional_Prorroga` |
-| Archivos de implementación | `ErrorFuncionalProrroga.tsx` (config centralizada en campos/fields.ts) |
+| Archivos de implementación | `ErrorFuncionalProrroga.tsx` (config centralizada en fields/fields.ts) |
 | Versión | 1.0 — 2026-06-30 |
 
 > Es el análogo, para el flujo de **prórroga (SP4)**, de SCR-003 (corrección error funcional de radicación).

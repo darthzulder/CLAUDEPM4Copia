@@ -8,9 +8,9 @@ import {
   ZdsInput, ZdsTextarea,
   ZrButton, ZrAlert, ZrModal, ZrLoader,
 } from '../../../../components/fields/ZdsFields';
-import { QD, SCR008_DEFAULTS as DEFAULTS, SCR008_SLA_UMBRAL_CRITICO as SLA_UMBRAL_CRITICO } from '../campos/fields';
-import type { RevisionRespuestaSacFormData, AccionRevisionSAC } from '../campos/fields';
-import type { SoporteAdjunto } from '../campos/types';
+import { QD, SCR008_DEFAULTS as DEFAULTS, SCR008_SLA_UMBRAL_CRITICO as SLA_UMBRAL_CRITICO } from '../fields/fields';
+import type { RevisionRespuestaSacFormData, AccionRevisionSAC } from '../fields/fields';
+import type { SoporteAdjunto } from '../fields/types';
 
 export default function RevisionRespuestaSac() {
   // Cargamos la tarea y su estado desde PM4

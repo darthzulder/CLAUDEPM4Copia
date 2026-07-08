@@ -12,7 +12,7 @@
 | Evento de apertura | SmartSupervision devuelve HTTP 400 **funcional** |
 | Acción de cierre | "Corregir y Reenviar" → SP1-T02 (reenvío M2) |
 | Slug / `?screen=` | `COL_QD_SCR-003_Correccion_Error_Funcional` |
-| Archivos de implementación | `CorreccionErrorFuncional.tsx` (config centralizada en `campos/fields.ts`) |
+| Archivos de implementación | `CorreccionErrorFuncional.tsx` (config centralizada en `fields/fields.ts`) |
 | Versión | 1.0 — 2026-06-30 |
 
 > **Nota de nomenclatura:** el SLUG solicitado fue `COL_QD_Corrección_Error_Funcional`. Se

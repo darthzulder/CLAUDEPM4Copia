@@ -12,7 +12,7 @@
 | Evento de apertura | Caso asignado a la bandeja del área |
 | Acción de cierre | Enviar comentario → continúa SP2-T02 |
 | Slug / `?screen=` | `COL_QD_SCR-0052_Respuesta_Area_Responsable` |
-| Archivos de implementación | `RespuestaAreaResponsable.tsx` (config centralizada en campos/fields.ts) |
+| Archivos de implementación | `RespuestaAreaResponsable.tsx` (config centralizada en fields/fields.ts) |
 | Versión | 1.0 — 2026-06-30 |
 
 > **Nota de nomenclatura:** el SLUG solicitado (`COL_QD_Respuesta_Area_Responsable`) se normalizó a

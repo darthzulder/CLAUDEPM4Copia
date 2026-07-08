@@ -3,9 +3,9 @@ import type { UseFormReturn } from 'react-hook-form';
 import { ZdsInput, ZdsSelect, ZrAlert } from '../../../../components/fields/ZdsFields';
 import FormSection from '../../../../components/FormSection';
 import { useCollection } from '../../../../core/useCollection';
-import type { CampoConError } from '../campos/types';
-import type { CorregirDatosFormData } from '../campos/fields';
-import { QD, QD_COLLECTIONS } from '../campos/fields';
+import type { CampoConError } from '../fields/types';
+import type { CorregirDatosFormData } from '../fields/fields';
+import { QD, QD_COLLECTIONS } from '../fields/fields';
 
 interface Props {
   camposConError: CampoConError[];

@@ -8,8 +8,8 @@ import {
   ZdsInput, ZdsTextarea,
   ZrButton, ZrAlert, ZrLoader,
 } from '../../../../components/fields/ZdsFields';
-import { QD, SCR011_DEFAULTS as DEFAULTS } from '../campos/fields';
-import type { RevisionErrorTecnicoProrrogaFormData, AccionErrorTecnicoProrroga } from '../campos/fields';
+import { QD, SCR011_DEFAULTS as DEFAULTS } from '../fields/fields';
+import type { RevisionErrorTecnicoProrrogaFormData, AccionErrorTecnicoProrroga } from '../fields/fields';
 
 export default function RevisionErrorTecnicoProrroga() {
   // Cargamos la tarea y su estado desde PM4

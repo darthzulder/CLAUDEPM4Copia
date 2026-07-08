@@ -13,8 +13,8 @@ import {
   SCR009_OPTIONS_LGBTIQ as OPTIONS_LGBTIQ,
   SCR009_CAMPOS_SFC_OBLIGATORIOS as CAMPOS_SFC_OBLIGATORIOS,
   SCR009_CAMPOS_FRAUDE as CAMPOS_FRAUDE,
-} from '../campos/fields';
-import type { FormularioSuperintendenciaFormData, AccionFormularioSFC } from '../campos/fields';
+} from '../fields/fields';
+import type { FormularioSuperintendenciaFormData, AccionFormularioSFC } from '../fields/fields';
 import SeccionFraudeAnexos from './SeccionFraudeAnexos';
 
 export default function FormularioSuperintendencia() {

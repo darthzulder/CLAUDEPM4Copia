@@ -11,7 +11,7 @@
 | Rol responsable | **Analista Técnico** (RESPONSABLE) |
 | Versión insumos | Anexo02 v3.0 · Matrices v3.0 · Anexo03 v2.0 |
 | Slug / carpeta | `COL_QD_Revision_Error_Tecnico_API` |
-| Archivos de implementación | `RevisionErrorTecnicoApi.tsx`, registro en `App.tsx` (config centralizada en `campos/fields.ts`) |
+| Archivos de implementación | `RevisionErrorTecnicoApi.tsx`, registro en `App.tsx` (config centralizada en `fields/fields.ts`) |
 
 ---
 

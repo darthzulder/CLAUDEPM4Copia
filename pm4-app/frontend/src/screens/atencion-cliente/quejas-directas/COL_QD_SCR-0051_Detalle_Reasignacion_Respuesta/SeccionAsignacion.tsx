@@ -7,9 +7,9 @@ import {
 } from '../../../../components/fields/ZdsFields';
 import { useCollection } from '../../../../core/useCollection';
 import pm4 from '../../../../api/pm4Client';
-import { QD, QD_COLLECTIONS, OPTIONS_SI_NO, SCR0051_MAX_AYUDANTES as MAX_AYUDANTES } from '../campos/fields';
-import type { DetalleReasignacionRespuestaFormData } from '../campos/fields';
-import type { AsignacionHistorial } from '../campos/types';
+import { QD, QD_COLLECTIONS, OPTIONS_SI_NO, SCR0051_MAX_AYUDANTES as MAX_AYUDANTES } from '../fields/fields';
+import type { DetalleReasignacionRespuestaFormData } from '../fields/fields';
+import type { AsignacionHistorial } from '../fields/types';
 
 interface Props {
   form: UseFormReturn<DetalleReasignacionRespuestaFormData>;
@@ -51,7 +51,7 @@ export default function SeccionAsignacion({ form, err, onConfirmarReasignacion, 
 
   // RUL-0051-02 — usuarios filtrados por área seleccionada (asignación inicial).
   // Shim de dependencia: 'qd_area' es una convención interna (no un campo PM4 real,
-  // ver campos/MAPEO_qd_old_new.md #2) — coincide con el dependsOn sin cambios.
+  // ver fields/MAPEO_qd_old_new.md #2) — coincide con el dependsOn sin cambios.
   const { options: cllAreaUsers } = useCollection(QD_COLLECTIONS.areaUsers, { qd_area: objWatch[QD.strAssigneeArea] });
 
   // FLD-092 — responsables del área destino de reasignación (autocompletado).

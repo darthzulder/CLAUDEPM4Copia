@@ -12,7 +12,7 @@
 | Evento de apertura | SP4-T01 falla técnicamente → escala |
 | Acción de cierre | Autorizar Reenvío Prórroga → SP4-T01 |
 | Slug / `?screen=` | `COL_QD_SCR-011_Revision_Error_Tecnico_Prorroga` |
-| Archivos de implementación | `RevisionErrorTecnicoProrroga.tsx` (config centralizada en campos/fields.ts) |
+| Archivos de implementación | `RevisionErrorTecnicoProrroga.tsx` (config centralizada en fields/fields.ts) |
 | Versión | 1.0 — 2026-06-30 |
 
 > Es el análogo, para el flujo de **prórroga (SP4)**, de SCR-004 (error técnico de radicación).

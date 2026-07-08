@@ -12,7 +12,7 @@
 | Evento de apertura | SP1 exitoso (HTTP 201) → bandeja SAC |
 | Acción de cierre | Enviar → "En revisión SAC" (SP2-T04) · o Reasignar (SP2-T03) · o Solicitar Prórroga (SP4-T01) |
 | Slug / `?screen=` | `COL_QD_SCR-0051_Detalle_Reasignacion_Respuesta` |
-| Archivos de implementación | `DetalleReasignacionRespuesta.tsx`, `SeccionDetalleCaso.tsx`, `SeccionAsignacion.tsx`, `SeccionRespuesta.tsx` (config centralizada en campos/fields.ts) |
+| Archivos de implementación | `DetalleReasignacionRespuesta.tsx`, `SeccionDetalleCaso.tsx`, `SeccionAsignacion.tsx`, `SeccionRespuesta.tsx` (config centralizada en fields/fields.ts) |
 | Versión | 1.0 — 2026-06-30 |
 
 > **Nota de nomenclatura:** el SLUG solicitado fue `COL_QD_Detalle_ Reasignación_Respuesta` (con

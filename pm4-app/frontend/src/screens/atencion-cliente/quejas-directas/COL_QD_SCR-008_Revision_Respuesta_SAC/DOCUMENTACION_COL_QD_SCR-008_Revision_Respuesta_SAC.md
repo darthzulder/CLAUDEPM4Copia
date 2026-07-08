@@ -12,7 +12,7 @@
 | Evento de apertura | El área envía el borrador para revisión |
 | Acción de cierre | Aprobar → SP2-T06 (PDF) · Devolver → SP2-T05 (PAN-07) |
 | Slug / `?screen=` | `COL_QD_SCR-008_Revision_Respuesta_SAC` |
-| Archivos de implementación | `RevisionRespuestaSac.tsx` (config centralizada en campos/fields.ts) |
+| Archivos de implementación | `RevisionRespuestaSac.tsx` (config centralizada en fields/fields.ts) |
 | Versión | 1.0 — 2026-06-30 |
 
 > **Nota de nomenclatura:** el SLUG solicitado (`COL_QD_Revisión_Respuesta_SAC`, con tilde) se
