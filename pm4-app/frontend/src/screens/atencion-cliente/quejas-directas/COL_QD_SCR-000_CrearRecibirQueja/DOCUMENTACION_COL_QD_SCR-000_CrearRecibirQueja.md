@@ -49,7 +49,7 @@ Catálogos implementados como **colecciones dinámicas PM4** (no listas estátic
 | CAT-MPIO | `qd_strCity` (15, depende de `qd_strDepartment`) | `qd_strCity` |
 | CAT-COND-ESP | `qd_strSpecialCondition` (24) | `qd_strSpecialCondition` |
 | CAT-PRODUCTO-SFC | `qd_strSfcProduct` (16) | `qd_strSfcProduct` |
-| cat_matriz_motivos | `qd_matrizMotivos` (45, carga completa; cascada momento/servicio/motivo derivada **en cliente**) | `qd_strInteraction`, `qd_strServiceProvided`, `qd_strSfcReason` |
+| cat_matriz_motivos | `qd_matrizMotivos` (45, carga completa; cascada momento/servicio/motivo derivada **en cliente**) | `qd_strInteraction`, `qd_strServiceProvided`, `qd_strSfcReason`, `qd_strResponsableRole`, `qd_strOmbudsmanEscalation`, `qd_strCompensation`, `qd_strSlaAssigned` |
 | CAT-MOTIVO-SFC *(legacy id 17)* | `qd_strSfcReason` (17, ya no lo usa SCR-000; sí SCR-002/0051/0052 en modo display) | `qd_strSfcReason` |
 | CAT-ADMISION | `qd_strAdmission` (21) | `qd_strAdmission` |
 
@@ -102,10 +102,13 @@ Catálogos implementados como **colecciones dinámicas PM4** (no listas estátic
 | Detalle del producto | `qd_strProductDetail` | Texto, solo lectura (back) | Sí | Anexo02 > SCR-000 > FLD-324 (fila 40) |
 | ¿Ya habías radicado / es reconsideración? | `qd_strReply` | Radio Sí/No | Sí | Anexo02 > SCR-000 > FLD-325 (fila 41) — Réplica SFC |
 | Argumento de la réplica | `qd_strReplyArgument` | Textarea (máx 2000) | No (visible si réplica=Sí) | Anexo02 > SCR-000 > FLD-326 (fila 42) |
-| Escalamiento al Defensor del Consumidor | `qd_strOmbudsmanEscalation` | Texto, solo lectura (computado) | Sí | Anexo02 > SCR-000 > FLD-327 (fila 43) |
+| Escalamiento al Defensor del Consumidor | `qd_strOmbudsmanEscalation` | Texto, solo lectura (computado desde `cat_matriz_motivos.escalamientoAdministrador`) | Sí | Anexo02 > SCR-000 > FLD-327 (fila 43) |
 | Selecciona el momento | `qd_strInteraction` | Select (`cat_matriz_motivos.interaccion`, cascada), deshabilitado hasta elegir seguro | Sí | Anexo02 > FormularioCreaciónPQRS #30 — "columna interaccion" |
 | Selecciona el servicio | `qd_strServiceProvided` | Select (`cat_matriz_motivos.servicioPrestado`), visible solo si momento = "Asistencias" | Sí (si Asistencias) | Anexo02 > FormularioCreaciónPQRS #31 — "columna servicioPrestado" |
 | Cuéntanos el motivo | `qd_strSfcReason` | Select (`cat_matriz_motivos`: value=`codigoMotivoSFC`, label=`motivoSFC`, cascada), deshabilitado hasta completar momento/servicio | Sí | Anexo02 > SCR-000 > FLD-328 (fila 44) — "crítico: condiciona fraude en M3" |
+| *(back, no visible)* | `qd_strResponsableRole` | Texto, computado desde `cat_matriz_motivos.rolResponsable` | Sí (al radicar) | Solicitud del usuario (2026-07-09) — rol sugerido para ruteo BPM, distinto del `qd_strAssigneeRole` post-radicación (S6) |
+| *(back, no visible)* | `qd_strCompensation` | Texto, computado desde `cat_matriz_motivos.resarcimientoAdministrador` | Sí (al radicar) | Solicitud del usuario (2026-07-09) |
+| *(back, no visible)* | `qd_strSlaAssigned` | Texto, computado desde `cat_matriz_motivos.sla` | Sí (al radicar) | Solicitud del usuario (2026-07-09) — mismo campo que consumen SCR-002/008/0051 |
 | Ingresa el detalle | `qd_strComplaintText` | Textarea (50–2000) | Sí | Anexo02 > SCR-000 > FLD-329 (fila 45) |
 | Ingresa archivos adjuntos | `qd_strAttach01…05` | Upload multi (máx 5) | Sí | Anexo02 > SCR-000 > FLD-330 (fila 46) — "pdf, jpg, png, docx. Máx 5 MB" |
 | Admisión | `qd_strAdmission` | Select (si Defensor) / solo lectura | Sí | Anexo02 > SCR-000 > FLD-331 (fila 47) |
@@ -206,7 +209,7 @@ Catálogos implementados como **colecciones dinámicas PM4** (no listas estátic
 | Campo Origen | Campo Dependiente | Comportamiento | Fuente |
 |---|---|---|---|
 | `qd_strFilerRole` | `qd_strReceptionInstance`, `qd_strReceptionPoint`, `qd_strAdmission` | Defensor → instancia "Defensor" y Admisión editable; resto → "Entidad vigilada" y Admisión "No aplica". Punto = "Virtual" | Anexo02 > 05_Reglas RUL-000-01 (fila 36); FLD-303/304/305/331 |
-| `qd_strFilerRole` | `qd_strOmbudsmanEscalation` | Defensor → "Sí"; resto → "No" | Anexo02 > SCR-000 FLD-327 (fila 43) |
+| `qd_strInteraction` + `qd_strServiceProvided` + `qd_strSfcReason` | `qd_strResponsableRole`, `qd_strOmbudsmanEscalation`, `qd_strCompensation`, `qd_strSlaAssigned` | Al completar la cadena y elegir motivo, se toma la fila exacta de `cat_matriz_motivos` para ese motivo y se copian sus columnas `rolResponsable` / `escalamientoAdministrador` / `resarcimientoAdministrador` / `sla`; cualquier cambio aguas arriba (tipo solicitud/producto/momento/servicio) limpia las 4 variables hasta reelegir motivo | Solicitud del usuario (2026-07-09) |
 | `qd_strIdType` | `qd_strPersonType` + bloque de campos (Natural vs. Jurídica) | NIT → Jurídica (Razón Social + contacto); resto → Natural (Nombres/Apellidos) | Anexo02 > 05_Reglas RUL-000-02/03 (filas 37–38); FLD-315 |
 | `qd_strDepartment` | `qd_strCity` | Al cambiar departamento se limpia la ciudad y se recarga el catálogo (colección 15, `dependsOn: qd_strDepartment`); ciudad deshabilitada sin departamento | Anexo02 > 05_Reglas RUL-000-09 (fila 39); FLD-317/318 |
 | `qd_strReply` (= Sí) | `qd_strReplyArgument` | Muestra el campo de argumento | Anexo02 > 05_Reglas RUL-000-12 (fila 42); FLD-325/326 |
@@ -245,6 +248,8 @@ Catálogos implementados como **colecciones dinámicas PM4** (no listas estátic
 12. **Cascada `cat_matriz_motivos` (id 45) — filtrada en cliente.** Los campos momento (`qd_strInteraction`), servicio (`qd_strServiceProvided`) y motivo (`qd_strSfcReason`) se derivan de una única colección PM4 (id **45**) con la cadena tipo de solicitud → producto → momento → servicio → motivo. **Decisión de diseño:** la matriz se carga completa (≈385 filas) y la cascada se filtra en **cliente** (`SeccionDetalleQueja`), no por PMQL, porque: (a) las columnas de filtro `tipoSolicitud`/`productoZurich` guardan el **texto** ("Queja", "Vida"), no el código que guarda el form → hay que comparar por *label*; (b) los datos traen **espacios sobrantes** ("Hogar ", "No aplica ") y variaciones de mayúsculas que romperían la igualdad exacta de PMQL. En cliente se normaliza con `trim` + minúsculas. Columnas usadas (camelCase, bajo `data.*`): `tipoSolicitud`, `productoZurich`, `interaccion`, `servicioPrestado`, `codigoMotivoSFC` (código → `qd_strSfcReason`), `motivoSFC` (descripción visible). El momento y el servicio se guardan como su texto (`interaccion`/`servicioPrestado`); el motivo guarda el **código** `codigoMotivoSFC`. Detección de "Autos" (placa) y "Asistencias" (servicio) por regex sobre el *label* (`/autos/i`, `/asistencias/i`).
 
 ---
+
+13. **Variables de ruteo extraídas de `cat_matriz_motivos` (2026-07-09).** A petición del usuario, `qd_strResponsableRole`, `qd_strOmbudsmanEscalation`, `qd_strCompensation` y `qd_strSlaAssigned` se computan (`SeccionDetalleQueja.tsx`) desde las columnas `rolResponsable`, `escalamientoAdministrador`, `resarcimientoAdministrador` y `sla` de la fila de la matriz que corresponde al motivo elegido — nombres de columna indicados por el usuario, no verificados por Claude contra el esquema real de la colección 45 en PM4. Esto **reemplaza** la regla anterior de `qd_strOmbudsmanEscalation` (computada por rol radicador); `qd_strResponsableRole` es una variable nueva, distinta de `qd_strAssigneeRole` (S6, post-radicación). Pendiente confirmar en PM4 que la colección 45 realmente expone esas 4 columnas.
 
 ## Cobertura de Trazabilidad
 

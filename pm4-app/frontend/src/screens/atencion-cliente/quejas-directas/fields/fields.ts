@@ -58,7 +58,9 @@ export const QD = {
   strProductDetail: 'qd_strProductDetail',             // FLD-324 · antes qd_detalleProducto (back)
   strReply: 'qd_strReply',                             // FLD-325 · antes qd_replica
   strReplyArgument: 'qd_strReplyArgument',             // FLD-326 · antes qd_argumentoReplica
-  strOmbudsmanEscalation: 'qd_strOmbudsmanEscalation', // FLD-327 · antes qd_escalamientoDefensor
+  strOmbudsmanEscalation: 'qd_strOmbudsmanEscalation', // FLD-327 · antes qd_escalamientoDefensor · extraído de cat_matriz_motivos.escalamientoAdministrador
+  strResponsableRole: 'qd_strResponsableRole',         // Anexo02 (nuevo) · rol responsable sugerido, extraído de cat_matriz_motivos.rolResponsable
+  strCompensation: 'qd_strCompensation',               // Anexo02 (nuevo) · resarcimiento administrador, extraído de cat_matriz_motivos.resarcimientoAdministrador
   strInteraction: 'qd_strInteraction',                 // Anexo02 #30 (nuevo) · momento/interacción (cat_matriz_motivos.interaccion)
   strServiceProvided: 'qd_strServiceProvided',         // Anexo02 #31 (nuevo) · servicio (cat_matriz_motivos.servicioPrestado; solo si momento = Asistencias)
   strSfcReason: 'qd_strSfcReason',                     // FLD-328 · antes qd_motivoSFC
@@ -247,6 +249,8 @@ export interface QdFields {
   qd_strReply: string;
   qd_strReplyArgument: string;
   qd_strOmbudsmanEscalation: string;
+  qd_strResponsableRole: string;
+  qd_strCompensation: string;
   qd_strInteraction: string;
   qd_strServiceProvided: string;
   qd_strSfcReason: string;
@@ -488,7 +492,8 @@ export type CrearRecibirQuejaFormData = Pick<QdFields,
   | typeof QD.strDepartment | typeof QD.strCity | typeof QD.strAddress | typeof QD.strSex
   | typeof QD.strLgbtiq | typeof QD.strSpecialCondition | typeof QD.strSfcProduct | typeof QD.strPlate
   | typeof QD.strProductDetail | typeof QD.strReply | typeof QD.strReplyArgument
-  | typeof QD.strOmbudsmanEscalation | typeof QD.strInteraction | typeof QD.strServiceProvided
+  | typeof QD.strOmbudsmanEscalation | typeof QD.strResponsableRole | typeof QD.strCompensation | typeof QD.strSlaAssigned
+  | typeof QD.strInteraction | typeof QD.strServiceProvided
   | typeof QD.strSfcReason | typeof QD.strComplaintText
   | typeof QD.strAttach01 | typeof QD.strAttach02 | typeof QD.strAttach03 | typeof QD.strAttach04 | typeof QD.strAttach05
   | typeof QD.strAdmission | typeof QD.strControlEntity | typeof QD.strTutela | typeof QD.strExpressComplaint
@@ -503,6 +508,9 @@ export const SCR000_DEFAULTS = {
   [QD.strPlate]: '',          // Anexo02 #25 — solo se llena si producto = Autos
   [QD.strInteraction]: '',    // Anexo02 #30 — cascada cat_matriz_motivos
   [QD.strServiceProvided]: '', // Anexo02 #31 — cascada cat_matriz_motivos (Asistencias)
+  [QD.strResponsableRole]: '', // Extraído de cat_matriz_motivos.rolResponsable al completar momento/servicio/motivo
+  [QD.strCompensation]: '',    // Extraído de cat_matriz_motivos.resarcimientoAdministrador
+  [QD.strSlaAssigned]: '',     // Extraído de cat_matriz_motivos.sla
 } as const;
 
 // ═══════════════════════════════════════════════════════════════════════════

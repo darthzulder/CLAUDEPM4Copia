@@ -108,6 +108,11 @@ export default function SeccionDetalleQueja({ form, fileRegistry }: Props) {
     label: leerColumna(r, 'motivoSFC'),
   })));
 
+  // Fila exacta de la matriz para el motivo elegido — de ella se extraen las
+  // variables de ruteo/negocio que se envían al radicar (ver useEffect abajo).
+  const objSelectedReasonRow = cllRowsForReason.find((r) =>
+    normalizar(leerColumna(r, 'codigoMotivoSFC')) === normalizar(objWatch[QD.strSfcReason]));
+
   // RUL cascada — al cambiar un eslabón aguas arriba se limpia lo de aguas abajo para
   // forzar la reselección coherente (mismo patrón que ciudad↔departamento en S2).
   // Producto → momento.
@@ -120,20 +125,32 @@ export default function SeccionDetalleQueja({ form, fileRegistry }: Props) {
     setValue(QD.strServiceProvided, '');
   }, [objWatch[QD.strInteraction], setValue]);
 
-  // Cualquier eslabón de la cadena → motivo.
+  // Cualquier eslabón de la cadena → motivo (y las variables derivadas de su fila,
+  // que se recalculan en el efecto siguiente cuando se vuelva a elegir un motivo).
   useEffect(() => {
     setValue(QD.strSfcReason, '');
+    setValue(QD.strResponsableRole, '');
+    setValue(QD.strOmbudsmanEscalation, '');
+    setValue(QD.strCompensation, '');
+    setValue(QD.strSlaAssigned, '');
   }, [objWatch[QD.strRequestType], objWatch[QD.strSfcProduct], objWatch[QD.strInteraction], objWatch[QD.strServiceProvided], setValue]);
+
+  // qd_strResponsableRole / qd_strOmbudsmanEscalation / qd_strCompensation / qd_strSlaAssigned
+  // se extraen de la fila de cat_matriz_motivos que corresponde a la selección completa
+  // del form (tipo solicitud + producto + momento + [servicio] + motivo), columnas
+  // rolResponsable / escalamientoAdministrador / resarcimientoAdministrador / sla.
+  useEffect(() => {
+    if (!objSelectedReasonRow) return;
+    setValue(QD.strResponsableRole, leerColumna(objSelectedReasonRow, 'rolResponsable'));
+    setValue(QD.strOmbudsmanEscalation, leerColumna(objSelectedReasonRow, 'escalamientoAdministrador'));
+    setValue(QD.strCompensation, leerColumna(objSelectedReasonRow, 'resarcimientoAdministrador'));
+    setValue(QD.strSlaAssigned, leerColumna(objSelectedReasonRow, 'sla'));
+  }, [objSelectedReasonRow, setValue]);
 
   // Placa fuera de "Autos" no debe conservar valor.
   useEffect(() => {
     if (!blnIsAutos && objWatch[QD.strPlate]) setValue(QD.strPlate, '');
   }, [blnIsAutos, objWatch[QD.strPlate], setValue]);
-
-  // FLD-327 — escalamiento al Defensor computado (back): Defensor → "Sí".
-  useEffect(() => {
-    setValue(QD.strOmbudsmanEscalation, blnIsDefender ? 'Sí' : 'No');
-  }, [blnIsDefender, setValue]);
 
   // FLD-324 — detalle del producto: primer código de CAT-DETALLE-PRODUCTO para el seguro elegido.
   useEffect(() => {
@@ -255,7 +272,7 @@ export default function SeccionDetalleQueja({ form, fileRegistry }: Props) {
           control={control}
           label="Escalamiento al Defensor del Consumidor"
           readOnly
-          helpText="Asignado por el sistema según la instancia."
+          helpText="Asignado por el sistema (cat_matriz_motivos.escalamientoAdministrador, según el motivo elegido)."
         />
       </div>
 
