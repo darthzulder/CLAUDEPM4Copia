@@ -1,6 +1,6 @@
 # Índice de Mockups y Especificaciones TO-BE (Anexo 02)
 
-Este directorio contiene una versión indexada en Markdown del archivo Excel `Anexo02_Mockups_TOBE_QuejaDirectas_v3_0.xlsx`. Fue diseñado para facilitar la búsqueda, lectura y análisis de las pantallas, campos, reglas y mensajes por parte de desarrolladores y Modelos de Inteligencia Artificial (IA).
+Este directorio contiene una versión indexada en Markdown del archivo Excel `Anexo02_Mockups_TOBE_QuejaDirectas_v3_1.xlsx`. Fue diseñado para facilitar la búsqueda, lectura y análisis de las pantallas, campos, reglas y mensajes por parte de desarrolladores y Modelos de Inteligencia Artificial (IA).
 
 ---
 
@@ -57,7 +57,7 @@ A continuación se listan las pantallas del proceso, agrupadas por su rol y tare
 
 ## Cómo Actualizar este Índice
 
-Este índice se autogenera a partir del archivo Excel utilizando un script de Python. Si realizas cambios en el archivo Excel `Anexo02_Mockups_TOBE_QuejaDirectas_v3_0.xlsx`, puedes regenerar todo el índice de la siguiente manera:
+Este índice se autogenera a partir del archivo Excel utilizando un script de Python. Si realizas cambios en el archivo Excel `Anexo02_Mockups_TOBE_QuejaDirectas_v3_1.xlsx`, puedes regenerar todo el índice de la siguiente manera:
 
 1. Asegúrate de tener instalados `pandas` y `openpyxl`:
    ```bash

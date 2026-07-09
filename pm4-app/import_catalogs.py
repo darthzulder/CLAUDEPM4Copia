@@ -535,7 +535,7 @@ def main():
 
     # Rutas relativas
     strHere = os.path.dirname(os.path.abspath(__file__))
-    strExcelPath = os.path.join(strHere, "insumos", "Anexo02_Mockups_TOBE_QuejaDirectas_v3_0.xlsx")
+    strExcelPath = os.path.join(strHere, "insumos", "Anexo02_Mockups_TOBE_QuejaDirectas_v3_1.xlsx")
     strEnvPath = os.path.join(strHere, ".env")
 
     print("=== PROCESO DE MIGRACIÓN DE CATÁLOGOS PM4 ===")

@@ -26,7 +26,7 @@ Todos los insumos están en `pm4-app/insumos/`. **La carpeta completa es la fuen
 
 ### Regla de sustitución: `.md` tiene prioridad sobre el archivo original
 
-Antes de leer cualquier archivo de insumos (`.xlsx`, `.pdf`, u otro), **verificar si existe en la misma carpeta `insumos/` un archivo `.md` con el mismo nombre base** (p. ej. `Anexo02_Mockups_TOBE_QuejaDirectas_v3_0.md` junto a su `.xlsx` homónimo). Si existe ese `.md`:
+Antes de leer cualquier archivo de insumos (`.xlsx`, `.pdf`, u otro), **verificar si existe en la misma carpeta `insumos/` un archivo `.md` con el mismo nombre base** (p. ej. `Anexo02_Mockups_TOBE_QuejaDirectas_v3_1.md` junto a su `.xlsx` homónimo). Si existe ese `.md`:
 
 - **Usar el `.md` en lugar del archivo original.** Es la versión procesada, navegable y sin dependencias de herramientas externas.
 - Solo recurrir al archivo original si el `.md` no existe o si la información requerida no está cubierta en él.

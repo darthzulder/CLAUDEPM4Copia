@@ -37,7 +37,7 @@ Fuente: `Anexo02 > 10_Trazabilidad_BPMN > SCR-004 (fila 9)`.
 
 | Archivo | Hoja | Descripción de uso |
 |---|---|---|
-| Anexo02_Mockups_TOBE_QuejaDirectas_v3_0.xlsx | `SCR-004` | Historia de usuario, campos (FLD-050…058), acciones (ACT-004-01/02/03), regla crítica RUL-004-01. **Fuente principal del layout.** |
+| Anexo02_Mockups_TOBE_QuejaDirectas_v3_1.xlsx | `SCR-004` | Historia de usuario, campos (FLD-050…058), acciones (ACT-004-01/02/03), regla crítica RUL-004-01. **Fuente principal del layout.** |
 | Anexo02 | `01_Pantallas` | Inventario maestro PAN-04: tarea SP1-T06, rol, historia y criterio de aceptación (fila 9). |
 | Anexo02 | `02_Secciones` | SEC-011 (S1 Detalle del Error Técnico) y SEC-012 (S2 Registro de Corrección Técnica), ambas siempre visibles. |
 | Anexo02 | `03_Campos` | Diccionario maestro FLD-050…058: nombre de variable lógica, tipo de dato, obligatoriedad, control UI, fuente (filas 43-51). |

@@ -14,7 +14,7 @@
 | Archivos de implementación | `DashboardGestionCasos.tsx`, `TablaCasos.tsx`, `DetalleCasoModal.tsx`, `useCasosDashboard.ts`, `dashboardHelpers.ts` (config centralizada en `fields/fields.ts` + `fields/types.ts`), estilos en `shared.css` (bloque *dashboard-gestion-casos*), + ruta backend `GET /api/requests` en `backend/src/routes/pm4.routes.ts` |
 
 > ⚠️ **Nota crítica de trazabilidad.** Esta pantalla **no tiene especificación formal en los insumos Excel**:
-> - `Anexo02_Mockups_TOBE_QuejaDirectas_v3_0.xlsx` **no tiene hoja `SCR-013`** (las hojas dedicadas terminan en `SCR-012`) y `01_Pantallas` **no lista PAN-13** (llega hasta SCR-012).
+> - `Anexo02_Mockups_TOBE_QuejaDirectas_v3_1.xlsx` **no tiene hoja `SCR-013`** (las hojas dedicadas terminan en `SCR-012`) y `01_Pantallas` **no lista PAN-13** (llega hasta SCR-012).
 > - En `Matrices > 4. Pantallas` el inventario de pantallas **termina en PAN-12**; no existe fila para PAN-13.
 > - El código `P01-T09` en `Matrices > 1. Tareas` corresponde a **"Enviar encuesta de satisfacción al cliente"** (tarea automática de tipo *Envío*), **no** a un dashboard de supervisión.
 >
@@ -50,7 +50,7 @@ El modal de detalle es solo lectura con un único botón "Cerrar".
 | `Anexo02_Mockups_TOBE_QuejaDirectas_v3_0.html` | Bloque `SCR-013` (líneas ~1396–1619) | **Fuente única de estructura**: alerta, top bar, KPIs, filtros, tabla, paginación y modal de detalle. |
 | API PM4 `GET /api/1.0/requests?include=data` | — | **Fuente de datos** de los casos (proceso 31). Lógica de paginado + PMQL + auto-recuperación replicada del script PHP entregado por el usuario. |
 | `screens/…/quejas-directas/fields/fields.ts` | Registro `QD` | Nombres canónicos de campos `qd_*` que viven en `request.data` (mapeo de columnas). |
-| `Anexo02_Mockups_TOBE_QuejaDirectas_v3_0.xlsx` | `01_Pantallas`, hojas `SCR-*` | Verificación de ausencia: **no hay SCR-013**. Confirma que la pantalla es mockup-only. |
+| `Anexo02_Mockups_TOBE_QuejaDirectas_v3_1.xlsx` | `01_Pantallas`, hojas `SCR-*` | Verificación de ausencia: **no hay SCR-013**. Confirma que la pantalla es mockup-only. |
 | `Matrices_Maduracion_TO-BE_QuejaDirectas_v3.0.xlsx` | `1. Tareas`, `4. Pantallas` | Verificación de ausencia de PAN-13 y del significado real de `P01-T09` (encuesta de satisfacción). |
 | `core/collections.ts` | `GLOBAL_COLLECTIONS` | Referencia de colecciones existentes (`qd_tipoSolicitud` id 18, `qd_estadoQueja` id 42, `qd_area` id 35) como posible origen futuro de los filtros. |
 

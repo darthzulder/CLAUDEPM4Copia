@@ -25,15 +25,15 @@ Todos en `pm4-app/insumos/` (versión vigente **v3.0**).
 
 | Archivo | Hoja | Descripción de uso |
 |---|---|---|
-| `Anexo02_Mockups_TOBE_QuejaDirectas_v3_0.xlsx` | `SCR-000` | **Fuente principal.** Historia de usuario, 42 campos (FLD-300…FLD-341), acciones (ACT-000-*) y reglas críticas (RUL-000-*). |
-| `Anexo02_Mockups_TOBE_QuejaDirectas_v3_0.xlsx` | `01_Pantallas` | Inventario maestro: fila SCR-000 / PAN-01.2 → P01-T00. |
-| `Anexo02_Mockups_TOBE_QuejaDirectas_v3_0.xlsx` | `02_Secciones` | SEC-041 a SEC-046 de SCR-000, orden y condición de visibilidad. |
-| `Anexo02_Mockups_TOBE_QuejaDirectas_v3_0.xlsx` | `04_Acciones` | Botones ACT-000-01/02/03 (Enviar PQRS, Limpiar, Cancelar). |
-| `Anexo02_Mockups_TOBE_QuejaDirectas_v3_0.xlsx` | `05_Reglas` | Reglas RUL-000-01…13. **Fuente principal de validaciones y dependencias.** |
-| `Anexo02_Mockups_TOBE_QuejaDirectas_v3_0.xlsx` | `06_Mensajes` | Mensajes MSG-000-01…08. **Fuente principal de mensajes.** |
-| `Anexo02_Mockups_TOBE_QuejaDirectas_v3_0.xlsx` | `07_Catalogs` | Catálogos CAT-ROL-RADICADOR, CAT-TIPO-SOLIC-PQRS, CAT-TIPO-ID, CAT-PAIS, CAT-DPTO, CAT-MPIO, CAT-PRODUCTO-SFC, CAT-MOTIVO-SFC, CAT-COND-ESP, CAT-ADMISION, etc. |
-| `Anexo02_Mockups_TOBE_QuejaDirectas_v3_0.xlsx` | `08_Permisos` | SCR-000: Consumidor Financiero radica; Gestor CX recibe (VER). |
-| `Anexo02_Mockups_TOBE_QuejaDirectas_v3_0.xlsx` | `10_Trazabilidad_BPMN` | SCR-000 → P01-T00, compuerta `¿Autorización aceptada y captcha válido?`, datos in/out. |
+| `Anexo02_Mockups_TOBE_QuejaDirectas_v3_1.xlsx` | `SCR-000` | **Fuente principal.** Historia de usuario, 42 campos (FLD-300…FLD-341), acciones (ACT-000-*) y reglas críticas (RUL-000-*). |
+| `Anexo02_Mockups_TOBE_QuejaDirectas_v3_1.xlsx` | `01_Pantallas` | Inventario maestro: fila SCR-000 / PAN-01.2 → P01-T00. |
+| `Anexo02_Mockups_TOBE_QuejaDirectas_v3_1.xlsx` | `02_Secciones` | SEC-041 a SEC-046 de SCR-000, orden y condición de visibilidad. |
+| `Anexo02_Mockups_TOBE_QuejaDirectas_v3_1.xlsx` | `04_Acciones` | Botones ACT-000-01/02/03 (Enviar PQRS, Limpiar, Cancelar). |
+| `Anexo02_Mockups_TOBE_QuejaDirectas_v3_1.xlsx` | `05_Reglas` | Reglas RUL-000-01…13. **Fuente principal de validaciones y dependencias.** |
+| `Anexo02_Mockups_TOBE_QuejaDirectas_v3_1.xlsx` | `06_Mensajes` | Mensajes MSG-000-01…08. **Fuente principal de mensajes.** |
+| `Anexo02_Mockups_TOBE_QuejaDirectas_v3_1.xlsx` | `07_Catalogs` | Catálogos CAT-ROL-RADICADOR, CAT-TIPO-SOLIC-PQRS, CAT-TIPO-ID, CAT-PAIS, CAT-DPTO, CAT-MPIO, CAT-PRODUCTO-SFC, CAT-MOTIVO-SFC, CAT-COND-ESP, CAT-ADMISION, etc. |
+| `Anexo02_Mockups_TOBE_QuejaDirectas_v3_1.xlsx` | `08_Permisos` | SCR-000: Consumidor Financiero radica; Gestor CX recibe (VER). |
+| `Anexo02_Mockups_TOBE_QuejaDirectas_v3_1.xlsx` | `10_Trazabilidad_BPMN` | SCR-000 → P01-T00, compuerta `¿Autorización aceptada y captcha válido?`, datos in/out. |
 | `Matrices_Maduracion_TO-BE_QuejaDirectas_v3.0.xlsx` | `1. Tareas` / `2. Directrices` / `5. Documentos` | Directrices de registro (canal único, correo obligatorio); documento de entrada del formulario. (No existe fila dedicada a P01-T00; se referencia el contexto de P01-T01.) |
 | `Anexo03_EspecTecnica_TareasAutomatizadas_TOBE_v2_0.xlsx` | `05_Variables_Entrada` | Variables de las tareas automatizadas posteriores (P01-T02 en adelante). P01-T00 no tiene fila por ser tarea de formulario front. |
 
