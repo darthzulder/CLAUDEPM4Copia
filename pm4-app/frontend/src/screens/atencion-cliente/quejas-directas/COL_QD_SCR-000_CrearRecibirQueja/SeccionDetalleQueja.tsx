@@ -59,8 +59,10 @@ export default function SeccionDetalleQueja({ form, fileRegistry }: Props) {
   const { options: cllGuardianship } = useCollection(QD_COLLECTIONS.tutela);
   const { options: cllExpressComplaint } = useCollection(QD_COLLECTIONS.expressComplaint);
 
-  // Determinamos si el rol radicador es el Defensor.
-  const blnIsDefender = objWatch[QD.strFilerRole] === 'DEFENSOR';
+  // Determinamos si el rol radicador es el Defensor del Consumidor (CAT-ROL-RADICADOR
+  // código '4' — mismo código que usa la RUL-000-01 en CrearRecibirQueja.tsx para
+  // resolver la instancia de recepción).
+  const blnIsDefender = String(objWatch[QD.strFilerRole]) === '4';
 
   // Placa: solo aplica cuando el producto seleccionado es "Autos" (Anexo02 #25).
   // El seguro se guarda por código, así que resolvemos el nombre desde el catálogo.
@@ -157,11 +159,15 @@ export default function SeccionDetalleQueja({ form, fileRegistry }: Props) {
     setValue(QD.strProductDetail, cllProductDetail[0]?.label ?? '');
   }, [cllProductDetail, setValue]);
 
-  // FLD-331 — admisión por defecto "No aplica" (rol ≠ Defensor), resuelta desde CAT-ADMISION.
+  // FLD-331 — admisión: visible (select) solo cuando el rol es Defensor; en los demás
+  // roles se oculta y se fija en "No aplica" (código 9, CAT-ADMISION).
   useEffect(() => {
-    if (blnIsDefender || objWatch[QD.strAdmission] || cllAdmission.length === 0) return;
-    const objNotApplicable = cllAdmission.find((o) => /no aplica/i.test(o.label));
-    if (objNotApplicable) setValue(QD.strAdmission, objNotApplicable.label);
+    if (blnIsDefender || cllAdmission.length === 0) return;
+    const objNotApplicable = cllAdmission.find((o) => o.value === '9')
+      ?? cllAdmission.find((o) => /no aplica/i.test(o.label));
+    if (objNotApplicable && objWatch[QD.strAdmission] !== objNotApplicable.label) {
+      setValue(QD.strAdmission, objNotApplicable.label);
+    }
   }, [blnIsDefender, objWatch[QD.strAdmission], cllAdmission, setValue]);
 
   // FLD-332 — ente de control por defecto "Otros", resuelto desde CAT-ENTE.
@@ -329,8 +335,11 @@ export default function SeccionDetalleQueja({ form, fileRegistry }: Props) {
         intro="Formatos permitidos: PDF, JPG, PNG, DOCX. Máximo 5 MB por archivo. Puede agregar hasta 5 documentos."
       />
 
-      <div className="form-row cols-2">
-        {blnIsDefender ? (
+      {/* Admisión: visible solo cuando el rol es Defensor; en los demás roles se oculta
+          y queda fija en "No aplica" (código 9). Ente de control, Tutela y Queja Exprés
+          son variables de back (se calculan y envían sin campo visible). */}
+      {blnIsDefender && (
+        <div className="form-row cols-2">
           <ZdsSelect
             name={QD.strAdmission}
             control={control}
@@ -340,40 +349,9 @@ export default function SeccionDetalleQueja({ form, fileRegistry }: Props) {
             required
             error={err(QD.strAdmission)}
           />
-        ) : (
-          <ZdsInput
-            name={QD.strAdmission}
-            control={control}
-            label="Admisión"
-            readOnly
-            helpText="Editable solo cuando el rol es Defensor del Consumidor."
-          />
-        )}
-        <ZdsInput
-          name={QD.strControlEntity}
-          control={control}
-          label="Ente de control"
-          readOnly
-          helpText="Asignado por el sistema (CAT-ENTE, por defecto: Otros)."
-        />
-      </div>
-
-      <div className="form-row cols-2">
-        <ZdsInput
-          name={QD.strTutela}
-          control={control}
-          label="Tutela"
-          readOnly
-          helpText="Asignada por el sistema (CAT-TUTELA, por defecto: No)."
-        />
-        <ZdsInput
-          name={QD.strExpressComplaint}
-          control={control}
-          label="Queja Exprés"
-          readOnly
-          helpText="Asignada por el sistema (CAT-EXPRES, por defecto: No)."
-        />
-      </div>
+          <div />
+        </div>
+      )}
     </FormSection>
   );
 }

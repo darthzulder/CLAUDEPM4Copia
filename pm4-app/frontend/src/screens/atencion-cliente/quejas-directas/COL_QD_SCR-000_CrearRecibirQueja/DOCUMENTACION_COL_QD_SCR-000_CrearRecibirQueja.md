@@ -111,10 +111,10 @@ Catálogos implementados como **colecciones dinámicas PM4** (no listas estátic
 | *(back, no visible)* | `qd_strSlaAssigned` | Texto, computado desde `cat_matriz_motivos.sla` | Sí (al radicar) | Solicitud del usuario (2026-07-09) — mismo campo que consumen SCR-002/008/0051 |
 | Ingresa el detalle | `qd_strComplaintText` | Textarea (50–2000) | Sí | Anexo02 > SCR-000 > FLD-329 (fila 45) |
 | Ingresa archivos adjuntos | `qd_strAttach01…05` | Upload multi (máx 5) | Sí | Anexo02 > SCR-000 > FLD-330 (fila 46) — "pdf, jpg, png, docx. Máx 5 MB" |
-| Admisión | `qd_strAdmission` | Select (si Defensor) / solo lectura | Sí | Anexo02 > SCR-000 > FLD-331 (fila 47) |
-| Ente de control | `qd_strControlEntity` | Texto, solo lectura (back), default "Otros" | Sí | Anexo02 > SCR-000 > FLD-332 (fila 48) |
-| Tutela | `qd_strTutela` | Texto, solo lectura (back), default "No" | Sí | Anexo02 > SCR-000 > FLD-333 (fila 49) |
-| Queja Exprés | `qd_strExpressComplaint` | Texto, solo lectura (back), default "No" | Sí | Anexo02 > SCR-000 > FLD-334 (fila 50) |
+| Admisión | `qd_strAdmission` | Select (CAT-ADMISION), visible solo si rol = Defensor (código '4' de CAT-ROL-RADICADOR); oculto y fijo en "No aplica" (código 9) en los demás roles | Sí (si rol = Defensor) | Anexo02 > SCR-000 > FLD-331 (fila 47) — corregido 2026-07-09 (ver Suposiciones) |
+| *(back, no visible)* | `qd_strControlEntity` | Texto, computado (back), default "Otros" | Sí | Anexo02 > SCR-000 > FLD-332 (fila 48) — sin campo visible desde 2026-07-09 |
+| *(back, no visible)* | `qd_strTutela` | Texto, computado (back), default "No" | Sí | Anexo02 > SCR-000 > FLD-333 (fila 49) — sin campo visible desde 2026-07-09 |
+| *(back, no visible)* | `qd_strExpressComplaint` | Texto, computado (back), default "No" | Sí | Anexo02 > SCR-000 > FLD-334 (fila 50) — sin campo visible desde 2026-07-09 |
 
 **S4 — Autorización y Envío** (`CrearRecibirQueja.tsx`):
 
@@ -176,9 +176,9 @@ Catálogos implementados como **colecciones dinámicas PM4** (no listas estátic
 | Tipo de documento define el tipo de persona | `esJuridica = tipoIdentificacion === 'NIT'`; `useEffect` fija `qd_strPersonType` = Jurídica/Natural | Anexo02 > 05_Reglas > **RUL-000-02 / RUL-000-03** (filas 37–38); FLD-315 |
 | País precargado a Colombia (`170`) | `DEFAULTS.qd_strCountryCode = '170'` | Anexo02 > 05_Reglas > **RUL-000-10** (fila 40); FLD-316 |
 | El correo es el destino de la respuesta final → obligatorio y validado | `required` + `pattern` en `qd_strEmail` | Anexo02 > SCR-000 FLD-314; Matrices > 2. Directrices fila 3 (P01-T01, 🟠 Control) |
-| Admisión editable solo si rol = Defensor | Render condicional: `ZdsSelect` si Defensor, `ZdsInput` readonly si no; default "No aplica" | Anexo02 > 05_Reglas > RUL-000-01 (fila 36); SCR-000 FLD-331 |
+| Admisión visible (select) solo si rol = Defensor (código '4'); oculta y fija en "No aplica" (código 9) en los demás roles | Render condicional en `SeccionDetalleQueja`: `ZdsSelect` si rol = Defensor; sin campo + default forzado si rol ≠ Defensor | Corregido 2026-07-09 a petición del usuario (restaura la regla original RUL-000-01, además de corregir el bug de comparación de `blnIsDefender` contra `'DEFENSOR'` en vez del código `'4'`) — Anexo02 > 05_Reglas > RUL-000-01 (fila 36); SCR-000 FLD-331 |
 | Escalamiento al Defensor computado | `useEffect`: Defensor → "Sí", resto → "No" (readonly) | Anexo02 > SCR-000 > FLD-327 (fila 43) |
-| Campos regulatorios asignados por back (defaults) | `DEFAULTS`: `qd_strControlEntity='Otros'`, `qd_strTutela='No'`, `qd_strExpressComplaint='No'`, `qd_strSex='No aplica'`, `qd_strLgbtiq='No aplica'`, `qd_strAddress=''`, `qd_strAdmission='No aplica'` | Anexo02 > SCR-000 FLD-319/320/321/331/332/333/334 (filas 35–52) |
+| Campos regulatorios asignados por back (defaults, sin campo visible), `qd_strAdmission` resuelto por rol | `qd_strControlEntity='Otros'`, `qd_strTutela='No'`, `qd_strExpressComplaint='No'`, `qd_strSex='No aplica'`, `qd_strLgbtiq='No aplica'`, `qd_strAddress=''`, `qd_strAdmission='No aplica'` (código 9) si Defensor / select manual si no | Anexo02 > SCR-000 FLD-319/320/321/331/332/333/334 (filas 35–52) |
 | Motivo SFC condiciona campos de fraude en M3 | `qd_strSfcReason` obligatorio (la activación de fraude ocurre en SCR-009/SCR-010, fuera de esta pantalla) | Anexo02 > SCR-000 > FLD-328 (fila 44) |
 
 ---
@@ -208,7 +208,7 @@ Catálogos implementados como **colecciones dinámicas PM4** (no listas estátic
 
 | Campo Origen | Campo Dependiente | Comportamiento | Fuente |
 |---|---|---|---|
-| `qd_strFilerRole` | `qd_strReceptionInstance`, `qd_strReceptionPoint`, `qd_strAdmission` | Defensor → instancia "Defensor" y Admisión editable; resto → "Entidad vigilada" y Admisión "No aplica". Punto = "Virtual" | Anexo02 > 05_Reglas RUL-000-01 (fila 36); FLD-303/304/305/331 |
+| `qd_strFilerRole` | `qd_strReceptionInstance`, `qd_strReceptionPoint`, `qd_strAdmission` | Defensor (código '4') → instancia "Defensor", Admisión **visible** (select manual); resto → "Entidad vigilada" y Admisión **oculta**, fija en "No aplica" (código 9). Punto = "Virtual" | Anexo02 > 05_Reglas RUL-000-01 (fila 36); FLD-303/304/305/331 — corregido 2026-07-09 |
 | `qd_strInteraction` + `qd_strServiceProvided` + `qd_strSfcReason` | `qd_strResponsableRole`, `qd_strOmbudsmanEscalation`, `qd_strCompensation`, `qd_strSlaAssigned` | Al completar la cadena y elegir motivo, se toma la fila exacta de `cat_matriz_motivos` para ese motivo y se copian sus columnas `rolResponsable` / `escalamientoAdministrador` / `resarcimientoAdministrador` / `sla`; cualquier cambio aguas arriba (tipo solicitud/producto/momento/servicio) limpia las 4 variables hasta reelegir motivo | Solicitud del usuario (2026-07-09) |
 | `qd_strIdType` | `qd_strPersonType` + bloque de campos (Natural vs. Jurídica) | NIT → Jurídica (Razón Social + contacto); resto → Natural (Nombres/Apellidos) | Anexo02 > 05_Reglas RUL-000-02/03 (filas 37–38); FLD-315 |
 | `qd_strDepartment` | `qd_strCity` | Al cambiar departamento se limpia la ciudad y se recarga el catálogo (colección 15, `dependsOn: qd_strDepartment`); ciudad deshabilitada sin departamento | Anexo02 > 05_Reglas RUL-000-09 (fila 39); FLD-317/318 |
@@ -250,6 +250,8 @@ Catálogos implementados como **colecciones dinámicas PM4** (no listas estátic
 ---
 
 13. **Variables de ruteo extraídas de `cat_matriz_motivos` (2026-07-09).** A petición del usuario, `qd_strResponsableRole`, `qd_strOmbudsmanEscalation`, `qd_strCompensation` y `qd_strSlaAssigned` se computan (`SeccionDetalleQueja.tsx`) desde las columnas `rolResponsable`, `escalamientoAdministrador`, `resarcimientoAdministrador` y `sla` de la fila de la matriz que corresponde al motivo elegido — nombres de columna indicados por el usuario, no verificados por Claude contra el esquema real de la colección 45 en PM4. Esto **reemplaza** la regla anterior de `qd_strOmbudsmanEscalation` (computada por rol radicador); `qd_strResponsableRole` es una variable nueva, distinta de `qd_strAssigneeRole` (S6, post-radicación). Pendiente confirmar en PM4 que la colección 45 realmente expone esas 4 columnas.
+
+14. **Admisión (bug de comparación + campos de back sin UI, 2026-07-09).** A petición del usuario: (a) `qd_strControlEntity` (Ente de control), `qd_strTutela` y `qd_strExpressComplaint` dejan de tener campo visible en el form — se siguen calculando y enviando igual que `qd_strAddress`/`qd_strSex` (variables de back sin `Controller` montado); (b) `qd_strAdmission` vuelve a la regla original (RUL-000-01): rol = Defensor → campo **visible** (`ZdsSelect` editable, requerido); rol ≠ Defensor → campo **oculto**, fijo en "No aplica" (código 9 de CAT-ADMISION, colección `qd_admision` id 21, `value=data.codigo`) — confirmado contra el catálogo real en PM4 (`codigo="9"` → `"No Aplica"`, fallback por regex `/no aplica/i` sobre el label si el código no calza). Durante la implementación se detectó y corrigió además un bug preexistente: `blnIsDefender` comparaba `qd_strFilerRole` contra el string `'DEFENSOR'`, que nunca coincide con el código real de CAT-ROL-RADICADOR (colección `qd_rol` id 39, `value=data.codigo_rol_radicador`); ahora compara contra `'4'` (confirmado en PM4: código `4` = "Defensor del consumidor"), el mismo código que ya usaba correctamente la RUL-000-01 en `CrearRecibirQueja.tsx` para resolver instancia/punto de recepción.
 
 ## Cobertura de Trazabilidad
 
