@@ -413,10 +413,9 @@ export const QD_COLLECTIONS = {
   sfcProduct: GLOBAL_COLLECTIONS.qd_seguro,
   productDetail: GLOBAL_COLLECTIONS.qd_detalleProducto,
   sfcReason: GLOBAL_COLLECTIONS.qd_motivo, // Legacy (id 17) — usado por SCR-002/0051/0052 en modo display.
-  // Cascada cat_matriz_motivos (id 45) para SCR-000: momento → servicio → motivo.
-  matrixInteraction: GLOBAL_COLLECTIONS.qd_matrizInteraccion,
-  matrixService: GLOBAL_COLLECTIONS.qd_matrizServicio,
-  matrixReason: GLOBAL_COLLECTIONS.qd_matrizMotivo,
+  // cat_matriz_motivos (id 45): matriz completa; SCR-000 deriva en cliente momento →
+  // servicio → motivo (ver SeccionDetalleQueja).
+  matrixMotivos: GLOBAL_COLLECTIONS.qd_matrizMotivos,
   admission: GLOBAL_COLLECTIONS.qd_admision,
   sex: GLOBAL_COLLECTIONS.qd_sexo,
   controlEntity: GLOBAL_COLLECTIONS.qd_ente,

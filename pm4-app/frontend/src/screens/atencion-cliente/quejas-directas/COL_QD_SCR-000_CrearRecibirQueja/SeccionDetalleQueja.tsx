@@ -13,6 +13,29 @@ interface Props {
   fileRegistry: MutableRefObject<Map<string, File>>;
 }
 
+// ── Helpers de la matriz cat_matriz_motivos (id 45) ──────────────────────────
+// Los datos vienen "sucios" (espacios sobrantes, comparación por texto), por eso
+// normalizamos antes de comparar y derivamos las opciones en cliente.
+const normalizar = (in_gen: unknown) => String(in_gen ?? '').trim().toLowerCase();
+
+// Lee una columna del registro crudo de la matriz (los campos viven bajo `data`).
+function leerColumna(in_objRow: Record<string, unknown>, in_strCol: string): string {
+  const dicData = (in_objRow.data ?? in_objRow) as Record<string, unknown>;
+  return String(dicData?.[in_strCol] ?? '').trim();
+}
+
+// Opciones únicas por value, descartando vacíos (una columna se repite en la matriz).
+function opcionesUnicas(in_cll: { value: string; label: string }[]): { value: string; label: string }[] {
+  const setSeen = new Set<string>();
+  const cllOut: { value: string; label: string }[] = [];
+  for (const objOpt of in_cll) {
+    if (!objOpt.value || setSeen.has(objOpt.value)) continue;
+    setSeen.add(objOpt.value);
+    cllOut.push(objOpt);
+  }
+  return cllOut;
+}
+
 export default function SeccionDetalleQueja({ form, fileRegistry }: Props) {
   const { control, watch, setValue, formState: { errors } } = form;
   // Tomamos una foto de los valores actuales del formulario.
@@ -25,12 +48,12 @@ export default function SeccionDetalleQueja({ form, fileRegistry }: Props) {
   // preservado — ver fields/MAPEO_qd_old_new.md #3). Solo se renombra la lectura
   // del campo real.
   const { options: cllProductDetail } = useCollection(QD_COLLECTIONS.productDetail, { qd_productoSFC: objWatch[QD.strSfcProduct] });
-  // Cascada cat_matriz_motivos (id 45): momento (interacción) → servicio → motivo.
-  // Cada colección resuelve su dependsOn contra el objWatch real del formulario.
-  const objFormValues = objWatch as unknown as Record<string, unknown>;
-  const { options: cllInteraction } = useCollection(QD_COLLECTIONS.matrixInteraction, objFormValues);
-  const { options: cllService } = useCollection(QD_COLLECTIONS.matrixService, objFormValues);
-  const { options: cllReason } = useCollection(QD_COLLECTIONS.matrixReason, objFormValues);
+  // Catálogo de tipo de solicitud: lo necesitamos para resolver el LABEL seleccionado
+  // (la matriz filtra por texto "Queja"/"Vida", no por el código que guarda el form).
+  const { options: cllRequestType } = useCollection(QD_COLLECTIONS.requestType);
+  // Matriz cat_matriz_motivos (id 45) COMPLETA. La cascada momento → servicio → motivo
+  // se deriva en cliente (abajo) por columnas de texto con espacios sobrantes.
+  const { records: cllMatrizRows } = useCollection(QD_COLLECTIONS.matrixMotivos);
   const { options: cllAdmission } = useCollection(QD_COLLECTIONS.admission);
   const { options: cllControlEntity } = useCollection(QD_COLLECTIONS.controlEntity);
   const { options: cllGuardianship } = useCollection(QD_COLLECTIONS.tutela);
@@ -46,6 +69,44 @@ export default function SeccionDetalleQueja({ form, fileRegistry }: Props) {
 
   // Servicio: solo aplica cuando el momento (interacción) es "Asistencias" (Anexo02 #31).
   const blnIsAsistencias = /asistencias/i.test(objWatch[QD.strInteraction] ?? '');
+
+  // ── Cascada cat_matriz_motivos derivada en cliente ─────────────────────────
+  // La matriz filtra por el LABEL de tipo de solicitud y producto (guarda texto,
+  // no código); resolvemos esos labels desde sus catálogos.
+  const strRequestTypeLabel = cllRequestType.find((o) => o.value === objWatch[QD.strRequestType])?.label ?? '';
+  const strProductLabel = objSelectedInsurance?.label ?? '';
+
+  // Filas de la matriz que corresponden al tipo de solicitud + producto elegidos.
+  const cllRowsForProduct = cllMatrizRows.filter((r) =>
+    normalizar(leerColumna(r, 'tipoSolicitud')) === normalizar(strRequestTypeLabel) &&
+    normalizar(leerColumna(r, 'productoZurich')) === normalizar(strProductLabel));
+
+  // Momento (interacción) — opciones únicas de la columna `interaccion`.
+  const cllInteraction = opcionesUnicas(cllRowsForProduct.map((r) => {
+    const strVal = leerColumna(r, 'interaccion');
+    return { value: strVal, label: strVal };
+  }));
+
+  // Filas del momento elegido.
+  const cllRowsForInteraction = cllRowsForProduct.filter((r) =>
+    normalizar(leerColumna(r, 'interaccion')) === normalizar(objWatch[QD.strInteraction]));
+
+  // Servicio (`servicioPrestado`) — solo se muestra cuando el momento es "Asistencias".
+  const cllService = opcionesUnicas(cllRowsForInteraction.map((r) => {
+    const strVal = leerColumna(r, 'servicioPrestado');
+    return { value: strVal, label: strVal };
+  }));
+
+  // Motivo — value = codigoMotivoSFC (código real), label = motivoSFC. Se filtra por
+  // servicio solo cuando aplica (Asistencias); en otros momentos basta con el momento.
+  const cllRowsForReason = blnIsAsistencias
+    ? cllRowsForInteraction.filter((r) =>
+        normalizar(leerColumna(r, 'servicioPrestado')) === normalizar(objWatch[QD.strServiceProvided]))
+    : cllRowsForInteraction;
+  const cllReason = opcionesUnicas(cllRowsForReason.map((r) => ({
+    value: leerColumna(r, 'codigoMotivoSFC'),
+    label: leerColumna(r, 'motivoSFC'),
+  })));
 
   // RUL cascada — al cambiar un eslabón aguas arriba se limpia lo de aguas abajo para
   // forzar la reselección coherente (mismo patrón que ciudad↔departamento en S2).

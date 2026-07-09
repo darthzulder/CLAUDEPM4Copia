@@ -317,44 +317,20 @@ export const GLOBAL_COLLECTIONS = {
   } satisfies CollectionDef,
 
   // ── cat_matriz_motivos (id 45) — matriz de cascada de SCR-000 ────────────────
-  // Una sola colección con la cadena de dependencia:
-  //   tipoSolicitud → productoZurich → interaccion (momento) → servicioPrestado
-  //   (servicio) → motivo.
-  // Cada dropdown lee UNA columna distinta de la MISMA colección, filtrando por lo
-  // ya elegido aguas arriba (PMQL con varios placeholders) y deduplicando (`distinct`),
-  // porque la columna se repite en muchas filas de la matriz.
-  // Columnas confirmadas (camelCase, bajo data.*): tipoSolicitud, productoZurich,
-  // interaccion, servicioPrestado, motivo.
-  qd_matrizInteraccion: {
+  // Cadena de dependencia: tipoSolicitud → productoZurich → interaccion (momento) →
+  // servicioPrestado (servicio) → motivo (codigoMotivoSFC / motivoSFC).
+  //
+  // Se carga COMPLETA (≈385 filas) sin PMQL y la cascada se filtra en CLIENTE
+  // (SeccionDetalleQueja). Motivo del filtrado en cliente y no por PMQL:
+  //   1. `tipoSolicitud`/`productoZurich` guardan el TEXTO ("Queja", "Hogar"), no el
+  //      código; el form guarda códigos → habría que comparar por label.
+  //   2. Los datos traen espacios sobrantes ("Hogar ", "No aplica ") que romperían la
+  //      igualdad exacta de PMQL; en cliente normalizamos con trim + case-insensitive.
+  // labelField/valueField apuntan al motivo (única columna con código propio); las
+  // demás columnas se leen directo del registro crudo (`records`).
+  qd_matrizMotivos: {
     id: 45,
-    labelField: 'data.interaccion',
-    valueField: 'data.interaccion',
-    distinct: true,
-    dependsOn: ['qd_strRequestType', 'qd_strSfcProduct'],
-    pmqlTemplate:
-      'data.tipoSolicitud = "{{qd_strRequestType}}" AND data.productoZurich = "{{qd_strSfcProduct}}"',
-  } satisfies CollectionDef,
-
-  qd_matrizServicio: {
-    id: 45,
-    labelField: 'data.servicioPrestado',
-    valueField: 'data.servicioPrestado',
-    distinct: true,
-    dependsOn: ['qd_strRequestType', 'qd_strSfcProduct', 'qd_strInteraction'],
-    pmqlTemplate:
-      'data.tipoSolicitud = "{{qd_strRequestType}}" AND data.productoZurich = "{{qd_strSfcProduct}}" AND data.interaccion = "{{qd_strInteraction}}"',
-  } satisfies CollectionDef,
-
-  // El servicio solo aplica cuando interaccion = "Asistencias"; para el resto de
-  // momentos `qd_strServiceProvided` va vacío y el filtro resuelve a "" (las filas
-  // no-Asistencias de la matriz deben traer servicioPrestado vacío).
-  qd_matrizMotivo: {
-    id: 45,
-    labelField: 'data.motivo',
-    valueField: 'data.motivo',
-    distinct: true,
-    dependsOn: ['qd_strRequestType', 'qd_strSfcProduct', 'qd_strInteraction', 'qd_strServiceProvided'],
-    pmqlTemplate:
-      'data.tipoSolicitud = "{{qd_strRequestType}}" AND data.productoZurich = "{{qd_strSfcProduct}}" AND data.interaccion = "{{qd_strInteraction}}" AND data.servicioPrestado = "{{qd_strServiceProvided}}"',
+    labelField: 'data.motivoSFC',
+    valueField: 'data.codigoMotivoSFC',
   } satisfies CollectionDef,
 } as const;

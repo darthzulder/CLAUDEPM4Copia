@@ -49,9 +49,7 @@ Catálogos implementados como **colecciones dinámicas PM4** (no listas estátic
 | CAT-MPIO | `qd_strCity` (15, depende de `qd_strDepartment`) | `qd_strCity` |
 | CAT-COND-ESP | `qd_strSpecialCondition` (24) | `qd_strSpecialCondition` |
 | CAT-PRODUCTO-SFC | `qd_strSfcProduct` (16) | `qd_strSfcProduct` |
-| cat_matriz_motivos (momento) | `qd_matrizInteraccion` (45, `distinct`, depende de tipo solicitud + producto) | `qd_strInteraction` |
-| cat_matriz_motivos (servicio) | `qd_matrizServicio` (45, `distinct`, + momento) | `qd_strServiceProvided` |
-| cat_matriz_motivos (motivo) | `qd_matrizMotivo` (45, `distinct`, + servicio) | `qd_strSfcReason` |
+| cat_matriz_motivos | `qd_matrizMotivos` (45, carga completa; cascada momento/servicio/motivo derivada **en cliente**) | `qd_strInteraction`, `qd_strServiceProvided`, `qd_strSfcReason` |
 | CAT-MOTIVO-SFC *(legacy id 17)* | `qd_strSfcReason` (17, ya no lo usa SCR-000; sí SCR-002/0051/0052 en modo display) | `qd_strSfcReason` |
 | CAT-ADMISION | `qd_strAdmission` (21) | `qd_strAdmission` |
 
@@ -107,7 +105,7 @@ Catálogos implementados como **colecciones dinámicas PM4** (no listas estátic
 | Escalamiento al Defensor del Consumidor | `qd_strOmbudsmanEscalation` | Texto, solo lectura (computado) | Sí | Anexo02 > SCR-000 > FLD-327 (fila 43) |
 | Selecciona el momento | `qd_strInteraction` | Select (`cat_matriz_motivos.interaccion`, cascada), deshabilitado hasta elegir seguro | Sí | Anexo02 > FormularioCreaciónPQRS #30 — "columna interaccion" |
 | Selecciona el servicio | `qd_strServiceProvided` | Select (`cat_matriz_motivos.servicioPrestado`), visible solo si momento = "Asistencias" | Sí (si Asistencias) | Anexo02 > FormularioCreaciónPQRS #31 — "columna servicioPrestado" |
-| Cuéntanos el motivo | `qd_strSfcReason` | Select (`cat_matriz_motivos.motivo`, cascada), deshabilitado hasta completar momento/servicio | Sí | Anexo02 > SCR-000 > FLD-328 (fila 44) — "crítico: condiciona fraude en M3" |
+| Cuéntanos el motivo | `qd_strSfcReason` | Select (`cat_matriz_motivos`: value=`codigoMotivoSFC`, label=`motivoSFC`, cascada), deshabilitado hasta completar momento/servicio | Sí | Anexo02 > SCR-000 > FLD-328 (fila 44) — "crítico: condiciona fraude en M3" |
 | Ingresa el detalle | `qd_strComplaintText` | Textarea (50–2000) | Sí | Anexo02 > SCR-000 > FLD-329 (fila 45) |
 | Ingresa archivos adjuntos | `qd_strAttach01…05` | Upload multi (máx 5) | Sí | Anexo02 > SCR-000 > FLD-330 (fila 46) — "pdf, jpg, png, docx. Máx 5 MB" |
 | Admisión | `qd_strAdmission` | Select (si Defensor) / solo lectura | Sí | Anexo02 > SCR-000 > FLD-331 (fila 47) |
@@ -244,7 +242,7 @@ Catálogos implementados como **colecciones dinámicas PM4** (no listas estátic
 
 11. **Banner informativo (S1).** El texto del `ZrAlert` informativo es redacción propia derivada de la historia de usuario y el criterio de aceptación de SCR-000; no es una cadena literal del insumo.
 
-12. **Cascada `cat_matriz_motivos` (id 45).** Los campos momento (`qd_strInteraction`), servicio (`qd_strServiceProvided`) y motivo (`qd_strSfcReason`) se alimentan de una única colección PM4 nueva (id **45**) con la cadena tipo de solicitud → producto → momento → servicio → motivo. Supuestos a confirmar en PM4: (a) columnas `data.tipoSolicitud`, `data.productoZurich`, `data.interaccion`, `data.servicioPrestado`, `data.motivo` (camelCase); (b) el motivo se guarda como **texto** (`data.motivo` sirve de value y label), no como código — antes `qd_strSfcReason` almacenaba el código de CAT-MOTIVO-SFC (id 17); (c) las filas de momentos distintos de "Asistencias" deben traer `servicioPrestado` vacío para que el filtro del motivo (`data.servicioPrestado = ""`) devuelva resultados. Detección de "Autos" (placa) y "Asistencias" (servicio) por coincidencia del *label* del catálogo (regex `/autos/i`, `/asistencias/i`).
+12. **Cascada `cat_matriz_motivos` (id 45) — filtrada en cliente.** Los campos momento (`qd_strInteraction`), servicio (`qd_strServiceProvided`) y motivo (`qd_strSfcReason`) se derivan de una única colección PM4 (id **45**) con la cadena tipo de solicitud → producto → momento → servicio → motivo. **Decisión de diseño:** la matriz se carga completa (≈385 filas) y la cascada se filtra en **cliente** (`SeccionDetalleQueja`), no por PMQL, porque: (a) las columnas de filtro `tipoSolicitud`/`productoZurich` guardan el **texto** ("Queja", "Vida"), no el código que guarda el form → hay que comparar por *label*; (b) los datos traen **espacios sobrantes** ("Hogar ", "No aplica ") y variaciones de mayúsculas que romperían la igualdad exacta de PMQL. En cliente se normaliza con `trim` + minúsculas. Columnas usadas (camelCase, bajo `data.*`): `tipoSolicitud`, `productoZurich`, `interaccion`, `servicioPrestado`, `codigoMotivoSFC` (código → `qd_strSfcReason`), `motivoSFC` (descripción visible). El momento y el servicio se guardan como su texto (`interaccion`/`servicioPrestado`); el motivo guarda el **código** `codigoMotivoSFC`. Detección de "Autos" (placa) y "Asistencias" (servicio) por regex sobre el *label* (`/autos/i`, `/asistencias/i`).
 
 ---
 

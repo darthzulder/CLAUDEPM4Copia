@@ -182,12 +182,16 @@ proceso PM4 nuevas que el proceso P01 debe crear/emitir.
 | SCR-000 | qd_strServiceProvided | string | #31 — servicio (`cat_matriz_motivos.servicioPrestado`, solo si momento = "Asistencias") |
 
 **Colección nueva `cat_matriz_motivos` (id 45)** en `core/collections.ts`
-(`qd_matrizInteraccion` / `qd_matrizServicio` / `qd_matrizMotivo`): matriz de cascada
-tipo solicitud → producto → momento → servicio → motivo. Reapunta el motivo
+(`qd_matrizMotivos`): matriz de cascada tipo solicitud → producto → momento →
+servicio → motivo. Se carga completa y la cascada se filtra **en cliente**
+(`SeccionDetalleQueja`) por *label* normalizado (las columnas `tipoSolicitud`/
+`productoZurich` guardan texto, y los datos traen espacios sobrantes). Columnas
+(camelCase, bajo `data.*`): `tipoSolicitud`, `productoZurich`, `interaccion`,
+`servicioPrestado`, `codigoMotivoSFC`, `motivoSFC`. Reapunta el motivo
 (`qd_strSfcReason`) de la colección legacy id 17 a esta matriz **solo en SCR-000**
-(SCR-002/0051/0052 siguen con id 17 en modo display). ⚠ `qd_strSfcReason` pasa a
-almacenar el **texto** del motivo (`data.motivo`), no el código — confirmar con la
-integración SFC si se requiere el código.
+(SCR-002/0051/0052 siguen con id 17 en modo display). `qd_strSfcReason` guarda el
+código `codigoMotivoSFC` (se preserva el código, igual que con id 17); `qd_strInteraction`
+y `qd_strServiceProvided` guardan el texto de `interaccion`/`servicioPrestado`.
 
 ## Casos especiales de traducción
 
@@ -294,7 +298,7 @@ gateways/scripts/SFC ya mencionados en el plan.
 
 - [ ] Renombrar las 143 variables de proceso del subproceso P01 (Quejas Directas) según la tabla.
 - [ ] Crear las 3 variables de proceso NUEVAS de SCR-000 (`qd_strPlate`, `qd_strInteraction`, `qd_strServiceProvided`).
-- [ ] Crear la colección `cat_matriz_motivos` (id 45) con columnas `tipoSolicitud`, `productoZurich`, `interaccion`, `servicioPrestado`, `motivo`; las filas no-"Asistencias" deben traer `servicioPrestado` vacío.
+- [ ] Crear la colección `cat_matriz_motivos` (id 45) con columnas `tipoSolicitud`, `productoZurich`, `interaccion`, `servicioPrestado`, `codigoMotivoSFC`, `motivoSFC` (el front la filtra en cliente por texto normalizado, así que tolera espacios/mayúsculas).
 - [ ] Actualizar expresiones de gateway BPMN que referencien estos nombres.
 - [ ] Actualizar scripts/watchers (incl. el validador que genera `qd_errores_json.campo`).
 - [ ] Actualizar la integración SFC/SmartSupervision (las "variables de back": `qd_strSmartSupStatus`, `qd_strSfcFilingDate`, `qd_strAssigneeRole`, `qd_strAssignee`, etc.).
