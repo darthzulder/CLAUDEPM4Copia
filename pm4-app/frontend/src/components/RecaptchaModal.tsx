@@ -14,7 +14,6 @@ const DEFAULT_SITE_KEY = '6Lf8IkgtAAAAAO5z1J1gKek_pl83NM4hP0tfhy8Y';
 const SITE_KEY = (typeof __RECAPTCHA_SITE_KEY__ !== 'undefined' && __RECAPTCHA_SITE_KEY__) || DEFAULT_SITE_KEY;
 const SCRIPT_ID = 'google-recaptcha-api';
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
 type Grecaptcha = any;
 declare global {
   interface Window { grecaptcha?: Grecaptcha; }
