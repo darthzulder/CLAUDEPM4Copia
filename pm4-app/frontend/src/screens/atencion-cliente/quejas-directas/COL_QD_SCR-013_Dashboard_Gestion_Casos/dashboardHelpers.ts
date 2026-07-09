@@ -21,28 +21,23 @@ function formatFecha(in_strIso?: string): string {
   return new Date(intT).toLocaleDateString('es-CO', { day: '2-digit', month: 'short', year: 'numeric' });
 }
 
-// Días restantes = (fecha de inicio + qd_strSlaAssigned) − hoy.
-// qd_strSlaAssigned se interpreta como el plazo en días desde la creación del caso; la
-// fecha límite es created_at + qd_strSlaAssigned días y los restantes se cuentan contra hoy.
-// Fallbacks: si falta el SLA o la fecha de inicio, usa qd_fechaVencimiento − hoy; si no, 0.
-// NOTA: qd_fechaVencimiento no forma parte de los 143 campos migrados (ver
-// fields/MAPEO_qd_old_new.md) — data_name pendiente de confirmar con TI, se deja literal.
-function calcularDiasRestantes(in_dicData: Record<string, unknown>, in_strCreatedAt?: string): number {
+// Fecha límite (deadline) = fecha de inicio + qd_strSlaAssigned días.
+// qd_strSlaAssigned se interpreta como el plazo en días desde la creación del caso.
+// Devuelve el timestamp en ms de la fecha de vencimiento, o null si falta el SLA o la
+// fecha de inicio (no hay campo qd_fechaVencimiento en los datos del caso: se calcula).
+function calcularDeadline(in_dicData: Record<string, unknown>, in_strCreatedAt?: string): number | null {
   const genSlaRaw = in_dicData[QD.strSlaAssigned];
   const intStartT = in_strCreatedAt ? Date.parse(in_strCreatedAt) : Number.NaN;
-  if (genSlaRaw !== undefined && genSlaRaw !== null && genSlaRaw !== '' && !Number.isNaN(intStartT)) {
-    const intSla = Number(genSlaRaw);
-    if (Number.isFinite(intSla)) {
-      const intDeadline = intStartT + intSla * 86_400_000;
-      return Math.ceil((intDeadline - Date.now()) / 86_400_000);
-    }
-  }
-  const strVenc = in_dicData.qd_fechaVencimiento;
-  if (strVenc) {
-    const intT = Date.parse(String(strVenc));
-    if (!Number.isNaN(intT)) return Math.ceil((intT - Date.now()) / 86_400_000);
-  }
-  return 0;
+  if (genSlaRaw === undefined || genSlaRaw === null || genSlaRaw === '' || Number.isNaN(intStartT)) return null;
+  const intSla = Number(genSlaRaw);
+  if (!Number.isFinite(intSla)) return null;
+  return intStartT + intSla * 86_400_000;
+}
+
+// Días restantes = deadline − hoy (redondeado hacia arriba). Si no hay deadline, 0.
+function calcularDiasRestantes(in_intDeadline: number | null): number {
+  if (in_intDeadline === null) return 0;
+  return Math.ceil((in_intDeadline - Date.now()) / 86_400_000);
 }
 
 // Estado operativo del caso a partir del status del request y los días restantes.
@@ -56,18 +51,22 @@ function estadoDeRequest(in_strStatus: string | undefined, in_intDiasRestantes: 
 export function mapRequestToCaso(in_objRequest: RequestRaw): CasoDashboard {
   const objData = in_objRequest.data ?? {};
   const str = (in_strKey: string) => (objData[in_strKey] === undefined || objData[in_strKey] === null ? '' : String(objData[in_strKey]));
-  const intDias = calcularDiasRestantes(objData, in_objRequest.created_at);
-  const strVenc = str('qd_fechaVencimiento');
+  const intDeadline = calcularDeadline(objData, in_objRequest.created_at);
+  const intDias = calcularDiasRestantes(intDeadline);
+  // Responsable: nombre completo del usuario del caso (data._user.fullname).
+  const objUser = objData._user as { fullname?: string } | undefined;
+  const strResponsable = objUser?.fullname ?? '';
   return {
     id: in_objRequest.id,
     numeroCaso: str(QD.strSfcCode) || String(in_objRequest.case_number ?? in_objRequest.id ?? ''),
     tipoSolicitud: str(QD.strRequestType),
     fechaCreacion: formatFecha(in_objRequest.created_at),
-    fechaVencimiento: strVenc ? formatFecha(strVenc) : '—',
+    fechaVencimiento: intDeadline !== null ? formatFecha(new Date(intDeadline).toISOString()) : '—',
     diasRestantes: intDias,
     estado: estadoDeRequest(in_objRequest.status, intDias),
-    areaResponsable: str(QD.strAssigneeArea),
-    responsable: str(QD.strAssignee) || str(QD.strAssigneeRole),
+    // Área: rol responsable del caso (qd_strResponsableRole).
+    areaResponsable: str('qd_strResponsableRole'),
+    responsable: strResponsable,
     descripcion: str(QD.strComplaintText),
   };
 }
