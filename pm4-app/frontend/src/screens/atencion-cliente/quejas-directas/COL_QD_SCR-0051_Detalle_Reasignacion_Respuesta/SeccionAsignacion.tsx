@@ -30,6 +30,11 @@ export default function SeccionAsignacion({ form, err, onConfirmarReasignacion, 
   // RUL-0051-07 — bloque de reasignación visible si "¿Necesitas de otras áreas?" = Sí.
   const blnShowReassign = objWatch[QD.strNeedsOtherAreas] === 'SI';
 
+  // Si el caso llega devuelto por el Analista SAC (con observaciones, FLD-131 de SCR-008),
+  // el área solo ajusta la respuesta: se ocultan la asignación (S5) y la solicitud de
+  // ayuda a otras áreas (S6). El historial (S7) se conserva para contexto/auditoría.
+  const blnReturnedBySac = !!objWatch[QD.strSacRemarks]?.trim();
+
   // RUL-0051-08 — máx. 4 ayudantes.
   const lstHistory: AsignacionHistorial[] = Array.isArray(objWatch[QD.lstAssignHistory]) ? objWatch[QD.lstAssignHistory] : [];
   const blnHelpersReached = lstHistory.length >= MAX_AYUDANTES;
@@ -119,6 +124,8 @@ export default function SeccionAsignacion({ form, err, onConfirmarReasignacion, 
 
   return (
     <>
+      {/* S5 y S6 se ocultan cuando el caso viene devuelto por el SAC (blnReturnedBySac). */}
+      {!blnReturnedBySac && (<>
       {/* ── S5 · Asignación de Responsable (SEC-051) ── */}
       {/* Siempre visible; datos pre-calculados por el BPM. Editable solo en blnReassignMode. */}
       <FormSection title="Asignación de Responsable">
@@ -227,6 +234,7 @@ export default function SeccionAsignacion({ form, err, onConfirmarReasignacion, 
           </>
         )}
       </FormSection>
+      </>)}
 
       {/* ── S7 · Historial de Asignaciones (SEC-053) ── */}
       {/* Visible si se está reasignando o si ya hay filas: así no desaparece al llegar al
