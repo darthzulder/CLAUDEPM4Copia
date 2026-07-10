@@ -500,7 +500,7 @@ z-table :is(th, td)[config*="right"] {
 
 /* Component: PreviewModal */
 .preview-modal {
-  width: min(840px, 88vw);
+  width: min(1080px, 94vw);
   display: flex;
   flex-direction: column;
 }
@@ -528,7 +528,7 @@ z-table :is(th, td)[config*="right"] {
 
 .preview-modal-iframe {
   width: 100%;
-  height: min(70vh, 680px);
+  height: min(82vh, 820px);
   border: none;
   display: block;
 }

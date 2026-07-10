@@ -18,6 +18,11 @@ export default function PreviewModal({ isOpen, onClose, previewDoc }: PreviewMod
   // Determinamos si el documento tiene un id de archivo en PM4.
   const blnHasFileId = previewDoc?.fileId !== undefined && previewDoc?.fileId !== null;
 
+  // Solo montamos el modal cuando está abierto: al cerrarlo se desmonta por
+  // completo y ZrModal libera su backdrop/scroll-lock (evita que la pantalla
+  // de atrás quede "congelada" capturando los clics del overlay residual).
+  if (!isOpen) return null;
+
   return (
     <ZrModal
       model={isOpen}
@@ -40,7 +45,7 @@ export default function PreviewModal({ isOpen, onClose, previewDoc }: PreviewMod
           <div style={{ padding: '0' }}>
             <PdfViewer
               fileId={previewDoc!.fileId!}
-              height={Math.min(window.innerHeight * 0.70, 680)}
+              height={Math.min(window.innerHeight * 0.82, 820)}
             />
           </div>
         ) : (

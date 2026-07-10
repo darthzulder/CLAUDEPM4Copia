@@ -58,11 +58,16 @@ export default function DetalleReasignacionRespuesta() {
     try {
       const intRequestId = task?.process_request_id;
       if (intRequestId && fileRegistry.current.size > 0) await uploadFiles(intRequestId);
+      // Marca la acción del flujo en qd_strAction (p. ej. el botón "Enviar" ⇒ 'ENVIAR').
+      const objPayload = {
+        ...in_objData,
+        [QD.strAction]: in_strAction,
+      } as unknown as Record<string, unknown>;
       if (in_strAction === 'GUARDAR_BORRADOR') {
-        await saveDraft({ ...in_objData, [QD.strAction]: in_strAction } as unknown as Record<string, unknown>);
+        await saveDraft(objPayload);
         return true;
       }
-      await completeTask({ ...in_objData, [QD.strAction]: in_strAction } as unknown as Record<string, unknown>);
+      await completeTask(objPayload);
       return true;
     } catch (exc) {
       console.error('[DetalleReasignacionRespuesta] Error al enviar:', exc);

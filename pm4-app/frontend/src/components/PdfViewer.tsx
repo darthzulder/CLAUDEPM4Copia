@@ -23,6 +23,7 @@ export default function PdfViewer({ fileId, label, height = 640, className = '' 
   const [strBlobUrl, setStrBlobUrl] = useState<string | null>(null);
   const [blnLoading, setBlnLoading] = useState(false);
   const [strError, setStrError] = useState<string | null>(null);
+  const [blnIsImage, setBlnIsImage] = useState(false);
   const prevUrl = useRef<string | null>(null);
 
   useEffect(() => {
@@ -41,7 +42,10 @@ export default function PdfViewer({ fileId, label, height = 640, className = '' 
         if (!blnActive) return;
         // Revocar URL anterior para liberar memoria
         if (prevUrl.current) URL.revokeObjectURL(prevUrl.current);
-        const strUrl = URL.createObjectURL(in_objResponse.data as Blob);
+        const objBlob = in_objResponse.data as Blob;
+        // Las imágenes se muestran con <img> ajustado; el resto (PDF, etc.) en <iframe>.
+        setBlnIsImage(objBlob.type.startsWith('image/'));
+        const strUrl = URL.createObjectURL(objBlob);
         prevUrl.current = strUrl;
         setStrBlobUrl(strUrl);
       })
@@ -93,11 +97,19 @@ export default function PdfViewer({ fileId, label, height = 640, className = '' 
 
       {strBlobUrl && !blnLoading && (
         <>
-          <iframe
-            src={strBlobUrl}
-            title={label ?? 'Documento'}
-            style={{ width: '100%', height, border: 'none', borderRadius: 4 }}
-          />
+          {blnIsImage ? (
+            <img
+              src={strBlobUrl}
+              alt={label ?? 'Documento'}
+              style={{ width: '100%', height, objectFit: 'contain', display: 'block', borderRadius: 4, background: 'var(--zg-white-zurich)' }}
+            />
+          ) : (
+            <iframe
+              src={strBlobUrl}
+              title={label ?? 'Documento'}
+              style={{ width: '100%', height, border: 'none', borderRadius: 4 }}
+            />
+          )}
           <div className="pdf-viewer-actions">
             <ZrButton config="secondary:s" icon="download:line" onClick={handleDownload}>
               Descargar
