@@ -4,13 +4,13 @@ import { useTask } from '../../../../core/useTask';
 import ScreenHeader from '../../../../components/ScreenHeader';
 import FormSection from '../../../../components/FormSection';
 import { ActionBar } from '../../../../components/ActionBar';
+import RequestFileList from '../../../../components/RequestFileList';
 import {
   ZdsInput, ZdsTextarea,
   ZrButton, ZrAlert, ZrModal, ZrLoader,
 } from '../../../../components/fields/ZdsFields';
 import { QD, SCR0051_ADJUNTO_KEYS as ADJUNTO_KEYS, SCR008_DEFAULTS as DEFAULTS, SCR008_SLA_UMBRAL_CRITICO as SLA_UMBRAL_CRITICO } from '../fields/fields';
 import type { RevisionRespuestaSacFormData, AccionRevisionSAC } from '../fields/fields';
-import type { SoporteAdjunto } from '../fields/types';
 
 export default function RevisionRespuestaSac() {
   // Cargamos la tarea y su estado desde PM4
@@ -51,17 +51,6 @@ export default function RevisionRespuestaSac() {
 
   // RUL-008-01 — observaciones obligatorias para devolver.
   const blnCanReturn = !!objWatch[QD.strSacRemarks]?.trim();
-
-  // FLD-130 — soportes internos: el proceso (SCR-0051) los guarda como campos planos
-  // qd_strSupport01..10, NO como la lista qd_lstSupportAttach. Derivamos los chips desde
-  // esos campos; si una versión previa envió la lista, la respetamos como respaldo.
-  const objData = (task?.data ?? {}) as Record<string, unknown>;
-  const lstFromList = Array.isArray(objData[QD.lstSupportAttach]) ? (objData[QD.lstSupportAttach] as SoporteAdjunto[]) : [];
-  const lstFromSupports: SoporteAdjunto[] = ADJUNTO_KEYS
-    .map((strKey) => objData[strKey])
-    .filter((v): v is string => typeof v === 'string' && v.trim() !== '')
-    .map((strNombre) => ({ nombre: strNombre }));
-  const lstAttachments: SoporteAdjunto[] = lstFromList.length ? lstFromList : lstFromSupports;
 
   // Enviamos la tarea con la accion seleccionada
   const enviarCon = (in_strAction: AccionRevisionSAC) => () =>
@@ -137,19 +126,15 @@ export default function RevisionRespuestaSac() {
               <ZdsInput name={QD.strAcknowledgment} control={control} label="¿Reconocimiento al cliente?" readOnly />
             </div>
 
-            {/* FLD-130 — soportes internos adjuntos (solo visualización). */}
-            <div className="field-wrap">
-              <span className="form-label">Soportes internos adjuntos</span>
-              {lstAttachments.length === 0 ? (
-                <span className="field-hint">Sin soportes adjuntos.</span>
-              ) : (
-                <div z-flex="col:50">
-                  {lstAttachments.map((objSupport, intIndex) => (
-                    <span key={intIndex} className="file-name-chip">{objSupport.nombre}</span>
-                  ))}
-                </div>
-              )}
-            </div>
+            {/* FLD-130 — soportes internos adjuntos (previsualizar + descargar).
+                El área los subió en SCR-0051 con data_name qd_strSupport01..10. */}
+            <RequestFileList
+              requestId={task?.process_request_id ?? null}
+              docKeys={ADJUNTO_KEYS}
+              label="Soportes internos adjuntos"
+              emptyText="Sin soportes adjuntos."
+              loadingText="Buscando soportes internos…"
+            />
           </FormSection>
 
           {/* ── S3 · Decisión del Analista SAC (SEC-027) ── */}

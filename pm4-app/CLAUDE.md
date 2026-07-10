@@ -281,6 +281,7 @@ Al construir UI hay **dos ejes** con escaleras distintas. Recorre cada una **de 
 | `PdfViewer` | `components/PdfViewer` | Visor de PDF/archivo PM4 vía blob |
 | `ResultCard` | `components/ResultCard` | Card centrado de resultado/confirmación (variantes) |
 | `DocList` / `DocItem` | `components/DocList`, `components/DocItem` | Lista/fila de documentos (modo upload o validación) |
+| `RequestFileList` | `components/RequestFileList` | Lista de solo lectura de archivos ya subidos al request (filtra por `data_name`), con previsualizar + descargar |
 | `DocSupportUploader` | `components/DocSupportUploader` | Bloque de carga de documentos de soporte |
 | `RecaptchaModal` | `components/RecaptchaModal` | Modal con reCAPTCHA v2 (checkbox); `onVerified(token)` al pasar. Site key en `VITE_RECAPTCHA_SITE_KEY`, verificación server-side en `/api/recaptcha/verify` |
 | Wrappers de campo | `components/fields/ZdsFields` | `ZdsInput/Select/Radio/Date/Textarea/CheckboxField/Segmented` |
