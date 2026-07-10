@@ -52,7 +52,7 @@ El modal de detalle es solo lectura con un único botón "Cerrar".
 | `screens/…/quejas-directas/fields/fields.ts` | Registro `QD` | Nombres canónicos de campos `qd_*` que viven en `request.data` (mapeo de columnas). |
 | `Anexo02_Mockups_TOBE_QuejaDirectas_v3_1.xlsx` | `01_Pantallas`, hojas `SCR-*` | Verificación de ausencia: **no hay SCR-013**. Confirma que la pantalla es mockup-only. |
 | `Matrices_Maduracion_TO-BE_QuejaDirectas_v3.0.xlsx` | `1. Tareas`, `4. Pantallas` | Verificación de ausencia de PAN-13 y del significado real de `P01-T09` (encuesta de satisfacción). |
-| `core/collections.ts` | `GLOBAL_COLLECTIONS` | Referencia de colecciones existentes (`qd_tipoSolicitud` id 18, `qd_estadoQueja` id 42, `qd_area` id 35) como posible origen futuro de los filtros. |
+| `core/collections.ts` | `GLOBAL_COLLECTIONS` | Referencia de colecciones existentes (`QD_COLLECTIONS.requestType` id 18, `QD_COLLECTIONS.complaintStatus` id 42, `QD_COLLECTIONS.area` id 35) como posible origen futuro de los filtros. |
 
 ---
 
@@ -71,9 +71,9 @@ El modal de detalle es solo lectura con un único botón "Cerrar".
 
 | Campo (UI) | Variable | Tipo | Obligatorio | Fuente |
 |---|---|---|---|---|
-| Tipo de solicitud | `filtroTipo` | select **colección** `qd_tipoSolicitud` (id 18) | No | HTML SCR-013 + `collections.ts` |
+| Tipo de solicitud | `filtroTipo` | select **colección** `QD_COLLECTIONS.requestType` (id 18) | No | HTML SCR-013 + `collections.ts` |
 | Estado | `filtroEstado` | select estático (`OPTIONS.estado`) — estado operativo | No | HTML SCR-013 (`select` Estado) |
-| Área responsable | `filtroArea` | select **colección** `qd_area` (id 35) | No | HTML SCR-013 + `collections.ts` |
+| Área responsable | `filtroArea` | select **colección** `QD_COLLECTIONS.area` (id 35) | No | HTML SCR-013 + `collections.ts` |
 | Buscar por caso o responsable | `filtroBuscar` | texto (`ZdsInput`, icono `search`) | No | HTML SCR-013 (`input placeholder="Buscar por caso…"`) |
 
 > Tipo y Área se conectan a colecciones PM4: el `value` del filtro es el **código** de la colección y coincide con el código almacenado en `request.data.qd_strRequestType` / `qd_strAssigneeArea` (`QD.strRequestType` / `QD.strAssigneeArea`). La tabla y el modal resuelven código → descripción con el mapa de la colección. **Estado** es un valor operativo derivado de `request.status` + SLA (no un catálogo), por eso queda estático.
@@ -172,7 +172,7 @@ El modal de detalle es solo lectura con un único botón "Cerrar".
 3. **Origen y mapeo de datos.** Los casos salen de `GET /api/1.0/requests?include=data` filtrando `process_id = 31` (mismo default que el Web Entry de SCR-000, `VITE_QD_PROCESS_ID` para override). Cada `request` se mapea a `CasoDashboard` (`mapRequestToCaso`): `numeroCaso` ← `data.qd_strSfcCode || case_number || id`; `diasRestantes` ← `data.qd_strSlaAssigned` (interpretado como plazo en días desde la creación) o estimado desde `data.qd_fechaVencimiento`; `estado` derivado de `request.status` (COMPLETED→Cerrada, CANCELED→Cancelada, ACTIVE con mora→Vencida, resto→Abierta); `responsable` ← `data.qd_strAssignee || qd_strAssigneeRole`; `descripcion` ← `data.qd_strComplaintText`. Fallback a `SAMPLE_CASES` solo en dev cuando la API no devuelve casos.
 4. **KPIs derivados de la lista completa.** El mockup muestra KPIs globales (12/3/5/20) distintos a las 8 filas visibles; se implementan como conteos derivados de la lista cargada para garantizar consistencia (los números del mockup son datos de ejemplo).
 5. **Umbral "Próximos a vencer" = 3 días hábiles.** El mockup no fija el número; se alineó con el umbral crítico de SLA usado en SCR-008 (`SLA_UMBRAL_CRITICO = 3`).
-6. **Filtros por colección (Tipo y Área).** Se conectan a `qd_tipoSolicitud` (id 18) y `qd_area` (id 35) vía `useCollection`; el `value` del filtro es el código y coincide con el código guardado en `request.data`. **Estado** queda estático porque es un valor operativo (derivado de `request.status` + SLA), no un catálogo. Si se quisiera un catálogo de estado (`qd_estadoQueja` id 42), habría que redefinir el significado de las píldoras/KPIs.
+6. **Filtros por colección (Tipo y Área).** Se conectan a `QD_COLLECTIONS.requestType` (id 18) y `QD_COLLECTIONS.area` (id 35) vía `useCollection`; el `value` del filtro es el código y coincide con el código guardado en `request.data`. **Estado** queda estático porque es un valor operativo (derivado de `request.status` + SLA), no un catálogo. Si se quisiera un catálogo de estado (`QD_COLLECTIONS.complaintStatus` id 42), habría que redefinir el significado de las píldoras/KPIs.
 7. **Campo "Rango de fechas" → "Buscar".** El mockup rotula el 4.º filtro como "Rango de fechas" pero el control es un `input` de texto con `placeholder="Buscar por caso…"`. Se implementó como **búsqueda de texto** (# caso, responsable, tipo). Si se requiere un rango de fechas real, cambiar a dos `ZdsDate`.
 8. **Exportación CSV.** "Descargar reporte" genera el CSV en el navegador (Blob + BOM UTF-8) con las columnas de la tabla resolviendo código→descripción. No hay endpoint de reporte server-side.
 9. **Manejo de error / lista vacía.** Textos de UI redactados por el desarrollador (no especificados en insumos). Ante error de API se muestra alerta y se cae a datos de ejemplo (dev).

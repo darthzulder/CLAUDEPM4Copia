@@ -65,12 +65,12 @@ export type EstadoCasoDashboard = 'Abierta' | 'Cerrada' | 'Vencida' | 'Cancelada
 export interface CasoDashboard {
   id:               number;               // request id (clave estable)
   numeroCaso:       string;                // # Caso (código SFC o case_number)
-  tipoSolicitud:    string;                // Tipo (CÓDIGO de la colección qd_tipoSolicitud)
+  tipoSolicitud:    string;                // Tipo (CÓDIGO de la colección QD_COLLECTIONS.requestType)
   fechaCreacion:    string;                // Creación (formateada)
   fechaVencimiento: string;                // Vencimiento (formateada o '—')
   diasRestantes:    number;                // Días hábiles restantes; < 0 = días de mora
   estado:           EstadoCasoDashboard;   // Estado operativo
-  areaResponsable:  string;                // Área responsable (CÓDIGO de la colección qd_area)
+  areaResponsable:  string;                // Área responsable (CÓDIGO de la colección QD_COLLECTIONS.area)
   responsable:      string;                // Responsable asignado
   descripcion:      string;                // Descripción / Motivo (detalle en modal)
 }

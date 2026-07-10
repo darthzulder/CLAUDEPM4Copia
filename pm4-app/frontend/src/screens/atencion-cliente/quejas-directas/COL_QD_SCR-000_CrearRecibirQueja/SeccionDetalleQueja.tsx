@@ -43,11 +43,11 @@ export default function SeccionDetalleQueja({ form, fileRegistry }: Props) {
 
   // Cargamos los catalogos de la seccion de detalle de la queja.
   const { options: cllInsurance } = useCollection(QD_COLLECTIONS.sfcProduct);
-  // Shim de dependencia: la clave 'qd_productoSFC' es una convención interna que NO
-  // coincide con el dependsOn:'qd_seguro' de esta colección (bug preexistente,
-  // preservado — ver fields/MAPEO_qd_old_new.md #3). Solo se renombra la lectura
-  // del campo real.
-  const { options: cllProductDetail } = useCollection(QD_COLLECTIONS.productDetail, { qd_productoSFC: objWatch[QD.strSfcProduct] });
+  // Shim de dependencia: la clave 'qd_strProductFilter' es una convención interna que
+  // NO coincide con el dependsOn:'qd_strLegacyInsurance' de esta colección (bug
+  // preexistente, preservado — ver fields/MAPEO_qd_old_new.md #3). Solo se renombra
+  // la lectura del campo real.
+  const { options: cllProductDetail } = useCollection(QD_COLLECTIONS.productDetail, { qd_strProductFilter: objWatch[QD.strSfcProduct] });
   // Catálogo de tipo de solicitud: lo necesitamos para resolver el LABEL seleccionado
   // (la matriz filtra por texto "Queja"/"Vida", no por el código que guarda el form).
   const { options: cllRequestType } = useCollection(QD_COLLECTIONS.requestType);

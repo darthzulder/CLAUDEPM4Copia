@@ -10,13 +10,18 @@ No editar esta tabla sin editar `fields.ts` en el mismo commit.
 ## Alcance de esta migración
 
 Se migran los **143 campos `qd_*` que son variables de proceso PM4** (claves de
-`task.data`, `name=` de react-hook-form). **NO se migran** las claves internas de
-`GLOBAL_COLLECTIONS` (`core/collections.ts`) que solo actúan como nombre de propiedad
-de un objeto de configuración (p. ej. `qd_tipoSolicitud: {...}`, `qd_ciudad: {...}`,
-`qd_area: {...}`) — esas nunca viajan a PM4, son análogas a las claves de `OPTIONS`/
-`COLLECTION_DEFS` que el refactor de nomenclatura anterior también dejó intactas.
-Ver la sección **Informe de impacto** para el detalle de qué sí cambia dentro de
-`collections.ts` (los valores de `dependsOn`/`pmqlTemplate` que SÍ son un campo real).
+`task.data`, `name=` de react-hook-form). Las claves internas de `GLOBAL_COLLECTIONS`
+(`core/collections.ts`) que solo actúan como nombre de propiedad de un objeto de
+configuración (p. ej. `qd_tipoSolicitud: {...}`, `qd_ciudad: {...}`, `qd_area: {...}`)
+**nunca viajan a PM4** — no cuentan hacia los 143, son análogas a las claves de
+`OPTIONS`/`COLLECTION_DEFS` que el refactor de nomenclatura anterior también dejó
+intactas. Sin embargo, **posteriormente se renombraron igual** (a `requestType`,
+`city`, `area`, etc., alineadas con `QD_COLLECTIONS` en `fields.ts`) por consistencia,
+y los tokens internos de `dependsOn`/`pmqlTemplate` que no son campos PM4 reales
+también se tradujeron a inglés (`qd_area` → `qd_strAreaCode`, `qd_seguro` →
+`qd_strLegacyInsurance`, `qd_productoSFC` → `qd_strProductFilter`). Ver la sección
+**Informe de impacto** para el detalle completo (qué SÍ es un campo real vs. qué es
+un token/propiedad interna, y su estado actual).
 
 ## Tabla old → new
 
@@ -211,13 +216,16 @@ y `qd_strServiceProvided` guardan el texto de `interaccion`/`servicioPrestado`.
   (SCR-009/010), `qd_areaResponsable`/`qd_usuarioResponsable` (SCR-0051/0052),
   `qd_motivoProrroga`→`qd_strExtensionReason` (SCR-012/0051).
 
-## Fuera de alcance (no se renombran)
+## Fuera de alcance del rename de campos PM4 (no cuentan hacia los 143)
 
-- **Claves de `GLOBAL_COLLECTIONS`** (`core/collections.ts`) que no son un campo
-  PM4 propio, sino solo el nombre de propiedad del objeto de configuración de una
-  colección: `qd_tipoSolicitud`, `qd_rol`, `qd_pais`, `qd_ciudad`, `qd_motivo`,
-  `qd_ente`, `qd_prodDigital`, `qd_area`, `qd_usuariosRole`, `qd_seguro`. Igual
-  tratamiento que `OPTIONS`/`COLLECTION_DEFS` en el refactor de nomenclatura previo.
+- **Claves de `GLOBAL_COLLECTIONS`** (`core/collections.ts`): no son un campo PM4
+  propio, sino el nombre de propiedad del objeto de configuración de una colección
+  (`requestType`, `filerRole`, `countryCode`, `city`, `sfcReason`, `controlEntity`,
+  `digitalProduct`, `area`, `areaUsers`, `sfcProduct`, etc. — ver el objeto completo
+  en `collections.ts`). Igual tratamiento que `OPTIONS`/`COLLECTION_DEFS` en el
+  refactor de nomenclatura previo — **sí se renombraron** por consistencia (ya no
+  llevan prefijo `qd_`), pero esa fue una limpieza cosmética aparte, no parte del
+  contrato con PM4.
 
 ## Informe de impacto — PMQL / colecciones dependientes (`core/collections.ts`)
 
@@ -252,41 +260,41 @@ seguir coincidiendo con el `dependsOn` renombrado).
 **LEFT-side de PMQL sin cambios:** `data.codigo_departamento` es una columna de la
 colección PM4 (id 15), no un campo del formulario — no se toca.
 
-### 2. `GLOBAL_COLLECTIONS.areaUsers` (antes `qd_usuariosRole`) — el `dependsOn` NO cambia
+### 2. `GLOBAL_COLLECTIONS.areaUsers` (antes `qd_usuariosRole`) — el shim se tradujo a inglés
 
 ```
-dependsOn: 'qd_area'
-pmqlTemplate: 'data.codigo_area = "{{qd_area}}"'
+dependsOn: 'qd_area'  → 'qd_strAreaCode'
+pmqlTemplate: 'data.codigo_area = "{{qd_area}}"' → '...{{qd_strAreaCode}}"'
 ```
-**Por qué NO:** en `SCR-0051/SeccionAsignacion.tsx` se llama con un objeto
-**sintético** construido ad-hoc: `useCollection(COLLECTION_DEFS.usuariosRole, { qd_area:
-objWatch.qd_areaResponsable })` y `{ qd_area: objWatch.qd_areaDestino })`. La clave
-`qd_area` es una **convención interna** entre el `dependsOn` y el objeto que arma el
-propio `SeccionAsignacion.tsx` — nunca es un campo real de `task.data`, así que no
-forma parte del contrato con PM4. Se deja intacta. Lo que SÍ cambia (por ser
-consecuencia del rename de los campos reales) es la lectura del **valor**:
-`objWatch.qd_areaResponsable` → `objWatch.qd_strAssigneeArea` y
-`objWatch.qd_areaDestino` → `objWatch.qd_strTargetArea` (la clave del objeto
-sintético `qd_area:` no cambia).
+**Por qué se tradujo (sin cambiar el comportamiento):** en `SCR-0051/SeccionAsignacion.tsx`
+se llama con un objeto **sintético** construido ad-hoc: `useCollection(QD_COLLECTIONS.areaUsers,
+{ qd_strAreaCode: objWatch[QD.strAssigneeArea] })` y `{ qd_strAreaCode: objWatch[QD.strTargetArea] })`.
+La clave `qd_strAreaCode` (antes `qd_area`) es una **convención interna** entre el
+`dependsOn` y el objeto que arma el propio `SeccionAsignacion.tsx` — nunca es un campo
+real de `task.data`, así que no forma parte del contrato con PM4. Como el usuario pidió
+que también los tokens internos respeten la nomenclatura en inglés, se tradujo
+`qd_area` → `qd_strAreaCode` en AMBOS lados a la vez (dependsOn/pmqlTemplate y los 2
+call sites), preservando el comportamiento exacto porque ambos lados coincidían antes
+y siguen coincidiendo después.
 
-### 3. `GLOBAL_COLLECTIONS.productDetail` (antes `qd_detalleProducto`) — el `dependsOn` NO cambia (bug preexistente, se preserva)
+### 3. `GLOBAL_COLLECTIONS.productDetail` (antes `qd_detalleProducto`) — tokens huérfanos traducidos por separado (bug preexistente, se preserva)
 
 ```
-dependsOn: 'qd_seguro'
-pmqlTemplate: 'data.codigo_producto_sfc = "{{qd_seguro}}"'
+dependsOn: 'qd_seguro'  → 'qd_strLegacyInsurance'
+pmqlTemplate: 'data.codigo_producto_sfc = "{{qd_seguro}}"' → '...{{qd_strLegacyInsurance}}"'
 ```
-**Hallazgo:** en `SCR-000/SeccionDetalleQueja.tsx` se llama con
-`useCollection(COLLECTION_DEFS.detalleProducto, { qd_productoSFC: objWatch.qd_productoSFC
-})` — la clave del objeto sintético es `qd_productoSFC`, que **no coincide** con
-`dependsOn: 'qd_seguro'`. Esto significa que `genDependsOnValue` siempre resuelve a
-`undefined` y **esta colección nunca se recarga dinámicamente hoy** (bug preexistente,
-anterior a este refactor). Por regla de "cero cambios de lógica" se **preserva tal
-cual**: `dependsOn` se deja como `'qd_seguro'` (no es un campo real, es un token
-huérfano) y solo se renombra la lectura del valor real: `objWatch.qd_productoSFC` →
-`objWatch.qd_strSfcProduct` (la clave del objeto sintético `qd_productoSFC:` no
-cambia, para no alterar el comportamiento actual ni de casualidad hacerlo funcionar).
-**Se notifica al usuario para que decida si corregir este bug por separado** (fuera
-del alcance de este refactor de nomenclatura).
+**Hallazgo (sigue vigente):** en `SCR-000/SeccionDetalleQueja.tsx` se llama con
+`useCollection(QD_COLLECTIONS.productDetail, { qd_strProductFilter: objWatch[QD.strSfcProduct] })`
+— la clave del objeto sintético (antes `qd_productoSFC`, ahora `qd_strProductFilter`)
+**no coincide** con `dependsOn: 'qd_strLegacyInsurance'` (antes `qd_seguro`). Esto
+significa que `genDependsOnValue` sigue resolviendo a `undefined` y **esta colección
+sigue sin recargarse dinámicamente** (bug preexistente, anterior a este refactor).
+Por regla de "cero cambios de lógica", los DOS tokens huérfanos se tradujeron a
+inglés **de forma independiente** (sin hacerlos coincidir): `qd_seguro` → `qd_strLegacyInsurance`
+en `collections.ts`, y `qd_productoSFC` → `qd_strProductFilter` en el call site —
+deliberadamente distintos, para no alterar el comportamiento actual ni de casualidad
+hacerlo funcionar. **Se notifica al usuario para que decida si corregir este bug por
+separado** (fuera del alcance de este refactor de nomenclatura).
 
 ## Hallazgo adicional — `qd_errores_json` transporta nombres de campo en runtime
 

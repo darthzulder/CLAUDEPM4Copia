@@ -55,12 +55,12 @@ export default function SeccionAsignacion({ form, err, onConfirmarReasignacion, 
   const { options: cllReassignReason } = useCollection(QD_COLLECTIONS.reassignReason);
 
   // RUL-0051-02 — usuarios filtrados por área seleccionada (asignación inicial).
-  // Shim de dependencia: 'qd_area' es una convención interna (no un campo PM4 real,
-  // ver fields/MAPEO_qd_old_new.md #2) — coincide con el dependsOn sin cambios.
-  const { options: cllAreaUsers } = useCollection(QD_COLLECTIONS.areaUsers, { qd_area: objWatch[QD.strAssigneeArea] });
+  // Shim de dependencia: 'qd_strAreaCode' es una convención interna (no un campo PM4
+  // real, ver fields/MAPEO_qd_old_new.md #2) — coincide con el dependsOn sin cambios.
+  const { options: cllAreaUsers } = useCollection(QD_COLLECTIONS.areaUsers, { qd_strAreaCode: objWatch[QD.strAssigneeArea] });
 
   // FLD-092 — responsables del área destino de reasignación (autocompletado).
-  const { options: cllTargetAreaUsers } = useCollection(QD_COLLECTIONS.areaUsers, { qd_area: objWatch[QD.strTargetArea] });
+  const { options: cllTargetAreaUsers } = useCollection(QD_COLLECTIONS.areaUsers, { qd_strAreaCode: objWatch[QD.strTargetArea] });
   useEffect(() => {
     setValue(QD.strNewAssignee, cllTargetAreaUsers[0]?.label ?? '');
   }, [cllTargetAreaUsers, setValue]);

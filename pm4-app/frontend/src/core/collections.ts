@@ -282,11 +282,11 @@ export const GLOBAL_COLLECTIONS = {
     id: 36,
     labelField: 'data.nombre_usuario',
     valueField: 'data.usuario',
-    // Shim interno: 'qd_area' aquí es una convención de dependsOn/pmqlTemplate
-    // acordada con los call sites (SeccionAsignacion.tsx pasa { qd_area: ... }), no
-    // el nombre de esta propiedad ni un campo PM4 real. Ver MAPEO_qd_old_new.md #2.
-    dependsOn: 'qd_area',
-    pmqlTemplate: 'data.codigo_area = "{{qd_area}}"',
+    // Shim interno: 'qd_strAreaCode' aquí es una convención de dependsOn/pmqlTemplate
+    // acordada con los call sites (SeccionAsignacion.tsx pasa { qd_strAreaCode: ... }),
+    // no el nombre de esta propiedad ni un campo PM4 real. Ver MAPEO_qd_old_new.md #2.
+    dependsOn: 'qd_strAreaCode',
+    pmqlTemplate: 'data.codigo_area = "{{qd_strAreaCode}}"',
   } satisfies CollectionDef,
 
   reassignReason: {
@@ -305,12 +305,15 @@ export const GLOBAL_COLLECTIONS = {
     id: 40,
     labelField: 'data.nombre_detalle_producto',
     valueField: 'data.codigo_detalle_producto',
-    // dependsOn/pmqlTemplate apuntan a 'qd_seguro', que ya NO es el nombre de ninguna
-    // propiedad de este objeto ni un campo PM4 real — es un token huérfano de un bug
-    // preexistente (esta colección nunca se recarga dinámicamente hoy). Se preserva
-    // tal cual por "cero cambios de lógica". Ver MAPEO_qd_old_new.md #3.
-    dependsOn: 'qd_seguro',
-    pmqlTemplate: 'data.codigo_producto_sfc = "{{qd_seguro}}"',
+    // dependsOn/pmqlTemplate apuntan a 'qd_strLegacyInsurance', que ya NO es el nombre
+    // de ninguna propiedad de este objeto ni un campo PM4 real — es un token huérfano
+    // de un bug preexistente (esta colección nunca se recarga dinámicamente hoy: el
+    // call site en SeccionDetalleQueja.tsx pasa una clave shim distinta,
+    // 'qd_strProductFilter', que nunca coincide con este dependsOn). Se preserva tal
+    // cual por "cero cambios de lógica" — ambos tokens se tradujeron a inglés de forma
+    // independiente, sin hacerlos coincidir. Ver MAPEO_qd_old_new.md #3.
+    dependsOn: 'qd_strLegacyInsurance',
+    pmqlTemplate: 'data.codigo_producto_sfc = "{{qd_strLegacyInsurance}}"',
   } satisfies CollectionDef,
 
   lgbtiq: {
