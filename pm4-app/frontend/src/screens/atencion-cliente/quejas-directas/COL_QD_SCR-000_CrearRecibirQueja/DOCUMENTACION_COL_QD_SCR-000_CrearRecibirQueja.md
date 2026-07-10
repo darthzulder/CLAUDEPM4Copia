@@ -227,7 +227,7 @@ Catálogos implementados como **colecciones dinámicas PM4** (no listas estátic
 
 2. **Versión de insumo v3.0.** La carpeta `insumos/` fue actualizada a v3.0 (`Anexo02_..._v3_0`, `Matrices_..._v3.0`, `Anexo03_..._v2_0`). SCR-000 solo existe en v3.0; la doc se basa en esa versión.
 
-3. **Catálogos dinámicos PM4.** A diferencia de versiones previas con listas estáticas, todos los catálogos se consumen como **colecciones PM4** vía `useCollection` (`GLOBAL_COLLECTIONS.qd_*`). Los IDs (39, 43, 11, 13, 14, 15, 16, 17, 21, 24) deben verificarse en cada instancia de PM4.
+3. **Catálogos dinámicos PM4.** A diferencia de versiones previas con listas estáticas, todos los catálogos se consumen como **colecciones PM4** vía `useCollection` (`QD_COLLECTIONS.*` en `fields/fields.ts`, que referencia `GLOBAL_COLLECTIONS` en `core/collections.ts`). Los IDs (39, 43, 11, 13, 14, 15, 16, 17, 21, 24) deben verificarse en cada instancia de PM4.
 
 4. **Captcha representado con checkbox.** FLD-336 especifica un componente *Captcha*; el DS no provee widget de captcha, por lo que se implementó un checkbox de confirmación ("No soy un robot") con el mismo patrón visual hasta integrar el widget real. (Comentario explícito en `CrearRecibirQueja.tsx`.)
 

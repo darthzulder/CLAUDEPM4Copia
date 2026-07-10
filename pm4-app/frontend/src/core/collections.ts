@@ -103,214 +103,224 @@ export const GLOBAL_COLLECTIONS = {
   // ==========================================
   // QUEJAS DIRECTAS COLLECTIONS
   // ==========================================
-  qd_tipoSolicitud: {
+  // Nombres alineados a QD_COLLECTIONS (campos/fields.ts) — sin prefijo qd_: estas
+  // claves son propiedades internas de configuración (como OPTIONS/COLLECTION_DEFS),
+  // no viajan a PM4. Ver campos/MAPEO_qd_old_new.md para el detalle.
+  requestType: {
     id: 18,
     labelField: 'data.descripcion',
     valueField: 'data.codigo',
   } satisfies CollectionDef,
 
-  qd_rol: {
+  filerRole: {
     id: 39,
     labelField: 'data.nombre_rol_radicador',
     valueField: 'data.codigo_rol_radicador',
   } satisfies CollectionDef,
 
-  qd_tipoIdentificacion: {
+  idType: {
     id: 11,
     labelField: 'data.descripcion',
     valueField: 'data.codigo',
   } satisfies CollectionDef,
 
-  qd_pais: {
+  countryCode: {
     id: 13,
     labelField: 'data.descripcion',
     valueField: 'data.codigo',
   } satisfies CollectionDef,
 
-  qd_departamento: {
+  department: {
     id: 14,
     labelField: 'data.nombre_departamento',
     valueField: 'data.codigo_departamento',
   } satisfies CollectionDef,
 
-  qd_ciudad: {
+  city: {
     id: 15,
     labelField: 'data.nombre_municipio',
     valueField: 'data.codigo_municipio',
     // dependsOn/pmqlTemplate referencian el campo real qd_strDepartment (ver
-    // campos/MAPEO_qd_old_new.md #1) — se llama con el objWatch real, no un shim.
+    // fields/MAPEO_qd_old_new.md #1) — se llama con el objWatch real, no un shim.
     dependsOn: 'qd_strDepartment',
     pmqlTemplate: 'data.codigo_departamento = "{{qd_strDepartment}}"',
   } satisfies CollectionDef,
 
-  qd_condicionEspecial: {
+  specialCondition: {
     id: 24,
     labelField: 'data.descripcion',
     valueField: 'data.codigo',
   } satisfies CollectionDef,
 
-  qd_seguro: {
+  sfcProduct: {
     id: 16,
     labelField: 'data.nombre_producto_sfc',
     valueField: 'data.codigo_producto_sfc',
   } satisfies CollectionDef,
 
-  qd_motivo: {
+  sfcReason: {
     id: 17,
     labelField: 'data.descripcion',
     valueField: 'data.codigo',
   } satisfies CollectionDef,
 
-  qd_admision: {
+  admission: {
     id: 21,
     labelField: 'data.descripcion',
     valueField: 'data.codigo',
   } satisfies CollectionDef,
 
-  qd_estadoQueja: {
+  complaintStatus: {
     id: 42,
     labelField: 'data.descripcion',
     valueField: 'data.codigo',
   } satisfies CollectionDef,
 
-  qd_favorabilidad: {
+  favorability: {
     id: 26,
     labelField: 'data.descripcion',
     valueField: 'data.codigo',
   } satisfies CollectionDef,
 
-  qd_aceptacion: {
+  acceptance: {
     id: 27,
     labelField: 'data.descripcion',
     valueField: 'data.codigo',
   } satisfies CollectionDef,
 
-  qd_marcacion: {
+  marking: {
     id: 31,
     labelField: 'data.descripcion',
     valueField: 'data.codigo',
   } satisfies CollectionDef,
 
-  qd_quejaExpres: {
+  expressComplaint: {
     id: 32,
     labelField: 'data.descripcion',
     valueField: 'data.codigo',
   } satisfies CollectionDef,
 
-  qd_tipoFraude: {
+  fraudType: {
     id: 33,
     labelField: 'data.descripcion',
     valueField: 'data.codigo',
   } satisfies CollectionDef,
 
-  qd_canal: {
+  channel: {
     id: 10,
     labelField: 'data.descripcion',
     valueField: 'data.codigo',
   } satisfies CollectionDef,
 
-  qd_tipoPersona: {
+  personType: {
     id: 12,
     labelField: 'data.descripcion',
     valueField: 'data.codigo',
   } satisfies CollectionDef,
 
-  qd_instancia: {
+  receptionInstance: {
     id: 19,
     labelField: 'data.descripcion',
     valueField: 'data.codigo',
   } satisfies CollectionDef,
 
-  qd_puntoRecepcion: {
+  receptionPoint: {
     id: 20,
     labelField: 'data.descripcion',
     valueField: 'data.codigo',
   } satisfies CollectionDef,
 
-  qd_ente: {
+  controlEntity: {
     id: 22,
     labelField: 'data.descripcion',
     valueField: 'data.codigo',
   } satisfies CollectionDef,
 
-  qd_sexo: {
+  sex: {
     id: 23,
     labelField: 'data.descripcion',
     valueField: 'data.codigo',
   } satisfies CollectionDef,
 
-  qd_prodDigital: {
+  digitalProduct: {
     id: 25,
     labelField: 'data.descripcion',
     valueField: 'data.codigo',
   } satisfies CollectionDef,
 
-  qd_rectificacion: {
+  rectification: {
     id: 28,
     labelField: 'data.descripcion',
     valueField: 'data.codigo',
   } satisfies CollectionDef,
 
-  qd_desistimiento: {
+  withdrawal: {
     id: 29,
     labelField: 'data.descripcion',
     valueField: 'data.codigo',
   } satisfies CollectionDef,
 
-  qd_tutela: {
+  tutela: {
     id: 30,
     labelField: 'data.descripcion',
     valueField: 'data.codigo',
   } satisfies CollectionDef,
 
-  qd_modFraude: {
+  fraudModality: {
     id: 34,
     labelField: 'data.descripcion',
     valueField: 'data.codigo',
   } satisfies CollectionDef,
 
-  qd_area: {
+  area: {
     id: 35,
     labelField: 'data.nombre_area',
     valueField: 'data.codigo_area',
   } satisfies CollectionDef,
 
-  qd_usuariosRole: {
+  areaUsers: {
     id: 36,
     labelField: 'data.nombre_usuario',
     valueField: 'data.usuario',
+    // Shim interno: 'qd_area' aquí es una convención de dependsOn/pmqlTemplate
+    // acordada con los call sites (SeccionAsignacion.tsx pasa { qd_area: ... }), no
+    // el nombre de esta propiedad ni un campo PM4 real. Ver MAPEO_qd_old_new.md #2.
     dependsOn: 'qd_area',
     pmqlTemplate: 'data.codigo_area = "{{qd_area}}"',
   } satisfies CollectionDef,
 
-  qd_motivoReasignacion: {
+  reassignReason: {
     id: 37,
     labelField: 'data.descripcion',
     valueField: 'data.codigo',
   } satisfies CollectionDef,
 
-  qd_motivoProrroga: {
+  extensionReason: {
     id: 38,
     labelField: 'data.descripcion',
     valueField: 'data.codigo',
   } satisfies CollectionDef,
 
-  qd_detalleProducto: {
+  productDetail: {
     id: 40,
     labelField: 'data.nombre_detalle_producto',
     valueField: 'data.codigo_detalle_producto',
+    // dependsOn/pmqlTemplate apuntan a 'qd_seguro', que ya NO es el nombre de ninguna
+    // propiedad de este objeto ni un campo PM4 real — es un token huérfano de un bug
+    // preexistente (esta colección nunca se recarga dinámicamente hoy). Se preserva
+    // tal cual por "cero cambios de lógica". Ver MAPEO_qd_old_new.md #3.
     dependsOn: 'qd_seguro',
     pmqlTemplate: 'data.codigo_producto_sfc = "{{qd_seguro}}"',
   } satisfies CollectionDef,
 
-  qd_lgbtiq: {
+  lgbtiq: {
     id: 41,
     labelField: 'data.descripcion',
     valueField: 'data.codigo',
   } satisfies CollectionDef,
 
   // Catálogo de alianzas comerciales (CATALOGOS v2). Creado pero aún sin uso en pantalla.
-  qd_alianza: {
+  alliance: {
     id: 44,
     labelField: 'data.alianza',
     valueField: 'data.codigo',
@@ -328,7 +338,7 @@ export const GLOBAL_COLLECTIONS = {
   //      igualdad exacta de PMQL; en cliente normalizamos con trim + case-insensitive.
   // labelField/valueField apuntan al motivo (única columna con código propio); las
   // demás columnas se leen directo del registro crudo (`records`).
-  qd_matrizMotivos: {
+  matrixMotivos: {
     id: 45,
     labelField: 'data.motivoSFC',
     valueField: 'data.codigoMotivoSFC',

@@ -224,7 +224,16 @@ y `qd_strServiceProvided` guardan el texto de `interaccion`/`servicioPrestado`.
 Antes de tocar `collections.ts`, este es el análisis completo de sus 3 definiciones
 con `dependsOn`/`pmqlTemplate` en el dominio Quejas Directas:
 
-### 1. `GLOBAL_COLLECTIONS.qd_ciudad` (municipios) — SÍ cambia
+> **Actualización posterior:** las claves de `GLOBAL_COLLECTIONS` del bloque Quejas
+> Directas (antes prefijadas `qd_*`, ej. `qd_ciudad`, `qd_usuariosRole`,
+> `qd_detalleProducto`) se renombraron a nombres semánticos sin prefijo (`city`,
+> `areaUsers`, `productDetail`, alineados 1:1 con `QD_COLLECTIONS` en `fields.ts`),
+> igual que el resto de propiedades de configuración (`OPTIONS`/`COLLECTION_DEFS`).
+> El análisis de `dependsOn`/`pmqlTemplate` de abajo (qué SÍ/NO cambia como valor
+> de campo real) sigue vigente sin cambios — solo cambió el nombre de la propiedad
+> contenedora, no el valor de sus strings `dependsOn`/`pmqlTemplate`.
+
+### 1. `GLOBAL_COLLECTIONS.city` (antes `qd_ciudad`, municipios) — SÍ cambia
 
 ```
 dependsOn: 'qd_departamento'                              → 'qd_strDepartment'
@@ -243,7 +252,7 @@ seguir coincidiendo con el `dependsOn` renombrado).
 **LEFT-side de PMQL sin cambios:** `data.codigo_departamento` es una columna de la
 colección PM4 (id 15), no un campo del formulario — no se toca.
 
-### 2. `GLOBAL_COLLECTIONS.qd_usuariosRole` — NO cambia
+### 2. `GLOBAL_COLLECTIONS.areaUsers` (antes `qd_usuariosRole`) — el `dependsOn` NO cambia
 
 ```
 dependsOn: 'qd_area'
@@ -260,7 +269,7 @@ consecuencia del rename de los campos reales) es la lectura del **valor**:
 `objWatch.qd_areaDestino` → `objWatch.qd_strTargetArea` (la clave del objeto
 sintético `qd_area:` no cambia).
 
-### 3. `GLOBAL_COLLECTIONS.qd_detalleProducto` — NO cambia (bug preexistente, se preserva)
+### 3. `GLOBAL_COLLECTIONS.productDetail` (antes `qd_detalleProducto`) — el `dependsOn` NO cambia (bug preexistente, se preserva)
 
 ```
 dependsOn: 'qd_seguro'
