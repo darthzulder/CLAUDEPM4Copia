@@ -126,6 +126,7 @@ export const QD = {
   strAcknowledgment: 'qd_strAcknowledgment',           // FLD-129/112 · antes qd_reconocimiento (back)
   lstSupportAttach: 'qd_lstSupportAttach',             // FLD-130 · antes qd_adjuntosSoporte
   strSacRemarks: 'qd_strSacRemarks',                   // FLD-131 · antes qd_observacionesSAC
+  blnSacApproved: 'qd_blnSACApproved',                 // Decisión SAC booleana: Aprobar ⇒ true, Devolver ⇒ false
 
   // ── SCR-009 · Formulario Superintendencia ─────────────────────────────────
   strDigitalProduct: 'qd_strDigitalProduct',           // FLD-149 · antes qd_productoDigital
@@ -312,6 +313,7 @@ export interface QdFields {
   qd_strAcknowledgment: string;
   qd_lstSupportAttach: SoporteAdjunto[];
   qd_strSacRemarks: string;
+  qd_blnSACApproved: boolean;
 
   // SCR-009
   qd_strDigitalProduct: string;
@@ -607,12 +609,13 @@ export type RevisionRespuestaSacFormData = Omit<Pick<QdFields,
   | typeof QD.strSfcCode | typeof QD.strSlaAssigned | typeof QD.strRevisionVersion
   | typeof QD.strAssigneeArea | typeof QD.strDraftDate
   | typeof QD.strClientResponse | typeof QD.strActionsTaken | typeof QD.strAcknowledgment | typeof QD.lstSupportAttach
-  | typeof QD.strSacRemarks | typeof QD.strAction
+  | typeof QD.strSacRemarks | typeof QD.blnSacApproved | typeof QD.strAction
 >, typeof QD.strAction> & { [QD.strAction]: AccionRevisionSAC };
 
 export const SCR008_DEFAULTS: Partial<RevisionRespuestaSacFormData> = {
   [QD.lstSupportAttach]: [],
   [QD.strSacRemarks]: '',
+  [QD.blnSacApproved]: false,
   [QD.strAction]: 'APROBAR',
 };
 

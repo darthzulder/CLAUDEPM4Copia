@@ -52,9 +52,15 @@ export default function RevisionRespuestaSac() {
   // RUL-008-01 — observaciones obligatorias para devolver.
   const blnCanReturn = !!objWatch[QD.strSacRemarks]?.trim();
 
-  // Enviamos la tarea con la accion seleccionada
+  // Enviamos la tarea con la accion seleccionada. qd_blnSACApproved refleja la
+  // decisión booleana del SAC: Aprobar ⇒ true, Devolver ⇒ false (Reasignar no la toca).
   const enviarCon = (in_strAction: AccionRevisionSAC) => () =>
-    completeTask({ ...objWatch, [QD.strAction]: in_strAction } as unknown as Record<string, unknown>)
+    completeTask({
+      ...objWatch,
+      [QD.strAction]: in_strAction,
+      ...(in_strAction === 'APROBAR' ? { [QD.blnSacApproved]: true } : {}),
+      ...(in_strAction === 'DEVOLVER' ? { [QD.blnSacApproved]: false } : {}),
+    } as unknown as Record<string, unknown>)
       .catch((excError) => console.error('[RevisionRespuestaSac] Error al enviar:', excError));
 
   // ACT-008-01 Aprobar · ACT-008-03 Reasignar (no requieren observaciones).
