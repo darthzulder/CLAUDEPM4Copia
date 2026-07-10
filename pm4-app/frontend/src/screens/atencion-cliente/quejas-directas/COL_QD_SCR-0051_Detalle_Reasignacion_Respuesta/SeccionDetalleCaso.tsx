@@ -2,8 +2,9 @@ import type { UseFormReturn } from 'react-hook-form';
 import FormSection from '../../../../components/FormSection';
 import { ZdsInput, ZdsTextarea, ZdsStatusBadge } from '../../../../components/fields/ZdsFields';
 import { useCollection } from '../../../../core/useCollection';
-import { QD, QD_COLLECTIONS } from '../fields/fields';
+import { QD, QD_COLLECTIONS, SCR000_ADJUNTO_KEYS } from '../fields/fields';
 import type { DetalleReasignacionRespuestaFormData } from '../fields/fields';
+import DocumentosRadicador from './DocumentosRadicador';
 
 // Mapea el estado SmartSupervision (FLD-079) al color del semáforo.
 export function estadoVariant(in_strStatus: string): 'success' | 'danger' | 'info' | 'neutral' {
@@ -20,10 +21,11 @@ interface Props {
   estado: string;
   nombre: string;          // derivado de qd_strFirstName+qd_strLastName / qd_strCompanyName
   identificacion: string;  // derivado de qd_strIdType+qd_strIdNumber
+  requestId: number | null; // request del caso, para listar los adjuntos del radicador
 }
 
 /** S1–S4 · Expediente del caso (solo lectura). */
-export default function SeccionDetalleCaso({ form, estado, nombre, identificacion }: Props) {
+export default function SeccionDetalleCaso({ form, estado, nombre, identificacion, requestId }: Props) {
   const { control, watch } = form;
   // Tomamos una foto de los valores actuales del formulario.
   const objWatch = watch();
@@ -103,6 +105,9 @@ export default function SeccionDetalleCaso({ form, estado, nombre, identificacio
         </div>
         <div className="form-row cols-1">
           <ZdsTextarea name={QD.strComplaintText} control={control} label="Descripción / Texto de la Queja" readOnly />
+        </div>
+        <div className="form-row cols-1">
+          <DocumentosRadicador requestId={requestId} docKeys={SCR000_ADJUNTO_KEYS} />
         </div>
       </FormSection>
 

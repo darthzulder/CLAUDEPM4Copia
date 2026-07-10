@@ -135,7 +135,7 @@ export default function DetalleReasignacionRespuesta() {
         )}
 
         <form onSubmit={onEnviar} noValidate>
-          <SeccionDetalleCaso form={form} estado={objWatch[QD.strSsStatus] || ''} nombre={strName} identificacion={strIdentification} />
+          <SeccionDetalleCaso form={form} estado={objWatch[QD.strSsStatus] || ''} nombre={strName} identificacion={strIdentification} requestId={task?.process_request_id ?? null} />
           <SeccionAsignacion form={form} err={err} onConfirmarReasignacion={onReasignarQueja} onSolicitarAyuda={onSolicitarAyuda} submitting={submitting} />
           <SeccionRespuesta
             form={form} fileRegistry={fileRegistry} err={err}

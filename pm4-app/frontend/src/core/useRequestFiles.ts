@@ -8,6 +8,8 @@ export interface Pm4File {
   size: number;
   created_at: string;
   updated_at: string;
+  // PM4 guarda el data_name del campo que originó el archivo dentro de custom_properties.
+  custom_properties?: Record<string, unknown>;
 }
 
 export function useRequestFiles(in_intRequestId: number | null | undefined) {
