@@ -8,7 +8,7 @@ import {
   ZdsInput, ZdsTextarea,
   ZrButton, ZrAlert, ZrModal, ZrLoader,
 } from '../../../../components/fields/ZdsFields';
-import { QD, SCR008_DEFAULTS as DEFAULTS, SCR008_SLA_UMBRAL_CRITICO as SLA_UMBRAL_CRITICO } from '../fields/fields';
+import { QD, SCR0051_ADJUNTO_KEYS as ADJUNTO_KEYS, SCR008_DEFAULTS as DEFAULTS, SCR008_SLA_UMBRAL_CRITICO as SLA_UMBRAL_CRITICO } from '../fields/fields';
 import type { RevisionRespuestaSacFormData, AccionRevisionSAC } from '../fields/fields';
 import type { SoporteAdjunto } from '../fields/types';
 
@@ -26,7 +26,16 @@ export default function RevisionRespuestaSac() {
 
   // Pre-poblamos el formulario con los datos del caso
   useEffect(() => {
-    if (task?.data) reset({ ...DEFAULTS, ...(task.data as Partial<RevisionRespuestaSacFormData>) });
+    if (!task?.data) return;
+    const objData = task.data as Partial<RevisionRespuestaSacFormData> & Record<string, unknown>;
+    reset({
+      ...DEFAULTS,
+      ...objData,
+      // "ID Caso / Código SFC": el código SFC (qd_strSfcCode) se asigna al radicar ante
+      // la SFC (momentos posteriores); en SP2 aún no existe, así que mostramos el # de
+      // caso BPM (qd_strBpmCaseId) como respaldo para que el campo no quede vacío.
+      [QD.strSfcCode]: (objData[QD.strSfcCode] as string) || (objData[QD.strBpmCaseId] as string) || '',
+    });
   }, [task, reset]);
 
   const err = (in_strField: keyof RevisionRespuestaSacFormData): string | undefined => {
@@ -43,8 +52,16 @@ export default function RevisionRespuestaSac() {
   // RUL-008-01 — observaciones obligatorias para devolver.
   const blnCanReturn = !!objWatch[QD.strSacRemarks]?.trim();
 
-  // Normalizamos la lista de soportes adjuntos
-  const lstAttachments: SoporteAdjunto[] = Array.isArray(objWatch[QD.lstSupportAttach]) ? objWatch[QD.lstSupportAttach] : [];
+  // FLD-130 — soportes internos: el proceso (SCR-0051) los guarda como campos planos
+  // qd_strSupport01..10, NO como la lista qd_lstSupportAttach. Derivamos los chips desde
+  // esos campos; si una versión previa envió la lista, la respetamos como respaldo.
+  const objData = (task?.data ?? {}) as Record<string, unknown>;
+  const lstFromList = Array.isArray(objData[QD.lstSupportAttach]) ? (objData[QD.lstSupportAttach] as SoporteAdjunto[]) : [];
+  const lstFromSupports: SoporteAdjunto[] = ADJUNTO_KEYS
+    .map((strKey) => objData[strKey])
+    .filter((v): v is string => typeof v === 'string' && v.trim() !== '')
+    .map((strNombre) => ({ nombre: strNombre }));
+  const lstAttachments: SoporteAdjunto[] = lstFromList.length ? lstFromList : lstFromSupports;
 
   // Enviamos la tarea con la accion seleccionada
   const enviarCon = (in_strAction: AccionRevisionSAC) => () =>
