@@ -90,7 +90,7 @@ mostrarlos de nuevo como solo lectura aquí. Se removió el bloque `ZdsInput rea
 |---|---|---|---|---|
 | ¿Incluye Anexos a la Queja? | `qd_strIncludesComplaintAnnex` | `ZdsRadio` inline | **Sí** | FLD-163 |
 | ¿Incluye Adjunto Respuesta Final? | `qd_strIncludesReplyAttach` | `ZdsRadio` inline | **Sí** | FLD-164 |
-| PDF Respuesta Final (generado) | `qd_strFinalReplyPdf` | `ZdsInput` readOnly + `ZrButton` descarga | No | FLD-165 |
+| PDF Respuesta Final (generado) | `qd_strFinalReplyPdf` | `RequestFileList` (previsualizar + descargar) | No | FLD-165 |
 | Prórroga (días, si aplica) | `qd_strExtensionDays` | `ZdsInput` (dígitos) | No | FLD-166 |
 
 ### Metadato de flujo (no visible)
@@ -139,7 +139,7 @@ mostrarlos de nuevo como solo lectura aquí. Se removió el bloque `ZdsInput rea
 | Precarga M1 sin UI (ya vista en SCR-000) | No se renderiza S1; los valores viajan en el `payload` vía `reset()` | SEC-028 · RUL-009-02 |
 | 12 selects de catálogo SFC | `ZdsSelect` en grids `cols-2`/`cols-3` | SEC-029/030 |
 | Sección de fraude condicional | render por `esFraude` | SEC-031 · RUL-009-01 |
-| Descarga del PDF generado | `ZrButton icon="download:line"` (abre `qd_strFinalReplyPdf`) | FLD-165 |
+| Previsualizar/descargar el PDF generado | `RequestFileList` filtra los archivos del request por `data_name=qd_strFinalReplyPdf` | FLD-165 |
 | Aviso LGBTIQ+ pendiente | `ZrAlert config="info"` permanente | MSG-009-04 |
 | Estados loading/error/submitting | `ZrLoader`, `ZrAlert`, botones `loading/disabled` | CLAUDE.md |
 
@@ -151,7 +151,7 @@ mostrarlos de nuevo como solo lectura aquí. Se removió el bloque `ZdsInput rea
 |---|---|---|---|
 | `qd_strFraudRelated` | tipo/modalidad/montos de fraude | Muestra y hace obligatorios los campos de fraude si = Sí | RUL-009-01 |
 | 12 campos SFC + anexos | Botón "Guardar Formulario" | Habilita guardar solo si todos están completos | RUL-009-03 |
-| `qd_strFinalReplyPdf` | Botón "Descargar PDF" | Se habilita solo si hay PDF generado | FLD-165 |
+| `qd_strFinalReplyPdf` (id del archivo subido al request) | `RequestFileList` | Se muestra la fila solo si ya existe un archivo con ese `data_name` en el request | FLD-165 |
 
 ---
 
@@ -166,8 +166,10 @@ mostrarlos de nuevo como solo lectura aquí. Se removió el bloque `ZdsInput rea
   MSG-009-04. No transmitir a SFC sin confirmar con TI.
 - **Montos y prórroga como `ZdsInput` de texto con `pattern` de dígitos**: la fachada no expone
   `inputType="number"` (solo text/email/tel). Se validan como enteros.
-- **PDF (FLD-165)**: se muestra el nombre en `ZdsInput readOnly` + botón que abre la URL/blob del
-  PDF. El endpoint real de descarga se conectará cuando SP2-T06 entregue la referencia.
+- **PDF (FLD-165)**: `qd_strFinalReplyPdf` deja de tratarse como texto/URL y se interpreta como el
+  `data_name` con el que SP2-T06 sube el archivo al request (mismo patrón que `ADJUNTO_KEYS` en
+  otras pantallas de Quejas Directas). Se reusa `RequestFileList` (`requestId={task.process_request_id}`,
+  `docKeys={[qd_strFinalReplyPdf]}`) para previsualizar y descargar, igual que SCR-008/SCR-0051.
 - **`qd_strAction`** (metadato): no es un FLD; se deriva del botón presionado (ACT-009-01/02).
 - **MSG-009-03** (éxito) lo emite el BPM tras `completeTask`; no se renderiza en la pantalla.
 

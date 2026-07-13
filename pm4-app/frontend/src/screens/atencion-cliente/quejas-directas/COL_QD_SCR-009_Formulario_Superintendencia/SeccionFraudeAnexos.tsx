@@ -1,6 +1,7 @@
 import type { UseFormReturn } from 'react-hook-form';
 import FormSection from '../../../../components/FormSection';
-import { ZdsSelect, ZdsInput, ZdsRadio, ZrButton, ZrAlert } from '../../../../components/fields/ZdsFields';
+import { ZdsSelect, ZdsInput, ZdsRadio, ZrAlert } from '../../../../components/fields/ZdsFields';
+import RequestFileList from '../../../../components/RequestFileList';
 import { useCollection } from '../../../../core/useCollection';
 import { QD, QD_COLLECTIONS, OPTIONS_SI_NO } from '../fields/fields';
 import type { FormularioSuperintendenciaFormData } from '../fields/fields';
@@ -8,13 +9,17 @@ import type { FormularioSuperintendenciaFormData } from '../fields/fields';
 interface Props {
   form: UseFormReturn<FormularioSuperintendenciaFormData>;
   err: (name: keyof FormularioSuperintendenciaFormData) => string | undefined;
+  requestId: number | null;
 }
+
+// data_name con el que SP2-T06 sube el PDF de respuesta final al request.
+const DOC_KEYS_FINAL_REPLY = [QD.strFinalReplyPdf] as const;
 
 // COP como texto numérico (el DS no expone inputType="number"; ver DOCUMENTACION §10).
 const objAmountOnly = { pattern: { value: /^\d+$/, message: 'Solo dígitos (COP)' } };
 
 /** S4 Datos de Fraude (condicional) · S5 Anexos del Formulario. */
-export default function SeccionFraudeAnexos({ form, err }: Props) {
+export default function SeccionFraudeAnexos({ form, err, requestId }: Props) {
   const { control, watch } = form;
   const objWatch = watch();
 
@@ -72,17 +77,13 @@ export default function SeccionFraudeAnexos({ form, err }: Props) {
             options={OPTIONS_SI_NO} inline required
             rules={{ required: 'Campo requerido' }} error={err(QD.strIncludesReplyAttach)} />
         </div>
-        <div className="form-row cols-2 row-align-bottom">
-          <ZdsInput name={QD.strFinalReplyPdf} control={control} label="PDF Respuesta Final (generado)" readOnly
-            helpText="Generado por SP2-T06. Solo descarga." />
-          <div className="field-wrap">
-            <ZrButton config="secondary" icon="download:line"
-              disabled={!objWatch[QD.strFinalReplyPdf]}
-              onClick={() => { if (objWatch[QD.strFinalReplyPdf]) window.open(objWatch[QD.strFinalReplyPdf], '_blank'); }}>
-              Descargar PDF
-            </ZrButton>
-          </div>
-        </div>
+        <RequestFileList
+          requestId={requestId}
+          docKeys={DOC_KEYS_FINAL_REPLY}
+          label="PDF Respuesta Final (generado)"
+          emptyText="Aún no se ha generado el PDF de respuesta final."
+          loadingText="Buscando el PDF de respuesta final…"
+        />
         <div className="form-row cols-2">
           <ZdsInput name={QD.strExtensionDays} control={control} label="Prórroga (días, si aplica)"
             rules={objAmountOnly} error={err(QD.strExtensionDays)}

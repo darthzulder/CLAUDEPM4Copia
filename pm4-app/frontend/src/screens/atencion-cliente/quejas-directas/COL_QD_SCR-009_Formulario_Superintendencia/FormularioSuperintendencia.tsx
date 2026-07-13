@@ -160,7 +160,7 @@ export default function FormularioSuperintendencia() {
           </FormSection>
 
           {/* ── S4 Fraude (condicional) · S5 Anexos ── */}
-          <SeccionFraudeAnexos form={form} err={err} />
+          <SeccionFraudeAnexos form={form} err={err} requestId={task?.process_request_id ?? null} />
 
           {/* RUL-009-03 / MSG-009-02 — bloqueo si faltan campos obligatorios SFC. */}
           {!blnCanSave && (
