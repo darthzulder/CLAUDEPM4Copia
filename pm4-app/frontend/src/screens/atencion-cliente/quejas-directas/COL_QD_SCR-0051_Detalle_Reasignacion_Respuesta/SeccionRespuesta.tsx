@@ -2,6 +2,7 @@ import { useState, type MutableRefObject } from 'react';
 import type { UseFormReturn } from 'react-hook-form';
 import FormSection from '../../../../components/FormSection';
 import DocSupportUploader from '../../../../components/DocSupportUploader';
+import RequestFileList from '../../../../components/RequestFileList';
 import { ZdsSelect, ZdsTextarea, ZdsInput, ZrAlert, ZrButton } from '../../../../components/fields/ZdsFields';
 import { useCollection } from '../../../../core/useCollection';
 import {
@@ -18,16 +19,21 @@ interface Props {
   onSolicitarProrroga: () => void;
   slaCritico: boolean;
   submitting: boolean;
+  requestId: number | null;
 }
 
 /** S8 Respuesta Técnica · S9 Soportes Internos · S10 Configuración de Respuesta. */
-export default function SeccionRespuesta({ form, fileRegistry, err, onVistaPrevia, onSolicitarProrroga, slaCritico, submitting }: Props) {
+export default function SeccionRespuesta({ form, fileRegistry, err, onVistaPrevia, onSolicitarProrroga, slaCritico, submitting, requestId }: Props) {
   const { control, watch } = form;
   // Tomamos una foto de los valores actuales del formulario.
   const objWatch = watch();
 
   // RUL-0051-09 — "Acciones Tomadas" visible solo si la respuesta es a favor del Cliente.
   const blnShowActions = objWatch[QD.strReplyFavorOf] === 'CLIENTE';
+
+  // El caso fue devuelto con observaciones por el Analista SAC (FLD-131, SCR-008):
+  // en ese reingreso mostramos los soportes internos ya subidos en la vuelta anterior.
+  const blnReturnedBySac = !!objWatch[QD.strSacRemarks]?.trim();
 
   // ACT-0051-04 — flujo de prórroga en dos pasos: primero se elige el motivo, luego se envía.
   const [blnExtensionMode, setBlnExtensionMode] = useState(false);
@@ -93,6 +99,20 @@ export default function SeccionRespuesta({ form, fileRegistry, err, onVistaPrevi
         <ZrAlert config="info" {...({ 'hide-close': true } as object)}>
           Estos adjuntos son de uso interno: <strong>no van al cliente ni a la SFC</strong>.
         </ZrAlert>
+
+        {/* Reingreso tras devolución del SAC: soportes internos ya cargados (solo lectura). */}
+        {blnReturnedBySac && (
+          <div className="form-row cols-1">
+            <RequestFileList
+              requestId={requestId}
+              docKeys={ADJUNTO_KEYS}
+              label="Soportes internos ya cargados"
+              emptyText="Aún no se han cargado soportes internos en este caso."
+              loadingText="Buscando soportes internos del caso…"
+            />
+          </div>
+        )}
+
         <DocSupportUploader
           form={form}
           fileRegistry={fileRegistry}

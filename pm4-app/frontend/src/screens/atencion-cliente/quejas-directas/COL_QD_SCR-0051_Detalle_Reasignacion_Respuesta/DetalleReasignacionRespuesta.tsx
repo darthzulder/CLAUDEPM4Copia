@@ -148,6 +148,7 @@ export default function DetalleReasignacionRespuesta() {
             onSolicitarProrroga={onSolicitarProrroga}
             slaCritico={blnSlaCritical}
             submitting={submitting}
+            requestId={task?.process_request_id ?? null}
           />
 
           {/* RUL-0051-05 / MSG-0051-02 — bloqueo de envío si falta la respuesta. */}
