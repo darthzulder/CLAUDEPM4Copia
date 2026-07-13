@@ -2,6 +2,7 @@ import type { UseFormReturn } from 'react-hook-form';
 import FormSection from '../../../../components/FormSection';
 import { ZdsSelect, ZdsInput, ZdsRadio, ZrAlert } from '../../../../components/fields/ZdsFields';
 import RequestFileList from '../../../../components/RequestFileList';
+import { resolveFileId } from '../../../../core/useRequestFiles';
 import { useCollection } from '../../../../core/useCollection';
 import { QD, QD_COLLECTIONS, OPTIONS_SI_NO } from '../fields/fields';
 import type { FormularioSuperintendenciaFormData } from '../fields/fields';
@@ -11,9 +12,6 @@ interface Props {
   err: (name: keyof FormularioSuperintendenciaFormData) => string | undefined;
   requestId: number | null;
 }
-
-// data_name con el que SP2-T06 sube el PDF de respuesta final al request.
-const DOC_KEYS_FINAL_REPLY = [QD.strFinalReplyPdf] as const;
 
 // COP como texto numérico (el DS no expone inputType="number"; ver DOCUMENTACION §10).
 const objAmountOnly = { pattern: { value: /^\d+$/, message: 'Solo dígitos (COP)' } };
@@ -30,6 +28,11 @@ export default function SeccionFraudeAnexos({ form, err, requestId }: Props) {
   // RUL-009-01 — campos de fraude visibles y obligatorios si relacionadaFraude = Sí.
   const blnIsFraud = objWatch[QD.strFraudRelated] === 'SI';
   const objFraudReq = blnIsFraud ? { required: 'Campo requerido' } : {};
+
+  // FLD-165 — el payload trae el id de PM4 del PDF (no un nombre fijo: el
+  // nombrado del PDF es decisión de negocio y puede cambiar), p.ej.
+  // { output_slip_final: 1713 } → qd_strFinalReplyPdf.
+  const intFinalReplyFileId = resolveFileId(objWatch[QD.strFinalReplyPdf]);
 
   return (
     <>
@@ -79,7 +82,7 @@ export default function SeccionFraudeAnexos({ form, err, requestId }: Props) {
         </div>
         <RequestFileList
           requestId={requestId}
-          docKeys={DOC_KEYS_FINAL_REPLY}
+          fileIds={[intFinalReplyFileId]}
           label="PDF Respuesta Final (generado)"
           emptyText="Aún no se ha generado el PDF de respuesta final."
           loadingText="Buscando el PDF de respuesta final…"

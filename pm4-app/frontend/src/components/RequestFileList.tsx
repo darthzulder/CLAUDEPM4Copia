@@ -8,7 +8,10 @@ interface Props {
   /** request (caso) del cual listar los adjuntos. */
   requestId: number | null;
   /** data_name de los adjuntos a mostrar (filtra los archivos del request). */
-  docKeys: readonly string[];
+  docKeys?: readonly string[];
+  /** IDs de archivo (PM4) a mostrar — alternativa a `docKeys` cuando el caso ya
+   *  trae el ID resuelto en el payload en vez de un data_name fijo. */
+  fileIds?: readonly (number | null | undefined)[];
   /** Título de la sección. */
   label?: string;
   /** Texto cuando no hay archivos que coincidan. */
@@ -26,13 +29,14 @@ function formatBytes(in_intBytes: number): string {
 
 /**
  * Lista de solo lectura de los archivos que un caso (request) tiene adjuntos,
- * filtrados por su `custom_properties.data_name` para no mezclar adjuntos de
- * otras tareas. Cada fila permite previsualizar el documento en un popup (icono
- * de ojo) y descargarlo. Reusado por SCR-0051 (documentos del radicador) y
- * SCR-008 (soportes internos del área).
+ * filtrados por `docKeys` (custom_properties.data_name) o por `fileIds` (id de
+ * PM4 ya resuelto en el payload) para no mezclar adjuntos de otras tareas.
+ * Cada fila permite previsualizar el documento en un popup (icono de ojo) y
+ * descargarlo. Reusado por SCR-0051 (documentos del radicador), SCR-008
+ * (soportes internos del área) y SCR-009 (PDF de respuesta final, por id).
  */
 export default function RequestFileList({
-  requestId, docKeys,
+  requestId, docKeys = [], fileIds = [],
   label = 'Documentos adjuntos',
   emptyText = 'No hay documentos adjuntos.',
   loadingText = 'Buscando documentos del caso…',
@@ -40,14 +44,16 @@ export default function RequestFileList({
   const { files, loading, error } = useRequestFiles(requestId);
   const [objPreview, setObjPreview] = useState<Pm4File | null>(null);
 
-  // Solo los archivos cuyo data_name coincide con las claves indicadas.
+  // Los archivos cuyo id (fileIds) o data_name (docKeys) coincide con lo indicado.
   const lstDocs = useMemo(() => {
     const setKeys = new Set<string>(docKeys);
+    const setIds = new Set<number>(fileIds.filter((genId): genId is number => typeof genId === 'number'));
     return files.filter((objFile) => {
+      if (setIds.has(objFile.id)) return true;
       const genDataName = objFile.custom_properties?.data_name;
       return typeof genDataName === 'string' && setKeys.has(genDataName);
     });
-  }, [files, docKeys]);
+  }, [files, docKeys, fileIds]);
 
   // Descarga el binario del archivo vía el proxy y lo guarda localmente.
   const descargar = async (in_objFile: Pm4File) => {

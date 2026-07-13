@@ -330,7 +330,7 @@ export interface QdFields {
   qd_strAcknowledgedAmount: string;
   qd_strIncludesComplaintAnnex: string;
   qd_strIncludesReplyAttach: string;
-  qd_strFinalReplyPdf: string;
+  qd_strFinalReplyPdf: string; // id de archivo PM4 (ver resolveFileId), no el nombre del PDF
   qd_strExtensionDays: string;
 
   // SCR-010
