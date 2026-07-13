@@ -42,16 +42,13 @@ anexos. Al guardarlo completo habilita el subproceso SP3 de cierre regulatorio.
 
 ## 4. Campos Implementados
 
-### S1 — Datos Precargados M1 (SEC-028, solo lectura — RUL-009-02)
+### S1 — Datos Precargados M1 (SEC-028, RUL-009-02) — sin UI propia
 
-| Campo (UI) | Variable | Tipo | Fuente |
-|---|---|---|---|
-| Código SFC | `qd_strSfcCode` | `ZdsInput` readOnly | FLD-140 |
-| Canal (precargado M1) | `qd_strChannel` | `ZdsInput` readOnly | FLD-141 |
-| Producto (precargado M1) | `qd_strSfcProduct` | `ZdsInput` readOnly | FLD-142 |
-| Motivo (precargado M1) | `qd_strSfcReason` | `ZdsInput` readOnly | FLD-143 |
-| Admisión (precargado M1) | `qd_strAdmission` | `ZdsInput` readOnly | FLD-144 |
-| Ente de Control (precargado M1) | `qd_strControlEntity` | `ZdsInput` readOnly | FLD-145 |
+`qd_strSfcCode`, `qd_strChannel`, `qd_strSfcProduct`, `qd_strSfcReason`, `qd_strAdmission` y
+`qd_strControlEntity` (FLD-140..145) ya llegan pre-cargados en `task.data` desde SCR-000 y viajan
+en el `payload` del formulario (vía `reset()`), pero **no se renderizan** en esta pantalla: son
+datos de clasificación de M1 que el usuario ya vio en pantallas previas y no aportan valor
+mostrarlos de nuevo como solo lectura aquí. Se removió el bloque `ZdsInput readOnly` de S1.
 
 ### S2 — Datos del Consumidor — Campos SFC (SEC-029, obligatorios)
 
@@ -130,7 +127,7 @@ anexos. Al guardarlo completo habilita el subproceso SP3 de cierre regulatorio.
 | Regla | Implementación | Fuente |
 |---|---|---|
 | RUL-009-01 (🔴) — fraude visible/obligatorio si `relacionadaFraude=Sí` | `esFraude` muestra campos + `reqFraude` los hace requeridos | SCR-009 > RUL-009-01 |
-| RUL-009-02 (info) — precargar M1 no editable | S1 con `readOnly` | SCR-009 > RUL-009-02 |
+| RUL-009-02 (info) — precargar M1 no editable | Datos M1 viajan en el `payload` (`reset()`) sin renderizarse en UI (ya vistos en pantallas previas desde SCR-000) | SCR-009 > RUL-009-02 |
 | RUL-009-03 (🔴) — bloquear guardar si falta obligatorio SFC | `puedeGuardar` deshabilita el botón + alerta MSG-009-02 | SCR-009 > RUL-009-03 |
 
 ---
@@ -139,7 +136,7 @@ anexos. Al guardarlo completo habilita el subproceso SP3 de cierre regulatorio.
 
 | Comportamiento | Implementación | Fuente |
 |---|---|---|
-| Precarga M1 solo lectura | `ZdsInput readOnly` en S1 | SEC-028 · RUL-009-02 |
+| Precarga M1 sin UI (ya vista en SCR-000) | No se renderiza S1; los valores viajan en el `payload` vía `reset()` | SEC-028 · RUL-009-02 |
 | 12 selects de catálogo SFC | `ZdsSelect` en grids `cols-2`/`cols-3` | SEC-029/030 |
 | Sección de fraude condicional | render por `esFraude` | SEC-031 · RUL-009-01 |
 | Descarga del PDF generado | `ZrButton icon="download:line"` (abre `qd_strFinalReplyPdf`) | FLD-165 |

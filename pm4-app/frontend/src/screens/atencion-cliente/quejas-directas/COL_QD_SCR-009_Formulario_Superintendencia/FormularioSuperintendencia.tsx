@@ -7,7 +7,7 @@ import ScreenHeader from '../../../../components/ScreenHeader';
 import FormSection from '../../../../components/FormSection';
 import { ActionBar } from '../../../../components/ActionBar';
 import {
-  ZdsInput, ZdsSelect, ZrButton, ZrAlert, ZrLoader,
+  ZdsSelect, ZrButton, ZrAlert, ZrLoader,
 } from '../../../../components/fields/ZdsFields';
 import {
   QD, QD_COLLECTIONS, SCR009_DEFAULTS as DEFAULTS,
@@ -107,20 +107,6 @@ export default function FormularioSuperintendencia() {
 
       <div className="screen-content">
         <form onSubmit={onGuardar} noValidate>
-
-          {/* ── S1 · Datos Precargados M1 (SEC-028, solo lectura — RUL-009-02) ── */}
-          <FormSection title="Datos Precargados M1">
-            <div className="form-row cols-3">
-              <ZdsInput name={QD.strSfcCode} control={control} label="Código SFC" readOnly />
-              <ZdsInput name={QD.strChannel} control={control} label="Canal (precargado M1)" readOnly />
-              <ZdsInput name={QD.strSfcProduct} control={control} label="Producto (precargado M1)" readOnly />
-            </div>
-            <div className="form-row cols-3">
-              <ZdsInput name={QD.strSfcReason} control={control} label="Motivo (precargado M1)" readOnly />
-              <ZdsInput name={QD.strAdmission} control={control} label="Admisión (precargado M1)" readOnly />
-              <ZdsInput name={QD.strControlEntity} control={control} label="Ente de Control (precargado M1)" readOnly />
-            </div>
-          </FormSection>
 
           {/* ── S2 · Datos del Consumidor — Campos SFC (SEC-029) ── */}
           <FormSection title="Datos del Consumidor — Campos SFC">
