@@ -88,16 +88,20 @@
     "hash": "cb6200e7fa04604f3fee5139a859c40b"
   },
   "G:\\DockerProys\\CLAUDEPM4Copia\\pm4-app\\frontend\\src\\components\\PdfViewer.tsx": {
-    "mtime": 1783546833.7927125,
-    "hash": "40d2df78f4cf3d2f4dd46e8e47903be8"
+    "mtime": 1783718215.3177736,
+    "hash": "d74244a4986c874f813a63343e49e73e"
   },
   "G:\\DockerProys\\CLAUDEPM4Copia\\pm4-app\\frontend\\src\\components\\PreviewModal.tsx": {
-    "mtime": 1783546833.7927125,
-    "hash": "1fadd8db6d1c6e456fe2b81e6164dc07"
+    "mtime": 1783718215.319278,
+    "hash": "25f6510a93bbfbd0e2825906fa9482ca"
   },
   "G:\\DockerProys\\CLAUDEPM4Copia\\pm4-app\\frontend\\src\\components\\RecaptchaModal.tsx": {
     "mtime": 1783614434.4586365,
     "hash": "a2e29836d489d8de70ffd52e05d7517d"
+  },
+  "G:\\DockerProys\\CLAUDEPM4Copia\\pm4-app\\frontend\\src\\components\\RequestFileList.tsx": {
+    "mtime": 1783958902.0933418,
+    "hash": "feb18c715df339bc53391db33ecc66ad"
   },
   "G:\\DockerProys\\CLAUDEPM4Copia\\pm4-app\\frontend\\src\\components\\ResultCard.tsx": {
     "mtime": 1782340064.8486643,
@@ -112,7 +116,7 @@
     "hash": "9404b1ce9030571632130530c711eb26"
   },
   "G:\\DockerProys\\CLAUDEPM4Copia\\pm4-app\\frontend\\src\\core\\collections.ts": {
-    "mtime": 1783712735.9409125,
+    "mtime": 1783958902.286721,
     "hash": "60b35be3162828b8c041c1d83cbde5c7"
   },
   "G:\\DockerProys\\CLAUDEPM4Copia\\pm4-app\\frontend\\src\\core\\useCollection.ts": {
@@ -148,7 +152,7 @@
     "hash": "11543f3a15726ee3e34e9bfe31382503"
   },
   "G:\\DockerProys\\CLAUDEPM4Copia\\pm4-app\\frontend\\src\\screens\\atencion-cliente\\quejas-directas\\COL_QD_SCR-000_CrearRecibirQueja\\SeccionDetalleQueja.tsx": {
-    "mtime": 1783712765.7386935,
+    "mtime": 1783958902.2872286,
     "hash": "1ba2dea82df90057196f1af34142995c"
   },
   "G:\\DockerProys\\CLAUDEPM4Copia\\pm4-app\\frontend\\src\\screens\\atencion-cliente\\quejas-directas\\COL_QD_SCR-002_corregir-datos-formulario\\CorregirDatosFormulario.tsx": {
@@ -168,16 +172,16 @@
     "hash": "69902eec83764cac7074c4471d6f89fd"
   },
   "G:\\DockerProys\\CLAUDEPM4Copia\\pm4-app\\frontend\\src\\screens\\atencion-cliente\\quejas-directas\\COL_QD_SCR-0051_Detalle_Reasignacion_Respuesta\\DetalleReasignacionRespuesta.tsx": {
-    "mtime": 1783709733.1754274,
-    "hash": "6f04c9843da2c62b94c88847a6f8f0d2"
+    "mtime": 1783718215.3212843,
+    "hash": "0520706871a8195fdca2bb59ba3e4ac7"
   },
   "G:\\DockerProys\\CLAUDEPM4Copia\\pm4-app\\frontend\\src\\screens\\atencion-cliente\\quejas-directas\\COL_QD_SCR-0051_Detalle_Reasignacion_Respuesta\\DocumentosRadicador.tsx": {
-    "mtime": 1783709733.1759572,
-    "hash": "f7b150183de779f8f8f27fba07a19165"
+    "mtime": 1783958902.0953462,
+    "hash": "a1b5a69c218d19ae384dedfcb24f94de"
   },
   "G:\\DockerProys\\CLAUDEPM4Copia\\pm4-app\\frontend\\src\\screens\\atencion-cliente\\quejas-directas\\COL_QD_SCR-0051_Detalle_Reasignacion_Respuesta\\SeccionAsignacion.tsx": {
-    "mtime": 1783712750.602661,
-    "hash": "75aba342bc636a7353dc6d6fee2d4df6"
+    "mtime": 1783958902.2877526,
+    "hash": "68bba7482765a2f58df988bb2e7f5d7c"
   },
   "G:\\DockerProys\\CLAUDEPM4Copia\\pm4-app\\frontend\\src\\screens\\atencion-cliente\\quejas-directas\\COL_QD_SCR-0051_Detalle_Reasignacion_Respuesta\\SeccionDetalleCaso.tsx": {
     "mtime": 1783709733.176474,
@@ -192,16 +196,16 @@
     "hash": "87a0f47e79a04d91f6a7eff0f90ca883"
   },
   "G:\\DockerProys\\CLAUDEPM4Copia\\pm4-app\\frontend\\src\\screens\\atencion-cliente\\quejas-directas\\COL_QD_SCR-008_Revision_Respuesta_SAC\\RevisionRespuestaSac.tsx": {
-    "mtime": 1783546833.8154445,
-    "hash": "77a1b260176692c6fb2b55dbce535cbf"
+    "mtime": 1783958902.096347,
+    "hash": "6d5f5939acbf46815bd40cbb037da9e0"
   },
   "G:\\DockerProys\\CLAUDEPM4Copia\\pm4-app\\frontend\\src\\screens\\atencion-cliente\\quejas-directas\\COL_QD_SCR-009_Formulario_Superintendencia\\FormularioSuperintendencia.tsx": {
-    "mtime": 1783546972.2046728,
-    "hash": "1347c20374542971662d5d457494a76a"
+    "mtime": 1783960862.8668125,
+    "hash": "12aa6db8cad6c0b64d52d46bc88caeef"
   },
   "G:\\DockerProys\\CLAUDEPM4Copia\\pm4-app\\frontend\\src\\screens\\atencion-cliente\\quejas-directas\\COL_QD_SCR-009_Formulario_Superintendencia\\SeccionFraudeAnexos.tsx": {
-    "mtime": 1783546833.8164444,
-    "hash": "8e7d947dccf351cb62b34d36d045f936"
+    "mtime": 1783960881.2379415,
+    "hash": "549904ccdba627b6567bddddf2ede4ca"
   },
   "G:\\DockerProys\\CLAUDEPM4Copia\\pm4-app\\frontend\\src\\screens\\atencion-cliente\\quejas-directas\\COL_QD_SCR-010_cierre-m3\\CierreM3.tsx": {
     "mtime": 1783546833.8164444,
@@ -240,11 +244,11 @@
     "hash": "145b9479642d92c192c069a4d6db7b4f"
   },
   "G:\\DockerProys\\CLAUDEPM4Copia\\pm4-app\\frontend\\src\\screens\\atencion-cliente\\quejas-directas\\fields\\fields.ts": {
-    "mtime": 1783709954.5018034,
-    "hash": "1e80ccb3cd25648354b3a5cf4b03dbba"
+    "mtime": 1783958902.1969318,
+    "hash": "77b02896d57c0e89dee7618beec1d7a2"
   },
   "G:\\DockerProys\\CLAUDEPM4Copia\\pm4-app\\frontend\\src\\screens\\atencion-cliente\\quejas-directas\\fields\\types.ts": {
-    "mtime": 1783712875.1004782,
+    "mtime": 1783958902.288797,
     "hash": "46ec553e581c71cb3108d8779a586dda"
   },
   "G:\\DockerProys\\CLAUDEPM4Copia\\pm4-app\\frontend\\src\\screens\\ds-catalog\\DsCatalog.tsx": {
@@ -404,8 +408,8 @@
     "hash": "bbd76e2d660da3f72a50e7fba9796296"
   },
   "G:\\DockerProys\\CLAUDEPM4Copia\\pm4-app\\CLAUDE.md": {
-    "mtime": 1783374477.474829,
-    "hash": "3c1990551b8eebc5bb0003edeb0adbe2"
+    "mtime": 1783958902.091837,
+    "hash": "f70f845a8fe10f85046bcc7ae9184c70"
   },
   "G:\\DockerProys\\CLAUDEPM4Copia\\pm4-app\\Diagrama.md": {
     "mtime": 1781193419.8678932,
@@ -424,7 +428,7 @@
     "hash": "1baa1af98cb3579a316e007ac6a10e1d"
   },
   "G:\\DockerProys\\CLAUDEPM4Copia\\pm4-app\\frontend\\src\\screens\\atencion-cliente\\quejas-directas\\COL_QD_SCR-000_CrearRecibirQueja\\DOCUMENTACION_COL_QD_SCR-000_CrearRecibirQueja.md": {
-    "mtime": 1783709995.4316294,
+    "mtime": 1783958902.1954894,
     "hash": "c95dbc4f868e0a9b6d56293333fd1a77"
   },
   "G:\\DockerProys\\CLAUDEPM4Copia\\pm4-app\\frontend\\src\\screens\\atencion-cliente\\quejas-directas\\COL_QD_SCR-002_corregir-datos-formulario\\DOCUMENTACION_COL_QD-corregir-datos-formulario.md": {
@@ -452,8 +456,8 @@
     "hash": "49cdb03d185409ff0eda476bf930fc3a"
   },
   "G:\\DockerProys\\CLAUDEPM4Copia\\pm4-app\\frontend\\src\\screens\\atencion-cliente\\quejas-directas\\COL_QD_SCR-009_Formulario_Superintendencia\\DOCUMENTACION_COL_QD_SCR-009_Formulario_Superintendencia.md": {
-    "mtime": 1783546833.8154445,
-    "hash": "961e3b5fe46b7ab944b5e7ef37d9c8b6"
+    "mtime": 1783960941.7596087,
+    "hash": "e21c1792192e6107ff86a2e50cb4bcdc"
   },
   "G:\\DockerProys\\CLAUDEPM4Copia\\pm4-app\\frontend\\src\\screens\\atencion-cliente\\quejas-directas\\COL_QD_SCR-010_cierre-m3\\DOCUMENTACION_COL_QD_cierre-m3.md": {
     "mtime": 1783546833.817448,
@@ -468,11 +472,11 @@
     "hash": "e7bb7f55c7f01f64da2251840d281676"
   },
   "G:\\DockerProys\\CLAUDEPM4Copia\\pm4-app\\frontend\\src\\screens\\atencion-cliente\\quejas-directas\\COL_QD_SCR-013_Dashboard_Gestion_Casos\\DOCUMENTACION_COL_QD_SCR-013_Dashboard_Gestion_Casos.md": {
-    "mtime": 1783712899.0057745,
-    "hash": "44edb9ed089ed3615aa1a4ce2225b08c"
+    "mtime": 1783958902.288316,
+    "hash": "8aec56012c06bed0b7de3e7c21fef46a"
   },
   "G:\\DockerProys\\CLAUDEPM4Copia\\pm4-app\\frontend\\src\\screens\\atencion-cliente\\quejas-directas\\fields\\MAPEO_qd_old_new.md": {
-    "mtime": 1783712844.688524,
+    "mtime": 1783958902.288316,
     "hash": "4f314313ff8bda92b8d3863fd2c63adf"
   },
   "G:\\DockerProys\\CLAUDEPM4Copia\\pm4-app\\frontend\\vendor\\README.md": {
