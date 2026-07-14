@@ -1,30 +1,31 @@
-import { useEffect, useRef } from 'react';
+import { useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import { useTask } from '../../../../core/useTask';
 import FormSection from '../../../../components/FormSection';
-import { ZdsInput, ZdsSelect, ZdsDate, ZdsRadio, ZdsFileInput, ZrButton, ZrAlert } from '../../../../components/fields/ZdsFields';
+import { ZdsInput, ZdsSelect, ZdsDate, ZdsRadio, ZrButton, ZrAlert } from '../../../../components/fields/ZdsFields';
+import RequestFileList from '../../../../components/RequestFileList';
+import { resolveFileId } from '../../../../core/useRequestFiles';
 import { useCollection } from '../../../../core/useCollection';
-import {
-  QD, QD_COLLECTIONS, OPTIONS_SI_NO,
-  SCR010_REGEX_NOMENCLATURA_PDF as REGEX_NOMENCLATURA_PDF,
-} from '../fields/fields';
+import { QD, QD_COLLECTIONS, OPTIONS_SI_NO } from '../fields/fields';
 import type { CierreM3FormData } from '../fields/fields';
 import SeccionEstadoCierre from './SeccionEstadoCierre';
 import zurichLogo from '../../../../resources/zurich/ZurichLogo_Horz_White_CMYK_no_R.png';
-import pm4 from '../../../../api/pm4Client';
+
+// El adjunto de respuesta final siempre va marcado en "Sí" y no es editable:
+// el PDF lo genera el proceso, no se sube a mano (mismo criterio que SCR-009).
+const OPTIONS_SI_NO_READONLY = OPTIONS_SI_NO.map((o) => ({ ...o, disabled: true }));
 
 export default function CierreM3() {
   // Cargamos la tarea y su estado desde PM4
   const { task, loading, error, submitting, completeTask } = useTask();
-  const dicFileRegistry = useRef(new Map<string, File>());
 
   // Inicializamos el formulario con los valores por defecto
-  const { control, watch, handleSubmit, reset, setValue, setError, clearErrors, formState: { errors, isSubmitted } } = useForm<CierreM3FormData>({
+  const { control, watch, handleSubmit, reset, formState: { errors, isSubmitted } } = useForm<CierreM3FormData>({
     defaultValues: {
       [QD.strM3ClosureStatus]: '', [QD.strM3ClosureAttempts]: '0', [QD.strLastError]: '',
       [QD.strSfcCode]: '', [QD.strComplaintStatus]: '', [QD.strUpdateDate]: '', [QD.strClosureDate]: '',
       [QD.strFavorability]: '', [QD.strAcceptance]: '', [QD.strMarking]: '', [QD.strExpressComplaint]: '',
-      [QD.strFinalReplyPdf]: '', [QD.strNamingValidation]: '', [QD.strFinalReplyAttach]: '',
+      [QD.strFinalReplyPdf]: '', [QD.strNamingValidation]: '', [QD.strFinalReplyAttach]: 'SI',
       [QD.strFraudRelated]: '', [QD.strFraudType]: '', [QD.strClaimedAmount]: '', [QD.strAcknowledgedAmount]: '',
     },
   });
@@ -39,22 +40,24 @@ export default function CierreM3() {
   const { options: cllExpressComplaint } = useCollection(QD_COLLECTIONS.expressComplaint);
   const { options: cllFraudType } = useCollection(QD_COLLECTIONS.fraudType);
 
-  // Pre-poblamos el formulario con los datos del caso
+  // Pre-poblamos el formulario con los datos del caso. El adjunto de respuesta
+  // final se fuerza siempre a "SI" (el PDF lo genera el proceso).
   useEffect(() => {
-    if (task?.data) reset(task.data as Partial<CierreM3FormData>);
+    if (task?.data) reset({ ...(task.data as Partial<CierreM3FormData>), [QD.strFinalReplyAttach]: 'SI' });
   }, [task, reset]);
+
+  // FLD-165 — el payload trae el id de PM4 del PDF de respuesta final generado.
+  const intFinalReplyFileId = resolveFileId(objWatch[QD.strFinalReplyPdf]);
 
   // RUL-010-01: fechaActualizacion debe coincidir con fechaCierre
   const blnDatesMatch = !objWatch[QD.strUpdateDate] || !objWatch[QD.strClosureDate] || objWatch[QD.strUpdateDate] === objWatch[QD.strClosureDate];
-  // RUL-010-02: PDF con nomenclatura correcta si se adjunta
-  const blnPdfValid = !objWatch[QD.strFinalReplyPdf] || REGEX_NOMENCLATURA_PDF.test(objWatch[QD.strFinalReplyPdf]);
   // RUL-010-03: todos los obligatorios completos + reglas anteriores
   const arrRequiredFields: (keyof CierreM3FormData)[] = [
     QD.strSfcCode, QD.strComplaintStatus, QD.strUpdateDate, QD.strClosureDate,
     QD.strFavorability, QD.strAcceptance, QD.strMarking, QD.strExpressComplaint, QD.strFinalReplyAttach,
   ];
   const blnAllComplete = arrRequiredFields.every(strField => !!objWatch[strField]);
-  const blnCanSubmit = blnDatesMatch && blnPdfValid && blnAllComplete;
+  const blnCanSubmit = blnDatesMatch && blnAllComplete;
 
   const blnRejected = objWatch[QD.strM3ClosureStatus] === 'Rechazado (400)';
 
@@ -68,15 +71,6 @@ export default function CierreM3() {
   const onSubmit = async (in_objData: CierreM3FormData) => {
     if (!blnCanSubmit) return;
     try {
-      // Subimos primero los archivos adjuntos al request
-      const intRequestId = task?.process_request_id;
-      if (intRequestId) {
-        for (const [strDocKey, objFile] of dicFileRegistry.current.entries()) {
-          const objFormData = new FormData();
-          objFormData.append('file', objFile);
-          await pm4.post(`/requests/${intRequestId}/files?data_name=${strDocKey}`, objFormData);
-        }
-      }
       // Completamos la tarea con los datos del formulario
       await completeTask(in_objData as unknown as Record<string, unknown>);
     } catch (excError) {
@@ -229,36 +223,20 @@ export default function CierreM3() {
               name={QD.strFinalReplyAttach}
               control={control}
               label="¿Se adjunta PDF de respuesta final?"
-              options={OPTIONS_SI_NO}
-              rules={{ required: 'Campo requerido' }}
+              options={OPTIONS_SI_NO_READONLY}
               required
               error={err(QD.strFinalReplyAttach)}
             />
           </div>
 
-          {objWatch[QD.strFinalReplyAttach] === 'SI' && (
-            <div className="form-row cols-1">
-              <ZdsFileInput
-                control={control}
-                name={QD.strFinalReplyPdf}
-                label="PDF Respuesta Final"
-                fileRegistry={dicFileRegistry}
-                setValue={setValue}
-                setError={setError}
-                clearErrors={clearErrors}
-                allowedExtensions={['pdf']}
-                maxSizeMb={5}
-                errorMessage="Solo se permiten archivos PDF, máx 5 MB"
-              />
-              {objWatch[QD.strFinalReplyPdf] && (
-                <p className={`cierre-m3--form-helper ${blnPdfValid ? 'cierre-m3--validacion-ok' : 'cierre-m3--validacion-error'}`}>
-                  {blnPdfValid
-                    ? `✓ Nomenclatura correcta: ${objWatch[QD.strFinalReplyPdf]}`
-                    : `✗ Nomenclatura inválida. Formato esperado: ENTIDAD_NRO_RESP_FINAL_SFC_NNNNN.pdf`}
-                </p>
-              )}
-            </div>
-          )}
+          {/* El PDF lo genera el proceso; se muestra en solo lectura (como SCR-009). */}
+          <RequestFileList
+            requestId={task?.process_request_id ?? null}
+            fileIds={[intFinalReplyFileId]}
+            label="PDF Respuesta Final (generado)"
+            emptyText="Aún no se ha generado el PDF de respuesta final."
+            loadingText="Buscando el PDF de respuesta final…"
+          />
         </FormSection>
 
         {/* Sección 4 — Datos de fraude (condicional) */}
