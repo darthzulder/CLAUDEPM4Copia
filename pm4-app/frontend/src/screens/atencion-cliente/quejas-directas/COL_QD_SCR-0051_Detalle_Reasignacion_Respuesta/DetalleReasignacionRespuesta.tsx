@@ -107,7 +107,7 @@ export default function DetalleReasignacionRespuesta() {
   }
 
   // Habilita el envío solo con respuesta al cliente y destinatario del fallo definidos.
-  const blnCanSubmit = !!objWatch[QD.strClientResponse]?.trim() && !!objWatch[QD.strReplyFavorOf];
+  const blnCanSubmit = !!objWatch[QD.strClientResponse]?.trim() && !!objWatch[QD.strFavorability];
 
   return (
     <div className="screen-wrapper">

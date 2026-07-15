@@ -131,7 +131,7 @@ export const QD = {
   // ── SCR-009 · Formulario Superintendencia ─────────────────────────────────
   strDigitalProduct: 'qd_strDigitalProduct',           // FLD-149 · antes qd_productoDigital
   strComplaintStatus: 'qd_strComplaintStatus',         // FLD-150/174 · antes qd_estadoQueja (unificado SCR-009/010)
-  strFavorability: 'qd_strFavorability',               // FLD-151/177 · antes qd_favorabilidad
+  strFavorability: 'qd_strFavorability',               // FLD-151/177/350 · antes qd_favorabilidad (unificado SCR-009/010/0051, antes qd_respuestaFavorDe en SCR-0051)
   strAcceptance: 'qd_strAcceptance',                   // FLD-152/178 · antes qd_aceptacion
   strRectification: 'qd_strRectification',             // FLD-153 · antes qd_rectificacion
   strWithdrawal: 'qd_strWithdrawal',                   // FLD-154 · antes qd_desistimiento
@@ -199,7 +199,6 @@ export const QD = {
   strSupport08: 'qd_strSupport08',                     // antes qd_soporte_08
   strSupport09: 'qd_strSupport09',                     // antes qd_soporte_09
   strSupport10: 'qd_strSupport10',                     // antes qd_soporte_10
-  strReplyFavorOf: 'qd_strReplyFavorOf',               // FLD-350 · antes qd_respuestaFavorDe
 
   // ── SCR-0052 · Respuesta del Área Responsable ─────────────────────────────
   strAreaComment: 'qd_strAreaComment',                 // FLD-354 · antes qd_comentarioArea
@@ -386,7 +385,6 @@ export interface QdFields {
   qd_strSupport08: string;
   qd_strSupport09: string;
   qd_strSupport10: string;
-  qd_strReplyFavorOf: string;
 
   // SCR-0052
   qd_strAreaComment: string;
@@ -745,10 +743,12 @@ export type AccionFlujoCombinado =
   | 'GUARDAR_BORRADOR'       // ACT-0051-07
   | 'ENVIAR';                // ACT-0051-08 → SP2-T04, estado 'En revisión SAC'
 
-// CAT-FAVOR (Pendiente TI). FLD-350.
+// CAT-FAVOR (Pendiente TI). Alimenta qd_strFavorability (FLD-151/177/350, unificado
+// SCR-0051/009/010) — códigos 1/3 según CAT-FAVORAB, para que SCR-009/010 resuelvan
+// el mismo valor con su catálogo dinámico (QD_COLLECTIONS.favorability).
 export const SCR0051_OPTIONS_FAVOR = [
-  { value: 'CLIENTE', label: 'Cliente' },
-  { value: 'COMPANIA', label: 'Compañía' },
+  { value: '1', label: 'Cliente' },
+  { value: '3', label: 'Compañía' },
 ] as const;
 
 export const SCR0051_ADJUNTO_KEYS = [
@@ -771,7 +771,7 @@ export type DetalleReasignacionRespuestaFormData = Omit<Pick<QdFields,
   | typeof QD.strClientResponse | typeof QD.strActionsTaken | typeof QD.strAcknowledgment | typeof QD.strSacRemarks
   | typeof QD.strSupport01 | typeof QD.strSupport02 | typeof QD.strSupport03 | typeof QD.strSupport04 | typeof QD.strSupport05
   | typeof QD.strSupport06 | typeof QD.strSupport07 | typeof QD.strSupport08 | typeof QD.strSupport09 | typeof QD.strSupport10
-  | typeof QD.strReplyFavorOf | typeof QD.strExtensionReason
+  | typeof QD.strFavorability | typeof QD.strExtensionReason
   | typeof QD.strAction
 >, typeof QD.strAction> & { [QD.strAction]: AccionFlujoCombinado };
 
@@ -789,7 +789,7 @@ export const SCR0051_DEFAULTS: Partial<DetalleReasignacionRespuestaFormData> = {
   [QD.intHelpNumber]: 0,
   [QD.strClientResponse]: '',
   [QD.strActionsTaken]: '',
-  [QD.strReplyFavorOf]: '',
+  [QD.strFavorability]: '',
   [QD.strExtensionReason]: '',
   [QD.strAction]: 'ENVIAR',
 };

@@ -139,7 +139,7 @@ borrador y solicitar prórroga regulatoria cuando el SLA es crítico.
 
 | Campo (UI) | Variable | Tipo | Obligatorio | Fuente |
 |---|---|---|---|---|
-| Respuesta a favor de | `qd_strReplyFavorOf` | `ZdsSelect` (CAT-FAVOR) | **Sí** | FLD-350 |
+| Respuesta a favor de | `qd_strFavorability` | `ZdsSelect` (CAT-FAVOR) | **Sí** | FLD-151/177/350 (unificado SCR-009/010/0051) |
 
 ### Metadato de flujo (no visible)
 
@@ -156,7 +156,7 @@ borrador y solicitar prórroga regulatoria cuando el SLA es crítico.
 | Respuesta al Cliente obligatoria | `rules.required` en `qd_strClientResponse`; botón "Enviar" deshabilitado si vacío | RUL-0051-05 · MSG-0051-02 · FLD-110 |
 | Reasignación: área/motivo/observaciones obligatorios | `reasignacionCompleta` deshabilita "Confirmar Reasignación"; alerta MSG-0051-03 | RUL-0051-04 · MSG-0051-03 |
 | Área/Usuario de asignación obligatorios | `rules.required` en FLD-082/083; "Confirmar Asignación" deshabilitado sin usuario | FLD-082/083 (Oblig.) · ACT-0051-01 |
-| Respuesta a favor de obligatoria | `rules.required` en `qd_strReplyFavorOf`; integrado en `puedeEnviar` | FLD-350 |
+| Respuesta a favor de obligatoria | `rules.required` en `qd_strFavorability`; integrado en `puedeEnviar` | FLD-151/177/350 |
 | Usuario filtrado por área | `qd_strAssigneeUser` carga `USUARIOS_POR_AREA[area]`; disabled sin área | RUL-0051-02 |
 | Máx. 4 ayudantes | `ayudantesAlcanzado` oculta el formulario de añadir y muestra MSG-0051-06 | RUL-0051-08 · MSG-0051-06 |
 | SLA crítico | `slaCritico = slaRestante <= 2` → banner rojo + habilita "Solicitar Prórroga" | RUL-0051-03 · MSG-0051-01 |
@@ -188,7 +188,7 @@ borrador y solicitar prórroga regulatoria cuando el SLA es crítico.
 | RUL-0051-06 (🔴) — no asignar a usuario fuera del proceso | Cubierto parcialmente: solo se ofrecen usuarios del catálogo placeholder (no hay entrada libre) | SCR-0051 > RUL-0051-06 |
 | RUL-0051-07 — mostrar reasignación si "¿otras áreas?" = Sí | `mostrarReasignacion = necesitaOtrasAreas === 'SI'` | SCR-0051 > RUL-0051-07 |
 | RUL-0051-08 — máx. 4 ayudantes | `ayudantesAlcanzado` | SCR-0051 > RUL-0051-08 |
-| RUL-0051-09 — "Acciones Tomadas" si favor = Cliente | `mostrarAcciones = respuestaFavorDe === 'CLIENTE'` | SCR-0051 > RUL-0051-09 |
+| RUL-0051-09 — "Acciones Tomadas" si favor = Cliente | `mostrarAcciones = qd_strFavorability === '1'` (código CAT-FAVORAB) | SCR-0051 > RUL-0051-09 |
 
 ---
 
@@ -200,7 +200,7 @@ borrador y solicitar prórroga regulatoria cuando el SLA es crítico.
 | Semáforo de estado SFC | `ZdsStatusBadge` con `estadoVariant()` | FLD-079 |
 | Añadir ayudante a historial | "Confirmar Reasignación" hace `push` a `qd_lstAssignHistory` y limpia el draft | ACT-0051-03 · FLD-095 |
 | Responsable autocompletado por área | `useEffect` → `RESPONSABLE_POR_AREA[areaDestino]` | FLD-092 |
-| Acciones Tomadas condicional | render condicional por `respuestaFavorDe` | RUL-0051-09 |
+| Acciones Tomadas condicional | render condicional por `qd_strFavorability` | RUL-0051-09 |
 | Carga múltiple de soportes (máx 10) | `DocSupportUploader max=10` | FLD-113 |
 | Ver Expediente / Vista Previa | `ZrModal` (link / secondary) | ACT-0051-06 / ACT-0051-05 |
 | Estados loading/error/submitting | `ZrLoader`, `ZrAlert`, botones `loading/disabled` | CLAUDE.md |
@@ -214,7 +214,7 @@ borrador y solicitar prórroga regulatoria cuando el SLA es crítico.
 | `qd_strAssigneeArea` | `qd_strAssigneeUser` | Filtra la lista de usuarios; lo deshabilita sin área | RUL-0051-02 |
 | `qd_strTargetArea` | `qd_strNewAssignee` | Autocompleta el responsable | FLD-092 |
 | `qd_strNeedsOtherAreas` | S6 + S7 | Muestra/oculta reasignación e historial | RUL-0051-07 |
-| `qd_strReplyFavorOf` | `qd_strActionsTaken` | Muestra "Acciones Tomadas" si = Cliente | RUL-0051-09 |
+| `qd_strFavorability` | `qd_strActionsTaken` | Muestra "Acciones Tomadas" si = Cliente | RUL-0051-09 |
 | `qd_blnHasAssignee` | S5 + botón "Confirmar Asignación" | Oculta asignación si ya hay responsable | RUL-0051-01 |
 | `qd_strSlaAssigned` | banner SLA + "Solicitar Prórroga" | Habilita si ≤ 2 | RUL-0051-03 |
 | `qd_lstAssignHistory` | formulario de ayudante | Oculta al llegar a 4 | RUL-0051-08 |

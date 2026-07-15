@@ -28,8 +28,8 @@ export default function SeccionRespuesta({ form, fileRegistry, err, onVistaPrevi
   // Tomamos una foto de los valores actuales del formulario.
   const objWatch = watch();
 
-  // RUL-0051-09 — "Acciones Tomadas" visible solo si la respuesta es a favor del Cliente.
-  const blnShowActions = objWatch[QD.strReplyFavorOf] === 'CLIENTE';
+  // RUL-0051-09 — "Acciones Tomadas" visible solo si la respuesta es a favor del Cliente (código '1' CAT-FAVORAB).
+  const blnShowActions = objWatch[QD.strFavorability] === '1';
 
   // El caso fue devuelto con observaciones por el Analista SAC (FLD-131, SCR-008):
   // en ese reingreso mostramos los soportes internos ya subidos en la vuelta anterior.
@@ -48,9 +48,9 @@ export default function SeccionRespuesta({ form, fileRegistry, err, onVistaPrevi
       <FormSection title="Configuración de Respuesta">
         <div className="form-row cols-2">
           <ZdsSelect
-            name={QD.strReplyFavorOf} control={control} label="Respuesta a favor de"
+            name={QD.strFavorability} control={control} label="Respuesta a favor de"
             options={OPTIONS_FAVOR} required
-            rules={{ required: 'Campo requerido' }} error={err(QD.strReplyFavorOf)}
+            rules={{ required: 'Campo requerido' }} error={err(QD.strFavorability)}
             helpText="⚠ Pendiente catálogo (CAT-FAVOR). Indica a quién favorece la resolución."
           />
           <div />

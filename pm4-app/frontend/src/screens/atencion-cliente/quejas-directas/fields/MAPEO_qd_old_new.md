@@ -106,7 +106,7 @@ un token/propiedad interna, y su estado actual).
 | SCR-008, 0051 | qd_observacionesSAC | qd_strSacRemarks | string |
 | SCR-009 | qd_productoDigital | qd_strDigitalProduct | string |
 | SCR-009, 010 | qd_estadoQueja | qd_strComplaintStatus | string |
-| SCR-009, 010 | qd_favorabilidad | qd_strFavorability | string |
+| SCR-009, 010, 0051 | qd_favorabilidad (SCR-0051: antes qd_respuestaFavorDe) | qd_strFavorability | string |
 | SCR-009, 010 | qd_aceptacion | qd_strAcceptance | string |
 | SCR-009 | qd_rectificacion | qd_strRectification | string |
 | SCR-009 | qd_desistimiento | qd_strWithdrawal | string |
@@ -166,7 +166,6 @@ un token/propiedad interna, y su estado actual).
 | SCR-0051 | qd_soporte_08 | qd_strSupport08 | string |
 | SCR-0051 | qd_soporte_09 | qd_strSupport09 | string |
 | SCR-0051 | qd_soporte_10 | qd_strSupport10 | string |
-| SCR-0051 | qd_respuestaFavorDe | qd_strReplyFavorOf | string |
 | SCR-0052 | qd_comentarioArea | qd_strAreaComment | string |
 | SCR-0052 | qd_adjuntoArea | qd_strAreaAttach | string |
 | SCR-0052 | qd_respuestasAyuda | qd_lstHelpResponses | array |
