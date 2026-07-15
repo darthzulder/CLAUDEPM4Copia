@@ -16,7 +16,7 @@
 
 ## 2. Resumen
 
-Pantalla de cierre regulatorio Momento 3. Permite al Gestor de Experiencia / Backoffice registrar los datos de cierre ante la SFC (Superfinanciera), adjuntar el PDF de respuesta final con nomenclatura regulatoria, e informar si la queja está relacionada con fraude. Muestra el estado del envío previo a SmartSupervision (SFC), incluyendo intentos y último error. El botón de envío se habilita solo cuando fechas coinciden, la nomenclatura del PDF es válida y todos los campos obligatorios están completos.
+Pantalla de **revisión/confirmación** del cierre regulatorio Momento 3. **Todos los datos de cierre los calcula el back** (Excel `Formulario PQRS`, hoja `MomentoIII` — cada campo marcado "Automático" o "Por default"; hoja `FormularioCreacionPQRS` sección "Cierre" filas 42-58 — todos marcados "Back", "Envío en Momento III para la SFC"). El Gestor de Experiencia / Backoffice **no edita** ningún campo: revisa en solo lectura los valores calculados (estado de la queja, fechas de actualización/cierre, favorabilidad, aceptación, marcación, queja exprés, datos de fraude), visualiza el PDF de respuesta final generado por el proceso, y dispara el envío a SmartSupervision (SFC). Muestra además el estado del envío previo (badge semáforo), intentos y último error. Los valores llegan pre-poblados desde PM4 en `task.data` y se reenvían intactos al completar la tarea. El botón de envío solo se deshabilita mientras hay un envío en curso.
 
 ---
 
@@ -49,49 +49,53 @@ Pantalla de cierre regulatorio Momento 3. Permite al Gestor de Experiencia / Bac
 
 > Los campos de la Sección 1 son solo lectura; se pre-populan desde `task.data` en PM4. El estado usa badge de color con configuración: Pendiente=azul, Enviando=amarillo, Rechazado(400)=rojo, Aceptado(200)=verde.
 
-### Sección 2 — Datos de Cierre Regulatorio (SEC-032)
+### Sección 2 — Datos de Cierre Regulatorio (SEC-032) — TODOS solo lectura (Back)
 
-| Campo UI                    | Variable             | Tipo     | Obligatorio | Fuente                               |
-|-----------------------------|----------------------|----------|-------------|--------------------------------------|
-| Código SFC / Radicado       | `qd_strSfcCode`          | text     | Sí          | Anexo02 > SCR-010 > FLD-010-04       |
-| Estado de la Queja          | `qd_strComplaintStatus`        | select   | Sí          | Anexo02 > SCR-010 > FLD-010-05       |
-| Fecha de Actualización      | `qd_strUpdateDate` | date     | Sí          | Anexo02 > SCR-010 > FLD-010-06       |
-| Fecha de Cierre             | `qd_strClosureDate`        | date     | Sí          | Anexo02 > SCR-010 > FLD-010-07       |
-| Favorabilidad               | `qd_strFavorability`      | select   | Sí          | Anexo02 > SCR-010 > FLD-010-08       |
-| Aceptación                  | `qd_strAcceptance`         | select   | Sí          | Anexo02 > SCR-010 > FLD-010-09       |
-| Marcación                   | `qd_strMarking`          | select   | Sí          | Anexo02 > SCR-010 > FLD-010-10       |
-| Queja Exprés                | `qd_strExpressComplaint`        | select   | Sí          | Anexo02 > SCR-010 > FLD-010-11       |
+| Campo UI                    | Variable                 | Presentación            | Origen (Back)                          |
+|-----------------------------|--------------------------|-------------------------|----------------------------------------|
+| Código SFC / Radicado       | `qd_strSfcCode`          | `ZdsInput readOnly`     | Asignado por el sistema al radicar     |
+| Estado de la Queja          | `qd_strComplaintStatus`  | label resuelto (info-bar) | MomentoIII "Automático"              |
+| Fecha de Actualización      | `qd_strUpdateDate`       | `ZdsInput readOnly`     | MomentoIII "Automático" (lo genera Jira) |
+| Fecha de Cierre             | `qd_strClosureDate`      | `ZdsInput readOnly`     | MomentoIII "Automático"                |
+| Favorabilidad               | `qd_strFavorability`     | label resuelto (info-bar) | Derivado de `qd_strReplyFavorOf`: Cliente→1, Compañía→3 |
+| Aceptación                  | `qd_strAcceptance`       | label resuelto (info-bar) | Por default "Sí" (1)                 |
+| Marcación                   | `qd_strMarking`          | label resuelto (info-bar) | Automático (revisar con IT)          |
+| Queja Exprés                | `qd_strExpressComplaint` | label resuelto (info-bar) | Back, resuelto por default           |
 
-### Sección 3 — Adjunto Respuesta Final (SEC-033)
+> Los campos codificados (estado, favorabilidad, aceptación, marcación, queja exprés) muestran la **descripción** del catálogo (`useCollection` + helper `desc()`), pero **conservan el código** que espera el BPM/SFC en `task.data`. El valor no se altera; se reenvía intacto al completar la tarea.
 
-| Campo UI                          | Variable                | Tipo     | Obligatorio | Fuente                          |
-|-----------------------------------|-------------------------|----------|-------------|---------------------------------|
-| ¿Se adjunta PDF?                  | `qd_strFinalReplyAttach` | radio    | Sí          | Anexo02 > SCR-010 > FLD-010-12  |
-| PDF Respuesta Final               | `qd_strFinalReplyPdf`     | file     | Condicional | Anexo02 > SCR-010 > FLD-010-13  |
+### Sección 3 — Adjunto Respuesta Final (SEC-033) — solo lectura
 
-### Sección 4 — Datos de Fraude (SEC-034, condicional)
+| Campo UI                          | Variable                | Presentación                | Origen (Back)                    |
+|-----------------------------------|-------------------------|-----------------------------|----------------------------------|
+| ¿Se adjunta PDF?                  | `qd_strFinalReplyAttach` | valor "Sí" (info-bar)      | Forzado a "SI" (Automático)      |
+| PDF Respuesta Final               | `qd_strFinalReplyPdf`   | `RequestFileList` (solo lectura) | Generado por el proceso (SCR-009) |
 
-| Campo UI                    | Variable          | Tipo   | Obligatorio | Fuente                          |
-|-----------------------------|-------------------|--------|-------------|---------------------------------|
-| ¿Relacionada con fraude?    | `qd_strFraudRelated` | radio  | No          | Anexo02 > SCR-010 > FLD-010-14  |
-| Tipo de Fraude              | `qd_strFraudType`      | text   | Condicional | Anexo02 > SCR-010 > FLD-010-15  |
-| Monto Reclamado (COP)       | `qd_strClaimedAmount`  | text   | Condicional | Anexo02 > SCR-010 > FLD-010-16  |
-| Monto Reconocido (COP)      | `qd_strAcknowledgedAmount` | text   | No          | Anexo02 > SCR-010 > FLD-010-17  |
+### Sección 4 — Datos de Fraude (SEC-034, condicional) — solo lectura
+
+| Campo UI                    | Variable                   | Presentación              | Origen (Back)                    |
+|-----------------------------|----------------------------|---------------------------|----------------------------------|
+| ¿Relacionada con fraude?    | `qd_strFraudRelated`       | valor Sí/No (info-bar)    | Back (depende del cierre)        |
+| Tipo de Fraude              | `qd_strFraudType`          | label resuelto (info-bar) | Back, según condición            |
+| Modalidad de Fraude         | `qd_strFraudModality`      | label resuelto (info-bar) | Lista "modalidad fraude" (Back)  |
+| Monto Reclamado (COP)       | `qd_strClaimedAmount`      | `ZdsInput readOnly`       | Back                             |
+| Monto Reconocido (COP)      | `qd_strAcknowledgedAmount` | `ZdsInput readOnly`       | Back                             |
+
+> La sección de fraude solo se muestra si `qd_strFraudRelated === 'SI'`. Se añadió **Modalidad de Fraude** (`qd_strFraudModality`), requerida por el Excel (hoja `Lista_Modalidad Fraude`) y ausente en la versión anterior.
 
 ---
 
 ## 5. Validaciones Implementadas
 
-| Validación                             | Comportamiento implementado                                                                 | Fuente                         |
-|----------------------------------------|---------------------------------------------------------------------------------------------|--------------------------------|
-| RUL-010-01: fechas coinciden           | `qd_strUpdateDate === qd_strClosureDate`; si no, muestra `ZrAlert` negativo y bloquea envío    | Anexo02 > SCR-010 > RUL-010-01 |
-| RUL-010-02: nomenclatura PDF           | Regex `/^[^_]+_[^_]+_RESP_FINAL_SFC_\d+\.pdf$/i`; helper verde/rojo bajo el input         | Anexo02 > SCR-010 > RUL-010-02 |
-| RUL-010-03: envío habilitado           | `puedeEnviar = fechasCoinciden && pdfValido && todosCompletos`; botón `disabled` si false  | Anexo02 > SCR-010 > RUL-010-03 |
-| Campos obligatorios Sec. 2             | `rules={{ required: 'Campo requerido' }}` en todos los campos de SEC-032                   | Anexo02 > SCR-010 > 03_Campos  |
-| Adjunto PDF obligatorio si `SI`        | `qd_strFinalReplyAttach === 'SI'` muestra el file input; `qd_strFinalReplyPdf` incluido en `puedeEnviar` | Inferido de RUL-010-02 |
-| Datos fraude obligatorios si `SI`      | `qd_strFraudType` y `qd_strClaimedAmount` con `required` cuando `qd_strFraudRelated === 'SI'`         | Anexo02 > SCR-010 > FLD-010-15/16 |
-| Máximo `qd_strSfcCode`                     | `maxLength: 100`                                                                            | Suposición (no en insumo)      |
-| Formato montos                         | `pattern: /^\d+(\.\d{1,2})?$/` — solo números con decimales opcionales                    | Suposición                     |
+Al ser una pantalla de **revisión de datos calculados en el back**, no hay validaciones de captura ni gating de front. Los datos ya vienen validados por el proceso PM4 / integración SFC antes de llegar a esta tarea.
+
+| Validación                             | Estado                                                                                      | Nota                            |
+|----------------------------------------|---------------------------------------------------------------------------------------------|---------------------------------|
+| ~~RUL-010-01: fechas coinciden~~       | **Eliminada**                                                                               | Ambas fechas las genera el back automáticamente (MomentoIII); ya no es gating de front. |
+| ~~RUL-010-02: nomenclatura PDF~~       | **Eliminada**                                                                               | El PDF lo genera el proceso (SCR-009) con la nomenclatura correcta; el front solo lo lista. Regex `SCR010_REGEX_NOMENCLATURA_PDF` borrada de `fields.ts`. |
+| ~~RUL-010-03: envío habilitado~~       | **Simplificada**                                                                            | El botón solo se deshabilita con `submitting`; ya no depende de campos completos. |
+| ~~Campos obligatorios Sec. 2~~         | **Eliminada**                                                                               | Los campos son solo lectura (Back). |
+| ~~Datos de fraude obligatorios~~       | **Eliminada**                                                                               | Datos de fraude también solo lectura (Back). |
 
 ---
 
@@ -109,11 +113,21 @@ Pantalla de cierre regulatorio Momento 3. Permite al Gestor de Experiencia / Bac
 
 ## 7. Reglas de Negocio
 
-| Regla     | Implementación                                                                                                      | Fuente                         |
-|-----------|---------------------------------------------------------------------------------------------------------------------|--------------------------------|
-| RUL-010-01 | `const fechasCoinciden = !w.qd_strUpdateDate \|\| !w.qd_strClosureDate \|\| w.qd_strUpdateDate === w.qd_strClosureDate`   | Anexo02 > SCR-010 > 05_Reglas  |
-| RUL-010-02 | `const pdfValido = !w.qd_strFinalReplyPdf \|\| REGEX_NOMENCLATURA_PDF.test(w.qd_strFinalReplyPdf)`                    | Anexo02 > SCR-010 > 05_Reglas  |
-| RUL-010-03 | `const puedeEnviar = fechasCoinciden && pdfValido && todosCompletos`; botón `disabled={!puedeEnviar}`             | Anexo02 > SCR-010 > 05_Reglas  |
+Alineación con el Excel `Formulario PQRS - Proyecto V3.0.xlsx`: **todos los campos de cierre se calculan en el back** (hoja `MomentoIII` — "Automático"/"Por default"; hoja `FormularioCreacionPQRS` sección "Cierre" — "Back", "Envío en Momento III para la SFC"). Por eso las reglas de front que capturaban/validaban esos campos ya no aplican.
+
+| Regla     | Estado    | Nota                                                                                     |
+|-----------|-----------|------------------------------------------------------------------------------------------|
+| RUL-010-01 | Eliminada | Fechas de actualización y cierre las genera el back; no hay validación de coincidencia en front. |
+| RUL-010-02 | Eliminada | Nomenclatura del PDF garantizada por el proceso (SCR-009); front solo lista el archivo.  |
+| RUL-010-03 | Simplificada | Envío habilitado salvo `submitting`.                                                  |
+
+> **Regla de negocio confirmada (cálculo del back):** homologación `qd_strReplyFavorOf → qd_strFavorability`: **Cliente → "1"**, **Compañía → "3"**. Debe resolverse en el back. En el JSON de ejemplo llega `qd_strReplyFavorOf:"COMPANIA"` con `qd_strFavorability:"1"` (debería ser "3"): pendiente que el equipo BPM aplique el mapeo.
+
+### 7.1 Datos de envío a la SFC en Momento III (Back, no renderizados)
+
+Todos los defaults "Back" que existen como variable `qd_*` en `task.data` se **conservan y reenvían intactos** al completar la tarea: `reset()` carga el objeto `task.data` completo en el form (el cast `Partial<CierreM3FormData>` solo estrecha el tipo TS, no elimina claves en runtime) y `completeTask` los envía en `data` (PM4 hace merge). Aplica a `qd_strRectification`, `qd_strWithdrawal`, `qd_strDigitalProduct`, `qd_strExtensionDays`, `qd_strChannel`, etc.
+
+**Excepción resuelta — Tipo/Código de entidad (Excel Cierre #46/#47):** no existían como variable. Se crearon `qd_strEntityType` (default `"13"`) y `qd_strEntityCode` (default `"9"`) en `fields.ts` (`SCR010_DEFAULT_ENTITY_TYPE` / `SCR010_DEFAULT_ENTITY_CODE`). En el `useEffect`, si el back no los trae, el front los inyecta con su default para que viajen y se guarden; si el back los trae, respeta ese valor. No se renderizan (decisión: no mostrar el bloque de envío M3).
 
 ---
 
@@ -125,10 +139,10 @@ Pantalla de cierre regulatorio Momento 3. Permite al Gestor de Experiencia / Bac
 | Estado del envío con badge de color               | `STATUS_CONFIG` en `SeccionEstadoCierre.tsx` con inline style               | Anexo02 > SCR-010 > FLD-010-01 |
 | Error SFC visible en panel rojo                   | `.ultimo-error-panel` / `.ultimo-error-texto`; solo renderiza si `qd_strLastError` | Anexo02 > SCR-010 > FLD-010-03 |
 | Botón cambia etiqueta si rechazado                | `esRechazado ? 'Reenviar Cierre (corrección) ▶' : 'Enviar a SmartSupervision ▶'` | Anexo02 > SCR-010 > ACT-010-01 |
-| File input aparece solo si `qd_strFinalReplyAttach === 'SI'` | render condicional en JSX                                   | Anexo02 > SCR-010 > SEC-033  |
-| Sección fraude aparece siempre, campos condicionales | `qd_strFraudRelated === 'SI'` muestra `qd_strFraudType`, `qd_strClaimedAmount`, `qd_strAcknowledgedAmount` | Anexo02 > SCR-010 > SEC-034 |
-| Upload de archivo antes de `completeTask`         | `fileRegistry` + `pm4.post(/requests/{id}/files)` en `onSubmit`             | CLAUDE.md — patrón subida     |
-| Pre-población desde PM4                           | `reset(task.data as Partial<CierreM3FormData>)` en `useEffect`              | CLAUDE.md — flujo datos       |
+| Sección fraude condicional (solo lectura)         | `qd_strFraudRelated === 'SI'` muestra `qd_strFraudType`, `qd_strFraudModality`, `qd_strClaimedAmount`, `qd_strAcknowledgedAmount` | Anexo02 > SCR-010 > SEC-034 |
+| PDF respuesta final en solo lectura               | `RequestFileList` filtrado por el id de `qd_strFinalReplyPdf`               | Anexo02 > SCR-010 > SEC-033  |
+| Guardar Borrador no avanza el proceso             | Botón usa `saveDraft()` (PUT `/requests/{id}`), no `completeTask`           | `useTask` — flujo datos      |
+| Pre-población desde PM4 (conserva todo)           | `reset({ ...task.data, ... })` en `useEffect` — carga todas las claves      | CLAUDE.md — flujo datos       |
 
 ---
 

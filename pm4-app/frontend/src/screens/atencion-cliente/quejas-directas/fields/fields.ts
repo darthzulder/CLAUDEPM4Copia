@@ -163,6 +163,8 @@ export const QD = {
   strClosureDate: 'qd_strClosureDate',                 // FLD-176 · antes qd_fechaCierre
   strNamingValidation: 'qd_strNamingValidation',       // FLD-182 · antes qd_validacionNomenclatura
   strFinalReplyAttach: 'qd_strFinalReplyAttach',       // FLD-183 · antes qd_adjuntoRespuestaFinal
+  strEntityType: 'qd_strEntityType',                   // Excel Cierre #46 · tipo entidad (default "13", envío M3 SFC)
+  strEntityCode: 'qd_strEntityCode',                   // Excel Cierre #47 · código entidad (default "9", envío M3 SFC)
 
   // ── SCR-011 · Revisión Error Técnico Prórroga ─────────────────────────────
   strExtHttpCode: 'qd_strExtHttpCode',                 // FLD-190 · antes qd_codigoHTTPProrroga
@@ -354,6 +356,8 @@ export interface QdFields {
   qd_strClosureDate: string;
   qd_strNamingValidation: string;
   qd_strFinalReplyAttach: string;
+  qd_strEntityType: string;
+  qd_strEntityCode: string;
 
   // SCR-011
   qd_strExtHttpCode: string;
@@ -696,15 +700,24 @@ export const SCR009_DEFAULTS: Partial<FormularioSuperintendenciaFormData> = {
 // SCR-010 — Cierre Regulatorio Momento 3
 // ═══════════════════════════════════════════════════════════════════════════
 
-export const SCR010_REGEX_NOMENCLATURA_PDF = /^[^_]+_[^_]+_RESP_FINAL_SFC_\d+\.pdf$/i;
-
+// Cierre M3 es una pantalla de revisión: TODOS los campos de cierre los calcula
+// el back (Excel PQRS, hojas "MomentoIII" / "FormularioCreacionPQRS" sección
+// "Cierre"). El front solo los muestra en solo lectura y reenvía sus valores.
 export type CierreM3FormData = Pick<QdFields,
   | typeof QD.strM3ClosureStatus | typeof QD.strM3ClosureAttempts | typeof QD.strLastError
   | typeof QD.strSfcCode | typeof QD.strComplaintStatus | typeof QD.strUpdateDate | typeof QD.strClosureDate
   | typeof QD.strFavorability | typeof QD.strAcceptance | typeof QD.strMarking | typeof QD.strExpressComplaint
-  | typeof QD.strFinalReplyPdf | typeof QD.strNamingValidation | typeof QD.strFinalReplyAttach
-  | typeof QD.strFraudRelated | typeof QD.strFraudType | typeof QD.strClaimedAmount | typeof QD.strAcknowledgedAmount
+  | typeof QD.strFinalReplyPdf | typeof QD.strFinalReplyAttach
+  | typeof QD.strFraudRelated | typeof QD.strFraudType | typeof QD.strFraudModality
+  | typeof QD.strClaimedAmount | typeof QD.strAcknowledgedAmount
+  | typeof QD.strEntityType | typeof QD.strEntityCode
 >;
+
+// Constantes de entidad para el envío a la SFC en Momento III (Excel Cierre #46/#47).
+// Son "Back": si el proceso no las trae en task.data, el front las inyecta con
+// estos valores por default para que viajen y se guarden en la data del request.
+export const SCR010_DEFAULT_ENTITY_TYPE = '13'; // Excel Cierre #46 · tipo entidad
+export const SCR010_DEFAULT_ENTITY_CODE = '9';  // Excel Cierre #47 · código entidad
 
 export const SCR010_CAMPOS_OBLIGATORIOS = [
   QD.strSfcCode, QD.strComplaintStatus, QD.strUpdateDate, QD.strClosureDate,
