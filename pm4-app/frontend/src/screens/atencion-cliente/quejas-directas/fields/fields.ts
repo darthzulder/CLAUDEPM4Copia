@@ -88,8 +88,9 @@ export const QD = {
 
   // ── SCR-000 · Chequeo de casos similares (watcher script 70, pre-envío) ────
   // Salida del script PM4 (id 70): busca casos ACTIVOS del proceso con el mismo
-  // motivo + producto + identificación. Se ejecuta al enviar (post-captcha) y sus
-  // variables se fusionan en el payload antes de radicar (patrón watcher).
+  // motivo + producto + identificación. Se ejecuta al enviar (antes del captcha);
+  // si hay coincidencias se pide confirmación y, al continuar, sus variables se
+  // fusionan en el payload antes de radicar (patrón watcher).
   strSimilarCheckStatus: 'similar_check_status',        // SUCCESS | ERROR (diagnóstico del script)
   arridSimilarCases: 'qd_arridSimilarCases',            // IDs de casos similares encontrados
   intCountSimilarCases: 'qd_intCountSimilarCases',      // cantidad de casos similares

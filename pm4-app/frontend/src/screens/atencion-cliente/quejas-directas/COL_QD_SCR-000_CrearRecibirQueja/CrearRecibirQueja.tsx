@@ -41,14 +41,15 @@ export default function CrearRecibirQueja() {
   // hasta que aparece la pantalla de éxito.
   const [blnSending, setBlnSending] = useState(false);
   // Cuando el watcher (script 70) detecta casos similares (qd_intCountSimilarCases > 0),
-  // guardamos aquí el detalle + el payload listo para radicar y abrimos el modal de
-  // confirmación. El envío queda en pausa hasta que el usuario decida continuar.
+  // guardamos aquí el detalle para mostrar el modal de confirmación. El flujo queda en
+  // pausa hasta que el usuario decida continuar (y recién ahí sigue al captcha).
   const [objSimilarPrompt, setObjSimilarPrompt] = useState<{
     ids: number[];
     count: number;
     cases: Record<string, unknown>[];
-    payload: CrearRecibirQuejaFormData;
   } | null>(null);
+  // Salida del watcher (qd_arridSimilarCases, etc.) que se fusiona en el payload al radicar.
+  const [objPendingSimilar, setObjPendingSimilar] = useState<Partial<CrearRecibirQuejaFormData>>({});
 
   const form = useForm<CrearRecibirQuejaFormData>({
     mode: 'onTouched',
@@ -112,29 +113,48 @@ export default function CrearRecibirQueja() {
   };
 
   // Paso 1 — el submit valida el formulario (react-hook-form) y, si es válido,
-  // abre el modal de captcha. El envío real NO ocurre hasta pasar la validación.
-  const requestCaptcha = (in_objData: CrearRecibirQuejaFormData) => {
+  // ejecuta el watcher de casos similares (script 70) ANTES del captcha:
+  //  · si hay casos similares → abre el modal de confirmación y espera decisión.
+  //  · si no hay → abre directamente el captcha.
+  // El envío real NO ocurre hasta pasar captcha.
+  const requestCaptcha = async (in_objData: CrearRecibirQuejaFormData) => {
     setStrCaptchaError('');
     setObjPendingData(in_objData);
+    setBlnSending(true); // overlay mientras corre el chequeo
+    const objSimilar = await checkSimilarCases(in_objData);
+    setObjPendingSimilar(objSimilar);
+    setBlnSending(false);
+
+    const intCount = Number(objSimilar[QD.intCountSimilarCases] ?? 0);
+    if (intCount > 0) {
+      setObjSimilarPrompt({
+        ids: (objSimilar[QD.arridSimilarCases] ?? []) as number[],
+        count: intCount,
+        cases: (objSimilar[QD.arrSimilarCases] ?? []) as Record<string, unknown>[],
+      });
+      return; // esperamos la decisión del usuario en el modal
+    }
     setBlnCaptchaOpen(true);
   };
 
   // Watcher pre-envío — ejecuta el script PM4 (id 70) que detecta casos ACTIVOS
   // del mismo proceso con idéntico motivo + producto + identificación. Se corre
-  // tras el captcha y antes de radicar; su salida (qd_arridSimilarCases,
-  // qd_intCountSimilarCases, qd_arrSimilarCases) se fusiona en el payload.
+  // al enviar (antes del captcha); su salida (qd_arridSimilarCases,
+  // qd_intCountSimilarCases, qd_arrSimilarCases) se fusiona en el payload al radicar.
   // Es best-effort: si el script falla, se registra y la radicación continúa.
   const checkSimilarCases = async (
     in_objData: CrearRecibirQuejaFormData,
   ): Promise<Partial<CrearRecibirQuejaFormData>> => {
-    // El caso actual (para excluirlo del match): existe en modo tarea, no en web entry.
-    const intCurrentRequestId = task?.process_request_id ?? null;
+    // ⚠ NO enviar la clave `_request`: PM4 la trata como reservada y sobrescribe el
+    // `$data` del script, borrando las variables de entrada (el script devolvía
+    // "Faltan variables obligatorias"). El script usa `process_id` para acotar la
+    // búsqueda; la exclusión del caso actual (por `_request.id`) no aplica en la
+    // radicación web, donde el caso todavía no existe.
     const objScriptData = {
       [QD.strSfcReason]: in_objData[QD.strSfcReason],
       [QD.strSfcProduct]: in_objData[QD.strSfcProduct],
       [QD.strIdNumber]: in_objData[QD.strIdNumber],
       process_id: WEB_ENTRY_PROCESS_ID,
-      _request: { id: intCurrentRequestId, process_id: WEB_ENTRY_PROCESS_ID },
     };
     // PM4 espera data/config como strings JSON y sync:true (mismo patrón que los demás watchers).
     const objBody = { data: JSON.stringify(objScriptData), config: JSON.stringify({}), sync: true };
@@ -143,7 +163,6 @@ export default function CrearRecibirQueja() {
       // La salida puede venir en .response, .output o directamente en .data.
       const objRaw = objRes.data as Record<string, unknown>;
       const objOut = (objRaw?.response ?? objRaw?.output ?? objRaw) as Record<string, unknown>;
-      console.log('[casos-similares] respuesta script:', objOut);
       return {
         [QD.strSimilarCheckStatus]: objOut[QD.strSimilarCheckStatus] as string,
         [QD.arridSimilarCases]: (objOut[QD.arridSimilarCases] ?? []) as number[],
@@ -185,8 +204,9 @@ export default function CrearRecibirQueja() {
     }
   };
 
-  // Paso 2 — el usuario resolvió el checkbox "No soy un robot": verificamos el
-  // token contra Google (backend) y recién ahí enviamos a PM4.
+  // Paso 3 — el usuario resolvió el checkbox "No soy un robot": verificamos el
+  // token contra Google (backend) y recién ahí enviamos a PM4, fusionando la
+  // salida del watcher de casos similares (ya obtenida en el paso 1).
   const handleCaptchaVerified = async (in_strToken: string) => {
     setBlnCaptchaOpen(false);
     const objData = objPendingData;
@@ -205,43 +225,24 @@ export default function CrearRecibirQueja() {
       setBlnSending(false);
       return;
     }
-    // Watcher pre-envío: detectamos casos similares/duplicados y fusionamos su
-    // salida en el payload antes de radicar.
-    const objSimilar = await checkSimilarCases(objData);
-    const objPayload = { ...objData, [QD.blnCaptcha]: true, ...objSimilar };
-
-    // Si hay casos similares, pausamos el envío y pedimos confirmación explícita.
-    const intCount = Number(objSimilar[QD.intCountSimilarCases] ?? 0);
-    if (intCount > 0) {
-      setObjSimilarPrompt({
-        ids: (objSimilar[QD.arridSimilarCases] ?? []) as number[],
-        count: intCount,
-        cases: (objSimilar[QD.arrSimilarCases] ?? []) as Record<string, unknown>[],
-        payload: objPayload,
-      });
-      setBlnSending(false); // ocultamos el overlay mientras el usuario decide
-      return;
-    }
-
-    await sendToPm4(objPayload);
+    await sendToPm4({ ...objData, [QD.blnCaptcha]: true, ...objPendingSimilar });
     // En éxito, sendToPm4 pone blnSent=true y se muestra la pantalla de confirmación;
     // si falló, quitamos el overlay para que el usuario vea el form y el error.
     setBlnSending(false);
   };
 
-  // El usuario, tras ver los casos similares, decide radicar de todas formas.
-  const handleConfirmSimilar = async () => {
-    const objPayload = objSimilarPrompt?.payload;
+  // Paso 2 — tras ver los casos similares, el usuario decide radicar de todas
+  // formas: cerramos el modal y avanzamos al captcha.
+  const handleConfirmSimilar = () => {
     setObjSimilarPrompt(null);
-    if (!objPayload) return;
-    setBlnSending(true);
-    await sendToPm4(objPayload);
-    setBlnSending(false);
+    setBlnCaptchaOpen(true);
   };
 
   // El usuario decide NO continuar: cerramos el modal y lo dejamos en el formulario.
   const handleCancelSimilar = () => {
     setObjSimilarPrompt(null);
+    setObjPendingData(null);
+    setObjPendingSimilar({});
   };
 
   // Reinicia el formulario y limpia los adjuntos cargados.
@@ -449,7 +450,7 @@ export default function CrearRecibirQueja() {
             </ul>
             <div z-flex="75" z-align="right:center" style={{ marginTop: 'var(--zs-100)' }}>
               <ZrButton config="secondary" onClick={handleCancelSimilar}>No continuar</ZrButton>
-              <ZrButton config="positive" onClick={handleConfirmSimilar}>Continuar y radicar</ZrButton>
+              <ZrButton config="positive" onClick={handleConfirmSimilar}>Continuar</ZrButton>
             </div>
           </ZrModal>
         )}
