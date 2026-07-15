@@ -658,17 +658,10 @@ export const SCR009_OPTIONS_LGBTIQ = [
   { value: 'NI', label: 'No informa' },
 ] as const;
 
-// Selects obligatorios de SmartSupervision (S2 + S3) — validados por RUL-009-03.
-export const SCR009_CAMPOS_SFC_OBLIGATORIOS = [
-  QD.strSex, QD.strLgbtiq, QD.strSpecialCondition, QD.strDigitalProduct,
-  QD.strComplaintStatus, QD.strFavorability, QD.strAcceptance, QD.strRectification,
-  QD.strWithdrawal, QD.strTutela, QD.strMarking, QD.strExpressComplaint,
-] as const;
-
-// Campos de fraude obligatorios cuando relacionadaFraude = Sí (RUL-009-01).
-export const SCR009_CAMPOS_FRAUDE = [
-  QD.strFraudType, QD.strFraudModality, QD.strClaimedAmount, QD.strAcknowledgedAmount,
-] as const;
+// Nota: SCR-009 ya no valida en front los campos SFC/fraude. Alineado con el
+// Excel PQRS V3.0, esos campos se calculan en el back ("Back"/"Automático"/
+// "Por default") y se muestran en solo lectura; solo Condición Especial (Front)
+// y los indicadores de anexos condicionan el guardado.
 
 export type FormularioSuperintendenciaFormData = Omit<Pick<QdFields,
   | typeof QD.strSfcCode | typeof QD.strChannel | typeof QD.strSfcProduct | typeof QD.strSfcReason

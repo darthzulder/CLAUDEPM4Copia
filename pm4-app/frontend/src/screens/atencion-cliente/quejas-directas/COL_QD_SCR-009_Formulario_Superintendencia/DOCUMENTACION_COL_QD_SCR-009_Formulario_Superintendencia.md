@@ -19,11 +19,15 @@
 
 ## 2. Resumen
 
-Formulario regulatorio que diligencia el Analista SAC tras aprobarse la respuesta y generarse el
-PDF. Precarga (solo lectura) los datos de clasificación del Momento 1 y captura los campos SFC
-obligatorios de condición del consumidor y de la queja (12 selects de catálogo), los datos de
-fraude CE-019/2024 (condicionales si la queja está relacionada con fraude) y los indicadores de
-anexos. Al guardarlo completo habilita el subproceso SP3 de cierre regulatorio.
+Formulario regulatorio que **revisa** el Analista SAC tras aprobarse la respuesta y generarse el
+PDF. **Alineado con el Excel `Formulario PQRS - Proyecto V3.0.xlsx`, los campos regulatorios los
+calcula el back** ("Back"/"Automático"/"Por default"): sexo, LGBTIQ+, producto digital y toda la
+Condición de la Queja (estado, favorabilidad, aceptación, rectificación, desistimiento, tutela,
+marcación, queja exprés), además de fraude (CE-019/2024) y prórroga. Todos se muestran en **solo
+lectura** (label del catálogo). Los **únicos campos editables** son **Condición Especial** (Front,
+obligatorio SFC) y los **dos indicadores de anexos**; el guardado se bloquea hasta completarlos.
+Los datos de clasificación de M1 viajan en el payload sin UI. Al guardar se habilita el subproceso
+SP3 de cierre regulatorio.
 
 ---
 
@@ -50,48 +54,48 @@ en el `payload` del formulario (vía `reset()`), pero **no se renderizan** en es
 datos de clasificación de M1 que el usuario ya vio en pantallas previas y no aportan valor
 mostrarlos de nuevo como solo lectura aquí. Se removió el bloque `ZdsInput readOnly` de S1.
 
-### S2 — Datos del Consumidor — Campos SFC (SEC-029, obligatorios)
+### S2 — Datos del Consumidor — Campos SFC (SEC-029)
 
-| Campo (UI) | Variable | Catálogo | Fuente |
+| Campo (UI) | Variable | Presentación | Origen |
 |---|---|---|---|
-| Sexo | `qd_strSex` | CAT-SEXO | FLD-146 |
-| LGBTIQ+ | `qd_strLgbtiq` | CAT-LGBTIQ ⚠ | FLD-147 |
-| Condición Especial | `qd_strSpecialCondition` | CAT-COND-ESP | FLD-148 |
-| Producto Digital | `qd_strDigitalProduct` | CAT-PROD-DIGITAL | FLD-149 |
+| Sexo | `qd_strSex` | label resuelto (info-bar) | 🔴 Back, default "No aplica" (Excel #21) |
+| LGBTIQ+ | `qd_strLgbtiq` | label resuelto (info-bar) | 🔴 Back, default "No aplica" (Excel #22) |
+| Producto Digital | `qd_strDigitalProduct` | label resuelto (info-bar) | 🔴 Back, default "No" (Excel #54) |
+| **Condición Especial** | `qd_strSpecialCondition` | `ZdsSelect` (editable, requerido) | 🟢 **Front, obligatorio SFC** (Excel #23/#26) |
 
-### S3 — Condición de la Queja (SEC-030, obligatorios)
+### S3 — Condición de la Queja (SEC-030) — todos solo lectura (Back)
 
-| Campo (UI) | Variable | Catálogo | Fuente |
+| Campo (UI) | Variable | Presentación | Origen (Back) |
 |---|---|---|---|
-| Estado de la Queja o Reclamo | `qd_strComplaintStatus` | CAT-ESTADO-QUEJA | FLD-150 |
-| Favorabilidad | `qd_strFavorability` | CAT-FAVORAB | FLD-151 |
-| Aceptación | `qd_strAcceptance` | CAT-ACEPTACION | FLD-152 |
-| Rectificación | `qd_strRectification` | CAT-RECTIF | FLD-153 |
-| Desistimiento | `qd_strWithdrawal` | CAT-DESIST | FLD-154 |
-| Tutela | `qd_strTutela` | CAT-TUTELA | FLD-155 |
-| Marcación | `qd_strMarking` | CAT-MARCACION | FLD-156 |
-| Queja Exprés | `qd_strExpressComplaint` | CAT-EXPRES | FLD-157 |
+| Estado de la Queja o Reclamo | `qd_strComplaintStatus` | label resuelto (info-bar) | MomentoIII "Automático" |
+| Favorabilidad | `qd_strFavorability` | label resuelto (info-bar) | Derivada de `qd_strReplyFavorOf`: Cliente→1, Compañía→3 |
+| Aceptación | `qd_strAcceptance` | label resuelto (info-bar) | Default "1" (Excel #51) |
+| Rectificación | `qd_strRectification` | label resuelto (info-bar) | Default 1, solo si Defensor (Excel #52) |
+| Desistimiento | `qd_strWithdrawal` | label resuelto (info-bar) | Default 2 (Excel #53) |
+| Tutela | `qd_strTutela` | label resuelto (info-bar) | Default "No" (Excel #37) |
+| Marcación | `qd_strMarking` | label resuelto (info-bar) | Back (Excel #56) |
+| Queja Exprés | `qd_strExpressComplaint` | label resuelto (info-bar) | Back, default (Excel #38/#41) |
 
-> Todos los anteriores: `ZdsSelect` con `rules.required`.
+> Los códigos se muestran como **descripción** del catálogo (`useCollection` + helper `descOpt()`) pero **conservan el código** que espera el BPM/SFC; se reenvían intactos vía `reset()` al guardar.
 
-### S4 — Datos de Fraude CE-019-2024 (SEC-031, condicional) — `SeccionFraudeAnexos.tsx`
+### S4 — Datos de Fraude CE-019-2024 (SEC-031, condicional) — solo lectura (Back)
 
-| Campo (UI) | Variable | Tipo | Obligatorio | Fuente |
-|---|---|---|---|---|
-| ¿Relacionada con Fraude? | `qd_strFraudRelated` | `ZdsRadio` inline (SI/NO) | **Sí** | FLD-158 |
-| Tipo de Fraude | `qd_strFraudType` | `ZdsSelect` (CAT-TIPO-FRAUDE) | Cond. (si fraude) | FLD-159 |
-| Modalidad de Fraude | `qd_strFraudModality` | `ZdsSelect` (CAT-MOD-FRAUDE) | Cond. | FLD-160 |
-| Monto Reclamado (COP) | `qd_strClaimedAmount` | `ZdsInput` (dígitos) | Cond. | FLD-161 |
-| Monto Reconocido (COP) | `qd_strAcknowledgedAmount` | `ZdsInput` (dígitos) | Cond. | FLD-162 |
+| Campo (UI) | Variable | Presentación | Origen (Back) |
+|---|---|---|---|
+| ¿Relacionada con Fraude? | `qd_strFraudRelated` | valor Sí/No (info-bar) | Back (depende del cierre, Excel #57/#60) |
+| Tipo de Fraude | `qd_strFraudType` | label resuelto (info-bar) | Back (Excel #57) |
+| Modalidad de Fraude | `qd_strFraudModality` | label resuelto (info-bar) | Back, lo fija el responsable si cierre=fraude (Excel #58/#61) |
+| Monto Reclamado (COP) | `qd_strClaimedAmount` | valor (info-bar) | Back |
+| Monto Reconocido (COP) | `qd_strAcknowledgedAmount` | valor (info-bar) | Back |
 
 ### S5 — Anexos del Formulario (SEC-032)
 
 | Campo (UI) | Variable | Tipo | Obligatorio | Fuente |
 |---|---|---|---|---|
-| ¿Incluye Anexos a la Queja? | `qd_strIncludesComplaintAnnex` | `ZdsRadio` inline | **Sí** | FLD-163 |
-| ¿Incluye Adjunto Respuesta Final? | `qd_strIncludesReplyAttach` | `ZdsRadio` inline | **Sí** | FLD-164 |
+| **¿Incluye Anexos a la Queja?** | `qd_strIncludesComplaintAnnex` | `ZdsRadio` inline (editable) | **Sí** | FLD-163 |
+| **¿Incluye Adjunto Respuesta Final?** | `qd_strIncludesReplyAttach` | `ZdsRadio` inline (editable) | **Sí** | FLD-164 |
 | PDF Respuesta Final (generado) | `qd_strFinalReplyPdf` | `RequestFileList` (previsualizar + descargar) | No | FLD-165 |
-| Prórroga (días, si aplica) | `qd_strExtensionDays` | `ZdsInput` (dígitos) | No | FLD-166 |
+| Prórroga (días, si aplica) | `qd_strExtensionDays` | solo lectura (info-bar) | 🔴 Back, automático (Excel #55) | FLD-166 |
 
 ### Metadato de flujo (no visible)
 
@@ -103,11 +107,14 @@ mostrarlos de nuevo como solo lectura aquí. Se removió el bloque `ZdsInput rea
 
 ## 5. Validaciones Implementadas
 
+Los campos regulatorios ya no se validan en front (son Back, solo lectura). Solo se valida lo editable.
+
 | Validación | Comportamiento implementado | Fuente |
 |---|---|---|
-| Todos los campos SFC obligatorios completos | `sfcCompletos` (12 selects) + `anexosCompletos`; botón "Guardar Formulario" deshabilitado si falta alguno; alerta MSG-009-02 | RUL-009-03 · FLD-146..157, 163/164 |
-| Campos de fraude obligatorios si aplica | `fraudeCompleto`; `rules.required` condicional en tipo/modalidad/montos cuando `relacionadaFraude='SI'` | RUL-009-01 · MSG-009-01 |
-| Montos y prórroga solo dígitos | `pattern: /^\d+$/` en montos y días | FLD-161/162/166 (tipo Número/Moneda) |
+| Condición Especial + anexos completos | `blnCanSave = blnSpecialCondOk && blnAnnexesComplete`; botón "Guardar Formulario" deshabilitado si falta alguno; alerta MSG-009-02 | Excel #23/#26 · FLD-163/164 |
+| ~~Campos SFC obligatorios (12 selects)~~ | **Eliminada** — son Back, solo lectura | — |
+| ~~Campos de fraude obligatorios~~ | **Eliminada** — fraude es Back, solo lectura | — |
+| ~~Montos/prórroga solo dígitos~~ | **Eliminada** — solo lectura | — |
 
 ---
 
@@ -115,10 +122,10 @@ mostrarlos de nuevo como solo lectura aquí. Se removió el bloque `ZdsInput rea
 
 | Mensaje | Condición | Implementación | Fuente |
 |---|---|---|---|
-| MSG-009-01 Campos fraude obligatorios | `relacionadaFraude='SI'` | `ZrAlert config="alert"` en S4 | 06_Mensajes > MSG-009-01 |
-| MSG-009-02 Campos SFC incompletos | Falta algún obligatorio | `ZrAlert config="info"` + "Guardar" disabled | 06_Mensajes > MSG-009-02 |
+| ~~MSG-009-01 Campos fraude obligatorios~~ | — | **Eliminado** — fraude es solo lectura | 06_Mensajes > MSG-009-01 |
+| MSG-009-02 Editables incompletos | Falta Condición Especial o anexos | `ZrAlert config="info"` + "Guardar" disabled | 06_Mensajes > MSG-009-02 |
 | MSG-009-03 Formulario guardado | Tras guardar | **No en UI** — lo emite el BPM tras `completeTask` | 06_Mensajes > MSG-009-03 |
-| MSG-009-04 LGBTIQ+ pendiente | Siempre (advertencia) | `ZrAlert config="info"` en S2 | 06_Mensajes > MSG-009-04 |
+| ~~MSG-009-04 LGBTIQ+ pendiente~~ | — | **Eliminado** — LGBTIQ+ ahora es solo lectura (Back) | 06_Mensajes > MSG-009-04 |
 
 ---
 
@@ -126,9 +133,11 @@ mostrarlos de nuevo como solo lectura aquí. Se removió el bloque `ZdsInput rea
 
 | Regla | Implementación | Fuente |
 |---|---|---|
-| RUL-009-01 (🔴) — fraude visible/obligatorio si `relacionadaFraude=Sí` | `esFraude` muestra campos + `reqFraude` los hace requeridos | SCR-009 > RUL-009-01 |
+| RUL-009-01 — fraude | **Reinterpretada:** fraude es Back → solo lectura, se muestra si `qd_strFraudRelated='SI'` (sin validación de captura) | Excel PQRS V3.0 #57/#58 |
 | RUL-009-02 (info) — precargar M1 no editable | Datos M1 viajan en el `payload` (`reset()`) sin renderizarse en UI (ya vistos en pantallas previas desde SCR-000) | SCR-009 > RUL-009-02 |
-| RUL-009-03 (🔴) — bloquear guardar si falta obligatorio SFC | `puedeGuardar` deshabilita el botón + alerta MSG-009-02 | SCR-009 > RUL-009-03 |
+| RUL-009-03 — bloquear guardar | `blnCanSave` deshabilita el botón hasta completar Condición Especial + anexos + alerta MSG-009-02 | Excel #23/#26 · FLD-163/164 |
+
+> **Regla de negocio confirmada (cálculo del back):** favorabilidad `qd_strReplyFavorOf → qd_strFavorability`: **Cliente → "1"**, **Compañía → "3"**. Mismo mapeo que SCR-010; debe resolverlo el back.
 
 ---
 
@@ -137,10 +146,11 @@ mostrarlos de nuevo como solo lectura aquí. Se removió el bloque `ZdsInput rea
 | Comportamiento | Implementación | Fuente |
 |---|---|---|
 | Precarga M1 sin UI (ya vista en SCR-000) | No se renderiza S1; los valores viajan en el `payload` vía `reset()` | SEC-028 · RUL-009-02 |
-| 12 selects de catálogo SFC | `ZdsSelect` en grids `cols-2`/`cols-3` | SEC-029/030 |
-| Sección de fraude condicional | render por `esFraude` | SEC-031 · RUL-009-01 |
+| Campos regulatorios solo lectura | Pares label/valor (`Ro` + `descOpt`) en grids `cols-2`/`cols-3`; conservan el código en el payload | Excel PQRS V3.0 sección "Cierre" |
+| Único select editable | Condición Especial (`ZdsSelect` requerido) | Excel #23/#26 |
+| Sección de fraude condicional (solo lectura) | render por `qd_strFraudRelated='SI'` | SEC-031 |
+| Anexos editables | 2 `ZdsRadio` requeridos (`qd_strIncludesComplaintAnnex`, `qd_strIncludesReplyAttach`) | FLD-163/164 |
 | Previsualizar/descargar el PDF generado | `RequestFileList` filtra los archivos del request por `data_name=qd_strFinalReplyPdf` | FLD-165 |
-| Aviso LGBTIQ+ pendiente | `ZrAlert config="info"` permanente | MSG-009-04 |
 | Estados loading/error/submitting | `ZrLoader`, `ZrAlert`, botones `loading/disabled` | CLAUDE.md |
 
 ---

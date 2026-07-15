@@ -1,11 +1,12 @@
 import type { UseFormReturn } from 'react-hook-form';
 import FormSection from '../../../../components/FormSection';
-import { ZdsSelect, ZdsInput, ZdsRadio, ZrAlert } from '../../../../components/fields/ZdsFields';
+import { ZdsRadio } from '../../../../components/fields/ZdsFields';
 import RequestFileList from '../../../../components/RequestFileList';
 import { resolveFileId } from '../../../../core/useRequestFiles';
 import { useCollection } from '../../../../core/useCollection';
 import { QD, QD_COLLECTIONS, OPTIONS_SI_NO } from '../fields/fields';
 import type { FormularioSuperintendenciaFormData } from '../fields/fields';
+import { Ro, descOpt } from './FormularioSuperintendencia';
 
 interface Props {
   form: UseFormReturn<FormularioSuperintendenciaFormData>;
@@ -13,21 +14,19 @@ interface Props {
   requestId: number | null;
 }
 
-// COP como texto numérico (el DS no expone inputType="number"; ver DOCUMENTACION §10).
-const objAmountOnly = { pattern: { value: /^\d+$/, message: 'Solo dígitos (COP)' } };
-
-/** S4 Datos de Fraude (condicional) · S5 Anexos del Formulario. */
+/** S4 Datos de Fraude (solo lectura, Back) · S5 Anexos del Formulario (editables). */
 export default function SeccionFraudeAnexos({ form, err, requestId }: Props) {
   const { control, watch } = form;
   const objWatch = watch();
 
-  // Cargamos los catalogos de fraude
+  // Cargamos los catalogos de fraude (para resolver el label del código)
   const { options: cllFraudType } = useCollection(QD_COLLECTIONS.fraudType);
   const { options: cllFraudModality } = useCollection(QD_COLLECTIONS.fraudModality);
 
-  // RUL-009-01 — campos de fraude visibles y obligatorios si relacionadaFraude = Sí.
+  // Fraude es "Back" (Excel PQRS V3.0 #57/#58/#60/#61): la relación con fraude,
+  // el tipo, la modalidad y los montos los define el cierre/responsable, no el
+  // Analista SAC → solo lectura.
   const blnIsFraud = objWatch[QD.strFraudRelated] === 'SI';
-  const objFraudReq = blnIsFraud ? { required: 'Campo requerido' } : {};
 
   // FLD-165 — el payload trae el id de PM4 del PDF (no un nombre fijo: el
   // nombrado del PDF es decisión de negocio y puede cambiar), p.ej.
@@ -36,35 +35,21 @@ export default function SeccionFraudeAnexos({ form, err, requestId }: Props) {
 
   return (
     <>
-      {/* ── S4 · Datos de Fraude CE-019-2024 (SEC-031, condicional) ── */}
+      {/* ── S4 · Datos de Fraude CE-019-2024 (SEC-031, solo lectura) ── */}
       <FormSection title="Datos de Fraude CE-019-2024">
         <div className="form-row cols-1">
-          <ZdsRadio
-            name={QD.strFraudRelated} control={control} label="¿Relacionada con Fraude?"
-            options={OPTIONS_SI_NO} inline required
-            rules={{ required: 'Campo requerido' }} error={err(QD.strFraudRelated)}
-          />
+          <Ro label="¿Relacionada con Fraude?" value={blnIsFraud ? 'Sí' : 'No'} />
         </div>
 
         {blnIsFraud && (
           <>
-            <ZrAlert config="alert" {...({ 'hide-close': true } as object)}>
-              La queja está relacionada con fraude. Complete los campos requeridos por
-              <strong> CE 019/2024</strong>: Tipo, Modalidad y Montos. {/* MSG-009-01 */}
-            </ZrAlert>
             <div className="form-row cols-2">
-              <ZdsSelect name={QD.strFraudType} control={control} label="Tipo de Fraude"
-                options={cllFraudType} required rules={objFraudReq} error={err(QD.strFraudType)}
-                helpText="CAT-TIPO-FRAUDE (CE 019/2024)." />
-              <ZdsSelect name={QD.strFraudModality} control={control} label="Modalidad de Fraude"
-                options={cllFraudModality} required rules={objFraudReq} error={err(QD.strFraudModality)}
-                helpText="CAT-MOD-FRAUDE (CE 019/2024)." />
+              <Ro label="Tipo de Fraude" value={descOpt(cllFraudType, objWatch[QD.strFraudType])} />
+              <Ro label="Modalidad de Fraude" value={descOpt(cllFraudModality, objWatch[QD.strFraudModality])} />
             </div>
             <div className="form-row cols-2">
-              <ZdsInput name={QD.strClaimedAmount} control={control} label="Monto Reclamado (COP)"
-                required rules={{ ...objFraudReq, ...objAmountOnly }} error={err(QD.strClaimedAmount)} />
-              <ZdsInput name={QD.strAcknowledgedAmount} control={control} label="Monto Reconocido (COP)"
-                required rules={{ ...objFraudReq, ...objAmountOnly }} error={err(QD.strAcknowledgedAmount)} />
+              <Ro label="Monto Reclamado (COP)" value={objWatch[QD.strClaimedAmount] || '—'} />
+              <Ro label="Monto Reconocido (COP)" value={objWatch[QD.strAcknowledgedAmount] || '—'} />
             </div>
           </>
         )}
@@ -87,10 +72,9 @@ export default function SeccionFraudeAnexos({ form, err, requestId }: Props) {
           emptyText="Aún no se ha generado el PDF de respuesta final."
           loadingText="Buscando el PDF de respuesta final…"
         />
+        {/* Prórroga (días) — "Back", automático (Excel PQRS V3.0 #55). */}
         <div className="form-row cols-2">
-          <ZdsInput name={QD.strExtensionDays} control={control} label="Prórroga (días, si aplica)"
-            rules={objAmountOnly} error={err(QD.strExtensionDays)}
-            helpText="Solo cuando el caso viene de SP4." />
+          <Ro label="Prórroga (días, si aplica)" value={objWatch[QD.strExtensionDays] || '0'} />
           <div />
         </div>
       </FormSection>

@@ -12,11 +12,25 @@ import {
 import {
   QD, QD_COLLECTIONS, SCR009_DEFAULTS as DEFAULTS,
   SCR009_OPTIONS_LGBTIQ as OPTIONS_LGBTIQ,
-  SCR009_CAMPOS_SFC_OBLIGATORIOS as CAMPOS_SFC_OBLIGATORIOS,
-  SCR009_CAMPOS_FRAUDE as CAMPOS_FRAUDE,
 } from '../fields/fields';
 import type { FormularioSuperintendenciaFormData, AccionFormularioSFC } from '../fields/fields';
 import SeccionFraudeAnexos from './SeccionFraudeAnexos';
+
+// Par etiqueta/valor de solo lectura (mismo patrón que SCR-0051 / SCR-010).
+export function Ro({ label, value }: { label: string; value: string }) {
+  return (
+    <div className="zds-field-wrap">
+      <span className="info-bar-label">{label}</span>
+      <div className="info-bar-value" style={{ marginTop: 'var(--zs-50)' }}>{value}</div>
+    </div>
+  );
+}
+
+// Resuelve la descripción de un código contra su catálogo (label si existe, si no el código).
+export function descOpt(in_lstOptions: readonly { value: string; label: string }[], in_strCode: string | undefined): string {
+  if (!in_strCode) return '—';
+  return in_lstOptions.find((o) => o.value === in_strCode)?.label ?? in_strCode;
+}
 
 export default function FormularioSuperintendencia() {
   // Cargamos la tarea y su estado desde PM4
@@ -27,7 +41,8 @@ export default function FormularioSuperintendencia() {
   const { control, watch, handleSubmit, reset, formState: { errors, isSubmitted } } = form;
   const objWatch = watch();
 
-  // Cargamos los catalogos de las listas desplegables
+  // Catálogos para resolver el CÓDIGO almacenado en PM4 a su descripción legible.
+  // El valor guardado no cambia (sigue siendo el código que espera el BPM/SFC).
   const { options: cllSex } = useCollection(QD_COLLECTIONS.sex);
   const { options: cllSpecialCond } = useCollection(QD_COLLECTIONS.specialCondition);
   const { options: cllDigitalProduct } = useCollection(QD_COLLECTIONS.digitalProduct);
@@ -40,7 +55,9 @@ export default function FormularioSuperintendencia() {
   const { options: cllMarking } = useCollection(QD_COLLECTIONS.marking);
   const { options: cllExpressComplaint } = useCollection(QD_COLLECTIONS.expressComplaint);
 
-  // Pre-poblamos el formulario con los datos del caso
+  // Pre-poblamos el formulario con los datos del caso. reset() reemplaza todo el
+  // estado, así que TODAS las claves de task.data (incl. los campos "Back"
+  // calculados que no son editables) quedan en el form y se reenvían intactas.
   useEffect(() => {
     if (task?.data) reset({ ...DEFAULTS, ...(task.data as Partial<FormularioSuperintendenciaFormData>) });
   }, [task, reset]);
@@ -52,12 +69,14 @@ export default function FormularioSuperintendencia() {
     return String(objFieldError.message);
   };
 
-  // RUL-009-03 — todos los campos SFC obligatorios completos; RUL-009-01 — fraude si aplica.
-  const blnSfcComplete = CAMPOS_SFC_OBLIGATORIOS.every((strField) => !!(objWatch[strField] as string)?.trim());
-  const blnFraudComplete = objWatch[QD.strFraudRelated] !== 'SI'
-    || CAMPOS_FRAUDE.every((strField) => !!(objWatch[strField] as string)?.trim());
+  // Alineación con el Excel PQRS V3.0: los campos regulatorios (sexo, LGBTIQ+,
+  // producto digital, y toda la Condición de la Queja) los calcula el back
+  // ("Back"/"Automático"/"Por default") → solo lectura. Los únicos editables que
+  // condicionan el guardado son Condición Especial (Front, obligatorio SFC) y los
+  // dos indicadores de anexos.
+  const blnSpecialCondOk = !!(objWatch[QD.strSpecialCondition] as string)?.trim();
   const blnAnnexesComplete = !!objWatch[QD.strIncludesComplaintAnnex] && !!objWatch[QD.strIncludesReplyAttach];
-  const blnCanSave = blnSfcComplete && blnFraudComplete && blnAnnexesComplete;
+  const blnCanSave = blnSpecialCondOk && blnAnnexesComplete;
 
   // Enviamos la tarea con la accion seleccionada
   const enviarCon = (in_strAction: AccionFormularioSFC) => async (in_objData: FormularioSuperintendenciaFormData): Promise<boolean> => {
@@ -109,64 +128,47 @@ export default function FormularioSuperintendencia() {
         <form onSubmit={onGuardar} noValidate>
 
           {/* ── S2 · Datos del Consumidor — Campos SFC (SEC-029) ── */}
+          {/* Sexo, LGBTIQ+ y Producto Digital son "Back" (default); solo Condición
+              Especial es Front editable (Excel PQRS V3.0 #23/#26). */}
           <FormSection title="Datos del Consumidor — Campos SFC">
             <div className="form-row cols-2">
-              <ZdsSelect name={QD.strSex} control={control} label="Sexo"
-                options={cllSex} required rules={objReq} error={err(QD.strSex)} helpText="CAT-SEXO." />
-              <ZdsSelect name={QD.strLgbtiq} control={control} label="LGBTIQ+"
-                options={OPTIONS_LGBTIQ} required rules={objReq} error={err(QD.strLgbtiq)}
-                helpText="CAT-LGBTIQ ⚠ pendiente confirmación con TI (CE 019/2024)." />
+              <Ro label="Sexo" value={descOpt(cllSex, objWatch[QD.strSex])} />
+              <Ro label="LGBTIQ+" value={descOpt(OPTIONS_LGBTIQ, objWatch[QD.strLgbtiq])} />
             </div>
             <div className="form-row cols-2">
+              <Ro label="Producto Digital" value={descOpt(cllDigitalProduct, objWatch[QD.strDigitalProduct])} />
               <ZdsSelect name={QD.strSpecialCondition} control={control} label="Condición Especial"
                 options={cllSpecialCond} required rules={objReq} error={err(QD.strSpecialCondition)}
-                helpText="CAT-COND-ESP." />
-              <ZdsSelect name={QD.strDigitalProduct} control={control} label="Producto Digital"
-                options={cllDigitalProduct} required rules={objReq} error={err(QD.strDigitalProduct)}
-                helpText="CAT-PROD-DIGITAL." />
+                helpText="CAT-COND-ESP (Front, obligatorio SFC)." />
             </div>
-            {/* MSG-009-04 — catálogo LGBTIQ+ pendiente. */}
-            <ZrAlert config="info" {...({ 'hide-close': true } as object)}>
-              ⚠ El catálogo <strong>LGBTIQ+</strong> está pendiente de confirmación con TI. Verifique
-              antes de transmitir a SmartSupervision. {/* MSG-009-04 */}
-            </ZrAlert>
           </FormSection>
 
-          {/* ── S3 · Condición de la Queja (SEC-030) ── */}
+          {/* ── S3 · Condición de la Queja (SEC-030) — solo lectura (Back) ── */}
           <FormSection title="Condición de la Queja">
             <div className="form-row cols-3">
-              <ZdsSelect name={QD.strComplaintStatus} control={control} label="Estado de la Queja o Reclamo"
-                options={cllComplaintStatus} required rules={objReq} error={err(QD.strComplaintStatus)} helpText="CAT-ESTADO-QUEJA." />
-              <ZdsSelect name={QD.strFavorability} control={control} label="Favorabilidad"
-                options={cllFavorability} required rules={objReq} error={err(QD.strFavorability)} helpText="CAT-FAVORAB." />
-              <ZdsSelect name={QD.strAcceptance} control={control} label="Aceptación"
-                options={cllAcceptance} required rules={objReq} error={err(QD.strAcceptance)} helpText="CAT-ACEPTACION." />
+              <Ro label="Estado de la Queja o Reclamo" value={descOpt(cllComplaintStatus, objWatch[QD.strComplaintStatus])} />
+              <Ro label="Favorabilidad" value={descOpt(cllFavorability, objWatch[QD.strFavorability])} />
+              <Ro label="Aceptación" value={descOpt(cllAcceptance, objWatch[QD.strAcceptance])} />
             </div>
             <div className="form-row cols-3">
-              <ZdsSelect name={QD.strRectification} control={control} label="Rectificación"
-                options={cllRectification} required rules={objReq} error={err(QD.strRectification)} helpText="CAT-RECTIF." />
-              <ZdsSelect name={QD.strWithdrawal} control={control} label="Desistimiento"
-                options={cllWithdrawal} required rules={objReq} error={err(QD.strWithdrawal)} helpText="CAT-DESIST." />
-              <ZdsSelect name={QD.strTutela} control={control} label="Tutela"
-                options={cllTutela} required rules={objReq} error={err(QD.strTutela)} helpText="CAT-TUTELA." />
+              <Ro label="Rectificación" value={descOpt(cllRectification, objWatch[QD.strRectification])} />
+              <Ro label="Desistimiento" value={descOpt(cllWithdrawal, objWatch[QD.strWithdrawal])} />
+              <Ro label="Tutela" value={descOpt(cllTutela, objWatch[QD.strTutela])} />
             </div>
             <div className="form-row cols-3">
-              <ZdsSelect name={QD.strMarking} control={control} label="Marcación"
-                options={cllMarking} required rules={objReq} error={err(QD.strMarking)} helpText="CAT-MARCACION." />
-              <ZdsSelect name={QD.strExpressComplaint} control={control} label="Queja Exprés"
-                options={cllExpressComplaint} required rules={objReq} error={err(QD.strExpressComplaint)} helpText="CAT-EXPRES." />
+              <Ro label="Marcación" value={descOpt(cllMarking, objWatch[QD.strMarking])} />
+              <Ro label="Queja Exprés" value={descOpt(cllExpressComplaint, objWatch[QD.strExpressComplaint])} />
               <div />
             </div>
           </FormSection>
 
-          {/* ── S4 Fraude (condicional) · S5 Anexos ── */}
+          {/* ── S4 Fraude (solo lectura) · S5 Anexos (editables) ── */}
           <SeccionFraudeAnexos form={form} err={err} requestId={task?.process_request_id ?? null} />
 
-          {/* RUL-009-03 / MSG-009-02 — bloqueo si faltan campos obligatorios SFC. */}
+          {/* MSG-009-02 — bloqueo si faltan los editables obligatorios. */}
           {!blnCanSave && (
             <ZrAlert config="info" {...({ 'hide-close': true } as object)}>
-              Existen campos obligatorios de SmartSupervision sin completar. Complete todos antes de
-              guardar. {/* MSG-009-02 */}
+              Complete <strong>Condición Especial</strong> y los indicadores de anexos antes de guardar. {/* MSG-009-02 */}
             </ZrAlert>
           )}
 
