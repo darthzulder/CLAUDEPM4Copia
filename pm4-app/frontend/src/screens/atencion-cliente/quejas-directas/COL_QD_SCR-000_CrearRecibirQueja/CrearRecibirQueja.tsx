@@ -6,7 +6,7 @@ import FormSection from '../../../../components/FormSection';
 import { ActionBar } from '../../../../components/ActionBar';
 import {
   ZdsInput, ZdsSelect, ZdsCheckboxField,
-  ZdsStatusBadge, ZrButton, ZrAlert, ZrLoader,
+  ZdsStatusBadge, ZrButton, ZrAlert, ZrLoader, ZrModal,
 } from '../../../../components/fields/ZdsFields';
 import pm4 from '../../../../api/pm4Client';
 import { useCollection } from '../../../../core/useCollection';
@@ -14,6 +14,7 @@ import {
   QD, QD_COLLECTIONS,
   SCR000_DEFAULTS as DEFAULTS, SCR000_ADJUNTO_KEYS as ADJUNTO_KEYS,
   SCR000_WEB_ENTRY_PROCESS_ID as WEB_ENTRY_PROCESS_ID, SCR000_WEB_ENTRY_EVENT_ID as WEB_ENTRY_EVENT_ID,
+  SCR000_SIMILAR_CASES_SCRIPT_ID as SIMILAR_CASES_SCRIPT_ID,
 } from '../fields/fields';
 import type { CrearRecibirQuejaFormData } from '../fields/fields';
 import SeccionConsumidor from './SeccionConsumidor';
@@ -39,6 +40,15 @@ export default function CrearRecibirQueja() {
   // Overlay de "enviando": cubre el lapso captcha-verificado → verify + envío a PM4,
   // hasta que aparece la pantalla de éxito.
   const [blnSending, setBlnSending] = useState(false);
+  // Cuando el watcher (script 70) detecta casos similares (qd_intCountSimilarCases > 0),
+  // guardamos aquí el detalle + el payload listo para radicar y abrimos el modal de
+  // confirmación. El envío queda en pausa hasta que el usuario decida continuar.
+  const [objSimilarPrompt, setObjSimilarPrompt] = useState<{
+    ids: number[];
+    count: number;
+    cases: Record<string, unknown>[];
+    payload: CrearRecibirQuejaFormData;
+  } | null>(null);
 
   const form = useForm<CrearRecibirQuejaFormData>({
     mode: 'onTouched',
@@ -109,6 +119,44 @@ export default function CrearRecibirQueja() {
     setBlnCaptchaOpen(true);
   };
 
+  // Watcher pre-envío — ejecuta el script PM4 (id 70) que detecta casos ACTIVOS
+  // del mismo proceso con idéntico motivo + producto + identificación. Se corre
+  // tras el captcha y antes de radicar; su salida (qd_arridSimilarCases,
+  // qd_intCountSimilarCases, qd_arrSimilarCases) se fusiona en el payload.
+  // Es best-effort: si el script falla, se registra y la radicación continúa.
+  const checkSimilarCases = async (
+    in_objData: CrearRecibirQuejaFormData,
+  ): Promise<Partial<CrearRecibirQuejaFormData>> => {
+    // El caso actual (para excluirlo del match): existe en modo tarea, no en web entry.
+    const intCurrentRequestId = task?.process_request_id ?? null;
+    const objScriptData = {
+      [QD.strSfcReason]: in_objData[QD.strSfcReason],
+      [QD.strSfcProduct]: in_objData[QD.strSfcProduct],
+      [QD.strIdNumber]: in_objData[QD.strIdNumber],
+      process_id: WEB_ENTRY_PROCESS_ID,
+      _request: { id: intCurrentRequestId, process_id: WEB_ENTRY_PROCESS_ID },
+    };
+    // PM4 espera data/config como strings JSON y sync:true (mismo patrón que los demás watchers).
+    const objBody = { data: JSON.stringify(objScriptData), config: JSON.stringify({}), sync: true };
+    try {
+      const objRes = await pm4.post(`/scripts/${SIMILAR_CASES_SCRIPT_ID}/execute`, objBody);
+      // La salida puede venir en .response, .output o directamente en .data.
+      const objRaw = objRes.data as Record<string, unknown>;
+      const objOut = (objRaw?.response ?? objRaw?.output ?? objRaw) as Record<string, unknown>;
+      console.log('[casos-similares] respuesta script:', objOut);
+      return {
+        [QD.strSimilarCheckStatus]: objOut[QD.strSimilarCheckStatus] as string,
+        [QD.arridSimilarCases]: (objOut[QD.arridSimilarCases] ?? []) as number[],
+        [QD.intCountSimilarCases]: (objOut[QD.intCountSimilarCases] ?? 0) as number,
+        [QD.arrSimilarCases]: (objOut[QD.arrSimilarCases] ?? []) as Record<string, unknown>[],
+      };
+    } catch (exc) {
+      // No bloqueamos la radicación por un fallo del chequeo de duplicados.
+      console.warn('[casos-similares] el script falló; se radica sin el chequeo:', exc);
+      return {};
+    }
+  };
+
   // Envía la solicitud a PM4, ya sea como web entry o completando la tarea.
   const sendToPm4 = async (in_objData: CrearRecibirQuejaFormData) => {
     try {
@@ -157,10 +205,43 @@ export default function CrearRecibirQueja() {
       setBlnSending(false);
       return;
     }
-    await sendToPm4({ ...objData, [QD.blnCaptcha]: true });
+    // Watcher pre-envío: detectamos casos similares/duplicados y fusionamos su
+    // salida en el payload antes de radicar.
+    const objSimilar = await checkSimilarCases(objData);
+    const objPayload = { ...objData, [QD.blnCaptcha]: true, ...objSimilar };
+
+    // Si hay casos similares, pausamos el envío y pedimos confirmación explícita.
+    const intCount = Number(objSimilar[QD.intCountSimilarCases] ?? 0);
+    if (intCount > 0) {
+      setObjSimilarPrompt({
+        ids: (objSimilar[QD.arridSimilarCases] ?? []) as number[],
+        count: intCount,
+        cases: (objSimilar[QD.arrSimilarCases] ?? []) as Record<string, unknown>[],
+        payload: objPayload,
+      });
+      setBlnSending(false); // ocultamos el overlay mientras el usuario decide
+      return;
+    }
+
+    await sendToPm4(objPayload);
     // En éxito, sendToPm4 pone blnSent=true y se muestra la pantalla de confirmación;
     // si falló, quitamos el overlay para que el usuario vea el form y el error.
     setBlnSending(false);
+  };
+
+  // El usuario, tras ver los casos similares, decide radicar de todas formas.
+  const handleConfirmSimilar = async () => {
+    const objPayload = objSimilarPrompt?.payload;
+    setObjSimilarPrompt(null);
+    if (!objPayload) return;
+    setBlnSending(true);
+    await sendToPm4(objPayload);
+    setBlnSending(false);
+  };
+
+  // El usuario decide NO continuar: cerramos el modal y lo dejamos en el formulario.
+  const handleCancelSimilar = () => {
+    setObjSimilarPrompt(null);
   };
 
   // Reinicia el formulario y limpia los adjuntos cargados.
@@ -340,6 +421,38 @@ export default function CrearRecibirQueja() {
           onVerified={handleCaptchaVerified}
           onClose={() => { setBlnCaptchaOpen(false); setObjPendingData(null); }}
         />
+
+        {/* Confirmación de casos similares — el watcher (script 70) detectó PQRS
+            activas con el mismo motivo + producto + identificación. */}
+        {objSimilarPrompt && (
+          <ZrModal model={!!objSimilarPrompt} onChange={(open: boolean) => { if (!open) handleCancelSimilar(); }}>
+            <h3 style={{ margin: '0 0 var(--zs-75)', font: 'var(--zf-h-20--700)', color: 'var(--z-text)' }}>
+              Encontramos casos similares
+            </h3>
+            <ZrAlert config="alert" {...({ 'hide-close': true } as object)}>
+              {objSimilarPrompt.count === 1
+                ? 'Ya existe 1 caso activo con el mismo motivo, producto e identificación. Revisa antes de radicar uno nuevo.'
+                : `Ya existen ${objSimilarPrompt.count} casos activos con el mismo motivo, producto e identificación. Revisa antes de radicar uno nuevo.`}
+            </ZrAlert>
+            <ul style={{ margin: 'var(--zs-100) 0', paddingLeft: 'var(--zs-150)', color: 'var(--z-text)', font: 'var(--zf-body-14--400)' }}>
+              {(objSimilarPrompt.cases.length > 0
+                ? objSimilarPrompt.cases.map((objCase) => {
+                    const strNumber = (objCase.case_number ?? objCase.id) as string | number;
+                    const strStatus = objCase.status as string | undefined;
+                    const strDate = objCase.created_at as string | undefined;
+                    return `Caso #${strNumber}${strStatus ? ` · ${strStatus}` : ''}${strDate ? ` · ${strDate.slice(0, 10)}` : ''}`;
+                  })
+                : objSimilarPrompt.ids.map((intId) => `Caso #${intId}`)
+              ).map((strLine, intIdx) => (
+                <li key={intIdx}>{strLine}</li>
+              ))}
+            </ul>
+            <div z-flex="75" z-align="right:center" style={{ marginTop: 'var(--zs-100)' }}>
+              <ZrButton config="secondary" onClick={handleCancelSimilar}>No continuar</ZrButton>
+              <ZrButton config="positive" onClick={handleConfirmSimilar}>Continuar y radicar</ZrButton>
+            </div>
+          </ZrModal>
+        )}
       </div>
     </div>
   );

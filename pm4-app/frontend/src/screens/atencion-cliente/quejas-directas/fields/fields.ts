@@ -86,6 +86,15 @@ export const QD = {
   strAssigneeRole: 'qd_strAssigneeRole',               // FLD-340 · antes qd_rolResponsable
   strAssignee: 'qd_strAssignee',                       // FLD-341 · antes qd_responsable
 
+  // ── SCR-000 · Chequeo de casos similares (watcher script 70, pre-envío) ────
+  // Salida del script PM4 (id 70): busca casos ACTIVOS del proceso con el mismo
+  // motivo + producto + identificación. Se ejecuta al enviar (post-captcha) y sus
+  // variables se fusionan en el payload antes de radicar (patrón watcher).
+  strSimilarCheckStatus: 'similar_check_status',        // SUCCESS | ERROR (diagnóstico del script)
+  arridSimilarCases: 'qd_arridSimilarCases',            // IDs de casos similares encontrados
+  intCountSimilarCases: 'qd_intCountSimilarCases',      // cantidad de casos similares
+  arrSimilarCases: 'qd_arrSimilarCases',                // detalle (data) de los casos similares
+
   // ── SCR-002 · Corrección de Datos (encabezado + metadata) ─────────────────
   strBpmCaseId: 'qd_strBpmCaseId',                     // antes qd_idCasoBPM
   strSlaAssigned: 'qd_strSlaAssigned',               // antes qd_slaRestante (corregido: el campo es el SLA asignado, no el restante)
@@ -271,6 +280,11 @@ export interface QdFields {
   qd_strSfcFilingDate: string;
   qd_strAssigneeRole: string;
   qd_strAssignee: string;
+  // Chequeo de casos similares (salida del script 70)
+  similar_check_status: string;
+  qd_arridSimilarCases: number[];
+  qd_intCountSimilarCases: number;
+  qd_arrSimilarCases: Record<string, unknown>[];
 
   // SCR-002
   qd_strBpmCaseId: string;
@@ -479,6 +493,11 @@ export const QD_GLOBAL_DEFAULTS: Partial<QdFields> = {
 export const SCR000_WEB_ENTRY_PROCESS_ID = Number(import.meta.env.WEB_ENTRY_PROCESS_ID || 31);
 export const SCR000_WEB_ENTRY_EVENT_ID = import.meta.env.WEB_ENTRY_EVENT_ID || 'node_661';
 
+// Script PM4 que detecta casos similares/duplicados (motivo + producto + identificación).
+// Se ejecuta al enviar el formulario (post-captcha, pre-radicación) como watcher.
+// https://cozurich.dev.cloud.processmaker.net/designer/scripts/70/builder
+export const SCR000_SIMILAR_CASES_SCRIPT_ID = Number(import.meta.env.VITE_SIMILAR_CASES_SCRIPT_ID || 70);
+
 export const SCR000_ADJUNTO_KEYS = [
   QD.strAttach01, QD.strAttach02, QD.strAttach03, QD.strAttach04, QD.strAttach05,
 ] as const;
@@ -499,7 +518,11 @@ export type CrearRecibirQuejaFormData = Pick<QdFields,
   | typeof QD.strAdmission | typeof QD.strControlEntity | typeof QD.strTutela | typeof QD.strExpressComplaint
   | typeof QD.blnDataAuth | typeof QD.blnCaptcha | typeof QD.strCcEmail
   | typeof QD.strSmartSupStatus | typeof QD.strSfcFilingDate | typeof QD.strAssigneeRole | typeof QD.strAssignee
->;
+> & Partial<Pick<QdFields,
+  // Salida del watcher de casos similares (script 70), fusionada en el envío.
+  | typeof QD.strSimilarCheckStatus | typeof QD.arridSimilarCases
+  | typeof QD.intCountSimilarCases | typeof QD.arrSimilarCases
+>>;
 
 export const SCR000_DEFAULTS = {
   ...QD_GLOBAL_DEFAULTS,
