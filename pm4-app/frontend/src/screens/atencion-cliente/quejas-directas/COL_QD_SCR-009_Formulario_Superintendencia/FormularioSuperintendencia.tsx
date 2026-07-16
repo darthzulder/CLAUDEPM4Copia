@@ -10,7 +10,7 @@ import {
   ZdsSelect, ZrButton, ZrAlert, ZrLoader,
 } from '../../../../components/fields/ZdsFields';
 import {
-  QD, QD_COLLECTIONS, SCR009_DEFAULTS as DEFAULTS,
+  QD, QD_COLLECTIONS, SCR009_DEFAULTS as DEFAULTS, SCR009_BACK_DEFAULTS,
   SCR009_OPTIONS_LGBTIQ as OPTIONS_LGBTIQ,
 } from '../fields/fields';
 import type { FormularioSuperintendenciaFormData, AccionFormularioSFC } from '../fields/fields';
@@ -58,8 +58,17 @@ export default function FormularioSuperintendencia() {
   // Pre-poblamos el formulario con los datos del caso. reset() reemplaza todo el
   // estado, así que TODAS las claves de task.data (incl. los campos "Back"
   // calculados que no son editables) quedan en el form y se reenvían intactas.
+  // Además, los defaults "Back" con código confirmado (SCR009_BACK_DEFAULTS) se
+  // GARANTIZAN al llegar aquí: si el proceso no los trae o los manda vacíos, se
+  // rellenan con su valor marcado (Excel PQRS V3.0) para que existan y viajen.
   useEffect(() => {
-    if (task?.data) reset({ ...DEFAULTS, ...(task.data as Partial<FormularioSuperintendenciaFormData>) });
+    if (!task?.data) return;
+    const objData = { ...(task.data as Partial<FormularioSuperintendenciaFormData>) };
+    for (const [strKey, strDefault] of Object.entries(SCR009_BACK_DEFAULTS)) {
+      const strCurrent = objData[strKey as keyof FormularioSuperintendenciaFormData] as string | undefined;
+      if (!strCurrent) objData[strKey as keyof FormularioSuperintendenciaFormData] = strDefault as never;
+    }
+    reset({ ...DEFAULTS, ...objData });
   }, [task, reset]);
 
   const err = (in_strField: keyof FormularioSuperintendenciaFormData): string | undefined => {

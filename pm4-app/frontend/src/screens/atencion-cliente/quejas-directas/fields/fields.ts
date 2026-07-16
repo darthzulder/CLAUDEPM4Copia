@@ -677,12 +677,24 @@ export type FormularioSuperintendenciaFormData = Omit<Pick<QdFields,
   | typeof QD.strAction
 >, typeof QD.strAction> & { [QD.strAction]: AccionFormularioSFC };
 
+// Defaults "Back" que el front GARANTIZA al llegar a SCR-009: si el proceso no
+// los trae (o los manda vacíos), se rellenan con estos valores para que la
+// variable exista y viaje al guardar. Solo los de código de catálogo CONFIRMADO
+// (Excel PQRS V3.0 · Lista_Aceptación/Rectificación/Desistimiento).
+// ⚠ Sexo ("No aplica"), LGBTIQ+ ("No aplica"), Tutela ("No"), Producto Digital
+// ("No") y Ente de Control ("Otros") NO se incluyen: su código de catálogo está
+// pendiente de confirmación con TI (Homologación SFC = "No existe"); los llena
+// el back para no arriesgar un código inválido en el envío a la SFC.
+export const SCR009_BACK_DEFAULTS = {
+  [QD.strAcceptance]: '1',     // Excel #51 · Lista_Aceptación (por default "1")
+  [QD.strRectification]: '1',  // Excel #52 · Lista_Rectificación (queda por default)
+  [QD.strWithdrawal]: '2',     // Excel #53 · Lista_Desistimiento (queda por default)
+} as const;
+
 export const SCR009_DEFAULTS: Partial<FormularioSuperintendenciaFormData> = {
   [QD.strSex]: '', [QD.strLgbtiq]: '', [QD.strSpecialCondition]: '', [QD.strDigitalProduct]: '',
-  [QD.strComplaintStatus]: '', [QD.strFavorability]: '', [QD.strAcceptance]: '',
-  // Defaults de negocio (CATALOGOS v2): rectificación código 1, desistimiento código 2.
-  [QD.strRectification]: '1',
-  [QD.strWithdrawal]: '2',
+  [QD.strComplaintStatus]: '', [QD.strFavorability]: '',
+  ...SCR009_BACK_DEFAULTS,
   [QD.strTutela]: '', [QD.strMarking]: '', [QD.strExpressComplaint]: '',
   [QD.strFraudRelated]: 'NO',
   [QD.strFraudType]: '', [QD.strFraudModality]: '', [QD.strClaimedAmount]: '', [QD.strAcknowledgedAmount]: '',

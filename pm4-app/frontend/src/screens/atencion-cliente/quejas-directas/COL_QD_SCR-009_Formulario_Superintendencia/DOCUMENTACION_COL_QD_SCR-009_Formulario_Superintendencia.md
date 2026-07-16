@@ -78,6 +78,18 @@ mostrarlos de nuevo como solo lectura aquí. Se removió el bloque `ZdsInput rea
 
 > Los códigos se muestran como **descripción** del catálogo (`useCollection` + helper `descOpt()`) pero **conservan el código** que espera el BPM/SFC; se reenvían intactos vía `reset()` al guardar.
 
+#### Defaults "Back" garantizados al llegar a SCR-009
+
+Los campos marcados con valor por default en el Excel deben **existir y estar llenos** al abrir SCR-009. El front lo garantiza (`SCR009_BACK_DEFAULTS` en `fields.ts` + relleno en el `useEffect`): si el proceso no trae el valor o lo manda vacío, se rellena con su default marcado antes de renderizar/guardar.
+
+| Campo | Default (código) | Fuente |
+|---|---|---|
+| Aceptación (`qd_strAcceptance`) | `1` | Excel #51 · Lista_Aceptación |
+| Rectificación (`qd_strRectification`) | `1` | Excel #52 · Lista_Rectificación |
+| Desistimiento (`qd_strWithdrawal`) | `2` | Excel #53 · Lista_Desistimiento |
+
+> **Pendientes de código de catálogo (los llena el back, NO el front):** Sexo ("No aplica"), LGBTIQ+ ("No aplica"), Tutela ("No"), Producto Digital ("No") y Ente de Control ("Otros"). El Excel `Homologación SFC` los marca "Es requerida su creación / No existe": su código no está confirmado con TI, y hard-codearlo arriesgaría un envío inválido a la SFC. El back debe poblarlos con el código correcto antes de M3.
+
 ### S4 — Datos de Fraude CE-019-2024 (SEC-031, condicional) — solo lectura (Back)
 
 | Campo (UI) | Variable | Presentación | Origen (Back) |
