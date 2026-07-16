@@ -87,8 +87,11 @@ Los campos marcados con valor por default en el Excel deben **existir y estar ll
 | Aceptación (`qd_strAcceptance`) | `1` | Excel #51 · Lista_Aceptación |
 | Rectificación (`qd_strRectification`) | `1` | Excel #52 · Lista_Rectificación |
 | Desistimiento (`qd_strWithdrawal`) | `2` | Excel #53 · Lista_Desistimiento |
+| Producto Digital (`qd_strDigitalProduct`) | `No` ⚠ provisional | Excel #54 (código de catálogo a confirmar con TI) |
 
-> **Pendientes de código de catálogo (los llena el back, NO el front):** Sexo ("No aplica"), LGBTIQ+ ("No aplica"), Tutela ("No"), Producto Digital ("No") y Ente de Control ("Otros"). El Excel `Homologación SFC` los marca "Es requerida su creación / No existe": su código no está confirmado con TI, y hard-codearlo arriesgaría un envío inválido a la SFC. El back debe poblarlos con el código correcto antes de M3.
+> **Producto Digital** se rellena con `"No"` **provisionalmente**: el default de negocio es "No" (Excel #54) pero el código exacto de catálogo (colección PM4 id 25) no está confirmado con TI. Confirmar el código real y reemplazar el literal `'No'` si difiere.
+
+> **Pendientes de código de catálogo (los llena el back, NO el front):** Sexo ("No aplica"), LGBTIQ+ ("No aplica"), Tutela ("No") y Ente de Control ("Otros"). El Excel `Homologación SFC` los marca "Es requerida su creación / No existe": su código no está confirmado con TI, y hard-codearlo arriesgaría un envío inválido a la SFC. El back debe poblarlos con el código correcto antes de M3.
 
 ### S4 — Datos de Fraude CE-019-2024 (SEC-031, condicional) — solo lectura (Back)
 

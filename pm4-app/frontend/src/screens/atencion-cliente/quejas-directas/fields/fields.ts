@@ -672,22 +672,22 @@ export type FormularioSuperintendenciaFormData = Omit<Pick<QdFields,
 
 // Defaults "Back" que el front GARANTIZA al llegar a SCR-009: si el proceso no
 // los trae (o los manda vacíos), se rellenan con estos valores para que la
-// variable exista y viaje al guardar. Solo los de código de catálogo CONFIRMADO
-// (Excel PQRS V3.0 · Lista_Aceptación/Rectificación/Desistimiento).
-// ⚠ Sexo ("No aplica"), LGBTIQ+ ("No aplica"), Tutela ("No"), Producto Digital
-// ("No") y Ente de Control ("Otros") NO se incluyen: su código de catálogo está
-// pendiente de confirmación con TI (Homologación SFC = "No existe"); los llena
-// el back para no arriesgar un código inválido en el envío a la SFC.
+// variable exista y viaje al guardar. Valores por default del Excel PQRS V3.0.
+// ⚠ Sexo ("No aplica"), LGBTIQ+ ("No aplica"), Tutela ("No") y Ente de Control
+// ("Otros") NO se incluyen: su código de catálogo está pendiente de confirmación
+// con TI (Homologación SFC = "No existe"); los llena el back para no arriesgar un
+// código inválido en el envío a la SFC.
 export const SCR009_BACK_DEFAULTS = {
-  [QD.strAcceptance]: '1',     // Excel #51 · Lista_Aceptación (por default "1")
-  [QD.strRectification]: '1',  // Excel #52 · Lista_Rectificación (queda por default)
-  [QD.strWithdrawal]: '2',     // Excel #53 · Lista_Desistimiento (queda por default)
+  [QD.strAcceptance]: '1',       // Excel #51 · Lista_Aceptación (por default "1")
+  [QD.strRectification]: '1',    // Excel #52 · Lista_Rectificación (queda por default)
+  [QD.strWithdrawal]: '2',       // Excel #53 · Lista_Desistimiento (queda por default)
+  [QD.strDigitalProduct]: 'No',  // Excel #54 · default "No" (provisional: confirmar código de catálogo con TI)
 } as const;
 
 export const SCR009_DEFAULTS: Partial<FormularioSuperintendenciaFormData> = {
-  [QD.strSex]: '', [QD.strLgbtiq]: '', [QD.strSpecialCondition]: '', [QD.strDigitalProduct]: '',
+  [QD.strSex]: '', [QD.strLgbtiq]: '', [QD.strSpecialCondition]: '',
   [QD.strComplaintStatus]: '', [QD.strFavorability]: '',
-  ...SCR009_BACK_DEFAULTS,
+  ...SCR009_BACK_DEFAULTS,  // incluye strDigitalProduct='No', aceptación/rectificación/desistimiento
   [QD.strTutela]: '', [QD.strMarking]: '', [QD.strExpressComplaint]: '',
   [QD.strFraudRelated]: 'NO',
   [QD.strFraudType]: '', [QD.strFraudModality]: '', [QD.strClaimedAmount]: '', [QD.strAcknowledgedAmount]: '',
