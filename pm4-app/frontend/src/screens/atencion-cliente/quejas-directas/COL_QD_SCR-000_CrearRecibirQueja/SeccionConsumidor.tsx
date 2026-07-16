@@ -39,10 +39,11 @@ export default function SeccionConsumidor({ form }: Props) {
     if (objNotReported) setValue(QD.strLgbtiq, objNotReported.label);
   }, [objWatch[QD.strLgbtiq], cllLgbtiq, setValue]);
 
-  // FLD-322 — Condición especial oculta, por defecto "NINGUNA" (back), resuelto desde CAT-COND-ESP.
+  // FLD-322 — Condición especial oculta, por defecto "No aplica" (back), resuelto desde CAT-COND-ESP.
+  // CATALOGOS v2: el catálogo confirmado (código 98) ya no trae "Ninguna" como opción.
   useEffect(() => {
     if (objWatch[QD.strSpecialCondition] || cllSpecialCond.length === 0) return;
-    const objNone = cllSpecialCond.find((o) => /ninguna/i.test(o.label));
+    const objNone = cllSpecialCond.find((o) => /no aplica/i.test(o.label));
     if (objNone) setValue(QD.strSpecialCondition, objNone.label);
   }, [objWatch[QD.strSpecialCondition], cllSpecialCond, setValue]);
 

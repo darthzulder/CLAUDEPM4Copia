@@ -484,7 +484,7 @@ export const QD_GLOBAL_DEFAULTS: Partial<QdFields> = {
   [QD.strAddress]: '',            // FLD-319 — Back, default vacío (pendiente API SFC)
   [QD.strSex]: '',                // FLD-320 — Back, resuelto desde CAT-SEXO ("No informa")
   [QD.strLgbtiq]: '',             // FLD-321 — Back, oculto, resuelto desde CAT-LGBTIQ ("No informa")
-  [QD.strSpecialCondition]: '',   // FLD-322 — Back, oculto, resuelto desde CAT-COND-ESP ("NINGUNA")
+  [QD.strSpecialCondition]: '',   // FLD-322 — Back, oculto, resuelto desde CAT-COND-ESP ("No aplica")
   [QD.strAdmission]: '',          // FLD-331 — Back, resuelto desde CAT-ADMISION si rol ≠ Defensor
   [QD.strControlEntity]: '',      // FLD-332 — Back, resuelto desde CAT-ENTE ("Otros")
   [QD.strTutela]: '',             // FLD-333 — Back, resuelto desde CAT-TUTELA ("No")
