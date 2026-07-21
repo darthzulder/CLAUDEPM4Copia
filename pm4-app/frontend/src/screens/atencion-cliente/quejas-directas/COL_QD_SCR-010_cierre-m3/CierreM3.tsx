@@ -5,7 +5,7 @@ import FormSection from '../../../../components/FormSection';
 import { ZdsInput, ZrButton, ZrAlert } from '../../../../components/fields/ZdsFields';
 import RequestFileList from '../../../../components/RequestFileList';
 import { resolveFileId } from '../../../../core/useRequestFiles';
-import { useCollection } from '../../../../core/useCollection';
+import { useCollection, descOf, useSyncDesc } from '../../../../core/useCollection';
 import { QD, QD_COLLECTIONS, SCR010_DEFAULT_ENTITY_TYPE, SCR010_DEFAULT_ENTITY_CODE } from '../fields/fields';
 import type { CierreM3FormData } from '../fields/fields';
 import SeccionEstadoCierre from './SeccionEstadoCierre';
@@ -25,7 +25,7 @@ export default function CierreM3() {
 
   // Formulario en modo lectura: solo aloja los valores pre-poblados desde PM4
   // para reenviarlos al completar la tarea (no hay campos editables).
-  const { control, watch, handleSubmit, reset } = useForm<CierreM3FormData>({
+  const form = useForm<CierreM3FormData>({
     defaultValues: {
       [QD.strM3ClosureStatus]: '', [QD.strM3ClosureAttempts]: '0', [QD.strLastError]: '',
       [QD.strSfcCode]: '', [QD.strComplaintStatus]: '', [QD.strUpdateDate]: '', [QD.strClosureDate]: '',
@@ -36,6 +36,7 @@ export default function CierreM3() {
       [QD.strEntityType]: SCR010_DEFAULT_ENTITY_TYPE, [QD.strEntityCode]: SCR010_DEFAULT_ENTITY_CODE,
     },
   });
+  const { control, watch, handleSubmit, reset } = form;
 
   const objWatch = watch();
 
@@ -48,6 +49,16 @@ export default function CierreM3() {
   const { options: cllExpressComplaint } = useCollection(QD_COLLECTIONS.expressComplaint);
   const { options: cllFraudType } = useCollection(QD_COLLECTIONS.fraudType);
   const { options: cllFraudModality } = useCollection(QD_COLLECTIONS.fraudModality);
+
+  // Sincroniza la variable compañera <campo>_desc con la descripción del código guardado.
+  // El campo base sigue enviando el CÓDIGO al back/SFC; _desc viaja junto para lectura.
+  useSyncDesc(form, QD.strComplaintStatus, cllComplaintStatus);
+  useSyncDesc(form, QD.strFavorability, cllFavorability);
+  useSyncDesc(form, QD.strAcceptance, cllAcceptance);
+  useSyncDesc(form, QD.strMarking, cllMarking);
+  useSyncDesc(form, QD.strExpressComplaint, cllExpressComplaint);
+  useSyncDesc(form, QD.strFraudType, cllFraudType);
+  useSyncDesc(form, QD.strFraudModality, cllFraudModality);
 
   // Pre-poblamos el formulario con los datos del caso. reset() reemplaza todo el
   // estado, así que TODAS las claves de task.data (incl. los defaults "Back" que
@@ -71,12 +82,6 @@ export default function CierreM3() {
 
   const blnRejected = objWatch[QD.strM3ClosureStatus] === 'Rechazado (400)';
   const blnFraud = objWatch[QD.strFraudRelated] === 'SI';
-
-  // Resuelve la descripción de un código contra su catálogo (mismo patrón que SCR-0051).
-  const desc = (in_lstOptions: { value: string; label: string }[], in_strCode: string | undefined): string => {
-    if (!in_strCode) return '—';
-    return in_lstOptions.find((o) => o.value === in_strCode)?.label ?? in_strCode;
-  };
 
   const onSubmit = async (in_objData: CierreM3FormData) => {
     try {
@@ -147,7 +152,7 @@ export default function CierreM3() {
             <div className="zds-field-wrap">
               <span className="info-bar-label">Estado de la Queja</span>
               <div className="info-bar-value" style={{ marginTop: 'var(--zs-50)' }}>
-                {desc(cllComplaintStatus, objWatch[QD.strComplaintStatus])}
+                {descOf(cllComplaintStatus, objWatch[QD.strComplaintStatus])}
               </div>
             </div>
           </div>
@@ -161,13 +166,13 @@ export default function CierreM3() {
             <div className="zds-field-wrap">
               <span className="info-bar-label">Favorabilidad</span>
               <div className="info-bar-value" style={{ marginTop: 'var(--zs-50)' }}>
-                {desc(cllFavorability, objWatch[QD.strFavorability])}
+                {descOf(cllFavorability, objWatch[QD.strFavorability])}
               </div>
             </div>
             <div className="zds-field-wrap">
               <span className="info-bar-label">Aceptación</span>
               <div className="info-bar-value" style={{ marginTop: 'var(--zs-50)' }}>
-                {desc(cllAcceptance, objWatch[QD.strAcceptance])}
+                {descOf(cllAcceptance, objWatch[QD.strAcceptance])}
               </div>
             </div>
           </div>
@@ -176,13 +181,13 @@ export default function CierreM3() {
             <div className="zds-field-wrap">
               <span className="info-bar-label">Marcación</span>
               <div className="info-bar-value" style={{ marginTop: 'var(--zs-50)' }}>
-                {desc(cllMarking, objWatch[QD.strMarking])}
+                {descOf(cllMarking, objWatch[QD.strMarking])}
               </div>
             </div>
             <div className="zds-field-wrap">
               <span className="info-bar-label">Queja Exprés</span>
               <div className="info-bar-value" style={{ marginTop: 'var(--zs-50)' }}>
-                {desc(cllExpressComplaint, objWatch[QD.strExpressComplaint])}
+                {descOf(cllExpressComplaint, objWatch[QD.strExpressComplaint])}
               </div>
             </div>
           </div>
@@ -226,13 +231,13 @@ export default function CierreM3() {
                 <div className="zds-field-wrap">
                   <span className="info-bar-label">Tipo de Fraude</span>
                   <div className="info-bar-value" style={{ marginTop: 'var(--zs-50)' }}>
-                    {desc(cllFraudType, objWatch[QD.strFraudType])}
+                    {descOf(cllFraudType, objWatch[QD.strFraudType])}
                   </div>
                 </div>
                 <div className="zds-field-wrap">
                   <span className="info-bar-label">Modalidad de Fraude</span>
                   <div className="info-bar-value" style={{ marginTop: 'var(--zs-50)' }}>
-                    {desc(cllFraudModality, objWatch[QD.strFraudModality])}
+                    {descOf(cllFraudModality, objWatch[QD.strFraudModality])}
                   </div>
                 </div>
               </div>

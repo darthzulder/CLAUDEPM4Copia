@@ -3,10 +3,10 @@ import FormSection from '../../../../components/FormSection';
 import { ZdsRadio } from '../../../../components/fields/ZdsFields';
 import RequestFileList from '../../../../components/RequestFileList';
 import { resolveFileId } from '../../../../core/useRequestFiles';
-import { useCollection } from '../../../../core/useCollection';
+import { useCollection, descOf, useSyncDesc } from '../../../../core/useCollection';
 import { QD, QD_COLLECTIONS, OPTIONS_SI_NO } from '../fields/fields';
 import type { FormularioSuperintendenciaFormData } from '../fields/fields';
-import { Ro, descOpt } from './FormularioSuperintendencia';
+import { Ro } from './FormularioSuperintendencia';
 
 interface Props {
   form: UseFormReturn<FormularioSuperintendenciaFormData>;
@@ -22,6 +22,10 @@ export default function SeccionFraudeAnexos({ form, err, requestId }: Props) {
   // Cargamos los catalogos de fraude (para resolver el label del código)
   const { options: cllFraudType } = useCollection(QD_COLLECTIONS.fraudType);
   const { options: cllFraudModality } = useCollection(QD_COLLECTIONS.fraudModality);
+
+  // Sincroniza la variable compañera <campo>_desc con la descripción del código (para PM4).
+  useSyncDesc(form, QD.strFraudType, cllFraudType);
+  useSyncDesc(form, QD.strFraudModality, cllFraudModality);
 
   // Fraude es "Back" (Excel PQRS V3.0 #57/#58/#60/#61): la relación con fraude,
   // el tipo, la modalidad y los montos los define el cierre/responsable, no el
@@ -44,8 +48,8 @@ export default function SeccionFraudeAnexos({ form, err, requestId }: Props) {
         {blnIsFraud && (
           <>
             <div className="form-row cols-2">
-              <Ro label="Tipo de Fraude" value={descOpt(cllFraudType, objWatch[QD.strFraudType])} />
-              <Ro label="Modalidad de Fraude" value={descOpt(cllFraudModality, objWatch[QD.strFraudModality])} />
+              <Ro label="Tipo de Fraude" value={descOf(cllFraudType, objWatch[QD.strFraudType])} />
+              <Ro label="Modalidad de Fraude" value={descOf(cllFraudModality, objWatch[QD.strFraudModality])} />
             </div>
             <div className="form-row cols-2">
               <Ro label="Monto Reclamado (COP)" value={objWatch[QD.strClaimedAmount] || '—'} />

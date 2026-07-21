@@ -310,6 +310,45 @@ en silencio (no lo detecta `tsc`, es una comparación de string contra dato din�
 Se incluye este script en el alcance de la migración PM4 recomendada, junto con
 gateways/scripts/SFC ya mencionados en el plan.
 
+## Convención `_desc` — código + descripción para campos de colección
+
+Todo campo respaldado por una colección PM4 sigue esta regla: el campo base guarda el
+**CÓDIGO** (numérico) y viaja una variable **compañera** `<campo>_desc` con la
+**descripción legible** del catálogo. Ejemplo: `qd_strChannel = "13"` +
+`qd_strChannel_desc = "Internet"`. Se descartó un objeto anidado (`{value, id}`) porque
+rompe `resolvePmql` (`String(obj)` → `"[object Object]"`) y los bindings/reportes nativos
+de PM4, que esperan escalares.
+
+**Implementación (frontend):** `core/useCollection.ts` expone `descOf(options, code)`
+(resuelve la descripción) y el hook `useSyncDesc(form, field, options)`, que mantiene
+`form[\`${field}_desc\`]` sincronizado con la descripción del código actual. Como todo
+payload a PM4 se arma con `{ ...formData }` (`completeTask`/`saveDraft`/`sendToPm4`), el
+`_desc` viaja solo, sin tocar ningún submit. **Estas variables `_desc` son datos NUEVOS**
+para PM4: se guardan sin romper nada aunque nadie las lea, pero si el proceso, los
+correos o los reportes deben **usarlas**, hay que crearlas/mapearlas del lado PM4.
+
+**Flip de campos que antes guardaban la ETIQUETA:** varios campos "back" (resueltos por
+regla/derivados, no elegidos directamente en un `<select>`) guardaban el texto del
+catálogo en vez del código, porque sus catálogos PM4 usaban códigos de texto. Al migrar
+esos catálogos a código numérico, estos campos se **flipearon** para guardar `.value`
+(código) en vez de `.label`, y ahora dependen de `_desc` para su descripción:
+`qd_strSex`, `qd_strLgbtiq`, `qd_strSpecialCondition`, `qd_strAdmission` (default
+"No aplica" → código `9`), `qd_strControlEntity`, `qd_strTutela`,
+`qd_strExpressComplaint`, `qd_strPersonType`, `qd_strProductDetail`,
+`qd_strReceptionInstance`. Los inputs read-only que mostraban estos campos (en SCR-000,
+SCR-0051 `SeccionDetalleCaso.tsx`, SCR-0052 `RespuestaAreaResponsable.tsx`) ahora
+muestran su `_desc` correspondiente, no el campo base.
+
+**Diferido — matriz `cat_matriz_motivos` (id 45):** `qd_strInteraction` y
+`qd_strServiceProvided` siguen guardando **texto** (value == label; la matriz no expone
+un código numérico propio para esas columnas). Quedan fuera de esta convención hasta
+definir de dónde saldría su código.
+
+**Dependencia externa:** el flip depende de que los catálogos PM4 (ids 12, 22, 23, 24,
+30, 32, 40, 41, y 19 para `receptionInstance`) ya usen código numérico — confirmado por
+el equipo PM4. Datos de casos viejos radicados con el catálogo anterior (que guardaban
+texto) quedan fuera de alcance de este cambio.
+
 ## Checklist para la migración PM4 (fuera de este repo)
 
 - [ ] Renombrar las 143 variables de proceso del subproceso P01 (Quejas Directas) según la tabla.

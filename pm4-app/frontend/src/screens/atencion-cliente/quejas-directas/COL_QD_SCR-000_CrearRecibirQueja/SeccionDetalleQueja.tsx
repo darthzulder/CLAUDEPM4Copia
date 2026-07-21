@@ -1,10 +1,10 @@
 import { useEffect } from 'react';
 import type { MutableRefObject } from 'react';
-import type { UseFormReturn } from 'react-hook-form';
+import type { FieldPath, UseFormReturn } from 'react-hook-form';
 import FormSection from '../../../../components/FormSection';
 import DocSupportUploader from '../../../../components/DocSupportUploader';
 import { ZdsInput, ZdsSelect, ZdsRadio, ZdsTextarea } from '../../../../components/fields/ZdsFields';
-import { useCollection } from '../../../../core/useCollection';
+import { useCollection, useSyncDesc } from '../../../../core/useCollection';
 import { QD, QD_COLLECTIONS, OPTIONS_SI_NO, SCR000_ADJUNTO_KEYS as ADJUNTO_KEYS } from '../fields/fields';
 import type { CrearRecibirQuejaFormData } from '../fields/fields';
 
@@ -155,41 +155,55 @@ export default function SeccionDetalleQueja({ form, fileRegistry }: Props) {
   }, [blnIsAutos, objWatch[QD.strPlate], setValue]);
 
   // FLD-324 — detalle del producto: primer código de CAT-DETALLE-PRODUCTO para el seguro elegido.
+  // Se almacena el CÓDIGO (.value); la descripción se muestra vía qd_strProductDetail_desc.
   useEffect(() => {
-    setValue(QD.strProductDetail, cllProductDetail[0]?.label ?? '');
+    setValue(QD.strProductDetail, cllProductDetail[0]?.value ?? '');
   }, [cllProductDetail, setValue]);
 
   // FLD-331 — admisión: visible (select) solo cuando el rol es Defensor; en los demás
-  // roles se oculta y se fija en "No aplica" (código 9, CAT-ADMISION).
+  // roles se oculta y se fija en "No aplica" (código 9, CAT-ADMISION). Se guarda el CÓDIGO.
   useEffect(() => {
     if (blnIsDefender || cllAdmission.length === 0) return;
     const objNotApplicable = cllAdmission.find((o) => o.value === '9')
       ?? cllAdmission.find((o) => /no aplica/i.test(o.label));
-    if (objNotApplicable && objWatch[QD.strAdmission] !== objNotApplicable.label) {
-      setValue(QD.strAdmission, objNotApplicable.label);
+    if (objNotApplicable && objWatch[QD.strAdmission] !== objNotApplicable.value) {
+      setValue(QD.strAdmission, objNotApplicable.value);
     }
   }, [blnIsDefender, objWatch[QD.strAdmission], cllAdmission, setValue]);
 
-  // FLD-332 — ente de control por defecto "Otros", resuelto desde CAT-ENTE.
+  // FLD-332 — ente de control por defecto "Otros", resuelto desde CAT-ENTE. Se guarda el CÓDIGO.
   useEffect(() => {
     if (objWatch[QD.strControlEntity] || cllControlEntity.length === 0) return;
     const objOthers = cllControlEntity.find((o) => /otros/i.test(o.label));
-    if (objOthers) setValue(QD.strControlEntity, objOthers.label);
+    if (objOthers) setValue(QD.strControlEntity, objOthers.value);
   }, [objWatch[QD.strControlEntity], cllControlEntity, setValue]);
 
-  // FLD-333 — tutela por defecto "No", resuelta desde CAT-TUTELA.
+  // FLD-333 — tutela por defecto "No", resuelta desde CAT-TUTELA. Se guarda el CÓDIGO.
   useEffect(() => {
     if (objWatch[QD.strTutela] || cllGuardianship.length === 0) return;
     const objNo = cllGuardianship.find((o) => /^\d?\.?\s*no$/i.test(o.label.trim()));
-    if (objNo) setValue(QD.strTutela, objNo.label);
+    if (objNo) setValue(QD.strTutela, objNo.value);
   }, [objWatch[QD.strTutela], cllGuardianship, setValue]);
 
-  // FLD-334 — queja exprés por defecto "No", resuelta desde CAT-EXPRES.
+  // FLD-334 — queja exprés por defecto "No", resuelta desde CAT-EXPRES. Se guarda el CÓDIGO.
   useEffect(() => {
     if (objWatch[QD.strExpressComplaint] || cllExpressComplaint.length === 0) return;
     const objNo = cllExpressComplaint.find((o) => /^\d?\.?\s*no$/i.test(o.label.trim()));
-    if (objNo) setValue(QD.strExpressComplaint, objNo.label);
+    if (objNo) setValue(QD.strExpressComplaint, objNo.value);
   }, [objWatch[QD.strExpressComplaint], cllExpressComplaint, setValue]);
+
+  // Sincroniza cada variable compañera <campo>_desc con la descripción del código guardado.
+  // (strInteraction / strServiceProvided se difieren: guardan texto de la matriz, sin código.)
+  useSyncDesc(form, QD.strSfcProduct, cllInsurance);
+  useSyncDesc(form, QD.strProductDetail, cllProductDetail);
+  useSyncDesc(form, QD.strSfcReason, cllReason);
+  useSyncDesc(form, QD.strAdmission, cllAdmission);
+  useSyncDesc(form, QD.strControlEntity, cllControlEntity);
+  useSyncDesc(form, QD.strTutela, cllGuardianship);
+  useSyncDesc(form, QD.strExpressComplaint, cllExpressComplaint);
+
+  // Nombre de la variable compañera de descripción para el input read-only de detalle de producto.
+  const strProductDetailDesc = `${QD.strProductDetail}_desc` as FieldPath<CrearRecibirQuejaFormData>;
 
   // Atajo para leer el mensaje de error de un campo.
   const err = (in_strName: keyof CrearRecibirQuejaFormData) => errors[in_strName]?.message;
@@ -208,7 +222,7 @@ export default function SeccionDetalleQueja({ form, fileRegistry }: Props) {
           error={err(QD.strSfcProduct)}
         />
         <ZdsInput
-          name={QD.strProductDetail}
+          name={strProductDetailDesc}
           control={control}
           label="Detalle del producto"
           readOnly

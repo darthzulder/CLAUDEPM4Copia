@@ -5,7 +5,7 @@ import {
   ZdsSelect, ZdsTextarea, ZdsRadio,
   ZrButton, ZrAlert, ZrTable, ZdsStatusBadge,
 } from '../../../../components/fields/ZdsFields';
-import { useCollection } from '../../../../core/useCollection';
+import { useCollection, useSyncDesc } from '../../../../core/useCollection';
 import pm4 from '../../../../api/pm4Client';
 import { QD, QD_COLLECTIONS, OPTIONS_SI_NO, SCR0051_MAX_AYUDANTES as MAX_AYUDANTES } from '../fields/fields';
 import type { DetalleReasignacionRespuestaFormData } from '../fields/fields';
@@ -64,6 +64,12 @@ export default function SeccionAsignacion({ form, err, onConfirmarReasignacion, 
   useEffect(() => {
     setValue(QD.strNewAssignee, cllTargetAreaUsers[0]?.label ?? '');
   }, [cllTargetAreaUsers, setValue]);
+
+  // Sincroniza la variable compañera <campo>_desc con la descripción del código (para PM4).
+  useSyncDesc(form, QD.strAssigneeArea, cllArea);
+  useSyncDesc(form, QD.strAssigneeUser, cllAreaUsers);
+  useSyncDesc(form, QD.strTargetArea, cllArea);
+  useSyncDesc(form, QD.strReassignReason, cllReassignReason);
 
   // Guarda un snapshot de la asignación actual y entra en modo reasignación.
   const iniciarReasignacion = () => {

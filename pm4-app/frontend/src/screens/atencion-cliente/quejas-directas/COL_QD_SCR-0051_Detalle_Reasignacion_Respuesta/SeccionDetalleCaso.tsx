@@ -1,7 +1,7 @@
-import type { UseFormReturn } from 'react-hook-form';
+import type { FieldPath, UseFormReturn } from 'react-hook-form';
 import FormSection from '../../../../components/FormSection';
 import { ZdsInput, ZdsTextarea, ZdsStatusBadge } from '../../../../components/fields/ZdsFields';
-import { useCollection } from '../../../../core/useCollection';
+import { useCollection, descOf, useSyncDesc } from '../../../../core/useCollection';
 import { QD, QD_COLLECTIONS, SCR000_ADJUNTO_KEYS } from '../fields/fields';
 import type { DetalleReasignacionRespuestaFormData } from '../fields/fields';
 import DocumentosRadicador from './DocumentosRadicador';
@@ -37,16 +37,22 @@ export default function SeccionDetalleCaso({ form, estado, nombre, identificacio
   const { options: cllReason } = useCollection(QD_COLLECTIONS.sfcReason);
   const { options: cllAdmission } = useCollection(QD_COLLECTIONS.admission);
 
-  // Resuelve la descripción de un código contra su catálogo.
-  const desc = (in_lstOptions: { value: string; label: string }[], in_strCode: string | undefined): string => {
-    if (!in_strCode) return '—';
-    return in_lstOptions.find((o) => o.value === in_strCode)?.label ?? in_strCode;
-  };
+  // Sincroniza la variable compañera <campo>_desc con la descripción del código (para PM4).
+  useSyncDesc(form, QD.strChannel, cllChannel);
+  useSyncDesc(form, QD.strSfcProduct, cllProduct);
+  useSyncDesc(form, QD.strSfcReason, cllReason);
+  useSyncDesc(form, QD.strAdmission, cllAdmission);
 
-  const strChannelDesc = desc(cllChannel, objWatch[QD.strChannel]);
-  const strProductDesc = desc(cllProduct, objWatch[QD.strSfcProduct]);
-  const strReasonDesc = desc(cllReason, objWatch[QD.strSfcReason]);
-  const strAdmissionDesc = desc(cllAdmission, objWatch[QD.strAdmission]);
+  const strChannelDesc = descOf(cllChannel, objWatch[QD.strChannel]);
+  const strProductDesc = descOf(cllProduct, objWatch[QD.strSfcProduct]);
+  const strReasonDesc = descOf(cllReason, objWatch[QD.strSfcReason]);
+  const strAdmissionDesc = descOf(cllAdmission, objWatch[QD.strAdmission]);
+
+  // Estos campos guardan el CÓDIGO (numérico) desde SCR-000; para el display read-only
+  // usamos la variable compañera <campo>_desc que viaja en task.data.
+  const strPersonTypeDesc = `${QD.strPersonType}_desc` as FieldPath<DetalleReasignacionRespuestaFormData>;
+  const strReceptionInstanceDesc = `${QD.strReceptionInstance}_desc` as FieldPath<DetalleReasignacionRespuestaFormData>;
+  const strControlEntityDesc = `${QD.strControlEntity}_desc` as FieldPath<DetalleReasignacionRespuestaFormData>;
 
   return (
     <>
@@ -65,7 +71,7 @@ export default function SeccionDetalleCaso({ form, estado, nombre, identificacio
         <div className="form-row cols-2">
           <ZdsInput name={QD.strEmail} control={control} label="Correo Electrónico" readOnly
             helpText="Destino del correo de respuesta final." />
-          <ZdsInput name={QD.strPersonType} control={control} label="Tipo de Persona" readOnly />
+          <ZdsInput name={strPersonTypeDesc} control={control} label="Tipo de Persona" readOnly />
         </div>
       </FormSection>
 
@@ -86,12 +92,12 @@ export default function SeccionDetalleCaso({ form, estado, nombre, identificacio
           </div>
         </div>
         <div className="form-row cols-3">
-          <ZdsInput name={QD.strReceptionInstance} control={control} label="Instancia de Recepción" readOnly />
+          <ZdsInput name={strReceptionInstanceDesc} control={control} label="Instancia de Recepción" readOnly />
           <div className="zds-field-wrap">
             <span className="info-bar-label">Admisión</span>
             <div className="info-bar-value" style={{ marginTop: 'var(--zs-50)' }}>{strAdmissionDesc}</div>
           </div>
-          <ZdsInput name={QD.strControlEntity} control={control} label="Ente de Control" readOnly />
+          <ZdsInput name={strControlEntityDesc} control={control} label="Ente de Control" readOnly />
         </div>
       </FormSection>
 

@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import type { FieldValues, Path, PathValue, UseFormReturn } from 'react-hook-form';
 import pm4 from '../api/pm4Client';
 
 export interface CollectionDef {
@@ -100,4 +101,40 @@ export function useCollection(
   }, [in_objDef?.id, String(genDependsOnValue)]);
 
   return { options, loading, rawMap, records };
+}
+
+// Resuelve la DESCRIPCIÓN (label) de un código contra las opciones de una colección.
+// Fuente única que reemplaza las copias locales de desc()/descOpt() en las pantallas.
+// Fallback al propio código si no hay match; '—' cuando no hay código (para render de
+// solo lectura).
+export function descOf(
+  in_lstOptions: readonly CollectionOption[],
+  in_strCode: string | undefined,
+): string {
+  if (!in_strCode) return '—';
+  return in_lstOptions.find((in_objOpt) => in_objOpt.value === in_strCode)?.label ?? in_strCode;
+}
+
+// Mantiene sincronizada la variable COMPAÑERA `<field>_desc` en el estado del formulario
+// con la descripción del código guardado en `field`. Como los payloads a PM4 se arman con
+// { ...formData } (completeTask/saveDraft/sendToPm4), el `_desc` viaja solo, sin tocar el
+// submit. Convención: el campo base guarda el CÓDIGO (numérico) y `<field>_desc` la etiqueta.
+// Para código vacío escribe '' (no '—'), para no mandar guiones a PM4.
+export function useSyncDesc<T extends FieldValues>(
+  in_objForm: UseFormReturn<T>,
+  in_strField: string,
+  in_lstOptions: readonly CollectionOption[],
+  in_objOpts?: { suffix?: string },
+): void {
+  const { watch, setValue } = in_objForm;
+  const strSuffix = in_objOpts?.suffix ?? '_desc';
+  // El campo `_desc` no está tipado en el form de cada pantalla; se castea (mismo criterio
+  // que los `as Record<string,unknown>` que el repo ya usa al enviar a PM4).
+  const strCode = watch(in_strField as Path<T>) as unknown as string | undefined;
+
+  useEffect(() => {
+    const strDesc = strCode ? descOf(in_lstOptions, strCode) : '';
+    setValue(`${in_strField}${strSuffix}` as Path<T>, strDesc as PathValue<T, Path<T>>);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [strCode, in_lstOptions]);
 }

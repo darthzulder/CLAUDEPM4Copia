@@ -2,7 +2,7 @@ import { useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import { useTask } from '../../../../core/useTask';
 import { pm4TasksUrl } from '../../../../core/useToken';
-import { useCollection } from '../../../../core/useCollection';
+import { useCollection, descOf, useSyncDesc } from '../../../../core/useCollection';
 import ScreenHeader from '../../../../components/ScreenHeader';
 import FormSection from '../../../../components/FormSection';
 import { ActionBar } from '../../../../components/ActionBar';
@@ -24,12 +24,6 @@ export function Ro({ label, value }: { label: string; value: string }) {
       <div className="info-bar-value" style={{ marginTop: 'var(--zs-50)' }}>{value}</div>
     </div>
   );
-}
-
-// Resuelve la descripción de un código contra su catálogo (label si existe, si no el código).
-export function descOpt(in_lstOptions: readonly { value: string; label: string }[], in_strCode: string | undefined): string {
-  if (!in_strCode) return '—';
-  return in_lstOptions.find((o) => o.value === in_strCode)?.label ?? in_strCode;
 }
 
 export default function FormularioSuperintendencia() {
@@ -54,6 +48,21 @@ export default function FormularioSuperintendencia() {
   const { options: cllTutela } = useCollection(QD_COLLECTIONS.tutela);
   const { options: cllMarking } = useCollection(QD_COLLECTIONS.marking);
   const { options: cllExpressComplaint } = useCollection(QD_COLLECTIONS.expressComplaint);
+
+  // Sincroniza la variable compañera <campo>_desc con la descripción del código guardado.
+  // El campo base mantiene el CÓDIGO que espera el BPM/SFC; _desc viaja junto para lectura.
+  useSyncDesc(form, QD.strSpecialCondition, cllSpecialCond);
+  useSyncDesc(form, QD.strSex, cllSex);
+  useSyncDesc(form, QD.strLgbtiq, OPTIONS_LGBTIQ);
+  useSyncDesc(form, QD.strDigitalProduct, cllDigitalProduct);
+  useSyncDesc(form, QD.strComplaintStatus, cllComplaintStatus);
+  useSyncDesc(form, QD.strFavorability, cllFavorability);
+  useSyncDesc(form, QD.strAcceptance, cllAcceptance);
+  useSyncDesc(form, QD.strRectification, cllRectification);
+  useSyncDesc(form, QD.strWithdrawal, cllWithdrawal);
+  useSyncDesc(form, QD.strTutela, cllTutela);
+  useSyncDesc(form, QD.strMarking, cllMarking);
+  useSyncDesc(form, QD.strExpressComplaint, cllExpressComplaint);
 
   // Pre-poblamos el formulario con los datos del caso. reset() reemplaza todo el
   // estado, así que TODAS las claves de task.data (incl. los campos "Back"
@@ -141,11 +150,11 @@ export default function FormularioSuperintendencia() {
               Especial es Front editable (Excel PQRS V3.0 #23/#26). */}
           <FormSection title="Datos del Consumidor — Campos SFC">
             <div className="form-row cols-2">
-              <Ro label="Sexo" value={descOpt(cllSex, objWatch[QD.strSex])} />
-              <Ro label="LGBTIQ+" value={descOpt(OPTIONS_LGBTIQ, objWatch[QD.strLgbtiq])} />
+              <Ro label="Sexo" value={descOf(cllSex, objWatch[QD.strSex])} />
+              <Ro label="LGBTIQ+" value={descOf(OPTIONS_LGBTIQ, objWatch[QD.strLgbtiq])} />
             </div>
             <div className="form-row cols-2">
-              <Ro label="Producto Digital" value={descOpt(cllDigitalProduct, objWatch[QD.strDigitalProduct])} />
+              <Ro label="Producto Digital" value={descOf(cllDigitalProduct, objWatch[QD.strDigitalProduct])} />
               <ZdsSelect name={QD.strSpecialCondition} control={control} label="Condición Especial"
                 options={cllSpecialCond} required rules={objReq} error={err(QD.strSpecialCondition)}
                 helpText="CAT-COND-ESP (Front, obligatorio SFC)." />
@@ -155,18 +164,18 @@ export default function FormularioSuperintendencia() {
           {/* ── S3 · Condición de la Queja (SEC-030) — solo lectura (Back) ── */}
           <FormSection title="Condición de la Queja">
             <div className="form-row cols-3">
-              <Ro label="Estado de la Queja o Reclamo" value={descOpt(cllComplaintStatus, objWatch[QD.strComplaintStatus])} />
-              <Ro label="Favorabilidad" value={descOpt(cllFavorability, objWatch[QD.strFavorability])} />
-              <Ro label="Aceptación" value={descOpt(cllAcceptance, objWatch[QD.strAcceptance])} />
+              <Ro label="Estado de la Queja o Reclamo" value={descOf(cllComplaintStatus, objWatch[QD.strComplaintStatus])} />
+              <Ro label="Favorabilidad" value={descOf(cllFavorability, objWatch[QD.strFavorability])} />
+              <Ro label="Aceptación" value={descOf(cllAcceptance, objWatch[QD.strAcceptance])} />
             </div>
             <div className="form-row cols-3">
-              <Ro label="Rectificación" value={descOpt(cllRectification, objWatch[QD.strRectification])} />
-              <Ro label="Desistimiento" value={descOpt(cllWithdrawal, objWatch[QD.strWithdrawal])} />
-              <Ro label="Tutela" value={descOpt(cllTutela, objWatch[QD.strTutela])} />
+              <Ro label="Rectificación" value={descOf(cllRectification, objWatch[QD.strRectification])} />
+              <Ro label="Desistimiento" value={descOf(cllWithdrawal, objWatch[QD.strWithdrawal])} />
+              <Ro label="Tutela" value={descOf(cllTutela, objWatch[QD.strTutela])} />
             </div>
             <div className="form-row cols-3">
-              <Ro label="Marcación" value={descOpt(cllMarking, objWatch[QD.strMarking])} />
-              <Ro label="Queja Exprés" value={descOpt(cllExpressComplaint, objWatch[QD.strExpressComplaint])} />
+              <Ro label="Marcación" value={descOf(cllMarking, objWatch[QD.strMarking])} />
+              <Ro label="Queja Exprés" value={descOf(cllExpressComplaint, objWatch[QD.strExpressComplaint])} />
               <div />
             </div>
           </FormSection>

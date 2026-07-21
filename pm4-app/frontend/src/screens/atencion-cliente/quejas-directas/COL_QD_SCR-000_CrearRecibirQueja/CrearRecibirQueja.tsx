@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 import { useForm } from 'react-hook-form';
+import type { FieldPath } from 'react-hook-form';
 import { useTask } from '../../../../core/useTask';
 import ScreenHeader from '../../../../components/ScreenHeader';
 import FormSection from '../../../../components/FormSection';
@@ -9,7 +10,7 @@ import {
   ZdsStatusBadge, ZrButton, ZrAlert, ZrLoader, ZrModal,
 } from '../../../../components/fields/ZdsFields';
 import pm4 from '../../../../api/pm4Client';
-import { useCollection } from '../../../../core/useCollection';
+import { useCollection, useSyncDesc } from '../../../../core/useCollection';
 import {
   QD, QD_COLLECTIONS,
   SCR000_DEFAULTS as DEFAULTS, SCR000_ADJUNTO_KEYS as ADJUNTO_KEYS,
@@ -67,6 +68,19 @@ export default function CrearRecibirQueja() {
   const { options: cllChannel } = useCollection(QD_COLLECTIONS.channel);
   const { options: cllAlliance } = useCollection(QD_COLLECTIONS.alliance);
 
+  // Sincroniza la variable compañera <campo>_desc con la descripción del código guardado.
+  // El campo base guarda el CÓDIGO (numérico); _desc viaja junto a PM4 para lectura.
+  useSyncDesc(form, QD.strRequestType, cllRequestType);
+  useSyncDesc(form, QD.strFilerRole, cllRole);
+  useSyncDesc(form, QD.strChannel, cllChannel);
+  useSyncDesc(form, QD.strReceptionPoint, cllReceptionPoint);
+  useSyncDesc(form, QD.strReceptionInstance, cllInstance);
+  useSyncDesc(form, QD.strAlliance, cllAlliance);
+
+  // Nombre de la variable compañera de descripción para inputs read-only (el campo base
+  // guarda el código; se muestra el _desc legible).
+  const strReceptionInstanceDesc = `${QD.strReceptionInstance}_desc` as FieldPath<CrearRecibirQuejaFormData>;
+
   // Empleado Zurich = rol código '3' (ver RUL-000-01). Solo este rol ve el campo Alianza.
   const blnIsZurichEmp = String(objWatch[QD.strFilerRole]) === '3';
 
@@ -87,7 +101,8 @@ export default function CrearRecibirQueja() {
     if (strRole === '4') strInstanceCode = '3';
     else if (['1', '2', '3', '5'].includes(strRole)) strInstanceCode = '2';
     const objInstance = cllInstance.find((o) => o.value === strInstanceCode);
-    if (objInstance) form.setValue(QD.strReceptionInstance, objInstance.label);
+    // Guardamos el CÓDIGO (la descripción viaja en qd_strReceptionInstance_desc vía useSyncDesc).
+    if (objInstance) form.setValue(QD.strReceptionInstance, objInstance.value);
   }, [objWatch[QD.strFilerRole], cllInstance, form]);
 
   // Punto de recepción por defecto para radicación web = "Internet" (CAT-PUNTO).
@@ -331,7 +346,7 @@ export default function CrearRecibirQueja() {
                 error={err(QD.strReceptionPoint)} />
             </div>
             <div className="form-row cols-2">
-              <ZdsInput name={QD.strReceptionInstance} control={control} label="Instancia de Recepción" readOnly
+              <ZdsInput name={strReceptionInstanceDesc} control={control} label="Instancia de Recepción" readOnly
                 helpText="Asignada automáticamente según el rol (CAT-INSTANCIA)." />
               {blnIsZurichEmp ? (
                 <ZdsSelect name={QD.strAlliance} control={control} label="Alianza"
