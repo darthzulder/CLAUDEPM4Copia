@@ -6,6 +6,7 @@ import ScreenHeader from '../../../../components/ScreenHeader';
 import InfoBar from '../../../../components/InfoBar';
 import { ActionBar } from '../../../../components/ActionBar';
 import { ZrButton, ZrAlert, ZrModal, ZrLoader, ZdsStatusBadge } from '../../../../components/fields/ZdsFields';
+import PreviewModal from '../../../../components/PreviewModal';
 import pm4 from '../../../../api/pm4Client';
 import { QD, SCR0051_DEFAULTS as DEFAULTS, SCR0051_SLA_UMBRAL_PRORROGA as SLA_UMBRAL_PRORROGA } from '../fields/fields';
 import type { DetalleReasignacionRespuestaFormData, AccionFlujoCombinado } from '../fields/fields';
@@ -44,6 +45,27 @@ export default function DetalleReasignacionRespuesta() {
   // Datos del consumidor derivados de los campos granulares producidos por SCR-000.
   const strName = (objWatch[QD.strCompanyName] || `${objWatch[QD.strFirstName] ?? ''} ${objWatch[QD.strLastName] ?? ''}`).trim();
   const strIdentification = `${objWatch[QD.strIdType] ?? ''} ${objWatch[QD.strIdNumber] ?? ''}`.trim();
+
+  // ACT-0051-05 — Vista previa: generamos la carta de respuesta (HTML del correo) y la
+  // servimos como blob a PreviewModal (mismo visor ancho que el resto de vistas previas).
+  // Se construye al abrir con la foto actual del formulario y se revoca al cerrar.
+  const [strPreviewUrl, setStrPreviewUrl] = useState<string | null>(null);
+  useEffect(() => {
+    if (!blnShowPreview) return;
+    const objData = form.getValues();
+    const strHtml = buildRespuestaFinalHtml({
+      tipo: objData[QD.strRequestType] || 'queja',
+      numeroRadicado: objData[QD.strBpmCaseId] || '',
+      nombre: (objData[QD.strCompanyName] || `${objData[QD.strFirstName] ?? ''} ${objData[QD.strLastName] ?? ''}`).trim(),
+      interaccion: objData[QD.strInteraction] || '',
+      loQueOcurrio: objData[QD.strComplaintText] || '',
+      nuestraRespuesta: objData[QD.strClientResponse] || '',
+      textoProcede: objData[QD.strActionsTaken] || '',
+    });
+    const strUrl = URL.createObjectURL(new Blob([strHtml], { type: 'text/html' }));
+    setStrPreviewUrl(strUrl);
+    return () => { URL.revokeObjectURL(strUrl); setStrPreviewUrl(null); };
+  }, [blnShowPreview, form]);
 
   // Recorremos el registro de archivos para subir cada adjunto a PM4.
   const uploadFiles = async (in_intRequestId: number) => {
@@ -192,33 +214,16 @@ export default function DetalleReasignacionRespuesta() {
         </ZrModal>
       )}
 
-      {/* ACT-0051-05 · Vista Previa Respuesta Final */}
-      {blnShowPreview && (
-        <ZrModal model={blnShowPreview} onChange={(open: boolean) => setBlnShowPreview(open)}>
-          <h3 style={{ margin: '0 0 var(--zs-75)', font: 'var(--zf-h-20--700)', color: 'var(--z-text)' }}>
-            Vista previa — carta de respuesta final
-          </h3>
-          <p className="subsection-note">Destinatario: {strName} ({objWatch[QD.strEmail]})</p>
-          {/* Se renderiza el HTML del correo en un iframe aislado para preservar
-              su layout table-based sin que sus estilos afecten a la app. */}
-          <iframe
-            title="Vista previa carta de respuesta final"
-            className="email-preview-frame"
-            srcDoc={buildRespuestaFinalHtml({
-              tipo: objWatch[QD.strRequestType] || 'queja',
-              numeroRadicado: objWatch[QD.strBpmCaseId] || '',
-              nombre: strName,
-              interaccion: objWatch[QD.strInteraction] || '',
-              loQueOcurrio: objWatch[QD.strComplaintText] || '',
-              nuestraRespuesta: objWatch[QD.strClientResponse] || '',
-              textoProcede: objWatch[QD.strActionsTaken] || '',
-            })}
-          />
-          <div z-flex="75" z-align="right:center" style={{ marginTop: 'var(--zs-100)' }}>
-            <ZrButton config="secondary:s" onClick={() => setBlnShowPreview(false)}>Cerrar</ZrButton>
-          </div>
-        </ZrModal>
-      )}
+      {/* ACT-0051-05 · Vista Previa Respuesta Final (visor ancho reutilizado) */}
+      <PreviewModal
+        isOpen={blnShowPreview && !!strPreviewUrl}
+        onClose={() => setBlnShowPreview(false)}
+        previewDoc={{
+          fileName: 'Vista previa — carta de respuesta final',
+          descripcion: `Destinatario: ${strName} (${objWatch[QD.strEmail] || '—'})`,
+          blobUrl: strPreviewUrl,
+        }}
+      />
     </div>
   );
 }
