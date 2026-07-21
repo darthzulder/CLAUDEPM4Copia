@@ -1,8 +1,8 @@
 import { useEffect } from 'react';
-import type { UseFormReturn } from 'react-hook-form';
+import type { FieldPath, UseFormReturn } from 'react-hook-form';
 import FormSection from '../../../../components/FormSection';
 import { ZdsInput, ZdsSelect } from '../../../../components/fields/ZdsFields';
-import { useCollection } from '../../../../core/useCollection';
+import { useCollection, useSyncDesc } from '../../../../core/useCollection';
 import { QD, QD_COLLECTIONS, LOCK_COUNTRY, DEFAULT_COUNTRY_CODE } from '../fields/fields';
 import type { CrearRecibirQuejaFormData } from '../fields/fields';
 
@@ -25,18 +25,34 @@ export default function SeccionConsumidor({ form }: Props) {
   const { options: cllSex } = useCollection(QD_COLLECTIONS.sex);
   const { options: cllPersonType } = useCollection(QD_COLLECTIONS.personType);
 
+  // Sincroniza la variable compañera <campo>_desc con la descripción del código guardado.
+  // El campo base guarda el CÓDIGO (numérico, catálogos PM4 actualizados); _desc viaja a PM4.
+  useSyncDesc(form, QD.strIdType, cllIdType);
+  useSyncDesc(form, QD.strCountryCode, cllCountry);
+  useSyncDesc(form, QD.strDepartment, cllDepartment);
+  useSyncDesc(form, QD.strCity, cllCity);
+  useSyncDesc(form, QD.strSex, cllSex);
+  useSyncDesc(form, QD.strLgbtiq, cllLgbtiq);
+  useSyncDesc(form, QD.strSpecialCondition, cllSpecialCond);
+  useSyncDesc(form, QD.strPersonType, cllPersonType);
+
+  // Nombre de la variable compañera de descripción para el input read-only de tipo de persona
+  // (el campo base guarda el código; se muestra el _desc legible).
+  const strPersonTypeDesc = `${QD.strPersonType}_desc` as FieldPath<CrearRecibirQuejaFormData>;
+
   // FLD-320 — sexo por defecto "No informa" (back, pendiente API SFC), resuelto desde CAT-SEXO.
+  // Se busca la opción por label pero se almacena el CÓDIGO (.value).
   useEffect(() => {
     if (objWatch[QD.strSex] || cllSex.length === 0) return;
     const objNotReported = cllSex.find((o) => /no informa/i.test(o.label));
-    if (objNotReported) setValue(QD.strSex, objNotReported.label);
+    if (objNotReported) setValue(QD.strSex, objNotReported.value);
   }, [objWatch[QD.strSex], cllSex, setValue]);
 
   // FLD-321 — LGBTIQ+ oculto, por defecto "No informa" (back), resuelto desde CAT-LGBTIQ.
   useEffect(() => {
     if (objWatch[QD.strLgbtiq] || cllLgbtiq.length === 0) return;
     const objNotReported = cllLgbtiq.find((o) => /no informa/i.test(o.label));
-    if (objNotReported) setValue(QD.strLgbtiq, objNotReported.label);
+    if (objNotReported) setValue(QD.strLgbtiq, objNotReported.value);
   }, [objWatch[QD.strLgbtiq], cllLgbtiq, setValue]);
 
   // FLD-322 — Condición especial oculta, por defecto "No aplica" (back), resuelto desde CAT-COND-ESP.
@@ -44,7 +60,7 @@ export default function SeccionConsumidor({ form }: Props) {
   useEffect(() => {
     if (objWatch[QD.strSpecialCondition] || cllSpecialCond.length === 0) return;
     const objNone = cllSpecialCond.find((o) => /no aplica/i.test(o.label));
-    if (objNone) setValue(QD.strSpecialCondition, objNone.label);
+    if (objNone) setValue(QD.strSpecialCondition, objNone.value);
   }, [objWatch[QD.strSpecialCondition], cllSpecialCond, setValue]);
 
   // RUL-000-02 / RUL-000-03 — el tipo de documento define el tipo de persona.
@@ -55,10 +71,11 @@ export default function SeccionConsumidor({ form }: Props) {
   const blnIsLegalEntity = strPersonTypeCode === '2';
 
   // FLD-315 — tipo de persona computado (back), resuelto desde CAT-TIPO-PERSONA.
+  // Se almacena el CÓDIGO (.value); la descripción se muestra vía qd_strPersonType_desc.
   useEffect(() => {
     if (!strPersonTypeCode || cllPersonType.length === 0) return;
     const objPersonType = cllPersonType.find((o) => o.value === strPersonTypeCode);
-    if (objPersonType) setValue(QD.strPersonType, objPersonType.label);
+    if (objPersonType) setValue(QD.strPersonType, objPersonType.value);
   }, [strPersonTypeCode, cllPersonType, setValue]);
 
   // RUL-000-09 — al cambiar el departamento se limpia y deshabilita la ciudad.
@@ -179,7 +196,7 @@ export default function SeccionConsumidor({ form }: Props) {
           error={err(QD.strEmail)}
         />
         <ZdsInput
-          name={QD.strPersonType}
+          name={strPersonTypeDesc}
           control={control}
           label="Tipo de persona"
           readOnly

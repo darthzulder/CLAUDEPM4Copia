@@ -365,6 +365,7 @@ const { control, handleSubmit, reset, formState: { errors } } = useForm<MiFormDa
 - Diseños DRY y ZurichDS: seguir la **Jerarquía de decisión de UI** (arriba). El **layout** se hace con primitivos DS (`z-flex`/`z-align`/`z-grid`), no con `display:flex` a mano; los **elementos** con componentes propios o del DS vía `ZdsFields`. No se permiten `styles.css` locales ni estilos en línea *ad-hoc*. [shared.css](file:///g:/DockerProys/CLAUDEPM4Copia/pm4-app/frontend/src/shared.css) es la única hoja de estilos global y queda reservada a: tablas editables, cards/secciones con estilo de dominio, tipografías (`Capt-12`, `Capt-14`) y grids de campos (`form-row.cols-*`) — siempre con tokens. Las píldoras de estado usan `ZdsStatusBadge` (no clases `.chip`).
 - `OPTIONS` en `variables.ts` usan `as const` → pasarlos directamente a los campos (aceptan `readonly`)
 - Componente principal < 300 líneas; secciones grandes van como funciones locales en el mismo archivo o archivos separados en la misma carpeta
+- **Convención `_desc` (campos de colección):** todo campo respaldado por una colección PM4 guarda el **código** y viaja con una variable compañera `<campo>_desc` con la descripción legible (p.ej. `qd_strChannel="13"` + `qd_strChannel_desc="Internet"`). Se sincroniza con `useSyncDesc(form, campo, options)` (`core/useCollection.ts`) junto al `useCollection` del campo; el resolver de solo lectura es `descOf(options, code)`. Detalle completo en `screens/atencion-cliente/quejas-directas/fields/MAPEO_qd_old_new.md`.
 
 ### Datos pre-cargados desde PM4
 

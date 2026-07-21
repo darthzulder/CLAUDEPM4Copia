@@ -4,7 +4,7 @@ import FormSection from '../../../../components/FormSection';
 import DocSupportUploader from '../../../../components/DocSupportUploader';
 import RequestFileList from '../../../../components/RequestFileList';
 import { ZdsSelect, ZdsTextarea, ZdsInput, ZrAlert, ZrButton } from '../../../../components/fields/ZdsFields';
-import { useCollection } from '../../../../core/useCollection';
+import { useCollection, useSyncDesc } from '../../../../core/useCollection';
 import {
   QD, QD_COLLECTIONS, SCR0051_OPTIONS_FAVOR as OPTIONS_FAVOR,
   SCR0051_ADJUNTO_KEYS as ADJUNTO_KEYS, SCR0051_MAX_SOPORTES as MAX_SOPORTES,
@@ -39,6 +39,7 @@ export default function SeccionRespuesta({ form, fileRegistry, err, onVistaPrevi
   const [blnExtensionMode, setBlnExtensionMode] = useState(false);
   // Cargamos el catálogo de motivos de prórroga.
   const { options: cllExtensionReason } = useCollection(QD_COLLECTIONS.extensionReason);
+  useSyncDesc(form, QD.strExtensionReason, cllExtensionReason);
   const blnCanSendExt = !!objWatch[QD.strExtensionReason];
 
   return (

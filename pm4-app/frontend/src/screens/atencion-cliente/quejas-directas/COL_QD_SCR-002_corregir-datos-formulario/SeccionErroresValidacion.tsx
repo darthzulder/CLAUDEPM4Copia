@@ -2,7 +2,7 @@ import { useEffect } from 'react';
 import type { UseFormReturn } from 'react-hook-form';
 import { ZdsInput, ZdsSelect, ZrAlert } from '../../../../components/fields/ZdsFields';
 import FormSection from '../../../../components/FormSection';
-import { useCollection } from '../../../../core/useCollection';
+import { useCollection, useSyncDesc } from '../../../../core/useCollection';
 import type { CampoConError } from '../fields/types';
 import type { CorregirDatosFormData } from '../fields/fields';
 import { QD, QD_COLLECTIONS } from '../fields/fields';
@@ -33,6 +33,10 @@ export default function SeccionErroresValidacion({ camposConError, form, trigger
   // Cargamos los catalogos de departamento y municipio.
   const { options: cllDepartment } = useCollection(QD_COLLECTIONS.department);
   const { options: cllCity } = useCollection(QD_COLLECTIONS.city, { [QD.strDepartment]: strDepartment });
+
+  // Sincroniza la variable compañera <campo>_desc con la descripción del código (para PM4).
+  useSyncDesc(form, QD.strDepartment, cllDepartment);
+  useSyncDesc(form, QD.strCity, cllCity);
 
   // Al cambiar departamento, limpiar municipio si ya no pertenece a la lista nueva
   useEffect(() => {

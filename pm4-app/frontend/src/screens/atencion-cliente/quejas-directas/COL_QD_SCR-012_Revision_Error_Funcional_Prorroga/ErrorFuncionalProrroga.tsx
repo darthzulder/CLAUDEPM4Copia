@@ -1,7 +1,7 @@
 import { useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import { useTask } from '../../../../core/useTask';
-import { useCollection } from '../../../../core/useCollection';
+import { useCollection, useSyncDesc } from '../../../../core/useCollection';
 import ScreenHeader from '../../../../components/ScreenHeader';
 import FormSection from '../../../../components/FormSection';
 import { ActionBar } from '../../../../components/ActionBar';
@@ -27,6 +27,7 @@ export default function ErrorFuncionalProrroga() {
 
   // Cargamos el catalogo de motivos de prorroga
   const { options: cllExtensionReason } = useCollection(QD_COLLECTIONS.extensionReason);
+  useSyncDesc(form, QD.strExtensionReason, cllExtensionReason);
 
   // Pre-poblamos el formulario con los datos del caso
   useEffect(() => {
