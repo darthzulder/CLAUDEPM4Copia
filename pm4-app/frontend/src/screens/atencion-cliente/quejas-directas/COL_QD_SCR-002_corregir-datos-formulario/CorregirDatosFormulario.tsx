@@ -7,7 +7,7 @@ import ScreenHeader from '../../../../components/ScreenHeader';
 import { ZdsInput, ZrAlert, ZrButton, ZrLoader } from '../../../../components/fields/ZdsFields';
 import { useTask } from '../../../../core/useTask';
 import { pm4TasksUrl } from '../../../../core/useToken';
-import { QD, SCR002_ERRORES_EJEMPLO as ERRORES_EJEMPLO } from '../fields/fields';
+import { QD, SCR002_DEFAULTS as DEFAULTS, SCR002_ERRORES_EJEMPLO as ERRORES_EJEMPLO } from '../fields/fields';
 import type { CorregirDatosFormData } from '../fields/fields';
 import type { CampoConError } from '../fields/types';
 import SeccionErroresValidacion from './SeccionErroresValidacion';
@@ -23,7 +23,7 @@ export default function CorregirDatosFormulario() {
   const { task, loading, error, submitting, completeTask, saveDraft } = useTask();
   const [blnTriggered, setBlnTriggered] = useState(false);
 
-  const form = useForm<CorregirDatosFormData>({ mode: 'onChange' });
+  const form = useForm<CorregirDatosFormData>({ mode: 'onChange', defaultValues: DEFAULTS });
   const { control, handleSubmit, reset, trigger, watch, formState: { errors } } = form;
   // Tomamos una foto de los valores actuales del formulario.
   const objWatch = watch();
@@ -52,7 +52,7 @@ export default function CorregirDatosFormulario() {
   // Precargamos el formulario y disparamos la validación de los campos con error.
   useEffect(() => {
     const objData = task?.data as (Partial<CorregirDatosFormData> & Record<string, unknown>) | undefined;
-    if (objData) reset(objData);
+    if (objData) reset({ ...DEFAULTS, ...objData });
 
     // Obtener nombres de error directamente de task.data para no depender de watch()
     const objErrJson = objData?.[QD.strErrorsJson];

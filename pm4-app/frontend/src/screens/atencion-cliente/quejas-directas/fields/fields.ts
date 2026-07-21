@@ -531,14 +531,55 @@ export type CrearRecibirQuejaFormData = Pick<QdFields,
 
 export const SCR000_DEFAULTS = {
   ...QD_GLOBAL_DEFAULTS,
+  // S1 — Tipo de Solicitud y Rol
+  [QD.strRequestType]: '',
+  [QD.strFilerRole]: '',
+  [QD.strChannel]: '',
+  [QD.strReceptionPoint]: '',
+  [QD.strReceptionInstance]: '',
+  [QD.strAlliance]: '',        // Solo visible/enviado si rol = Empleado Zurich (blnIsZurichEmp)
+  // S2 — Datos del Consumidor Financiero
+  [QD.strIdType]: '',
+  [QD.strIdNumber]: '',
+  [QD.strFirstName]: '',       // Solo visible si persona natural
+  [QD.strLastName]: '',        // Solo visible si persona natural
+  [QD.strCompanyName]: '',     // Solo visible si persona jurídica
+  [QD.strContactFirstName]: '', // Solo visible si persona jurídica
+  [QD.strContactLastName]: '', // Solo visible si persona jurídica
+  [QD.strPhone]: '',
+  [QD.strEmail]: '',
+  [QD.strPersonType]: '',
   [QD.strCountryCode]: DEFAULT_COUNTRY_CODE, // RUL-000-10
+  [QD.strDepartment]: '',
+  [QD.strCity]: '',
+  // S3 — Detalle de la Queja
+  [QD.strSfcProduct]: '',
+  [QD.strProductDetail]: '',
   [QD.strReply]: 'NO',
+  [QD.strReplyArgument]: '',   // Solo visible si strReply = 'SI'
+  [QD.strOmbudsmanEscalation]: '', // Extraído de cat_matriz_motivos.escalamientoAdministrador
   [QD.strPlate]: '',          // Anexo02 #25 — solo se llena si producto = Autos
   [QD.strInteraction]: '',    // Anexo02 #30 — cascada cat_matriz_motivos
   [QD.strServiceProvided]: '', // Anexo02 #31 — cascada cat_matriz_motivos (Asistencias)
   [QD.strResponsableRole]: '', // Extraído de cat_matriz_motivos.rolResponsable al completar momento/servicio/motivo
   [QD.strCompensation]: '',    // Extraído de cat_matriz_motivos.resarcimientoAdministrador
   [QD.strSlaAssigned]: '',     // Extraído de cat_matriz_motivos.sla
+  [QD.strSfcReason]: '',
+  [QD.strComplaintText]: '',
+  [QD.strAttach01]: '',
+  [QD.strAttach02]: '',        // Solo se registra al agregar el 2do documento (DocSupportUploader)
+  [QD.strAttach03]: '',        // Solo se registra al agregar el 3er documento
+  [QD.strAttach04]: '',        // Solo se registra al agregar el 4to documento
+  [QD.strAttach05]: '',        // Solo se registra al agregar el 5to documento
+  // S4 — Autorización y Envío
+  [QD.blnDataAuth]: false,
+  [QD.blnCaptcha]: false,
+  [QD.strCcEmail]: '',
+  // S5/S6 — Estado ante SFC / Responsable (post-radicación, back; solo visibles si aplica)
+  [QD.strSmartSupStatus]: '',
+  [QD.strSfcFilingDate]: '',
+  [QD.strAssigneeRole]: '',
+  [QD.strAssignee]: '',
 } as const;
 
 // ═══════════════════════════════════════════════════════════════════════════
@@ -554,6 +595,35 @@ export type CorregirDatosFormData = Pick<QdFields,
   | typeof QD.strReceptionInstance | typeof QD.strReceptionPoint | typeof QD.strAdmission
   | typeof QD.strControlEntity | typeof QD.strComplaintText | typeof QD.strErrorsJson
 >;
+
+// Sin este objeto, react-hook-form no registra ningún campo hasta que
+// SeccionErroresValidacion monta su Controller (solo ocurre si el campo aparece en
+// qd_strErrorsJson) — cualquier campo no listado como erróneo quedaría ausente del
+// payload de completeTask/saveDraft en vez de viajar con su valor precargado.
+export const SCR002_DEFAULTS: Partial<CorregirDatosFormData> = {
+  [QD.strBpmCaseId]: '',
+  [QD.strChannel]: '',
+  [QD.strSlaAssigned]: '',
+  [QD.strFirstName]: '',
+  [QD.strLastName]: '',
+  [QD.strCompanyName]: '',
+  [QD.strIdType]: '',
+  [QD.strIdNumber]: '',
+  [QD.strEmail]: '',
+  [QD.strPersonType]: '',
+  [QD.strCountryCode]: '',
+  [QD.strDepartment]: '',
+  [QD.strCity]: '',
+  [QD.strSfcProduct]: '',
+  [QD.strSfcReason]: '',
+  [QD.strRequestType]: '',
+  [QD.strReceptionInstance]: '',
+  [QD.strReceptionPoint]: '',
+  [QD.strAdmission]: '',
+  [QD.strControlEntity]: '',
+  [QD.strComplaintText]: '',
+  [QD.strErrorsJson]: '',
+};
 
 // Fallback de desarrollo (se usa cuando task.data no tiene qd_strErrorsJson)
 export const SCR002_ERRORES_EJEMPLO: CampoConError[] = [
@@ -598,6 +668,12 @@ export type CorreccionErrorFuncionalFormData = Omit<Pick<QdFields,
 >, typeof QD.strAction> & { [QD.strAction]: AccionErrorFuncional };
 
 export const SCR003_DEFAULTS: Partial<CorreccionErrorFuncionalFormData> = {
+  [QD.strSfcErrorCode]: '',
+  [QD.strAffectedField]: '',
+  [QD.strRejectedValue]: '',
+  [QD.strSfcErrorMessage]: '',
+  [QD.strM1M2AttemptNum]: '',
+  [QD.strRejectionDate]: '',
   [QD.strFieldCorrection]: '',
   [QD.strCorrectionJustif]: '',
   [QD.lstAttemptHistory]: [],
@@ -619,6 +695,14 @@ export type RevisionErrorTecnicoApiFormData = Omit<Pick<QdFields,
 >, typeof QD.strAction> & { [QD.strAction]: AccionErrorTecnico };
 
 export const SCR004_DEFAULTS: Partial<RevisionErrorTecnicoApiFormData> = {
+  [QD.strHttpCode]: '',
+  [QD.strErrorType]: '',
+  [QD.strApiTechMessage]: '',
+  [QD.strEndpointCalled]: '',
+  [QD.strPayloadSent]: '',
+  [QD.strAttemptNum]: '',
+  [QD.strRootCause]: '',
+  [QD.strCorrectionApplied]: '',
   [QD.strPayloadAdjustNeeded]: 'NO',
   [QD.strAction]: 'AUTORIZAR_REENVIO',
 };
@@ -639,6 +723,14 @@ export type RevisionRespuestaSacFormData = Omit<Pick<QdFields,
 >, typeof QD.strAction> & { [QD.strAction]: AccionRevisionSAC };
 
 export const SCR008_DEFAULTS: Partial<RevisionRespuestaSacFormData> = {
+  [QD.strSfcCode]: '',
+  [QD.strSlaAssigned]: '',
+  [QD.strRevisionVersion]: '',
+  [QD.strAssigneeArea]: '',
+  [QD.strDraftDate]: '',
+  [QD.strClientResponse]: '',
+  [QD.strActionsTaken]: '',
+  [QD.strAcknowledgment]: '',
   [QD.lstSupportAttach]: [],
   [QD.strSacRemarks]: '',
   [QD.blnSacApproved]: false,
@@ -685,6 +777,8 @@ export const SCR009_BACK_DEFAULTS = {
 } as const;
 
 export const SCR009_DEFAULTS: Partial<FormularioSuperintendenciaFormData> = {
+  [QD.strSfcCode]: '', [QD.strChannel]: '', [QD.strSfcProduct]: '', [QD.strSfcReason]: '',
+  [QD.strAdmission]: '', [QD.strControlEntity]: '',
   [QD.strSex]: '', [QD.strLgbtiq]: '', [QD.strSpecialCondition]: '',
   [QD.strComplaintStatus]: '', [QD.strFavorability]: '',
   ...SCR009_BACK_DEFAULTS,  // incluye strDigitalProduct='No', aceptación/rectificación/desistimiento
@@ -692,6 +786,7 @@ export const SCR009_DEFAULTS: Partial<FormularioSuperintendenciaFormData> = {
   [QD.strFraudRelated]: 'NO',
   [QD.strFraudType]: '', [QD.strFraudModality]: '', [QD.strClaimedAmount]: '', [QD.strAcknowledgedAmount]: '',
   [QD.strIncludesComplaintAnnex]: '', [QD.strIncludesReplyAttach]: 'SI', [QD.strExtensionDays]: '0',
+  [QD.strFinalReplyPdf]: '',
   [QD.strAction]: 'GUARDAR',
 };
 
@@ -737,6 +832,11 @@ export type RevisionErrorTecnicoProrrogaFormData = Omit<Pick<QdFields,
 >, typeof QD.strAction> & { [QD.strAction]: AccionErrorTecnicoProrroga };
 
 export const SCR011_DEFAULTS: Partial<RevisionErrorTecnicoProrrogaFormData> = {
+  [QD.strExtHttpCode]: '',
+  [QD.strExtErrorType]: '',
+  [QD.strExtTechMessage]: '',
+  [QD.strExtPayload]: '',
+  [QD.strExtAttempt]: '',
   [QD.strExtRootCause]: '',
   [QD.strExtCorrection]: '',
   [QD.strAction]: 'AUTORIZAR_REENVIO',
@@ -756,6 +856,10 @@ export type ErrorFuncionalProrrogaFormData = Omit<Pick<QdFields,
 >, typeof QD.strAction> & { [QD.strAction]: AccionErrorFuncionalProrroga };
 
 export const SCR012_DEFAULTS: Partial<ErrorFuncionalProrrogaFormData> = {
+  [QD.strExtErrorCode]: '',
+  [QD.strExtAffectedField]: '',
+  [QD.strExtErrorMessage]: '',
+  [QD.strExtCurrentAttempt]: '',
   [QD.strExtensionReason]: '',
   [QD.strNewDeadline]: '',
   [QD.strExtensionCounter]: '',
@@ -812,11 +916,35 @@ export type DetalleReasignacionRespuestaFormData = Omit<Pick<QdFields,
 >, typeof QD.strAction> & { [QD.strAction]: AccionFlujoCombinado };
 
 export const SCR0051_DEFAULTS: Partial<DetalleReasignacionRespuestaFormData> = {
+  [QD.strBpmCaseId]: '',
+  [QD.strSfcCode]: '',
+  [QD.strFirstName]: '',
+  [QD.strLastName]: '',
+  [QD.strCompanyName]: '',
+  [QD.strIdType]: '',
+  [QD.strIdNumber]: '',
+  [QD.strEmail]: '',
+  [QD.strPersonType]: '',
+  [QD.strRequestType]: '',
+  [QD.strInteraction]: '',
+  [QD.strChannel]: '',
+  [QD.strSfcProduct]: '',
+  [QD.strSfcReason]: '',
+  [QD.strReceptionInstance]: '',
+  [QD.strReceptionPoint]: '',
+  [QD.strAdmission]: '',
+  [QD.strControlEntity]: '',
+  [QD.strComplaintText]: '',
+  [QD.strSsStatus]: '',
+  [QD.strM1M2Attempts]: '',
+  [QD.strFilingDate]: '',
+  [QD.strSlaAssigned]: '',
   [QD.blnHasAssignee]: false,
   [QD.strNeedsOtherAreas]: 'NO',
   [QD.strAssigneeArea]: '',
   [QD.strAssigneeUser]: '',
   [QD.strAssignmentRemarks]: '',
+  [QD.strCurrentAssignee]: '',
   [QD.strTargetArea]: '',
   [QD.strNewAssignee]: '',
   [QD.strReassignReason]: '',
@@ -825,6 +953,18 @@ export const SCR0051_DEFAULTS: Partial<DetalleReasignacionRespuestaFormData> = {
   [QD.intHelpNumber]: 0,
   [QD.strClientResponse]: '',
   [QD.strActionsTaken]: '',
+  [QD.strAcknowledgment]: '',
+  [QD.strSacRemarks]: '',
+  [QD.strSupport01]: '',
+  [QD.strSupport02]: '',       // Solo se registra al agregar el 2do soporte (DocSupportUploader)
+  [QD.strSupport03]: '',
+  [QD.strSupport04]: '',
+  [QD.strSupport05]: '',
+  [QD.strSupport06]: '',
+  [QD.strSupport07]: '',
+  [QD.strSupport08]: '',
+  [QD.strSupport09]: '',
+  [QD.strSupport10]: '',
   [QD.strFavorability]: '',
   [QD.strExtensionReason]: '',
   [QD.strAction]: 'ENVIAR',
@@ -851,6 +991,24 @@ export type RespuestaAreaResponsableFormData = Omit<Pick<QdFields,
 >, typeof QD.strAction> & { [QD.strAction]: AccionRespuestaArea };
 
 export const SCR0052_DEFAULTS: Partial<RespuestaAreaResponsableFormData> = {
+  [QD.strFirstName]: '',
+  [QD.strLastName]: '',
+  [QD.strCompanyName]: '',
+  [QD.strIdType]: '',
+  [QD.strIdNumber]: '',
+  [QD.strEmail]: '',
+  [QD.strPersonType]: '',
+  [QD.strChannel]: '',
+  [QD.strSfcProduct]: '',
+  [QD.strSfcReason]: '',
+  [QD.strReceptionInstance]: '',
+  [QD.strReceptionPoint]: '',
+  [QD.strAdmission]: '',
+  [QD.strControlEntity]: '',
+  [QD.strComplaintText]: '',
+  [QD.strAssigneeArea]: '',
+  [QD.strAssigneeUser]: '',
+  [QD.strAssignmentRemarks]: '',
   [QD.strAreaComment]: '',
   [QD.strAreaAttach]: '',
   [QD.intHelpNumber]: 0,
