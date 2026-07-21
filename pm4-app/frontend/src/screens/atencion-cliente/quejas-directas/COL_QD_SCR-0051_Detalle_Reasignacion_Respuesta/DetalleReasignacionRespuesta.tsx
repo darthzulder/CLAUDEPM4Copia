@@ -12,6 +12,7 @@ import type { DetalleReasignacionRespuestaFormData, AccionFlujoCombinado } from 
 import SeccionDetalleCaso, { estadoVariant } from './SeccionDetalleCaso';
 import SeccionAsignacion from './SeccionAsignacion';
 import SeccionRespuesta from './SeccionRespuesta';
+import { buildRespuestaFinalHtml } from './respuestaFinalTemplate';
 
 export default function DetalleReasignacionRespuesta() {
   const { task, loading, error, submitting, completeTask, saveDraft } = useTask();
@@ -198,9 +199,21 @@ export default function DetalleReasignacionRespuesta() {
             Vista previa — carta de respuesta final
           </h3>
           <p className="subsection-note">Destinatario: {strName} ({objWatch[QD.strEmail]})</p>
-          <p style={{ font: 'var(--zf-cap-14)', whiteSpace: 'pre-wrap' }}>
-            {objWatch[QD.strClientResponse] || 'Aún no se ha redactado la respuesta al cliente.'}
-          </p>
+          {/* Se renderiza el HTML del correo en un iframe aislado para preservar
+              su layout table-based sin que sus estilos afecten a la app. */}
+          <iframe
+            title="Vista previa carta de respuesta final"
+            className="email-preview-frame"
+            srcDoc={buildRespuestaFinalHtml({
+              tipo: objWatch[QD.strRequestType] || 'queja',
+              numeroRadicado: objWatch[QD.strBpmCaseId] || '',
+              nombre: strName,
+              interaccion: objWatch[QD.strInteraction] || '',
+              loQueOcurrio: objWatch[QD.strComplaintText] || '',
+              nuestraRespuesta: objWatch[QD.strClientResponse] || '',
+              textoProcede: objWatch[QD.strActionsTaken] || '',
+            })}
+          />
           <div z-flex="75" z-align="right:center" style={{ marginTop: 'var(--zs-100)' }}>
             <ZrButton config="secondary:s" onClick={() => setBlnShowPreview(false)}>Cerrar</ZrButton>
           </div>

@@ -1283,3 +1283,13 @@ z-table :is(th, td)[config*="right"] {
   gap: var(--zs-75);
   margin-top: var(--zs-100);
 }
+
+/* ── Vista previa de correo (SCR-0051 · carta de respuesta final) ──
+   iframe aislado que renderiza el HTML del correo con su propio layout. */
+.email-preview-frame {
+  width: 100%;
+  height: 60vh;
+  border: 1px solid var(--z-border);
+  border-radius: 8px;
+  background: var(--zg-white);
+}

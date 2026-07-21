@@ -795,6 +795,7 @@ export type DetalleReasignacionRespuestaFormData = Omit<Pick<QdFields,
   | typeof QD.strBpmCaseId | typeof QD.strSfcCode
   | typeof QD.strFirstName | typeof QD.strLastName | typeof QD.strCompanyName
   | typeof QD.strIdType | typeof QD.strIdNumber | typeof QD.strEmail | typeof QD.strPersonType
+  | typeof QD.strRequestType | typeof QD.strInteraction
   | typeof QD.strChannel | typeof QD.strSfcProduct | typeof QD.strSfcReason
   | typeof QD.strReceptionInstance | typeof QD.strReceptionPoint | typeof QD.strAdmission | typeof QD.strControlEntity
   | typeof QD.strComplaintText
