@@ -651,13 +651,6 @@ export const SCR008_DEFAULTS: Partial<RevisionRespuestaSacFormData> = {
 
 export type AccionFormularioSFC = 'GUARDAR' | 'GUARDAR_BORRADOR';
 
-// CAT-LGBTIQ ⚠ PENDIENTE CRÍTICO — catálogo no confirmado con TI (placeholder).
-export const SCR009_OPTIONS_LGBTIQ = [
-  { value: 'SI', label: 'Sí' },
-  { value: 'NO', label: 'No' },
-  { value: 'NI', label: 'No informa' },
-] as const;
-
 // Nota: SCR-009 ya no valida en front los campos SFC/fraude. Alineado con el
 // Excel PQRS V3.0, esos campos se calculan en el back ("Back"/"Automático"/
 // "Por default") y se muestran en solo lectura; solo Condición Especial (Front)

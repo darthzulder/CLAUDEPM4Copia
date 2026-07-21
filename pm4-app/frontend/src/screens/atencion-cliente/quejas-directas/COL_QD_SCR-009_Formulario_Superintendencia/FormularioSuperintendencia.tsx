@@ -11,7 +11,6 @@ import {
 } from '../../../../components/fields/ZdsFields';
 import {
   QD, QD_COLLECTIONS, SCR009_DEFAULTS as DEFAULTS, SCR009_BACK_DEFAULTS,
-  SCR009_OPTIONS_LGBTIQ as OPTIONS_LGBTIQ,
 } from '../fields/fields';
 import type { FormularioSuperintendenciaFormData, AccionFormularioSFC } from '../fields/fields';
 import SeccionFraudeAnexos from './SeccionFraudeAnexos';
@@ -38,6 +37,7 @@ export default function FormularioSuperintendencia() {
   // Catálogos para resolver el CÓDIGO almacenado en PM4 a su descripción legible.
   // El valor guardado no cambia (sigue siendo el código que espera el BPM/SFC).
   const { options: cllSex } = useCollection(QD_COLLECTIONS.sex);
+  const { options: cllLgbtiq } = useCollection(QD_COLLECTIONS.lgbtiq);
   const { options: cllSpecialCond } = useCollection(QD_COLLECTIONS.specialCondition);
   const { options: cllDigitalProduct } = useCollection(QD_COLLECTIONS.digitalProduct);
   const { options: cllComplaintStatus } = useCollection(QD_COLLECTIONS.complaintStatus);
@@ -53,7 +53,7 @@ export default function FormularioSuperintendencia() {
   // El campo base mantiene el CÓDIGO que espera el BPM/SFC; _desc viaja junto para lectura.
   useSyncDesc(form, QD.strSpecialCondition, cllSpecialCond);
   useSyncDesc(form, QD.strSex, cllSex);
-  useSyncDesc(form, QD.strLgbtiq, OPTIONS_LGBTIQ);
+  useSyncDesc(form, QD.strLgbtiq, cllLgbtiq);
   useSyncDesc(form, QD.strDigitalProduct, cllDigitalProduct);
   useSyncDesc(form, QD.strComplaintStatus, cllComplaintStatus);
   useSyncDesc(form, QD.strFavorability, cllFavorability);
@@ -151,7 +151,7 @@ export default function FormularioSuperintendencia() {
           <FormSection title="Datos del Consumidor — Campos SFC">
             <div className="form-row cols-2">
               <Ro label="Sexo" value={descOf(cllSex, objWatch[QD.strSex])} />
-              <Ro label="LGBTIQ+" value={descOf(OPTIONS_LGBTIQ, objWatch[QD.strLgbtiq])} />
+              <Ro label="LGBTIQ+" value={descOf(cllLgbtiq, objWatch[QD.strLgbtiq])} />
             </div>
             <div className="form-row cols-2">
               <Ro label="Producto Digital" value={descOf(cllDigitalProduct, objWatch[QD.strDigitalProduct])} />
