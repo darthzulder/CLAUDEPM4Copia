@@ -18,8 +18,9 @@ export interface RespuestaFinalVars {
 }
 
 // Escapa caracteres HTML para inyectar texto del usuario sin romper el markup.
-const esc = (in_str: string): string =>
-  (in_str ?? '')
+// Coacciona a string: algunas variables de PM4 pueden llegar como número/otro tipo.
+const esc = (in_val: unknown): string =>
+  String(in_val ?? '')
     .replace(/&/g, '&amp;')
     .replace(/</g, '&lt;')
     .replace(/>/g, '&gt;')
