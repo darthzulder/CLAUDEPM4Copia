@@ -22,6 +22,24 @@ import SeccionConsumidor from './SeccionConsumidor';
 import SeccionDetalleQueja from './SeccionDetalleQueja';
 import RecaptchaModal from '../../../../components/RecaptchaModal';
 
+// Puntos de recepción (CAT-PUNTO, colección 20) que ya no deben ofrecerse en el
+// selector: 2 (Aplicación móvil), 6 (Audio respuesta), 99 (Otros Puntos de recepción).
+const RECEPTION_POINTS_HIDDEN = ['2', '6', '99'];
+
+// Canal (qd_strChannel) ya no es seleccionable: se deriva del punto de recepción
+// elegido (colección 20 → colección 10, CAT-CANAL), según regla de negocio:
+//  · Punto 5 (Call center)         → Canal 5
+//  · Puntos 1, 3, 7 (Internet, Correo electrónico, Redes sociales) → Canal 13
+//  · Punto 4 (Oficina)             → Canal 14
+// Los puntos sin regla (ninguno queda tras ocultar 2/6/99) dejan el canal vacío.
+const CHANNEL_BY_RECEPTION_POINT: Record<string, string> = {
+  '5': '5',
+  '1': '13',
+  '3': '13',
+  '7': '13',
+  '4': '14',
+};
+
 // Mapea el estado SmartSupervision (FLD-338) al color del semáforo.
 function estadoVariant(in_strStatus: string): 'success' | 'danger' | 'info' | 'neutral' {
   const strStatus = in_strStatus.toLowerCase();
@@ -67,6 +85,8 @@ export default function CrearRecibirQueja() {
   const { options: cllReceptionPoint } = useCollection(QD_COLLECTIONS.receptionPoint);
   const { options: cllChannel } = useCollection(QD_COLLECTIONS.channel);
   const { options: cllAlliance } = useCollection(QD_COLLECTIONS.alliance);
+  // Puntos de recepción ofrecidos en el selector, sin los ocultos (ver RECEPTION_POINTS_HIDDEN).
+  const cllReceptionPointVisible = cllReceptionPoint.filter((o) => !RECEPTION_POINTS_HIDDEN.includes(o.value));
 
   // Sincroniza la variable compañera <campo>_desc con la descripción del código guardado.
   // El campo base guarda el CÓDIGO (numérico); _desc viaja junto a PM4 para lectura.
@@ -108,10 +128,17 @@ export default function CrearRecibirQueja() {
   // Punto de recepción por defecto para radicación web = "Internet" (CAT-PUNTO).
   // Ahora es un select editable, así que se precarga el código (value), no la etiqueta.
   useEffect(() => {
-    if (objWatch[QD.strReceptionPoint] || cllReceptionPoint.length === 0) return;
-    const objInternet = cllReceptionPoint.find((o) => /internet/i.test(o.label));
+    if (objWatch[QD.strReceptionPoint] || cllReceptionPointVisible.length === 0) return;
+    const objInternet = cllReceptionPointVisible.find((o) => /internet/i.test(o.label));
     if (objInternet) form.setValue(QD.strReceptionPoint, objInternet.value);
-  }, [objWatch[QD.strReceptionPoint], cllReceptionPoint, form]);
+  }, [objWatch[QD.strReceptionPoint], cllReceptionPointVisible, form]);
+
+  // El canal ya no se selecciona manualmente: se deriva del punto de recepción
+  // elegido (ver CHANNEL_BY_RECEPTION_POINT). Sin regla → canal vacío.
+  useEffect(() => {
+    const strChannelCode = CHANNEL_BY_RECEPTION_POINT[String(objWatch[QD.strReceptionPoint])] ?? '';
+    if (objWatch[QD.strChannel] !== strChannelCode) form.setValue(QD.strChannel, strChannelCode);
+  }, [objWatch[QD.strReceptionPoint], objWatch[QD.strChannel], form]);
 
   // La alianza solo aplica al rol Empleado Zurich; al cambiar a otro rol se limpia.
   useEffect(() => {
@@ -338,12 +365,12 @@ export default function CrearRecibirQueja() {
                 error={err(QD.strFilerRole)} />
             </div>
             <div className="form-row cols-2">
-              <ZdsSelect name={QD.strChannel} control={control} label="Canal"
-                options={cllChannel} rules={{ required: 'Campo requerido' }} required
-                error={err(QD.strChannel)} />
               <ZdsSelect name={QD.strReceptionPoint} control={control} label="Punto de Recepción"
-                options={cllReceptionPoint} rules={{ required: 'Campo requerido' }} required
+                options={cllReceptionPointVisible} rules={{ required: 'Campo requerido' }} required
                 error={err(QD.strReceptionPoint)} />
+              {/* Canal (qd_strChannel) ya no es seleccionable: se deriva automáticamente
+                  del punto de recepción elegido (ver CHANNEL_BY_RECEPTION_POINT). */}
+              <div />
             </div>
             <div className="form-row cols-2">
               <ZdsInput name={strReceptionInstanceDesc} control={control} label="Instancia de Recepción" readOnly
