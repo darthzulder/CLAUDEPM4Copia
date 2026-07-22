@@ -1,0 +1,30 @@
+{
+  "name": "frontend",
+  "private": true,
+  "scripts": {
+    "dev": "vite",
+    "build": "tsc && vite build",
+    "preview": "vite preview",
+    "lint": "eslint src"
+  },
+  "dependencies": {
+    "axios": "^1.18.1",
+    "react": "^19.2.7",
+    "react-dom": "^19.2.7",
+    "react-hook-form": "^7.80.0"
+  },
+  "devDependencies": {
+    "@types/react": "^19.2.17",
+    "@types/react-dom": "^19.2.3",
+    "@typescript-eslint/parser": "^8.62.0",
+    "@vitejs/plugin-react": "^6.0.3",
+    "@zurich/css-components": "file:vendor/zurich-css-components-0.8.1.tgz",
+    "@zurich/design-tokens": "file:vendor/zurich-design-tokens-0.8.1.tgz",
+    "@zurich/dev-utils": "file:vendor/zurich-dev-utils-0.8.1.tgz",
+    "@zurich/web-components": "file:vendor/zurich-web-components-0.8.1.tgz",
+    "eslint": "^10.5.0",
+    "eslint-plugin-react-hooks": "^7.1.1",
+    "typescript": "^5.9.3",
+    "vite": "^8.1.2"
+  }
+}

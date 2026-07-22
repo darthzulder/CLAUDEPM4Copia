@@ -1,0 +1,11 @@
+{
+  "version": "0.0.1",
+  "configurations": [
+    {
+      "name": "pm4-frontend",
+      "runtimeExecutable": "npm",
+      "runtimeArgs": ["run", "dev", "--workspace=frontend", "--prefix", "pm4-app", "--", "--port", "5176", "--strictPort"],
+      "port": 5176
+    }
+  ]
+}

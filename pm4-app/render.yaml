@@ -1,0 +1,21 @@
+services:
+  - type: web
+    name: pm4-app
+    runtime: node
+    rootDir: .
+    buildCommand: npm ci && npm run build
+    startCommand: npm run start
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: PM4_BASE_URL
+        sync: false
+      - key: PM4_TOKEN
+        sync: false
+      # reCAPTCHA v2. La site key es PÚBLICA (viaja en el HTML) → se puede commitear.
+      # Debe estar presente en BUILD para que Vite la inyecte (__RECAPTCHA_SITE_KEY__).
+      - key: VITE_RECAPTCHA_SITE_KEY
+        value: 6Lf8IkgtAAAAAO5z1J1gKek_pl83NM4hP0tfhy8Y
+      # El secret es PRIVADO → cargar el valor en el dashboard de Render (no en el repo).
+      - key: RECAPTCHA_SECRET_KEY
+        sync: false

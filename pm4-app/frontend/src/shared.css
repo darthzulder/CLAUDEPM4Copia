@@ -1,0 +1,1285 @@
+/* ==========================================================================
+   SHARED — ESTILOS COMUNES DE LAS PANTALLAS DE PM4
+   Importado una sola vez en main.tsx.
+   ========================================================================== */
+
+/* ── 1. TOKENS & ALIASES ZURICH ────────────────────────────────────────── */
+:root {
+  --z-blue: var(--zc-blue-zurich);
+  --z-blue-dark: var(--zc-blue-dark);
+  --z-blue-light: var(--zc-blue-sky-10);
+  --z-green: var(--zc-moss-aa);
+  --z-red: var(--zc-peach-aa);
+  --z-orange: var(--zc-lemon-aa);
+  --z-bg: var(--zg-white-zurich);
+  --z-border: var(--zg-9);
+  --z-text: var(--zc-blue-dark);
+  --z-muted: var(--zg-5);
+  /* Sombra de elevación: ZDS 0.8.1 no expone tokens de elevación; el color se
+     deriva del token negro del DS vía color-mix (resultado idéntico al rgba). */
+  --z-card-shadow:
+    0 1px 3px color-mix(in srgb, var(--zg-black) 7%, transparent),
+    0 6px 18px color-mix(in srgb, var(--zg-black) 6%, transparent);
+  /* Excepciones: sin equivalente exacto en ZDS 0.8.1. Centralizadas aquí para
+     que sigan siendo única fuente de verdad, aunque no sean tokens del DS. */
+  --z-card-border: #DDE3EC;    /* borde azul-grisáceo de cards (sin token DS) */
+  --z-warning-deep: #B8860B;   /* ámbar legible p/ícono warning sobre lemon */
+  --z-modal-backdrop: #0B1B3C; /* navy del scrim de modales (sin token DS) */
+}
+
+@font-face {
+  font-family: 'ZurichSans';
+  src: url('https://bpm.beesmart.ec/fonts/zurich/ZurichSans-Regular.ttf') format('truetype');
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+
+* {
+  font-family: ZurichSans, Arial, Helvetica, sans-serif;
+  box-sizing: border-box;
+}
+
+/* ── 1b. TYPOGRAPHY AND THEMING CONSOLIDATION ──────────────────────────── */
+/* Caption 12 — muted */
+.preview-modal-doc-desc,
+.file-name-empty,
+.file-name-chip,
+.field-hint,
+.doc-meta,
+.quote-summary-cell--muted,
+.subsection-note {
+  font: var(--zf-capt-12);
+  color: var(--z-muted);
+}
+
+/* Caption 12 — bold label */
+.info-bar-label,
+.section-title,
+.doc-num-badge,
+.doc-table-header,
+.pdf-viewer-label,
+.additional-emails-header,
+.cover-note-label,
+.doc-row-label,
+.activities-product-label,
+.billing-block-label,
+.form-label {
+  font: var(--zf-capt-12--700);
+}
+
+.info-bar-label,
+.section-title,
+.doc-num-badge,
+.doc-table-header,
+.pdf-viewer-label,
+.additional-emails-header,
+.cover-note-label,
+.form-label {
+  color: var(--z-muted);
+}
+
+.doc-row-label,
+.activities-product-label,
+.billing-block-label {
+  color: var(--z-blue);
+}
+
+/* Caption 14 — regular */
+.screen-loading,
+.doc-desc,
+.pdf-viewer-state,
+.subsection-intro,
+.no-docs-card p {
+  font: var(--zf-capt-14);
+}
+
+/* Caption 14 — bold (incluye info-bar-value, antes 600) */
+.preview-modal-doc-name,
+.info-bar-value,
+.doc-name {
+  font: var(--zf-capt-14--700);
+  color: var(--z-text);
+}
+
+.form-subsection-title,
+.decision-title,
+.subsection-title {
+  font: var(--zf-capt-14--700);
+  color: var(--z-blue);
+  display: flex;
+  align-items: center;
+  gap: var(--zs-50);
+}
+
+/* Body 14 — regular sobre texto base */
+z-table td,
+.service-item,
+.quote-summary-cell {
+  font: var(--zf-body-14);
+  color: var(--z-text);
+}
+
+/* Body 14 — bold sobre texto base */
+z-table th,
+.quote-summary-label {
+  font: var(--zf-body-14--700);
+  color: var(--z-text);
+}
+
+/* Body 14 — muted */
+.email-status-note,
+.quote-summary-status {
+  font: var(--zf-body-14);
+  color: var(--z-muted);
+}
+
+/* Uppercase micro-labels (letter-spacing .3px) */
+.info-bar-label,
+.pdf-viewer-label,
+.additional-emails-header,
+.doc-table-header,
+.cover-note-label,
+.form-label,
+.billing-block-label {
+  text-transform: uppercase;
+  letter-spacing: .3px;
+}
+
+/* Uppercase section headers (letter-spacing .55px) */
+.section-title,
+.form-section-header span,
+.quote-summary-product-header,
+.screen-header .title-block h1 {
+  text-transform: uppercase;
+  letter-spacing: .55px;
+}
+
+/* ── 1c. STATUS AND BACKGROUND CONSOLIDATION ──────────────────────────── */
+.doc-num-badge--aprobada {
+  background: var(--zc-moss-20);
+  color: var(--zc-moss-aa);
+}
+
+.doc-num-badge--rechazada {
+  background: var(--zc-peach-10);
+  color: var(--z-red);
+}
+
+.policyholder-create-body {
+  background: var(--zc-lemon-20);
+}
+
+/* ── 2. ESTRUCTURA Y BASE ──────────────────────────────────────────────── */
+.screen-wrapper {
+  min-height: 100vh;
+  background: var(--z-bg);
+}
+
+.screen-content {
+  max-width: 960px;
+  margin: 0 auto;
+  padding: var(--zs-150) var(--zs-150) var(--zs-400);
+}
+
+/* ── 3. ESTADOS DE CARGA Y ERROR globales ────────────────────────────── */
+.screen-loading {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 60vh;
+  gap: var(--zs-100);
+  color: var(--z-muted);
+}
+
+.loading-overlay {
+  position: fixed;
+  inset: 0;
+  background: color-mix(in srgb, var(--zg-white) 70%, transparent);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+}
+
+/* ── 4. LAYOUT DE FORMULARIOS Y GRID ───────────────────────────────────── */
+
+.form-row {
+  display: grid;
+  gap: var(--zs-150);
+  margin-bottom: 0;
+  overflow: visible;
+}
+
+.form-row.cols-1 {
+  grid-template-columns: 1fr;
+}
+
+.form-row.cols-2 {
+  grid-template-columns: 1fr 1fr;
+}
+
+.form-row.cols-3 {
+  grid-template-columns: 1fr 1fr 1fr;
+}
+
+.form-row.cols-4 {
+  grid-template-columns: 1fr 1fr 1fr 1fr;
+}
+
+@media (max-width: 900px) {
+
+  .form-row.cols-3,
+  .form-row.cols-4 {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+
+@media (max-width: 600px) {
+
+  .form-row.cols-2,
+  .form-row.cols-3,
+  .form-row.cols-4 {
+    grid-template-columns: 1fr;
+  }
+}
+
+.form-row.row-align-bottom {
+  align-items: flex-end;
+}
+
+.section-spacer {
+  height: var(--zs-100);
+}
+
+
+
+/* Clases de spans de columnas */
+.col-span-2 {
+  grid-column: span 2;
+}
+
+.col-span-3 {
+  grid-column: span 3;
+}
+
+.col-span-4 {
+  grid-column: span 4;
+}
+
+@media (max-width: 900px) {
+
+  .col-span-3,
+  .col-span-4 {
+    grid-column: span 2;
+  }
+}
+
+@media (max-width: 600px) {
+
+  .col-span-2,
+  .col-span-3,
+  .col-span-4 {
+    grid-column: span 1;
+  }
+}
+
+/* Wrappers de campos ZDS */
+/* Base común: cada campo reserva la misma caja (pill + línea de ayuda),
+   así los pills alinean en la fila exista o no helpText, sea input o select. */
+.zds-field-wrap,
+.zds-select-wrap {
+  width: 100%;
+  min-height: 68px;
+}
+
+.zds-select-wrap {
+  position: relative;
+  height: 68px;
+  overflow: visible;
+  z-index: 0;
+}
+
+.zds-select-wrap:focus-within {
+  z-index: 200;
+}
+
+.zds-select-wrap>* {
+  position: absolute;
+  width: 100%;
+  top: 0;
+}
+
+/* Campos de entrada: se usan los DEFAULTS del DS sin overrides (radio pill
+   1.75rem, fondo --z-bg-light-base, estado readonly nativo via color/borde). */
+
+/* Sub-secciones básicas */
+.form-subsection {
+  border: 1px solid var(--z-border);
+  border-radius: 8px;
+  padding: var(--zs-100) var(--zs-150) var(--zs-75);
+  background: var(--zg-white);
+  display: flex;
+  flex-direction: column;
+  gap: var(--zs-150);
+}
+
+/* El z-table global es overflow-x:auto y recorta los dropdowns ZDS; dentro de
+   una subsección siempre queremos dejarlos desplegar. */
+.form-subsection z-table {
+  overflow: visible;
+}
+
+.form-subsection-title {
+  margin-bottom: var(--zs-100);
+}
+
+.form-subsection-title--spaced {
+  margin-top: var(--zs-75);
+}
+
+/* Barras de acento verticales (3px) */
+.form-subsection-title::before,
+.subsection-title::before,
+.decision-accent,
+.form-section-header::before,
+.quote-summary-product-header::before {
+  content: '';
+  display: inline-block;
+  width: 3px;
+  height: 14px;
+  border-radius: 2px;
+  flex-shrink: 0;
+}
+
+.form-subsection-title::before,
+.subsection-title::before,
+.decision-accent {
+  background: var(--z-blue);
+}
+
+.form-section-header::before,
+.quote-summary-product-header::before {
+  background: color-mix(in srgb, var(--zg-white) 45%, transparent);
+}
+
+/* Tabla z-table celda overrides */
+z-table {
+  --z-table--cell-padding: var(--zs-75) var(--zs-100);
+  display: block;
+  width: 100%;
+  overflow-x: auto;
+}
+
+z-table table {
+  width: 100%;
+  border-collapse: collapse;
+  border-spacing: 0;
+  border-top: 1px solid var(--z-border);
+  border-bottom: 1px solid var(--z-border);
+  margin: var(--zs-100) auto;
+}
+
+z-table th,
+z-table td {
+  padding: var(--z-table--cell-padding, var(--zs-75) var(--zs-100));
+  border-bottom: 1px solid var(--z-border);
+  vertical-align: middle;
+  text-align: left;
+}
+
+z-table th {
+  letter-spacing: .4px;
+}
+
+z-table :is(th, td)[config*="center"] {
+  text-align: center;
+}
+
+z-table :is(th, td)[config*="right"] {
+  text-align: right;
+}
+
+/* Barra de acciones al pie del form (ver componente ActionBar). El layout flex
+   lo aportan z-flex/z-align; aquí solo borde/margen/padding (tokens, sin
+   equivalente en el DS). */
+.action-bar {
+  border-top: 1px solid var(--z-border);
+  margin-top: var(--zs-150);
+  padding: var(--zs-150) var(--zs-200) var(--zs-50);
+}
+
+/* ── 5. ESTILOS DE COMPONENTES REUTILIZABLES ───────────────────────────── */
+
+/* Component: ScreenHeader */
+.screen-header {
+  background: var(--z-blue);
+  padding: var(--zs-150) var(--zs-200);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  box-shadow: 0 4px 12px color-mix(in srgb, var(--zc-blue-zurich) 35%, transparent);
+}
+
+.screen-header .title-block {
+  color: var(--zg-white-zurich);
+}
+
+.screen-header .title-block h1 {
+  font: var(--zf-body-16--700);
+  margin: 0 0 var(--zs-25);
+}
+
+.screen-header .subtitle {
+  display: flex;
+  gap: var(--zs-100);
+  font: var(--zf-capt-12);
+  color: color-mix(in srgb, var(--zg-white) 80%, transparent);
+}
+
+.screen-header .subtitle span {
+  display: flex;
+  align-items: center;
+  gap: var(--zs-25);
+}
+
+.screen-header .subtitle span::before {
+  content: '';
+  display: inline-block;
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background: color-mix(in srgb, var(--zg-white) 55%, transparent);
+}
+
+.screen-header .subtitle span:first-child::before {
+  display: none;
+}
+
+.header-logo {
+  height: 44px;
+  width: auto;
+  object-fit: contain;
+  flex-shrink: 0;
+}
+
+/* Component: FormSection */
+.form-section-card {
+  margin-bottom: var(--zs-250);
+  background: var(--zg-white);
+  border: 1px solid var(--z-card-border);
+  border-radius: 12px;
+  box-shadow: var(--z-card-shadow);
+}
+
+.form-section-header {
+  padding: var(--zs-100) var(--zs-200);
+  display: flex;
+  align-items: center;
+  gap: var(--zs-50);
+  border-radius: 12px 12px 0 0;
+}
+
+.form-section-header span {
+  color: var(--zg-white-zurich);
+  font: var(--zf-capt-12--700);
+}
+
+
+.form-section-body {
+  padding: var(--zs-200) var(--zs-300) var(--zs-200);
+  display: flex;
+  flex-direction: column;
+  gap: var(--zs-200);
+  overflow: visible;
+}
+
+/* Component: ResultCard → migrado a ZrCard + ZrIcon (defaults DS). Sin CSS propio. */
+
+
+/* Component: PreviewModal */
+.preview-modal {
+  width: min(1080px, 94vw);
+  display: flex;
+  flex-direction: column;
+}
+
+.preview-modal-header {
+  padding: var(--zs-100) var(--zs-150);
+  border-bottom: 1px solid var(--z-border);
+  background: var(--zg-white-zurich);
+}
+
+.preview-modal-title {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--zs-75);
+}
+
+.preview-modal-doc-name {
+  word-break: break-word;
+}
+
+.preview-modal-doc-desc {
+  margin-top: 2px;
+  line-height: 1.4;
+}
+
+.preview-modal-iframe {
+  width: 100%;
+  height: min(82vh, 820px);
+  border: none;
+  display: block;
+}
+
+/* Component: InfoBar */
+.info-bar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--zs-150);
+  background: var(--zg-white);
+  border: 1px solid var(--z-border);
+  border-radius: 10px;
+  padding: var(--zs-100) var(--zs-150);
+  margin-bottom: var(--zs-150);
+  box-shadow: var(--z-card-shadow);
+}
+
+.info-bar-item {
+  display: flex;
+  flex-direction: column;
+  gap: var(--zs-12);
+}
+
+.section-title {
+  margin-bottom: var(--zs-75);
+  padding-left: var(--zs-25);
+}
+
+@media (max-width: 900px) {
+  .info-bar {
+    flex-direction: column;
+    gap: var(--zs-75);
+  }
+}
+
+.doc-item {
+  display: flex;
+  align-items: center;
+  gap: var(--zs-100);
+  padding: var(--zs-100) var(--zs-150);
+  border: 1px solid var(--z-border);
+  border-radius: 10px;
+  background: var(--zg-white-zurich);
+  transition: border-color .15s, background .15s, box-shadow .15s;
+}
+
+.doc-item:hover {
+  border-color: var(--z-blue);
+  background: var(--zg-white);
+  box-shadow: 0 2px 8px color-mix(in srgb, var(--zc-blue-zurich) 8%, transparent);
+}
+
+.doc-item.is-loaded {
+  border-color: var(--zc-moss-aa);
+  background: var(--zg-white);
+  box-shadow: 0 2px 8px color-mix(in srgb, var(--zc-moss-aa) 7%, transparent);
+}
+
+.doc-num-badge {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--zg-9);
+  transition: background .2s, color .2s;
+}
+
+.doc-num-badge--loaded {
+  background: var(--zc-moss-aa);
+  color: var(--zg-white-zurich);
+}
+
+.doc-body {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+
+.doc-desc {
+  color: var(--z-text);
+  line-height: 1.4;
+}
+
+
+.doc-status-wrap {
+  flex-shrink: 0;
+  width: 88px;
+  display: flex;
+  justify-content: center;
+}
+
+.file-name-empty {
+  padding: 2px 4px;
+}
+
+.doc-file-area,
+.doc-file-area--validation {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 5px;
+  flex-shrink: 0;
+  flex-grow: 0;
+}
+
+.doc-file-area {
+  width: 210px;
+}
+
+.file-name-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  background: var(--zg-9);
+  border-radius: 4px;
+  padding: 2px 7px;
+}
+
+.doc-preview-trigger {
+  flex-shrink: 0;
+}
+
+.doc-table-header {
+  display: flex;
+  align-items: center;
+  gap: var(--zs-100);
+  padding: var(--zs-50) var(--zs-150) var(--zs-50) calc(32px + var(--zs-100) + var(--zs-100));
+  border-bottom: 1px solid var(--z-border);
+  margin-bottom: var(--zs-75);
+}
+
+.doc-table-col-desc {
+  flex: 1;
+}
+
+.doc-table-col-file {
+  width: 200px;
+}
+
+.doc-table-col-val {
+  width: 180px;
+}
+
+.doc-item--validation {
+  gap: var(--zs-75);
+}
+
+.doc-file-area--validation {
+  width: 200px;
+}
+
+.doc-num-badge--en-revision {
+  background: color-mix(in srgb, var(--zc-blue-zurich) 15%, transparent);
+  color: var(--z-blue);
+}
+
+
+.validation-select-wrap {
+  flex-shrink: 0;
+  width: 180px;
+  position: relative;
+  z-index: 0;
+}
+
+.validation-select-wrap:focus-within {
+  z-index: 50;
+}
+
+.decision-section {
+  padding: var(--zs-150) var(--zs-200) var(--zs-100);
+  border-top: 2px dashed var(--z-border);
+  margin-top: var(--zs-50);
+}
+
+.decision-title {
+  margin-bottom: var(--zs-150);
+}
+
+
+
+/* Component: PdfViewer */
+.pdf-viewer {
+  width: 100%;
+}
+
+.pdf-viewer-label {
+  margin-bottom: var(--zs-50);
+}
+
+.pdf-viewer-state {
+  display: flex;
+  align-items: center;
+  gap: var(--zs-75);
+  padding: var(--zs-150);
+  background: var(--zg-white-zurich);
+  border: 1px solid var(--z-border);
+  border-radius: 8px;
+  color: var(--z-muted);
+}
+
+.pdf-viewer-error {
+  color: var(--z-red);
+}
+
+.pdf-viewer-actions {
+  display: flex;
+  justify-content: flex-end;
+  padding-top: var(--zs-50);
+}
+
+/* ── 6. DISEÑOS ESPECÍFICOS DE LAS PANTALLAS (Keep DRY) ──────────────────── */
+
+/* ---- Cotizador y tomador ---- */
+.lookup-wrapper {
+  display: flex;
+  align-items: flex-end;
+}
+
+.form-group--billing {
+  margin-top: var(--zs-25);
+}
+
+/* Labels y requireds */
+.form-group {
+  margin-bottom: var(--zs-100);
+}
+
+.form-label {
+  display: block;
+  margin-bottom: var(--zs-25);
+}
+
+.required-star {
+  color: var(--z-red);
+  margin-right: var(--zs-12);
+}
+
+/* Checkboxes y facturación */
+
+.checkbox-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--zs-75);
+}
+
+@media (max-width: 700px) {
+  .checkbox-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+.activities-product-label {
+  line-height: 1.3;
+}
+
+.billing-grid {
+  display: grid;
+  gap: var(--zs-100);
+  grid-template-columns: repeat(auto-fill, minmax(210px, 1fr));
+  margin-top: var(--zs-25);
+}
+
+.billing-block {
+  background: var(--zg-white-zurich);
+  border: 1px solid var(--z-border);
+  border-radius: 8px;
+  padding: var(--zs-75) var(--zs-100);
+}
+
+.billing-block-label {
+  margin-bottom: var(--zs-50);
+}
+
+.additional-emails-header {
+  margin-bottom: var(--zs-75);
+  padding-top: var(--zs-75);
+  border-top: 1px dashed var(--z-border);
+  display: flex;
+  align-items: center;
+  gap: var(--zs-50);
+}
+
+/* Colapsable de tomador */
+.policyholder-create-body {
+  border: 1.5px solid var(--zc-lemon-aa);
+  border-radius: 8px;
+  padding: var(--zs-150) var(--zs-150) var(--zs-75);
+  margin-bottom: var(--zs-25);
+}
+
+/* Products card */
+.products-card {
+  background: var(--zg-white);
+  border-radius: 10px;
+  box-shadow: var(--z-card-shadow);
+  margin-bottom: var(--zs-150);
+  overflow: visible;
+  border: 1px solid var(--z-card-border);
+}
+
+.products-tab-body {
+  padding: var(--zs-150) var(--zs-200) var(--zs-100);
+}
+
+/* Subsecciones apiladas, intro/nota, fila de documento y listas (genérico) */
+.form-subsection--stack {
+  margin-bottom: var(--zs-150);
+}
+
+.form-subsection--stack:last-child {
+  margin-bottom: 0;
+}
+
+.subsection-intro {
+  color: var(--z-text);
+  margin: 0 0 var(--zs-100);
+  line-height: 1.5;
+}
+
+.subsection-note {
+  margin: var(--zs-75) 0 0;
+  font-style: italic;
+}
+
+.si-no-select-all {
+  display: flex;
+  gap: var(--zs-50);
+  justify-content: flex-end;
+  margin-bottom: var(--zs-50);
+}
+
+.doc-row {
+  display: flex;
+  align-items: center;
+  gap: var(--zs-75);
+  padding: var(--zs-50) var(--zs-75);
+  border: 1px solid var(--z-border);
+  border-radius: 8px;
+  background: var(--zg-white);
+}
+
+.doc-row-label {
+  min-width: 96px;
+  flex-shrink: 0;
+}
+
+.service-list {
+  margin: var(--zs-25) 0 0 0;
+  padding-left: var(--zs-100);
+}
+
+.service-item {
+  padding: var(--zs-12) 0;
+  line-height: 1.5;
+}
+
+/* Tables / Records */
+.record-table-header {
+  display: flex;
+  justify-content: flex-end;
+  margin-bottom: var(--zs-50);
+}
+
+.record-empty {
+  text-align: center;
+  color: var(--z-muted);
+  padding: var(--zs-150);
+}
+
+.record-validation-msg {
+  text-align: right;
+  font-size: 12px;
+  color: var(--z-red);
+  margin-top: var(--zs-50);
+}
+
+.record-validation-msg strong {
+  font-weight: 700;
+}
+
+/* Info bars and section titles */
+.subsection-title {
+  margin-bottom: var(--zs-50);
+}
+
+.cover-note-toggle {
+  display: flex;
+  align-items: center;
+  gap: var(--zs-75);
+}
+
+/* Stack de label + control con gap 4px: --zs-25 no existe como gap de z-flex
+   (cuyo mínimo es 50 = 8px), por eso se mantiene como clase. */
+.field-wrap {
+  display: flex;
+  flex-direction: column;
+  gap: var(--zs-25);
+}
+
+.field-hint {
+  font-weight: 400;
+  margin-left: var(--zs-25);
+}
+
+/* Resumen de cotizaciones (preview) */
+.quote-summary-body {
+  padding: var(--zs-150) var(--zs-200);
+  display: flex;
+  flex-direction: column;
+  gap: var(--zs-100);
+}
+
+.quote-summary-product {
+  border: 1px solid var(--zg-9);
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+.quote-summary-product-header {
+  background: var(--zc-blue-zurich);
+  color: var(--zg-white-zurich);
+  font: var(--zf-capt-12--700);
+  padding: var(--zs-75) var(--zs-150);
+  display: flex;
+  align-items: center;
+  gap: var(--zs-50);
+}
+
+.quote-summary-status {
+  display: flex;
+  align-items: center;
+  gap: var(--zs-75);
+  padding: var(--zs-100) var(--zs-200);
+}
+
+
+.quote-summary-status--hint {
+  font-style: italic;
+}
+
+/* Respuesta cotización screen */
+.result-content {
+  max-width: 640px;
+  margin: 0 auto;
+  padding: var(--zs-200) var(--zs-150) var(--zs-400);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.result-actions {
+  margin-top: var(--zs-200);
+  display: flex;
+  justify-content: center;
+}
+
+/* Opciones cotización screen */
+.screen-body {
+  padding: var(--zs-150) var(--zs-200);
+  display: grid;
+  grid-template-columns: 1fr 380px;
+  gap: var(--zs-150);
+  align-items: start;
+}
+
+@media (max-width: 1024px) {
+  .screen-body {
+    grid-template-columns: 1fr;
+  }
+}
+
+.decision-actions {
+  padding: var(--zs-100) var(--zs-150) var(--zs-150);
+  display: flex;
+  justify-content: flex-end;
+  border-top: 1px solid var(--z-border);
+}
+
+@media (max-width: 600px) {
+  .screen-body {
+    padding: var(--zs-100) var(--zs-150);
+  }
+}
+
+/* Nota Cobertura screen */
+.doc-card {
+  border: 1px solid var(--z-border);
+  border-radius: 8px;
+  overflow: hidden;
+  background: var(--zg-white-zurich);
+}
+
+.doc-card-header {
+  display: flex;
+  align-items: center;
+  gap: var(--zs-75);
+  padding: var(--zs-75) var(--zs-100);
+  background: var(--zg-white);
+  border-bottom: 1px solid transparent;
+  transition: background .1s;
+}
+
+.doc-card-header:hover {
+  background: var(--zg-white-zurich);
+}
+
+.doc-card.is-open .doc-card-header {
+  border-bottom-color: var(--z-border);
+  background: var(--z-blue-light);
+}
+
+.doc-info {
+  flex: 1;
+  min-width: 0;
+}
+
+.doc-name {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.doc-meta {
+  margin-top: 2px;
+}
+
+.doc-actions {
+  display: flex;
+  gap: var(--zs-50);
+  flex-shrink: 0;
+}
+
+.doc-viewer {
+  padding: var(--zs-100);
+  background: var(--zg-white-zurich);
+}
+
+.no-docs-card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: var(--zs-300) var(--zs-200);
+  gap: var(--zs-75);
+  color: var(--z-muted);
+  text-align: center;
+}
+
+.no-docs-card p {
+  margin: 0;
+}
+
+/* Estado Correo screen */
+.email-status-content {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: var(--zs-300) var(--zs-200);
+  gap: var(--zs-200);
+}
+
+.email-status-note {
+  margin-top: var(--zs-150);
+  border-top: 1px dashed var(--zg-9);
+  padding-top: var(--zs-100);
+}
+
+.email-status-badge {
+  display: inline-block;
+  margin: var(--zs-75) 0;
+  padding: var(--zs-75) var(--zs-150);
+  background: color-mix(in srgb, var(--zc-blue-zurich) 8%, transparent);
+  border: 1px solid var(--zc-blue-zurich);
+  border-radius: 999px;
+  font: var(--zf-body-14--700);
+  color: var(--zc-blue-zurich);
+  word-break: break-all;
+  max-width: 100%;
+}
+
+.email-status-badge--error {
+  background: color-mix(in srgb, var(--zc-peach-aa) 8%, transparent);
+  border-color: var(--zc-peach-aa);
+  color: var(--zc-peach-aa);
+}
+
+.email-status-actions {
+  display: flex;
+  justify-content: center;
+}
+
+.email-status-overlay {
+  position: fixed;
+  inset: 0;
+  background: color-mix(in srgb, var(--zg-white) 75%, transparent);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: var(--zs-100);
+  z-index: 100;
+  font: var(--zf-body-16--700);
+  color: var(--zc-blue-zurich);
+}
+
+/* Error logs & validation lists */
+.affected-fields-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--zs-50);
+  padding: var(--zs-50) 0;
+  min-height: 38px;
+  align-items: center;
+}
+
+
+/* ========== revisar-queja-asignar ========== */
+/* =====================================================
+   REVISAR QUEJA Y ASIGNAR RESPONSABLE — SP2-T01
+   Proceso: SP2-T01 | Quejas Directas | Zurich Colombia
+   ===================================================== */
+
+/* ──────────────────────────────────────
+   BADGE DE PRIORIDAD
+────────────────────────────────────── */
+
+/* .sla-* → indicador SLA no usado en TSX, eliminado */
+
+
+/* ========== COL_QD_cierre-m3 ========== */
+/* =====================================================
+   CIERRE REGULATORIO MOMENTO 3 — SP3-T01/T04/T08
+   Proceso: Quejas Directas | Zurich Colombia
+   ===================================================== */
+
+/* ── Grid de estado (Sección 1) ── */
+.estado-cierre-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--zs-100) var(--zs-150);
+  padding: var(--zs-100) 0 var(--zs-50);
+}
+
+@media (max-width: 600px) {
+  .estado-cierre-grid { grid-template-columns: 1fr; }
+}
+
+/* ── Contador de intentos ── */
+.intentos-valor {
+  font: var(--zf-body-16--700);
+  color: var(--z-blue);
+  line-height: 1;
+  padding-top: 4px;
+}
+
+/* ── Panel de último error ── */
+.ultimo-error-panel {
+  background: var(--zc-peach-20);
+  border-left: 3px solid var(--zc-peach-aa);
+  border-radius: 0 4px 4px 0;
+  padding: var(--zs-75) var(--zs-100);
+  margin-top: 4px;
+}
+
+.ultimo-error-texto {
+  font: var(--zf-capt-12);
+  color: var(--zc-peach-aa);
+  word-break: break-word;
+}
+
+/* ── Helper de validación PDF ── */
+.cierre-m3--form-helper {
+  font: var(--zf-capt-12);
+  margin-top: 4px;
+}
+
+.cierre-m3--validacion-ok  { color: var(--z-green); }
+.cierre-m3--validacion-error { color: var(--z-red); }
+
+
+/* ========== dashboard-gestion-casos (SCR-013 / PAN-13) ========== */
+/* =====================================================
+   DASHBOARD — GESTIÓN DE CASOS — P01 (Supervisor / Jefe SAC)
+   Patrones de dominio sin equivalente en el DS: KPIs de SLA,
+   punto-semáforo de días y barras de encabezado/paginación.
+   ===================================================== */
+
+/* ── Barra superior: título de trabajo + acción "Nuevo caso" ── */
+.dashboard-toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--zs-100);
+  margin: var(--zs-100) 0;
+}
+
+/* ── KPIs de SLA (4 tarjetas) ── */
+.kpi-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: var(--zs-100);
+  margin-bottom: var(--zs-150);
+}
+
+@media (max-width: 900px) { .kpi-grid { grid-template-columns: repeat(2, 1fr); } }
+@media (max-width: 600px) { .kpi-grid { grid-template-columns: 1fr; } }
+
+.kpi-card {
+  display: flex;
+  flex-direction: column;
+  gap: var(--zs-25);
+  background: var(--zg-white);
+  border: 1px solid var(--z-card-border);
+  border-radius: 8px;
+  padding: var(--zs-100) var(--zs-150);
+  box-shadow: var(--z-card-shadow);
+}
+
+.kpi-card-label {
+  font: var(--zf-capt-12--700);
+  color: var(--z-muted);
+}
+
+.kpi-card-value {
+  font: var(--zf-h-28);
+  font-weight: 700;
+  line-height: 1.1;
+  color: var(--z-text);
+}
+
+.kpi-card--warn   .kpi-card-value { color: var(--z-orange); }
+.kpi-card--danger .kpi-card-value { color: var(--z-red); }
+.kpi-card--ok     .kpi-card-value { color: var(--z-green); }
+
+/* ── Paginación de la tabla de casos ── */
+.dashboard-pagination {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: var(--zs-75);
+  margin-top: var(--zs-100);
+}

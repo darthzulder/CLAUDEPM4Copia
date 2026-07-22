@@ -1,0 +1,55 @@
+import { ZrModal, ZrButton, ZdsStatusBadge } from '../../../../components/fields/ZdsFields';
+import InfoBar from '../../../../components/InfoBar';
+import { diasRestantesTexto, estadoVariante } from './dashboardHelpers';
+import type { CasoDashboard } from '../fields/types';
+
+interface DetalleCasoModalProps {
+  caso: CasoDashboard;
+  tipoMap: Record<string, string>;
+  areaMap: Record<string, string>;
+  onClose: () => void;
+}
+
+/**
+ * Modal de detalle de caso (SCR-013 · modal PAN-13). Vista de solo lectura del expediente
+ * resumido. Tipo y Área se resuelven de código a descripción vía las colecciones.
+ */
+export default function DetalleCasoModal({ caso, tipoMap, areaMap, onClose }: DetalleCasoModalProps) {
+  const tipo = (tipoMap[caso.tipoSolicitud] ?? caso.tipoSolicitud) || '—';
+  const area = (areaMap[caso.areaResponsable] ?? caso.areaResponsable) || '—';
+
+  return (
+    <ZrModal model onChange={(open: boolean) => { if (!open) onClose(); }}>
+      <div className="section-spacer">
+        <h3 style={{ margin: '0 0 var(--zs-25)', font: 'var(--zf-h-20)', fontWeight: 700, color: 'var(--z-text)' }}>
+          Caso #{caso.numeroCaso} — {tipo}
+        </h3>
+        <p className="subsection-note" style={{ margin: 0 }}>
+          {area} · Responsable: {caso.responsable || '—'}
+        </p>
+      </div>
+
+      <InfoBar
+        items={[
+          { label: 'Estado', value: <ZdsStatusBadge variant={estadoVariante(caso.estado)}>{caso.estado}</ZdsStatusBadge> },
+          { label: 'Tipo de solicitud', value: tipo },
+          { label: 'Fecha de creación', value: caso.fechaCreacion },
+          { label: 'Fecha de vencimiento', value: caso.fechaVencimiento },
+          { label: 'Días restantes', value: diasRestantesTexto(caso) },
+          { label: 'Área responsable', value: area },
+        ]}
+      />
+
+      <div className="field-wrap" style={{ marginTop: 'var(--zs-100)' }}>
+        <span className="form-label">Descripción / Motivo</span>
+        <p style={{ margin: '4px 0 0', font: 'var(--zf-capt-14)', color: 'var(--z-text)', whiteSpace: 'pre-wrap' }}>
+          {caso.descripcion || 'Sin descripción registrada.'}
+        </p>
+      </div>
+
+      <div z-flex="75" z-align="right:center" style={{ marginTop: 'var(--zs-150)' }}>
+        <ZrButton config="secondary:s" onClick={onClose}>Cerrar</ZrButton>
+      </div>
+    </ZrModal>
+  );
+}
