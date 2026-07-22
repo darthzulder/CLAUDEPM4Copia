@@ -329,6 +329,17 @@ export const GLOBAL_COLLECTIONS = {
     valueField: 'data.codigo',
   } satisfies CollectionDef,
 
+  // Plantillas HTML de correos BPM (id 46). Cada registro guarda el nombre del correo en
+  // `nombre_HTML` (ej. "09 Mails BPM_Respuesta queja procede") y su HTML en `HTML_completo`.
+  // Usado por SCR-0051 para la Vista Previa de la respuesta final: se elige la fila 09
+  // (queja procede / a favor del cliente) o la 10 (no procede / a favor de la compañía).
+  // options → { value: HTML_completo, label: nombre_HTML }.
+  emailTemplates: {
+    id: 46,
+    labelField: 'data.nombre_HTML',
+    valueField: 'data.HTML_completo',
+  } satisfies CollectionDef,
+
   // ── cat_matriz_motivos (id 45) — matriz de cascada de SCR-000 ────────────────
   // Cadena de dependencia: tipoSolicitud → productoZurich → interaccion (momento) →
   // servicioPrestado (servicio) → motivo (codigoMotivoSFC / motivoSFC).

@@ -462,6 +462,7 @@ export const QD_COLLECTIONS = {
   areaUsers: GLOBAL_COLLECTIONS.areaUsers,
   reassignReason: GLOBAL_COLLECTIONS.reassignReason,
   extensionReason: GLOBAL_COLLECTIONS.extensionReason,
+  emailTemplates: GLOBAL_COLLECTIONS.emailTemplates, // id 46 — plantillas HTML de correos BPM (SCR-0051 Vista Previa)
 } as const;
 
 // ═══════════════════════════════════════════════════════════════════════════
@@ -899,7 +900,7 @@ export type DetalleReasignacionRespuestaFormData = Omit<Pick<QdFields,
   | typeof QD.strBpmCaseId | typeof QD.strSfcCode
   | typeof QD.strFirstName | typeof QD.strLastName | typeof QD.strCompanyName
   | typeof QD.strIdType | typeof QD.strIdNumber | typeof QD.strEmail | typeof QD.strPersonType
-  | typeof QD.strRequestType | typeof QD.strInteraction
+  | typeof QD.strRequestType | typeof QD.strInteraction | typeof QD.strServiceProvided | typeof QD.strPlate
   | typeof QD.strChannel | typeof QD.strSfcProduct | typeof QD.strSfcReason
   | typeof QD.strReceptionInstance | typeof QD.strReceptionPoint | typeof QD.strAdmission | typeof QD.strControlEntity
   | typeof QD.strComplaintText
@@ -927,6 +928,8 @@ export const SCR0051_DEFAULTS: Partial<DetalleReasignacionRespuestaFormData> = {
   [QD.strPersonType]: '',
   [QD.strRequestType]: '',
   [QD.strInteraction]: '',
+  [QD.strServiceProvided]: '',
+  [QD.strPlate]: '',
   [QD.strChannel]: '',
   [QD.strSfcProduct]: '',
   [QD.strSfcReason]: '',

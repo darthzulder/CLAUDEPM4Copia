@@ -8,7 +8,8 @@
 // buildRespuestaFinalHtml() más abajo.
 
 export interface RespuestaFinalVars {
-  tipo: string;            // qd_strRequestType   (tipo de solicitud PQRS)
+  tipo: string;            // qd_strRequestType   (tipo de solicitud PQRS · código)
+  tipoDesc?: string;       // qd_strRequestType_desc (descripción legible del tipo)
   numeroRadicado: string;  // qd_strBpmCaseId     (número de radicado del caso)
   nombre: string;          // qd_strCompanyName | qd_strFirstName + qd_strLastName
   interaccion: string;     // qd_strInteraction   (momento/interacción)
@@ -30,6 +31,50 @@ const esc = (in_val: unknown): string =>
 const nl2br = (in_str: string): string => esc(in_str).replace(/\r?\n/g, '<br>');
 
 const PLACEHOLDER = '—';
+
+// Envuelve el contenido de una caja gris en el estilo de cuerpo (navy, peso normal),
+// para que herede la tipografía correcta aunque la celda de la plantilla sea azul/bold.
+const cuerpo = (in_strHtml: string): string =>
+  `<span style="color: #23366F; font-size: 15px; line-height: 22px; font-weight: normal;">${in_strHtml}</span>`;
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Rellena la plantilla HTML del correo traída de la colección 46 de PM4 (fila 09
+// "queja procede" o 10 "queja no procede") sustituyendo los marcadores del BPM por
+// los valores del formulario. El proceso PM4 hace su propia sustitución al enviar;
+// aquí replicamos la de las variables de cara al cliente SOLO para la vista previa.
+//
+// Marcadores soportados (según las plantillas 09/10 de la colección 46):
+//   {{qd_strRequestType_desc}} · {{qd_strInteraction}} · {{NúmeroRadicado}} ·
+//   {{nombre_cliente}} · {{%texto_procede}} / {{%texto_no_procede}} (y cualquier
+//   {{%texto_*}}) → acciones tomadas · %% Lo que ocurrió% y %% Nuestra respuesta%%
+//   (cajas de contenido) → texto de la queja / respuesta al cliente.
+// Los marcadores no reconocidos se dejan intactos (no adivinamos su expansión BPM).
+export function fillRespuestaFinalHtml(in_strRawHtml: string, in_objVars: RespuestaFinalVars): string {
+  const dicSimple: Record<string, string> = {
+    qd_strRequestType_desc: esc(in_objVars.tipoDesc || in_objVars.tipo) || 'queja',
+    qd_strInteraction: esc(in_objVars.interaccion) || PLACEHOLDER,
+    'NúmeroRadicado': esc(in_objVars.numeroRadicado) || PLACEHOLDER,
+    nombre_cliente: esc(in_objVars.nombre) || PLACEHOLDER,
+  };
+  const strTextoProcede = cuerpo(nl2br(in_objVars.textoProcede) || 'Sin acciones registradas.');
+
+  let strOut = in_strRawHtml
+    // {{ token }} — con o sin espacios y con prefijo % opcional (marcadores del BPM).
+    .replace(/\{\{\s*%?\s*([\wÁÉÍÓÚáéíóúÑñ]+)\s*\}\}/g, (in_strFull, in_strKey: string) => {
+      if (in_strKey in dicSimple) return dicSimple[in_strKey];
+      if (/^texto_/i.test(in_strKey)) return strTextoProcede; // texto_procede / texto_no_procede
+      return in_strFull; // desconocido → intacto
+    });
+
+  // Cajas de contenido con marcadores %% … %: conservan su encabezado y anexan el cuerpo.
+  strOut = strOut
+    .split('%% Lo que ocurrió%')
+    .join(`Lo que ocurrió<br><br>${cuerpo(nl2br(in_objVars.loQueOcurrio) || 'Sin descripción registrada.')}`)
+    .split('%% Nuestra respuesta%%')
+    .join(`Nuestra respuesta<br><br>${cuerpo(nl2br(in_objVars.nuestraRespuesta) || 'Aún no se ha redactado la respuesta al cliente.')}`);
+
+  return strOut;
+}
 
 export function buildRespuestaFinalHtml(in_objVars: RespuestaFinalVars): string {
   const tipo = esc(in_objVars.tipo) || 'queja';

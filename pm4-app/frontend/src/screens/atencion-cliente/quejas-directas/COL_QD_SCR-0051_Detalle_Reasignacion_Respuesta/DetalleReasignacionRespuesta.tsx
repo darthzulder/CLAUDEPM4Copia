@@ -8,12 +8,19 @@ import { ActionBar } from '../../../../components/ActionBar';
 import { ZrButton, ZrAlert, ZrModal, ZrLoader, ZdsStatusBadge } from '../../../../components/fields/ZdsFields';
 import PreviewModal from '../../../../components/PreviewModal';
 import pm4 from '../../../../api/pm4Client';
-import { QD, SCR0051_DEFAULTS as DEFAULTS, SCR0051_SLA_UMBRAL_PRORROGA as SLA_UMBRAL_PRORROGA } from '../fields/fields';
+import { useCollection } from '../../../../core/useCollection';
+import { QD, QD_COLLECTIONS, SCR0051_DEFAULTS as DEFAULTS, SCR0051_SLA_UMBRAL_PRORROGA as SLA_UMBRAL_PRORROGA } from '../fields/fields';
 import type { DetalleReasignacionRespuestaFormData, AccionFlujoCombinado } from '../fields/fields';
 import SeccionDetalleCaso, { estadoVariant } from './SeccionDetalleCaso';
 import SeccionAsignacion from './SeccionAsignacion';
 import SeccionRespuesta from './SeccionRespuesta';
-import { buildRespuestaFinalHtml } from './respuestaFinalTemplate';
+import { buildRespuestaFinalHtml, fillRespuestaFinalHtml } from './respuestaFinalTemplate';
+
+// Correos de la colección 46 (Mails BPM) para la respuesta final. La favorabilidad
+// (qd_strFavorability) decide cuál: '1' = a favor del Cliente ⇒ "09 … queja procede";
+// '3' = a favor de la Compañía ⇒ "10 … queja no procede".
+const EMAIL_TPL_PROCEDE_PREFIX = '09';
+const EMAIL_TPL_NO_PROCEDE_PREFIX = '10';
 
 export default function DetalleReasignacionRespuesta() {
   const { task, loading, error, submitting, completeTask, saveDraft } = useTask();
@@ -44,28 +51,40 @@ export default function DetalleReasignacionRespuesta() {
 
   // Datos del consumidor derivados de los campos granulares producidos por SCR-000.
   const strName = (objWatch[QD.strCompanyName] || `${objWatch[QD.strFirstName] ?? ''} ${objWatch[QD.strLastName] ?? ''}`).trim();
-  const strIdentification = `${objWatch[QD.strIdType] ?? ''} ${objWatch[QD.strIdNumber] ?? ''}`.trim();
+  // Mostramos el texto del tipo de identificación (companion _desc) en vez del código; fallback al código.
+  const strIdTypeDesc = (objWatch as Record<string, unknown>)[`${QD.strIdType}_desc`] as string | undefined;
+  const strIdentification = `${strIdTypeDesc || objWatch[QD.strIdType] || ''} ${objWatch[QD.strIdNumber] ?? ''}`.trim();
 
-  // ACT-0051-05 — Vista previa: generamos la carta de respuesta (HTML del correo) y la
-  // servimos como blob a PreviewModal (mismo visor ancho que el resto de vistas previas).
-  // Se construye al abrir con la foto actual del formulario y se revoca al cerrar.
+  // Plantillas HTML de correos BPM (colección 46). La vista previa elige la fila 09/10
+  // según la favorabilidad; se rellena con los datos del caso.
+  const { options: cllEmailTpl } = useCollection(QD_COLLECTIONS.emailTemplates);
+
+  // ACT-0051-05 — Vista previa: obtenemos la carta de respuesta (HTML del correo) de la
+  // colección 46 de PM4 y la servimos como blob a PreviewModal (mismo visor ancho que el
+  // resto de vistas previas). Se construye al abrir con la foto actual del formulario y se
+  // revoca al cerrar. Si la colección aún no cargó o no trae la fila, cae a la plantilla local.
   const [strPreviewUrl, setStrPreviewUrl] = useState<string | null>(null);
   useEffect(() => {
     if (!blnShowPreview) return;
     const objData = form.getValues();
-    const strHtml = buildRespuestaFinalHtml({
+    const objVars = {
       tipo: objData[QD.strRequestType] || 'queja',
+      tipoDesc: (objData as Record<string, unknown>)[`${QD.strRequestType}_desc`] as string | undefined,
       numeroRadicado: objData[QD.strBpmCaseId] || '',
       nombre: (objData[QD.strCompanyName] || `${objData[QD.strFirstName] ?? ''} ${objData[QD.strLastName] ?? ''}`).trim(),
       interaccion: objData[QD.strInteraction] || '',
       loQueOcurrio: objData[QD.strComplaintText] || '',
       nuestraRespuesta: objData[QD.strClientResponse] || '',
       textoProcede: objData[QD.strActionsTaken] || '',
-    });
+    };
+    // '1' = a favor del Cliente ⇒ queja procede (fila 09); cualquier otro ⇒ no procede (fila 10).
+    const strPrefix = objData[QD.strFavorability] === '1' ? EMAIL_TPL_PROCEDE_PREFIX : EMAIL_TPL_NO_PROCEDE_PREFIX;
+    const strRawHtml = cllEmailTpl.find((o) => o.label.trim().startsWith(strPrefix))?.value;
+    const strHtml = strRawHtml ? fillRespuestaFinalHtml(strRawHtml, objVars) : buildRespuestaFinalHtml(objVars);
     const strUrl = URL.createObjectURL(new Blob([strHtml], { type: 'text/html' }));
     setStrPreviewUrl(strUrl);
     return () => { URL.revokeObjectURL(strUrl); setStrPreviewUrl(null); };
-  }, [blnShowPreview, form]);
+  }, [blnShowPreview, form, cllEmailTpl]);
 
   // Recorremos el registro de archivos para subir cada adjunto a PM4.
   const uploadFiles = async (in_intRequestId: number) => {
