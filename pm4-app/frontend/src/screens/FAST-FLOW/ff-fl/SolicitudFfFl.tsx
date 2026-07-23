@@ -2,6 +2,7 @@ import { useEffect, useState, useMemo, useRef } from 'react';
 import { ActionBar } from '../../../components/ActionBar';
 import { useForm, FieldError } from 'react-hook-form';
 import { useTask } from '../../../core/useTask';
+import { scrollToFirstError } from '../../../core/scrollToFirstError';
 import pm4 from '../../../api/pm4Client';
 import { useCollection } from '../../../core/useCollection';
 import FormSection from '../../../components/FormSection';
@@ -905,7 +906,7 @@ export default function SolicitudFfFl() {
               icon="arrow-long-right:line"
               disabled={submitting}
               loading={submitting}
-              onClick={() => form.handleSubmit(onSubmit)()}
+              onClick={() => form.handleSubmit(onSubmit, scrollToFirstError)()}
             >
               {submitting ? 'Enviando...' : 'CONTINUAR'}
             </ZrButton>

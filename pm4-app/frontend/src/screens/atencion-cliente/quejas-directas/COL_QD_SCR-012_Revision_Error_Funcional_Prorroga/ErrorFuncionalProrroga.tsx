@@ -1,6 +1,7 @@
 import { useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import { useTask } from '../../../../core/useTask';
+import { scrollToFirstError } from '../../../../core/scrollToFirstError';
 import { useCollection, useSyncDesc } from '../../../../core/useCollection';
 import ScreenHeader from '../../../../components/ScreenHeader';
 import FormSection from '../../../../components/FormSection';
@@ -54,7 +55,7 @@ export default function ErrorFuncionalProrroga() {
     completeTask({ ...in_objData, [QD.strAction]: in_strAction } as unknown as Record<string, unknown>)
       .catch((excError) => console.error('[ErrorFuncionalProrroga] Error al enviar:', excError));
 
-  const onReenviar = handleSubmit(enviarCon('REENVIAR'));       // ACT-012-01
+  const onReenviar = handleSubmit(enviarCon('REENVIAR'), scrollToFirstError);       // ACT-012-01
   const onCancelar = () => enviarCon('CANCELAR')(objWatch);     // ACT-012-02
 
   if (loading) {

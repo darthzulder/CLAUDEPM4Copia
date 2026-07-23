@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { useTask } from '../../../../core/useTask';
+import { scrollToFirstError } from '../../../../core/scrollToFirstError';
 import ScreenHeader from '../../../../components/ScreenHeader';
 import FormSection from '../../../../components/FormSection';
 import { ActionBar } from '../../../../components/ActionBar';
@@ -74,7 +75,7 @@ export default function RevisionRespuestaSac() {
       return;
     }
     enviarCon('DEVOLVER')();
-  });
+  }, scrollToFirstError);
 
   if (loading) {
     return <div className="screen-wrapper"><div className="screen-loading"><ZrLoader /></div></div>;

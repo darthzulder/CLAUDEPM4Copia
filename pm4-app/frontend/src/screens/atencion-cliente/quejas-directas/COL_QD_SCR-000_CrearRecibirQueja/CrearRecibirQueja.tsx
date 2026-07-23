@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import type { FieldPath } from 'react-hook-form';
 import { useTask } from '../../../../core/useTask';
+import { scrollToFirstError } from '../../../../core/scrollToFirstError';
 import ScreenHeader from '../../../../components/ScreenHeader';
 import FormSection from '../../../../components/FormSection';
 import { ActionBar } from '../../../../components/ActionBar';
@@ -347,7 +348,7 @@ export default function CrearRecibirQueja() {
       />
 
       <div className="screen-content">
-        <form onSubmit={handleSubmit(requestCaptcha)} noValidate>
+        <form onSubmit={handleSubmit(requestCaptcha, scrollToFirstError)} noValidate>
 
           {/* ── S1: Tipo de Solicitud y Rol ── */}
           <FormSection title="Tipo de Solicitud y Rol">
@@ -450,7 +451,7 @@ export default function CrearRecibirQueja() {
             <ZrButton config="secondary" onClick={() => window.history.back()}>Cancelar</ZrButton>
             <ZrButton
               config="positive"
-              onClick={() => handleSubmit(requestCaptcha)()}
+              onClick={() => handleSubmit(requestCaptcha, scrollToFirstError)()}
               loading={submitting}
               disabled={submitting || !blnCanSubmit}
             >

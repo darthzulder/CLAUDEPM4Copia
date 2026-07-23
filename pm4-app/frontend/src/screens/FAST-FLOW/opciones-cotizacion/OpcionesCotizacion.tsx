@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { useTask } from '../../../core/useTask';
+import { scrollToFirstError } from '../../../core/scrollToFirstError';
 import { resolveFileId } from '../../../core/useRequestFiles';
 import PdfViewer from '../../../components/PdfViewer';
 import { ZrButton, ZdsSelect, ZdsTextarea, ZrTabs, ZrAlert, ZrLoader } from '../../../components/fields/ZdsFields';
@@ -185,12 +186,12 @@ export default function OpcionesCotizacion() {
         </div>
 
         {/* Panel de decisión */}
-        <form onSubmit={handleSubmit(onSubmit)} noValidate>
+        <form onSubmit={handleSubmit(onSubmit, scrollToFirstError)} noValidate>
           <FormSection
             title="Decisión de Cotización"
             footer={
               <div className="decision-actions">
-                <ZrButton config="primary:l" onClick={() => { handleSubmit(onSubmit)(); }} disabled={submitting} loading={submitting}>DERIVAR</ZrButton>
+                <ZrButton config="primary:l" onClick={() => { handleSubmit(onSubmit, scrollToFirstError)(); }} disabled={submitting} loading={submitting}>DERIVAR</ZrButton>
               </div>
             }
           >

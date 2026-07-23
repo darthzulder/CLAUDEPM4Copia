@@ -1,6 +1,7 @@
 import { useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import { useTask } from '../../../../core/useTask';
+import { scrollToFirstError } from '../../../../core/scrollToFirstError';
 import ScreenHeader from '../../../../components/ScreenHeader';
 import FormSection from '../../../../components/FormSection';
 import { ActionBar } from '../../../../components/ActionBar';
@@ -41,7 +42,7 @@ export default function RevisionErrorTecnicoProrroga() {
       .catch((excError) => console.error('[RevisionErrorTecnicoProrroga] Error al enviar:', excError));
 
   // ACT-011-01 Autorizar Reenvío (valida RUL-011-01).
-  const onAutorizar = handleSubmit(enviarCon('AUTORIZAR_REENVIO'));
+  const onAutorizar = handleSubmit(enviarCon('AUTORIZAR_REENVIO'), scrollToFirstError);
   // ACT-011-02 Escalar a Proveedor (siempre disponible).
   const onEscalar = () => enviarCon('ESCALAR_PROVEEDOR')(objWatch);
 

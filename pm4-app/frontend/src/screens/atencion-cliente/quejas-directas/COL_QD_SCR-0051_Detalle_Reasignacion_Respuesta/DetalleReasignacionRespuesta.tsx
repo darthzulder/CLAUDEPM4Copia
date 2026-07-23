@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { useTask } from '../../../../core/useTask';
+import { scrollToFirstError } from '../../../../core/scrollToFirstError';
 import { pm4TasksUrl } from '../../../../core/useToken';
 import ScreenHeader from '../../../../components/ScreenHeader';
 import InfoBar from '../../../../components/InfoBar';
@@ -118,7 +119,7 @@ export default function DetalleReasignacionRespuesta() {
   };
 
   // ACT-0051-08 Enviar (valida RUL-0051-05: respuestaCliente no vacío).
-  const onEnviar = handleSubmit(enviarCon('ENVIAR'));
+  const onEnviar = handleSubmit(enviarCon('ENVIAR'), scrollToFirstError);
 
   // ACT-0051-07 Guardar Borrador: guarda sin completar la tarea y redirige el frame
   // superior al home de tareas de ProcessMaker (solo si se guardó bien).

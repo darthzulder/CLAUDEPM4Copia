@@ -1,6 +1,7 @@
 import { useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import { useTask } from '../../../../core/useTask';
+import { scrollToFirstError } from '../../../../core/scrollToFirstError';
 import { pm4TasksUrl } from '../../../../core/useToken';
 import { useCollection, descOf, useSyncDesc } from '../../../../core/useCollection';
 import ScreenHeader from '../../../../components/ScreenHeader';
@@ -119,7 +120,7 @@ export default function FormularioSuperintendencia() {
     }
   };
 
-  const onGuardar = handleSubmit(enviarCon('GUARDAR'));         // ACT-009-01
+  const onGuardar = handleSubmit(enviarCon('GUARDAR'), scrollToFirstError);         // ACT-009-01
   // ACT-009-02 Guardar Borrador: guarda sin completar la tarea y redirige el frame
   // superior al home de tareas de ProcessMaker (solo si se guardó bien).
   const onGuardarBorrador = async () => {

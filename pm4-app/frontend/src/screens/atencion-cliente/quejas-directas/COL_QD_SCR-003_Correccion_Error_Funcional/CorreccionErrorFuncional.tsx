@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { useTask } from '../../../../core/useTask';
+import { scrollToFirstError } from '../../../../core/scrollToFirstError';
 import ScreenHeader from '../../../../components/ScreenHeader';
 import FormSection from '../../../../components/FormSection';
 import { ActionBar } from '../../../../components/ActionBar';
@@ -56,7 +57,7 @@ export default function CorreccionErrorFuncional() {
   const onReenviar = handleSubmit((in_objData) =>
     completeTask({ ...in_objData, [QD.strAction]: 'CORREGIR_REENVIAR' as AccionErrorFuncional } as unknown as Record<string, unknown>)
       .catch((exc) => console.error('[CorreccionErrorFuncional] Error al reenviar:', exc)),
-  );
+  scrollToFirstError);
 
   if (loading) {
     return <div className="screen-wrapper"><div className="screen-loading"><ZrLoader /></div></div>;

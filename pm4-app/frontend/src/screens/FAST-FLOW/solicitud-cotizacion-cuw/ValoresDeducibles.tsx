@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { ZdsInput, ZdsSelect, ZrModal, ZrButton, ZrTable } from '../../../components/fields/ZdsFields';
+import { scrollToFirstError } from '../../../core/scrollToFirstError';
 
 // ---------------------------------------------------------------------------
 // Tipos
@@ -138,7 +139,7 @@ function ValorDeducibleModal({ initial, onClose, onSave }: ModalProps) {
       </div>
       <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 'var(--zs-75)', marginTop: 'var(--zs-150)' }}>
         <ZrButton config="secondary" onClick={onClose}>CANCELAR</ZrButton>
-        <ZrButton config="primary:l" onClick={() => { handleSubmit(onSubmit)(); }}>GUARDAR</ZrButton>
+        <ZrButton config="primary:l" onClick={() => { handleSubmit(onSubmit, scrollToFirstError)(); }}>GUARDAR</ZrButton>
       </div>
     </ZrModal>
   );

@@ -122,6 +122,7 @@ export function ZdsInput<TFV extends FieldValues>({
         rules={rules as RegisterOptions<TFV, typeof name>}
         render={({ field }) => (
           <ZrTextInput
+            id={`field-${String(name)}`}
             name={field.name}
             model={String(field.value ?? '')}
             label={label}
@@ -153,6 +154,7 @@ export function ZdsDate<TFV extends FieldValues>({
         rules={rules as RegisterOptions<TFV, typeof name>}
         render={({ field }) => (
           <ZrDateInput
+            id={`field-${String(name)}`}
             name={field.name}
             model={String(field.value ?? '')}
             label={label}
@@ -197,6 +199,7 @@ export function ZdsTextarea<TFV extends FieldValues>({
       rules={rules as RegisterOptions<TFV, typeof name>}
       render={({ field }) => (
         <ZrTextarea
+          id={`field-${String(name)}`}
           name={field.name}
           model={String(field.value ?? '')}
           label={label}
@@ -231,6 +234,7 @@ export function ZdsCheckboxField<TFV extends FieldValues>({
       control={control}
       render={({ field }) => (
         <ZrCheckbox
+          id={`field-${String(name)}`}
           name={field.name}
           model={!!field.value}
           label={label}
@@ -282,6 +286,7 @@ export function ZdsSelect<TFV extends FieldValues>({
         rules={rules as RegisterOptions<TFV, typeof name>}
         render={({ field }) => (
           <ZrSelect
+            id={`field-${String(name)}`}
             name={field.name}
             label={label}
             model={String(field.value ?? '')}
@@ -334,6 +339,7 @@ export function ZdsRadio<TFV extends FieldValues>({
       rules={rules as RegisterOptions<TFV, typeof name>}
       render={({ field }) => (
         <ZrRadioSelect
+          id={`field-${String(name)}`}
           name={field.name}
           model={String(field.value ?? '')}
           label={label}
@@ -378,6 +384,7 @@ export function ZdsSegmented<TFV extends FieldValues>({
       rules={rules as RegisterOptions<TFV, typeof name>}
       render={({ field }) => (
         <ZrSegmentedControl
+          id={`field-${String(name)}`}
           name={field.name}
           model={field.value ? String(field.value) : null}
           disabled={disabled}
@@ -409,6 +416,7 @@ export function ZdsStepper<TFV extends FieldValues>({
       rules={rules as RegisterOptions<TFV, typeof name>}
       render={({ field }) => (
         <ZrStepper
+          id={`field-${String(name)}`}
           model={Number(field.value) || 1}
           disabled={disabled}
           onChange={(val: number) => field.onChange(val)}
@@ -443,6 +451,7 @@ export function ZdsCalendar<TFV extends FieldValues>({
       rules={rules as RegisterOptions<TFV, typeof name>}
       render={({ field }) => (
         <ZrCalendar
+          id={`field-${String(name)}`}
           model={String(field.value ?? '')}
           disabled={disabled}
           wide={wide}
@@ -498,6 +507,7 @@ export function ZdsFileInput<TFV extends FieldValues>({
         control={control}
         render={({ field }) => (
           <ZrFileInput
+            id={`field-${String(name)}`}
             label={label}
             model={(field.value as string) || null}
             droppable={droppable}

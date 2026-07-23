@@ -6,6 +6,7 @@ import InfoBar from '../../../../components/InfoBar';
 import ScreenHeader from '../../../../components/ScreenHeader';
 import { ZdsInput, ZrAlert, ZrButton, ZrLoader } from '../../../../components/fields/ZdsFields';
 import { useTask } from '../../../../core/useTask';
+import { scrollToFirstError } from '../../../../core/scrollToFirstError';
 import { pm4TasksUrl } from '../../../../core/useToken';
 import { QD, SCR002_DEFAULTS as DEFAULTS, SCR002_ERRORES_EJEMPLO as ERRORES_EJEMPLO } from '../fields/fields';
 import type { CorregirDatosFormData } from '../fields/fields';
@@ -117,7 +118,7 @@ export default function CorregirDatosFormulario() {
           { label: 'Errores pendientes', value: `${intPendingErrors} de ${lstFieldsWithError.length}` },
         ]} />
 
-        <form onSubmit={handleSubmit(onSubmit)} noValidate>
+        <form onSubmit={handleSubmit(onSubmit, scrollToFirstError)} noValidate>
 
           {/* Alerta principal */}
           {!blnCanSubmit ? (
@@ -156,7 +157,7 @@ export default function CorregirDatosFormulario() {
               config="positive"
               disabled={!blnCanSubmit}
               loading={submitting}
-              onClick={() => { handleSubmit(onSubmit)(); }}
+              onClick={() => { handleSubmit(onSubmit, scrollToFirstError)(); }}
             >
               {strSubmitLabel}
             </ZrButton>

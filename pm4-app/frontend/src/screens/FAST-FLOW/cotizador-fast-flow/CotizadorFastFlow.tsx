@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { ActionBar } from '../../../components/ActionBar';
 import { useForm, FieldError } from 'react-hook-form';
 import { useTask } from '../../../core/useTask';
+import { scrollToFirstError } from '../../../core/scrollToFirstError';
 import { useCollection } from '../../../core/useCollection';
 import FormSection from '../../../components/FormSection';
 import ScreenHeader from '../../../components/ScreenHeader';
@@ -594,7 +595,7 @@ export default function CotizadorFastFlow() {
       />
 
       <div className="screen-content">
-        <form onSubmit={form.handleSubmit(onSubmit)} noValidate>
+        <form onSubmit={form.handleSubmit(onSubmit, scrollToFirstError)} noValidate>
           <InfoGeneral form={form} />
           <InfoTomador form={form} onConsultarCliente={handleConsultarCliente} consultarLoading={blnConsultarLoading} tiaFilledFields={lstTiaFields} />
           <DatosCotizacion form={form} />
@@ -602,7 +603,7 @@ export default function CotizadorFastFlow() {
           <PlanPago form={form} />
 
           <ActionBar>
-            <ZrButton config="primary:l" onClick={() => { form.handleSubmit(onSubmit)(); }} loading={submitting} disabled={submitting}>
+            <ZrButton config="primary:l" onClick={() => { form.handleSubmit(onSubmit, scrollToFirstError)(); }} loading={submitting} disabled={submitting}>
               ENVIAR
             </ZrButton>
           </ActionBar>

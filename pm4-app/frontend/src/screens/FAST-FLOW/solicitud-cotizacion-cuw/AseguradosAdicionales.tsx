@@ -3,6 +3,7 @@ import { useForm } from 'react-hook-form';
 import { ZdsInput, ZdsSelect, ZrModal, ZrButton, ZrTable } from '../../../components/fields/ZdsFields';
 import { useCollection } from '../../../core/useCollection';
 import type { CollectionDef } from '../../../core/useCollection';
+import { scrollToFirstError } from '../../../core/scrollToFirstError';
 
 // ---------------------------------------------------------------------------
 // Tipos
@@ -163,7 +164,7 @@ function AseguradoModal({ initial, onClose, onAccept }: ModalProps) {
       </div>
       <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 'var(--zs-75)', marginTop: 'var(--zs-150)' }}>
         <ZrButton config="secondary" onClick={onClose}>CANCELAR</ZrButton>
-        <ZrButton config="primary:l" onClick={() => { handleSubmit(onSubmit)(); }}>ACEPTAR</ZrButton>
+        <ZrButton config="primary:l" onClick={() => { handleSubmit(onSubmit, scrollToFirstError)(); }}>ACEPTAR</ZrButton>
       </div>
     </ZrModal>
   );

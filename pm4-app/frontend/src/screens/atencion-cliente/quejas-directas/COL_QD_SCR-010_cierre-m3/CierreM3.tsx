@@ -1,6 +1,7 @@
 import { useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import { useTask } from '../../../../core/useTask';
+import { scrollToFirstError } from '../../../../core/scrollToFirstError';
 import FormSection from '../../../../components/FormSection';
 import { ZdsInput, ZrButton, ZrAlert } from '../../../../components/fields/ZdsFields';
 import RequestFileList from '../../../../components/RequestFileList';
@@ -122,7 +123,7 @@ export default function CierreM3() {
         <img src={zurichLogo} alt="Zurich" className="header-logo" />
       </div>
 
-      <form onSubmit={handleSubmit(onSubmit)} noValidate style={{ maxWidth: 960, margin: '0 auto', padding: '24px 24px 0' }}>
+      <form onSubmit={handleSubmit(onSubmit, scrollToFirstError)} noValidate style={{ maxWidth: 960, margin: '0 auto', padding: '24px 24px 0' }}>
 
         {/* Sección 1 — Estado del envío a SFC */}
         <FormSection title="Estado del Envío a SmartSupervision (SFC)">
@@ -261,7 +262,7 @@ export default function CierreM3() {
           </ZrButton>
           <ZrButton
             config="positive"
-            onClick={() => { handleSubmit(onSubmit)(); }}
+            onClick={() => { handleSubmit(onSubmit, scrollToFirstError)(); }}
             loading={submitting}
             disabled={submitting}
           >
