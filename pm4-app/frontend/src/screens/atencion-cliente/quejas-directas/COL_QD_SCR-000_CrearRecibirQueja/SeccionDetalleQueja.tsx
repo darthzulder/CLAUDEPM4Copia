@@ -135,18 +135,22 @@ export default function SeccionDetalleQueja({ form, fileRegistry }: Props) {
     setValue(QD.strOmbudsmanEscalation, '');
     setValue(QD.strCompensation, '');
     setValue(QD.strSlaAssigned, '');
+    setValue(QD.strFraudRelated, 'NO');
   }, [objWatch[QD.strRequestType], objWatch[QD.strSfcProduct], objWatch[QD.strInteraction], objWatch[QD.strServiceProvided], setValue]);
 
-  // qd_strResponsableRole / qd_strOmbudsmanEscalation / qd_strCompensation / qd_strSlaAssigned
-  // se extraen de la fila de cat_matriz_motivos que corresponde a la selección completa
-  // del form (tipo solicitud + producto + momento + [servicio] + motivo), columnas
-  // rolResponsable / escalamientoAdministrador / resarcimientoAdministrador / sla.
+  // qd_strResponsableRole / qd_strOmbudsmanEscalation / qd_strCompensation / qd_strSlaAssigned /
+  // qd_strFraudRelated se extraen de la fila de cat_matriz_motivos que corresponde a la selección
+  // completa del form (tipo solicitud + producto + momento + [servicio] + motivo), columnas
+  // rolResponsable / escalamientoAdministrador / resarcimientoAdministrador / sla / relacionFraude.
+  // relacionFraude (SI/NO) marca los motivos relacionados con fraude (p.ej. 104/114/144) → gatilla
+  // los campos de fraude en SCR-009/010; se normaliza a 'SI'/'NO' porque la matriz trae texto sucio.
   useEffect(() => {
     if (!objSelectedReasonRow) return;
     setValue(QD.strResponsableRole, leerColumna(objSelectedReasonRow, 'rolResponsable'));
     setValue(QD.strOmbudsmanEscalation, leerColumna(objSelectedReasonRow, 'escalamientoAdministrador'));
     setValue(QD.strCompensation, leerColumna(objSelectedReasonRow, 'resarcimientoAdministrador'));
     setValue(QD.strSlaAssigned, leerColumna(objSelectedReasonRow, 'sla'));
+    setValue(QD.strFraudRelated, normalizar(leerColumna(objSelectedReasonRow, 'relacionFraude')) === 'si' ? 'SI' : 'NO');
   }, [objSelectedReasonRow, setValue]);
 
   // Placa fuera de "Autos" no debe conservar valor.

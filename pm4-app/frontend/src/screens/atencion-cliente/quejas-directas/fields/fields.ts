@@ -518,7 +518,7 @@ export type CrearRecibirQuejaFormData = Pick<QdFields,
   | typeof QD.strLgbtiq | typeof QD.strSpecialCondition | typeof QD.strSfcProduct | typeof QD.strPlate
   | typeof QD.strProductDetail | typeof QD.strReply | typeof QD.strReplyArgument
   | typeof QD.strOmbudsmanEscalation | typeof QD.strResponsableRole | typeof QD.strCompensation | typeof QD.strSlaAssigned
-  | typeof QD.strInteraction | typeof QD.strServiceProvided
+  | typeof QD.strInteraction | typeof QD.strServiceProvided | typeof QD.strFraudRelated
   | typeof QD.strSfcReason | typeof QD.strComplaintText
   | typeof QD.strAttach01 | typeof QD.strAttach02 | typeof QD.strAttach03 | typeof QD.strAttach04 | typeof QD.strAttach05
   | typeof QD.strAdmission | typeof QD.strControlEntity | typeof QD.strTutela | typeof QD.strExpressComplaint
@@ -565,6 +565,7 @@ export const SCR000_DEFAULTS = {
   [QD.strResponsableRole]: '', // Extraído de cat_matriz_motivos.rolResponsable al completar momento/servicio/motivo
   [QD.strCompensation]: '',    // Extraído de cat_matriz_motivos.resarcimientoAdministrador
   [QD.strSlaAssigned]: '',     // Extraído de cat_matriz_motivos.sla
+  [QD.strFraudRelated]: 'NO',  // Derivado de cat_matriz_motivos.relacionFraude (SI/NO) según el motivo
   [QD.strSfcReason]: '',
   [QD.strComplaintText]: '',
   [QD.strAttach01]: '',
