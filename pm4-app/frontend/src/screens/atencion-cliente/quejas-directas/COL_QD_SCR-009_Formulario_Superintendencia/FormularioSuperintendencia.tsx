@@ -1,6 +1,5 @@
 import { useEffect } from 'react';
 import { useForm } from 'react-hook-form';
-import type { FieldPath } from 'react-hook-form';
 import { useTask } from '../../../../core/useTask';
 import { pm4TasksUrl } from '../../../../core/useToken';
 import { useCollection, descOf, useSyncDesc } from '../../../../core/useCollection';
@@ -8,7 +7,7 @@ import ScreenHeader from '../../../../components/ScreenHeader';
 import FormSection from '../../../../components/FormSection';
 import { ActionBar } from '../../../../components/ActionBar';
 import {
-  ZdsSelect, ZdsInput, ZrButton, ZrAlert, ZrLoader,
+  ZdsSelect, ZrButton, ZrAlert, ZrLoader,
 } from '../../../../components/fields/ZdsFields';
 import {
   QD, QD_COLLECTIONS, SCR009_DEFAULTS as DEFAULTS, SCR009_BACK_DEFAULTS,
@@ -64,11 +63,6 @@ export default function FormularioSuperintendencia() {
   useSyncDesc(form, QD.strTutela, cllTutela);
   useSyncDesc(form, QD.strMarking, cllMarking);
   useSyncDesc(form, QD.strExpressComplaint, cllExpressComplaint);
-
-  // Nombres de las variables compañeras de descripción para los inputs de solo
-  // lectura de Sexo/LGBTIQ+ (el campo base guarda el código, seleccionable).
-  const strSexDesc = `${QD.strSex}_desc` as FieldPath<FormularioSuperintendenciaFormData>;
-  const strLgbtiqDesc = `${QD.strLgbtiq}_desc` as FieldPath<FormularioSuperintendenciaFormData>;
 
   // Pre-poblamos el formulario con los datos del caso. reset() reemplaza todo el
   // estado, así que TODAS las claves de task.data (incl. los campos "Back"
@@ -161,18 +155,15 @@ export default function FormularioSuperintendencia() {
 
           {/* ── S2 · Datos del Consumidor — Campos SFC (SEC-029) ── */}
           {/* Sexo y LGBTIQ+ llegan precargados desde SCR-000 (default "No Aplica"/
-              "No") y aquí son seleccionables por el Analista SAC; su _desc se
-              muestra en un input de solo lectura (useSyncDesc). Producto Digital
-              sigue siendo "Back"; Condición Especial sigue siendo Front editable
-              (Excel PQRS V3.0 #23/#26). */}
+              "No") y aquí son seleccionables por el Analista SAC: el ZdsSelect
+              muestra la descripción (label) pero guarda el código; su _desc
+              compañera viaja sola vía useSyncDesc, sin campo visible propio.
+              Producto Digital sigue siendo "Back"; Condición Especial sigue
+              siendo Front editable (Excel PQRS V3.0 #23/#26). */}
           <FormSection title="Datos del Consumidor — Campos SFC">
             <div className="form-row cols-2">
               <ZdsSelect name={QD.strSex} control={control} label="Sexo" options={cllSex} />
-              <ZdsInput name={strSexDesc} control={control} label="Sexo (descripción)" readOnly />
-            </div>
-            <div className="form-row cols-2">
               <ZdsSelect name={QD.strLgbtiq} control={control} label="LGBTIQ+" options={cllLgbtiq} />
-              <ZdsInput name={strLgbtiqDesc} control={control} label="LGBTIQ+ (descripción)" readOnly />
             </div>
             <div className="form-row cols-2">
               <Ro label="Producto Digital" value={descOf(cllDigitalProduct, objWatch[QD.strDigitalProduct])} />

@@ -25,8 +25,9 @@ calcula el back** ("Back"/"Automático"/"Por default"): producto digital y toda 
 Queja (estado, favorabilidad, aceptación, rectificación, desistimiento, tutela, marcación, queja
 exprés), además de fraude (CE-019/2024) y prórroga — se muestran en **solo lectura** (label del
 catálogo). **Sexo y LGBTIQ+** (FLD-320/321) llegan precargados desde SCR-000 (default "No Aplica"/
-"No") y aquí **sí son editables** (`ZdsSelect` + input de solo lectura con su `_desc`), sin bloquear
-el guardado. Los **editables que sí condicionan el guardado** son **Condición Especial** (Front,
+"No") y aquí **sí son editables**: un `ZdsSelect` por campo que muestra la descripción del catálogo
+pero guarda el código/ID por detrás (su `_desc` compañera viaja sola, sin input propio), sin
+bloquear el guardado. Los **editables que sí condicionan el guardado** son **Condición Especial** (Front,
 obligatorio SFC) y los **dos indicadores de anexos**; el guardado se bloquea hasta completarlos.
 Los datos de clasificación de M1 viajan en el payload sin UI. Al guardar se habilita el subproceso
 SP3 de cierre regulatorio.
@@ -60,8 +61,8 @@ mostrarlos de nuevo como solo lectura aquí. Se removió el bloque `ZdsInput rea
 
 | Campo (UI) | Variable | Presentación | Origen |
 |---|---|---|---|
-| **Sexo** | `qd_strSex` + `qd_strSex_desc` | `ZdsSelect` (CAT-SEXO, colección 23) + `ZdsInput readOnly` con la descripción | 🟢 Editable aquí; llega precargado desde SCR-000 (default "No Aplica", Excel #21) |
-| **LGBTIQ+** | `qd_strLgbtiq` + `qd_strLgbtiq_desc` | `ZdsSelect` (CAT-LGBTIQ, colección 41) + `ZdsInput readOnly` con la descripción | 🟢 Editable aquí; llega precargado desde SCR-000 (default "No", Excel #22) |
+| **Sexo** | `qd_strSex` (+ `qd_strSex_desc` compañera, sin campo propio) | `ZdsSelect` (CAT-SEXO, colección 23): muestra la descripción, guarda el código | 🟢 Editable aquí; llega precargado desde SCR-000 (default "No Aplica", Excel #21) |
+| **LGBTIQ+** | `qd_strLgbtiq` (+ `qd_strLgbtiq_desc` compañera, sin campo propio) | `ZdsSelect` (CAT-LGBTIQ, colección 41): muestra la descripción, guarda el código | 🟢 Editable aquí; llega precargado desde SCR-000 (default "No", Excel #22) |
 | Producto Digital | `qd_strDigitalProduct` | label resuelto (info-bar) | 🔴 Back, default "No" (Excel #54) |
 | **Condición Especial** | `qd_strSpecialCondition` | `ZdsSelect` (editable, requerido) | 🟢 **Front, obligatorio SFC** (Excel #23/#26) |
 
