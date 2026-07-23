@@ -1,9 +1,9 @@
 import type { UseFormReturn } from 'react-hook-form';
 import FormSection from '../../../../components/FormSection';
-import { ZdsRadio } from '../../../../components/fields/ZdsFields';
+import { ZdsRadio, ZdsSelect, ZdsInput } from '../../../../components/fields/ZdsFields';
 import RequestFileList from '../../../../components/RequestFileList';
 import { resolveFileId } from '../../../../core/useRequestFiles';
-import { useCollection, descOf, useSyncDesc } from '../../../../core/useCollection';
+import { useCollection, useSyncDesc } from '../../../../core/useCollection';
 import { QD, QD_COLLECTIONS, OPTIONS_SI_NO } from '../fields/fields';
 import type { FormularioSuperintendenciaFormData } from '../fields/fields';
 import { Ro } from './FormularioSuperintendencia';
@@ -14,12 +14,12 @@ interface Props {
   requestId: number | null;
 }
 
-/** S4 Datos de Fraude (solo lectura, Back) · S5 Anexos del Formulario (editables). */
+/** S4 Datos de Fraude (tipo/modalidad/montos editables) · S5 Anexos del Formulario (editables). */
 export default function SeccionFraudeAnexos({ form, err, requestId }: Props) {
   const { control, watch } = form;
   const objWatch = watch();
 
-  // Cargamos los catalogos de fraude (para resolver el label del código)
+  // Cargamos los catalogos de fraude (Tipo/Modalidad son selects respaldados por colección)
   const { options: cllFraudType } = useCollection(QD_COLLECTIONS.fraudType);
   const { options: cllFraudModality } = useCollection(QD_COLLECTIONS.fraudModality);
 
@@ -27,10 +27,12 @@ export default function SeccionFraudeAnexos({ form, err, requestId }: Props) {
   useSyncDesc(form, QD.strFraudType, cllFraudType);
   useSyncDesc(form, QD.strFraudModality, cllFraudModality);
 
-  // Fraude es "Back" (Excel PQRS V3.0 #57/#58/#60/#61): la relación con fraude,
-  // el tipo, la modalidad y los montos los define el cierre/responsable, no el
-  // Analista SAC → solo lectura.
+  // ¿Relacionada con Fraude? sigue siendo "Back" (Excel PQRS V3.0 #60): la fija
+  // el cierre/responsable → solo lectura. Tipo, modalidad y montos SÍ son
+  // editables por el Analista SAC (Excel #57/#58/#61) y obligatorios cuando
+  // aplica (RUL-009-01 / MSG-009-01).
   const blnIsFraud = objWatch[QD.strFraudRelated] === 'SI';
+  const objFraudReq = blnIsFraud ? { required: 'Campo requerido' } : undefined;
 
   // FLD-165 — el payload trae el id de PM4 del PDF (no un nombre fijo: el
   // nombrado del PDF es decisión de negocio y puede cambiar), p.ej.
@@ -39,7 +41,7 @@ export default function SeccionFraudeAnexos({ form, err, requestId }: Props) {
 
   return (
     <>
-      {/* ── S4 · Datos de Fraude CE-019-2024 (SEC-031, solo lectura) ── */}
+      {/* ── S4 · Datos de Fraude CE-019-2024 (SEC-031) ── */}
       <FormSection title="Datos de Fraude CE-019-2024">
         <div className="form-row cols-1">
           <Ro label="¿Relacionada con Fraude?" value={blnIsFraud ? 'Sí' : 'No'} />
@@ -48,12 +50,16 @@ export default function SeccionFraudeAnexos({ form, err, requestId }: Props) {
         {blnIsFraud && (
           <>
             <div className="form-row cols-2">
-              <Ro label="Tipo de Fraude" value={descOf(cllFraudType, objWatch[QD.strFraudType])} />
-              <Ro label="Modalidad de Fraude" value={descOf(cllFraudModality, objWatch[QD.strFraudModality])} />
+              <ZdsSelect name={QD.strFraudType} control={control} label="Tipo de Fraude"
+                options={cllFraudType} required rules={objFraudReq} error={err(QD.strFraudType)} />
+              <ZdsSelect name={QD.strFraudModality} control={control} label="Modalidad de Fraude"
+                options={cllFraudModality} required rules={objFraudReq} error={err(QD.strFraudModality)} />
             </div>
             <div className="form-row cols-2">
-              <Ro label="Monto Reclamado (COP)" value={objWatch[QD.strClaimedAmount] || '—'} />
-              <Ro label="Monto Reconocido (COP)" value={objWatch[QD.strAcknowledgedAmount] || '—'} />
+              <ZdsInput name={QD.strClaimedAmount} control={control} label="Monto Reclamado (COP)"
+                required rules={objFraudReq} error={err(QD.strClaimedAmount)} />
+              <ZdsInput name={QD.strAcknowledgedAmount} control={control} label="Monto Reconocido (COP)"
+                required rules={objFraudReq} error={err(QD.strAcknowledgedAmount)} />
             </div>
           </>
         )}

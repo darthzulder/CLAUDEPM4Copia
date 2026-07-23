@@ -93,15 +93,19 @@ Los campos marcados con valor por default en el Excel deben **existir y estar ll
 
 > **Pendientes de código de catálogo (los llena el back, NO el front):** Sexo ("No aplica"), LGBTIQ+ ("No aplica"), Tutela ("No") y Ente de Control ("Otros"). El Excel `Homologación SFC` los marca "Es requerida su creación / No existe": su código no está confirmado con TI, y hard-codearlo arriesgaría un envío inválido a la SFC. El back debe poblarlos con el código correcto antes de M3.
 
-### S4 — Datos de Fraude CE-019-2024 (SEC-031, condicional) — solo lectura (Back)
+### S4 — Datos de Fraude CE-019-2024 (SEC-031, condicional)
 
-| Campo (UI) | Variable | Presentación | Origen (Back) |
+| Campo (UI) | Variable | Presentación | Origen |
 |---|---|---|---|
-| ¿Relacionada con Fraude? | `qd_strFraudRelated` | valor Sí/No (info-bar) | Back (depende del cierre, Excel #57/#60) |
-| Tipo de Fraude | `qd_strFraudType` | label resuelto (info-bar) | Back (Excel #57) |
-| Modalidad de Fraude | `qd_strFraudModality` | label resuelto (info-bar) | Back, lo fija el responsable si cierre=fraude (Excel #58/#61) |
-| Monto Reclamado (COP) | `qd_strClaimedAmount` | valor (info-bar) | Back |
-| Monto Reconocido (COP) | `qd_strAcknowledgedAmount` | valor (info-bar) | Back |
+| ¿Relacionada con Fraude? | `qd_strFraudRelated` | valor Sí/No (info-bar) | 🔴 Back (depende del cierre, Excel #60) |
+| Tipo de Fraude | `qd_strFraudType` | `ZdsSelect` (editable) — colección `cat-tipo-fraude` (id 33) | 🟢 **Front, editable**; obligatorio si fraude=Sí (Excel #57) |
+| Modalidad de Fraude | `qd_strFraudModality` | `ZdsSelect` (editable) — colección `cat-mod-fraude` (id 34) | 🟢 **Front, editable**; obligatorio si fraude=Sí (Excel #58/#61) |
+| Monto Reclamado (COP) | `qd_strClaimedAmount` | `ZdsInput` texto (editable) | 🟢 **Front, editable**; obligatorio si fraude=Sí |
+| Monto Reconocido (COP) | `qd_strAcknowledgedAmount` | `ZdsInput` texto (editable) | 🟢 **Front, editable**; obligatorio si fraude=Sí |
+
+> Cambio 2026-07-23: Tipo/Modalidad de Fraude y los dos montos dejaron de ser "Back" solo lectura y
+> pasaron a ser editables por el Analista SAC, alineado con RUL-009-01 (antes no se validaba porque
+> eran de solo lectura). Solo `qd_strFraudRelated` sigue siendo Back.
 
 ### S5 — Anexos del Formulario (SEC-032)
 
@@ -126,10 +130,10 @@ Los campos regulatorios ya no se validan en front (son Back, solo lectura). Solo
 
 | Validación | Comportamiento implementado | Fuente |
 |---|---|---|
-| Condición Especial + anexos completos | `blnCanSave = blnSpecialCondOk && blnAnnexesComplete`; botón "Guardar Formulario" deshabilitado si falta alguno; alerta MSG-009-02 | Excel #23/#26 · FLD-163/164 |
+| Condición Especial + anexos + fraude completos | `blnCanSave = blnSpecialCondOk && blnAnnexesComplete && blnFraudComplete`; botón "Guardar Formulario" deshabilitado si falta alguno; alerta MSG-009-02 | Excel #23/#26 · FLD-163/164 · RUL-009-01 |
+| Tipo/Modalidad/Montos de fraude obligatorios si `qd_strFraudRelated='SI'` | `rules={{ required: 'Campo requerido' }}` condicional en los 4 campos de `SeccionFraudeAnexos` | RUL-009-01 / MSG-009-01 |
 | ~~Campos SFC obligatorios (12 selects)~~ | **Eliminada** — son Back, solo lectura | — |
-| ~~Campos de fraude obligatorios~~ | **Eliminada** — fraude es Back, solo lectura | — |
-| ~~Montos/prórroga solo dígitos~~ | **Eliminada** — solo lectura | — |
+| ~~Prórroga solo dígitos~~ | **Eliminada** — solo lectura | — |
 
 ---
 
@@ -137,8 +141,8 @@ Los campos regulatorios ya no se validan en front (son Back, solo lectura). Solo
 
 | Mensaje | Condición | Implementación | Fuente |
 |---|---|---|---|
-| ~~MSG-009-01 Campos fraude obligatorios~~ | — | **Eliminado** — fraude es solo lectura | 06_Mensajes > MSG-009-01 |
-| MSG-009-02 Editables incompletos | Falta Condición Especial o anexos | `ZrAlert config="info"` + "Guardar" disabled | 06_Mensajes > MSG-009-02 |
+| MSG-009-01 Campos fraude obligatorios | Falta tipo/modalidad/monto con fraude=Sí | `error` por campo (`ZdsSelect`/`ZdsInput` con `rules` condicional) | 06_Mensajes > MSG-009-01 |
+| MSG-009-02 Editables incompletos | Falta Condición Especial, anexos o (si aplica) datos de fraude | `ZrAlert config="info"` + "Guardar" disabled | 06_Mensajes > MSG-009-02 |
 | MSG-009-03 Formulario guardado | Tras guardar | **No en UI** — lo emite el BPM tras `completeTask` | 06_Mensajes > MSG-009-03 |
 | ~~MSG-009-04 LGBTIQ+ pendiente~~ | — | **Eliminado** — LGBTIQ+ ahora es solo lectura (Back) | 06_Mensajes > MSG-009-04 |
 
@@ -148,7 +152,7 @@ Los campos regulatorios ya no se validan en front (son Back, solo lectura). Solo
 
 | Regla | Implementación | Fuente |
 |---|---|---|
-| RUL-009-01 — fraude | **Reinterpretada:** fraude es Back → solo lectura, se muestra si `qd_strFraudRelated='SI'` (sin validación de captura) | Excel PQRS V3.0 #57/#58 |
+| RUL-009-01 — fraude | Tipo/Modalidad/Montos son editables y obligatorios cuando `qd_strFraudRelated='SI'`; `qd_strFraudRelated` sigue siendo Back | Excel PQRS V3.0 #57/#58 |
 | RUL-009-02 (info) — precargar M1 no editable | Datos M1 viajan en el `payload` (`reset()`) sin renderizarse en UI (ya vistos en pantallas previas desde SCR-000) | SCR-009 > RUL-009-02 |
 | RUL-009-03 — bloquear guardar | `blnCanSave` deshabilita el botón hasta completar Condición Especial + anexos + alerta MSG-009-02 | Excel #23/#26 · FLD-163/164 |
 
@@ -161,9 +165,9 @@ Los campos regulatorios ya no se validan en front (son Back, solo lectura). Solo
 | Comportamiento | Implementación | Fuente |
 |---|---|---|
 | Precarga M1 sin UI (ya vista en SCR-000) | No se renderiza S1; los valores viajan en el `payload` vía `reset()` | SEC-028 · RUL-009-02 |
-| Campos regulatorios solo lectura | Pares label/valor (`Ro` + `descOpt`) en grids `cols-2`/`cols-3`; conservan el código en el payload | Excel PQRS V3.0 sección "Cierre" |
-| Único select editable | Condición Especial (`ZdsSelect` requerido) | Excel #23/#26 |
-| Sección de fraude condicional (solo lectura) | render por `qd_strFraudRelated='SI'` | SEC-031 |
+| Campos regulatorios solo lectura (S2/S3) | Pares label/valor (`Ro` + `descOpt`) en grids `cols-2`/`cols-3`; conservan el código en el payload | Excel PQRS V3.0 sección "Cierre" |
+| Selects/inputs editables | Condición Especial (`ZdsSelect` requerido) + Tipo/Modalidad de Fraude (`ZdsSelect`) + Montos (`ZdsInput`), estos 4 obligatorios solo si fraude=Sí | Excel #23/#26/#57/#58/#61 |
+| Sección de fraude condicional | render por `qd_strFraudRelated='SI'`; `qd_strFraudRelated` solo lectura, resto editable | SEC-031 |
 | Anexos editables | 2 `ZdsRadio` requeridos (`qd_strIncludesComplaintAnnex`, `qd_strIncludesReplyAttach`) | FLD-163/164 |
 | Previsualizar/descargar el PDF generado | `RequestFileList` filtra los archivos del request por `data_name=qd_strFinalReplyPdf` | FLD-165 |
 | Estados loading/error/submitting | `ZrLoader`, `ZrAlert`, botones `loading/disabled` | CLAUDE.md |
@@ -174,7 +178,7 @@ Los campos regulatorios ya no se validan en front (son Back, solo lectura). Solo
 
 | Campo Origen | Campo Dependiente | Comportamiento | Fuente |
 |---|---|---|---|
-| `qd_strFraudRelated` | tipo/modalidad/montos de fraude | Muestra y hace obligatorios los campos de fraude si = Sí | RUL-009-01 |
+| `qd_strFraudRelated` | tipo/modalidad/montos de fraude | Muestra y hace obligatorios (editables) los campos de fraude si = Sí | RUL-009-01 |
 | 12 campos SFC + anexos | Botón "Guardar Formulario" | Habilita guardar solo si todos están completos | RUL-009-03 |
 | `qd_strFinalReplyPdf` (id del archivo subido al request) | `RequestFileList` | Se muestra la fila solo si ya existe un archivo con ese `data_name` en el request | FLD-165 |
 

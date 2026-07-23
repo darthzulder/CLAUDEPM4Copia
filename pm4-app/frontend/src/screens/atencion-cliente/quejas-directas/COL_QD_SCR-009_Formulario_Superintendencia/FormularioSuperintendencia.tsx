@@ -89,12 +89,20 @@ export default function FormularioSuperintendencia() {
 
   // Alineación con el Excel PQRS V3.0: los campos regulatorios (sexo, LGBTIQ+,
   // producto digital, y toda la Condición de la Queja) los calcula el back
-  // ("Back"/"Automático"/"Por default") → solo lectura. Los únicos editables que
-  // condicionan el guardado son Condición Especial (Front, obligatorio SFC) y los
-  // dos indicadores de anexos.
+  // ("Back"/"Automático"/"Por default") → solo lectura. Los editables que
+  // condicionan el guardado son Condición Especial (Front, obligatorio SFC),
+  // los dos indicadores de anexos y, si ¿Relacionada con Fraude? = Sí, los 4
+  // campos de fraude (RUL-009-01 / MSG-009-01).
   const blnSpecialCondOk = !!(objWatch[QD.strSpecialCondition] as string)?.trim();
   const blnAnnexesComplete = !!objWatch[QD.strIncludesComplaintAnnex] && !!objWatch[QD.strIncludesReplyAttach];
-  const blnCanSave = blnSpecialCondOk && blnAnnexesComplete;
+  const blnIsFraud = objWatch[QD.strFraudRelated] === 'SI';
+  const blnFraudComplete = !blnIsFraud || (
+    !!(objWatch[QD.strFraudType] as string)?.trim()
+    && !!(objWatch[QD.strFraudModality] as string)?.trim()
+    && !!(objWatch[QD.strClaimedAmount] as string)?.trim()
+    && !!(objWatch[QD.strAcknowledgedAmount] as string)?.trim()
+  );
+  const blnCanSave = blnSpecialCondOk && blnAnnexesComplete && blnFraudComplete;
 
   // Enviamos la tarea con la accion seleccionada
   const enviarCon = (in_strAction: AccionFormularioSFC) => async (in_objData: FormularioSuperintendenciaFormData): Promise<boolean> => {
@@ -180,13 +188,16 @@ export default function FormularioSuperintendencia() {
             </div>
           </FormSection>
 
-          {/* ── S4 Fraude (solo lectura) · S5 Anexos (editables) ── */}
+          {/* ── S4 Fraude (tipo/modalidad/montos editables) · S5 Anexos (editables) ── */}
           <SeccionFraudeAnexos form={form} err={err} requestId={task?.process_request_id ?? null} />
 
           {/* MSG-009-02 — bloqueo si faltan los editables obligatorios. */}
           {!blnCanSave && (
             <ZrAlert config="info" {...({ 'hide-close': true } as object)}>
-              Complete <strong>Condición Especial</strong> y los indicadores de anexos antes de guardar. {/* MSG-009-02 */}
+              <span>
+                Complete <strong>Condición Especial</strong>, los indicadores de anexos
+                {blnIsFraud && <> y los <strong>datos de fraude</strong> (tipo, modalidad y montos)</>} antes de guardar. {/* MSG-009-02 */}
+              </span>
             </ZrAlert>
           )}
 

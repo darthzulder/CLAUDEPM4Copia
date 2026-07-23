@@ -745,10 +745,12 @@ export const SCR008_DEFAULTS: Partial<RevisionRespuestaSacFormData> = {
 
 export type AccionFormularioSFC = 'GUARDAR' | 'GUARDAR_BORRADOR';
 
-// Nota: SCR-009 ya no valida en front los campos SFC/fraude. Alineado con el
-// Excel PQRS V3.0, esos campos se calculan en el back ("Back"/"Automático"/
-// "Por default") y se muestran en solo lectura; solo Condición Especial (Front)
-// y los indicadores de anexos condicionan el guardado.
+// Nota: SCR-009 ya no valida en front los campos SFC de S2/S3 (Sexo, LGBTIQ+,
+// Producto Digital, Condición de la Queja) — se calculan en el back ("Back"/
+// "Automático"/"Por default") y se muestran en solo lectura. Los campos que sí
+// condicionan el guardado son: Condición Especial (Front), los indicadores de
+// anexos y, si strFraudRelated='SI', Tipo/Modalidad/Montos de fraude
+// (editables por el Analista SAC, RUL-009-01) — ver SeccionFraudeAnexos.tsx.
 
 export type FormularioSuperintendenciaFormData = Omit<Pick<QdFields,
   | typeof QD.strSfcCode | typeof QD.strChannel | typeof QD.strSfcProduct | typeof QD.strSfcReason
