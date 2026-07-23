@@ -89,8 +89,8 @@ Catálogos implementados como **colecciones dinámicas PM4** (no listas estátic
 | Departamento | `qd_strDepartment` | Select (CAT-DPTO) con búsqueda | Sí | Anexo02 > SCR-000 > FLD-317 (fila 33) |
 | Ciudad | `qd_strCity` | Select (CAT-MPIO), dependiente | Sí | Anexo02 > SCR-000 > FLD-318 (fila 34) |
 | Dirección | `qd_strAddress` | Variable de back, **oculta** (no se muestra) | — | Anexo02 > SCR-000 > FLD-319 (fila 35) — "default vacío, pendiente API SFC" |
-| Sexo | `qd_strSex` | Variable de back, **oculta** (no se muestra), default "No informa" | — | Anexo02 > SCR-000 > FLD-320 (fila 36) |
-| LGBTIQ+ | `qd_strLgbtiq` | Variable de back, oculta | — | Anexo02 > SCR-000 > FLD-321 (fila 37) — catálogo pendiente TI |
+| Sexo | `qd_strSex` | Select (CAT-SEXO, colección 23: Femenino/Masculino/No Binario/No Aplica), sin default | Sí | Anexo02 > SCR-000 > FLD-320 (fila 36) — Solicitud del usuario (2026-07-23): pasa de variable de back oculta a seleccionable y obligatoria |
+| ¿Perteneces a la comunidad LGBTIQ+? | `qd_strLgbtiq` | Select (CAT-LGBTIQ, colección 41: Sí/No), sin default | Sí | Anexo02 > SCR-000 > FLD-321 (fila 37) — Solicitud del usuario (2026-07-23): pasa de variable de back oculta a seleccionable y obligatoria |
 | Condición especial | `qd_strSpecialCondition` | Select (CAT-COND-ESP) | Sí | Anexo02 > SCR-000 > FLD-322 (fila 38) |
 
 **S3 — Detalle de la Queja** (`SeccionDetalleQueja.tsx`):

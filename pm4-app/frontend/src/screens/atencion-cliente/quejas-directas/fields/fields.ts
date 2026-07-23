@@ -48,8 +48,8 @@ export const QD = {
   strDepartment: 'qd_strDepartment',                   // FLD-317 · antes qd_departamento
   strCity: 'qd_strCity',                               // FLD-318 · antes qd_municipio
   strAddress: 'qd_strAddress',                         // FLD-319 · antes qd_direccion (back)
-  strSex: 'qd_strSex',                                 // FLD-320 · antes qd_sexo (back)
-  strLgbtiq: 'qd_strLgbtiq',                           // FLD-321 · antes qd_lgbtiq (back, oculto)
+  strSex: 'qd_strSex',                                 // FLD-320 · antes qd_sexo · seleccionable (CAT-SEXO, colección 23)
+  strLgbtiq: 'qd_strLgbtiq',                           // FLD-321 · antes qd_lgbtiq · seleccionable (CAT-LGBTIQ, colección 41)
   strSpecialCondition: 'qd_strSpecialCondition',       // FLD-322 · antes qd_condicionEspecial (back, oculto)
 
   // ── SCR-000 · S3 Detalle de la Queja ──────────────────────────────────────
@@ -483,8 +483,8 @@ export const OPTIONS_SI_NO = [
 
 export const QD_GLOBAL_DEFAULTS: Partial<QdFields> = {
   [QD.strAddress]: '',            // FLD-319 — Back, default vacío (pendiente API SFC)
-  [QD.strSex]: '',                // FLD-320 — Back, resuelto desde CAT-SEXO ("No informa")
-  [QD.strLgbtiq]: '',             // FLD-321 — Back, oculto, resuelto desde CAT-LGBTIQ ("No informa")
+  [QD.strSex]: '',                // FLD-320 — Seleccionable (CAT-SEXO); sin default, el catálogo no trae "No informa"
+  [QD.strLgbtiq]: '',             // FLD-321 — Seleccionable (CAT-LGBTIQ); sin default, el catálogo no trae "No informa"
   [QD.strSpecialCondition]: '',   // FLD-322 — Back, oculto, resuelto desde CAT-COND-ESP ("No aplica")
   [QD.strAdmission]: '',          // FLD-331 — Back, resuelto desde CAT-ADMISION si rol ≠ Defensor
   [QD.strControlEntity]: '',      // FLD-332 — Back, resuelto desde CAT-ENTE ("Otros")
