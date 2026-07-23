@@ -131,10 +131,12 @@ export default function SeccionDetalleCaso({ form, estado, nombre, identificacio
     if (!cllReason.some((o) => o.value === strVal)) setValue(QD.strSfcReason, '');
   }, [cllReason, objWatch, setValue]);
 
-  // Placa fuera de "Autos" no debe conservar valor.
+  // Placa fuera de "Autos" no debe conservar valor. Gate en cllInsurance cargado: mientras
+  // el catálogo no llegue, blnIsAutos es false por defecto y borraría la placa precargada.
   useEffect(() => {
+    if (cllInsurance.length === 0) return;
     if (!blnIsAutos && objWatch[QD.strPlate]) setValue(QD.strPlate, '');
-  }, [blnIsAutos, objWatch, setValue]);
+  }, [cllInsurance, blnIsAutos, objWatch, setValue]);
 
   // Sincroniza cada variable compañera <campo>_desc con la descripción del código guardado.
   useSyncDesc(form, QD.strChannel, cllChannel);
