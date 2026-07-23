@@ -48,8 +48,8 @@ export const QD = {
   strDepartment: 'qd_strDepartment',                   // FLD-317 · antes qd_departamento
   strCity: 'qd_strCity',                               // FLD-318 · antes qd_municipio
   strAddress: 'qd_strAddress',                         // FLD-319 · antes qd_direccion (back)
-  strSex: 'qd_strSex',                                 // FLD-320 · antes qd_sexo · seleccionable (CAT-SEXO, colección 23)
-  strLgbtiq: 'qd_strLgbtiq',                           // FLD-321 · antes qd_lgbtiq · seleccionable (CAT-LGBTIQ, colección 41)
+  strSex: 'qd_strSex',                                 // FLD-320 · antes qd_sexo (back, oculto en SCR-000; seleccionable en SCR-009)
+  strLgbtiq: 'qd_strLgbtiq',                           // FLD-321 · antes qd_lgbtiq (back, oculto en SCR-000; seleccionable en SCR-009)
   strSpecialCondition: 'qd_strSpecialCondition',       // FLD-322 · antes qd_condicionEspecial (back, oculto)
 
   // ── SCR-000 · S3 Detalle de la Queja ──────────────────────────────────────
@@ -483,8 +483,8 @@ export const OPTIONS_SI_NO = [
 
 export const QD_GLOBAL_DEFAULTS: Partial<QdFields> = {
   [QD.strAddress]: '',            // FLD-319 — Back, default vacío (pendiente API SFC)
-  [QD.strSex]: '',                // FLD-320 — Seleccionable (CAT-SEXO); sin default, el catálogo no trae "No informa"
-  [QD.strLgbtiq]: '',             // FLD-321 — Seleccionable (CAT-LGBTIQ); sin default, el catálogo no trae "No informa"
+  [QD.strSex]: '',                // FLD-320 — Back, oculto en SCR-000, resuelto desde CAT-SEXO ("No Aplica")
+  [QD.strLgbtiq]: '',             // FLD-321 — Back, oculto en SCR-000, resuelto desde CAT-LGBTIQ ("No")
   [QD.strSpecialCondition]: '',   // FLD-322 — Back, oculto, resuelto desde CAT-COND-ESP ("No aplica")
   [QD.strAdmission]: '',          // FLD-331 — Back, resuelto desde CAT-ADMISION si rol ≠ Defensor
   [QD.strControlEntity]: '',      // FLD-332 — Back, resuelto desde CAT-ENTE ("Otros")
@@ -745,12 +745,14 @@ export const SCR008_DEFAULTS: Partial<RevisionRespuestaSacFormData> = {
 
 export type AccionFormularioSFC = 'GUARDAR' | 'GUARDAR_BORRADOR';
 
-// Nota: SCR-009 ya no valida en front los campos SFC de S2/S3 (Sexo, LGBTIQ+,
-// Producto Digital, Condición de la Queja) — se calculan en el back ("Back"/
-// "Automático"/"Por default") y se muestran en solo lectura. Los campos que sí
-// condicionan el guardado son: Condición Especial (Front), los indicadores de
-// anexos y, si strFraudRelated='SI', Tipo/Modalidad/Montos de fraude
-// (editables por el Analista SAC, RUL-009-01) — ver SeccionFraudeAnexos.tsx.
+// Nota: SCR-009 muestra Sexo y LGBTIQ+ como seleccionables (con su _desc como
+// input de solo lectura) precargados con el valor que llega del caso (default
+// "No Aplica"/"No" fijado en SCR-000); no bloquean el guardado. Producto
+// Digital y el resto de Condición de la Queja siguen siendo "Back"/"Automático"
+// y se muestran en solo lectura. Los campos que sí condicionan el guardado
+// son: Condición Especial (Front), los indicadores de anexos y, si
+// strFraudRelated='SI', Tipo/Modalidad/Montos de fraude (editables por el
+// Analista SAC, RUL-009-01) — ver SeccionFraudeAnexos.tsx.
 
 export type FormularioSuperintendenciaFormData = Omit<Pick<QdFields,
   | typeof QD.strSfcCode | typeof QD.strChannel | typeof QD.strSfcProduct | typeof QD.strSfcReason

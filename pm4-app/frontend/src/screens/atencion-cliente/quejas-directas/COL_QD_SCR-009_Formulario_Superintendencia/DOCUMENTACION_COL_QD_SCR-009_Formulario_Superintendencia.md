@@ -21,10 +21,12 @@
 
 Formulario regulatorio que **revisa** el Analista SAC tras aprobarse la respuesta y generarse el
 PDF. **Alineado con el Excel `Formulario PQRS - Proyecto V3.0.xlsx`, los campos regulatorios los
-calcula el back** ("Back"/"Automático"/"Por default"): sexo, LGBTIQ+, producto digital y toda la
-Condición de la Queja (estado, favorabilidad, aceptación, rectificación, desistimiento, tutela,
-marcación, queja exprés), además de fraude (CE-019/2024) y prórroga. Todos se muestran en **solo
-lectura** (label del catálogo). Los **únicos campos editables** son **Condición Especial** (Front,
+calcula el back** ("Back"/"Automático"/"Por default"): producto digital y toda la Condición de la
+Queja (estado, favorabilidad, aceptación, rectificación, desistimiento, tutela, marcación, queja
+exprés), además de fraude (CE-019/2024) y prórroga — se muestran en **solo lectura** (label del
+catálogo). **Sexo y LGBTIQ+** (FLD-320/321) llegan precargados desde SCR-000 (default "No Aplica"/
+"No") y aquí **sí son editables** (`ZdsSelect` + input de solo lectura con su `_desc`), sin bloquear
+el guardado. Los **editables que sí condicionan el guardado** son **Condición Especial** (Front,
 obligatorio SFC) y los **dos indicadores de anexos**; el guardado se bloquea hasta completarlos.
 Los datos de clasificación de M1 viajan en el payload sin UI. Al guardar se habilita el subproceso
 SP3 de cierre regulatorio.
@@ -58,8 +60,8 @@ mostrarlos de nuevo como solo lectura aquí. Se removió el bloque `ZdsInput rea
 
 | Campo (UI) | Variable | Presentación | Origen |
 |---|---|---|---|
-| Sexo | `qd_strSex` | label resuelto (info-bar) | 🔴 Back, default "No aplica" (Excel #21) |
-| LGBTIQ+ | `qd_strLgbtiq` | label resuelto (info-bar) | 🔴 Back, default "No aplica" (Excel #22) |
+| **Sexo** | `qd_strSex` + `qd_strSex_desc` | `ZdsSelect` (CAT-SEXO, colección 23) + `ZdsInput readOnly` con la descripción | 🟢 Editable aquí; llega precargado desde SCR-000 (default "No Aplica", Excel #21) |
+| **LGBTIQ+** | `qd_strLgbtiq` + `qd_strLgbtiq_desc` | `ZdsSelect` (CAT-LGBTIQ, colección 41) + `ZdsInput readOnly` con la descripción | 🟢 Editable aquí; llega precargado desde SCR-000 (default "No", Excel #22) |
 | Producto Digital | `qd_strDigitalProduct` | label resuelto (info-bar) | 🔴 Back, default "No" (Excel #54) |
 | **Condición Especial** | `qd_strSpecialCondition` | `ZdsSelect` (editable, requerido) | 🟢 **Front, obligatorio SFC** (Excel #23/#26) |
 
@@ -91,7 +93,12 @@ Los campos marcados con valor por default en el Excel deben **existir y estar ll
 
 > **Producto Digital** se rellena con `"No"` **provisionalmente**: el default de negocio es "No" (Excel #54) pero el código exacto de catálogo (colección PM4 id 25) no está confirmado con TI. Confirmar el código real y reemplazar el literal `'No'` si difiere.
 
-> **Pendientes de código de catálogo (los llena el back, NO el front):** Sexo ("No aplica"), LGBTIQ+ ("No aplica"), Tutela ("No") y Ente de Control ("Otros"). El Excel `Homologación SFC` los marca "Es requerida su creación / No existe": su código no está confirmado con TI, y hard-codearlo arriesgaría un envío inválido a la SFC. El back debe poblarlos con el código correcto antes de M3.
+> **Pendientes de código de catálogo (los llena el back, NO el front):** Tutela ("No") y Ente de
+> Control ("Otros"). El Excel `Homologación SFC` los marca "Es requerida su creación / No existe":
+> su código no está confirmado con TI, y hard-codearlo arriesgaría un envío inválido a la SFC. El
+> back debe poblarlos con el código correcto antes de M3. Sexo ("No Aplica", colección 23) y
+> LGBTIQ+ ("No", colección 41) ya no están pendientes: sus códigos vienen confirmados desde
+> CAT-SEXO/CAT-LGBTIQ y se resuelven en el front (default en SCR-000, editable en SCR-009).
 
 ### S4 — Datos de Fraude CE-019-2024 (SEC-031, condicional)
 

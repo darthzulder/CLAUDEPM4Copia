@@ -40,6 +40,21 @@ export default function SeccionConsumidor({ form }: Props) {
   // (el campo base guarda el código; se muestra el _desc legible).
   const strPersonTypeDesc = `${QD.strPersonType}_desc` as FieldPath<CrearRecibirQuejaFormData>;
 
+  // FLD-320 — Sexo oculto (back); default "No Aplica", resuelto desde CAT-SEXO.
+  // La variable compañera qd_strSex_desc se sincroniza sola vía useSyncDesc de arriba.
+  useEffect(() => {
+    if (objWatch[QD.strSex] || cllSex.length === 0) return;
+    const objDefault = cllSex.find((o) => /no aplica/i.test(o.label));
+    if (objDefault) setValue(QD.strSex, objDefault.value);
+  }, [objWatch[QD.strSex], cllSex, setValue]);
+
+  // FLD-321 — LGBTIQ+ oculto (back); default "No", resuelto desde CAT-LGBTIQ.
+  useEffect(() => {
+    if (objWatch[QD.strLgbtiq] || cllLgbtiq.length === 0) return;
+    const objDefault = cllLgbtiq.find((o) => /^no$/i.test(o.label));
+    if (objDefault) setValue(QD.strLgbtiq, objDefault.value);
+  }, [objWatch[QD.strLgbtiq], cllLgbtiq, setValue]);
+
   // FLD-322 — Condición especial oculta, por defecto "No aplica" (back), resuelto desde CAT-COND-ESP.
   // CATALOGOS v2: el catálogo confirmado (código 98) ya no trae "Ninguna" como opción.
   useEffect(() => {
@@ -224,31 +239,11 @@ export default function SeccionConsumidor({ form }: Props) {
         />
       </div>
 
-      <div className="form-row cols-2">
-        <ZdsSelect
-          name={QD.strSex}
-          control={control}
-          label="Sexo"
-          options={cllSex}
-          rules={{ required: 'Campo requerido' }}
-          required
-          error={err(QD.strSex)}
-        />
-        <ZdsSelect
-          name={QD.strLgbtiq}
-          control={control}
-          label="¿Perteneces a la comunidad LGBTIQ+?"
-          options={cllLgbtiq}
-          rules={{ required: 'Campo requerido' }}
-          required
-          error={err(QD.strLgbtiq)}
-        />
-      </div>
-
-      {/* FLD-319 (Dirección) y FLD-322 (Condición especial) — ocultos por
-          requerimiento: son variables de back (Dirección queda vacía pendiente
-          API SFC; Condición especial se precarga "No aplica" vía el effect de
-          arriba), no se muestran en el formulario. */}
+      {/* FLD-319 (Dirección), FLD-320 (Sexo), FLD-321 (LGBTIQ+) y FLD-322
+          (Condición especial) — ocultos por requerimiento: son variables de
+          back (Dirección queda vacía pendiente API SFC; Sexo/LGBTIQ+/Condición
+          especial se precargan con su default vía los effects de arriba), no
+          se muestran en el formulario. */}
     </FormSection>
   );
 }
