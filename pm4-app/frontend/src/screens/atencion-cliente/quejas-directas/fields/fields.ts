@@ -745,9 +745,11 @@ export const SCR008_DEFAULTS: Partial<RevisionRespuestaSacFormData> = {
 
 export type AccionFormularioSFC = 'GUARDAR' | 'GUARDAR_BORRADOR';
 
-// Nota: SCR-009 muestra Sexo y LGBTIQ+ como seleccionables (con su _desc como
-// input de solo lectura) precargados con el valor que llega del caso (default
-// "No Aplica"/"No" fijado en SCR-000); no bloquean el guardado. Producto
+// Nota: SCR-009 muestra Sexo y LGBTIQ+ como seleccionables (un ZdsSelect por
+// campo: muestra la descripción, guarda el código; su _desc compañera viaja
+// sola vía useSyncDesc, sin campo propio) precargados con el valor que llega
+// del caso (default "No Aplica"/"No" fijado en SCR-000); no bloquean el
+// guardado. Producto
 // Digital y el resto de Condición de la Queja siguen siendo "Back"/"Automático"
 // y se muestran en solo lectura. Los campos que sí condicionan el guardado
 // son: Condición Especial (Front), los indicadores de anexos y, si
