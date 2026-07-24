@@ -44,17 +44,29 @@ const cuerpo = (in_strHtml: string): string =>
 // aquí replicamos la de las variables de cara al cliente SOLO para la vista previa.
 //
 // Marcadores soportados (según las plantillas 09/10 de la colección 46):
-//   {{qd_strRequestType_desc}} · {{qd_strInteraction}} · {{NúmeroRadicado}} ·
-//   {{nombre_cliente}} · {{%texto_procede}} / {{%texto_no_procede}} (y cualquier
+//   {{qd_strRequestType_desc}} / {{qd_strRequestType}} · {{qd_strInteraction}} ·
+//   {{NúmeroRadicado}} / {{qd_strBpmCaseId}} · {{nombre_cliente}} ·
+//   {{qd_strComplaintText}} (lo que ocurrió) · {{qd_strClientResponse}} (nuestra respuesta) ·
+//   {{qd_strActionsTaken}} / {{%texto_procede}} / {{%texto_no_procede}} (y cualquier
 //   {{%texto_*}}) → acciones tomadas · %% Lo que ocurrió% y %% Nuestra respuesta%%
 //   (cajas de contenido) → texto de la queja / respuesta al cliente.
 // Los marcadores no reconocidos se dejan intactos (no adivinamos su expansión BPM).
 export function fillRespuestaFinalHtml(in_strRawHtml: string, in_objVars: RespuestaFinalVars): string {
+  // Marcadores de una sola línea (texto plano escapado).
   const dicSimple: Record<string, string> = {
     qd_strRequestType_desc: esc(in_objVars.tipoDesc || in_objVars.tipo) || 'queja',
+    qd_strRequestType: esc(in_objVars.tipoDesc || in_objVars.tipo) || 'queja',
     qd_strInteraction: esc(in_objVars.interaccion) || PLACEHOLDER,
     'NúmeroRadicado': esc(in_objVars.numeroRadicado) || PLACEHOLDER,
+    qd_strBpmCaseId: esc(in_objVars.numeroRadicado) || PLACEHOLDER,
     nombre_cliente: esc(in_objVars.nombre) || PLACEHOLDER,
+  };
+  // Marcadores multilínea del cuerpo (se convierten \n → <br>). La celda del correo ya trae
+  // su propio estilo, así que se inyecta el texto tal cual (sin envolver en cuerpo()).
+  const dicMultiline: Record<string, string> = {
+    qd_strComplaintText: nl2br(in_objVars.loQueOcurrio) || 'Sin descripción registrada.',
+    qd_strClientResponse: nl2br(in_objVars.nuestraRespuesta) || 'Aún no se ha redactado la respuesta al cliente.',
+    qd_strActionsTaken: nl2br(in_objVars.textoProcede) || 'Sin acciones registradas.',
   };
   const strTextoProcede = cuerpo(nl2br(in_objVars.textoProcede) || 'Sin acciones registradas.');
 
@@ -62,6 +74,7 @@ export function fillRespuestaFinalHtml(in_strRawHtml: string, in_objVars: Respue
     // {{ token }} — con o sin espacios y con prefijo % opcional (marcadores del BPM).
     .replace(/\{\{\s*%?\s*([\wÁÉÍÓÚáéíóúÑñ]+)\s*\}\}/g, (in_strFull, in_strKey: string) => {
       if (in_strKey in dicSimple) return dicSimple[in_strKey];
+      if (in_strKey in dicMultiline) return dicMultiline[in_strKey];
       if (/^texto_/i.test(in_strKey)) return strTextoProcede; // texto_procede / texto_no_procede
       return in_strFull; // desconocido → intacto
     });

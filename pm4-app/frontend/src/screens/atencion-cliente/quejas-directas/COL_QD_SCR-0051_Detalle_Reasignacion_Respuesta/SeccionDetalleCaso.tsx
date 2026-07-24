@@ -107,6 +107,11 @@ export default function SeccionDetalleCaso({ form, estado, nombre, identificacio
     label: leerColumna(r, 'motivoSFC'),
   })));
 
+  // Fila COMPLETA de la matriz para la selección actual de motivo — de aquí se re-derivan los
+  // regulatorios al corregir la clasificación en M3 (misma fuente que SCR-000/SeccionDetalleQueja).
+  const objSelectedReasonRow = cllRowsForReason.find(
+    (r) => leerColumna(r, 'codigoMotivoSFC') === objWatch[QD.strSfcReason]);
+
   // Reselección coherente SIN pisar la precarga: si el valor actual ya no existe entre las
   // opciones derivadas (tras cambiar un eslabón aguas arriba), se limpia. A diferencia de
   // SCR-000 (form vacío), aquí el form llega precargado, así que NO limpiamos a ciegas por
@@ -130,6 +135,20 @@ export default function SeccionDetalleCaso({ form, estado, nombre, identificacio
     if (cllReason.length === 0 || !strVal) return;
     if (!cllReason.some((o) => o.value === strVal)) setValue(QD.strSfcReason, '');
   }, [cllReason, objWatch, setValue]);
+
+  // Re-deriva los regulatorios desde la fila de cat_matriz_motivos cuando cambia el motivo, para
+  // que una corrección de la clasificación en M3 quede consistente con la matriz (igual que SCR-000).
+  // A diferencia de SCR-000 NO se limpian a ciegas por cambio de dependencia (el form llega
+  // precargado): solo se reescriben cuando hay una fila de motivo válida seleccionada, así se evita
+  // vaciar los valores heredados de M1 mientras la matriz aún no ha cargado.
+  // Nota de negocio: SLA (qd_strSlaAssigned) y rol responsable (qd_strResponsableRole) NO se
+  // recalculan aquí a propósito — conservan el valor asignado en M1.
+  useEffect(() => {
+    if (!objSelectedReasonRow) return;
+    setValue(QD.strOmbudsmanEscalation, leerColumna(objSelectedReasonRow, 'escalamientoAdministrador'));
+    setValue(QD.strCompensation, leerColumna(objSelectedReasonRow, 'resarcimientoAdministrador'));
+    setValue(QD.strFraudRelated, normalizar(leerColumna(objSelectedReasonRow, 'relacionFraude')) === 'si' ? 'SI' : 'NO');
+  }, [objSelectedReasonRow, setValue]);
 
   // Placa fuera de "Autos" no debe conservar valor. Gate en cllInsurance cargado: mientras
   // el catálogo no llegue, blnIsAutos es false por defecto y borraría la placa precargada.

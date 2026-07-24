@@ -68,16 +68,43 @@ borrador y solicitar prórroga regulatoria cuando el SLA es crítico.
 | Correo Electrónico | `qd_strEmail` | `ZdsInput` readOnly | No | Anexo02 > SCR-0051 > FLD-068 |
 | Tipo de Persona | `qd_strPersonType` | `ZdsInput` readOnly | No | Anexo02 > SCR-0051 > FLD-069 |
 
-### S2 — Clasificación Regulatoria M1 (SEC-048, solo lectura)
+### S2 — Clasificación Regulatoria (precargada M1, re-editable en M3)
+
+Producto SFC, Momento, Servicio/Placa y Motivo SFC son **editables** con la misma cascada
+`cat_matriz_motivos` (colección 45) de SCR-000 (seguro → momento → (servicio/placa) → motivo).
+Llegan precargados con la selección de M1 y pueden corregirse. Canal, Instancia, Admisión y
+Ente de Control siguen siendo de solo lectura (calculados en M1).
 
 | Campo (UI) | Variable | Tipo | Fuente |
 |---|---|---|---|
-| Canal de Recepción | `qd_strChannel` | `ZdsInput` readOnly | FLD-070 |
-| Producto SFC | `qd_strSfcProduct` | `ZdsInput` readOnly | FLD-071 |
-| Motivo SFC | `qd_strSfcReason` | `ZdsInput` readOnly | FLD-072 |
+| Producto SFC (seguro) | `qd_strSfcProduct` | `ZdsSelect` (col. `sfcProduct`) | FLD-071 |
+| Momento | `qd_strInteraction` | `ZdsSelect` (cascada matriz) | Anexo02 |
+| Servicio (solo si momento = Asistencias) | `qd_strServiceProvided` | `ZdsSelect` (cascada matriz) | Anexo02 #31 |
+| Placa (solo si producto = Autos) | `qd_strPlate` | `ZdsInput` | Anexo02 #25 |
+| Motivo SFC | `qd_strSfcReason` | `ZdsSelect` (cascada matriz) | FLD-072 |
+| Canal de Recepción | `qd_strChannel` | `InfoBar` readOnly | FLD-070 |
 | Instancia / Punto de Recepción | `qd_strReceptionInstance` | `ZdsInput` readOnly | FLD-073 |
-| Admisión | `qd_strAdmission` | `ZdsInput` readOnly | FLD-074 |
+| Admisión | `qd_strAdmission` | `InfoBar` readOnly | FLD-074 |
 | Ente de Control | `qd_strControlEntity` | `ZdsInput` readOnly | FLD-075 |
+
+**Regulatorios re-derivados al corregir el motivo (no visibles, pero persistidos en el form):**
+al cambiar `qd_strSfcReason` se reescriben desde la fila de `cat_matriz_motivos` correspondiente
+—misma lógica que SCR-000/`SeccionDetalleQueja`— para que la corrección quede consistente con la
+matriz:
+
+| Variable | Columna de la matriz (id 45) | Notas |
+|---|---|---|
+| `qd_strOmbudsmanEscalation` | `escalamientoAdministrador` | Escalamiento al Defensor del Consumidor |
+| `qd_strCompensation` | `resarcimientoAdministrador` | Resarcimiento del administrador |
+| `qd_strFraudRelated` | `relacionFraude` (→ `SI`/`NO`) | Gatilla los campos de fraude en SCR-009 |
+
+A diferencia de SCR-000, la re-derivación **no limpia** los campos a ciegas por cambio de
+dependencia (el form llega precargado): solo se reescriben cuando hay una fila de motivo válida
+seleccionada, evitando vaciar los valores heredados de M1 mientras la matriz aún carga.
+
+> **Decisión de negocio:** el **SLA** (`qd_strSlaAssigned`) y el **rol responsable**
+> (`qd_strResponsableRole`) **NO se recalculan** en M3 aunque también salgan de la matriz —
+> conservan el valor asignado en M1.
 
 ### S3 — Descripción de la Queja (SEC-049, solo lectura)
 
