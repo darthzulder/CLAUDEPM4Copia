@@ -1,4 +1,4 @@
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { useTask } from '../../../../core/useTask';
 import { scrollToFirstError } from '../../../../core/scrollToFirstError';
@@ -8,7 +8,7 @@ import ScreenHeader from '../../../../components/ScreenHeader';
 import FormSection from '../../../../components/FormSection';
 import { ActionBar } from '../../../../components/ActionBar';
 import {
-  ZdsSelect, ZrButton, ZrAlert, ZrLoader,
+  ZdsSelect, ZrButton, ZrAlert, ZrLoader, ZrModal,
 } from '../../../../components/fields/ZdsFields';
 import {
   QD, QD_COLLECTIONS, SCR009_DEFAULTS as DEFAULTS, SCR009_BACK_DEFAULTS,
@@ -31,6 +31,9 @@ export function Ro({ label, value }: { label: string; value: string }) {
 export default function FormularioSuperintendencia() {
   // Cargamos la tarea y su estado desde PM4
   const { task, loading, error, submitting, completeTask, saveDraft } = useTask();
+
+  // Popup de confirmación previo al envío a SmartSupervision (cierra el caso).
+  const [blnShowConfirm, setBlnShowConfirm] = useState(false);
 
   // Inicializamos el formulario con los valores por defecto
   const form = useForm<FormularioSuperintendenciaFormData>({ defaultValues: DEFAULTS });
@@ -84,12 +87,18 @@ export default function FormularioSuperintendencia() {
     // el valor del back si viene; si no, se inyectan con su default para que
     // igual viajen. El adjunto de respuesta final se fuerza siempre a "SI"
     // (el PDF lo genera el proceso).
+    // Fecha de Actualización y Fecha de Cierre se autocompletan con la fecha de
+    // hoy (YYYY-MM-DD) y son idénticas; en la sección de cierre son readOnly, así
+    // que el gestor no puede modificarlas.
+    const strHoyISO = new Date().toISOString().slice(0, 10);
     reset({
       ...DEFAULTS,
       ...objData,
       [QD.strEntityType]: objData[QD.strEntityType] || SCR009_DEFAULT_ENTITY_TYPE,
       [QD.strEntityCode]: objData[QD.strEntityCode] || SCR009_DEFAULT_ENTITY_CODE,
       [QD.strFinalReplyAttach]: 'SI',
+      [QD.strUpdateDate]: strHoyISO,
+      [QD.strClosureDate]: strHoyISO,
     });
   }, [task, reset]);
 
@@ -121,7 +130,8 @@ export default function FormularioSuperintendencia() {
   // acción de envío pasa a "Reenviar Cierre (corrección)".
   const blnRejected = objWatch[QD.strM3ClosureStatus] === 'Rechazado (400)';
 
-  // Enviamos la tarea con la accion seleccionada
+  // Enviamos la tarea con la acción seleccionada (ENVIAR_SFC completa; GUARDAR_BORRADOR
+  // guarda sin completar).
   const enviarCon = (in_strAction: AccionFormularioSFC) => async (in_objData: FormularioSuperintendenciaFormData): Promise<boolean> => {
     try {
       if (in_strAction === 'GUARDAR_BORRADOR') {
@@ -136,12 +146,20 @@ export default function FormularioSuperintendencia() {
     }
   };
 
-  const onGuardar = handleSubmit(enviarCon('GUARDAR'), scrollToFirstError);         // ACT-009-01
   // ACT-009-02 Guardar Borrador: guarda sin completar la tarea y redirige el frame
   // superior al home de tareas de ProcessMaker (solo si se guardó bien).
   const onGuardarBorrador = async () => {
     const blnOk = await enviarCon('GUARDAR_BORRADOR')(objWatch);
     if (blnOk) window.top!.location.href = pm4TasksUrl();
+  };
+
+  // Al pulsar "Enviar a SmartSupervision": valida el formulario y, si está OK,
+  // abre el popup de confirmación (el envío real ocurre al confirmar).
+  const onSolicitarEnvio = handleSubmit(() => setBlnShowConfirm(true), scrollToFirstError);
+  // Confirmación del popup → completa la tarea y cierra el caso.
+  const onConfirmarEnvio = async () => {
+    setBlnShowConfirm(false);
+    await handleSubmit(enviarCon('ENVIAR_SFC'))();
   };
 
   if (loading) {
@@ -168,7 +186,7 @@ export default function FormularioSuperintendencia() {
       />
 
       <div className="screen-content">
-        <form onSubmit={onGuardar} noValidate>
+        <form onSubmit={(e) => { e.preventDefault(); onSolicitarEnvio(); }} noValidate>
 
           {/* ── S2 · Datos del Consumidor — Campos SFC (SEC-029) ── */}
           {/* Sexo y LGBTIQ+ llegan precargados desde SCR-000 (default "No Aplica"/
@@ -207,10 +225,15 @@ export default function FormularioSuperintendencia() {
               <Ro label="Desistimiento" value={descOf(cllWithdrawal, objWatch[QD.strWithdrawal])} />
               <Ro label="Tutela" value={descOf(cllTutela, objWatch[QD.strTutela])} />
             </div>
-            <div className="form-row cols-3">
+            {/* Marcación tiene etiquetas de opción largas → a ancho completo (cols-1)
+                para que el dropdown no trunque el texto. */}
+            <div className="form-row cols-1">
               <ZdsSelect name={QD.strMarking} control={control} label="Marcación"
                 options={cllMarking} placeholder="-" />
+            </div>
+            <div className="form-row cols-3">
               <Ro label="Queja Exprés" value={descOf(cllExpressComplaint, objWatch[QD.strExpressComplaint])} />
+              <div />
               <div />
             </div>
           </FormSection>
@@ -226,28 +249,44 @@ export default function FormularioSuperintendencia() {
             <ZrAlert config="info" {...({ 'hide-close': true } as object)}>
               <span>
                 Complete <strong>Condición Especial</strong>, los indicadores de anexos
-                {blnIsFraud && <> y los <strong>datos de fraude</strong> (tipo, modalidad y montos)</>} antes de guardar. {/* MSG-009-02 */}
+                {blnIsFraud && <> y los <strong>datos de fraude</strong> (tipo, modalidad y montos)</>} antes de enviar. {/* MSG-009-02 */}
               </span>
             </ZrAlert>
           )}
 
-          {/* ── Acciones (ACT-009-01/02/03) ── */}
+          {/* ── Acciones: Guardar Borrador (ACT-009-02) y Enviar (ACT-009-03). ── */}
           <ActionBar>
             <ZrButton config="secondary" disabled={submitting} loading={submitting} onClick={onGuardarBorrador}>
               Guardar Borrador
             </ZrButton>
-            <ZrButton config="secondary" disabled={!blnCanSave || submitting} loading={submitting}
-              onClick={() => { onGuardar(); }}>
-              Guardar Formulario
-            </ZrButton>
-            {/* ACT-009-03 — envío del cierre M3 a SmartSupervision (fusionado ex SCR-010). */}
             <ZrButton config="positive" disabled={!blnCanSave || submitting} loading={submitting}
-              onClick={() => { handleSubmit(enviarCon('ENVIAR_SFC'))(); }}>
+              onClick={() => { onSolicitarEnvio(); }}>
               {blnRejected ? 'Reenviar Cierre (corrección) ▶' : 'Enviar a SmartSupervision ▶'}
             </ZrButton>
           </ActionBar>
         </form>
       </div>
+
+      {/* Popup de confirmación previo al envío (el envío cierra el caso). */}
+      {blnShowConfirm && (
+        <ZrModal model={blnShowConfirm} onChange={(in_blnOpen: boolean) => setBlnShowConfirm(in_blnOpen)}>
+          <h3 style={{ margin: '0 0 var(--zs-75)', font: 'var(--zf-h-20--700)', color: 'var(--z-text)' }}>
+            Confirmar envío a SmartSupervision
+          </h3>
+          <p style={{ margin: '0 0 var(--zs-100)', color: 'var(--z-text)' }}>
+            ¿Está seguro de enviar estos datos? Se enviarán a <strong>SmartSupervision (SFC)</strong> y
+            el caso quedará <strong>cerrado</strong>. Esta acción no se puede deshacer.
+          </p>
+          <div z-flex="75" z-align="right:center">
+            <ZrButton config="secondary" disabled={submitting} onClick={() => setBlnShowConfirm(false)}>
+              Atrás
+            </ZrButton>
+            <ZrButton config="positive" disabled={submitting} loading={submitting} onClick={onConfirmarEnvio}>
+              Enviar ▶
+            </ZrButton>
+          </div>
+        </ZrModal>
+      )}
     </div>
   );
 }

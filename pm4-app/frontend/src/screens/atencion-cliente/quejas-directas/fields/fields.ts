@@ -809,7 +809,7 @@ export const SCR009_DEFAULTS: Partial<FormularioSuperintendenciaFormData> = {
   [QD.strTutela]: '', [QD.strMarking]: '', [QD.strExpressComplaint]: '',
   [QD.strFraudRelated]: 'NO',
   [QD.strFraudType]: '', [QD.strFraudModality]: '', [QD.strClaimedAmount]: '', [QD.strAcknowledgedAmount]: '',
-  [QD.strIncludesComplaintAnnex]: '', [QD.strIncludesReplyAttach]: 'SI', [QD.strExtensionDays]: '0',
+  [QD.strIncludesComplaintAnnex]: 'SI', [QD.strIncludesReplyAttach]: 'SI', [QD.strExtensionDays]: '0',
   [QD.strFinalReplyPdf]: '',
   // Cierre Regulatorio M3 (fusionado desde la ex SCR-010) — todos "Back".
   [QD.strM3ClosureStatus]: '', [QD.strM3ClosureAttempts]: '0', [QD.strLastError]: '',
@@ -910,6 +910,9 @@ export type DetalleReasignacionRespuestaFormData = Omit<Pick<QdFields,
   | typeof QD.strIdType | typeof QD.strIdNumber | typeof QD.strEmail | typeof QD.strPersonType
   | typeof QD.strRequestType | typeof QD.strInteraction | typeof QD.strServiceProvided | typeof QD.strPlate
   | typeof QD.strChannel | typeof QD.strSfcProduct | typeof QD.strSfcReason
+  // Regulatorios derivados de cat_matriz_motivos al re-editar la clasificación en M3 (SCR-0051).
+  // SLA y rol responsable NO se recalculan aquí (decisión de negocio) aunque viajen en el form.
+  | typeof QD.strOmbudsmanEscalation | typeof QD.strCompensation | typeof QD.strFraudRelated
   | typeof QD.strReceptionInstance | typeof QD.strReceptionPoint | typeof QD.strAdmission | typeof QD.strControlEntity
   | typeof QD.strComplaintText
   | typeof QD.strSsStatus | typeof QD.strM1M2Attempts | typeof QD.strFilingDate | typeof QD.strSlaAssigned
@@ -941,6 +944,9 @@ export const SCR0051_DEFAULTS: Partial<DetalleReasignacionRespuestaFormData> = {
   [QD.strChannel]: '',
   [QD.strSfcProduct]: '',
   [QD.strSfcReason]: '',
+  [QD.strOmbudsmanEscalation]: '', // Recalculado desde cat_matriz_motivos.escalamientoAdministrador al re-editar el motivo
+  [QD.strCompensation]: '',        // Recalculado desde cat_matriz_motivos.resarcimientoAdministrador
+  [QD.strFraudRelated]: 'NO',      // Recalculado desde cat_matriz_motivos.relacionFraude (SI/NO)
   [QD.strReceptionInstance]: '',
   [QD.strReceptionPoint]: '',
   [QD.strAdmission]: '',
