@@ -1,0 +1,601 @@
+openapi: 3.0.3
+info:
+  title: Web Service Smartsupervisión
+  version: "2025.08"
+  description: >-
+    Recursos REST expuestos por la **Superintendencia Financiera de Colombia (SFC)**
+    para que las entidades vigiladas mantengan al día la información de quejas o reclamos
+    de los consumidores financieros. Sólo se admite REST + JSON (no SOAP). Los métodos
+    habilitados son `GET`, `POST` y `PUT/PATCH`.
+
+
+    **Firma obligatoria:** toda petición viaja con la cabecera `X-SFC-Signature`,
+    calculada con HMAC-SHA256 usando el *secret* asignado a la entidad.
+    En `GET` se firma la URL completa (con query params); en `POST`/`PUT` se firma
+    el cuerpo JSON como cadena; en `multipart` se firman sólo `codigo_queja` + `type`.
+
+
+    Reconstruido a partir del documento «Construcción Web Service Smartsupervisión — Agosto 2025».
+  contact:
+    name: Delegatura para Consumidor Financiero — Dirección de Tecnología
+
+servers:
+  - url: https://{UrlBase}/api
+    description: URL base productiva/pruebas de la entidad vigilada
+    variables:
+      UrlBase:
+        default: UrlBase
+        description: Dirección raíz del recurso REST
+
+tags:
+  - name: Autenticación
+    description: Genera el par de tokens (access + refresh).
+  - name: Momento 1 · Captura de quejas
+    description: La entidad captura (GET) quejas expuestas por la SFC y confirma su recibido.
+  - name: Momento 2 · Radicación
+    description: La SFC recibe (POST) quejas radicadas ante la entidad. Proforma F.0000-165 (formato 410).
+  - name: Momento 3 · Gestión
+    description: La SFC recibe (PUT/PATCH) la gestión de la queja. Proforma F.0000-166 (formato 411).
+  - name: Momento 4 · Datos de usuario
+    description: La entidad captura (GET) datos actualizados del consumidor y confirma su recibido.
+
+security:
+  - bearerAuth: []
+    sfcSignature: []
+
+paths:
+  /login/:
+    post:
+      tags: [Autenticación]
+      summary: Inicio de sesión — obtiene access & refresh token
+      description: >-
+        Autentica a la entidad vigilada. Con credenciales correctas retorna dos tokens:
+        `access` (30 min) y `refresh` (12 h). Con datos incorrectos retorna error.
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/LoginRequest'
+      responses:
+        '200':
+          description: Autenticación exitosa.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TokenPair'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+
+  /queja/:
+    get:
+      tags: [Momento 1 · Captura de quejas]
+      summary: Listado paginado de quejas expuestas por la SFC
+      description: >-
+        Obtiene los recursos de quejas agrupados en páginas de 100 registros.
+        Recorra la paginación con los enlaces `next` / `previous`.
+      parameters:
+        - $ref: '#/components/parameters/AcceptLanguage'
+        - $ref: '#/components/parameters/Page'
+      responses:
+        '200':
+          description: Recurso obtenido y transmitido en el cuerpo.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedQuejas'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+    post:
+      tags: [Momento 2 · Radicación]
+      summary: Enviar una nueva queja o reclamo a la SFC
+      description: >-
+        La entidad vigilada envía a la SFC la información de una queja radicada ante ella.
+        **`codigo_queja` debe anteponer el tipo y el código de la entidad**
+        (ej. tipo `1` + entidad `423` + queja `16551509974606` → `142316551509974606`).
+      parameters:
+        - $ref: '#/components/parameters/AcceptLanguage'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/QuejaM2Request'
+      responses:
+        '201':
+          description: La queja fue creada; el cuerpo devuelve el eco de los campos.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/QuejaM2Request'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '500':
+          $ref: '#/components/responses/ServerError'
+
+  /queja/{codigo_queja}/:
+    put:
+      tags: [Momento 3 · Gestión]
+      summary: Actualizar la gestión de una queja
+      description: >-
+        Actualiza el estado y los resultados de la gestión de una queja específica.
+        Incluye campos de control de cambios por fraude (`tipo_fraude`, `modalidad_fraude`,
+        `monto_reclamado`, `monto_reconocido`).
+      parameters:
+        - $ref: '#/components/parameters/CodigoQuejaPath'
+        - $ref: '#/components/parameters/AcceptLanguage'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/QuejaM3Update'
+      responses:
+        '200':
+          description: Gestión registrada; el cuerpo devuelve el eco de los campos actualizados.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/QuejaM3Update'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '500':
+          $ref: '#/components/responses/ServerError'
+    patch:
+      tags: [Momento 3 · Gestión]
+      summary: Actualizar parcialmente la gestión de una queja
+      description: Variante PATCH de la actualización de gestión (Momento 3).
+      parameters:
+        - $ref: '#/components/parameters/CodigoQuejaPath'
+        - $ref: '#/components/parameters/AcceptLanguage'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/QuejaM3Update'
+      responses:
+        '200':
+          description: Gestión registrada.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/QuejaM3Update'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '500':
+          $ref: '#/components/responses/ServerError'
+
+  /complaint/ack/:
+    post:
+      tags: [Momento 1 · Captura de quejas]
+      summary: Confirmar recibido (ACK) de quejas sincronizadas
+      description: >-
+        Marca como recibidas las quejas sincronizadas para que no aparezcan en la siguiente
+        consulta. Máximo 100 códigos por llamada. Plazo de confirmación: 48 horas.
+      parameters:
+        - $ref: '#/components/parameters/AcceptLanguage'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AckQuejasRequest'
+      responses:
+        '200':
+          description: Marcación realizada.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AckQuejasResponse'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+
+  /storage/:
+    get:
+      tags: [Momento 1 · Captura de quejas]
+      summary: Descargar anexos de una queja
+      description: >-
+        Transferencia de archivos. Los archivos son validados por antivirus en tiempo real;
+        los sospechosos van a cuarentena. La entidad recibe el ID de la referencia del anexo.
+      parameters:
+        - name: codigo_queja
+          in: query
+          required: true
+          description: Código de la queja de la cual se solicitan los anexos.
+          schema:
+            type: string
+            maxLength: 30
+        - $ref: '#/components/parameters/AcceptLanguage'
+      responses:
+        '200':
+          description: Anexos entregados.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedStorage'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+    post:
+      tags: [Momento 2 · Radicación]
+      summary: Subir anexos de la queja (multipart)
+      description: >-
+        Envía los anexos generados en el seguimiento de la queja (Momento 2 y 3). Para gestión
+        de cierre el archivo debe llevar el sufijo `RESP_FINAL_SFC`; para fraude, `INV_FRAUDE_SFC`.
+        La firma se calcula con `codigo_queja` + `type` (se omite `file`).
+      parameters:
+        - $ref: '#/components/parameters/AcceptLanguage'
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/StorageUpload'
+      responses:
+        '201':
+          description: Anexo cargado correctamente.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/StorageFile'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+
+  /usuarios/info/:
+    get:
+      tags: [Momento 4 · Datos de usuario]
+      summary: Listado paginado de usuarios con datos actualizados
+      description: >-
+        Retorna la información actualizada de los consumidores financieros que editaron
+        sus datos en el portal SmartSupervisión. Entrega paginada de a 100 registros.
+      parameters:
+        - $ref: '#/components/parameters/AcceptLanguage'
+        - $ref: '#/components/parameters/Page'
+      responses:
+        '200':
+          description: Información de usuarios entregada.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UsuarioInfo'
+        '204':
+          description: Petición correcta, sin cuerpo de respuesta.
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+
+  /usuarios/ack/:
+    post:
+      tags: [Momento 4 · Datos de usuario]
+      summary: Confirmar recibido (ACK) de datos de usuario
+      description: Confirma la recepción de la información actualizada de usuarios.
+      parameters:
+        - $ref: '#/components/parameters/AcceptLanguage'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AckUsuariosRequest'
+      responses:
+        '200':
+          description: IDs marcados.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AckUsuariosResponse'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+      description: Access token JWT obtenido en `/login/` (cabecera `Authorization`).
+    sfcSignature:
+      type: apiKey
+      in: header
+      name: X-SFC-Signature
+      description: Firma HMAC-SHA256 de la petición con el secret de la entidad.
+
+  parameters:
+    AcceptLanguage:
+      name: Accept-Language
+      in: header
+      required: false
+      description: Idioma de la respuesta.
+      schema:
+        type: string
+        enum: [es, en]
+        default: es
+    Page:
+      name: page
+      in: query
+      required: false
+      description: Número de página (100 registros por página).
+      schema:
+        type: integer
+        minimum: 1
+        default: 1
+    CodigoQuejaPath:
+      name: codigo_queja
+      in: path
+      required: true
+      description: Código de la queja a actualizar.
+      schema:
+        type: string
+        maxLength: 30
+
+  responses:
+    Unauthorized:
+      description: El recurso requiere autorización; credenciales ausentes o incorrectas.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/CanonicalResponse'
+          example:
+            status_code: E
+            messages: ["No autorizado"]
+    NotFound:
+      description: El servidor no encuentra el recurso solicitado.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/CanonicalResponse'
+    ServerError:
+      description: La estructura JSON no coincide con la definición del servidor.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/CanonicalResponse'
+
+  schemas:
+    CanonicalResponse:
+      type: object
+      description: Estructura canónica de respuesta.
+      properties:
+        status_code:
+          type: string
+          enum: [S, E]
+          description: "S: Success | E: Error"
+        messages:
+          type: array
+          items:
+            type: string
+      example:
+        status_code: S
+        messages: ["Transacción exitosa"]
+
+    LoginRequest:
+      type: object
+      required: [username, password, secret_key]
+      properties:
+        username:
+          type: string
+          description: Usuario asignado.
+        password:
+          type: string
+          format: password
+          description: Contraseña asignada al usuario.
+        secret_key:
+          type: string
+          format: password
+          description: Llave secreta para firmar las peticiones (HMAC-SHA256).
+
+    TokenPair:
+      type: object
+      properties:
+        access:
+          type: string
+          description: Access token JWT (vigencia 30 min).
+        refresh:
+          type: string
+          description: Refresh token JWT (vigencia 12 h).
+
+    Pagination:
+      type: object
+      properties:
+        count: { type: integer, example: 1000 }
+        pages: { type: integer, example: 10 }
+        current_page: { type: integer, example: 1 }
+        next: { type: string, nullable: true, example: "https://UrlBase/api/queja/?page=2" }
+        previous: { type: string, nullable: true, example: null }
+
+    QuejaM1:
+      type: object
+      description: Queja expuesta por la SFC en el Momento 1 (todos los campos).
+      properties:
+        tipo_entidad: { type: string, maxLength: 3, description: "Tipo de Entidad (numérico)" }
+        entidad_cod: { type: string, maxLength: 5, description: "Código de Entidad (numérico)" }
+        fecha_creacion: { type: string, format: date-time, description: "YYYY-MM-DDTHH:MM:SS" }
+        codigo_queja: { type: string, maxLength: 30 }
+        codigo_pais: { type: string, maxLength: 3 }
+        departamento_cod: { type: string, maxLength: 3 }
+        municipio_cod: { type: string, maxLength: 5 }
+        nombres: { type: string, maxLength: 50, description: "Nombre o razón social del CF" }
+        tipo_id_CF: { type: string, maxLength: 2 }
+        numero_id_CF: { type: string, maxLength: 15 }
+        telefono: { type: string, maxLength: 15 }
+        correo: { type: string, maxLength: 50 }
+        direccion: { type: string, maxLength: 250 }
+        tipo_persona: { type: string, maxLength: 1 }
+        sexo: { type: string, maxLength: 2 }
+        lgbtiq: { type: string, maxLength: 1 }
+        canal_cod: { type: string, maxLength: 2 }
+        condicion_especial: { type: string, maxLength: 2 }
+        producto_cod: { type: string, maxLength: 5 }
+        producto_nombre: { type: string, maxLength: 100 }
+        macro_motivo_cod: { type: string, maxLength: 5 }
+        texto_queja: { type: string, maxLength: 4500 }
+        anexo_queja: { type: boolean }
+        tutela: { type: string, maxLength: 2 }
+        ente_control: { type: string, maxLength: 2 }
+        escalamiento_DCF: { type: string, maxLength: 2, description: "Escalamiento al defensor del consumidor financiero" }
+        replica: { type: string, maxLength: 2 }
+        argumento_replica: { type: string, maxLength: 1000 }
+        desistimiento_queja: { type: string, maxLength: 2 }
+        queja_expres: { type: string, maxLength: 2 }
+
+    PaginatedQuejas:
+      allOf:
+        - $ref: '#/components/schemas/Pagination'
+        - type: object
+          properties:
+            results:
+              type: array
+              items:
+                $ref: '#/components/schemas/QuejaM1'
+
+    QuejaM2Request:
+      type: object
+      description: Queja radicada ante la entidad y enviada a la SFC (Momento 2).
+      required: [codigo_queja]
+      properties:
+        codigo_queja: { type: string, maxLength: 30, description: "Prefijado con tipo+código de entidad" }
+        codigo_pais: { type: string, maxLength: 3 }
+        departamento_cod: { type: string, maxLength: 3 }
+        municipio_cod: { type: string, maxLength: 5 }
+        canal_cod: { type: string, maxLength: 2 }
+        producto_cod: { type: string, maxLength: 5 }
+        macro_motivo_cod: { type: string, maxLength: 5 }
+        fecha_creacion: { type: string, format: date-time }
+        nombres: { type: string, maxLength: 50 }
+        tipo_id_CF: { type: string, maxLength: 2 }
+        numero_id_CF: { type: string, maxLength: 15 }
+        tipo_persona: { type: string, maxLength: 1 }
+        insta_recepcion: { type: string, maxLength: 2, description: "Instancia de recepción" }
+        punto_recepcion: { type: string, maxLength: 2 }
+        admision: { type: string, maxLength: 2 }
+        texto_queja: { type: string, maxLength: 4500 }
+        anexo_queja: { type: boolean }
+        ente_control: { type: string, maxLength: 2 }
+
+    QuejaM3Update:
+      type: object
+      description: Gestión de la queja enviada a la SFC (Momento 3), incluye control de fraude.
+      required: [codigo_queja]
+      properties:
+        codigo_queja: { type: string, maxLength: 30 }
+        sexo: { type: string, maxLength: 2 }
+        lgbtiq: { type: string, maxLength: 1 }
+        condicion_especial: { type: string, maxLength: 2 }
+        canal_cod: { type: string, maxLength: 2 }
+        producto_cod: { type: string, maxLength: 5 }
+        macro_motivo_cod: { type: string, maxLength: 5 }
+        estado_cod: { type: string, maxLength: 2, description: "Estado de la queja (4 = cierre)" }
+        fecha_actualizacion: { type: string, format: date-time }
+        producto_digital: { type: string, maxLength: 1 }
+        a_favor_de: { type: string, maxLength: 2, description: "Favorabilidad" }
+        aceptacion_queja: { type: string, maxLength: 2 }
+        rectificacion_queja: { type: string, maxLength: 2 }
+        desistimiento_queja: { type: string, maxLength: 2 }
+        prorroga_queja: { type: string, maxLength: 2 }
+        admision: { type: string, maxLength: 2 }
+        documentacion_rta_final: { type: boolean }
+        anexo_queja: { type: boolean, description: "Anexos a la respuesta final" }
+        fecha_cierre: { type: string, format: date-time }
+        tutela: { type: string, maxLength: 2 }
+        ente_control: { type: string, maxLength: 2 }
+        marcacion: { type: string, maxLength: 2 }
+        queja_expres: { type: string, maxLength: 2 }
+        tipo_fraude: { type: integer, description: "Tipología de fraude (id, 3 díg.)", example: 1 }
+        modalidad_fraude: { type: integer, description: "Modalidad de fraude (id, 3 díg.)", example: 1 }
+        monto_reclamado: { type: number, format: double, example: 2000 }
+        monto_reconocido: { type: number, format: double, example: 2000 }
+
+    AckQuejasRequest:
+      type: object
+      required: [pqrs]
+      properties:
+        pqrs:
+          type: array
+          maxItems: 100
+          description: Códigos de las quejas sincronizadas a marcar.
+          items: { type: string }
+      example:
+        pqrs: ["ID_QUEJA_1", "ID_QUEJA_2", "ID_QUEJA_3"]
+
+    AckQuejasResponse:
+      type: object
+      properties:
+        message: { type: string, example: "Código actualizado" }
+        pqrs_error:
+          type: array
+          items: { type: string }
+          example: []
+
+    StorageFile:
+      type: object
+      properties:
+        id: { type: integer, format: int64 }
+        file: { type: string, description: "URL del archivo (máx. 30 MB, nombre ≤ 150 car.)" }
+        type: { type: string, maxLength: 100 }
+        state: { type: string, maxLength: 1 }
+        codigo_queja: { type: string, maxLength: 30 }
+        reference:
+          type: integer
+          description: "1=queja 2=apoderado 3=replica 4=escalonamiento 5=anexo nuevo 6=gestion 7=respuesta"
+          enum: [1, 2, 3, 4, 5, 6, 7]
+
+    PaginatedStorage:
+      allOf:
+        - $ref: '#/components/schemas/Pagination'
+        - type: object
+          properties:
+            results:
+              type: array
+              items:
+                $ref: '#/components/schemas/StorageFile'
+
+    StorageUpload:
+      type: object
+      required: [file, codigo_queja, type]
+      properties:
+        file:
+          type: string
+          format: binary
+          description: "Archivo (máx. 30 MB, nombre ≤ 150 car.)"
+        codigo_queja: { type: string, maxLength: 30 }
+        type: { type: string, maxLength: 100 }
+
+    UsuarioInfo:
+      type: object
+      description: Información actualizada del consumidor financiero (Momento 4).
+      properties:
+        numero_id_CF: { type: string, maxLength: 15 }
+        tipo_id_CF: { type: string, maxLength: 2 }
+        nombre: { type: string, maxLength: 25 }
+        apellido: { type: string, maxLength: 25 }
+        fecha_nacimiento: { type: string, format: date-time }
+        correo: { type: string, maxLength: 50 }
+        telefono: { type: string, maxLength: 15 }
+        razon_social: { type: string, maxLength: 50 }
+        direccion: { type: string, maxLength: 250 }
+        departamento_cod: { type: string, maxLength: 3 }
+        municipio_cod: { type: string, maxLength: 5 }
+
+    AckUsuariosRequest:
+      type: object
+      required: [numero_id_CF]
+      properties:
+        numero_id_CF:
+          type: array
+          description: Identificaciones sincronizadas a marcar.
+          items: { type: string }
+      example:
+        numero_id_CF: ["numero_id_CF_1", "numero_id_CF_2", "numero_id_CF_3"]
+
+    AckUsuariosResponse:
+      type: object
+      properties:
+        message: { type: string, example: "ID CF actualizado" }
+        numero_id_CF_error:
+          type: array
+          items: { type: string }
+          example: []
