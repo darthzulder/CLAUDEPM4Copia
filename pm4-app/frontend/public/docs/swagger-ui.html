@@ -136,9 +136,17 @@
   .swagger-ui svg.arrow{ filter:invert(0.85); }
   .swagger-ui .authorization__btn svg{ fill:var(--muted); }
 
-  /* Modal de autorización */
+  /* Modal de autorización (Available authorizations) */
   .swagger-ui .dialog-ux .modal-ux{ background:var(--panel); border:1px solid var(--border2); }
   .swagger-ui .dialog-ux .modal-ux-header{ border-bottom:1px solid var(--border); }
+  .swagger-ui .dialog-ux .modal-ux-content p,
+  .swagger-ui .dialog-ux .modal-ux-content li,
+  .swagger-ui .dialog-ux .modal-ux-content .markdown p,
+  .swagger-ui .dialog-ux .modal-ux-content .scope-def{ color:var(--muted); }
+  .swagger-ui .dialog-ux .modal-ux-content h4,
+  .swagger-ui .dialog-ux .modal-ux-content label{ color:var(--txt); }
+  .swagger-ui .dialog-ux .modal-ux-content code{ background:var(--code-bg); color:#8fd3ff; }
+  .swagger-ui .dialog-ux .modal-ux-content .auth-container{ border-bottom:1px solid var(--border); }
 
   /* Loader/errores */
   .swagger-ui .errors-wrapper{ background:rgba(229,72,77,.10); border:1px solid rgba(229,72,77,.4); }
