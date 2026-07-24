@@ -24,6 +24,7 @@ import FormularioSuperintendencia from './screens/atencion-cliente/quejas-direct
 import RevisionErrorTecnicoProrroga from './screens/atencion-cliente/quejas-directas/COL_QD_SCR-011_Revision_Error_Tecnico_Prorroga/RevisionErrorTecnicoProrroga';
 import ErrorFuncionalProrroga from './screens/atencion-cliente/quejas-directas/COL_QD_SCR-012_Revision_Error_Funcional_Prorroga/ErrorFuncionalProrroga';
 import DashboardGestionCasos from './screens/atencion-cliente/quejas-directas/COL_QD_SCR-013_Dashboard_Gestion_Casos/DashboardGestionCasos';
+import SmartsupervisionApiDocs from './screens/smartsupervision-api-docs/SmartsupervisionApiDocs';
 
 class ErrorBoundary extends Component<{ children: ReactNode }, { error: Error | null }> {
   state = { error: null };
@@ -70,6 +71,7 @@ const SCREENS: Record<string, React.ComponentType> = {
   'COL_QD_SCR-012_Revision_Error_Funcional_Prorroga': ErrorFuncionalProrroga,
   'COL_QD_SCR-013_Dashboard_Gestion_Casos': DashboardGestionCasos,
   'ds-catalog': DsCatalog,
+  'smartsupervision-api-docs': SmartsupervisionApiDocs,
 };
 
 const DEBUG_BANNER_STYLE: React.CSSProperties = {
