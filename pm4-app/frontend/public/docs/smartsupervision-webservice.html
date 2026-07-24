@@ -261,9 +261,13 @@
         Los métodos HTTPS habilitados son <code>GET</code>, <code>POST</code> y <code>PUT/PATCH</code>.
       </p>
       <div class="baseurl">
-        <span class="lbl">URL Base</span>
-        <span>https://<span style="color:var(--amber)">&lt;UrlBase&gt;</span>/api/</span>
+        <span class="lbl">Producción</span>
+        <span>https://smart.superfinanciera.gov.co/api/</span>
         <a class="try-live" href="swagger-ui.html" title="Abrir Swagger UI interactivo con Try it out">⚡ Probar en Swagger UI</a>
+      </div>
+      <div class="baseurl">
+        <span class="lbl">Pruebas</span>
+        <span>https://qasmart.superfinanciera.gov.co/api/</span>
       </div>
     </div>
 
@@ -386,7 +390,7 @@
 
           <div class="block-t">Ejemplo de petición</div>
           <div class="code">
-            <div class="code-bar"><span class="dot" style="background:#22a06b"></span> POST https://&lt;UrlBase&gt;/api/login/<button class="copy" onclick="cp(this)">Copiar</button></div>
+            <div class="code-bar"><span class="dot" style="background:#22a06b"></span> POST https://smart.superfinanciera.gov.co/api/login/<button class="copy" onclick="cp(this)">Copiar</button></div>
             <pre>{
   <span class="tok-key">"username"</span>: <span class="tok-str">"entidad_142"</span>,
   <span class="tok-key">"password"</span>: <span class="tok-str">"••••••••"</span>,
@@ -483,7 +487,7 @@
   <span class="tok-key">"count"</span>: <span class="tok-num">1000</span>,
   <span class="tok-key">"pages"</span>: <span class="tok-num">10</span>,
   <span class="tok-key">"current_page"</span>: <span class="tok-num">1</span>,
-  <span class="tok-key">"next"</span>: <span class="tok-str">"https://&lt;UrlBase&gt;/api/queja/?page=2"</span>,
+  <span class="tok-key">"next"</span>: <span class="tok-str">"https://smart.superfinanciera.gov.co/api/queja/?page=2"</span>,
   <span class="tok-key">"previous"</span>: <span class="tok-str">null</span>,
   <span class="tok-key">"results"</span>: [
     {
@@ -611,7 +615,7 @@
           </table>
           <div class="code" style="margin-top:8px">
             <div class="code-bar"><span class="dot" style="background:#3b82f6"></span> GET /api/storage/?codigo_queja=&lt;codigo_queja&gt;<button class="copy" onclick="cp(this)">Copiar</button></div>
-            <pre>GET https://&lt;UrlBase&gt;/api/storage/?codigo_queja=142316551509974606</pre>
+            <pre>GET https://smart.superfinanciera.gov.co/api/storage/?codigo_queja=142316551509974606</pre>
           </div>
 
           <div class="block-t">Encabezados requeridos</div>
@@ -651,7 +655,7 @@
   <span class="tok-key">"results"</span>: [
     {
       <span class="tok-key">"id"</span>: <span class="tok-num">98765</span>,
-      <span class="tok-key">"file"</span>: <span class="tok-str">"https://&lt;UrlBase&gt;/media/anexo_1.pdf"</span>,
+      <span class="tok-key">"file"</span>: <span class="tok-str">"https://smart.superfinanciera.gov.co/media/anexo_1.pdf"</span>,
       <span class="tok-key">"type"</span>: <span class="tok-str">"application/pdf"</span>,
       <span class="tok-key">"state"</span>: <span class="tok-str">"1"</span>,
       <span class="tok-key">"codigo_queja"</span>: <span class="tok-str">"142316551509974606"</span>,
@@ -793,7 +797,7 @@
             <div class="code-bar"><span class="dot" style="background:#3b82f6"></span> 201 CREATED<button class="copy" onclick="cp(this)">Copiar</button></div>
             <pre>{
   <span class="tok-key">"id"</span>: <span class="tok-num">98766</span>,
-  <span class="tok-key">"file"</span>: <span class="tok-str">"https://&lt;UrlBase&gt;/media/soporte.pdf"</span>,
+  <span class="tok-key">"file"</span>: <span class="tok-str">"https://smart.superfinanciera.gov.co/media/soporte.pdf"</span>,
   <span class="tok-key">"type"</span>: <span class="tok-str">"application/pdf"</span>,
   <span class="tok-key">"state"</span>: <span class="tok-str">"1"</span>,
   <span class="tok-key">"codigo_queja"</span>: <span class="tok-str">"142316551509974606"</span>

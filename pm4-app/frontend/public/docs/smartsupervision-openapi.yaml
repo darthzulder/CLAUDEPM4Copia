@@ -20,12 +20,10 @@ info:
     name: Delegatura para Consumidor Financiero — Dirección de Tecnología
 
 servers:
-  - url: https://{UrlBase}/api
-    description: URL base productiva/pruebas de la entidad vigilada
-    variables:
-      UrlBase:
-        default: UrlBase
-        description: Dirección raíz del recurso REST
+  - url: https://smart.superfinanciera.gov.co/api
+    description: Producción
+  - url: https://qasmart.superfinanciera.gov.co/api
+    description: Pruebas (QA)
 
 tags:
   - name: Autenticación
@@ -404,7 +402,7 @@ components:
         count: { type: integer, example: 1000 }
         pages: { type: integer, example: 10 }
         current_page: { type: integer, example: 1 }
-        next: { type: string, nullable: true, example: "https://UrlBase/api/queja/?page=2" }
+        next: { type: string, nullable: true, example: "https://smart.superfinanciera.gov.co/api/queja/?page=2" }
         previous: { type: string, nullable: true, example: null }
 
     QuejaM1:
