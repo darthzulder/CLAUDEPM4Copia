@@ -4,7 +4,7 @@ import pandas as pd
 
 # Path configurations
 FILE_DIR = os.path.dirname(os.path.abspath(__file__))
-EXCEL_PATH = os.path.join(FILE_DIR, "Anexo02_Mockups_TOBE_QuejaDirectas_v3_1.xlsx")
+EXCEL_PATH = os.path.join(FILE_DIR, "Anexo02_Mockups_TOBE_QuejaDirectas_v3_2.xlsx")
 OUTPUT_DIR = os.path.join(FILE_DIR, "Anexo02_Index")
 MASTERS_DIR = os.path.join(OUTPUT_DIR, "masters")
 SCREENS_DIR = os.path.join(OUTPUT_DIR, "screens")
@@ -386,7 +386,7 @@ print("Todas las fichas técnicas por pantalla generadas en Anexo02_Index/screen
 # 4. Generate global README.md
 strReadmeContent = """# Índice de Mockups y Especificaciones TO-BE (Anexo 02)
 
-Este directorio contiene una versión indexada en Markdown del archivo Excel `Anexo02_Mockups_TOBE_QuejaDirectas_v3_1.xlsx`. Fue diseñado para facilitar la búsqueda, lectura y análisis de las pantallas, campos, reglas y mensajes por parte de desarrolladores y Modelos de Inteligencia Artificial (IA).
+Este directorio contiene una versión indexada en Markdown del archivo Excel `Anexo02_Mockups_TOBE_QuejaDirectas_v3_2.xlsx`. Fue diseñado para facilitar la búsqueda, lectura y análisis de las pantallas, campos, reglas y mensajes por parte de desarrolladores y Modelos de Inteligencia Artificial (IA).
 
 ---
 
@@ -457,7 +457,7 @@ strReadmeContent += """
 
 ## Cómo Actualizar este Índice
 
-Este índice se autogenera a partir del archivo Excel utilizando un script de Python. Si realizas cambios en el archivo Excel `Anexo02_Mockups_TOBE_QuejaDirectas_v3_1.xlsx`, puedes regenerar todo el índice de la siguiente manera:
+Este índice se autogenera a partir del archivo Excel utilizando un script de Python. Si realizas cambios en el archivo Excel `Anexo02_Mockups_TOBE_QuejaDirectas_v3_2.xlsx`, puedes regenerar todo el índice de la siguiente manera:
 
 1. Asegúrate de tener instalados `pandas` y `openpyxl`:
    ```bash

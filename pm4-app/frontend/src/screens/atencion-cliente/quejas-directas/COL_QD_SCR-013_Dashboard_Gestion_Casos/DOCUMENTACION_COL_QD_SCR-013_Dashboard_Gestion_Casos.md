@@ -13,12 +13,11 @@
 | Slug / carpeta | `COL_QD_SCR-013_Dashboard_Gestion_Casos` |
 | Archivos de implementación | `DashboardGestionCasos.tsx`, `TablaCasos.tsx`, `DetalleCasoModal.tsx`, `useCasosDashboard.ts`, `dashboardHelpers.ts` (config centralizada en `fields/fields.ts` + `fields/types.ts`), estilos en `shared.css` (bloque *dashboard-gestion-casos*), + ruta backend `GET /api/requests` en `backend/src/routes/pm4.routes.ts` |
 
-> ⚠️ **Nota crítica de trazabilidad.** Esta pantalla **no tiene especificación formal en los insumos Excel**:
-> - `Anexo02_Mockups_TOBE_QuejaDirectas_v3_1.xlsx` **no tiene hoja `SCR-013`** (las hojas dedicadas terminan en `SCR-012`) y `01_Pantallas` **no lista PAN-13** (llega hasta SCR-012).
-> - En `Matrices > 4. Pantallas` el inventario de pantallas **termina en PAN-12**; no existe fila para PAN-13.
-> - El código `P01-T09` en `Matrices > 1. Tareas` corresponde a **"Enviar encuesta de satisfacción al cliente"** (tarea automática de tipo *Envío*), **no** a un dashboard de supervisión.
+> ⚠️ **Nota de trazabilidad.** Esta pantalla nació **sin especificación formal en los insumos Excel** (era *mockup-only*): ninguna versión del Anexo02 tenía hoja `SCR-013` ni fila PAN-13, y su estructura se derivó del mockup HTML `Anexo02_Mockups_TOBE_QuejaDirectas_v3_0.html` (bloque `SCR-013`, líneas ~1396–1619).
 >
-> Por tanto, **la única fuente de esta pantalla es el mockup HTML** `Anexo02_Mockups_TOBE_QuejaDirectas_v3_0.html` (bloque `SCR-013`, líneas ~1396–1619). Todos los campos, columnas, filtros, KPIs y textos se derivan de ese mockup. Cualquier detalle no visible en el HTML se declara como suposición en §10.
+> **Actualización 2026-07-24 — ya está formalizada en `Anexo02_Mockups_TOBE_QuejaDirectas_v3_2.xlsx`:** se agregó la hoja `SCR-013` y sus filas en `01_Pantallas` (SCR-013 / PAN-13), `02_Secciones` (SEC-062…065), `03_Campos` (FLD-360…377), `04_Acciones` (ACT-013-01…05), `05_Reglas` (RUL-013-01…04), `06_Mensajes` (MSG-013-01…03) y `08_Permisos`. Los campos siguen siendo derivados del mockup HTML (no hay variables `qd_*` propias salvo las de origen citadas), y cualquier detalle no visible en el HTML se declara como suposición en §10.
+>
+> **Salvedades que se mantienen:** en `Matrices > 4. Pantallas` el inventario **no** incluye PAN-13, y el código `P01-T09` en `Matrices > 1. Tareas` corresponde a **"Enviar encuesta de satisfacción al cliente"** (tarea automática de tipo *Envío*), **no** a un dashboard de supervisión; el código de tarea queda marcado como *"(ver nota crítica)"* en el Excel.
 
 ---
 
@@ -50,7 +49,7 @@ El modal de detalle es solo lectura con un único botón "Cerrar".
 | `Anexo02_Mockups_TOBE_QuejaDirectas_v3_0.html` | Bloque `SCR-013` (líneas ~1396–1619) | **Fuente única de estructura**: alerta, top bar, KPIs, filtros, tabla, paginación y modal de detalle. |
 | API PM4 `GET /api/1.0/requests?include=data` | — | **Fuente de datos** de los casos (proceso 31). Lógica de paginado + PMQL + auto-recuperación replicada del script PHP entregado por el usuario. |
 | `screens/…/quejas-directas/fields/fields.ts` | Registro `QD` | Nombres canónicos de campos `qd_*` que viven en `request.data` (mapeo de columnas). |
-| `Anexo02_Mockups_TOBE_QuejaDirectas_v3_1.xlsx` | `01_Pantallas`, hojas `SCR-*` | Verificación de ausencia: **no hay SCR-013**. Confirma que la pantalla es mockup-only. |
+| `Anexo02_Mockups_TOBE_QuejaDirectas_v3_2.xlsx` | Hoja `SCR-013` + `01_Pantallas`, `02_Secciones`, `03_Campos`, `04_Acciones`, `05_Reglas`, `06_Mensajes`, `08_Permisos` | **Especificación formal** de la pantalla (agregada 2026-07-24). Antes (v3_1) no existía: la pantalla era mockup-only. |
 | `Matrices_Maduracion_TO-BE_QuejaDirectas_v3.0.xlsx` | `1. Tareas`, `4. Pantallas` | Verificación de ausencia de PAN-13 y del significado real de `P01-T09` (encuesta de satisfacción). |
 | `core/collections.ts` | `GLOBAL_COLLECTIONS` | Referencia de colecciones existentes (`QD_COLLECTIONS.requestType` id 18, `QD_COLLECTIONS.complaintStatus` id 42, `QD_COLLECTIONS.area` id 35) como posible origen futuro de los filtros. |
 
