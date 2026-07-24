@@ -14,7 +14,6 @@ import EstadoCorreo from './screens/FAST-FLOW/estado-correo/EstadoCorreo';
 import CorregirDatosFormulario from './screens/atencion-cliente/quejas-directas/COL_QD_SCR-002_corregir-datos-formulario/CorregirDatosFormulario';
 import CrearRecibirQueja from './screens/atencion-cliente/quejas-directas/COL_QD_SCR-000_CrearRecibirQueja/CrearRecibirQueja';
 import DsCatalog from './screens/ds-catalog/DsCatalog';
-import CierreM3 from './screens/atencion-cliente/quejas-directas/COL_QD_SCR-010_cierre-m3/CierreM3';
 import RevisionErrorTecnicoApi from './screens/atencion-cliente/quejas-directas/COL_QD_SCR-004_Revision_Error_Tecnico_API/RevisionErrorTecnicoApi';
 import CorreccionErrorFuncional from './screens/atencion-cliente/quejas-directas/COL_QD_SCR-003_Correccion_Error_Funcional/CorreccionErrorFuncional';
 import DetalleReasignacionRespuesta from './screens/atencion-cliente/quejas-directas/COL_QD_SCR-0051_Detalle_Reasignacion_Respuesta/DetalleReasignacionRespuesta';
@@ -60,13 +59,15 @@ const SCREENS: Record<string, React.ComponentType> = {
   'estado-correo': EstadoCorreo,
   'COL_QD_SCR-002_corregir-datos-formulario': CorregirDatosFormulario,
   'COL_QD_SCR-000_CrearRecibirQueja': CrearRecibirQueja,
-  'COL_QD_SCR-010_cierre-m3': CierreM3,
   'COL_QD_SCR-004_Revision_Error_Tecnico_API': RevisionErrorTecnicoApi,
   'COL_QD_SCR-003_Correccion_Error_Funcional': CorreccionErrorFuncional,
   'COL_QD_SCR-0051_Detalle_Reasignacion_Respuesta': DetalleReasignacionRespuesta,
   'COL_QD_SCR-0052_Respuesta_Area_Responsable': RespuestaAreaResponsable,
   'COL_QD_SCR-008_Revision_Respuesta_SAC': RevisionRespuestaSac,
   'COL_QD_SCR-009_Formulario_Superintendencia': FormularioSuperintendencia,
+  // La ex SCR-010 (Cierre M3) se fusionó en la SCR-009: alias para que cualquier
+  // nodo del BPM que aún apunte al slug antiguo renderice el formulario unificado.
+  'COL_QD_SCR-010_cierre-m3': FormularioSuperintendencia,
   'COL_QD_SCR-011_Revision_Error_Tecnico_Prorroga': RevisionErrorTecnicoProrroga,
   'COL_QD_SCR-012_Revision_Error_Funcional_Prorroga': ErrorFuncionalProrroga,
   'COL_QD_SCR-013_Dashboard_Gestion_Casos': DashboardGestionCasos,

@@ -743,7 +743,10 @@ export const SCR008_DEFAULTS: Partial<RevisionRespuestaSacFormData> = {
 // SCR-009 — Formulario Superintendencia
 // ═══════════════════════════════════════════════════════════════════════════
 
-export type AccionFormularioSFC = 'GUARDAR' | 'GUARDAR_BORRADOR';
+// ENVIAR_SFC (ACT-009-03, fusionado desde la ex SCR-010) dispara el envío del
+// cierre regulatorio M3 a SmartSupervision; también sirve de reenvío tras un
+// rechazo (400). GUARDAR/GUARDAR_BORRADOR mantienen su semántica original.
+export type AccionFormularioSFC = 'GUARDAR' | 'GUARDAR_BORRADOR' | 'ENVIAR_SFC';
 
 // Nota: SCR-009 muestra Sexo y LGBTIQ+ como seleccionables (un ZdsSelect por
 // campo: muestra la descripción, guarda el código; su _desc compañera viaja
@@ -767,6 +770,11 @@ export type FormularioSuperintendenciaFormData = Omit<Pick<QdFields,
   | typeof QD.strClaimedAmount | typeof QD.strAcknowledgedAmount
   | typeof QD.strIncludesComplaintAnnex | typeof QD.strIncludesReplyAttach
   | typeof QD.strFinalReplyPdf | typeof QD.strExtensionDays
+  // Cierre Regulatorio M3 (fusionado desde la ex SCR-010): estado del envío a la
+  // SFC, fechas de cierre y datos de entidad — todos "Back", solo se reenvían.
+  | typeof QD.strM3ClosureStatus | typeof QD.strM3ClosureAttempts | typeof QD.strLastError
+  | typeof QD.strUpdateDate | typeof QD.strClosureDate | typeof QD.strFinalReplyAttach
+  | typeof QD.strEntityType | typeof QD.strEntityCode
   | typeof QD.strAction
 >, typeof QD.strAction> & { [QD.strAction]: AccionFormularioSFC };
 
@@ -778,53 +786,46 @@ export type FormularioSuperintendenciaFormData = Omit<Pick<QdFields,
 // con TI (Homologación SFC = "No existe"); los llena el back para no arriesgar un
 // código inválido en el envío a la SFC.
 export const SCR009_BACK_DEFAULTS = {
+  [QD.strComplaintStatus]: '4',  // default "Cerrada" = código '4' de la colección 42 (1=Recibida, 2=Abierta, 4=Cerrada)
   [QD.strAcceptance]: '1',       // Excel #51 · Lista_Aceptación (por default "1")
   [QD.strRectification]: '1',    // Excel #52 · Lista_Rectificación (queda por default)
   [QD.strWithdrawal]: '2',       // Excel #53 · Lista_Desistimiento (queda por default)
-  [QD.strDigitalProduct]: 'No',  // Excel #54 · default "No" (provisional: confirmar código de catálogo con TI)
+  [QD.strDigitalProduct]: '2',   // Excel #54 · default "No" = código '2' de la colección 25 (1=Sí, 2=No)
 } as const;
+
+// Constantes de entidad para el envío a la SFC en Momento III (Excel Cierre
+// #46/#47), fusionadas desde la ex SCR-010. Son "Back": si el proceso no las
+// trae en task.data, el front las inyecta con estos valores por default para
+// que viajen y se guarden en la data del request.
+export const SCR009_DEFAULT_ENTITY_TYPE = '13'; // Excel Cierre #46 · tipo entidad
+export const SCR009_DEFAULT_ENTITY_CODE = '9';  // Excel Cierre #47 · código entidad
 
 export const SCR009_DEFAULTS: Partial<FormularioSuperintendenciaFormData> = {
   [QD.strSfcCode]: '', [QD.strChannel]: '', [QD.strSfcProduct]: '', [QD.strSfcReason]: '',
   [QD.strAdmission]: '', [QD.strControlEntity]: '',
   [QD.strSex]: '', [QD.strLgbtiq]: '', [QD.strSpecialCondition]: '',
-  [QD.strComplaintStatus]: '', [QD.strFavorability]: '',
-  ...SCR009_BACK_DEFAULTS,  // incluye strDigitalProduct='No', aceptación/rectificación/desistimiento
+  [QD.strFavorability]: '',
+  ...SCR009_BACK_DEFAULTS,  // incluye complaintStatus='4', digitalProduct='2', aceptación/rectificación/desistimiento
   [QD.strTutela]: '', [QD.strMarking]: '', [QD.strExpressComplaint]: '',
   [QD.strFraudRelated]: 'NO',
   [QD.strFraudType]: '', [QD.strFraudModality]: '', [QD.strClaimedAmount]: '', [QD.strAcknowledgedAmount]: '',
   [QD.strIncludesComplaintAnnex]: '', [QD.strIncludesReplyAttach]: 'SI', [QD.strExtensionDays]: '0',
   [QD.strFinalReplyPdf]: '',
+  // Cierre Regulatorio M3 (fusionado desde la ex SCR-010) — todos "Back".
+  [QD.strM3ClosureStatus]: '', [QD.strM3ClosureAttempts]: '0', [QD.strLastError]: '',
+  [QD.strUpdateDate]: '', [QD.strClosureDate]: '', [QD.strFinalReplyAttach]: 'SI',
+  [QD.strEntityType]: SCR009_DEFAULT_ENTITY_TYPE, [QD.strEntityCode]: SCR009_DEFAULT_ENTITY_CODE,
   [QD.strAction]: 'GUARDAR',
 };
 
 // ═══════════════════════════════════════════════════════════════════════════
-// SCR-010 — Cierre Regulatorio Momento 3
+// SCR-010 — Cierre Regulatorio Momento 3  (FUSIONADA en SCR-009)
 // ═══════════════════════════════════════════════════════════════════════════
-
-// Cierre M3 es una pantalla de revisión: TODOS los campos de cierre los calcula
-// el back (Excel PQRS, hojas "MomentoIII" / "FormularioCreacionPQRS" sección
-// "Cierre"). El front solo los muestra en solo lectura y reenvía sus valores.
-export type CierreM3FormData = Pick<QdFields,
-  | typeof QD.strM3ClosureStatus | typeof QD.strM3ClosureAttempts | typeof QD.strLastError
-  | typeof QD.strSfcCode | typeof QD.strComplaintStatus | typeof QD.strUpdateDate | typeof QD.strClosureDate
-  | typeof QD.strFavorability | typeof QD.strAcceptance | typeof QD.strMarking | typeof QD.strExpressComplaint
-  | typeof QD.strFinalReplyPdf | typeof QD.strFinalReplyAttach
-  | typeof QD.strFraudRelated | typeof QD.strFraudType | typeof QD.strFraudModality
-  | typeof QD.strClaimedAmount | typeof QD.strAcknowledgedAmount
-  | typeof QD.strEntityType | typeof QD.strEntityCode
->;
-
-// Constantes de entidad para el envío a la SFC en Momento III (Excel Cierre #46/#47).
-// Son "Back": si el proceso no las trae en task.data, el front las inyecta con
-// estos valores por default para que viajen y se guarden en la data del request.
-export const SCR010_DEFAULT_ENTITY_TYPE = '13'; // Excel Cierre #46 · tipo entidad
-export const SCR010_DEFAULT_ENTITY_CODE = '9';  // Excel Cierre #47 · código entidad
-
-export const SCR010_CAMPOS_OBLIGATORIOS = [
-  QD.strSfcCode, QD.strComplaintStatus, QD.strUpdateDate, QD.strClosureDate,
-  QD.strFavorability, QD.strAcceptance, QD.strMarking, QD.strExpressComplaint, QD.strFinalReplyAttach,
-] as const;
+// La pantalla de cierre M3 se consolidó dentro de la SCR-009 (Formulario
+// Superintendencia): sus campos, la sección de estado del envío a SFC y la
+// acción de envío ahora viven en FormularioSuperintendenciaFormData /
+// SCR009_DEFAULTS / AccionFormularioSFC ('ENVIAR_SFC'). Ver la carpeta
+// COL_QD_SCR-009_Formulario_Superintendencia.
 
 // ═══════════════════════════════════════════════════════════════════════════
 // SCR-011 — Revisión Error Técnico Prórroga
