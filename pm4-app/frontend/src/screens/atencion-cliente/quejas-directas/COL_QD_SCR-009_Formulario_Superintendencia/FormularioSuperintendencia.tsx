@@ -12,9 +12,11 @@ import {
 } from '../../../../components/fields/ZdsFields';
 import {
   QD, QD_COLLECTIONS, SCR009_DEFAULTS as DEFAULTS, SCR009_BACK_DEFAULTS,
+  SCR009_DEFAULT_ENTITY_TYPE, SCR009_DEFAULT_ENTITY_CODE,
 } from '../fields/fields';
 import type { FormularioSuperintendenciaFormData, AccionFormularioSFC } from '../fields/fields';
 import SeccionFraudeAnexos from './SeccionFraudeAnexos';
+import SeccionCierreEnvio from './SeccionCierreEnvio';
 
 // Par etiqueta/valor de solo lectura (mismo patrón que SCR-0051 / SCR-010).
 export function Ro({ label, value }: { label: string; value: string }) {
@@ -78,7 +80,17 @@ export default function FormularioSuperintendencia() {
       const strCurrent = objData[strKey as keyof FormularioSuperintendenciaFormData] as string | undefined;
       if (!strCurrent) objData[strKey as keyof FormularioSuperintendenciaFormData] = strDefault as never;
     }
-    reset({ ...DEFAULTS, ...objData });
+    // Cierre M3 (fusionado desde la ex SCR-010): tipo/código de entidad respetan
+    // el valor del back si viene; si no, se inyectan con su default para que
+    // igual viajen. El adjunto de respuesta final se fuerza siempre a "SI"
+    // (el PDF lo genera el proceso).
+    reset({
+      ...DEFAULTS,
+      ...objData,
+      [QD.strEntityType]: objData[QD.strEntityType] || SCR009_DEFAULT_ENTITY_TYPE,
+      [QD.strEntityCode]: objData[QD.strEntityCode] || SCR009_DEFAULT_ENTITY_CODE,
+      [QD.strFinalReplyAttach]: 'SI',
+    });
   }, [task, reset]);
 
   const err = (in_strField: keyof FormularioSuperintendenciaFormData): string | undefined => {
@@ -104,6 +116,10 @@ export default function FormularioSuperintendencia() {
     && !!(objWatch[QD.strAcknowledgedAmount] as string)?.trim()
   );
   const blnCanSave = blnSpecialCondOk && blnAnnexesComplete && blnFraudComplete;
+
+  // Cierre M3 (fusionado desde la ex SCR-010): si la SFC rechazó el envío, la
+  // acción de envío pasa a "Reenviar Cierre (corrección)".
+  const blnRejected = objWatch[QD.strM3ClosureStatus] === 'Rechazado (400)';
 
   // Enviamos la tarea con la accion seleccionada
   const enviarCon = (in_strAction: AccionFormularioSFC) => async (in_objData: FormularioSuperintendenciaFormData): Promise<boolean> => {
@@ -159,25 +175,30 @@ export default function FormularioSuperintendencia() {
               "No") y aquí son seleccionables por el Analista SAC: el ZdsSelect
               muestra la descripción (label) pero guarda el código; su _desc
               compañera viaja sola vía useSyncDesc, sin campo visible propio.
-              Producto Digital sigue siendo "Back"; Condición Especial sigue
-              siendo Front editable (Excel PQRS V3.0 #23/#26). */}
+              Producto Digital ahora es editable (ZdsSelect sobre la colección
+              25, default "No"=código '2'); Condición Especial sigue siendo Front
+              editable (Excel PQRS V3.0 #23/#26). */}
           <FormSection title="Datos del Consumidor — Campos SFC">
             <div className="form-row cols-2">
               <ZdsSelect name={QD.strSex} control={control} label="Sexo" options={cllSex} />
               <ZdsSelect name={QD.strLgbtiq} control={control} label="LGBTIQ+" options={cllLgbtiq} />
             </div>
             <div className="form-row cols-2">
-              <Ro label="Producto Digital" value={descOf(cllDigitalProduct, objWatch[QD.strDigitalProduct])} />
+              <ZdsSelect name={QD.strDigitalProduct} control={control} label="Producto Digital"
+                options={cllDigitalProduct} />
               <ZdsSelect name={QD.strSpecialCondition} control={control} label="Condición Especial"
                 options={cllSpecialCond} required rules={objReq} error={err(QD.strSpecialCondition)}
                 helpText="CAT-COND-ESP (Front, obligatorio SFC)." />
             </div>
           </FormSection>
 
-          {/* ── S3 · Condición de la Queja (SEC-030) — solo lectura (Back) ── */}
+          {/* ── S3 · Condición de la Queja (SEC-030) — Back/solo lectura, salvo:
+                 Estado de la Queja (ZdsSelect colección 42, default "Cerrada"='4')
+                 y Marcación (ZdsSelect colección 31, opción inicial "-" sin valor). ── */}
           <FormSection title="Condición de la Queja">
             <div className="form-row cols-3">
-              <Ro label="Estado de la Queja o Reclamo" value={descOf(cllComplaintStatus, objWatch[QD.strComplaintStatus])} />
+              <ZdsSelect name={QD.strComplaintStatus} control={control} label="Estado de la Queja o Reclamo"
+                options={cllComplaintStatus} />
               <Ro label="Favorabilidad" value={descOf(cllFavorability, objWatch[QD.strFavorability])} />
               <Ro label="Aceptación" value={descOf(cllAcceptance, objWatch[QD.strAcceptance])} />
             </div>
@@ -187,7 +208,8 @@ export default function FormularioSuperintendencia() {
               <Ro label="Tutela" value={descOf(cllTutela, objWatch[QD.strTutela])} />
             </div>
             <div className="form-row cols-3">
-              <Ro label="Marcación" value={descOf(cllMarking, objWatch[QD.strMarking])} />
+              <ZdsSelect name={QD.strMarking} control={control} label="Marcación"
+                options={cllMarking} placeholder="-" />
               <Ro label="Queja Exprés" value={descOf(cllExpressComplaint, objWatch[QD.strExpressComplaint])} />
               <div />
             </div>
@@ -195,6 +217,9 @@ export default function FormularioSuperintendencia() {
 
           {/* ── S4 Fraude (tipo/modalidad/montos editables) · S5 Anexos (editables) ── */}
           <SeccionFraudeAnexos form={form} err={err} requestId={task?.process_request_id ?? null} />
+
+          {/* ── Cierre Regulatorio M3 (fusionado desde la ex SCR-010) ── */}
+          <SeccionCierreEnvio form={form} />
 
           {/* MSG-009-02 — bloqueo si faltan los editables obligatorios. */}
           {!blnCanSave && (
@@ -206,14 +231,19 @@ export default function FormularioSuperintendencia() {
             </ZrAlert>
           )}
 
-          {/* ── Acciones (ACT-009-01/02) ── */}
+          {/* ── Acciones (ACT-009-01/02/03) ── */}
           <ActionBar>
             <ZrButton config="secondary" disabled={submitting} loading={submitting} onClick={onGuardarBorrador}>
               Guardar Borrador
             </ZrButton>
-            <ZrButton config="positive" disabled={!blnCanSave || submitting} loading={submitting}
+            <ZrButton config="secondary" disabled={!blnCanSave || submitting} loading={submitting}
               onClick={() => { onGuardar(); }}>
-              Guardar Formulario ▶
+              Guardar Formulario
+            </ZrButton>
+            {/* ACT-009-03 — envío del cierre M3 a SmartSupervision (fusionado ex SCR-010). */}
+            <ZrButton config="positive" disabled={!blnCanSave || submitting} loading={submitting}
+              onClick={() => { handleSubmit(enviarCon('ENVIAR_SFC'))(); }}>
+              {blnRejected ? 'Reenviar Cierre (corrección) ▶' : 'Enviar a SmartSupervision ▶'}
             </ZrButton>
           </ActionBar>
         </form>

@@ -6,14 +6,22 @@
 |---|---|
 | Pantalla | **SCR-009** / PAN-09 — Formulario Superintendencia (F.1000-166 / Formato 411) |
 | Tipo | Formulario regulatorio SFC |
-| Tarea BPMN | **SP2-T07** — Diligenciar formulario Superintendencia |
-| Proceso | SP2 — Gestionar Respuesta Interna y Revisión SAC |
-| Rol responsable | Analista SAC (VER+EDITAR) · Líder SAC (VER) · Control SLA (INFORMADO) |
+| Tarea BPMN | **SP2-T07** — Diligenciar formulario Superintendencia · **SP3-T01/T04/T08** — Cierre Regulatorio M3 (fusionado) |
+| Proceso | SP2 — Gestionar Respuesta Interna y Revisión SAC · SP3 — Cierre Regulatorio |
+| Rol responsable | Analista SAC (VER+EDITAR) · Gestor de Experiencia / Backoffice SFC (envío M3) · Líder SAC (VER) · Control SLA (INFORMADO) |
 | Evento de apertura | Respuesta aprobada + PDF generado (SP2-T06) |
-| Acción de cierre | Guardar Formulario → habilita SP3 (PAN-10) |
-| Slug / `?screen=` | `COL_QD_SCR-009_Formulario_Superintendencia` |
-| Archivos de implementación | `FormularioSuperintendencia.tsx`, `SeccionFraudeAnexos.tsx` (config centralizada en fields/fields.ts) |
-| Versión | 1.0 — 2026-06-30 |
+| Acción de cierre | Guardar Formulario → habilita SP3 · **Enviar a SmartSupervision** → dispara el cierre M3 a la SFC |
+| Slug / `?screen=` | `COL_QD_SCR-009_Formulario_Superintendencia` (alias legacy: `COL_QD_SCR-010_cierre-m3`) |
+| Archivos de implementación | `FormularioSuperintendencia.tsx`, `SeccionFraudeAnexos.tsx`, `SeccionCierreEnvio.tsx` (config centralizada en fields/fields.ts) |
+| Versión | 2.0 — 2026-07-24 (fusión de la ex SCR-010 Cierre M3) |
+
+> **Fusión SCR-010 → SCR-009 (2026-07-24):** la pantalla de Cierre Regulatorio M3 (ex
+> `COL_QD_SCR-010_cierre-m3`) se consolidó en esta pantalla. Se migraron sus campos de cierre
+> (estado del envío a SFC, intentos, último error, código SFC, fechas de actualización/cierre,
+> tipo/código de entidad, adjunto de respuesta final), la sección **Estado del Envío a
+> SmartSupervision (SFC)** (`SeccionCierreEnvio.tsx`) y la acción **`ENVIAR_SFC`**
+> (botón "Enviar a SmartSupervision" / "Reenviar Cierre" si la SFC rechazó). El slug antiguo
+> queda como alias en `App.tsx` para no romper nodos del BPM que aún lo referencien.
 
 ---
 
@@ -63,20 +71,20 @@ mostrarlos de nuevo como solo lectura aquí. Se removió el bloque `ZdsInput rea
 |---|---|---|---|
 | **Sexo** | `qd_strSex` (+ `qd_strSex_desc` compañera, sin campo propio) | `ZdsSelect` (CAT-SEXO, colección 23): muestra la descripción, guarda el código | 🟢 Editable aquí; llega precargado desde SCR-000 (default "No Aplica", Excel #21) |
 | **LGBTIQ+** | `qd_strLgbtiq` (+ `qd_strLgbtiq_desc` compañera, sin campo propio) | `ZdsSelect` (CAT-LGBTIQ, colección 41): muestra la descripción, guarda el código | 🟢 Editable aquí; llega precargado desde SCR-000 (default "No", Excel #22) |
-| Producto Digital | `qd_strDigitalProduct` | label resuelto (info-bar) | 🔴 Back, default "No" (Excel #54) |
+| **Producto Digital** | `qd_strDigitalProduct` (+ `qd_strDigitalProduct_desc` compañera) | `ZdsSelect` (colección 25): muestra la descripción, guarda el código | 🟢 Editable aquí; default "No" = código `'2'` (1=Sí, 2=No) (Excel #54) |
 | **Condición Especial** | `qd_strSpecialCondition` | `ZdsSelect` (editable, requerido) | 🟢 **Front, obligatorio SFC** (Excel #23/#26) |
 
 ### S3 — Condición de la Queja (SEC-030) — todos solo lectura (Back)
 
 | Campo (UI) | Variable | Presentación | Origen (Back) |
 |---|---|---|---|
-| Estado de la Queja o Reclamo | `qd_strComplaintStatus` | label resuelto (info-bar) | MomentoIII "Automático" |
+| **Estado de la Queja o Reclamo** | `qd_strComplaintStatus` (+ `qd_strComplaintStatus_desc` compañera) | `ZdsSelect` (colección 42): muestra la descripción, guarda el código | 🟢 Editable aquí; default "Cerrada" = código `'4'` (1=Recibida, 2=Abierta, 4=Cerrada) |
 | Favorabilidad | `qd_strFavorability` | label resuelto (info-bar) | Derivada de `qd_strReplyFavorOf`: Cliente→1, Compañía→3 |
 | Aceptación | `qd_strAcceptance` | label resuelto (info-bar) | Default "1" (Excel #51) |
 | Rectificación | `qd_strRectification` | label resuelto (info-bar) | Default 1, solo si Defensor (Excel #52) |
 | Desistimiento | `qd_strWithdrawal` | label resuelto (info-bar) | Default 2 (Excel #53) |
 | Tutela | `qd_strTutela` | label resuelto (info-bar) | Default "No" (Excel #37) |
-| Marcación | `qd_strMarking` | label resuelto (info-bar) | Back (Excel #56) |
+| **Marcación** | `qd_strMarking` (+ `qd_strMarking_desc` compañera) | `ZdsSelect` (colección 31): opción inicial "-" (valor vacío, no guarda nada), muestra descripción/guarda código | 🟢 Editable aquí; sin default (arranca en "-") (Excel #56) |
 | Queja Exprés | `qd_strExpressComplaint` | label resuelto (info-bar) | Back, default (Excel #38/#41) |
 
 > Los códigos se muestran como **descripción** del catálogo (`useCollection` + helper `descOpt()`) pero **conservan el código** que espera el BPM/SFC; se reenvían intactos vía `reset()` al guardar.
@@ -87,12 +95,11 @@ Los campos marcados con valor por default en el Excel deben **existir y estar ll
 
 | Campo | Default (código) | Fuente |
 |---|---|---|
+| Estado de la Queja (`qd_strComplaintStatus`) | `4` (= "Cerrada") | colección 42 (1=Recibida, 2=Abierta, 4=Cerrada) |
 | Aceptación (`qd_strAcceptance`) | `1` | Excel #51 · Lista_Aceptación |
 | Rectificación (`qd_strRectification`) | `1` | Excel #52 · Lista_Rectificación |
 | Desistimiento (`qd_strWithdrawal`) | `2` | Excel #53 · Lista_Desistimiento |
-| Producto Digital (`qd_strDigitalProduct`) | `No` ⚠ provisional | Excel #54 (código de catálogo a confirmar con TI) |
-
-> **Producto Digital** se rellena con `"No"` **provisionalmente**: el default de negocio es "No" (Excel #54) pero el código exacto de catálogo (colección PM4 id 25) no está confirmado con TI. Confirmar el código real y reemplazar el literal `'No'` si difiere.
+| Producto Digital (`qd_strDigitalProduct`) | `2` (= "No") | Excel #54 · colección 25 (1=Sí, 2=No) |
 
 > **Pendientes de código de catálogo (los llena el back, NO el front):** Tutela ("No") y Ente de
 > Control ("Otros"). El Excel `Homologación SFC` los marca "Es requerida su creación / No existe":
