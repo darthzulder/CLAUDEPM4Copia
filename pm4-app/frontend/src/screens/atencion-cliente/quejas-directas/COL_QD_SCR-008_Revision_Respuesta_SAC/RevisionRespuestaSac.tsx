@@ -6,12 +6,21 @@ import ScreenHeader from '../../../../components/ScreenHeader';
 import FormSection from '../../../../components/FormSection';
 import { ActionBar } from '../../../../components/ActionBar';
 import RequestFileList from '../../../../components/RequestFileList';
+import PreviewModal from '../../../../components/PreviewModal';
 import {
   ZdsInput, ZdsTextarea,
-  ZrButton, ZrAlert, ZrModal, ZrLoader,
+  ZrButton, ZrAlert, ZrLoader,
 } from '../../../../components/fields/ZdsFields';
-import { QD, SCR0051_ADJUNTO_KEYS as ADJUNTO_KEYS, SCR008_DEFAULTS as DEFAULTS, SCR008_SLA_UMBRAL_CRITICO as SLA_UMBRAL_CRITICO } from '../fields/fields';
+import { useCollection } from '../../../../core/useCollection';
+import { QD, QD_COLLECTIONS, SCR0051_ADJUNTO_KEYS as ADJUNTO_KEYS, SCR000_ADJUNTO_KEYS, SCR008_DEFAULTS as DEFAULTS, SCR008_SLA_UMBRAL_CRITICO as SLA_UMBRAL_CRITICO } from '../fields/fields';
 import type { RevisionRespuestaSacFormData, AccionRevisionSAC } from '../fields/fields';
+import { buildRespuestaFinalHtml, fillRespuestaFinalHtml } from '../COL_QD_SCR-0051_Detalle_Reasignacion_Respuesta/respuestaFinalTemplate';
+
+// Correos de la colección 46 (Mails BPM) para la respuesta final. La favorabilidad
+// (qd_strFavorability) decide cuál: '1' = a favor del Cliente ⇒ "09 … queja procede";
+// cualquier otro ⇒ "10 … queja no procede". (Misma lógica que SCR-0051.)
+const EMAIL_TPL_PROCEDE_PREFIX = '09';
+const EMAIL_TPL_NO_PROCEDE_PREFIX = '10';
 
 export default function RevisionRespuestaSac() {
   // Cargamos la tarea y su estado desde PM4
@@ -52,6 +61,46 @@ export default function RevisionRespuestaSac() {
 
   // RUL-008-01 — observaciones obligatorias para devolver.
   const blnCanReturn = !!objWatch[QD.strSacRemarks]?.trim();
+
+  // Clasificación Regulatoria / Asunto (solo lectura): estos campos guardan el CÓDIGO
+  // (calculado en M1); para el display usamos su variable compañera <campo>_desc que
+  // viaja en task.data (misma resolución que SCR-0051 en su vista de solo lectura).
+  const dicWatch = objWatch as Record<string, unknown>;
+  const descDe = (in_strBase: string): string => {
+    const strDesc = dicWatch[`${in_strBase}_desc`] as string | undefined;
+    return (strDesc && strDesc.trim()) || (dicWatch[in_strBase] as string) || '—';
+  };
+
+  // Nombre del cliente (persona jurídica o natural), para el destinatario de la carta.
+  const strName = (objWatch[QD.strCompanyName] || `${objWatch[QD.strFirstName] ?? ''} ${objWatch[QD.strLastName] ?? ''}`).trim();
+
+  // ACT-008-04 — Vista Previa Respuesta Final (igual que SCR-0051): obtenemos la carta
+  // (HTML del correo) de la colección 46 según la favorabilidad y la servimos como blob a
+  // PreviewModal. Se construye al abrir con la foto actual del formulario y se revoca al
+  // cerrar. Si la colección aún no cargó o no trae la fila, cae a la plantilla local.
+  const { options: cllEmailTpl } = useCollection(QD_COLLECTIONS.emailTemplates);
+  const [strPreviewUrl, setStrPreviewUrl] = useState<string | null>(null);
+  useEffect(() => {
+    if (!blnShowPreview) return;
+    const objData = form.getValues();
+    const objVars = {
+      tipo: objData[QD.strRequestType] || 'queja',
+      tipoDesc: (objData as Record<string, unknown>)[`${QD.strRequestType}_desc`] as string | undefined,
+      numeroRadicado: objData[QD.strBpmCaseId] || '',
+      nombre: (objData[QD.strCompanyName] || `${objData[QD.strFirstName] ?? ''} ${objData[QD.strLastName] ?? ''}`).trim(),
+      interaccion: objData[QD.strInteraction] || '',
+      loQueOcurrio: objData[QD.strComplaintText] || '',
+      nuestraRespuesta: objData[QD.strClientResponse] || '',
+      textoProcede: objData[QD.strActionsTaken] || '',
+    };
+    // '1' = a favor del Cliente ⇒ queja procede (fila 09); cualquier otro ⇒ no procede (fila 10).
+    const strPrefix = objData[QD.strFavorability] === '1' ? EMAIL_TPL_PROCEDE_PREFIX : EMAIL_TPL_NO_PROCEDE_PREFIX;
+    const strRawHtml = cllEmailTpl.find((o) => o.label.trim().startsWith(strPrefix))?.value;
+    const strHtml = strRawHtml ? fillRespuestaFinalHtml(strRawHtml, objVars) : buildRespuestaFinalHtml(objVars);
+    const strUrl = URL.createObjectURL(new Blob([strHtml], { type: 'text/html' }));
+    setStrPreviewUrl(strUrl);
+    return () => { URL.revokeObjectURL(strUrl); setStrPreviewUrl(null); };
+  }, [blnShowPreview, form, cllEmailTpl]);
 
   // Enviamos la tarea con la accion seleccionada. qd_blnSACApproved refleja la
   // decisión booleana del SAC: Aprobar ⇒ true, Devolver ⇒ false (Reasignar no la toca).
@@ -121,13 +170,82 @@ export default function RevisionRespuestaSac() {
             </div>
           </FormSection>
 
-          {/* ── S2 · Respuesta del Área (SEC-026, solo lectura) ── */}
-          <FormSection title="Respuesta del Área">
-            <div className="form-row cols-1">
-              <ZdsTextarea name={QD.strClientResponse} control={control} label="Respuesta al Cliente" readOnly />
+          {/* ── Clasificación Regulatoria (solo lectura, heredada de M1) ──
+              Mismo bloque de referencia que muestra SCR-0051, aquí siempre de solo
+              lectura: el SAC la consulta para revisar la respuesta, no la reclasifica. */}
+          <FormSection title="Clasificación Regulatoria">
+            <div className="form-row cols-2">
+              <div className="zds-field-wrap">
+                <span className="info-bar-label">Producto SFC (seguro)</span>
+                <div className="info-bar-value" style={{ marginTop: 'var(--zs-50)' }}>{descDe(QD.strSfcProduct)}</div>
+              </div>
+              <div className="zds-field-wrap">
+                <span className="info-bar-label">Momento</span>
+                <div className="info-bar-value" style={{ marginTop: 'var(--zs-50)' }}>{objWatch[QD.strInteraction] || '—'}</div>
+              </div>
             </div>
             <div className="form-row cols-1">
-              <ZdsTextarea name={QD.strActionsTaken} control={control} label="Acciones Tomadas" readOnly />
+              <div className="zds-field-wrap">
+                <span className="info-bar-label">Motivo SFC</span>
+                <div className="info-bar-value" style={{ marginTop: 'var(--zs-50)' }}>{descDe(QD.strSfcReason)}</div>
+              </div>
+            </div>
+            <div className="form-row cols-3">
+              <div className="zds-field-wrap">
+                <span className="info-bar-label">Canal de Recepción</span>
+                <div className="info-bar-value" style={{ marginTop: 'var(--zs-50)' }}>{descDe(QD.strChannel)}</div>
+              </div>
+              <div className="zds-field-wrap">
+                <span className="info-bar-label">Instancia de Recepción</span>
+                <div className="info-bar-value" style={{ marginTop: 'var(--zs-50)' }}>{descDe(QD.strReceptionInstance)}</div>
+              </div>
+              <div className="zds-field-wrap">
+                <span className="info-bar-label">Admisión</span>
+                <div className="info-bar-value" style={{ marginTop: 'var(--zs-50)' }}>{descDe(QD.strAdmission)}</div>
+              </div>
+            </div>
+            <div className="form-row cols-3">
+              <div className="zds-field-wrap">
+                <span className="info-bar-label">Ente de Control</span>
+                <div className="info-bar-value" style={{ marginTop: 'var(--zs-50)' }}>{descDe(QD.strControlEntity)}</div>
+              </div>
+              <div />
+              <div />
+            </div>
+          </FormSection>
+
+          {/* ── Descripción de la Queja (solo lectura) ──
+              Asunto (= motivo SFC) y texto original del radicador, tal cual en SCR-0051. */}
+          <FormSection title="Descripción de la Queja">
+            <div className="form-row cols-1">
+              <div className="zds-field-wrap">
+                <span className="info-bar-label">Asunto de la Queja</span>
+                <div className="info-bar-value" style={{ marginTop: 'var(--zs-50)' }}>{descDe(QD.strSfcReason)}</div>
+              </div>
+            </div>
+            <div className="form-row cols-1">
+              <ZdsTextarea name={QD.strComplaintText} control={control} label="Descripción / Texto de la Queja" readOnly />
+            </div>
+
+            {/* Adjuntos del radicador (los que subió el cliente en SCR-000, qd_strAttach01..05). */}
+            <RequestFileList
+              requestId={task?.process_request_id ?? null}
+              docKeys={SCR000_ADJUNTO_KEYS}
+              label="Documentos adjuntos del radicador"
+              emptyText="El radicador no adjuntó documentos a esta queja."
+              loadingText="Buscando documentos del caso…"
+            />
+          </FormSection>
+
+          {/* ── S2 · Respuesta del Área (SEC-026) ──
+              Respuesta al Cliente y Acciones Tomadas son editables por el SAC:
+              puede corregir el texto del área antes de aprobar/devolver. */}
+          <FormSection title="Respuesta del Área">
+            <div className="form-row cols-1">
+              <ZdsTextarea name={QD.strClientResponse} control={control} label="Respuesta al Cliente" maxLength={5000} />
+            </div>
+            <div className="form-row cols-1">
+              <ZdsTextarea name={QD.strActionsTaken} control={control} label="Acciones Tomadas" maxLength={5000} />
             </div>
             <div className="form-row cols-1">
               <ZdsInput name={QD.strAcknowledgment} control={control} label="¿Reconocimiento al cliente?" readOnly />
@@ -182,21 +300,16 @@ export default function RevisionRespuestaSac() {
         </form>
       </div>
 
-      {/* ACT-008-04 · Vista Previa Respuesta Final */}
-      {blnShowPreview && (
-        <ZrModal model={blnShowPreview} onChange={(in_blnOpen: boolean) => setBlnShowPreview(in_blnOpen)}>
-          <h3 style={{ margin: '0 0 var(--zs-75)', font: 'var(--zf-h-20--700)', color: 'var(--z-text)' }}>
-            Vista previa — carta de respuesta final
-          </h3>
-          <p className="subsection-note">Caso {objWatch[QD.strSfcCode]} · Versión {objWatch[QD.strRevisionVersion]}</p>
-          <p style={{ font: 'var(--zf-cap-14)', whiteSpace: 'pre-wrap' }}>
-            {objWatch[QD.strClientResponse] || 'Sin respuesta redactada.'}
-          </p>
-          <div z-flex="75" z-align="right:center" style={{ marginTop: 'var(--zs-100)' }}>
-            <ZrButton config="secondary:s" onClick={() => setBlnShowPreview(false)}>Cerrar</ZrButton>
-          </div>
-        </ZrModal>
-      )}
+      {/* ACT-008-04 · Vista Previa Respuesta Final (visor ancho reutilizado, igual que SCR-0051) */}
+      <PreviewModal
+        isOpen={blnShowPreview && !!strPreviewUrl}
+        onClose={() => setBlnShowPreview(false)}
+        previewDoc={{
+          fileName: 'Vista previa — carta de respuesta final',
+          descripcion: `Destinatario: ${strName || '—'} (${objWatch[QD.strEmail] || '—'})`,
+          blobUrl: strPreviewUrl,
+        }}
+      />
     </div>
   );
 }

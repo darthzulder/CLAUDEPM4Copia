@@ -720,6 +720,14 @@ export type AccionRevisionSAC = 'APROBAR' | 'DEVOLVER' | 'REASIGNAR';
 export type RevisionRespuestaSacFormData = Omit<Pick<QdFields,
   | typeof QD.strSfcCode | typeof QD.strSlaAssigned | typeof QD.strRevisionVersion
   | typeof QD.strAssigneeArea | typeof QD.strDraftDate
+  // Clasificación Regulatoria + Descripción de la Queja (solo lectura, referencia
+  // heredada de M1; mismo bloque que muestra SCR-0051).
+  | typeof QD.strChannel | typeof QD.strReceptionInstance | typeof QD.strAdmission | typeof QD.strControlEntity
+  | typeof QD.strSfcProduct | typeof QD.strInteraction | typeof QD.strSfcReason | typeof QD.strComplaintText
+  // Datos del cliente / caso necesarios para la Vista Previa de la carta de respuesta
+  // final (misma plantilla de correo 09/10 que SCR-0051).
+  | typeof QD.strBpmCaseId | typeof QD.strRequestType | typeof QD.strEmail | typeof QD.strFavorability
+  | typeof QD.strFirstName | typeof QD.strLastName | typeof QD.strCompanyName
   | typeof QD.strClientResponse | typeof QD.strActionsTaken | typeof QD.strAcknowledgment | typeof QD.lstSupportAttach
   | typeof QD.strSacRemarks | typeof QD.blnSacApproved | typeof QD.strAction
 >, typeof QD.strAction> & { [QD.strAction]: AccionRevisionSAC };
@@ -730,6 +738,23 @@ export const SCR008_DEFAULTS: Partial<RevisionRespuestaSacFormData> = {
   [QD.strRevisionVersion]: '',
   [QD.strAssigneeArea]: '',
   [QD.strDraftDate]: '',
+  // Clasificación Regulatoria + Descripción de la Queja (solo lectura).
+  [QD.strChannel]: '',
+  [QD.strReceptionInstance]: '',
+  [QD.strAdmission]: '',
+  [QD.strControlEntity]: '',
+  [QD.strSfcProduct]: '',
+  [QD.strInteraction]: '',
+  [QD.strSfcReason]: '',
+  [QD.strComplaintText]: '',
+  // Datos del cliente / caso para la Vista Previa de la carta de respuesta final.
+  [QD.strBpmCaseId]: '',
+  [QD.strRequestType]: '',
+  [QD.strEmail]: '',
+  [QD.strFavorability]: '',
+  [QD.strFirstName]: '',
+  [QD.strLastName]: '',
+  [QD.strCompanyName]: '',
   [QD.strClientResponse]: '',
   [QD.strActionsTaken]: '',
   [QD.strAcknowledgment]: '',
