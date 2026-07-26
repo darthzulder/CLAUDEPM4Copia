@@ -95,6 +95,12 @@ export const QD = {
   arridSimilarCases: 'qd_arridSimilarCases',            // IDs de casos similares encontrados
   intCountSimilarCases: 'qd_intCountSimilarCases',      // cantidad de casos similares
   arrSimilarCases: 'qd_arrSimilarCases',                // detalle (data) de los casos similares
+  // Derivada al radicar (VALOR BOOLEANO true/false, pese al prefijo str del nombre físico
+  // que es CONTRATO con PM4): true solo si el radicador marcó "Sí" en la pregunta de réplica
+  // (qd_strReply === 'SI') Y el chequeo de casos similares NO disparó la advertencia
+  // (qd_intCountSimilarCases === 0). Es decir, el cliente declara una reconsideración pero el
+  // detector automático de casos abiertos no encontró coincidencia → SAC debe escalarla a mano.
+  strReconsiderationSacEscalation: 'qd_strReconsiderationSACEscalation',
 
   // ── SCR-002 · Corrección de Datos (encabezado + metadata) ─────────────────
   strBpmCaseId: 'qd_strBpmCaseId',                     // antes qd_idCasoBPM
@@ -288,6 +294,7 @@ export interface QdFields {
   qd_arridSimilarCases: number[];
   qd_intCountSimilarCases: number;
   qd_arrSimilarCases: Record<string, unknown>[];
+  qd_strReconsiderationSACEscalation: boolean; // derivada al radicar (ver QD.strReconsiderationSacEscalation)
 
   // SCR-002
   qd_strBpmCaseId: string;
@@ -528,6 +535,8 @@ export type CrearRecibirQuejaFormData = Pick<QdFields,
   // Salida del watcher de casos similares (script 70), fusionada en el envío.
   | typeof QD.strSimilarCheckStatus | typeof QD.arridSimilarCases
   | typeof QD.intCountSimilarCases | typeof QD.arrSimilarCases
+  // Derivada al radicar (réplica "Sí" + sin advertencia de casos similares).
+  | typeof QD.strReconsiderationSacEscalation
 >>;
 
 export const SCR000_DEFAULTS = {

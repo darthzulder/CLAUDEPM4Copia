@@ -268,7 +268,18 @@ export default function CrearRecibirQueja() {
       setBlnSending(false);
       return;
     }
-    await sendToPm4({ ...objData, [QD.blnCaptcha]: true, ...objPendingSimilar });
+    // Escalamiento de reconsideración a SAC (valor booleano): el radicador declaró que
+    // ya había radicado la misma queja (réplica "Sí") pero el chequeo de casos similares
+    // NO disparó la advertencia (0 casos abiertos coincidentes) → SAC debe escalarla a mano.
+    const blnReconsiderationEscalation =
+      objData[QD.strReply] === 'SI' &&
+      Number(objPendingSimilar[QD.intCountSimilarCases] ?? 0) === 0;
+    await sendToPm4({
+      ...objData,
+      [QD.blnCaptcha]: true,
+      ...objPendingSimilar,
+      [QD.strReconsiderationSacEscalation]: blnReconsiderationEscalation,
+    });
     // En éxito, sendToPm4 pone blnSent=true y se muestra la pantalla de confirmación;
     // si falló, quitamos el overlay para que el usuario vea el form y el error.
     setBlnSending(false);
