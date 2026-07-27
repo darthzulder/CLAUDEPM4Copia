@@ -2,7 +2,7 @@ import { useEffect } from 'react';
 import type { FieldPath, UseFormReturn } from 'react-hook-form';
 import FormSection from '../../../../components/FormSection';
 import { ZdsInput, ZdsSelect, ZdsTextarea, ZdsStatusBadge } from '../../../../components/fields/ZdsFields';
-import { useCollection, descOf, useSyncDesc } from '../../../../core/useCollection';
+import { useCollection, descOf, useSyncDesc, toUiOptions, uiValueFromCode, codeFromUiValue, labelFromUiValue } from '../../../../core/useCollection';
 import { QD, QD_COLLECTIONS, SCR000_ADJUNTO_KEYS } from '../fields/fields';
 import type { DetalleReasignacionRespuestaFormData } from '../fields/fields';
 import DocumentosRadicador from './DocumentosRadicador';
@@ -68,15 +68,27 @@ export default function SeccionDetalleCaso({ form, estado, nombre, identificacio
   const { options: cllRequestType } = useCollection(QD_COLLECTIONS.requestType);
   const { records: cllMatrizRows } = useCollection(QD_COLLECTIONS.matrixMotivos);
 
+  // FLD-071 — Producto SFC (seguro): el catálogo (colección 16) repite el mismo código
+  // (codigo_producto_sfc) en más de un registro — p.ej. "Garantía extendida" y
+  // "Copropiedades" comparten el código 104. El picker no puede distinguir cuál de los
+  // dos se clickeó si comparten `value`, así que se le pasan opciones con un value de UI
+  // desambiguado (código + etiqueta, ver toUiOptions); el value real que guarda el form
+  // y se envía a PM4 sigue siendo el código puro (ver ZdsSelect toPickerValue/fromPickerValue
+  // más abajo). El companion `_desc` se sincroniza a mano con la etiqueta elegida —
+  // useSyncDesc no podría distinguir el duplicado (ambos resuelven al mismo código).
+  const cllInsuranceUi = toUiOptions(cllInsurance);
+  const strSfcProductDescField = `${QD.strSfcProduct}_desc` as FieldPath<DetalleReasignacionRespuestaFormData>;
+  const strSfcProductDesc = (objWatch as Record<string, unknown>)[strSfcProductDescField] as string | undefined;
+  const strInsuranceUiValue = uiValueFromCode(cllInsurance, objWatch[QD.strSfcProduct], strSfcProductDesc);
+
   // Placa: solo aplica cuando el producto seleccionado es "Autos" (Anexo02 #25).
-  const objSelectedInsurance = cllInsurance.find((o) => o.value === objWatch[QD.strSfcProduct]);
-  const blnIsAutos = /autos/i.test(objSelectedInsurance?.label ?? '');
+  const blnIsAutos = /autos/i.test(labelFromUiValue(strInsuranceUiValue));
   // Servicio: solo aplica cuando el momento (interacción) es "Asistencias" (Anexo02 #31).
   const blnIsAsistencias = /asistencias/i.test(objWatch[QD.strInteraction] ?? '');
 
   // La matriz filtra por el LABEL de tipo de solicitud y producto (guarda texto, no código).
   const strRequestTypeLabel = cllRequestType.find((o) => o.value === objWatch[QD.strRequestType])?.label ?? '';
-  const strProductLabel = objSelectedInsurance?.label ?? '';
+  const strProductLabel = labelFromUiValue(strInsuranceUiValue);
 
   const cllRowsForProduct = cllMatrizRows.filter((r) =>
     normalizar(leerColumna(r, 'tipoSolicitud')) === normalizar(strRequestTypeLabel) &&
@@ -158,8 +170,9 @@ export default function SeccionDetalleCaso({ form, estado, nombre, identificacio
   }, [cllInsurance, blnIsAutos, objWatch, setValue]);
 
   // Sincroniza cada variable compañera <campo>_desc con la descripción del código guardado.
+  // qd_strSfcProduct_desc NO usa useSyncDesc (ver más arriba) — se sincroniza a mano en el
+  // onChange del picker, porque el código no alcanza para distinguir el duplicado.
   useSyncDesc(form, QD.strChannel, cllChannel);
-  useSyncDesc(form, QD.strSfcProduct, cllInsurance);
   useSyncDesc(form, QD.strSfcReason, cllReason);
   useSyncDesc(form, QD.strAdmission, cllAdmission);
 
@@ -212,11 +225,14 @@ export default function SeccionDetalleCaso({ form, estado, nombre, identificacio
             name={QD.strSfcProduct}
             control={control}
             label="Producto SFC (seguro)"
-            options={cllInsurance}
+            options={cllInsuranceUi}
             rules={{ required: 'Campo requerido' }}
             required
             withSearch
             error={err(QD.strSfcProduct)}
+            toPickerValue={() => strInsuranceUiValue}
+            fromPickerValue={codeFromUiValue}
+            onPickerChange={(strUiValue) => setValue(strSfcProductDescField, labelFromUiValue(strUiValue) as never)}
           />
           <ZdsSelect
             name={QD.strInteraction}

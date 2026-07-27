@@ -181,9 +181,7 @@ export default function FormularioSuperintendencia() {
   return (
     <div className="screen-wrapper">
       <ScreenHeader
-        title="Formulario Superintendencia"
-        subtitle={["SP2-T07 · PAN-09", "Gestión de Quejas Directas", "Rol: Analista SAC"]}
-      />
+        title="Formulario Superintendencia"      />
 
       <div className="screen-content">
         <form onSubmit={(e) => { e.preventDefault(); onSolicitarEnvio(); }} noValidate>

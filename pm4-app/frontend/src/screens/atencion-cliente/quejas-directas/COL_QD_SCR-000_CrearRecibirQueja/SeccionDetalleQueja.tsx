@@ -1,10 +1,10 @@
 import { useEffect } from 'react';
 import type { MutableRefObject } from 'react';
-import type { UseFormReturn } from 'react-hook-form';
+import type { FieldPath, UseFormReturn } from 'react-hook-form';
 import FormSection from '../../../../components/FormSection';
 import DocSupportUploader from '../../../../components/DocSupportUploader';
 import { ZdsInput, ZdsSelect, ZdsRadio, ZdsTextarea } from '../../../../components/fields/ZdsFields';
-import { useCollection, useSyncDesc } from '../../../../core/useCollection';
+import { useCollection, useSyncDesc, toUiOptions, uiValueFromCode, codeFromUiValue, labelFromUiValue } from '../../../../core/useCollection';
 import { QD, QD_COLLECTIONS, OPTIONS_SI_NO, SCR000_ADJUNTO_KEYS as ADJUNTO_KEYS } from '../fields/fields';
 import type { CrearRecibirQuejaFormData } from '../fields/fields';
 
@@ -64,10 +64,21 @@ export default function SeccionDetalleQueja({ form, fileRegistry }: Props) {
   // resolver la instancia de recepción).
   const blnIsDefender = String(objWatch[QD.strFilerRole]) === '4';
 
+  // FLD-323 — Selecciona el seguro: el catálogo (colección 16) repite el mismo código
+  // (codigo_producto_sfc) en más de un registro — p.ej. "Garantía extendida" y
+  // "Copropiedades" comparten el código 104. El picker no puede distinguir cuál de los
+  // dos se clickeó si comparten `value`, así que se le pasan opciones con un value de UI
+  // desambiguado (código + etiqueta, ver toUiOptions); el value real que guarda el form
+  // y se envía a PM4 sigue siendo el código puro (ver ZdsSelect toPickerValue/fromPickerValue
+  // más abajo). El companion `_desc` se sincroniza a mano con la etiqueta elegida —
+  // useSyncDesc no podría distinguir el duplicado (ambos resuelven al mismo código).
+  const cllInsuranceUi = toUiOptions(cllInsurance);
+  const strSfcProductDescField = `${QD.strSfcProduct}_desc` as FieldPath<CrearRecibirQuejaFormData>;
+  const strSfcProductDesc = (objWatch as Record<string, unknown>)[strSfcProductDescField] as string | undefined;
+  const strInsuranceUiValue = uiValueFromCode(cllInsurance, objWatch[QD.strSfcProduct], strSfcProductDesc);
+
   // Placa: solo aplica cuando el producto seleccionado es "Autos" (Anexo02 #25).
-  // El seguro se guarda por código, así que resolvemos el nombre desde el catálogo.
-  const objSelectedInsurance = cllInsurance.find((o) => o.value === objWatch[QD.strSfcProduct]);
-  const blnIsAutos = /autos/i.test(objSelectedInsurance?.label ?? '');
+  const blnIsAutos = /autos/i.test(labelFromUiValue(strInsuranceUiValue));
 
   // Servicio: solo aplica cuando el momento (interacción) es "Asistencias" (Anexo02 #31).
   const blnIsAsistencias = /asistencias/i.test(objWatch[QD.strInteraction] ?? '');
@@ -76,7 +87,7 @@ export default function SeccionDetalleQueja({ form, fileRegistry }: Props) {
   // La matriz filtra por el LABEL de tipo de solicitud y producto (guarda texto,
   // no código); resolvemos esos labels desde sus catálogos.
   const strRequestTypeLabel = cllRequestType.find((o) => o.value === objWatch[QD.strRequestType])?.label ?? '';
-  const strProductLabel = objSelectedInsurance?.label ?? '';
+  const strProductLabel = labelFromUiValue(strInsuranceUiValue);
 
   // Filas de la matriz que corresponden al tipo de solicitud + producto elegidos.
   const cllRowsForProduct = cllMatrizRows.filter((r) =>
@@ -198,7 +209,8 @@ export default function SeccionDetalleQueja({ form, fileRegistry }: Props) {
 
   // Sincroniza cada variable compañera <campo>_desc con la descripción del código guardado.
   // (strInteraction / strServiceProvided se difieren: guardan texto de la matriz, sin código.)
-  useSyncDesc(form, QD.strSfcProduct, cllInsurance);
+  // qd_strSfcProduct_desc NO usa useSyncDesc (ver más arriba) — se sincroniza a mano en el
+  // onChange del picker, porque el código no alcanza para distinguir el duplicado.
   useSyncDesc(form, QD.strProductDetail, cllProductDetail);
   useSyncDesc(form, QD.strSfcReason, cllReason);
   useSyncDesc(form, QD.strAdmission, cllAdmission);
@@ -216,11 +228,14 @@ export default function SeccionDetalleQueja({ form, fileRegistry }: Props) {
           name={QD.strSfcProduct}
           control={control}
           label="Selecciona el seguro"
-          options={cllInsurance}
+          options={cllInsuranceUi}
           rules={{ required: 'Campo requerido' }}
           required
           withSearch
           error={err(QD.strSfcProduct)}
+          toPickerValue={() => strInsuranceUiValue}
+          fromPickerValue={codeFromUiValue}
+          onPickerChange={(strUiValue) => setValue(strSfcProductDescField, labelFromUiValue(strUiValue) as never)}
         />
         {/* FLD-324 — Detalle del producto: variable de back (se deriva del seguro
             elegido vía el effect de CAT-DETALLE-PRODUCTO), oculto por requerimiento. */}
@@ -329,8 +344,8 @@ export default function SeccionDetalleQueja({ form, fileRegistry }: Props) {
           label="Ingresa el detalle"
           rules={{
             required: 'Campo requerido',
-            minLength: { value: 50, message: 'Mínimo 50 caracteres (MSG-000-03)' },
-            maxLength: { value: 2000, message: 'Máximo 2000 caracteres (MSG-000-03)' },
+            minLength: { value: 50, message: 'Mínimo 50 caracteres' },
+            maxLength: { value: 2000, message: 'Máximo 2000 caracteres' },
           }}
           required
           maxLength={2000}

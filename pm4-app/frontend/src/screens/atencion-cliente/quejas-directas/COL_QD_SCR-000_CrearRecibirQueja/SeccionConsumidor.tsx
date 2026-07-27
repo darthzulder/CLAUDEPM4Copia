@@ -113,7 +113,7 @@ export default function SeccionConsumidor({ form }: Props) {
           autoComplete="off"
           rules={{
             required: 'Campo requerido',
-            pattern: { value: /^[A-Za-z0-9]{5,15}$/, message: 'Verifica el formato según el tipo de documento (MSG-000-07)' },
+            pattern: { value: /^[A-Za-z0-9]{5,15}$/, message: 'Verifica el formato según el tipo de documento' },
           }}
           required
           error={err(QD.strIdNumber)}
@@ -182,7 +182,7 @@ export default function SeccionConsumidor({ form }: Props) {
           control={control}
           label="Celular"
           inputType="tel"
-          rules={{ required: 'Campo requerido', pattern: { value: /^\d{10}$/, message: 'Debe contener exactamente 10 dígitos (MSG-000-01)' } }}
+          rules={{ required: 'Campo requerido', pattern: { value: /^\d{10}$/, message: 'Debe contener exactamente 10 dígitos' } }}
           required
           error={err(QD.strPhone)}
         />
@@ -191,7 +191,7 @@ export default function SeccionConsumidor({ form }: Props) {
           control={control}
           label="Correo electrónico"
           inputType="email"
-          rules={{ required: 'Campo requerido', pattern: { value: /^[^\s@]+@[^\s@]+\.[^\s@]+$/, message: 'Formato esperado: usuario@dominio.com (MSG-000-02)' } }}
+          rules={{ required: 'Campo requerido', pattern: { value: /^[^\s@]+@[^\s@]+\.[^\s@]+$/, message: 'Formato esperado: usuario@dominio.com' } }}
           required
           error={err(QD.strEmail)}
         />

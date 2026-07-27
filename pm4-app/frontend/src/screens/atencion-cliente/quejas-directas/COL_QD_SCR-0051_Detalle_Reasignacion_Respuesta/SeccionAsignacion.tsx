@@ -145,7 +145,7 @@ export default function SeccionAsignacion({ form, err, onConfirmarReasignacion, 
             name={QD.strAssigneeUser} control={control} label="Usuario responsable"
             options={cllAreaUsers} withSearch
             disabled={!blnReassignMode || !objWatch[QD.strAssigneeArea]}
-            helpText="Solo usuarios autorizados del área (RUL-0051-02)."
+            helpText="Solo usuarios autorizados del área."
           />
         </div>
         {blnReassignMode && (
@@ -216,7 +216,7 @@ export default function SeccionAsignacion({ form, err, onConfirmarReasignacion, 
                 <div className="form-row cols-1">
                   <ZdsTextarea name={QD.strReassignRemarks} control={control}
                     label="Observaciones (justificación)" maxLength={2000}
-                    helpText="Obligatorio (RUL-0051-04). Queda en el historial para auditoría." />
+                    helpText="Obligatorio. Queda en el historial para auditoría." />
                 </div>
 
                 {/* RUL-0051-04 — bloquea hasta completar área, motivo y observaciones. */}

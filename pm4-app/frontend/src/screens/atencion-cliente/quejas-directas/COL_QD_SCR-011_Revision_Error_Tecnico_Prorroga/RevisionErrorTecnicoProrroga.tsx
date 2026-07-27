@@ -62,9 +62,7 @@ export default function RevisionErrorTecnicoProrroga() {
   return (
     <div className="screen-wrapper">
       <ScreenHeader
-        title="Revisión Error Técnico Prórroga"
-        subtitle={["SP4-T05 · PAN-11", "Gestión de Quejas Directas", "Rol: Analista Técnico"]}
-      />
+        title="Revisión Error Técnico Prórroga"      />
 
       <div className="screen-content">
         <form onSubmit={onAutorizar} noValidate>

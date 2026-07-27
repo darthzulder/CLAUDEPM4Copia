@@ -74,9 +74,7 @@ export default function ErrorFuncionalProrroga() {
   return (
     <div className="screen-wrapper">
       <ScreenHeader
-        title="Corrección Error Funcional Prórroga"
-        subtitle={["SP4-T06 · PAN-12", "Gestión de Quejas Directas", "Rol: Analista SAC / Área Responsable"]}
-      />
+        title="Corrección Error Funcional Prórroga"      />
 
       <div className="screen-content">
         <form onSubmit={onReenviar} noValidate>

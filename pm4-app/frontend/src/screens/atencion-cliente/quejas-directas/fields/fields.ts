@@ -947,6 +947,9 @@ export type DetalleReasignacionRespuestaFormData = Omit<Pick<QdFields,
   // Regulatorios derivados de cat_matriz_motivos al re-editar la clasificación en M3 (SCR-0051).
   // SLA y rol responsable NO se recalculan aquí (decisión de negocio) aunque viajen en el form.
   | typeof QD.strOmbudsmanEscalation | typeof QD.strCompensation | typeof QD.strFraudRelated
+  // Marcación: si la clasificación regulatoria cambia respecto a la original, se fuerza a '2'
+  // para que SCR-009 la traiga preelegida (sin campo visible en SCR-0051, viaja en el payload).
+  | typeof QD.strMarking
   | typeof QD.strReceptionInstance | typeof QD.strReceptionPoint | typeof QD.strAdmission | typeof QD.strControlEntity
   | typeof QD.strComplaintText
   | typeof QD.strSsStatus | typeof QD.strM1M2Attempts | typeof QD.strFilingDate | typeof QD.strSlaAssigned
@@ -981,6 +984,7 @@ export const SCR0051_DEFAULTS: Partial<DetalleReasignacionRespuestaFormData> = {
   [QD.strOmbudsmanEscalation]: '', // Recalculado desde cat_matriz_motivos.escalamientoAdministrador al re-editar el motivo
   [QD.strCompensation]: '',        // Recalculado desde cat_matriz_motivos.resarcimientoAdministrador
   [QD.strFraudRelated]: 'NO',      // Recalculado desde cat_matriz_motivos.relacionFraude (SI/NO)
+  [QD.strMarking]: '',             // '2' si la clasificación regulatoria cambia vs. la original (para SCR-009)
   [QD.strReceptionInstance]: '',
   [QD.strReceptionPoint]: '',
   [QD.strAdmission]: '',

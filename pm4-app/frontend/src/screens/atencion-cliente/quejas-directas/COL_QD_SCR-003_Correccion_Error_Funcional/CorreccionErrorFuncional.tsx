@@ -76,7 +76,6 @@ export default function CorreccionErrorFuncional() {
     <div className="screen-wrapper">
       <ScreenHeader
         title="Corrección Error Funcional M1/M2"
-        subtitle={["SP1-T05", "Gestión de Quejas Directas", "Rol: Gestor de Experiencia"]}
       />
 
       <div className="screen-content">

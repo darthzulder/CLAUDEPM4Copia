@@ -264,11 +264,22 @@ interface SelectProps<TFV extends FieldValues> {
   helpText?: string;
   placeholder?: string;
   withSearch?: boolean;
+  // Traducciones opcionales entre el valor guardado en el form (`field.value`, lo que se
+  // envía a PM4) y el value que necesita mostrar el picker. Usar cuando ambos difieren —
+  // p.ej. catálogos que repiten el mismo código en más de un registro, donde el picker
+  // necesita un value único por opción para poder distinguir cuál se clickeó (ver
+  // "Selecciona el seguro" / "Producto SFC" en Quejas Directas, catálogo id 16).
+  toPickerValue?: (in_strFieldValue: string) => string;
+  fromPickerValue?: (in_strPickerValue: string) => string;
+  // Efecto adicional al elegir una opción, con el value CRUDO del picker (antes de
+  // `fromPickerValue`) — p.ej. sincronizar un `_desc` que no puede resolverse solo con
+  // el código real por la colisión mencionada arriba.
+  onPickerChange?: (in_strPickerValue: string) => void;
 }
 
 export function ZdsSelect<TFV extends FieldValues>({
   control, name, label, options, rules, required, disabled, loading,
-  error, helpText, placeholder, withSearch,
+  error, helpText, placeholder, withSearch, toPickerValue, fromPickerValue, onPickerChange,
 }: SelectProps<TFV>) {
   const zdsOptions = options.map((o) => ({
     value:    o.value,
@@ -291,7 +302,7 @@ export function ZdsSelect<TFV extends FieldValues>({
             id={`field-${String(name)}`}
             name={field.name}
             label={label}
-            model={String(field.value ?? '')}
+            model={toPickerValue ? toPickerValue(String(field.value ?? '')) : String(field.value ?? '')}
             options={allOptions}
             required={required}
             disabled={disabled || loading}
@@ -302,7 +313,11 @@ export function ZdsSelect<TFV extends FieldValues>({
                 ? { 'with-search': true, 'search-autofocus': true, 'search-placeholder': 'Buscar...' }
                 : {}),
             } as Record<string, unknown>)}
-            onChange={(val: string | null) => field.onChange(val ?? '')}
+            onChange={(val: string | null) => {
+              const strPickerVal = val ?? '';
+              onPickerChange?.(strPickerVal);
+              field.onChange(fromPickerValue ? fromPickerValue(strPickerVal) : strPickerVal);
+            }}
             onBlur={() => field.onBlur()}
           />
         )}

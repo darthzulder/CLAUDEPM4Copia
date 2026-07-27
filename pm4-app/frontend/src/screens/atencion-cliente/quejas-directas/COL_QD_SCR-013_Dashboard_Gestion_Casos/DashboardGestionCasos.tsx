@@ -88,9 +88,7 @@ export default function DashboardGestionCasos() {
   return (
     <div className="screen-wrapper">
       <ScreenHeader
-        title="Dashboard — Gestión de Casos"
-        subtitle={['SCR-013 · PAN-13', 'Gestión de Quejas Directas', 'Rol: Supervisor / Jefe SAC']}
-      />
+        title="Dashboard — Gestión de Casos"      />
 
       <div className="screen-content">
         {/* Aviso informativo (mockup: alerta superior). */}

@@ -69,9 +69,7 @@ export default function RevisionErrorTecnicoApi() {
   return (
     <div className="screen-wrapper">
       <ScreenHeader
-        title="Revisión Error Técnico API"
-        subtitle={["SP1-T06", "Gestión de Quejas Directas", "Rol: Analista Técnico"]}
-      />
+        title="Revisión Error Técnico API"      />
 
       <div className="screen-content">
         <form onSubmit={onAutorizar} noValidate>

@@ -75,7 +75,7 @@ export default function SeccionRespuesta({ form, fileRegistry, err, onVistaPrevi
             name={QD.strClientResponse} control={control} label="Respuesta al Cliente (borrador)"
             required maxLength={5000}
             rules={{ required: 'Campo requerido' }} error={err(QD.strClientResponse)}
-            helpText="Este texto irá en la carta PDF de respuesta final (RUL-0051-05)."
+            helpText="Este texto irá en la carta PDF de respuesta final."
           />
         </div>
 
@@ -84,7 +84,7 @@ export default function SeccionRespuesta({ form, fileRegistry, err, onVistaPrevi
             <ZdsTextarea
               name={QD.strActionsTaken} control={control} label="Acciones Tomadas"
               maxLength={2000}
-              helpText="Visible porque la respuesta es a favor del Cliente (RUL-0051-09)."
+              helpText="Visible porque la respuesta es a favor del Cliente."
             />
           </div>
         )}

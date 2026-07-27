@@ -103,6 +103,51 @@ export function useCollection(
   return { options, loading, rawMap, records };
 }
 
+// ─── Desambiguación de catálogos con código repetido ─────────────────────────
+// Algunos catálogos PM4 repiten el mismo `value` (código) en más de un registro —
+// p.ej. colección 16 "Producto SFC": "Garantía extendida" y "Copropiedades" comparten
+// codigo_producto_sfc = "104". El picker (ZrSelect) indexa sus opciones por `value`, así
+// que si dos opciones comparten value, no puede distinguir cuál de las dos se clickeó
+// (ambas terminan resolviendo al mismo registro interno). Se compone un value de UI único
+// (código + etiqueta) para el picker, y se decodifica de vuelta al código real (lo que se
+// guarda en el form / se envía a PM4) y a la etiqueta elegida (para el `_desc` compañero).
+const UI_VALUE_SEP = '::';
+
+export function toUiValue(in_strCode: string, in_strLabel: string): string {
+  return `${in_strCode}${UI_VALUE_SEP}${in_strLabel}`;
+}
+
+// Código real a partir de un value de UI compuesto.
+export function codeFromUiValue(in_strUiValue: string | undefined): string {
+  return String(in_strUiValue ?? '').split(UI_VALUE_SEP)[0] ?? '';
+}
+
+// Etiqueta elegida (para él `_desc` compañero) a partir de un value de UI compuesto.
+export function labelFromUiValue(in_strUiValue: string | undefined): string {
+  return String(in_strUiValue ?? '').split(UI_VALUE_SEP).slice(1).join(UI_VALUE_SEP);
+}
+
+// Opciones con value de UI desambiguado — usar como `options` del picker cuando el
+// catálogo puede repetir el mismo código en más de un registro.
+export function toUiOptions(in_lstOptions: readonly CollectionOption[]): CollectionOption[] {
+  return in_lstOptions.map((o) => ({ value: toUiValue(o.value, o.label), label: o.label }));
+}
+
+// Reconstruye el value de UI a partir del código + descripción ya guardados en el form
+// (p.ej. al precargar `task.data`), para preseleccionar el registro correcto entre
+// duplicados. Sin `_desc` (dato guardado antes de este fix) cae al primer registro que
+// tenga ese código — mismo comportamiento que había antes de desambiguar.
+export function uiValueFromCode(
+  in_lstOptions: readonly CollectionOption[],
+  in_strCode: string | undefined,
+  in_strDesc: string | undefined,
+): string {
+  if (!in_strCode) return '';
+  const objMatch = (in_strDesc ? in_lstOptions.find((o) => o.value === in_strCode && o.label === in_strDesc) : undefined)
+    ?? in_lstOptions.find((o) => o.value === in_strCode);
+  return objMatch ? toUiValue(objMatch.value, objMatch.label) : '';
+}
+
 // Resuelve la DESCRIPCIÓN (label) de un código contra las opciones de una colección.
 // Fuente única que reemplaza las copias locales de desc()/descOpt() en las pantallas.
 // Fallback al propio código si no hay match; '—' cuando no hay código (para render de

@@ -346,11 +346,6 @@ export default function CrearRecibirQueja() {
       )}
       <ScreenHeader
         title="Radicación de PQRS"
-        subtitle={[
-          'SCR-000 · P01-T00',
-          'Gestión de Quejas Directas.',
-          'Atención al Consumidor Financiero.',
-        ]}
       />
 
       <div className="screen-content">
@@ -407,7 +402,7 @@ export default function CrearRecibirQueja() {
             </div>
             {isSubmitted && !objWatch[QD.blnDataAuth] && (
               <ZrAlert config="alert" {...({ 'hide-close': true } as object)}>
-                Debe aceptar el tratamiento de datos personales para poder radicar su solicitud. (MSG-000-04)
+                Debe aceptar el tratamiento de datos personales para poder radicar su solicitud.
               </ZrAlert>
             )}
             {/* FLD-336 — validación de seguridad: reCAPTCHA v2 (checkbox) en un modal

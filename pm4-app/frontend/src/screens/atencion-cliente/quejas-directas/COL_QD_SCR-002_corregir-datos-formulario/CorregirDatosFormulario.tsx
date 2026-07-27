@@ -106,9 +106,7 @@ export default function CorregirDatosFormulario() {
   return (
     <div className="screen-wrapper">
       <ScreenHeader
-        title="Corrección de Datos"
-        subtitle={['SCR-002 · PAN-02 · P01-T07', 'Gestión de Quejas Directas', 'Rol: Gestor de Experiencia']}
-      />
+        title="Corrección de Datos"      />
 
       <div className="screen-content">
         <InfoBar items={[
@@ -124,7 +122,7 @@ export default function CorregirDatosFormulario() {
           {!blnCanSubmit ? (
             <ZrAlert config="negative" {...({ 'hide-close': true } as object)}>
               <strong>{intPendingErrors} error{intPendingErrors !== 1 ? 'es' : ''} de validación {intPendingErrors !== 1 ? 'detectados' : 'detectado'}.</strong>{' '}
-              Corrija cada campo resaltado. El botón "Guardar Correcciones" se habilitará únicamente cuando el contador de errores llegue a 0 (RUL-002-01).
+              Corrija cada campo resaltado. El botón "Guardar Correcciones" se habilitará únicamente cuando el contador de errores llegue a 0.
             </ZrAlert>
           ) : (
             <ZrAlert config="positive" {...({ 'hide-close': true } as object)}>

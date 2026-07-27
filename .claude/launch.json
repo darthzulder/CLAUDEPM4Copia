@@ -6,6 +6,12 @@
       "runtimeExecutable": "npm",
       "runtimeArgs": ["run", "dev", "--workspace=frontend", "--prefix", "pm4-app", "--", "--port", "5176", "--strictPort"],
       "port": 5176
+    },
+    {
+      "name": "pm4-backend",
+      "runtimeExecutable": "npm",
+      "runtimeArgs": ["run", "dev", "--workspace=backend", "--prefix", "pm4-app"],
+      "port": 3001
     }
   ]
 }

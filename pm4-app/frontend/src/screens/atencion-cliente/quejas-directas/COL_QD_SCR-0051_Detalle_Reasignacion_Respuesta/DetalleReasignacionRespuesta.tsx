@@ -23,6 +23,13 @@ import { buildRespuestaFinalHtml, fillRespuestaFinalHtml } from './respuestaFina
 const EMAIL_TPL_PROCEDE_PREFIX = '09';
 const EMAIL_TPL_NO_PROCEDE_PREFIX = '10';
 
+// Campos que componen la Clasificación Regulatoria re-editable en M3 (S2 de SeccionDetalleCaso).
+// Si el analista cambia cualquiera de ellos, la marcación (qd_strMarking) pasa a '2' para que
+// SCR-009 traiga la Marcación preelegida con ese valor.
+const CLASSIFICATION_FIELDS = [
+  QD.strSfcProduct, QD.strInteraction, QD.strServiceProvided, QD.strPlate, QD.strSfcReason,
+] as const;
+
 export default function DetalleReasignacionRespuesta() {
   const { task, loading, error, submitting, completeTask, saveDraft } = useTask();
   const fileRegistry = useRef(new Map<string, File>());
@@ -30,14 +37,38 @@ export default function DetalleReasignacionRespuesta() {
   const [blnShowPreview, setBlnShowPreview] = useState(false);
 
   const form = useForm<DetalleReasignacionRespuestaFormData>({ defaultValues: DEFAULTS });
-  const { watch, handleSubmit, reset, formState: { errors, isSubmitted } } = form;
+  const { watch, handleSubmit, reset, setValue, formState: { errors, isSubmitted } } = form;
   // Tomamos una foto de los valores actuales del formulario.
   const objWatch = watch();
 
+  // Foto de la clasificación original (la que trae la tarea) y de la marcación original,
+  // para comparar contra la selección actual. Se fija al precargar y no vuelve a cambiar.
+  const objOriginal = useRef<{ classification: string[]; marking: string } | null>(null);
+
   // Precargamos el formulario con los datos que llegan de la tarea.
   useEffect(() => {
-    if (task?.data) reset({ ...DEFAULTS, ...(task.data as Partial<DetalleReasignacionRespuestaFormData>) });
+    if (!task?.data) return;
+    const objData = task.data as Partial<DetalleReasignacionRespuestaFormData>;
+    reset({ ...DEFAULTS, ...objData });
+    objOriginal.current = {
+      classification: CLASSIFICATION_FIELDS.map((strField) => String(objData[strField] ?? '')),
+      marking: String(objData[QD.strMarking] ?? ''),
+    };
   }, [task, reset]);
+
+  // Marcación derivada: si la clasificación regulatoria cambió respecto a la original,
+  // qd_strMarking = '2' (para que SCR-009 traiga la Marcación preelegida con ese valor);
+  // si vuelve a coincidir, restauramos la marcación original.
+  useEffect(() => {
+    if (!objOriginal.current) return;
+    const blnChanged = CLASSIFICATION_FIELDS.some(
+      (strField, intIdx) => String(objWatch[strField] ?? '') !== objOriginal.current!.classification[intIdx],
+    );
+    const strTarget = blnChanged ? '2' : objOriginal.current.marking;
+    if (String(objWatch[QD.strMarking] ?? '') !== strTarget) {
+      setValue(QD.strMarking, strTarget);
+    }
+  }, [objWatch, setValue]);
 
   // Atajo para leer el mensaje de error de un campo (solo tras el submit).
   const err = (in_strName: keyof DetalleReasignacionRespuestaFormData): string | undefined => {
@@ -162,7 +193,6 @@ export default function DetalleReasignacionRespuesta() {
     <div className="screen-wrapper">
       <ScreenHeader
         title="Detalle / Reasignación / Respuesta"
-        subtitle={["SP2 · PAN-05.1", "Gestión de Quejas Directas", "Rol: Analista SAC / Área Responsable"]}
       />
 
       <div className="screen-content">

@@ -142,9 +142,7 @@ export default function RevisionRespuestaSac() {
   return (
     <div className="screen-wrapper">
       <ScreenHeader
-        title="Revisión Respuesta SAC"
-        subtitle={["SP2-T04 · PAN-08", "Gestión de Quejas Directas", "Rol: Analista SAC"]}
-      />
+        title="Revisión Respuesta SAC"      />
 
       <div className="screen-content">
         {/* RUL-008-02 / MSG-008-02 — banner SLA crítico. */}

@@ -200,9 +200,7 @@ export default function RespuestaAreaResponsable() {
   return (
     <div className="screen-wrapper">
       <ScreenHeader
-        title="Respuesta del Área Responsable"
-        subtitle={["SP2-T02 · PAN-05.2", "Gestión de Quejas Directas", "Rol: Área Responsable"]}
-      />
+        title="Respuesta del Área Responsable"      />
 
       <div className="screen-content">
         <form onSubmit={onEnviar} noValidate>
