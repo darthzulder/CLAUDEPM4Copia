@@ -50,6 +50,12 @@ export default function DetalleReasignacionRespuesta() {
   const intSla = Number.parseInt(objWatch[QD.strSlaAssigned] ?? '', 10);
   const blnSlaCritical = Number.isFinite(intSla) && intSla <= SLA_UMBRAL_PRORROGA;
 
+  // Días restantes del SLA: PM4 los expone en `timeLeft` (nivel raíz de la tarea),
+  // no es un campo del formulario. Puede llegar como number o string.
+  const varTimeLeft = (task?.data as Record<string, unknown> | undefined)?.timeLeft;
+  const intTimeLeft = Number.parseInt(String(varTimeLeft ?? ''), 10);
+  const blnHasTimeLeft = Number.isFinite(intTimeLeft);
+
   // Datos del consumidor derivados de los campos granulares producidos por SCR-000.
   const strName = (objWatch[QD.strCompanyName] || `${objWatch[QD.strFirstName] ?? ''} ${objWatch[QD.strLastName] ?? ''}`).trim();
   // Mostramos el texto del tipo de identificación (companion _desc) en vez del código; fallback al código.
@@ -162,7 +168,20 @@ export default function DetalleReasignacionRespuesta() {
       <div className="screen-content">
         <InfoBar items={[
           { label: 'Case', value: objWatch[QD.strBpmCaseId] || '—' },
-          { label: 'SLA', value: objWatch[QD.strSlaAssigned] ? `${objWatch[QD.strSlaAssigned]} días hábiles` : '—' },
+          {
+            label: 'SLA',
+            value: objWatch[QD.strSlaAssigned] ? (
+              <>
+                {objWatch[QD.strSlaAssigned]} días hábiles
+                {blnHasTimeLeft && (
+                  <>
+                    <br />
+                    <span className="Capt-12">({intTimeLeft} días restantes)</span>
+                  </>
+                )}
+              </>
+            ) : '—',
+          },
           {
             label: 'Estado',
             value: (
