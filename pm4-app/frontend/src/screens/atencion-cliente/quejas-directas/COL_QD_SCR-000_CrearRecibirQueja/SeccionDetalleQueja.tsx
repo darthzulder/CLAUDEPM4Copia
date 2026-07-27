@@ -1,6 +1,6 @@
 import { useEffect } from 'react';
 import type { MutableRefObject } from 'react';
-import type { FieldPath, UseFormReturn } from 'react-hook-form';
+import type { UseFormReturn } from 'react-hook-form';
 import FormSection from '../../../../components/FormSection';
 import DocSupportUploader from '../../../../components/DocSupportUploader';
 import { ZdsInput, ZdsSelect, ZdsRadio, ZdsTextarea } from '../../../../components/fields/ZdsFields';
@@ -206,9 +206,6 @@ export default function SeccionDetalleQueja({ form, fileRegistry }: Props) {
   useSyncDesc(form, QD.strTutela, cllGuardianship);
   useSyncDesc(form, QD.strExpressComplaint, cllExpressComplaint);
 
-  // Nombre de la variable compañera de descripción para el input read-only de detalle de producto.
-  const strProductDetailDesc = `${QD.strProductDetail}_desc` as FieldPath<CrearRecibirQuejaFormData>;
-
   // Atajo para leer el mensaje de error de un campo.
   const err = (in_strName: keyof CrearRecibirQuejaFormData) => errors[in_strName]?.message;
 
@@ -225,23 +222,24 @@ export default function SeccionDetalleQueja({ form, fileRegistry }: Props) {
           withSearch
           error={err(QD.strSfcProduct)}
         />
-        <ZdsInput
-          name={strProductDetailDesc}
-          control={control}
-          label="Detalle del producto"
-          readOnly
-          helpText="Asignado por el sistema (CAT-DETALLE-PRODUCTO)."
-        />
+        {/* FLD-324 — Detalle del producto: variable de back (se deriva del seguro
+            elegido vía el effect de CAT-DETALLE-PRODUCTO), oculto por requerimiento. */}
+        <div />
       </div>
 
-      {/* Anexo02 #25 — placa: solo si el producto seleccionado es "Autos" */}
+      {/* Anexo02 #25 — placa: solo si el producto seleccionado es "Autos".
+          Formato: 3 letras + espacio + 3 números (sin guiones), p.ej. "ABC 123". */}
       {blnIsAutos && (
         <div className="form-row cols-2">
           <ZdsInput
             name={QD.strPlate}
             control={control}
             label="Ingrese la placa"
-            rules={{ required: 'Campo requerido' }}
+            placeholder="Ej. ABC 123"
+            rules={{
+              required: 'Campo requerido',
+              pattern: { value: /^[A-Za-z]{3} ?[0-9]{3}$/, message: 'Formato esperado: 3 letras y 3 números, p.ej. ABC 123' },
+            }}
             required
             error={err(QD.strPlate)}
           />
@@ -280,6 +278,9 @@ export default function SeccionDetalleQueja({ form, fileRegistry }: Props) {
         )}
       </div>
 
+      {/* Escalamiento al Defensor del Consumidor (qd_strOmbudsmanEscalation): variable
+          de back (se deriva de cat_matriz_motivos.escalamientoAdministrador vía el effect),
+          oculto por requerimiento. */}
       <div className="form-row cols-2">
         <ZdsRadio
           name={QD.strReply}
@@ -291,13 +292,7 @@ export default function SeccionDetalleQueja({ form, fileRegistry }: Props) {
           inline
           error={err(QD.strReply)}
         />
-        <ZdsInput
-          name={QD.strOmbudsmanEscalation}
-          control={control}
-          label="Escalamiento al Defensor del Consumidor"
-          readOnly
-          helpText="Asignado por el sistema (cat_matriz_motivos.escalamientoAdministrador, según el motivo elegido)."
-        />
+        <div />
       </div>
 
       {/* RUL-000-12 — argumento visible solo si réplica = Sí */}

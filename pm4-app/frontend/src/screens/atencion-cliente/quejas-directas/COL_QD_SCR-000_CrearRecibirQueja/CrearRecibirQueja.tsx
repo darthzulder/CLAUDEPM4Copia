@@ -1,6 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
 import { useForm } from 'react-hook-form';
-import type { FieldPath } from 'react-hook-form';
 import { useTask } from '../../../../core/useTask';
 import { scrollToFirstError } from '../../../../core/scrollToFirstError';
 import ScreenHeader from '../../../../components/ScreenHeader';
@@ -97,10 +96,6 @@ export default function CrearRecibirQueja() {
   useSyncDesc(form, QD.strReceptionPoint, cllReceptionPoint);
   useSyncDesc(form, QD.strReceptionInstance, cllInstance);
   useSyncDesc(form, QD.strAlliance, cllAlliance);
-
-  // Nombre de la variable compañera de descripción para inputs read-only (el campo base
-  // guarda el código; se muestra el _desc legible).
-  const strReceptionInstanceDesc = `${QD.strReceptionInstance}_desc` as FieldPath<CrearRecibirQuejaFormData>;
 
   // Empleado Zurich = rol código '3' (ver RUL-000-01). Solo este rol ve el campo Alianza.
   const blnIsZurichEmp = String(objWatch[QD.strFilerRole]) === '3';
@@ -384,15 +379,17 @@ export default function CrearRecibirQueja() {
                   del punto de recepción elegido (ver CHANNEL_BY_RECEPTION_POINT). */}
               <div />
             </div>
+            {/* Instancia de Recepción (qd_strReceptionInstance): variable de back
+                (se asigna automáticamente según el rol vía el effect de RUL-000-01),
+                oculta por requerimiento. */}
             <div className="form-row cols-2">
-              <ZdsInput name={strReceptionInstanceDesc} control={control} label="Instancia de Recepción" readOnly
-                helpText="Asignada automáticamente según el rol (CAT-INSTANCIA)." />
               {blnIsZurichEmp ? (
                 <ZdsSelect name={QD.strAlliance} control={control} label="Alianza"
                   options={cllAlliance} error={err(QD.strAlliance)} />
               ) : (
                 <div />
               )}
+              <div />
             </div>
           </FormSection>
 
@@ -420,13 +417,6 @@ export default function CrearRecibirQueja() {
                 {strCaptchaError}
               </ZrAlert>
             )}
-            <div className="form-row cols-2">
-              <ZdsInput name={QD.strCcEmail} control={control} label="¿Quieres enviar copia de la respuesta a otro correo?"
-                inputType="email"
-                rules={{ pattern: { value: /^[^\s@]+@[^\s@]+\.[^\s@]+$/, message: 'Formato esperado: usuario@dominio.com' } }}
-                error={err(QD.strCcEmail)} />
-              <div />
-            </div>
           </FormSection>
 
           {/* ── S5: Estado ante la SFC (post-radicación) ── */}
@@ -455,6 +445,16 @@ export default function CrearRecibirQueja() {
               </div>
             </FormSection>
           )}
+
+          {/* Copia de la respuesta a otro correo — fuera del formulario de
+              autorización y envío, justo encima de los botones. */}
+          <div className="form-row cols-2">
+            <ZdsInput name={QD.strCcEmail} control={control} label="¿Quieres enviar copia de la respuesta a otro correo?"
+              inputType="email"
+              rules={{ pattern: { value: /^[^\s@]+@[^\s@]+\.[^\s@]+$/, message: 'Formato esperado: usuario@dominio.com' } }}
+              error={err(QD.strCcEmail)} />
+            <div />
+          </div>
 
           {/* ── Acciones ── */}
           <ActionBar>
