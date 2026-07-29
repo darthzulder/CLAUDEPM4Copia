@@ -511,6 +511,20 @@ export const SCR000_WEB_ENTRY_EVENT_ID = import.meta.env.WEB_ENTRY_EVENT_ID || '
 // https://cozurich.dev.cloud.processmaker.net/designer/scripts/70/builder
 export const SCR000_SIMILAR_CASES_SCRIPT_ID = Number(import.meta.env.VITE_SIMILAR_CASES_SCRIPT_ID || 70);
 
+// Componentes fijos del código SFC (qd_strSfcCode), mismos valores que
+// SCR009_DEFAULT_ENTITY_TYPE/CODE (Excel Cierre #46/#47): tipo de entidad (13,
+// Zurich) + código de entidad (9). El código completo solo puede construirse
+// DESPUÉS de crear el caso, porque su tercer componente es el número de queja
+// (caso BPM) que PM4 asigna al radicar — el mismo valor que luego persiste
+// como qd_strBpmCaseId.
+export const SCR000_SFC_TIPO_ENTIDAD = '13';
+export const SCR000_SFC_ENTIDAD_COD = '9';
+
+// codigo_queja = tipo_entidad(13) + entidad_cod(9) + numero de queja (caso BPM).
+export function buildSfcCode(in_numBpmCaseId: number | string): string {
+  return `${SCR000_SFC_TIPO_ENTIDAD}${SCR000_SFC_ENTIDAD_COD}${in_numBpmCaseId}`;
+}
+
 export const SCR000_ADJUNTO_KEYS = [
   QD.strAttach01, QD.strAttach02, QD.strAttach03, QD.strAttach04, QD.strAttach05,
 ] as const;

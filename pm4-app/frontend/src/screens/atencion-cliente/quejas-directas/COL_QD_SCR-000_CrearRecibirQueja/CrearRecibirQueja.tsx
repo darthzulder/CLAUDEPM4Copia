@@ -16,6 +16,7 @@ import {
   SCR000_DEFAULTS as DEFAULTS, SCR000_ADJUNTO_KEYS as ADJUNTO_KEYS,
   SCR000_WEB_ENTRY_PROCESS_ID as WEB_ENTRY_PROCESS_ID, SCR000_WEB_ENTRY_EVENT_ID as WEB_ENTRY_EVENT_ID,
   SCR000_SIMILAR_CASES_SCRIPT_ID as SIMILAR_CASES_SCRIPT_ID,
+  buildSfcCode,
 } from '../fields/fields';
 import type { CrearRecibirQuejaFormData } from '../fields/fields';
 import SeccionConsumidor from './SeccionConsumidor';
@@ -224,8 +225,13 @@ export default function CrearRecibirQueja() {
           { params: { event: WEB_ENTRY_EVENT_ID } },
         );
         const intNewRequestId = (objResult.data?.request_id ?? objResult.data?.id) as number | undefined;
-        if (intNewRequestId && fileRegistry.current.size > 0) {
-          await uploadFiles(intNewRequestId);
+        if (intNewRequestId) {
+          // qd_strSfcCode solo puede construirse tras crear el caso: su tercer
+          // componente es el número de queja (caso BPM) que PM4 acaba de asignar.
+          await pm4.put(`/requests/${intNewRequestId}`, {
+            data: { [QD.strSfcCode]: buildSfcCode(intNewRequestId) },
+          });
+          if (fileRegistry.current.size > 0) await uploadFiles(intNewRequestId);
         }
         setBlnSent(true);
       } else {
@@ -233,7 +239,10 @@ export default function CrearRecibirQueja() {
         if (intRequestId && fileRegistry.current.size > 0) {
           await uploadFiles(intRequestId);
         }
-        await completeTask(in_objData as unknown as Record<string, unknown>);
+        await completeTask({
+          ...in_objData,
+          ...(intRequestId ? { [QD.strSfcCode]: buildSfcCode(intRequestId) } : {}),
+        } as unknown as Record<string, unknown>);
         setBlnSent(true);
       }
     } catch (exc) {
