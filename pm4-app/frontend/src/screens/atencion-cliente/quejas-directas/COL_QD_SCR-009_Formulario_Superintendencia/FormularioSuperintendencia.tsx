@@ -87,10 +87,10 @@ export default function FormularioSuperintendencia() {
     // el valor del back si viene; si no, se inyectan con su default para que
     // igual viajen. El adjunto de respuesta final se fuerza siempre a "SI"
     // (el PDF lo genera el proceso).
-    // Fecha de Actualización y Fecha de Cierre se autocompletan con la fecha de
-    // hoy (YYYY-MM-DD) y son idénticas; en la sección de cierre son readOnly, así
-    // que el gestor no puede modificarlas.
-    const strHoyISO = new Date().toISOString().slice(0, 10);
+    // Fecha de Actualización y Fecha de Cierre se autocompletan con la fecha y hora
+    // actuales (YYYY-MM-DDThh:mm:ss, formato SFC) y son idénticas; en la sección de
+    // cierre son readOnly, así que el gestor no puede modificarlas.
+    const strHoyISO = new Date().toISOString().slice(0, 19);
     reset({
       ...DEFAULTS,
       ...objData,
