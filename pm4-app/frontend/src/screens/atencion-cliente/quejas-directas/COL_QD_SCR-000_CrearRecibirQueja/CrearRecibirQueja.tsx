@@ -293,10 +293,10 @@ export default function CrearRecibirQueja() {
     // ya había radicado la misma queja (réplica "Sí") pero el chequeo de casos similares
     // NO disparó la advertencia (0 casos abiertos coincidentes) → SAC debe escalarla a mano.
     const blnReconsiderationEscalation = blnIsReply && intSimilarCount === 0;
-    // Marcación (qd_strMarking = '1'): réplica "Sí" Y el chequeo de casos similares SÍ
-    // confirmó al menos un caso activo coincidente (duplicidad confirmada). Complemento
-    // exacto de blnReconsiderationEscalation (ver comentario de QD.strMarking en fields.ts).
-    const strMarking = blnIsReply && intSimilarCount > 0 ? '1' : objData[QD.strMarking];
+    // Marcación (qd_strMarking = '1'): réplica "Sí" Y el chequeo de casos similares NO
+    // encontró coincidencias (el detector automático no "atrapó" la duplicidad) → misma
+    // condición que blnReconsiderationEscalation, para que quede marcada y SAC la revise a mano.
+    const strMarking = blnIsReply && intSimilarCount === 0 ? '1' : objData[QD.strMarking];
     await sendToPm4({
       ...objData,
       [QD.blnCaptcha]: true,

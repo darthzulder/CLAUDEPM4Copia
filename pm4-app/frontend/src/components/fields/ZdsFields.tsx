@@ -11,6 +11,7 @@ import { ZrRadioSelect }      from '@zurich/web-components/react/radio-select';
 import { ZrSegmentedControl } from '@zurich/web-components/react/segmented-control';
 import { ZrStepper }         from '@zurich/web-components/react/stepper';
 import { ZrCalendar }        from '@zurich/web-components/react/calendar';
+import { findDuplicateAttachment } from '../../core/fileHash';
 
 // ─── Re-exports: raw Zurich DS components (facade única para toda la app) ───
 export { ZrTextInput };
@@ -496,6 +497,7 @@ interface FileInputProps<TFV extends FieldValues> {
   allowedExtensions?: string[];
   maxSizeMb?: number;
   errorMessage?: string;
+  duplicateMessage?: string;
   droppable?: boolean;
 }
 
@@ -511,11 +513,16 @@ export function ZdsFileInput<TFV extends FieldValues>({
   allowedExtensions = ['pdf', 'doc', 'docx', 'jpg', 'jpeg', 'png'],
   maxSizeMb = 5,
   errorMessage,
+  duplicateMessage,
   droppable = true,
 }: FileInputProps<TFV>) {
   // Mensaje de error a mostrar: el recibido o uno construido por defecto.
   const strDefaultError = `Solo se permiten archivos ${allowedExtensions.join(', ')}, máx ${maxSizeMb} MB`;
   const strEffectiveError = errorMessage || strDefaultError;
+  // MSG duplicado: PM4/Smart Supervision rechaza subir un binario ya existente en el
+  // request aunque el archivo tenga otro nombre — se detecta por hash (ver core/fileHash).
+  const strEffectiveDuplicateError = duplicateMessage
+    || 'Este archivo ya fue adjuntado (el contenido es idéntico a otro documento, aunque el nombre sea distinto)';
 
   return (
     <div style={{ flexGrow: 1, display: 'flex', flexDirection: 'column' }}>
@@ -528,13 +535,13 @@ export function ZdsFileInput<TFV extends FieldValues>({
             label={label}
             model={(field.value as string) || null}
             droppable={droppable}
-            onChange={(file: File | string | null, event?: any) => {
+            onChange={async (file: File | string | null, event?: any) => {
               if (file && typeof file !== 'string') {
                 const fileName = event?.target?.fileName || file.name || '';
                 const ext = fileName.split('.').pop()?.toLowerCase() || '';
                 const maxSize = maxSizeMb * 1024 * 1024;
 
-                if (!allowedExtensions.includes(ext) || file.size > maxSize) {
+                const rejectFile = (in_strMessage: string) => {
                   const target = event?.target as any;
                   if (target) {
                     target._fileName = null;
@@ -547,24 +554,39 @@ export function ZdsFileInput<TFV extends FieldValues>({
                   }
                   setError(name, {
                     type: 'manual',
-                    message: strEffectiveError,
+                    message: in_strMessage,
                   } as any);
                   setValue(name, '' as any);
                   if (fileRegistry) {
                     fileRegistry.current.delete(name as string);
                   }
-                } else {
-                  clearErrors(name);
-                  setValue(name, fileName as any);
-                  if (fileRegistry) {
-                    // ZrFileInput entrega un Blob genérico (sin .name) en `file`;
-                    // sin nombre real, FormData lo sube como "blob" y PM4 no
-                    // puede resolver la extensión → 500 al guardar el media.
-                    const namedFile = file.name === fileName
-                      ? file
-                      : new File([file], fileName, { type: file.type });
-                    fileRegistry.current.set(name as string, namedFile);
+                };
+
+                if (!allowedExtensions.includes(ext) || file.size > maxSize) {
+                  rejectFile(strEffectiveError);
+                  return;
+                }
+
+                // ZrFileInput entrega un Blob genérico (sin .name) en `file`; sin nombre
+                // real, FormData lo sube como "blob" y PM4 no puede resolver la extensión.
+                const namedFile = file.name === fileName
+                  ? file
+                  : new File([file], fileName, { type: file.type });
+
+                // Duplicado por CONTENIDO (no por nombre) contra el resto de adjuntos ya
+                // registrados — Smart Supervision rechaza el binario repetido al guardarlo.
+                if (fileRegistry) {
+                  const strDuplicateKey = await findDuplicateAttachment(namedFile, fileRegistry.current, name as string);
+                  if (strDuplicateKey) {
+                    rejectFile(strEffectiveDuplicateError);
+                    return;
                   }
+                }
+
+                clearErrors(name);
+                setValue(name, fileName as any);
+                if (fileRegistry) {
+                  fileRegistry.current.set(name as string, namedFile);
                 }
               } else {
                 clearErrors(name);
