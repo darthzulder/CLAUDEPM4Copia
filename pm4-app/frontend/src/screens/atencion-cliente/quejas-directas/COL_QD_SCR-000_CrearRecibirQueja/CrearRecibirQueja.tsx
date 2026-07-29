@@ -287,17 +287,22 @@ export default function CrearRecibirQueja() {
       setBlnSending(false);
       return;
     }
+    const intSimilarCount = Number(objPendingSimilar[QD.intCountSimilarCases] ?? 0);
+    const blnIsReply = objData[QD.strReply] === 'SI';
     // Escalamiento de reconsideración a SAC (valor booleano): el radicador declaró que
     // ya había radicado la misma queja (réplica "Sí") pero el chequeo de casos similares
     // NO disparó la advertencia (0 casos abiertos coincidentes) → SAC debe escalarla a mano.
-    const blnReconsiderationEscalation =
-      objData[QD.strReply] === 'SI' &&
-      Number(objPendingSimilar[QD.intCountSimilarCases] ?? 0) === 0;
+    const blnReconsiderationEscalation = blnIsReply && intSimilarCount === 0;
+    // Marcación (qd_strMarking = '1'): réplica "Sí" Y el chequeo de casos similares SÍ
+    // confirmó al menos un caso activo coincidente (duplicidad confirmada). Complemento
+    // exacto de blnReconsiderationEscalation (ver comentario de QD.strMarking en fields.ts).
+    const strMarking = blnIsReply && intSimilarCount > 0 ? '1' : objData[QD.strMarking];
     await sendToPm4({
       ...objData,
       [QD.blnCaptcha]: true,
       ...objPendingSimilar,
       [QD.strReconsiderationSacEscalation]: blnReconsiderationEscalation,
+      [QD.strMarking]: strMarking,
     });
     // En éxito, sendToPm4 pone blnSent=true y se muestra la pantalla de confirmación;
     // si falló, quitamos el overlay para que el usuario vea el form y el error.

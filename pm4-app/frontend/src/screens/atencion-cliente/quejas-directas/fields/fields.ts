@@ -101,6 +101,11 @@ export const QD = {
   // (qd_intCountSimilarCases === 0). Es decir, el cliente declara una reconsideración pero el
   // detector automático de casos abiertos no encontró coincidencia → SAC debe escalarla a mano.
   strReconsiderationSacEscalation: 'qd_strReconsiderationSACEscalation',
+  // Derivada al radicar en SCR-000 (complemento de strReconsiderationSacEscalation): '1' solo
+  // si el radicador marcó "Sí" en réplica (qd_strReply === 'SI') Y el chequeo de casos similares
+  // SÍ confirmó al menos un caso activo coincidente (qd_intCountSimilarCases > 0), es decir la
+  // duplicidad quedó confirmada por el detector automático. En SCR-0051 este mismo campo se
+  // recalcula a '2' si el analista cambia la clasificación regulatoria (ver DetalleReasignacionRespuesta.tsx).
 
   // ── SCR-002 · Corrección de Datos (encabezado + metadata) ─────────────────
   strBpmCaseId: 'qd_strBpmCaseId',                     // antes qd_idCasoBPM
@@ -551,6 +556,8 @@ export type CrearRecibirQuejaFormData = Pick<QdFields,
   | typeof QD.intCountSimilarCases | typeof QD.arrSimilarCases
   // Derivada al radicar (réplica "Sí" + sin advertencia de casos similares).
   | typeof QD.strReconsiderationSacEscalation
+  // Derivada al radicar (réplica "Sí" + casos similares confirmados) — ver QD.strMarking.
+  | typeof QD.strMarking
 >>;
 
 export const SCR000_DEFAULTS = {
