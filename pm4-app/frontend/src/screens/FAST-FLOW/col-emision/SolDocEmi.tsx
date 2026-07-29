@@ -9,7 +9,7 @@ import HelpModal from '../../../components/HelpModal';
 import PreviewModal from '../../../components/PreviewModal';
 import DocList from '../../../components/DocList';
 import DocItem from '../../../components/DocItem';
-import pm4 from '../../../api/pm4Client';
+import { uploadAttachments, attachIdsToPayload } from '../../../core/attachments';
 import {
   type SolDocEmiData,
   PRODUCTO_DOC_DEFS,
@@ -85,18 +85,16 @@ export default function SolDocEmi() {
     setStrValidationError(null);
 
     try {
-      // Subimos cada archivo al request antes de completar la tarea
-      if (intRequestId) {
-        for (const objDoc of lstDocs) {
-          const objFile = dicRowStates[objDoc.key]?.file;
-          if (!objFile) continue;
-          const objFormData = new FormData();
-          objFormData.append('file', objFile);
-          await pm4.post(`/requests/${intRequestId}/files?data_name=${objDoc.key}`, objFormData);
-        }
-      }
+      // Subimos cada archivo al request antes de completar la tarea, y guardamos
+      // el fileUploadId de cada uno como <key>_id para poder referenciarlo con precisión.
+      const mapFiles = new Map<string, File>();
+      lstDocs.forEach((objDoc) => {
+        const objFile = dicRowStates[objDoc.key]?.file;
+        if (objFile) mapFiles.set(objDoc.key, objFile);
+      });
+      const dicUploadedIds = intRequestId && mapFiles.size > 0 ? await uploadAttachments(intRequestId, mapFiles) : {};
       const { _user: _u, _request: _r, ...objTaskData } = (task?.data ?? {}) as Record<string, unknown>;
-      await completeTask({ ...objTaskData });
+      await completeTask({ ...objTaskData, ...attachIdsToPayload(dicUploadedIds) });
       setBlnSent(true);
     } catch (excError) {
       console.error('[SolDocEmi] Error al enviar:', excError);

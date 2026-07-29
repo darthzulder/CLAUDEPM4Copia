@@ -11,6 +11,7 @@ import {
 } from '../../../../components/fields/ZdsFields';
 import pm4 from '../../../../api/pm4Client';
 import { useCollection, useSyncDesc } from '../../../../core/useCollection';
+import { uploadAttachments, attachIdsToPayload } from '../../../../core/attachments';
 import {
   QD, QD_COLLECTIONS,
   SCR000_DEFAULTS as DEFAULTS, SCR000_ADJUNTO_KEYS as ADJUNTO_KEYS,
@@ -142,15 +143,6 @@ export default function CrearRecibirQueja() {
     if (!blnIsZurichEmp && objWatch[QD.strAlliance]) form.setValue(QD.strAlliance, '');
   }, [blnIsZurichEmp, objWatch[QD.strAlliance], form]);
 
-  // Recorremos el registro de archivos para subir cada adjunto a PM4.
-  const uploadFiles = async (in_intRequestId: number) => {
-    for (const [strDocKey, objFile] of fileRegistry.current.entries()) {
-      const objFormData = new FormData();
-      objFormData.append('file', objFile);
-      await pm4.post(`/requests/${in_intRequestId}/files?data_name=${strDocKey}`, objFormData);
-    }
-  };
-
   // Resuelve el case_number de PM4 (número de caso/queja, el mismo valor que
   // otras pantallas leen como qd_strBpmCaseId) a partir del id interno del
   // request. NO es lo mismo que el `id`/`request_id` interno: PM4 expone ambos
@@ -238,26 +230,32 @@ export default function CrearRecibirQueja() {
         // de process_events, junto al id interno del request.
         const numBpmCaseId = (objResult.data?.case_number ?? intNewRequestId) as number | undefined;
         if (intNewRequestId) {
+          // Subimos primero los adjuntos (si hay) para poder incluir su fileUploadId
+          // (<docKey>_id) en la misma actualización que qd_strSfcCode.
+          const dicUploadedIds = fileRegistry.current.size > 0
+            ? await uploadAttachments(intNewRequestId, fileRegistry.current)
+            : {};
+          const objExtraData: Record<string, unknown> = { ...attachIdsToPayload(dicUploadedIds) };
           // qd_strSfcCode solo puede construirse tras crear el caso: su tercer
           // componente es el número de queja (caso BPM) que PM4 acaba de asignar.
-          if (numBpmCaseId) {
-            await pm4.put(`/requests/${intNewRequestId}`, {
-              data: { [QD.strSfcCode]: buildSfcCode(numBpmCaseId) },
-            });
+          if (numBpmCaseId) objExtraData[QD.strSfcCode] = buildSfcCode(numBpmCaseId);
+          if (Object.keys(objExtraData).length > 0) {
+            await pm4.put(`/requests/${intNewRequestId}`, { data: objExtraData });
           }
-          if (fileRegistry.current.size > 0) await uploadFiles(intNewRequestId);
         }
         setBlnSent(true);
       } else {
         const intRequestId = task?.process_request_id;
         let numBpmCaseId: number | undefined;
+        let dicUploadedIds: Record<string, number> = {};
         if (intRequestId) {
-          if (fileRegistry.current.size > 0) await uploadFiles(intRequestId);
+          if (fileRegistry.current.size > 0) dicUploadedIds = await uploadAttachments(intRequestId, fileRegistry.current);
           // task.process_request_id es el id interno del request, no el case_number.
           numBpmCaseId = await fetchCaseNumber(intRequestId);
         }
         await completeTask({
           ...in_objData,
+          ...attachIdsToPayload(dicUploadedIds),
           ...(numBpmCaseId ? { [QD.strSfcCode]: buildSfcCode(numBpmCaseId) } : {}),
         } as unknown as Record<string, unknown>);
         setBlnSent(true);

@@ -4,6 +4,7 @@ import { useForm, FieldError } from 'react-hook-form';
 import { useTask } from '../../../core/useTask';
 import { scrollToFirstError } from '../../../core/scrollToFirstError';
 import pm4 from '../../../api/pm4Client';
+import { uploadAttachments, attachIdsToPayload } from '../../../core/attachments';
 import { useCollection } from '../../../core/useCollection';
 import FormSection from '../../../components/FormSection';
 import ScreenHeader from '../../../components/ScreenHeader';
@@ -756,17 +757,16 @@ export default function SolicitudFfFl() {
 
     try {
       // ── Subir archivos ──────────────────────────────────────────────────────
+      // Guardamos el fileUploadId de cada adjunto como <docKey>_id para poder
+      // referenciarlo con precisión (no solo por data_name).
       const intRequestId = task?.process_request_id;
+      let dicUploadedIds: Record<string, number> = {};
       if (dicFileRegistry.current.size > 0 && intRequestId) {
-        for (const [strDocKey, objFile] of dicFileRegistry.current.entries()) {
-          const objFormData = new FormData();
-          objFormData.append('file', objFile);
-          try {
-            await pm4.post(`/requests/${intRequestId}/files?data_name=${strDocKey}`, objFormData);
-          } catch (excUpload: unknown) {
-            const objErr = excUpload as { response?: { data: unknown }; message: string };
-            throw new Error(`Error subiendo "${objFile.name}": ${JSON.stringify(objErr.response?.data ?? objErr.message)}`);
-          }
+        try {
+          dicUploadedIds = await uploadAttachments(intRequestId, dicFileRegistry.current);
+        } catch (excUpload: unknown) {
+          const objErr = excUpload as { response?: { data: unknown }; message: string };
+          throw new Error(`Error subiendo adjuntos: ${JSON.stringify(objErr.response?.data ?? objErr.message)}`);
         }
       }
 
@@ -775,6 +775,7 @@ export default function SolicitudFfFl() {
       const dicPayload: Record<string, unknown> = {
         ...dicTaskData,
         ...(in_objData as unknown as Record<string, unknown>),
+        ...attachIdsToPayload(dicUploadedIds),
         ...(objQuoteResult && objQuoterInputs ? quoterResultToPayload(objQuoteResult, objQuoterInputs) : {}),
       };
       await completeTask(dicPayload);

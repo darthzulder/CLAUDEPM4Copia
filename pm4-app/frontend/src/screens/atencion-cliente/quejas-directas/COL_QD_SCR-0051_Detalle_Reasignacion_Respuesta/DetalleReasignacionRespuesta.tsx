@@ -8,8 +8,8 @@ import InfoBar from '../../../../components/InfoBar';
 import { ActionBar } from '../../../../components/ActionBar';
 import { ZrButton, ZrAlert, ZrModal, ZrLoader, ZdsStatusBadge } from '../../../../components/fields/ZdsFields';
 import PreviewModal from '../../../../components/PreviewModal';
-import pm4 from '../../../../api/pm4Client';
 import { useCollection } from '../../../../core/useCollection';
+import { uploadAttachments, attachIdsToPayload } from '../../../../core/attachments';
 import { QD, QD_COLLECTIONS, SCR0051_DEFAULTS as DEFAULTS, SCR0051_SLA_UMBRAL_PRORROGA as SLA_UMBRAL_PRORROGA } from '../fields/fields';
 import type { DetalleReasignacionRespuestaFormData, AccionFlujoCombinado } from '../fields/fields';
 import SeccionDetalleCaso, { estadoVariant } from './SeccionDetalleCaso';
@@ -124,23 +124,17 @@ export default function DetalleReasignacionRespuesta() {
     return () => { URL.revokeObjectURL(strUrl); setStrPreviewUrl(null); };
   }, [blnShowPreview, form, cllEmailTpl]);
 
-  // Recorremos el registro de archivos para subir cada adjunto a PM4.
-  const uploadFiles = async (in_intRequestId: number) => {
-    for (const [strDocKey, objFile] of fileRegistry.current.entries()) {
-      const objFormData = new FormData();
-      objFormData.append('file', objFile);
-      await pm4.post(`/requests/${in_intRequestId}/files?data_name=${strDocKey}`, objFormData);
-    }
-  };
-
   // Envía la tarea con la acción indicada, subiendo antes los adjuntos si los hay.
   const enviarCon = (in_strAction: AccionFlujoCombinado) => async (in_objData: DetalleReasignacionRespuestaFormData): Promise<boolean> => {
     try {
       const intRequestId = task?.process_request_id;
-      if (intRequestId && fileRegistry.current.size > 0) await uploadFiles(intRequestId);
+      const dicUploadedIds = intRequestId && fileRegistry.current.size > 0
+        ? await uploadAttachments(intRequestId, fileRegistry.current)
+        : {};
       // Marca la acción del flujo en qd_strAction (p. ej. el botón "Enviar" ⇒ 'ENVIAR').
       const objPayload = {
         ...in_objData,
+        ...attachIdsToPayload(dicUploadedIds),
         [QD.strAction]: in_strAction,
       } as unknown as Record<string, unknown>;
       if (in_strAction === 'GUARDAR_BORRADOR') {

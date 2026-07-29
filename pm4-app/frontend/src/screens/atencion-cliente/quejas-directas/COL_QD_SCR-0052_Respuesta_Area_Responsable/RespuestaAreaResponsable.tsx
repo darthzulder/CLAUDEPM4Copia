@@ -13,6 +13,7 @@ import {
   ZrButton, ZrAlert, ZrLoader,
 } from '../../../../components/fields/ZdsFields';
 import pm4 from '../../../../api/pm4Client';
+import { uploadAttachments, attachIdsToPayload } from '../../../../core/attachments';
 import { QD, QD_COLLECTIONS, SCR0052_DEFAULTS as DEFAULTS, SCR0052_MAX_ADJUNTO_MB as MAX_ADJUNTO_MB } from '../fields/fields';
 import type { RespuestaAreaResponsableFormData, AccionRespuestaArea } from '../fields/fields';
 import type { AsignacionHistorial, RespuestaAyuda } from '../fields/types';
@@ -76,19 +77,6 @@ export default function RespuestaAreaResponsable() {
   const strReceptionInstanceDesc = `${QD.strReceptionInstance}_desc` as FieldPath<RespuestaAreaResponsableFormData>;
   const strControlEntityDesc = `${QD.strControlEntity}_desc` as FieldPath<RespuestaAreaResponsableFormData>;
 
-  // Sube cada archivo y devuelve un mapa docKey → file_id (fileUploadId de PM4),
-  // para poder guardar el id del adjunto en el historial y descargarlo luego.
-  const uploadFiles = async (in_intRequestId: number): Promise<Record<string, number>> => {
-    const dicIds: Record<string, number> = {};
-    for (const [strDocKey, objFile] of fileRegistry.current.entries()) {
-      const objFormData = new FormData();
-      objFormData.append('file', objFile);
-      const objResponse = await pm4.post(`/requests/${in_intRequestId}/files?data_name=${strDocKey}`, objFormData);
-      const intId = (objResponse.data as { fileUploadId?: number })?.fileUploadId;
-      if (typeof intId === 'number') dicIds[strDocKey] = intId;
-    }
-    return dicIds;
-  };
 
   // Registra la respuesta del ayudante en el array diferenciado (qd_lstHelpResponses) y
   // completa la fila correspondiente del historial (qd_lstAssignHistory), matcheando
@@ -155,14 +143,16 @@ export default function RespuestaAreaResponsable() {
     setStrSendError(null);
     try {
       const intRequestId = task?.process_request_id;
-      let dicUploadedIds: Record<string, number> = {};
-      if (intRequestId && fileRegistry.current.size > 0) dicUploadedIds = await uploadFiles(intRequestId);
+      const dicUploadedIds = intRequestId && fileRegistry.current.size > 0
+        ? await uploadAttachments(intRequestId, fileRegistry.current)
+        : {};
+      const objAttachIds = attachIdsToPayload(dicUploadedIds);
       if (in_strAction === 'GUARDAR_BORRADOR') {
-        await saveDraft({ ...in_objData, [QD.strAction]: in_strAction } as unknown as Record<string, unknown>);
+        await saveDraft({ ...in_objData, ...objAttachIds, [QD.strAction]: in_strAction } as unknown as Record<string, unknown>);
         return true;
       }
       const objExtra = in_strAction === 'ENVIAR' ? await registrarRespuesta(in_objData, dicUploadedIds[QD.strAreaAttach]) : {};
-      await completeTask({ ...in_objData, ...objExtra, [QD.strAction]: in_strAction } as unknown as Record<string, unknown>);
+      await completeTask({ ...in_objData, ...objAttachIds, ...objExtra, [QD.strAction]: in_strAction } as unknown as Record<string, unknown>);
       return true;
     } catch (exc) {
       // No tragar el error: si la tarea no se completa, PM4 no cierra el iframe.
