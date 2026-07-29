@@ -151,6 +151,15 @@ export default function CrearRecibirQueja() {
     }
   };
 
+  // Resuelve el case_number de PM4 (número de caso/queja, el mismo valor que
+  // otras pantallas leen como qd_strBpmCaseId) a partir del id interno del
+  // request. NO es lo mismo que el `id`/`request_id` interno: PM4 expone ambos
+  // como campos independientes (ver `processRequest` en docs (4).json).
+  const fetchCaseNumber = async (in_intRequestId: number): Promise<number | undefined> => {
+    const { data } = await pm4.get<{ case_number?: number }>(`/requests/${in_intRequestId}`);
+    return data?.case_number;
+  };
+
   // Paso 1 — el submit valida el formulario (react-hook-form) y, si es válido,
   // ejecuta el watcher de casos similares (script 70) ANTES del captcha:
   //  · si hay casos similares → abre el modal de confirmación y espera decisión.
@@ -224,24 +233,32 @@ export default function CrearRecibirQueja() {
           in_objData,
           { params: { event: WEB_ENTRY_EVENT_ID } },
         );
-        const intNewRequestId = (objResult.data?.request_id ?? objResult.data?.id) as number | undefined;
+        const intNewRequestId = (objResult.data?.id ?? objResult.data?.request_id) as number | undefined;
+        // El case_number (número de queja/caso BPM) ya viene en la misma respuesta
+        // de process_events, junto al id interno del request.
+        const numBpmCaseId = (objResult.data?.case_number ?? intNewRequestId) as number | undefined;
         if (intNewRequestId) {
           // qd_strSfcCode solo puede construirse tras crear el caso: su tercer
           // componente es el número de queja (caso BPM) que PM4 acaba de asignar.
-          await pm4.put(`/requests/${intNewRequestId}`, {
-            data: { [QD.strSfcCode]: buildSfcCode(intNewRequestId) },
-          });
+          if (numBpmCaseId) {
+            await pm4.put(`/requests/${intNewRequestId}`, {
+              data: { [QD.strSfcCode]: buildSfcCode(numBpmCaseId) },
+            });
+          }
           if (fileRegistry.current.size > 0) await uploadFiles(intNewRequestId);
         }
         setBlnSent(true);
       } else {
         const intRequestId = task?.process_request_id;
-        if (intRequestId && fileRegistry.current.size > 0) {
-          await uploadFiles(intRequestId);
+        let numBpmCaseId: number | undefined;
+        if (intRequestId) {
+          if (fileRegistry.current.size > 0) await uploadFiles(intRequestId);
+          // task.process_request_id es el id interno del request, no el case_number.
+          numBpmCaseId = await fetchCaseNumber(intRequestId);
         }
         await completeTask({
           ...in_objData,
-          ...(intRequestId ? { [QD.strSfcCode]: buildSfcCode(intRequestId) } : {}),
+          ...(numBpmCaseId ? { [QD.strSfcCode]: buildSfcCode(numBpmCaseId) } : {}),
         } as unknown as Record<string, unknown>);
         setBlnSent(true);
       }
