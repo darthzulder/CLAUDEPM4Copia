@@ -106,7 +106,7 @@ export default function RevisionErrorTecnicoApi() {
                 control={control}
                 label="Mensaje Técnico de la API"
                 readOnly
-                helpText="Stack trace o mensaje técnico completo devuelto por la API — solo lectura."
+                helpText='Mensaje devuelto por la API — solo lectura. El log técnico completo está en "Ver Log Completo".'
               />
             </div>
 
@@ -201,17 +201,20 @@ export default function RevisionErrorTecnicoApi() {
         </form>
       </div>
 
-      {/* ACT-004-03 · Ver Log Completo */}
+      {/* ACT-004-03 · Ver Log Completo — un único campo con el log que emite el
+          script de Momento 3 en qd_strCompleteLogAPI. */}
       {blnShowLog && (
         <ZrModal model={blnShowLog} onChange={(open: boolean) => setBlnShowLog(open)}>
-          <h3 style={{ margin: '0 0 var(--zs-75)', font: 'var(--zf-h-20--700)', color: 'var(--z-text)' }}>
-            Log completo del error técnico
-          </h3>
-          <ZdsInput name={QD.strEndpointCalled} control={control} label="Endpoint Invocado" readOnly />
-          <ZdsTextarea name={QD.strApiTechMessage} control={control} label="Mensaje Técnico de la API" readOnly />
-          <ZdsTextarea name={QD.strPayloadSent} control={control} label="Payload Enviado (JSON)" readOnly />
-          <div z-flex="75" z-align="right:center" style={{ marginTop: 'var(--zs-100)' }}>
-            <ZrButton config="secondary:s" onClick={() => setBlnShowLog(false)}>Cerrar</ZrButton>
+          <div className="modal-wide">
+            <h3 style={{ margin: '0 0 var(--zs-75)', font: 'var(--zf-h-20--700)', color: 'var(--z-text)' }}>
+              Log completo del error técnico
+            </h3>
+            <div className="modal-scroll-body">
+              <ZdsTextarea name={QD.strCompleteLogAPI} control={control} label="Log Completo" readOnly />
+            </div>
+            <div z-flex="75" z-align="right:center" style={{ marginTop: 'var(--zs-100)' }}>
+              <ZrButton config="secondary:s" onClick={() => setBlnShowLog(false)}>Cerrar</ZrButton>
+            </div>
           </div>
         </ZrModal>
       )}

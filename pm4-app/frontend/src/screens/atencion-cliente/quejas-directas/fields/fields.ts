@@ -130,7 +130,8 @@ export const QD = {
   // ── SCR-004 · Revisión Error Técnico API ──────────────────────────────────
   strHttpCode: 'qd_strHttpCode',                       // FLD-050 · antes qd_codigoHTTP
   strErrorType: 'qd_strErrorType',                     // FLD-051 · antes qd_tipoError
-  strApiTechMessage: 'qd_strApiTechMessage',           // FLD-052 · antes qd_mensajeTecnicoAPI
+  strApiTechMessage: 'qd_strApiTechMessage',           // FLD-052 · antes qd_mensajeTecnicoAPI (mismo valor que qd_SSHTTPSP3_message)
+  strCompleteLogAPI: 'qd_strCompleteLogAPI',           // sin FLD · log técnico completo del script M3 (modal "Ver Log Completo")
   strEndpointCalled: 'qd_strEndpointCalled',           // FLD-053 · antes qd_endpointInvocado
   strPayloadSent: 'qd_strPayloadSent',                 // FLD-054 · antes qd_payloadEnviado
   strAttemptNum: 'qd_strAttemptNum',                   // FLD-055 · antes qd_numeroIntento
@@ -325,6 +326,7 @@ export interface QdFields {
   qd_strHttpCode: string;
   qd_strErrorType: string;
   qd_strApiTechMessage: string;
+  qd_strCompleteLogAPI: string;
   qd_strEndpointCalled: string;
   qd_strPayloadSent: string;
   qd_strAttemptNum: string;
@@ -722,6 +724,7 @@ export type AccionErrorTecnico = 'AUTORIZAR_REENVIO' | 'ESCALAR_PROVEEDOR';
 
 export type RevisionErrorTecnicoApiFormData = Omit<Pick<QdFields,
   | typeof QD.strHttpCode | typeof QD.strErrorType | typeof QD.strApiTechMessage
+  | typeof QD.strCompleteLogAPI
   | typeof QD.strEndpointCalled | typeof QD.strPayloadSent | typeof QD.strAttemptNum
   | typeof QD.strRootCause | typeof QD.strCorrectionApplied | typeof QD.strPayloadAdjustNeeded
   | typeof QD.strAction
@@ -731,6 +734,7 @@ export const SCR004_DEFAULTS: Partial<RevisionErrorTecnicoApiFormData> = {
   [QD.strHttpCode]: '',
   [QD.strErrorType]: '',
   [QD.strApiTechMessage]: '',
+  [QD.strCompleteLogAPI]: '',
   [QD.strEndpointCalled]: '',
   [QD.strPayloadSent]: '',
   [QD.strAttemptNum]: '',

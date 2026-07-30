@@ -1232,3 +1232,16 @@ z-table :is(th, td)[config*="right"] {
   gap: var(--zs-75);
   margin-top: var(--zs-100);
 }
+
+/* ── Modal ancho con cuerpo desplazable (logs, textos largos) ──────────────
+   Mismo ancho que .preview-modal para que todos los modales grandes coincidan.
+   Se aplica al contenedor que va DENTRO de ZrModal (el web component maneja
+   su propio layout, no se le ponen clases ni z-flex encima). */
+.modal-wide {
+  width: min(1080px, 94vw);
+}
+
+.modal-scroll-body {
+  max-height: min(62vh, 620px);
+  overflow-y: auto;
+}

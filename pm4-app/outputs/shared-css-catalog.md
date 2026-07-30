@@ -44,6 +44,7 @@ Para huecos en una fila usa un `<div />` vacío como celda.
 | `InfoBar` | `.info-bar`, `.info-bar-item`, `.info-bar-label`, `.info-bar-value` | pares label/valor |
 | `DocSupportUploader`/`DocItem`/`DocList` | `.doc-row`, `.doc-row-label`, `.doc-item`, `.doc-num-badge`, `.doc-file-area`, `.file-name-chip`, `.doc-table-*` | filas/listas de documentos (upload o validación) |
 | `PreviewModal` | `.preview-modal*` | modal vista previa |
+| Modales grandes | `.modal-wide`, `.modal-scroll-body` | ancho `min(1080px, 94vw)` + cuerpo desplazable; se aplican al `div` **dentro** de `ZrModal` (logs, textos largos) |
 | `PdfViewer` | `.pdf-viewer*` | visor de PDF/blob |
 | Sub-secciones | `.form-subsection`, `.form-subsection--stack`, `.form-subsection-title`, `.subsection-intro`, `.subsection-note` | bloque dentro de una `FormSection` |
 

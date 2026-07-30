@@ -88,7 +88,8 @@ un token/propiedad interna, y su estado actual).
 | SCR-003, 004, 008, 009, 011, 012, 0051, 0052 | qd_accion | qd_strAction | string (unión por screen) |
 | SCR-004 | qd_codigoHTTP | qd_strHttpCode | string |
 | SCR-004 | qd_tipoError | qd_strErrorType | string |
-| SCR-004 | qd_mensajeTecnicoAPI | qd_strApiTechMessage | string |
+| SCR-004 | qd_mensajeTecnicoAPI | qd_strApiTechMessage | string (mismo valor que `qd_SSHTTPSP3_message`) |
+| SCR-004 | *(nuevo — sin nombre previo)* | qd_strCompleteLogAPI | string (log técnico completo del script M3; modal "Ver Log Completo") |
 | SCR-004 | qd_endpointInvocado | qd_strEndpointCalled | string |
 | SCR-004 | qd_payloadEnviado | qd_strPayloadSent | string |
 | SCR-004 | qd_numeroIntento | qd_strAttemptNum | string |

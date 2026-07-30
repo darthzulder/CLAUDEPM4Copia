@@ -67,7 +67,8 @@ Fuente: `Anexo02 > 10_Trazabilidad_BPMN > SCR-004 (fila 9)`.
 | Tipo de Error | `qd_strErrorType` | `tipoError` | Texto / readOnly | No | `Anexo02 > SCR-004 > FLD-051 (fila 44)` · alim. `Anexo03 > 06_Variables_Salida > tipoError_M1M2 (fila 53/59)` |
 | Número de Intento Acumulado | `qd_strAttemptNum` | `numeroIntento` | Texto (Número) / readOnly | No | `Anexo02 > SCR-004 > FLD-055 (fila 48)` · alim. `Anexo03 > numeroIntento (06 fila 54)` |
 | Endpoint Invocado | `qd_strEndpointCalled` | `endpointInvocado` | Texto / readOnly | No | `Anexo02 > SCR-004 > FLD-053 (fila 46)` · alim. `Anexo03 > endpointAPI (05 fila 84)` |
-| Mensaje Técnico de la API | `qd_strApiTechMessage` | `mensajeTecnicoAPI` | Área de texto / readOnly | No | `Anexo02 > SCR-004 > FLD-052 (fila 45)` · alim. `Anexo03 > mensajeErrorAPI (06 fila 51)` |
+| Mensaje Técnico de la API | `qd_strApiTechMessage` | `mensajeTecnicoAPI` | Área de texto / readOnly | No | `Anexo02 > SCR-004 > FLD-052 (fila 45)` · alim. `Anexo03 > mensajeErrorAPI (06 fila 51)` · **mismo valor que `qd_SSHTTPSP3_message`** |
+| Log Completo *(solo en el modal ACT-004-03)* | `qd_strCompleteLogAPI` | — | Área de texto / readOnly | No | **Añadido** — lo emite el script de Momento 3 (`.claude/solo momento 3`); ver §10.9 |
 | Payload Enviado (JSON) | `qd_strPayloadSent` | `payloadEnviado` | Área de texto (editable si requiere ajuste) | No | `Anexo02 > SCR-004 > FLD-054 (fila 47)` · alim. `Anexo03 > payloadEnviado (05 fila 95)` |
 
 ### S2 — Registro de Corrección Técnica *(editable — `SEC-012`, siempre visible)*
@@ -129,7 +130,7 @@ Fuente: `Anexo02 > 10_Trazabilidad_BPMN > SCR-004 (fila 9)`.
 |---|---|---|
 | Sección S1 con identidad de "error" | `FormSection color="var(--z-red)"` + `ZrAlert config="negative"` con nº de intento. | Inferido del tono de error (ver §10) |
 | Payload editable solo si "Requiere ajuste = Sí" | `readOnly={!ajustaPayload}`; alerta que indica editar el payload superior. | Deriva de FLD-058 + criterio "reenvío del **payload corregido**" (`Anexo02 > SCR-004 > Criterio de Aceptación`) |
-| "Ver Log Completo" (ACT-004-03, Link) | `ZrButton config="link"` en el header de S1 abre `ZrModal` con endpoint + mensaje técnico + payload (solo lectura). | `Anexo02 > SCR-004 > 04_Acciones > ACT-004-03` |
+| "Ver Log Completo" (ACT-004-03, Link) | `ZrButton config="link"` en el header de S1 abre un `ZrModal` **ancho** (`.modal-wide` + `.modal-scroll-body`, mismo ancho que `PreviewModal`) con **un único campo**: "Log Completo" (`qd_strCompleteLogAPI`, solo lectura). | `Anexo02 > SCR-004 > 04_Acciones > ACT-004-03` |
 | "Autorizar Reenvío" (ACT-004-01, Primaria) | `ZrButton config="positive:s"`, deshabilitado por RUL-004-01; `completeTask` con `qd_strAction='AUTORIZAR_REENVIO'`. | `Anexo02 > SCR-004 > ACT-004-01` |
 | "Escalar a Proveedor" (ACT-004-02, Secundaria, Siempre) | `ZrButton config="secondary:s"`; `completeTask` con `qd_strAction='ESCALAR_PROVEEDOR'` **sin** exigir la validación de S2 (condición "Siempre"). | `Anexo02 > SCR-004 > ACT-004-02` |
 | Aviso permanente cuando faltan datos | `ZrAlert config="info"` con el texto de MSG-004-01. | `Anexo02 > 06_Mensajes > MSG-004-01` |
@@ -162,12 +163,17 @@ Fuente: `Anexo02 > 10_Trazabilidad_BPMN > SCR-004 (fila 9)`.
 5. **Identidad visual de error** (sección roja + alerta negativa): decisión de UX no dictada por el
    mockup, alineada con la pantalla análoga SCR-003 (`corregir-error-funcional-ss`).
 6. **"Ver Log Completo" → modal.** El mockup lo define como acción tipo *Link* sin destino; se
-   implementa como modal que reúne el endpoint, mensaje técnico y payload ya disponibles (sin inventar
-   un backend de log adicional).
+   implementa como modal ancho con un solo campo de solo lectura, `qd_strCompleteLogAPI`, que trae el
+   log ya ensamblado por el script (sin inventar un backend de log adicional).
 7. **MSG-004-02 (éxito)** no se renderiza en esta pantalla: tras `completeTask` el control vuelve al
    BPM, que ejecuta SP1-T02 y notifica el avance.
 8. **"Escalar a Proveedor" omite la validación de S2** por su condición "Siempre" (ACT-004-02), de modo
    análogo al patrón "Guardar Borrador" del proyecto.
+9. **`qd_strCompleteLogAPI` (campo añadido, sin FLD).** El insumo solo prevé `mensajeTecnicoAPI`, pero el
+   script de Momento 3 produce dos niveles de detalle: el **mensaje** que devolvió la API (idéntico a
+   `qd_SSHTTPSP3_message`, en `qd_strApiTechMessage`) y el **log completo** —paso, endpoint, HTTP, tipo
+   clasificado, error de cURL, excepción PM4 y cuerpo crudo truncado a 8 KB— que se guarda aparte para
+   alimentar ACT-004-03 sin saturar el textarea de S1.
 
 ---
 
@@ -183,7 +189,7 @@ Fuente: `Anexo02 > 10_Trazabilidad_BPMN > SCR-004 (fila 9)`.
 | Catálogos | **N/A** | SCR-004 no referencia catálogos. |
 | Permisos | Respetado a nivel funcional | Pantalla de uso exclusivo del Analista Técnico (`08_Permisos`). |
 
-**Elementos inferidos** (sin respaldo literal en insumos): `qd_strAction`, edición condicional del payload,
+**Elementos inferidos** (sin respaldo literal en insumos): `qd_strAction`, `qd_strCompleteLogAPI`, edición condicional del payload,
 límites `maxLength`, identidad visual de error, modal de "Ver Log Completo", indicador de intento en la
 alerta. Todos detallados en §10.
 
