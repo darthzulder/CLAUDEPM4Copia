@@ -719,8 +719,9 @@ export const SCR003_DEFAULTS: Partial<CorreccionErrorFuncionalFormData> = {
 // SCR-004 — Revisión Error Técnico API
 // ═══════════════════════════════════════════════════════════════════════════
 
-// AUTORIZAR_REENVIO → ACT-004-01 (ejecuta SP1-T02) · ESCALAR_PROVEEDOR → ACT-004-02.
-export type AccionErrorTecnico = 'AUTORIZAR_REENVIO' | 'ESCALAR_PROVEEDOR';
+// AUTORIZAR_REENVIO → ACT-004-01 (ejecuta SP1-T02). ESCALAR_PROVEEDOR (ACT-004-02)
+// se retiró de la pantalla, así que ya no es un valor posible aquí.
+export type AccionErrorTecnico = 'AUTORIZAR_REENVIO';
 
 export type RevisionErrorTecnicoApiFormData = Omit<Pick<QdFields,
   | typeof QD.strHttpCode | typeof QD.strErrorType | typeof QD.strApiTechMessage

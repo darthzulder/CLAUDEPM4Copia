@@ -83,7 +83,7 @@ Fuente: `Anexo02 > 10_Trazabilidad_BPMN > SCR-004 (fila 9)`.
 
 | Campo | Variable | Uso | Fuente |
 |---|---|---|---|
-| Acción seleccionada | `qd_strAction` (`AUTORIZAR_REENVIO` / `ESCALAR_PROVEEDOR`) | Distingue ACT-004-01 de ACT-004-02 al completar la tarea. | `Anexo02 > SCR-004 > 04_Acciones` (inferido — ver §10) |
+| Acción seleccionada | `qd_strAction` (`AUTORIZAR_REENVIO`) | Única acción de cierre de la pantalla; ACT-004-02 se retiró (ver §10.10). | `Anexo02 > SCR-004 > 04_Acciones` (inferido — ver §10) |
 
 > **Nota de nomenclatura:** los `data_name` definitivos de PM4 aún no se entregan (CLAUDE.md). Se usan
 > nombres con prefijo `qd_` (unificado con las pantallas QD hermanas; antes `et_`, Error Técnico). El mapeo a la **variable lógica** del
@@ -100,6 +100,7 @@ Fuente: `Anexo02 > 10_Trazabilidad_BPMN > SCR-004 (fila 9)`.
 | ¿Requiere ajuste en payload? obligatorio | `rules.required`; valor por defecto `NO`. | `Anexo02 > SCR-004 > FLD-058` |
 | Longitud máxima causa/corrección | `maxLength: 2000` con contador (UI). | **Suposición** (ver §10) — no especificada en insumos |
 | Campos de S1 solo lectura | `readOnly` en todos los FLD-050…055. | `Anexo02 > SCR-004 > 03_Campos` (columna Control UI = Label/Solo lectura) |
+| Payload editado debe ser JSON de objeto válido | Con FLD-058 = `SI`, se hace `JSON.parse` del textarea: si falla (o no es objeto) se bloquea "Autorizar Reenvío" y se muestra alerta negativa. | **Derivada de la implementación** — el script de M3 descarta un JSON inválido y reconstruye el body, así que la pantalla evita la edición silenciosamente perdida (ver §10.3) |
 
 ---
 
@@ -121,6 +122,7 @@ Fuente: `Anexo02 > 10_Trazabilidad_BPMN > SCR-004 (fila 9)`.
 | Usar catálogos/valores estandarizados para minimizar errores de formato (🟢 Lineamiento) | Informativo — sin campo de catálogo en esta pantalla. | `Matrices > 2. Directrices fila 35` |
 | Cada intento se registra en el log (caso, intento, HTTP, mensaje, campos) (🟠 Control de SP1-T02) | Fuera de alcance UI — lo registra el servicio SP1-T02/SP1-T04; la pantalla solo lo consume. | `Matrices > 2. Directrices fila 29` · `Anexo03 > 01_Inventario fila 18` |
 | Escalamiento a Analista Técnico tras 3+ intentos | Esta pantalla **es** el destino del escalamiento (`escalarATecnico=true`). | `Anexo03 > 08_CA_Errores fila 17` |
+| **Reintento por paso en Momento 3** — el M3 hace anexo + cierre; el reenvío no debe repetir un paso ya exitoso | El script escribe `qd_blnM3AttachDone` y `qd_strM3FailedStep` en el caso: si el anexo ya subió, el reintento va **directo al cierre** y el detalle técnico que llena esta pantalla corresponde al paso que falló (anexo o cierre). Tras un cierre 2xx el script limpia ambas y pone `qd_strPayloadAdjustNeeded = 'NO'`. | Implementación del script de Momento 3 (`.claude/solo momento 3`) |
 
 ---
 
@@ -129,10 +131,11 @@ Fuente: `Anexo02 > 10_Trazabilidad_BPMN > SCR-004 (fila 9)`.
 | Comportamiento | Implementación | Fuente |
 |---|---|---|
 | Sección S1 con identidad de "error" | `FormSection color="var(--z-red)"` + `ZrAlert config="negative"` con nº de intento. | Inferido del tono de error (ver §10) |
-| Payload editable solo si "Requiere ajuste = Sí" | `readOnly={!ajustaPayload}`; alerta que indica editar el payload superior. | Deriva de FLD-058 + criterio "reenvío del **payload corregido**" (`Anexo02 > SCR-004 > Criterio de Aceptación`) |
+| Payload editable solo si "Requiere ajuste = Sí" | `readOnly={!blnAdjustPayload}`; alerta que indica editar el payload superior. **El script de Momento 3 firma y envía ese JSON tal cual** (`sfcPayloadCorregido`), y toma de él el `codigo_queja` del path para que cuerpo y ruta coincidan. | Deriva de FLD-058 + criterio "reenvío del **payload corregido**" (`Anexo02 > SCR-004 > Criterio de Aceptación`) |
+| JSON inválido bloquea la autorización | Alerta negativa + botón deshabilitado mientras `JSON.parse` falle. | Implementación (ver §5) |
 | "Ver Log Completo" (ACT-004-03, Link) | `ZrButton config="link"` en el header de S1 abre un `ZrModal` **ancho** (`.modal-wide` + `.modal-scroll-body`, mismo ancho que `PreviewModal`) con **un único campo**: "Log Completo" (`qd_strCompleteLogAPI`, solo lectura). | `Anexo02 > SCR-004 > 04_Acciones > ACT-004-03` |
-| "Autorizar Reenvío" (ACT-004-01, Primaria) | `ZrButton config="positive:s"`, deshabilitado por RUL-004-01; `completeTask` con `qd_strAction='AUTORIZAR_REENVIO'`. | `Anexo02 > SCR-004 > ACT-004-01` |
-| "Escalar a Proveedor" (ACT-004-02, Secundaria, Siempre) | `ZrButton config="secondary:s"`; `completeTask` con `qd_strAction='ESCALAR_PROVEEDOR'` **sin** exigir la validación de S2 (condición "Siempre"). | `Anexo02 > SCR-004 > ACT-004-02` |
+| "Autorizar Reenvío" (ACT-004-01, Primaria) | `ZrButton config="positive"`, deshabilitado por RUL-004-01 y por JSON inválido; `completeTask` con `qd_strAction='AUTORIZAR_REENVIO'`. **Única acción de la pantalla.** | `Anexo02 > SCR-004 > ACT-004-01` |
+| ~~"Escalar a Proveedor" (ACT-004-02)~~ | **Retirado** por decisión funcional (§10.10). La pantalla ya no ofrece esa ruta y `qd_strAction` solo puede valer `AUTORIZAR_REENVIO`. | `Anexo02 > SCR-004 > ACT-004-02` (no implementado) |
 | Aviso permanente cuando faltan datos | `ZrAlert config="info"` con el texto de MSG-004-01. | `Anexo02 > 06_Mensajes > MSG-004-01` |
 | Prepoblación desde PM4 | `useTask` → `reset({...DEFAULTS, ...task.data})`. | CLAUDE.md (flujo de datos PM4) |
 
@@ -142,7 +145,8 @@ Fuente: `Anexo02 > 10_Trazabilidad_BPMN > SCR-004 (fila 9)`.
 
 | Campo Origen | Campo Dependiente | Comportamiento | Fuente |
 |---|---|---|---|
-| `qd_strPayloadAdjustNeeded` = `SI` | `qd_strPayloadSent` | El payload pasa de solo lectura a **editable** y se muestra alerta. | FLD-058 + Criterio de Aceptación (`Anexo02 > SCR-004`) |
+| `qd_strPayloadAdjustNeeded` = `SI` | `qd_strPayloadSent` | El payload pasa de solo lectura a **editable**, se muestra alerta y el reenvío usa ese JSON. | FLD-058 + Criterio de Aceptación (`Anexo02 > SCR-004`) |
+| `qd_strPayloadSent` (JSON válido) | Botón "Autorizar Reenvío" | Con ajuste marcado, un JSON inválido deshabilita la acción. | Implementación (§5) |
 | `qd_strRootCause` + `qd_strCorrectionApplied` (no vacíos) | Botón "Autorizar Reenvío" | Habilita/deshabilita la acción primaria. | `Anexo02 > 05_Reglas > RUL-004-01` |
 | `qd_strAttemptNum` | Texto del `ZrAlert` de S1 | Muestra "Intento acumulado #N" si hay valor. | Inferido de FLD-055 (ver §10) |
 
@@ -158,7 +162,11 @@ Fuente: `Anexo02 > 10_Trazabilidad_BPMN > SCR-004 (fila 9)`.
    ruta tomar. *(deriva de `04_Acciones`)*
 3. **Payload editable con FLD-058 = Sí.** El criterio de aceptación exige "reenvío del **payload
    corregido**"; se interpreta que marcar "¿Requiere ajuste en payload? = Sí" habilita la edición del
-   JSON. No está descrito como interacción explícita en el mockup.
+   JSON. No está descrito como interacción explícita en el mockup. **Implementado de punta a punta:**
+   el script de Momento 3 firma y envía ese JSON literal en vez de reconstruir el body; si el JSON no
+   es un objeto válido lo descarta y reconstruye (fallback defensivo), y la pantalla bloquea la
+   autorización en ese caso para que la edición nunca se pierda en silencio. La salida del script
+   informa cuál se usó en `payload_origen`.
 4. **`maxLength = 2000`** en causa raíz y corrección: límite razonable no especificado en insumos.
 5. **Identidad visual de error** (sección roja + alerta negativa): decisión de UX no dictada por el
    mockup, alineada con la pantalla análoga SCR-003 (`corregir-error-funcional-ss`).
@@ -167,13 +175,16 @@ Fuente: `Anexo02 > 10_Trazabilidad_BPMN > SCR-004 (fila 9)`.
    log ya ensamblado por el script (sin inventar un backend de log adicional).
 7. **MSG-004-02 (éxito)** no se renderiza en esta pantalla: tras `completeTask` el control vuelve al
    BPM, que ejecuta SP1-T02 y notifica el avance.
-8. **"Escalar a Proveedor" omite la validación de S2** por su condición "Siempre" (ACT-004-02), de modo
-   análogo al patrón "Guardar Borrador" del proyecto.
+8. ~~**"Escalar a Proveedor" omite la validación de S2**~~ — sin efecto: el botón se retiró (§10.10).
 9. **`qd_strCompleteLogAPI` (campo añadido, sin FLD).** El insumo solo prevé `mensajeTecnicoAPI`, pero el
    script de Momento 3 produce dos niveles de detalle: el **mensaje** que devolvió la API (idéntico a
    `qd_SSHTTPSP3_message`, en `qd_strApiTechMessage`) y el **log completo** —paso, endpoint, HTTP, tipo
    clasificado, error de cURL, excepción PM4 y cuerpo crudo truncado a 8 KB— que se guarda aparte para
    alimentar ACT-004-03 sin saturar el textarea de S1.
+10. **ACT-004-02 "Escalar a Proveedor" retirado** (decisión del negocio, 30-jul-2026). La pantalla queda
+    con una sola salida: autorizar el reenvío. El escalamiento al proveedor, si se necesita, se gestiona
+    fuera de esta pantalla. `AccionErrorTecnico` quedó reducido a `'AUTORIZAR_REENVIO'`; SCR-011
+    (prórroga) **sí conserva** su botón de escalar con su propio tipo `AccionErrorTecnicoProrroga`.
 
 ---
 
@@ -183,7 +194,7 @@ Fuente: `Anexo02 > 10_Trazabilidad_BPMN > SCR-004 (fila 9)`.
 |---|---|---|
 | Campos (FLD-050…058) | **100 %** (9/9) | Todos implementados con su control y obligatoriedad. |
 | Secciones (SEC-011, SEC-012) | **100 %** (2/2) | Ambas siempre visibles. |
-| Acciones (ACT-004-01/02/03) | **100 %** (3/3) | Autorizar, Escalar, Ver Log. |
+| Acciones (ACT-004-01/02/03) | **67 %** (2/3) | Autorizar y Ver Log. ACT-004-02 (Escalar) retirado por decisión funcional — §10.10. |
 | Reglas (RUL-004-01) | **100 %** (1/1) | Bloqueo de autorización implementado. |
 | Mensajes (MSG-004-01/02) | **50 %** (1/2) | MSG-004-01 implementado; MSG-004-02 lo gestiona el BPM. |
 | Catálogos | **N/A** | SCR-004 no referencia catálogos. |
@@ -193,7 +204,16 @@ Fuente: `Anexo02 > 10_Trazabilidad_BPMN > SCR-004 (fila 9)`.
 límites `maxLength`, identidad visual de error, modal de "Ver Log Completo", indicador de intento en la
 alerta. Todos detallados en §10.
 
+**Variables de control del script de Momento 3** (no se muestran en la pantalla, las escribe el script):
+
+| Variable | Valores | Uso |
+|---|---|---|
+| `qd_blnM3AttachDone` | `true` / `false` | `true` ⇒ el anexo ya subió: el reintento salta el `POST /api/storage/` y va directo al cierre. Se limpia a `false` tras un cierre 2xx. |
+| `qd_strM3FailedStep` | `ATTACHMENTS` / `CIERRE` / `''` | Paso donde se detuvo el flujo; para la compuerta del BPM. Vacío en éxito. |
+
 **Pendientes / dependencias externas:**
 - `data_name` definitivos de PM4 (homologar `qd_*` ↔ variable lógica).
 - Renovación automática de credenciales ante HTTP 401 (backend, `Matrices > 2. Directrices fila 34`).
-- Generación del ticket de incidente al "Escalar a Proveedor" (integración externa, no UI).
+- Si alguna vez hay que **reemplazar** el PDF de respuesta final antes de reintentar el cierre, el BPM debe
+  poner `qd_blnM3AttachDone = false` para que el script vuelva a subir el anexo (hoy, con el flag en `true`,
+  siempre lo salta).

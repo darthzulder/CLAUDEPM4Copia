@@ -10,7 +10,7 @@ import {
   ZrButton, ZrAlert, ZrModal, ZrLoader,
 } from '../../../../components/fields/ZdsFields';
 import { QD, SCR004_DEFAULTS as DEFAULTS, OPTIONS_SI_NO } from '../fields/fields';
-import type { RevisionErrorTecnicoApiFormData, AccionErrorTecnico } from '../fields/fields';
+import type { RevisionErrorTecnicoApiFormData } from '../fields/fields';
 
 export default function RevisionErrorTecnicoApi() {
   const { task, loading, error, submitting, completeTask } = useTask();
@@ -35,14 +35,28 @@ export default function RevisionErrorTecnicoApi() {
     return String(objErr.message);
   };
 
-  // RUL-004-01 (🔴 BLOQUEA): causaRaiz o correccionAplicada vacíos ⇒ no se puede autorizar.
-  const blnCanAuthorize =
-    !!objWatch[QD.strRootCause]?.trim() && !!objWatch[QD.strCorrectionApplied]?.trim();
+  // Indica si el analista debe ajustar el payload antes de reenviar.
+  const blnAdjustPayload = objWatch[QD.strPayloadAdjustNeeded] === 'SI';
 
-  // ACT-004-01 / ACT-004-02 — ambos completan la tarea; difieren en la acción registrada.
-  const enviar = (in_strAction: AccionErrorTecnico) =>
-    completeTask({ ...objWatch, [QD.strAction]: in_strAction } as unknown as Record<string, unknown>)
-      .catch((exc) => console.error('[RevisionErrorTecnicoApi] Error al enviar:', exc));
+  // El script de Momento 3 solo reenvía el payload editado si es un objeto JSON
+  // válido; si no lo es lo descarta y reconstruye el body desde los campos del
+  // caso. Validamos aquí para que el analista no crea que su edición viajó.
+  const blnPayloadJsonOk = (() => {
+    if (!blnAdjustPayload) return true;
+    try {
+      const genParsed: unknown = JSON.parse(objWatch[QD.strPayloadSent] ?? '');
+      return !!genParsed && typeof genParsed === 'object' && !Array.isArray(genParsed);
+    } catch {
+      return false;
+    }
+  })();
+
+  // RUL-004-01 (🔴 BLOQUEA): causaRaiz o correccionAplicada vacíos ⇒ no se puede autorizar.
+  // Se suma el payload: con ajuste marcado, el JSON debe ser válido.
+  const blnCanAuthorize =
+    !!objWatch[QD.strRootCause]?.trim()
+    && !!objWatch[QD.strCorrectionApplied]?.trim()
+    && blnPayloadJsonOk;
 
   // ACT-004-01 — autorizar el reenvío (valida causa raíz y corrección).
   const onAutorizar = handleSubmit((in_objData) =>
@@ -62,9 +76,6 @@ export default function RevisionErrorTecnicoApi() {
       </div>
     );
   }
-
-  // Indica si el analista debe ajustar el payload antes de reenviar.
-  const blnAdjustPayload = objWatch[QD.strPayloadAdjustNeeded] === 'SI';
 
   return (
     <div className="screen-wrapper">
@@ -171,6 +182,14 @@ export default function RevisionErrorTecnicoApi() {
               </ZrAlert>
             )}
 
+            {blnAdjustPayload && !blnPayloadJsonOk && (
+              <ZrAlert config="negative" {...({ 'hide-close': true } as object)}>
+                El <strong>Payload Enviado (JSON)</strong> no es un objeto JSON válido. Corríjalo
+                para poder autorizar el reenvío — de lo contrario la edición se descartaría y se
+                reenviarían los datos del caso sin sus ajustes.
+              </ZrAlert>
+            )}
+
             {!blnCanAuthorize && (
               <ZrAlert config="info" {...({ 'hide-close': true } as object)}>
                 Debe registrar la <strong>causa raíz</strong> y la <strong>corrección aplicada</strong>{' '}
@@ -179,16 +198,8 @@ export default function RevisionErrorTecnicoApi() {
             )}
           </FormSection>
 
-          {/* ── Acciones (ACT-004-01 / ACT-004-02) ── */}
+          {/* ── Acción (ACT-004-01) ── */}
           <ActionBar>
-            <ZrButton
-              config="secondary"
-              loading={submitting}
-              disabled={submitting}
-              onClick={() => enviar('ESCALAR_PROVEEDOR')}
-            >
-              Escalar a Proveedor
-            </ZrButton>
             <ZrButton
               config="positive"
               loading={submitting}
