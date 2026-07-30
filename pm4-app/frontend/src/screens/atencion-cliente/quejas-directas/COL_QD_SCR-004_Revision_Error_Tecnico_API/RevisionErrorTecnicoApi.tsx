@@ -129,8 +129,8 @@ export default function RevisionErrorTecnicoApi() {
                 readOnly={!blnAdjustPayload}
                 helpText={
                   blnAdjustPayload
-                    ? 'Ajuste el JSON del payload que se reenviará a SmartSupervision.'
-                    : 'JSON del payload del intento fallido — solo lectura.'
+                    ? 'Ajuste el JSON del body de cierre: si difiere del que genera el BPM, se reenviará este.'
+                    : 'JSON del body de cierre del intento fallido — solo lectura.'
                 }
               />
             </div>

@@ -101,6 +101,7 @@ Fuente: `Anexo02 > 10_Trazabilidad_BPMN > SCR-004 (fila 9)`.
 | Longitud máxima causa/corrección | `maxLength: 2000` con contador (UI). | **Suposición** (ver §10) — no especificada en insumos |
 | Campos de S1 solo lectura | `readOnly` en todos los FLD-050…055. | `Anexo02 > SCR-004 > 03_Campos` (columna Control UI = Label/Solo lectura) |
 | Payload editado debe ser JSON de objeto válido | Con FLD-058 = `SI`, se hace `JSON.parse` del textarea: si falla (o no es objeto) se bloquea "Autorizar Reenvío" y se muestra alerta negativa. | **Derivada de la implementación** — el script de M3 descarta un JSON inválido y reconstruye el body, así que la pantalla evita la edición silenciosamente perdida (ver §10.3) |
+| Payload vacío ⇒ se envía el generado | Si `qd_strPayloadSent` está vacío (caso nuevo, o limpiado tras un cierre 2xx), no hay nada que comparar y viaja el body reconstruido. | Implementación del script |
 
 ---
 
@@ -131,7 +132,7 @@ Fuente: `Anexo02 > 10_Trazabilidad_BPMN > SCR-004 (fila 9)`.
 | Comportamiento | Implementación | Fuente |
 |---|---|---|
 | Sección S1 con identidad de "error" | `FormSection color="var(--z-red)"` + `ZrAlert config="negative"` con nº de intento. | Inferido del tono de error (ver §10) |
-| Payload editable solo si "Requiere ajuste = Sí" | `readOnly={!blnAdjustPayload}`; alerta que indica editar el payload superior. **El script de Momento 3 firma y envía ese JSON tal cual** (`sfcPayloadCorregido`), y toma de él el `codigo_queja` del path para que cuerpo y ruta coincidan. | Deriva de FLD-058 + criterio "reenvío del **payload corregido**" (`Anexo02 > SCR-004 > Criterio de Aceptación`) |
+| Payload editable solo si "Requiere ajuste = Sí" | `readOnly={!blnAdjustPayload}`; alerta que indica editar el payload superior. **El script compara `qd_strPayloadSent` con el body que genera desde los campos del caso: si difiere, firma y envía el de la variable** (`sfcPayloadEditado` + `sfcMismoJson`), y toma de él el `codigo_queja` del path para que cuerpo y ruta coincidan. El flag ya no es requisito para que se use — solo habilita la edición. | Deriva de FLD-058 + criterio "reenvío del **payload corregido**" (`Anexo02 > SCR-004 > Criterio de Aceptación`) |
 | JSON inválido bloquea la autorización | Alerta negativa + botón deshabilitado mientras `JSON.parse` falle. | Implementación (ver §5) |
 | "Ver Log Completo" (ACT-004-03, Link) | `ZrButton config="link"` en el header de S1 abre un `ZrModal` **ancho** (`.modal-wide` + `.modal-scroll-body`, mismo ancho que `PreviewModal`) con **un único campo**: "Log Completo" (`qd_strCompleteLogAPI`, solo lectura). | `Anexo02 > SCR-004 > 04_Acciones > ACT-004-03` |
 | "Autorizar Reenvío" (ACT-004-01, Primaria) | `ZrButton config="positive"`, deshabilitado por RUL-004-01 y por JSON inválido; `completeTask` con `qd_strAction='AUTORIZAR_REENVIO'`. **Única acción de la pantalla.** | `Anexo02 > SCR-004 > ACT-004-01` |
@@ -163,10 +164,13 @@ Fuente: `Anexo02 > 10_Trazabilidad_BPMN > SCR-004 (fila 9)`.
 3. **Payload editable con FLD-058 = Sí.** El criterio de aceptación exige "reenvío del **payload
    corregido**"; se interpreta que marcar "¿Requiere ajuste en payload? = Sí" habilita la edición del
    JSON. No está descrito como interacción explícita en el mockup. **Implementado de punta a punta:**
-   el script de Momento 3 firma y envía ese JSON literal en vez de reconstruir el body; si el JSON no
-   es un objeto válido lo descarta y reconstruye (fallback defensivo), y la pantalla bloquea la
-   autorización en ese caso para que la edición nunca se pierda en silencio. La salida del script
-   informa cuál se usó en `payload_origen`.
+   `qd_strPayloadSent` es la variable del body de cierre; en cada ejecución el script genera el body
+   desde los campos y lo compara con la variable — si el **contenido** difiere (la indentación no
+   cuenta), envía el de la variable. Si el JSON no es un objeto válido lo descarta y reconstruye
+   (fallback defensivo), y la pantalla bloquea la autorización en ese caso para que la edición nunca se
+   pierda en silencio. La salida del script informa cuál se usó en `payload_origen`.
+   **La variable solo se sobrescribe cuando el paso que falla es el CIERRE:** si falla el anexo, su
+   payload es el descriptor del archivo y escribirlo ahí haría que luego se enviara como body de cierre.
 4. **`maxLength = 2000`** en causa raíz y corrección: límite razonable no especificado en insumos.
 5. **Identidad visual de error** (sección roja + alerta negativa): decisión de UX no dictada por el
    mockup, alineada con la pantalla análoga SCR-003 (`corregir-error-funcional-ss`).
