@@ -337,12 +337,13 @@ interface RadioProps<TFV extends FieldValues> {
   options: readonly ZdsRadioOption[];
   rules?: RegisterOptions<TFV, FieldPath<TFV>>;
   required?: boolean;
+  disabled?: boolean;
   error?: string;
   inline?: boolean;
 }
 
 export function ZdsRadio<TFV extends FieldValues>({
-  control, name, label, options, rules, required, error, inline,
+  control, name, label, options, rules, required, disabled, error, inline,
 }: RadioProps<TFV>) {
   const zdsOptions = options.map((o) => ({
     value:    o.value,
@@ -363,6 +364,7 @@ export function ZdsRadio<TFV extends FieldValues>({
           label={label}
           options={zdsOptions}
           required={required}
+          disabled={disabled}
           invalid={!!error}
           onChange={(val: string | null) => field.onChange(val ?? '')}
           onBlur={field.onBlur}

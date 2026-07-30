@@ -119,7 +119,7 @@ un token/propiedad interna, y su estado actual).
 | SCR-009 | qd_incluyeAnexosQueja | qd_strIncludesComplaintAnnex | string |
 | SCR-009 | qd_incluyeAdjuntoRespuesta | qd_strIncludesReplyAttach | string |
 | SCR-009, 010 | qd_pdfRespuestaFinal | qd_strFinalReplyPdf | string |
-| SCR-009 | qd_diasProrroga | qd_strExtensionDays | string |
+| SCR-009 | qd_diasProrroga | qd_strSlaDaysProlognated | string |
 | SCR-010 | qd_estadoCierreM3 | qd_strM3ClosureStatus | string |
 | SCR-010 | qd_intentosCierreM3 | qd_strM3ClosureAttempts | string |
 | SCR-010 | qd_ultimoError | qd_strLastError | string |

@@ -166,7 +166,7 @@ export const QD = {
   strIncludesComplaintAnnex: 'qd_strIncludesComplaintAnnex', // FLD-163 · antes qd_incluyeAnexosQueja
   strIncludesReplyAttach: 'qd_strIncludesReplyAttach', // FLD-164 · antes qd_incluyeAdjuntoRespuesta
   strFinalReplyPdf: 'qd_strFinalReplyPdf',             // FLD-165/181 · antes qd_pdfRespuestaFinal
-  strExtensionDays: 'qd_strExtensionDays',             // FLD-166 · antes qd_diasProrroga
+  strSlaDaysProlognated: 'qd_strSlaDaysProlognated',   // FLD-166 · antes qd_diasProrroga / qd_strExtensionDays
 
   // ── SCR-010 · Cierre Regulatorio Momento 3 ────────────────────────────────
   strM3ClosureStatus: 'qd_strM3ClosureStatus',         // FLD-170 · antes qd_estadoCierreM3
@@ -360,7 +360,7 @@ export interface QdFields {
   qd_strIncludesComplaintAnnex: string;
   qd_strIncludesReplyAttach: string;
   qd_strFinalReplyPdf: string; // id de archivo PM4 (ver resolveFileId), no el nombre del PDF
-  qd_strExtensionDays: string;
+  qd_strSlaDaysProlognated: string;
 
   // SCR-010
   qd_strM3ClosureStatus: string;
@@ -825,7 +825,7 @@ export type FormularioSuperintendenciaFormData = Omit<Pick<QdFields,
   | typeof QD.strFraudRelated | typeof QD.strFraudType | typeof QD.strFraudModality
   | typeof QD.strClaimedAmount | typeof QD.strAcknowledgedAmount
   | typeof QD.strIncludesComplaintAnnex | typeof QD.strIncludesReplyAttach
-  | typeof QD.strFinalReplyPdf | typeof QD.strExtensionDays
+  | typeof QD.strFinalReplyPdf | typeof QD.strSlaDaysProlognated
   // Cierre Regulatorio M3 (fusionado desde la ex SCR-010): estado del envío a la
   // SFC, fechas de cierre y datos de entidad — todos "Back", solo se reenvían.
   | typeof QD.strM3ClosureStatus | typeof QD.strM3ClosureAttempts | typeof QD.strLastError
@@ -865,7 +865,7 @@ export const SCR009_DEFAULTS: Partial<FormularioSuperintendenciaFormData> = {
   [QD.strTutela]: '', [QD.strMarking]: '', [QD.strExpressComplaint]: '',
   [QD.strFraudRelated]: 'NO',
   [QD.strFraudType]: '', [QD.strFraudModality]: '', [QD.strClaimedAmount]: '', [QD.strAcknowledgedAmount]: '',
-  [QD.strIncludesComplaintAnnex]: 'SI', [QD.strIncludesReplyAttach]: 'SI', [QD.strExtensionDays]: '0',
+  [QD.strIncludesComplaintAnnex]: 'SI', [QD.strIncludesReplyAttach]: 'SI', [QD.strSlaDaysProlognated]: '1',
   [QD.strFinalReplyPdf]: '',
   // Cierre Regulatorio M3 (fusionado desde la ex SCR-010) — todos "Back".
   [QD.strM3ClosureStatus]: '', [QD.strM3ClosureAttempts]: '0', [QD.strLastError]: '',

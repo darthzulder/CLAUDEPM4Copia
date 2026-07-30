@@ -126,10 +126,10 @@ Los campos marcados con valor por default en el Excel deben **existir y estar ll
 
 | Campo (UI) | Variable | Tipo | Obligatorio | Fuente |
 |---|---|---|---|---|
-| **¿Incluye Anexos a la Queja?** | `qd_strIncludesComplaintAnnex` | `ZdsRadio` inline (editable) | **Sí** | FLD-163 |
-| **¿Incluye Adjunto Respuesta Final?** | `qd_strIncludesReplyAttach` | `ZdsRadio` inline (editable) | **Sí** | FLD-164 |
+| **¿Incluye Anexos a la Queja?** | `qd_strIncludesComplaintAnnex` | `ZdsRadio` inline, fijo en "Sí" y `disabled` | **Sí** | FLD-163 |
+| **¿Incluye Adjunto Respuesta Final?** | `qd_strIncludesReplyAttach` | `ZdsRadio` inline, fijo en "Sí" y `disabled` | **Sí** | FLD-164 |
 | PDF Respuesta Final (generado) | `qd_strFinalReplyPdf` | `RequestFileList` (previsualizar + descargar) | No | FLD-165 |
-| Prórroga (días, si aplica) | `qd_strExtensionDays` | solo lectura (info-bar) | 🔴 Back, automático (Excel #55) | FLD-166 |
+| Prórroga (Código) | `qd_strSlaDaysProlognated` | solo lectura (info-bar), default `'1'` | 🔴 Back, automático (Excel #55) | FLD-166 |
 
 ### Metadato de flujo (no visible)
 
@@ -183,7 +183,7 @@ Los campos regulatorios ya no se validan en front (son Back, solo lectura). Solo
 | Campos regulatorios solo lectura (S2/S3) | Pares label/valor (`Ro` + `descOpt`) en grids `cols-2`/`cols-3`; conservan el código en el payload | Excel PQRS V3.0 sección "Cierre" |
 | Selects/inputs editables | Condición Especial (`ZdsSelect` requerido) + Tipo/Modalidad de Fraude (`ZdsSelect`) + Montos (`ZdsInput`), estos 4 obligatorios solo si fraude=Sí | Excel #23/#26/#57/#58/#61 |
 | Sección de fraude condicional | render por `qd_strFraudRelated='SI'`; `qd_strFraudRelated` solo lectura, resto editable | SEC-031 |
-| Anexos editables | 2 `ZdsRadio` requeridos (`qd_strIncludesComplaintAnnex`, `qd_strIncludesReplyAttach`) | FLD-163/164 |
+| Anexos fijos en "Sí" (solo lectura) | 2 `ZdsRadio` `disabled` con valor por defecto `'SI'` (`qd_strIncludesComplaintAnnex`, `qd_strIncludesReplyAttach`) | FLD-163/164 |
 | Previsualizar/descargar el PDF generado | `RequestFileList` filtra los archivos del request por `data_name=qd_strFinalReplyPdf` | FLD-165 |
 | Estados loading/error/submitting | `ZrLoader`, `ZrAlert`, botones `loading/disabled` | CLAUDE.md |
 

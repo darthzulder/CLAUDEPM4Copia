@@ -68,11 +68,12 @@ export default function SeccionFraudeAnexos({ form, err, requestId }: Props) {
       {/* ── S5 · Anexos del Formulario (SEC-032) ── */}
       <FormSection title="Anexos del Formulario">
         <div className="form-row cols-2">
+          {/* FLD-163/164 — siempre "Sí" (Excel #163/164): se muestran fijos y de solo lectura. */}
           <ZdsRadio name={QD.strIncludesComplaintAnnex} control={control} label="¿Incluye Anexos a la Queja?"
-            options={OPTIONS_SI_NO} inline required
+            options={OPTIONS_SI_NO} inline required disabled
             rules={{ required: 'Campo requerido' }} error={err(QD.strIncludesComplaintAnnex)} />
           <ZdsRadio name={QD.strIncludesReplyAttach} control={control} label="¿Incluye Adjunto Respuesta Final?"
-            options={OPTIONS_SI_NO} inline required
+            options={OPTIONS_SI_NO} inline required disabled
             rules={{ required: 'Campo requerido' }} error={err(QD.strIncludesReplyAttach)} />
         </div>
         <RequestFileList
@@ -82,9 +83,9 @@ export default function SeccionFraudeAnexos({ form, err, requestId }: Props) {
           emptyText="Aún no se ha generado el PDF de respuesta final."
           loadingText="Buscando el PDF de respuesta final…"
         />
-        {/* Prórroga (días) — "Back", automático (Excel PQRS V3.0 #55). */}
+        {/* Prórroga (código) — "Back", automático (Excel PQRS V3.0 #55). */}
         <div className="form-row cols-2">
-          <Ro label="Prórroga (días, si aplica)" value={objWatch[QD.strExtensionDays] || '0'} />
+          <Ro label="Prórroga (Código)" value={objWatch[QD.strSlaDaysProlognated] || '1'} />
           <div />
         </div>
       </FormSection>
