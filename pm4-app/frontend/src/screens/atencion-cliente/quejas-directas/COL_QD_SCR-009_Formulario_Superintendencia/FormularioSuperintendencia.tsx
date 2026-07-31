@@ -18,6 +18,24 @@ import type { FormularioSuperintendenciaFormData, AccionFormularioSFC } from '..
 import SeccionFraudeAnexos from './SeccionFraudeAnexos';
 import SeccionCierreEnvio from './SeccionCierreEnvio';
 
+// Fecha/hora actual en zona horaria Colombia (Bogotá, UTC-5 sin DST),
+// formato SFC (YYYY-MM-DDThh:mm:ss), sin importar la zona horaria del navegador/servidor.
+function hoyBogotaISO(): string {
+  const objParts = new Intl.DateTimeFormat('en-CA', {
+    timeZone: 'America/Bogota',
+    year: 'numeric',
+    month: '2-digit',
+    day: '2-digit',
+    hour: '2-digit',
+    minute: '2-digit',
+    second: '2-digit',
+    hourCycle: 'h23',
+  }).formatToParts(new Date());
+  const objMap: Record<string, string> = {};
+  for (const objPart of objParts) objMap[objPart.type] = objPart.value;
+  return `${objMap.year}-${objMap.month}-${objMap.day}T${objMap.hour}:${objMap.minute}:${objMap.second}`;
+}
+
 // Par etiqueta/valor de solo lectura (mismo patrón que SCR-0051 / SCR-010).
 export function Ro({ label, value }: { label: string; value: string }) {
   return (
@@ -88,9 +106,9 @@ export default function FormularioSuperintendencia() {
     // igual viajen. El adjunto de respuesta final se fuerza siempre a "SI"
     // (el PDF lo genera el proceso).
     // Fecha de Actualización y Fecha de Cierre se autocompletan con la fecha y hora
-    // actuales (YYYY-MM-DDThh:mm:ss, formato SFC) y son idénticas; en la sección de
-    // cierre son readOnly, así que el gestor no puede modificarlas.
-    const strHoyISO = new Date().toISOString().slice(0, 19);
+    // actuales en horario Colombia (YYYY-MM-DDThh:mm:ss, formato SFC) y son idénticas;
+    // en la sección de cierre son readOnly, así que el gestor no puede modificarlas.
+    const strHoyISO = hoyBogotaISO();
     reset({
       ...DEFAULTS,
       ...objData,
