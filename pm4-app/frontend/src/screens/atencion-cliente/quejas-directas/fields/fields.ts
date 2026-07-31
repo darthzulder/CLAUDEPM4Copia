@@ -79,6 +79,8 @@ export const QD = {
   blnDataAuth: 'qd_blnDataAuth',                       // FLD-335 · antes qd_autorizacionDatos
   blnCaptcha: 'qd_blnCaptcha',                         // FLD-336 · antes qd_captcha
   strCcEmail: 'qd_strCcEmail',                         // FLD-337 · antes qd_correoCopia
+  // Siempre se envía en false al radicar desde SCR-000 (la solicitud aún no tiene caso SmartSupervision).
+  blnSmartSupervisionCase: 'qd_blnSmartSupervisionCase',
 
   // ── SCR-000 · S5/S6 Estado ante SFC / Responsable (post-radicación, back) ─
   strSmartSupStatus: 'qd_strSmartSupStatus',           // FLD-338 · antes qd_estadoSmartSupervision
@@ -292,6 +294,7 @@ export interface QdFields {
   qd_blnDataAuth: boolean;
   qd_blnCaptcha: boolean;
   qd_strCcEmail: string;
+  qd_blnSmartSupervisionCase: boolean;
   qd_strSmartSupStatus: string;
   qd_strSfcFilingDate: string;
   qd_strAssigneeRole: string;
@@ -561,6 +564,8 @@ export type CrearRecibirQuejaFormData = Pick<QdFields,
   | typeof QD.strReconsiderationSacEscalation
   // Derivada al radicar (réplica "Sí" + sin coincidencias del chequeo similar) — ver QD.strMarking.
   | typeof QD.strMarking
+  // Siempre false al radicar desde SCR-000 — ver QD.blnSmartSupervisionCase.
+  | typeof QD.blnSmartSupervisionCase
 >>;
 
 export const SCR000_DEFAULTS = {
@@ -610,6 +615,7 @@ export const SCR000_DEFAULTS = {
   [QD.blnDataAuth]: false,
   [QD.blnCaptcha]: false,
   [QD.strCcEmail]: '',
+  [QD.blnSmartSupervisionCase]: false,
   // S5/S6 — Estado ante SFC / Responsable (post-radicación, back; solo visibles si aplica)
   [QD.strSmartSupStatus]: '',
   [QD.strSfcFilingDate]: '',

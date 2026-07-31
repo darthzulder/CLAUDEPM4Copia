@@ -303,6 +303,8 @@ export default function CrearRecibirQueja() {
       ...objPendingSimilar,
       [QD.strReconsiderationSacEscalation]: blnReconsiderationEscalation,
       [QD.strMarking]: strMarking,
+      // Siempre false al radicar desde SCR-000: la solicitud aún no tiene caso SmartSupervision.
+      [QD.blnSmartSupervisionCase]: false,
     });
     // En éxito, sendToPm4 pone blnSent=true y se muestra la pantalla de confirmación;
     // si falló, quitamos el overlay para que el usuario vea el form y el error.
