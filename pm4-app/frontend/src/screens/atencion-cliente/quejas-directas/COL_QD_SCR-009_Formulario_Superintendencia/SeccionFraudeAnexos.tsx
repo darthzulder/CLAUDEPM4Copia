@@ -85,7 +85,7 @@ export default function SeccionFraudeAnexos({ form, err, requestId }: Props) {
         />
         {/* Prórroga (código) — "Back", automático (Excel PQRS V3.0 #55). */}
         <div className="form-row cols-2">
-          <Ro label="Prórroga (Código)" value={objWatch[QD.strSlaDaysProlognated] || '1'} />
+          <Ro label="Prórroga (días, si aplica)" value={objWatch[QD.strExtensionDays] || '1'} />
           <div />
         </div>
       </FormSection>
