@@ -75,18 +75,25 @@ export function useTask() {
     [task]
   );
 
-  // Reasigna la tarea actual a otro usuario PM4 (user_id) sin completarla: se conserva el
-  // status actual de la tarea, así la tarea sigue activa y el flujo BPM no avanza de nodo.
+  // Reasigna la tarea actual a otro usuario PM4 (user_id) sin completarla. Confirmado
+  // contra la UI real de PM4 (curl del navegador): el PUT que reasigna lleva SOLO
+  // { user_id } — mezclarlo con status/data en el mismo PUT hace que PM4 no reasigne.
+  // Los datos del formulario se guardan aparte, vía PUT /requests/{id} (mismo mecanismo
+  // que "Guardar Borrador"), sin tocar el status de la tarea.
   const reassignTask = useCallback(
     async (in_dicFormData: Record<string, unknown>, in_strUserId: string) => {
       if (!task?.id) throw new Error('No hay task_id resuelto');
       setSubmitting(true);
       try {
-        const objPayload = { status: task.status, user_id: in_strUserId, data: in_dicFormData };
-        console.log(`[useTask] Reasignando task_id=${task.id} a user_id=${in_strUserId}:`, objPayload);
-        const objResponse = await pm4.put(`/tasks/${task.id}`, objPayload);
-        console.log('[useTask] Respuesta de PM4:', objResponse.data);
-        return objResponse.data;
+        console.log(`[useTask] Reasignando task_id=${task.id} a user_id=${in_strUserId}`);
+        const objReassignResp = await pm4.put(`/tasks/${task.id}`, { user_id: in_strUserId });
+        console.log('[useTask] Respuesta de PM4 (reasignar):', objReassignResp.data);
+
+        if (task.process_request_id) {
+          const objDataResp = await pm4.put(`/requests/${task.process_request_id}`, { data: in_dicFormData });
+          console.log('[useTask] Respuesta de PM4 (guardar datos):', objDataResp.data);
+        }
+        return objReassignResp.data;
       } finally {
         setSubmitting(false);
       }
