@@ -75,6 +75,25 @@ export function useTask() {
     [task]
   );
 
+  // Reasigna la tarea actual a otro usuario PM4 (user_id) sin completarla: se conserva el
+  // status actual de la tarea, así la tarea sigue activa y el flujo BPM no avanza de nodo.
+  const reassignTask = useCallback(
+    async (in_dicFormData: Record<string, unknown>, in_strUserId: string) => {
+      if (!task?.id) throw new Error('No hay task_id resuelto');
+      setSubmitting(true);
+      try {
+        const objPayload = { status: task.status, user_id: in_strUserId, data: in_dicFormData };
+        console.log(`[useTask] Reasignando task_id=${task.id} a user_id=${in_strUserId}:`, objPayload);
+        const objResponse = await pm4.put(`/tasks/${task.id}`, objPayload);
+        console.log('[useTask] Respuesta de PM4:', objResponse.data);
+        return objResponse.data;
+      } finally {
+        setSubmitting(false);
+      }
+    },
+    [task]
+  );
+
   // Guarda los datos del caso sin completar/avanzar la tarea (p.ej. "Guardar Borrador").
   const saveDraft = useCallback(
     async (in_dicFormData: Record<string, unknown>) => {
@@ -112,5 +131,5 @@ export function useTask() {
     [strProcessId, strEventId]
   );
 
-  return { task, loading, error, submitting, completeTask, saveDraft, startProcess, isWebEntry };
+  return { task, loading, error, submitting, completeTask, saveDraft, reassignTask, startProcess, isWebEntry };
 }

@@ -31,7 +31,7 @@ const CLASSIFICATION_FIELDS = [
 ] as const;
 
 export default function DetalleReasignacionRespuesta() {
-  const { task, loading, error, submitting, completeTask, saveDraft } = useTask();
+  const { task, loading, error, submitting, completeTask, saveDraft, reassignTask } = useTask();
   const fileRegistry = useRef(new Map<string, File>());
   const [blnShowExpediente, setBlnShowExpediente] = useState(false);
   const [blnShowPreview, setBlnShowPreview] = useState(false);
@@ -158,10 +158,22 @@ export default function DetalleReasignacionRespuesta() {
     const blnOk = await enviarCon('GUARDAR_BORRADOR')(objWatch);
     if (blnOk) window.top!.location.href = pm4TasksUrl();
   };
-  // ACT-0051-04 Solicitar Prórroga · ACT-0051-01 Reasignar
-  // (sin validación bloqueante — envían los valores actuales del formulario directamente).
+  // ACT-0051-04 Solicitar Prórroga (sin validación bloqueante — envía los valores
+  // actuales del formulario directamente).
   const onSolicitarProrroga = () => enviarCon('SOLICITAR_PRORROGA')(objWatch);
-  const onReasignarQueja = () => enviarCon('CONFIRMAR_ASIGNACION')(objWatch);
+
+  // ACT-0051-01 Reasignar — solo cambia el responsable (PUT /tasks/{id} { user_id, data },
+  // mismo status): NO completa la tarea ni avanza el flujo BPM, a diferencia de las demás
+  // acciones de enviarCon.
+  const onReasignarQueja = async (in_strUserId?: string) => {
+    if (!in_strUserId) return;
+    const objPayload = { ...objWatch, [QD.strAction]: 'CONFIRMAR_ASIGNACION' } as unknown as Record<string, unknown>;
+    try {
+      await reassignTask(objPayload, in_strUserId);
+    } catch (exc) {
+      console.error('[DetalleReasignacionRespuesta] Error al reasignar:', exc);
+    }
+  };
   // La sección de asignación pasa el snapshot fresco del formulario (incluye la fila
   // recién agregada al historial), evitando el stale closure de watch() tras setValue.
   const onSolicitarAyuda = (in_objData?: DetalleReasignacionRespuestaFormData) =>

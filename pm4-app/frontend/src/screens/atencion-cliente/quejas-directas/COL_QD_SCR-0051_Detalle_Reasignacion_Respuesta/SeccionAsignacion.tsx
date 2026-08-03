@@ -36,7 +36,9 @@ function opcionesUnicas(in_cll: { value: string; label: string }[]): { value: st
 interface Props {
   form: UseFormReturn<DetalleReasignacionRespuestaFormData>;
   err: (name: keyof DetalleReasignacionRespuestaFormData) => string | undefined;
-  onConfirmarReasignacion: () => void;
+  // ACT-0051-01 — recibe el user_id (PM4) del usuario elegido para reasignar la tarea
+  // sin completarla; undefined si no se pudo resolver (p.ej. options aún cargando).
+  onConfirmarReasignacion: (userId?: string) => void;
   onSolicitarAyuda: (data?: DetalleReasignacionRespuestaFormData) => void;
   submitting: boolean;
 }
@@ -87,7 +89,9 @@ export default function SeccionAsignacion({ form, err, onConfirmarReasignacion, 
   // Usuarios reales del grupo PM4 elegido en "Área a reasignar" (GET /groups?filter= +
   // GET /groups/{id}/users). Se listan mientras se está reasignando, para poder elegir
   // otro miembro del mismo grupo sin perder la asignación original si no se cambia nada.
-  const [cllGroupUsers, setCllGroupUsers] = useState<{ value: string; label: string }[]>([]);
+  // `id` (numérico, PM4) viaja junto a value/label — lo necesita ACT-0051-01 para reasignar
+  // la tarea vía PUT /tasks/{id} { user_id }, sin completarla.
+  const [cllGroupUsers, setCllGroupUsers] = useState<{ value: string; label: string; id: string }[]>([]);
   const strPrevGroupRef = useRef<string | null>(null);
   useEffect(() => {
     const strGroupName = objWatch[QD.strAssigneeArea] || '';
@@ -108,11 +112,12 @@ export default function SeccionAsignacion({ form, err, onConfirmarReasignacion, 
         if (!objGroup) { if (blnActive) setCllGroupUsers([]); return; }
 
         const objUsersResp = await pm4.get(`/groups/${objGroup.id}/users`, { params: { per_page: 100 } });
-        const lstUsers: { username: string; firstname?: string; lastname?: string }[] = objUsersResp.data?.data ?? [];
+        const lstUsers: { id: number | string; username: string; firstname?: string; lastname?: string }[] = objUsersResp.data?.data ?? [];
         const cllMapped = lstUsers
           .map((objUser) => ({
             value: objUser.username,
             label: `${objUser.firstname ?? ''} ${objUser.lastname ?? ''}`.trim() || objUser.username,
+            id: String(objUser.id),
           }))
           .filter((objOpt) => !!objOpt.value);
 
@@ -233,7 +238,9 @@ export default function SeccionAsignacion({ form, err, onConfirmarReasignacion, 
               <ZrButton
                 config="positive" loading={submitting}
                 disabled={submitting || !objWatch[QD.strAssigneeUser]}
-                onClick={onConfirmarReasignacion}
+                onClick={() => onConfirmarReasignacion(
+                  cllGroupUsers.find((objOpt) => objOpt.value === objWatch[QD.strAssigneeUser])?.id
+                )}
               >
                 Confirmar Reasignación
               </ZrButton>
