@@ -547,7 +547,8 @@ export type CrearRecibirQuejaFormData = Pick<QdFields,
   | typeof QD.strCompanyName | typeof QD.strContactFirstName | typeof QD.strContactLastName
   | typeof QD.strPhone | typeof QD.strEmail | typeof QD.strPersonType | typeof QD.strCountryCode
   | typeof QD.strDepartment | typeof QD.strCity | typeof QD.strAddress | typeof QD.strSex
-  | typeof QD.strLgbtiq | typeof QD.strSpecialCondition | typeof QD.strSfcProduct | typeof QD.strPlate
+  | typeof QD.strLgbtiq | typeof QD.strSpecialCondition | typeof QD.strDigitalProduct
+  | typeof QD.strComplaintStatus | typeof QD.strSfcProduct | typeof QD.strPlate
   | typeof QD.strProductDetail | typeof QD.strReply | typeof QD.strReplyArgument
   | typeof QD.strOmbudsmanEscalation | typeof QD.strResponsableRole | typeof QD.strCompensation | typeof QD.strSlaAssigned
   | typeof QD.strInteraction | typeof QD.strServiceProvided | typeof QD.strFraudRelated
@@ -591,6 +592,12 @@ export const SCR000_DEFAULTS = {
   [QD.strCountryCode]: DEFAULT_COUNTRY_CODE, // RUL-000-10
   [QD.strDepartment]: '',
   [QD.strCity]: '',
+  // Back, oculto en SCR-000: se garantiza en '2' (="No") para que viaje desde
+  // la radicación, mismo default "No" que SCR009_BACK_DEFAULTS (Excel #54).
+  [QD.strDigitalProduct]: '2',
+  // Back, oculto en SCR-000: se garantiza en '2' (="Abierta", colección 42:
+  // 1=Recibida, 2=Abierta, 4=Cerrada) para que viaje desde la radicación.
+  [QD.strComplaintStatus]: '2',
   // S3 — Detalle de la Queja
   [QD.strSfcProduct]: '',
   [QD.strProductDetail]: '',
