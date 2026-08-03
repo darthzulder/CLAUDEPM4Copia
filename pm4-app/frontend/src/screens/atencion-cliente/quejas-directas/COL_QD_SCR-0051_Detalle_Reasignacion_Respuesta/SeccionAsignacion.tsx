@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import type { UseFormReturn } from 'react-hook-form';
 import FormSection from '../../../../components/FormSection';
 import {
@@ -10,6 +10,28 @@ import pm4 from '../../../../api/pm4Client';
 import { QD, QD_COLLECTIONS, OPTIONS_SI_NO, SCR0051_MAX_AYUDANTES as MAX_AYUDANTES } from '../fields/fields';
 import type { DetalleReasignacionRespuestaFormData } from '../fields/fields';
 import type { AsignacionHistorial } from '../fields/types';
+
+// ── Helpers de la matriz cat_matriz_motivos (id 45) ──────────────────────────
+// Los datos vienen "sucios" (espacios sobrantes), por eso normalizamos antes de comparar.
+const normalizar = (in_gen: unknown) => String(in_gen ?? '').trim().toLowerCase();
+
+// Lee una columna del registro crudo de la matriz (los campos viven bajo `data`).
+function leerColumna(in_objRow: Record<string, unknown>, in_strCol: string): string {
+  const dicData = (in_objRow.data ?? in_objRow) as Record<string, unknown>;
+  return String(dicData?.[in_strCol] ?? '').trim();
+}
+
+// Opciones únicas por value, descartando vacíos (una columna se repite en la matriz).
+function opcionesUnicas(in_cll: { value: string; label: string }[]): { value: string; label: string }[] {
+  const setSeen = new Set<string>();
+  const cllOut: { value: string; label: string }[] = [];
+  for (const objOpt of in_cll) {
+    if (!objOpt.value || setSeen.has(objOpt.value)) continue;
+    setSeen.add(objOpt.value);
+    cllOut.push(objOpt);
+  }
+  return cllOut;
+}
 
 interface Props {
   form: UseFormReturn<DetalleReasignacionRespuestaFormData>;
@@ -54,10 +76,58 @@ export default function SeccionAsignacion({ form, err, onConfirmarReasignacion, 
   const { options: cllArea } = useCollection(QD_COLLECTIONS.area);
   const { options: cllReassignReason } = useCollection(QD_COLLECTIONS.reassignReason);
 
-  // RUL-0051-02 — usuarios filtrados por área seleccionada (asignación inicial).
-  // Shim de dependencia: 'qd_strAreaCode' es una convención interna (no un campo PM4
-  // real, ver fields/MAPEO_qd_old_new.md #2) — coincide con el dependsOn sin cambios.
-  const { options: cllAreaUsers } = useCollection(QD_COLLECTIONS.areaUsers, { qd_strAreaCode: objWatch[QD.strAssigneeArea] });
+  // "Área a reasignar" — grupos de ProcessMaker: valores únicos de la columna
+  // rolResponsable de cat_matriz_motivos (id 45), no un catálogo de áreas (CAT-AREA).
+  const { records: cllMatrizRows } = useCollection(QD_COLLECTIONS.matrixMotivos);
+  const cllReassignGroups = opcionesUnicas(cllMatrizRows.map((objRow) => {
+    const strRol = leerColumna(objRow, 'rolResponsable');
+    return { value: strRol, label: strRol };
+  }));
+
+  // Usuarios reales del grupo PM4 elegido en "Área a reasignar" (GET /groups?filter= +
+  // GET /groups/{id}/users). Se listan mientras se está reasignando, para poder elegir
+  // otro miembro del mismo grupo sin perder la asignación original si no se cambia nada.
+  const [cllGroupUsers, setCllGroupUsers] = useState<{ value: string; label: string }[]>([]);
+  const strPrevGroupRef = useRef<string | null>(null);
+  useEffect(() => {
+    const strGroupName = objWatch[QD.strAssigneeArea] || '';
+    const strPrevGroup = strPrevGroupRef.current;
+    strPrevGroupRef.current = strGroupName;
+    // Autocompletar el primer usuario solo cuando el grupo cambia por una selección real
+    // del usuario en modo reasignación — no al precargar el área ya asignada desde task.data.
+    const blnUserChangedGroup = blnReassignMode && strPrevGroup !== null && strPrevGroup !== strGroupName;
+
+    if (!blnReassignMode || !strGroupName) { setCllGroupUsers([]); return; }
+
+    let blnActive = true;
+    (async () => {
+      try {
+        const objGroupsResp = await pm4.get('/groups', { params: { filter: strGroupName, per_page: 100 } });
+        const lstGroups: { id: string; name?: string }[] = objGroupsResp.data?.data ?? [];
+        const objGroup = lstGroups.find((objG) => normalizar(objG.name) === normalizar(strGroupName)) ?? lstGroups[0];
+        if (!objGroup) { if (blnActive) setCllGroupUsers([]); return; }
+
+        const objUsersResp = await pm4.get(`/groups/${objGroup.id}/users`, { params: { per_page: 100 } });
+        const lstUsers: { username: string; firstname?: string; lastname?: string }[] = objUsersResp.data?.data ?? [];
+        const cllMapped = lstUsers
+          .map((objUser) => ({
+            value: objUser.username,
+            label: `${objUser.firstname ?? ''} ${objUser.lastname ?? ''}`.trim() || objUser.username,
+          }))
+          .filter((objOpt) => !!objOpt.value);
+
+        if (!blnActive) return;
+        setCllGroupUsers(cllMapped);
+        // ACT-0051 (nuevo) — al elegir un grupo distinto se autocompleta con su primer usuario.
+        if (blnUserChangedGroup) setValue(QD.strAssigneeUser, cllMapped[0]?.value ?? '');
+      } catch (excError) {
+        console.error('[SeccionAsignacion] Error al buscar usuarios del grupo PM4:', excError);
+        if (blnActive) setCllGroupUsers([]);
+      }
+    })();
+    return () => { blnActive = false; };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [objWatch[QD.strAssigneeArea], blnReassignMode]);
 
   // FLD-092 — responsables del área destino de reasignación (autocompletado).
   const { options: cllTargetAreaUsers } = useCollection(QD_COLLECTIONS.areaUsers, { qd_strAreaCode: objWatch[QD.strTargetArea] });
@@ -66,8 +136,8 @@ export default function SeccionAsignacion({ form, err, onConfirmarReasignacion, 
   }, [cllTargetAreaUsers, setValue]);
 
   // Sincroniza la variable compañera <campo>_desc con la descripción del código (para PM4).
-  useSyncDesc(form, QD.strAssigneeArea, cllArea);
-  useSyncDesc(form, QD.strAssigneeUser, cllAreaUsers);
+  useSyncDesc(form, QD.strAssigneeArea, cllReassignGroups);
+  useSyncDesc(form, QD.strAssigneeUser, cllGroupUsers);
   useSyncDesc(form, QD.strTargetArea, cllArea);
   useSyncDesc(form, QD.strReassignReason, cllReassignReason);
 
@@ -134,18 +204,18 @@ export default function SeccionAsignacion({ form, err, onConfirmarReasignacion, 
       {!blnReturnedBySac && (<>
       {/* ── S5 · Asignación de Responsable (SEC-051) ── */}
       {/* Siempre visible; datos pre-calculados por el BPM. Editable solo en blnReassignMode. */}
-      <FormSection title="Asignación de Responsable">
+      <FormSection title="Reasignación de Responsable">
         <div className="form-row cols-2">
           <ZdsSelect
-            name={QD.strAssigneeArea} control={control} label="Área responsable"
-            options={cllArea} withSearch disabled={!blnReassignMode}
-            helpText="Áreas habilitadas para quejas (CAT-AREA)."
+            name={QD.strAssigneeArea} control={control} label="Área a reasignar"
+            options={cllReassignGroups} withSearch disabled={!blnReassignMode}
+            helpText="Grupos de ProcessMaker (rolResponsable de CAT-MATRIZ-MOTIVOS)."
           />
           <ZdsSelect
             name={QD.strAssigneeUser} control={control} label="Usuario responsable"
-            options={cllAreaUsers} withSearch
+            options={cllGroupUsers} withSearch
             disabled={!blnReassignMode || !objWatch[QD.strAssigneeArea]}
-            helpText="Solo usuarios autorizados del área."
+            helpText="Autocompletado con el primer usuario del grupo elegido."
           />
         </div>
         {blnReassignMode && (

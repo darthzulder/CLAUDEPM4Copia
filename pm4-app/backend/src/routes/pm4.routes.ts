@@ -194,6 +194,13 @@ router.get('/collections/:id/records', (req, res) =>
   pm4Request('GET', `/collections/${req.params.id}/records`, req, res)
 );
 
+// Groups (equipos/roles de ProcessMaker) — usado por SCR-0051 para resolver el
+// grupo elegido en "Área a reasignar" y su primer usuario.
+router.get('/groups', (req, res) => pm4Request('GET', '/groups', req, res));
+router.get('/groups/:group_id/users', (req, res) =>
+  pm4Request('GET', `/groups/${req.params.group_id}/users`, req, res)
+);
+
 // Scripts (watchers) — PM4 path is /scripts/execute/{id}, not /scripts/{id}/execute
 router.post('/scripts/:id/execute', (req, res) =>
   pm4Request('POST', `/scripts/execute/${req.params.id}`, req, res)
