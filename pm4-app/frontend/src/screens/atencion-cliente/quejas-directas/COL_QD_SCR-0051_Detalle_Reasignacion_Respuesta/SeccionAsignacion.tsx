@@ -108,6 +108,10 @@ export default function SeccionAsignacion({ form, err, onConfirmarReasignacion, 
   // value/label — lo necesita ACT-0051-01 para reasignar la tarea vía PUT /tasks/{id}
   // { user_id }, sin completarla.
   const [cllGroupUsers, setCllGroupUsers] = useState<{ value: string; label: string; id: string }[]>([]);
+  // Loading real (no solo "hay opciones o no"): evita que "Confirmar Reasignación" quede
+  // habilitado por tener un qd_strAssigneeUser precargado mientras cllGroupUsers todavía
+  // está vacío por estar cargando (o por no encontrar coincidencia) — RUL-0051-01-bis abajo.
+  const [blnGroupUsersLoading, setBlnGroupUsersLoading] = useState(false);
   const strPrevGroupRef = useRef<string | null>(null);
   useEffect(() => {
     const strGroupName = objWatch[QD.strAssigneeArea] || '';
@@ -117,9 +121,10 @@ export default function SeccionAsignacion({ form, err, onConfirmarReasignacion, 
     // del usuario en modo reasignación — no al precargar el área ya asignada desde task.data.
     const blnUserChangedGroup = blnReassignMode && strPrevGroup !== null && strPrevGroup !== strGroupName;
 
-    if (!blnReassignMode || !strGroupName) { setCllGroupUsers([]); return; }
+    if (!blnReassignMode || !strGroupName) { setCllGroupUsers([]); setBlnGroupUsersLoading(false); return; }
 
     let blnActive = true;
+    setBlnGroupUsersLoading(true);
     fetchGroupUsers(strGroupName)
       .then((cllMapped) => {
         if (!blnActive) return;
@@ -130,10 +135,16 @@ export default function SeccionAsignacion({ form, err, onConfirmarReasignacion, 
       .catch((excError) => {
         console.error('[SeccionAsignacion] Error al buscar usuarios del grupo PM4:', excError);
         if (blnActive) setCllGroupUsers([]);
-      });
+      })
+      .finally(() => { if (blnActive) setBlnGroupUsersLoading(false); });
     return () => { blnActive = false; };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [objWatch[QD.strAssigneeArea], blnReassignMode]);
+
+  // Usuario elegido, ya resuelto contra cllGroupUsers (con su id real de PM4). Si viene
+  // undefined (grupo aún cargando, o el username precargado no está en este grupo — p.ej.
+  // dato legado de antes de este cambio) NO se puede reasignar todavía: RUL-0051-01-bis.
+  const objSelectedAssigneeUser = cllGroupUsers.find((objOpt) => objOpt.value === objWatch[QD.strAssigneeUser]);
 
   // "Responsable" (S6, solicitud de ayuda) — usuarios reales del grupo PM4 elegido en
   // "Área destino"; misma mecánica que "Usuario responsable" en S5, salvo que
@@ -194,14 +205,20 @@ export default function SeccionAsignacion({ form, err, onConfirmarReasignacion, 
   // Registra la solicitud de ayuda en el historial y envía el snapshot fresco.
   const confirmarReasignacion = () => {
     if (!blnReassignComplete || blnHelpersReached) return;
+    // Snapshot de esta solicitud ANTES de limpiar el mini-formulario (abajo) — así el
+    // payload que se envía a PM4 conserva el área/responsable/observaciones elegidos en
+    // vez de mandarlos vacíos (bug previo: se limpiaban en el form Y en el payload).
+    const strTargetAreaActual = objWatch[QD.strTargetArea];
+    const strNewAssigneeActual = objWatch[QD.strNewAssignee];
+    const strReassignRemarksActual = objWatch[QD.strReassignRemarks];
     const objRow: AsignacionHistorial = {
       fecha: new Date().toISOString().slice(0, 10),
       de: objWatch[QD.strCurrentAssignee] || objWatch[QD.strAssigneeUser] || '—',
       // qd_strNewAssignee guarda el id (no el nombre) — se resuelve el nombre para el historial.
-      para: cllTargetGroupUsers.find((objOpt) => objOpt.value === objWatch[QD.strNewAssignee])?.label
-        ?? objWatch[QD.strNewAssignee] ?? '—',
+      para: cllTargetGroupUsers.find((objOpt) => objOpt.value === strNewAssigneeActual)?.label
+        ?? strNewAssigneeActual ?? '—',
       motivo: '', // CAT-MOTIVO-REASIG retirado — el campo ya no se captura.
-      observaciones: objWatch[QD.strReassignRemarks],
+      observaciones: strReassignRemarksActual,
     };
     const lstNewHistory = [...lstHistory, objRow];
     // Número de esta ayuda (1-based) = posición de la fila recién agregada. Viaja con el
@@ -209,21 +226,22 @@ export default function SeccionAsignacion({ form, err, onConfirmarReasignacion, 
     const intHelpNumber = lstNewHistory.length;
     setValue(QD.lstAssignHistory, lstNewHistory);
     setValue(QD.intHelpNumber, intHelpNumber);
-    // limpiar el formulario de ayudante para el siguiente
+    // limpiar el formulario de ayudante para el siguiente (solo en pantalla)
     setValue(QD.strTargetArea, '');
     setValue(QD.strNewAssignee, '');
     setValue(QD.strReassignRemarks, '');
     // Submit inmediato con el snapshot fresco: watch() (objWatch) aún no refleja los setValue
     // anteriores, por eso construimos el payload explícitamente para que PM4 persista
-    // la nueva fila del historial junto con el resto de variables.
+    // la nueva fila del historial junto con el resto de variables — conservando el
+    // área/responsable/observaciones de ESTA solicitud (no las versiones ya limpiadas).
     onSolicitarAyuda({
       ...objWatch,
       [QD.lstAssignHistory]: lstNewHistory,
       [QD.intHelpNumber]: intHelpNumber,
-      [QD.strTargetArea]: '',
-      [QD.strNewAssignee]: '',
+      [QD.strTargetArea]: strTargetAreaActual,
+      [QD.strNewAssignee]: strNewAssigneeActual,
       [QD.strReassignReason]: '',
-      [QD.strReassignRemarks]: '',
+      [QD.strReassignRemarks]: strReassignRemarksActual,
     });
   };
 
@@ -242,9 +260,9 @@ export default function SeccionAsignacion({ form, err, onConfirmarReasignacion, 
           />
           <ZdsSelect
             name={QD.strAssigneeUser} control={control} label="Usuario responsable"
-            options={cllGroupUsers} withSearch
+            options={cllGroupUsers} withSearch loading={blnGroupUsersLoading}
             disabled={!blnReassignMode || !objWatch[QD.strAssigneeArea]}
-            helpText="Autocompletado con el primer usuario del grupo elegido."
+            helpText={blnGroupUsersLoading ? undefined : 'Autocompletado con el primer usuario del grupo elegido.'}
           />
         </div>
         {blnReassignMode && (
@@ -252,6 +270,14 @@ export default function SeccionAsignacion({ form, err, onConfirmarReasignacion, 
             <ZdsTextarea name={QD.strAssignmentRemarks} control={control}
               label="Comentario de reasignación" maxLength={2000} />
           </div>
+        )}
+        {/* RUL-0051-01-bis — si hay grupo elegido pero no se pudo resolver un usuario real
+            de PM4 para él (ya cargó y sigue vacío), no se puede reasignar todavía. */}
+        {blnReassignMode && !!objWatch[QD.strAssigneeArea] && !blnGroupUsersLoading && !objSelectedAssigneeUser && (
+          <ZrAlert config="alert" {...({ 'hide-close': true } as object)}>
+            No se encontraron usuarios de ProcessMaker para el grupo <strong>{objWatch[QD.strAssigneeArea]}</strong>.
+            Verifique que el grupo exista en ProcessMaker y tenga miembros, o elija otro.
+          </ZrAlert>
         )}
         <div z-flex="75" z-align="right:center" style={{ marginTop: 'var(--zs-75)' }}>
           {blnReassignMode ? (
@@ -261,10 +287,8 @@ export default function SeccionAsignacion({ form, err, onConfirmarReasignacion, 
               </ZrButton>
               <ZrButton
                 config="positive" loading={submitting}
-                disabled={submitting || !objWatch[QD.strAssigneeUser]}
-                onClick={() => onConfirmarReasignacion(
-                  cllGroupUsers.find((objOpt) => objOpt.value === objWatch[QD.strAssigneeUser])?.id
-                )}
+                disabled={submitting || !objSelectedAssigneeUser}
+                onClick={() => onConfirmarReasignacion(objSelectedAssigneeUser?.id)}
               >
                 Confirmar Reasignación
               </ZrButton>
