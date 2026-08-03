@@ -357,4 +357,16 @@ export const GLOBAL_COLLECTIONS = {
     labelField: 'data.motivoSFC',
     valueField: 'data.codigoMotivoSFC',
   } satisfies CollectionDef,
+
+  // ==========================================
+  // UTILIDADES GENERALES
+  // ==========================================
+  // cat-feriados-colombia (id 48) — mismos feriados que usa el script PM4
+  // COL_UTIL_Dias_Habiles (id 95) para excluirlos del cálculo de días hábiles.
+  // Ver core/businessDays.ts.
+  holidaysColombia: {
+    id: 48,
+    labelField: 'data.holyday_name',
+    valueField: 'data.holyday_date', // 'YYYY-MM-DD'
+  } satisfies CollectionDef,
 } as const;

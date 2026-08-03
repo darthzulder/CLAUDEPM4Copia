@@ -10,6 +10,7 @@
 
 import { QD, SCR013_SLA_UMBRAL_PROXIMO } from '../fields/fields';
 import type { CasoDashboard, EstadoCasoDashboard, KpisDashboard, RequestRaw } from '../fields/types';
+import { addBusinessDays, countBusinessDaysBetween } from '../../../../core/businessDays';
 
 // ---------------------------------------------------------------------------
 // Mapeo request PM4 → CasoDashboard
@@ -21,23 +22,30 @@ function formatFecha(in_strIso?: string): string {
   return new Date(intT).toLocaleDateString('es-CO', { day: '2-digit', month: 'short', year: 'numeric' });
 }
 
-// Fecha límite (deadline) = fecha de inicio + qd_strSlaAssigned días.
-// qd_strSlaAssigned se interpreta como el plazo en días desde la creación del caso.
+// Fecha límite (deadline) = fecha de inicio + qd_strSlaAssigned días HÁBILES.
+// qd_strSlaAssigned se interpreta como el plazo en días hábiles desde la creación del caso.
 // Devuelve el timestamp en ms de la fecha de vencimiento, o null si falta el SLA o la
 // fecha de inicio (no hay campo qd_fechaVencimiento en los datos del caso: se calcula).
-function calcularDeadline(in_dicData: Record<string, unknown>, in_strCreatedAt?: string): number | null {
+// Misma regla que el script PM4 COL_UTIL_Dias_Habiles (id 95, op 'add').
+function calcularDeadline(
+  in_dicData: Record<string, unknown>,
+  in_strCreatedAt: string | undefined,
+  in_setFeriados: ReadonlySet<string>,
+): number | null {
   const genSlaRaw = in_dicData[QD.strSlaAssigned];
   const intStartT = in_strCreatedAt ? Date.parse(in_strCreatedAt) : Number.NaN;
   if (genSlaRaw === undefined || genSlaRaw === null || genSlaRaw === '' || Number.isNaN(intStartT)) return null;
   const intSla = Number(genSlaRaw);
   if (!Number.isFinite(intSla)) return null;
-  return intStartT + intSla * 86_400_000;
+  return addBusinessDays(new Date(intStartT), intSla, in_setFeriados).getTime();
 }
 
-// Días restantes = deadline − hoy (redondeado hacia arriba). Si no hay deadline, 0.
-function calcularDiasRestantes(in_intDeadline: number | null): number {
+// Días HÁBILES restantes = deadline − hoy, contando solo días hábiles (con signo: negativo
+// si el deadline ya pasó). Si no hay deadline, 0. Misma regla que el script PM4
+// COL_UTIL_Dias_Habiles (id 95, op 'diff').
+function calcularDiasRestantes(in_intDeadline: number | null, in_setFeriados: ReadonlySet<string>): number {
   if (in_intDeadline === null) return 0;
-  return Math.ceil((in_intDeadline - Date.now()) / 86_400_000);
+  return countBusinessDaysBetween(new Date(), new Date(in_intDeadline), in_setFeriados);
 }
 
 // Estado operativo del caso a partir del status del request y los días restantes.
@@ -48,11 +56,11 @@ function estadoDeRequest(in_strStatus: string | undefined, in_intDiasRestantes: 
   return in_intDiasRestantes < 0 ? 'Vencida' : 'Abierta'; // ACTIVE / ERROR / otros
 }
 
-export function mapRequestToCaso(in_objRequest: RequestRaw): CasoDashboard {
+export function mapRequestToCaso(in_objRequest: RequestRaw, in_setFeriados: ReadonlySet<string>): CasoDashboard {
   const objData = in_objRequest.data ?? {};
   const str = (in_strKey: string) => (objData[in_strKey] === undefined || objData[in_strKey] === null ? '' : String(objData[in_strKey]));
-  const intDeadline = calcularDeadline(objData, in_objRequest.created_at);
-  const intDias = calcularDiasRestantes(intDeadline);
+  const intDeadline = calcularDeadline(objData, in_objRequest.created_at, in_setFeriados);
+  const intDias = calcularDiasRestantes(intDeadline, in_setFeriados);
   // Responsable: nombre completo del usuario del caso (data._user.fullname).
   const objUser = objData._user as { fullname?: string } | undefined;
   const strResponsable = objUser?.fullname ?? '';

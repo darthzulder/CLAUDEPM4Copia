@@ -3,6 +3,7 @@ import { useForm } from 'react-hook-form';
 import { useTask } from '../../../../core/useTask';
 import { scrollToFirstError } from '../../../../core/scrollToFirstError';
 import { pm4TasksUrl } from '../../../../core/useToken';
+import { useHolidaySet, diasHabilesRestantes } from '../../../../core/businessDays';
 import ScreenHeader from '../../../../components/ScreenHeader';
 import InfoBar from '../../../../components/InfoBar';
 import { ActionBar } from '../../../../components/ActionBar';
@@ -77,15 +78,19 @@ export default function DetalleReasignacionRespuesta() {
     return String(objErr.message);
   };
 
-  // RUL-0051-03 — SLA crítico: habilita prórroga y banner rojo si slaRestante <= 2.
   const intSla = Number.parseInt(objWatch[QD.strSlaAssigned] ?? '', 10);
-  const blnSlaCritical = Number.isFinite(intSla) && intSla <= SLA_UMBRAL_PRORROGA;
 
-  // Días restantes del SLA: PM4 los expone en `timeLeft` (nivel raíz de la tarea),
-  // no es un campo del formulario. Puede llegar como number o string.
-  const varTimeLeft = (task?.data as Record<string, unknown> | undefined)?.timeLeft;
-  const intTimeLeft = Number.parseInt(String(varTimeLeft ?? ''), 10);
-  const blnHasTimeLeft = Number.isFinite(intTimeLeft);
+  // Días HÁBILES restantes = fecha de radicación SFC (filing date, qd_strFilingDate) +
+  // SLA asignado (días hábiles) − hoy, contando solo días hábiles (excluye fines de
+  // semana y feriados de Colombia). Misma regla que el script PM4 COL_UTIL_Dias_Habiles
+  // (id 95): 'add' seguido de 'diff'.
+  const { holidays } = useHolidaySet();
+  const dtFilingDate = objWatch[QD.strFilingDate] ? new Date(objWatch[QD.strFilingDate]) : null;
+  const blnHasTimeLeft = !!dtFilingDate && !Number.isNaN(dtFilingDate.getTime()) && Number.isFinite(intSla);
+  const intTimeLeft = blnHasTimeLeft ? diasHabilesRestantes(dtFilingDate!, intSla, holidays) : NaN;
+
+  // RUL-0051-03 — SLA crítico: habilita prórroga y banner rojo si slaRestante <= 2.
+  const blnSlaCritical = blnHasTimeLeft && intTimeLeft <= SLA_UMBRAL_PRORROGA;
 
   // Datos del consumidor derivados de los campos granulares producidos por SCR-000.
   const strName = (objWatch[QD.strCompanyName] || `${objWatch[QD.strFirstName] ?? ''} ${objWatch[QD.strLastName] ?? ''}`).trim();
@@ -232,7 +237,7 @@ export default function DetalleReasignacionRespuesta() {
         {/* RUL-0051-03 / MSG-0051-01 — banner SLA crítico. */}
         {blnSlaCritical && (
           <ZrAlert config="negative" {...({ 'hide-close': true } as object)}>
-            ⚠ El caso tiene <strong>{objWatch[QD.strSlaAssigned]}</strong> día(s) hábil(es) restante(s). Priorice
+            ⚠ El caso tiene <strong>{intTimeLeft}</strong> día(s) hábil(es) restante(s). Priorice
             la gestión; puede <strong>solicitar prórroga regulatoria</strong>. {/* MSG-0051-01 */}
           </ZrAlert>
         )}

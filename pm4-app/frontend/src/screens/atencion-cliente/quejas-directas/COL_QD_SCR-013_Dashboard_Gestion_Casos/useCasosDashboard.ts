@@ -1,7 +1,8 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import pm4 from '../../../../api/pm4Client';
+import { useHolidaySet } from '../../../../core/businessDays';
 import { SCR013_PROCESS_ID } from '../fields/fields';
-import type { CasoDashboard, RequestRaw } from '../fields/types';
+import type { RequestRaw } from '../fields/types';
 import { mapRequestToCaso } from './dashboardHelpers';
 
 interface RequestsResponse {
@@ -14,11 +15,16 @@ interface RequestsResponse {
  * (paginando hasta last_page) y los mapea a CasoDashboard. Réplica de la lógica del
  * script PHP de PM4: intenta acotar con PMQL `process_id = N` y, si el servidor rechaza
  * el PMQL, reintenta sin él filtrando el process_id en el cliente.
+ *
+ * Los "días restantes" se calculan en días HÁBILES (feriados de Colombia vía
+ * useHolidaySet); el mapeo se recalcula si la colección de feriados llega después
+ * que los requests.
  */
 export function useCasosDashboard() {
-  const [casos, setCasos] = useState<CasoDashboard[]>([]);
+  const [requests, setRequests] = useState<RequestRaw[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const { holidays } = useHolidaySet();
 
   useEffect(() => {
     let blnCancelled = false;
@@ -60,7 +66,7 @@ export function useCasosDashboard() {
           intPage += 1;
         } while (intPage <= intLastPage);
 
-        if (!blnCancelled) setCasos(lstAcumulados.map(mapRequestToCaso));
+        if (!blnCancelled) setRequests(lstAcumulados);
       } catch (exc) {
         const objErr = exc as { response?: { data?: { message?: string } }; message?: string };
         if (!blnCancelled) setError(objErr.response?.data?.message ?? objErr.message ?? 'Error desconocido');
@@ -72,6 +78,11 @@ export function useCasosDashboard() {
     fetchAll();
     return () => { blnCancelled = true; };
   }, []);
+
+  const casos = useMemo(
+    () => requests.map((objRequest) => mapRequestToCaso(objRequest, holidays)),
+    [requests, holidays],
+  );
 
   return { casos, loading, error };
 }
