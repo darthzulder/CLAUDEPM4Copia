@@ -3,7 +3,7 @@ import { useForm } from 'react-hook-form';
 import { useTask } from '../../../../core/useTask';
 import { scrollToFirstError } from '../../../../core/scrollToFirstError';
 import { pm4TasksUrl } from '../../../../core/useToken';
-import { useHolidaySet, diasHabilesRestantes } from '../../../../core/businessDays';
+import { useHolidaySet, diasHabilesRestantes, parsePm4Date } from '../../../../core/businessDays';
 import ScreenHeader from '../../../../components/ScreenHeader';
 import InfoBar from '../../../../components/InfoBar';
 import { ActionBar } from '../../../../components/ActionBar';
@@ -85,8 +85,8 @@ export default function DetalleReasignacionRespuesta() {
   // semana y feriados de Colombia). Misma regla que el script PM4 COL_UTIL_Dias_Habiles
   // (id 95): 'add' seguido de 'diff'.
   const { holidays } = useHolidaySet();
-  const dtFilingDate = objWatch[QD.strFilingDate] ? new Date(objWatch[QD.strFilingDate]) : null;
-  const blnHasTimeLeft = !!dtFilingDate && !Number.isNaN(dtFilingDate.getTime()) && Number.isFinite(intSla);
+  const dtFilingDate = parsePm4Date(objWatch[QD.strFilingDate]);
+  const blnHasTimeLeft = !!dtFilingDate && Number.isFinite(intSla);
   const intTimeLeft = blnHasTimeLeft ? diasHabilesRestantes(dtFilingDate!, intSla, holidays) : NaN;
 
   // RUL-0051-03 — SLA crítico: habilita prórroga y banner rojo si slaRestante <= 2.

@@ -20,6 +20,22 @@ function atMidnight(in_dtDate: Date): Date {
   return dtCopy;
 }
 
+// Parsea fechas de PM4 en formato 'DD/MM/YYYY' (el formato real de qd_strFilingDate,
+// igual al 'd/m/Y' por defecto del script 95). `new Date(string)` NO sirve para este
+// formato: interpreta "08/07/2026" como MM/DD/YYYY (7 de agosto) en vez de DD/MM/YYYY
+// (8 de julio). Si el valor no matchea ese patrón, cae a Date nativo (soporta ISO, etc.).
+export function parsePm4Date(in_strValue: string | undefined | null): Date | null {
+  if (!in_strValue) return null;
+  const objMatch = /^(\d{1,2})\/(\d{1,2})\/(\d{4})$/.exec(in_strValue.trim());
+  if (objMatch) {
+    const [, strDay, strMonth, strYear] = objMatch;
+    const dtParsed = new Date(Number(strYear), Number(strMonth) - 1, Number(strDay));
+    return Number.isNaN(dtParsed.getTime()) ? null : dtParsed;
+  }
+  const dtNative = new Date(in_strValue);
+  return Number.isNaN(dtNative.getTime()) ? null : dtNative;
+}
+
 export function isBusinessDay(in_dtDate: Date, in_setFeriados: ReadonlySet<string>): boolean {
   const intWeekday = in_dtDate.getDay(); // 0=domingo … 6=sábado
   if (intWeekday === 0 || intWeekday === 6) return false;
