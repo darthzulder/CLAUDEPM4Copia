@@ -129,16 +129,20 @@ export const QD = {
   // ── Metadato de flujo (compartido por varias pantallas, unión por screen) ─
   strAction: 'qd_strAction',                           // antes qd_accion
 
-  // ── SCR-004 · Revisión Error Técnico API ──────────────────────────────────
-  strHttpCode: 'qd_strHttpCode',                       // FLD-050 · antes qd_codigoHTTP
-  strErrorType: 'qd_strErrorType',                     // FLD-051 · antes qd_tipoError
-  strApiTechMessage: 'qd_strApiTechMessage',           // FLD-052 · antes qd_mensajeTecnicoAPI (mismo valor que qd_SSHTTPSP3_message)
-  strCompleteLogAPI: 'qd_strCompleteLogAPI',           // sin FLD · log técnico completo del script M3 (modal "Ver Log Completo")
+  // ── SCR-004 / SCR-011 · Revisión Error Técnico API y Prórroga ─────────────
+  // Los scripts de Momento 2/3 escriben SIEMPRE estas variables cuando la API
+  // de SmartSupervision falla — también cuando el paso fallido es la prórroga
+  // (viaja como prorroga_queja dentro del body de cierre). SCR-011 comparte por
+  // eso el mismo juego de campos (FLD-190..196 quedan unificados aquí).
+  strHttpCode: 'qd_strHttpCode',                       // FLD-050/190 · antes qd_codigoHTTP / qd_strExtHttpCode
+  strErrorType: 'qd_strErrorType',                     // FLD-051/191 · antes qd_tipoError / qd_strExtErrorType
+  strApiTechMessage: 'qd_strApiTechMessage',           // FLD-052/192 · antes qd_mensajeTecnicoAPI / qd_strExtTechMessage (mismo valor que qd_SSHTTPSP3_message)
+  strCompleteLogAPI: 'qd_strCompleteLogAPI',           // sin FLD · log técnico completo del script M2/M3 (modal "Ver Log Completo")
   strEndpointCalled: 'qd_strEndpointCalled',           // FLD-053 · antes qd_endpointInvocado
-  strPayloadSent: 'qd_strPayloadSent',                 // FLD-054 · antes qd_payloadEnviado
-  strAttemptNum: 'qd_strAttemptNum',                   // FLD-055 · antes qd_numeroIntento
-  strRootCause: 'qd_strRootCause',                     // FLD-056 · antes qd_causaRaiz
-  strCorrectionApplied: 'qd_strCorrectionApplied',     // FLD-057 · antes qd_correccionAplicada
+  strPayloadSent: 'qd_strPayloadSent',                 // FLD-054/193 · antes qd_payloadEnviado / qd_strExtPayload
+  strAttemptNum: 'qd_strAttemptNum',                   // FLD-055/194 · antes qd_numeroIntento / qd_strExtAttempt
+  strRootCause: 'qd_strRootCause',                     // FLD-056/195 · antes qd_causaRaiz / qd_strExtRootCause
+  strCorrectionApplied: 'qd_strCorrectionApplied',     // FLD-057/196 · antes qd_correccionAplicada / qd_strExtCorrection
   strPayloadAdjustNeeded: 'qd_strPayloadAdjustNeeded', // FLD-058 · antes qd_requiereAjustePayload
 
   // ── SCR-008 · Revisión Respuesta SAC ──────────────────────────────────────
@@ -183,13 +187,8 @@ export const QD = {
   strEntityCode: 'qd_strEntityCode',                   // Excel Cierre #47 · código entidad (default "9", envío M3 SFC)
 
   // ── SCR-011 · Revisión Error Técnico Prórroga ─────────────────────────────
-  strExtHttpCode: 'qd_strExtHttpCode',                 // FLD-190 · antes qd_codigoHTTPProrroga
-  strExtErrorType: 'qd_strExtErrorType',               // FLD-191 · antes qd_tipoErrorProrroga
-  strExtTechMessage: 'qd_strExtTechMessage',           // FLD-192 · antes qd_mensajeTecnicoProrroga
-  strExtPayload: 'qd_strExtPayload',                   // FLD-193 · antes qd_payloadProrroga
-  strExtAttempt: 'qd_strExtAttempt',                   // FLD-194 · antes qd_intentoProrroga
-  strExtRootCause: 'qd_strExtRootCause',               // FLD-195 · antes qd_causaRaizProrroga
-  strExtCorrection: 'qd_strExtCorrection',             // FLD-196 · antes qd_correccionProrroga
+  // Sin campos propios: reusa el juego de SCR-004 (arriba). Las variantes
+  // qd_strExt* (FLD-190..196) se retiraron porque ningún script las escribía.
 
   // ── SCR-012 · Corrección Error Funcional Prórroga ─────────────────────────
   strExtErrorCode: 'qd_strExtErrorCode',               // FLD-200 · antes qd_codigoErrorProrroga
@@ -325,7 +324,7 @@ export interface QdFields {
   // Metadato de flujo compartido
   qd_strAction: string;
 
-  // SCR-004
+  // SCR-004 / SCR-011 (mismo juego de variables)
   qd_strHttpCode: string;
   qd_strErrorType: string;
   qd_strApiTechMessage: string;
@@ -378,14 +377,7 @@ export interface QdFields {
   qd_strEntityType: string;
   qd_strEntityCode: string;
 
-  // SCR-011
-  qd_strExtHttpCode: string;
-  qd_strExtErrorType: string;
-  qd_strExtTechMessage: string;
-  qd_strExtPayload: string;
-  qd_strExtAttempt: string;
-  qd_strExtRootCause: string;
-  qd_strExtCorrection: string;
+  // SCR-011 → sin campos propios (usa los de SCR-004)
 
   // SCR-012
   qd_strExtErrorCode: string;
@@ -908,20 +900,28 @@ export const SCR009_DEFAULTS: Partial<FormularioSuperintendenciaFormData> = {
 // AUTORIZAR_REENVIO → ACT-011-01 (ejecuta SP4-T01) · ESCALAR_PROVEEDOR → ACT-011-02.
 export type AccionErrorTecnicoProrroga = 'AUTORIZAR_REENVIO' | 'ESCALAR_PROVEEDOR';
 
+// Mismas variables que SCR-004: el error de prórroga lo reporta el mismo script
+// de Momento 2/3 (la prórroga viaja como prorroga_queja en el body de cierre),
+// así que los diagnósticos llegan en qd_strHttpCode / qd_strErrorType / etc.
 export type RevisionErrorTecnicoProrrogaFormData = Omit<Pick<QdFields,
-  | typeof QD.strExtHttpCode | typeof QD.strExtErrorType | typeof QD.strExtTechMessage
-  | typeof QD.strExtPayload | typeof QD.strExtAttempt | typeof QD.strExtRootCause | typeof QD.strExtCorrection
+  | typeof QD.strHttpCode | typeof QD.strErrorType | typeof QD.strApiTechMessage
+  | typeof QD.strCompleteLogAPI
+  | typeof QD.strEndpointCalled | typeof QD.strPayloadSent | typeof QD.strAttemptNum
+  | typeof QD.strRootCause | typeof QD.strCorrectionApplied | typeof QD.strPayloadAdjustNeeded
   | typeof QD.strAction
 >, typeof QD.strAction> & { [QD.strAction]: AccionErrorTecnicoProrroga };
 
 export const SCR011_DEFAULTS: Partial<RevisionErrorTecnicoProrrogaFormData> = {
-  [QD.strExtHttpCode]: '',
-  [QD.strExtErrorType]: '',
-  [QD.strExtTechMessage]: '',
-  [QD.strExtPayload]: '',
-  [QD.strExtAttempt]: '',
-  [QD.strExtRootCause]: '',
-  [QD.strExtCorrection]: '',
+  [QD.strHttpCode]: '',
+  [QD.strErrorType]: '',
+  [QD.strApiTechMessage]: '',
+  [QD.strCompleteLogAPI]: '',
+  [QD.strEndpointCalled]: '',
+  [QD.strPayloadSent]: '',
+  [QD.strAttemptNum]: '',
+  [QD.strRootCause]: '',
+  [QD.strCorrectionApplied]: '',
+  [QD.strPayloadAdjustNeeded]: 'NO',
   [QD.strAction]: 'AUTORIZAR_REENVIO',
 };
 
