@@ -43,12 +43,19 @@ async function fetchGroupUsers(in_strGroupName: string): Promise<{ value: string
   if (!objGroup) return [];
 
   const objUsersResp = await pm4.get(`/groups/${objGroup.id}/users`, { params: { per_page: 100 } });
-  const lstUsers: { id: number | string; username: string; firstname?: string; lastname?: string }[] = objUsersResp.data?.data ?? [];
+  // OJO: pese a que el OpenAPI de este endpoint documenta la respuesta como `users` puros,
+  // PM4 en la práctica devuelve registros con forma de GroupMember (pivote): `id` es el id
+  // de LA FILA del pivote group_members, no el id real del usuario — ese viaja en
+  // `member_id` (ver schemas groupMembers/getGroupMembersById en docs (4).json). Se prioriza
+  // member_id y se cae a id solo si member_id no viene (por si alguna instancia sí devuelve
+  // el user plano).
+  const lstUsers: { id: number | string; member_id?: number | string; username: string; firstname?: string; lastname?: string }[]
+    = objUsersResp.data?.data ?? [];
   return lstUsers
     .map((objUser) => ({
       value: objUser.username,
       label: `${objUser.firstname ?? ''} ${objUser.lastname ?? ''}`.trim() || objUser.username,
-      id: String(objUser.id),
+      id: String(objUser.member_id ?? objUser.id),
     }))
     .filter((objOpt) => !!objOpt.value);
 }

@@ -3,7 +3,7 @@ import type { UseFormReturn } from 'react-hook-form';
 import FormSection from '../../../../components/FormSection';
 import DocSupportUploader from '../../../../components/DocSupportUploader';
 import RequestFileList from '../../../../components/RequestFileList';
-import { ZdsSelect, ZdsTextarea, ZdsInput, ZrAlert, ZrButton } from '../../../../components/fields/ZdsFields';
+import { ZdsSelect, ZdsTextarea, ZrAlert, ZrButton } from '../../../../components/fields/ZdsFields';
 import { useCollection, useSyncDesc } from '../../../../core/useCollection';
 import {
   QD, QD_COLLECTIONS, SCR0051_OPTIONS_FAVOR as OPTIONS_FAVOR,
@@ -88,11 +88,6 @@ export default function SeccionRespuesta({ form, fileRegistry, err, onVistaPrevi
             />
           </div>
         )}
-
-        <div className="form-row cols-1">
-          <ZdsInput name={QD.strAcknowledgment} control={control} label="¿Reconocimiento al cliente?" readOnly
-            helpText="Se calcula en el back — solo lectura." />
-        </div>
       </FormSection>
 
       {/* ── S9 · Soportes Internos (SEC-055, FLD-113) ── */}
