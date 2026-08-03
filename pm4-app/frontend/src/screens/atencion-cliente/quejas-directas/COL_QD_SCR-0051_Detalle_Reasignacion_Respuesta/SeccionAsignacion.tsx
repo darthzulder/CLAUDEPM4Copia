@@ -33,6 +33,26 @@ function opcionesUnicas(in_cll: { value: string; label: string }[]): { value: st
   return cllOut;
 }
 
+// Resuelve los usuarios reales de un grupo PM4 por nombre (GET /groups?filter= +
+// GET /groups/{id}/users). Compartido por "Área a reasignar" (S5) y "Área destino"
+// (S6, solicitud de ayuda) — ambas apuntan a grupos PM4 (rolResponsable de la matriz).
+async function fetchGroupUsers(in_strGroupName: string): Promise<{ value: string; label: string; id: string }[]> {
+  const objGroupsResp = await pm4.get('/groups', { params: { filter: in_strGroupName, per_page: 100 } });
+  const lstGroups: { id: string; name?: string }[] = objGroupsResp.data?.data ?? [];
+  const objGroup = lstGroups.find((objG) => normalizar(objG.name) === normalizar(in_strGroupName)) ?? lstGroups[0];
+  if (!objGroup) return [];
+
+  const objUsersResp = await pm4.get(`/groups/${objGroup.id}/users`, { params: { per_page: 100 } });
+  const lstUsers: { id: number | string; username: string; firstname?: string; lastname?: string }[] = objUsersResp.data?.data ?? [];
+  return lstUsers
+    .map((objUser) => ({
+      value: objUser.username,
+      label: `${objUser.firstname ?? ''} ${objUser.lastname ?? ''}`.trim() || objUser.username,
+      id: String(objUser.id),
+    }))
+    .filter((objOpt) => !!objOpt.value);
+}
+
 interface Props {
   form: UseFormReturn<DetalleReasignacionRespuestaFormData>;
   err: (name: keyof DetalleReasignacionRespuestaFormData) => string | undefined;
@@ -74,23 +94,19 @@ export default function SeccionAsignacion({ form, err, onConfirmarReasignacion, 
     URL.revokeObjectURL(strUrl);
   };
 
-  // Cargamos los catalogos de área y motivo de reasignación.
-  const { options: cllArea } = useCollection(QD_COLLECTIONS.area);
-  const { options: cllReassignReason } = useCollection(QD_COLLECTIONS.reassignReason);
-
-  // "Área a reasignar" — grupos de ProcessMaker: valores únicos de la columna
-  // rolResponsable de cat_matriz_motivos (id 45), no un catálogo de áreas (CAT-AREA).
+  // "Área a reasignar" / "Área destino" — grupos de ProcessMaker: valores únicos de la
+  // columna rolResponsable de cat_matriz_motivos (id 45), no un catálogo de áreas (CAT-AREA).
   const { records: cllMatrizRows } = useCollection(QD_COLLECTIONS.matrixMotivos);
   const cllReassignGroups = opcionesUnicas(cllMatrizRows.map((objRow) => {
     const strRol = leerColumna(objRow, 'rolResponsable');
     return { value: strRol, label: strRol };
   }));
 
-  // Usuarios reales del grupo PM4 elegido en "Área a reasignar" (GET /groups?filter= +
-  // GET /groups/{id}/users). Se listan mientras se está reasignando, para poder elegir
-  // otro miembro del mismo grupo sin perder la asignación original si no se cambia nada.
-  // `id` (numérico, PM4) viaja junto a value/label — lo necesita ACT-0051-01 para reasignar
-  // la tarea vía PUT /tasks/{id} { user_id }, sin completarla.
+  // Usuarios reales del grupo PM4 elegido en "Área a reasignar" (S5). Se listan mientras
+  // se está reasignando, para poder elegir otro miembro del mismo grupo sin perder la
+  // asignación original si no se cambia nada. `id` (numérico, PM4) viaja junto a
+  // value/label — lo necesita ACT-0051-01 para reasignar la tarea vía PUT /tasks/{id}
+  // { user_id }, sin completarla.
   const [cllGroupUsers, setCllGroupUsers] = useState<{ value: string; label: string; id: string }[]>([]);
   const strPrevGroupRef = useRef<string | null>(null);
   useEffect(() => {
@@ -104,47 +120,53 @@ export default function SeccionAsignacion({ form, err, onConfirmarReasignacion, 
     if (!blnReassignMode || !strGroupName) { setCllGroupUsers([]); return; }
 
     let blnActive = true;
-    (async () => {
-      try {
-        const objGroupsResp = await pm4.get('/groups', { params: { filter: strGroupName, per_page: 100 } });
-        const lstGroups: { id: string; name?: string }[] = objGroupsResp.data?.data ?? [];
-        const objGroup = lstGroups.find((objG) => normalizar(objG.name) === normalizar(strGroupName)) ?? lstGroups[0];
-        if (!objGroup) { if (blnActive) setCllGroupUsers([]); return; }
-
-        const objUsersResp = await pm4.get(`/groups/${objGroup.id}/users`, { params: { per_page: 100 } });
-        const lstUsers: { id: number | string; username: string; firstname?: string; lastname?: string }[] = objUsersResp.data?.data ?? [];
-        const cllMapped = lstUsers
-          .map((objUser) => ({
-            value: objUser.username,
-            label: `${objUser.firstname ?? ''} ${objUser.lastname ?? ''}`.trim() || objUser.username,
-            id: String(objUser.id),
-          }))
-          .filter((objOpt) => !!objOpt.value);
-
+    fetchGroupUsers(strGroupName)
+      .then((cllMapped) => {
         if (!blnActive) return;
         setCllGroupUsers(cllMapped);
         // ACT-0051 (nuevo) — al elegir un grupo distinto se autocompleta con su primer usuario.
         if (blnUserChangedGroup) setValue(QD.strAssigneeUser, cllMapped[0]?.value ?? '');
-      } catch (excError) {
+      })
+      .catch((excError) => {
         console.error('[SeccionAsignacion] Error al buscar usuarios del grupo PM4:', excError);
         if (blnActive) setCllGroupUsers([]);
-      }
-    })();
+      });
     return () => { blnActive = false; };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [objWatch[QD.strAssigneeArea], blnReassignMode]);
 
-  // FLD-092 — responsables del área destino de reasignación (autocompletado).
-  const { options: cllTargetAreaUsers } = useCollection(QD_COLLECTIONS.areaUsers, { qd_strAreaCode: objWatch[QD.strTargetArea] });
+  // "Responsable" (S6, solicitud de ayuda) — usuarios reales del grupo PM4 elegido en
+  // "Área destino"; misma mecánica que "Usuario responsable" en S5, salvo que
+  // qd_strNewAssignee guarda el id numérico de PM4 (no el username): value = id.
+  // Como "Área destino" arranca vacía en cada solicitud de ayuda (se limpia tras cada
+  // "Confirmar"), se autocompleta con el primer usuario cada vez que cambia, sin
+  // necesidad de rastrear el valor anterior.
+  const [cllTargetGroupUsers, setCllTargetGroupUsers] = useState<{ value: string; label: string }[]>([]);
   useEffect(() => {
-    setValue(QD.strNewAssignee, cllTargetAreaUsers[0]?.label ?? '');
-  }, [cllTargetAreaUsers, setValue]);
+    const strGroupName = objWatch[QD.strTargetArea] || '';
+    if (!strGroupName) { setCllTargetGroupUsers([]); return; }
+
+    let blnActive = true;
+    fetchGroupUsers(strGroupName)
+      .then((cllMapped) => {
+        if (!blnActive) return;
+        const cllOptions = cllMapped.map((objUser) => ({ value: objUser.id, label: objUser.label }));
+        setCllTargetGroupUsers(cllOptions);
+        setValue(QD.strNewAssignee, cllOptions[0]?.value ?? '');
+      })
+      .catch((excError) => {
+        console.error('[SeccionAsignacion] Error al buscar usuarios del grupo PM4 (área destino):', excError);
+        if (blnActive) setCllTargetGroupUsers([]);
+      });
+    return () => { blnActive = false; };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [objWatch[QD.strTargetArea]]);
 
   // Sincroniza la variable compañera <campo>_desc con la descripción del código (para PM4).
   useSyncDesc(form, QD.strAssigneeArea, cllReassignGroups);
   useSyncDesc(form, QD.strAssigneeUser, cllGroupUsers);
-  useSyncDesc(form, QD.strTargetArea, cllArea);
-  useSyncDesc(form, QD.strReassignReason, cllReassignReason);
+  useSyncDesc(form, QD.strTargetArea, cllReassignGroups);
+  useSyncDesc(form, QD.strNewAssignee, cllTargetGroupUsers);
 
   // Guarda un snapshot de la asignación actual y entra en modo reasignación.
   const iniciarReasignacion = () => {
@@ -165,8 +187,9 @@ export default function SeccionAsignacion({ form, err, onConfirmarReasignacion, 
   };
 
   // ACT-0051-03 — añade el ayudante al historial (RUL-0051-04 valida campos obligatorios).
+  // El motivo (CAT-MOTIVO-REASIG) ya no se usa/muestra — se retiró de la validación.
   const blnReassignComplete =
-    !!objWatch[QD.strTargetArea] && !!objWatch[QD.strReassignReason] && !!objWatch[QD.strReassignRemarks]?.trim();
+    !!objWatch[QD.strTargetArea] && !!objWatch[QD.strReassignRemarks]?.trim();
 
   // Registra la solicitud de ayuda en el historial y envía el snapshot fresco.
   const confirmarReasignacion = () => {
@@ -174,8 +197,10 @@ export default function SeccionAsignacion({ form, err, onConfirmarReasignacion, 
     const objRow: AsignacionHistorial = {
       fecha: new Date().toISOString().slice(0, 10),
       de: objWatch[QD.strCurrentAssignee] || objWatch[QD.strAssigneeUser] || '—',
-      para: objWatch[QD.strNewAssignee] || '—',
-      motivo: cllReassignReason.find((objOption) => objOption.value === objWatch[QD.strReassignReason])?.label ?? objWatch[QD.strReassignReason],
+      // qd_strNewAssignee guarda el id (no el nombre) — se resuelve el nombre para el historial.
+      para: cllTargetGroupUsers.find((objOpt) => objOpt.value === objWatch[QD.strNewAssignee])?.label
+        ?? objWatch[QD.strNewAssignee] ?? '—',
+      motivo: '', // CAT-MOTIVO-REASIG retirado — el campo ya no se captura.
       observaciones: objWatch[QD.strReassignRemarks],
     };
     const lstNewHistory = [...lstHistory, objRow];
@@ -187,7 +212,6 @@ export default function SeccionAsignacion({ form, err, onConfirmarReasignacion, 
     // limpiar el formulario de ayudante para el siguiente
     setValue(QD.strTargetArea, '');
     setValue(QD.strNewAssignee, '');
-    setValue(QD.strReassignReason, '');
     setValue(QD.strReassignRemarks, '');
     // Submit inmediato con el snapshot fresco: watch() (objWatch) aún no refleja los setValue
     // anteriores, por eso construimos el payload explícitamente para que PM4 persista
@@ -278,29 +302,26 @@ export default function SeccionAsignacion({ form, err, onConfirmarReasignacion, 
                 </p>
                 <div className="form-row cols-2">
                   <ZdsSelect name={QD.strTargetArea} control={control} label="Área destino"
-                    options={cllArea} withSearch error={err(QD.strTargetArea)}
-                    helpText="CAT-AREA." />
+                    options={cllReassignGroups} withSearch error={err(QD.strTargetArea)}
+                    helpText="Grupos de ProcessMaker (rolResponsable de CAT-MATRIZ-MOTIVOS)." />
                   <ZdsSelect name={QD.strNewAssignee} control={control} label="Responsable"
-                    options={objWatch[QD.strNewAssignee] ? [{ value: objWatch[QD.strNewAssignee], label: objWatch[QD.strNewAssignee] }] : []}
-                    disabled
-                    helpText="Autocompletado según el área destino (CAT-USUARIOS-ROLE)." />
+                    options={cllTargetGroupUsers} withSearch
+                    disabled={!objWatch[QD.strTargetArea]}
+                    helpText="Autocompletado con el primer usuario del grupo elegido." />
                 </div>
-                <div className="form-row cols-1">
-                  <ZdsSelect name={QD.strReassignReason} control={control} label="Motivo"
-                    options={cllReassignReason} error={err(QD.strReassignReason)}
-                    helpText="CAT-MOTIVO-REASIG." />
-                </div>
+                {/* Motivo (CAT-MOTIVO-REASIG) retirado — ya no se usa (qd_strReassignReason
+                    sigue viajando vacío en el payload por compatibilidad con SCR-0052). */}
                 <div className="form-row cols-1">
                   <ZdsTextarea name={QD.strReassignRemarks} control={control}
                     label="Observaciones (justificación)" maxLength={2000}
                     helpText="Obligatorio. Queda en el historial para auditoría." />
                 </div>
 
-                {/* RUL-0051-04 — bloquea hasta completar área, motivo y observaciones. */}
+                {/* RUL-0051-04 — bloquea hasta completar área y observaciones. */}
                 {!blnReassignComplete && (
                   <ZrAlert config="info" {...({ 'hide-close': true } as object)}>
-                    El <strong>área destino</strong>, el <strong>motivo</strong> y las{' '}
-                    <strong>observaciones</strong> son obligatorios para registrar la asignación.
+                    El <strong>área destino</strong> y las <strong>observaciones</strong>{' '}
+                    son obligatorios para registrar la asignación.
                     {/* MSG-0051-03 */}
                   </ZrAlert>
                 )}
