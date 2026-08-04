@@ -84,6 +84,33 @@ export function diasHabilesRestantes(in_dtInicio: Date, in_intSlaDias: number, i
   return countBusinessDaysBetween(new Date(), dtVencimiento, in_setFeriados);
 }
 
+// ── Estado del caso por proximidad al vencimiento (SCR-013 dashboard, SCR-0051 detalle) ──
+// Estado derivado SOLO de los días hábiles restantes (sin mirar el status del request/tarea:
+// Cerrada/Cancelada se resuelven en cada pantalla, que sí conoce ese status). "Por Vencer" =
+// caso activo con in_intUmbralProximo días hábiles o menos hasta el vencimiento.
+export type EstadoSlaCaso = 'Abierta' | 'Por Vencer' | 'Vencida';
+
+export function estadoSlaPorDiasRestantes(
+  in_intDiasRestantes: number,
+  in_blnTieneDeadline: boolean,
+  in_intUmbralProximo: number,
+): EstadoSlaCaso {
+  if (!in_blnTieneDeadline) return 'Abierta'; // aún no tiene SLA/fecha de radicación
+  if (in_intDiasRestantes < 0) return 'Vencida';
+  if (in_intDiasRestantes <= in_intUmbralProximo) return 'Por Vencer';
+  return 'Abierta';
+}
+
+// Variante de ZdsStatusBadge para EstadoSlaCaso. EstadoCasoDashboard (SCR-013) añade encima
+// Cerrada/Cancelada — ver estadoVariante() en dashboardHelpers.ts.
+export function estadoSlaVariant(in_strEstado: EstadoSlaCaso): 'success' | 'danger' | 'info' | 'warning' {
+  switch (in_strEstado) {
+    case 'Vencida':    return 'danger';
+    case 'Por Vencer': return 'warning';
+    default:           return 'info'; // Abierta
+  }
+}
+
 // Carga la colección cat-feriados-colombia (id 48) y expone el set de fechas (YYYY-MM-DD)
 // que consumen los helpers de arriba.
 export function useHolidaySet(): { holidays: ReadonlySet<string>; loading: boolean } {
