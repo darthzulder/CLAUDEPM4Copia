@@ -71,15 +71,19 @@ Los FLD-040..045 se muestran **si el caso los trae**; como ningún script los es
 | Código de Error SFC / HTTP | `qd_strSfcErrorCode` | `qd_strHttpCode` | `ZdsInput` readOnly | FLD-040 / script M2 |
 | Tipo de Error | `qd_strErrorType` | — | `ZdsInput` readOnly | script M2 (`sfcClasificarError`) |
 | Intento N.° actual (M1/M2) | `qd_strM1M2AttemptNum` | `qd_strAttemptNum` | `ZdsInput` readOnly | FLD-044 / script M2 |
-| Campo Afectado | `qd_strAffectedField` | — | `ZdsInput` readOnly | FLD-041 |
-| Valor Rechazado | `qd_strRejectedValue` | — | `ZdsInput` readOnly | FLD-042 |
 | Endpoint Invocado | `qd_strEndpointCalled` | — | `ZdsInput` readOnly | script M2 |
 | Mensaje de Error SFC | `qd_strSfcErrorMessage` | `qd_strApiTechMessage` | `ZdsTextarea` readOnly | FLD-043 / script M2 |
+| Payload Enviado (JSON) | `qd_strPayloadSent` | — | `ZdsTextarea` readOnly (igual que SCR-004) | FLD-054 |
 | Log técnico completo (modal) | `qd_strCompleteLogAPI` | — | `ZdsTextarea` readOnly | script M2 |
-| Payload enviado (modal) | `qd_strPayloadSent` | — | `ZdsTextarea` readOnly | FLD-054 |
 
-> `qd_strRejectionDate` (FLD-045) se retiró de la UI: ningún script lo emite y la fecha del
-> rechazo ya consta en el log completo (`timestamp` de `_sfc_respons_logs`).
+> **Campos retirados de la UI** (ningún script los emite, salían siempre vacíos):
+> `qd_strAffectedField` (FLD-041), `qd_strRejectedValue` (FLD-042) y `qd_strRejectionDate`
+> (FLD-045). Las variables siguen en el formulario: si el caso las trae, `qd_strAffectedField`
+> alimenta la píldora "Señalado por la SFC" de S2 y las tres viajan en el `completeTask`. La
+> fecha/hora del rechazo consta en el log completo (`timestamp` de `_sfc_respons_logs`).
+>
+> El **Payload Enviado** se muestra en S1 en solo lectura (a diferencia de SCR-004, donde es
+> editable): en SCR-003 la corrección se hace campo por campo en S2 y el body se regenera.
 
 ### S2 — Campos a Corregir (SEC-009, editable) — editor del payload de Momento 2
 
@@ -181,7 +185,7 @@ Cada campo de catálogo guarda el **código** y sincroniza su compañera `<campo
 |---|---|---|
 | Panel de error con acento rojo | `FormSection color="var(--z-red)"` (igual que SCR-004) | Anexo02 > SCR-003 > tipo "Panel de error" |
 | Banner de error 400 funcional | `ZrAlert config="negative"` con el número de intento | Anexo02 > SCR-003 (contexto/criterio de aceptación) |
-| "Ver Log Completo" abre modal | `ACT-003-03`: `ZrButton config="link"` → `ZrModal` (`.modal-wide` + `.modal-scroll-body`) con `qd_strCompleteLogAPI` y el payload enviado | Anexo02 > SCR-003 > ACT-003-03 |
+| "Ver Log Completo" abre modal | `ACT-003-03`: `ZrButton config="link"` → `ZrModal` (`.modal-wide` + `.modal-scroll-body`) con `qd_strCompleteLogAPI` — mismo patrón que SCR-004 | Anexo02 > SCR-003 > ACT-003-03 |
 | Edición bajo checkbox | Cada fila del payload trae un `ZrCheckbox` "Editar" (estado local de UI, **no** viaja a PM4): desmarcado ⇒ `readOnly`/`disabled`; al desmarcar se restaura el valor original de `task.data` | Requerimiento 2026-08-04 |
 | Desbloqueo en cascada | Marcar "Editar" en departamento o producto deja editables las filas dependientes (municipio / momento / servicio / motivo) | Derivado de las dependencias de catálogo |
 | Píldoras por fila | `ZdsStatusBadge` "Modificado" (valor ≠ original) y "Señalado por la SFC" (la clave del body o su token aparece en `qd_strAffectedField` / el mensaje de error) | Patrón del proyecto |
@@ -261,7 +265,7 @@ Cada campo de catálogo guarda el **código** y sincroniza su compañera `<campo
 
 | Categoría | Cobertura | Observación |
 |---|---|---|
-| Campos (FLD-040..048) | 8/9 en UI | FLD-045 (fecha del rechazo) se retiró: ningún script lo emite y la hora consta en el log. FLD-040/043/044 se muestran con fallback a las variables del script (§4) |
+| Campos (FLD-040..048) | 6/9 en UI | FLD-041 (campo afectado), FLD-042 (valor rechazado) y FLD-045 (fecha del rechazo) se retiraron: ningún script los emite (§4). FLD-040/043/044 se muestran con fallback a las variables del script; se añade FLD-054 (payload enviado, solo lectura) |
 | Campos del body de Momento 2 | 20/20 claves | Todas mapeadas a su variable `qd_*` o marcadas como constante/derivado (`SCR003_PAYLOAD_M2_FIELDS`) |
 | Acciones (ACT-003-01/02/03) | 3/3 (100%) | Reenviar, Escalar, Ver Log |
 | Reglas (RUL-003-01/02) | 1/2 + 1 nueva | RUL-003-01 retirada como bloqueo (decisión de negocio); se añade la regla de regeneración del body (§7) |

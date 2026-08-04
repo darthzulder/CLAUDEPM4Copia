@@ -81,6 +81,9 @@ export default function CorreccionErrorFuncional() {
 
   // Campo señalado por la SFC: el explícito si viene, si no el mensaje de error
   // (SeccionCamposPayload busca en él el nombre de la clave del payload).
+  // qd_strAffectedField / qd_strRejectedValue ya no se muestran en S1 (ningún script
+  // los escribe → salían vacíos), pero si el caso los trae siguen alimentando esta
+  // pista y viajan en el payload de completeTask.
   const strSenalado = objWatch[QD.strAffectedField] || objWatch[nmErrorMessage] || '';
 
   // Lista de intentos previos del caso.
@@ -174,11 +177,6 @@ export default function CorreccionErrorFuncional() {
               <ZdsInput name={nmAttempt} control={control} label="Intento N.° actual (M1/M2)" readOnly />
             </div>
 
-            <div className="form-row cols-2">
-              <ZdsInput name={QD.strAffectedField} control={control} label="Campo Afectado" readOnly />
-              <ZdsInput name={QD.strRejectedValue} control={control} label="Valor Rechazado" readOnly />
-            </div>
-
             <div className="form-row cols-1">
               <ZdsInput name={QD.strEndpointCalled} control={control} label="Endpoint Invocado" readOnly />
             </div>
@@ -190,6 +188,16 @@ export default function CorreccionErrorFuncional() {
                 label="Mensaje de Error SFC"
                 readOnly
                 helpText="Mensaje literal devuelto por SmartSupervision — solo lectura."
+              />
+            </div>
+
+            <div className="form-row cols-1">
+              <ZdsTextarea
+                name={QD.strPayloadSent}
+                control={control}
+                label="Payload Enviado (JSON)"
+                readOnly
+                helpText="JSON del body que se envió en el intento fallido — solo lectura. Para corregirlo use la sección Campos a Corregir: el body se regenera con las variables del caso."
               />
             </div>
 
@@ -279,8 +287,8 @@ export default function CorreccionErrorFuncional() {
         </form>
       </div>
 
-      {/* ACT-003-03 · Ver Log Completo — log técnico que emite el script de Momento 2
-          (qd_strCompleteLogAPI) + el body que se envió, como evidencia. */}
+      {/* ACT-003-03 · Ver Log Completo — un único campo con el log que emite el
+          script de Momento 2 en qd_strCompleteLogAPI (igual que SCR-004). */}
       {blnShowLog && (
         <ZrModal model={blnShowLog} onChange={(open: boolean) => setBlnShowLog(open)}>
           <div className="modal-wide">
@@ -289,7 +297,6 @@ export default function CorreccionErrorFuncional() {
             </h3>
             <div className="modal-scroll-body">
               <ZdsTextarea name={QD.strCompleteLogAPI} control={control} label="Log Completo" readOnly />
-              <ZdsTextarea name={QD.strPayloadSent} control={control} label="Payload Enviado (JSON)" readOnly />
             </div>
             <div z-flex="75" z-align="right:center" style={{ marginTop: 'var(--zs-100)' }}>
               <ZrButton config="secondary:s" onClick={() => setBlnShowLog(false)}>Cerrar</ZrButton>
