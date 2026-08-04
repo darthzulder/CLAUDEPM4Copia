@@ -59,12 +59,13 @@ export { ZrLoader }      from '@zurich/web-components/react/loader';
 // El DS no tiene "status pill" dedicada; ZrTag es la pill en-flujo. Mapeamos la
 // variante a su fill DS (neutral = sin fill → default del DS). ZrBadge NO sirve:
 // es notificación overlay (position:absolute → se superpone si hay varias en fila).
-export type StatusVariant = 'success' | 'danger' | 'info' | 'neutral';
+export type StatusVariant = 'success' | 'danger' | 'info' | 'neutral' | 'warning';
 
-const STATUS_FILL: Record<StatusVariant, 'moss' | 'peach' | 'teal' | undefined> = {
+const STATUS_FILL: Record<StatusVariant, 'moss' | 'peach' | 'teal' | 'lemon' | undefined> = {
   success: 'moss',
   danger:  'peach',
   info:    'teal',
+  warning: 'lemon',
   neutral: undefined,
 };
 

@@ -10,34 +10,31 @@
 
 import { QD, SCR013_SLA_UMBRAL_PROXIMO } from '../fields/fields';
 import type { CasoDashboard, EstadoCasoDashboard, KpisDashboard, RequestRaw } from '../fields/types';
-import { addBusinessDays, countBusinessDaysBetween } from '../../../../core/businessDays';
+import { addBusinessDays, countBusinessDaysBetween, parsePm4Date, estadoSlaPorDiasRestantes, estadoSlaVariant } from '../../../../core/businessDays';
 
 // ---------------------------------------------------------------------------
 // Mapeo request PM4 → CasoDashboard
 // ---------------------------------------------------------------------------
-function formatFecha(in_strIso?: string): string {
-  if (!in_strIso) return '—';
-  const intT = Date.parse(in_strIso);
-  if (Number.isNaN(intT)) return String(in_strIso);
-  return new Date(intT).toLocaleDateString('es-CO', { day: '2-digit', month: 'short', year: 'numeric' });
+function formatFecha(in_dtFecha: Date | null): string {
+  if (!in_dtFecha) return '—';
+  return in_dtFecha.toLocaleDateString('es-CO', { day: '2-digit', month: 'short', year: 'numeric' });
 }
 
-// Fecha límite (deadline) = fecha de inicio + qd_strSlaAssigned días HÁBILES.
-// qd_strSlaAssigned se interpreta como el plazo en días hábiles desde la creación del caso.
-// Devuelve el timestamp en ms de la fecha de vencimiento, o null si falta el SLA o la
-// fecha de inicio (no hay campo qd_fechaVencimiento en los datos del caso: se calcula).
+// Fecha límite (deadline) = fecha de radicación (qd_strFilingDate) + qd_strSlaAssigned días
+// HÁBILES. qd_strSlaAssigned se interpreta como el plazo en días hábiles desde la radicación
+// del caso. Devuelve el timestamp en ms de la fecha de vencimiento, o null si falta el SLA o
+// la fecha de radicación (no hay campo qd_fechaVencimiento en los datos del caso: se calcula).
 // Misma regla que el script PM4 COL_UTIL_Dias_Habiles (id 95, op 'add').
 function calcularDeadline(
   in_dicData: Record<string, unknown>,
-  in_strCreatedAt: string | undefined,
+  in_dtFilingDate: Date | null,
   in_setFeriados: ReadonlySet<string>,
 ): number | null {
   const genSlaRaw = in_dicData[QD.strSlaAssigned];
-  const intStartT = in_strCreatedAt ? Date.parse(in_strCreatedAt) : Number.NaN;
-  if (genSlaRaw === undefined || genSlaRaw === null || genSlaRaw === '' || Number.isNaN(intStartT)) return null;
+  if (genSlaRaw === undefined || genSlaRaw === null || genSlaRaw === '' || !in_dtFilingDate) return null;
   const intSla = Number(genSlaRaw);
   if (!Number.isFinite(intSla)) return null;
-  return addBusinessDays(new Date(intStartT), intSla, in_setFeriados).getTime();
+  return addBusinessDays(in_dtFilingDate, intSla, in_setFeriados).getTime();
 }
 
 // Días HÁBILES restantes = deadline − hoy, contando solo días hábiles (con signo: negativo
@@ -48,18 +45,25 @@ function calcularDiasRestantes(in_intDeadline: number | null, in_setFeriados: Re
   return countBusinessDaysBetween(new Date(), new Date(in_intDeadline), in_setFeriados);
 }
 
-// Estado operativo del caso a partir del status del request y los días restantes.
-function estadoDeRequest(in_strStatus: string | undefined, in_intDiasRestantes: number): EstadoCasoDashboard {
+// Estado operativo del caso a partir del status del request y, si el request sigue activo,
+// de la proximidad al vencimiento (estadoSlaPorDiasRestantes(), compartida con SCR-0051 —
+// ver core/businessDays.ts). Cerrada/Cancelada solo dependen del status del request de PM4,
+// que SCR-0051 no tiene disponible de la misma forma (por eso viven aquí y no en el helper
+// compartido).
+function estadoDeRequest(in_strStatus: string | undefined, in_intDiasRestantes: number, in_blnTieneDeadline: boolean): EstadoCasoDashboard {
   const strStatus = String(in_strStatus ?? '').toUpperCase();
   if (strStatus === 'COMPLETED') return 'Cerrada';
   if (strStatus === 'CANCELED' || strStatus === 'CANCELLED') return 'Cancelada';
-  return in_intDiasRestantes < 0 ? 'Vencida' : 'Abierta'; // ACTIVE / ERROR / otros
+  return estadoSlaPorDiasRestantes(in_intDiasRestantes, in_blnTieneDeadline, SCR013_SLA_UMBRAL_PROXIMO);
 }
 
 export function mapRequestToCaso(in_objRequest: RequestRaw, in_setFeriados: ReadonlySet<string>): CasoDashboard {
   const objData = in_objRequest.data ?? {};
   const str = (in_strKey: string) => (objData[in_strKey] === undefined || objData[in_strKey] === null ? '' : String(objData[in_strKey]));
-  const intDeadline = calcularDeadline(objData, in_objRequest.created_at, in_setFeriados);
+  // Fecha de creación real del caso = radicación SFC (qd_strFilingDate, 'DD/MM/YYYY'),
+  // NO el created_at del request de PM4 (que refleja cuándo se abrió la tarea en el BPM).
+  const dtFilingDate = parsePm4Date(objData[QD.strFilingDate] as string | undefined);
+  const intDeadline = calcularDeadline(objData, dtFilingDate, in_setFeriados);
   const intDias = calcularDiasRestantes(intDeadline, in_setFeriados);
   // Responsable: nombre completo del usuario del caso (data._user.fullname).
   const objUser = objData._user as { fullname?: string } | undefined;
@@ -68,10 +72,11 @@ export function mapRequestToCaso(in_objRequest: RequestRaw, in_setFeriados: Read
     id: in_objRequest.id,
     numeroCaso: str(QD.strSfcCode) || String(in_objRequest.case_number ?? in_objRequest.id ?? ''),
     tipoSolicitud: str(QD.strRequestType),
-    fechaCreacion: formatFecha(in_objRequest.created_at),
-    fechaVencimiento: intDeadline !== null ? formatFecha(new Date(intDeadline).toISOString()) : '—',
+    fechaCreacion: formatFecha(dtFilingDate),
+    fechaVencimiento: intDeadline !== null ? formatFecha(new Date(intDeadline)) : '—',
+    sla: str(QD.strSlaAssigned),
     diasRestantes: intDias,
-    estado: estadoDeRequest(in_objRequest.status, intDias),
+    estado: estadoDeRequest(in_objRequest.status, intDias, intDeadline !== null),
     // Área: rol responsable del caso (qd_strResponsableRole).
     areaResponsable: str('qd_strResponsableRole'),
     responsable: strResponsable,
@@ -83,19 +88,22 @@ export function mapRequestToCaso(in_objRequest: RequestRaw, in_setFeriados: Read
 // Helpers de presentación
 // ---------------------------------------------------------------------------
 
-// Estado del caso → variante de ZdsStatusBadge (píldoras del DS).
-export function estadoVariante(in_strEstado: EstadoCasoDashboard): 'success' | 'danger' | 'info' | 'neutral' {
+// Estado del caso → variante de ZdsStatusBadge (píldoras del DS). Cerrada/Cancelada son
+// propias de este dashboard (dependen del status del request); Abierta/Por Vencer/Vencida
+// delegan en estadoSlaVariant(), compartida con SCR-0051.
+export function estadoVariante(in_strEstado: EstadoCasoDashboard): 'success' | 'danger' | 'info' | 'neutral' | 'warning' {
   switch (in_strEstado) {
     case 'Cerrada':   return 'success';
-    case 'Vencida':   return 'danger';
     case 'Cancelada': return 'neutral';
-    default:          return 'info'; // Abierta
+    default:          return estadoSlaVariant(in_strEstado as 'Abierta' | 'Por Vencer' | 'Vencida');
   }
 }
 
-// Columna "Días restantes": solo texto. Para casos cerrados/cancelados no aplica ("—").
+// Columna "Días restantes": solo texto. No aplica ("—") para casos cerrados/cancelados,
+// ni para casos que todavía no tienen deadline calculable (sin SLA/fecha de radicación).
 export function diasRestantesTexto(in_objCaso: CasoDashboard): string {
   if (in_objCaso.estado === 'Cerrada' || in_objCaso.estado === 'Cancelada') return '—';
+  if (in_objCaso.fechaVencimiento === '—') return '—';
   const intN = in_objCaso.diasRestantes;
   const plural = (in_intX: number) => `${in_intX} ${in_intX === 1 ? 'día' : 'días'}`;
   if (intN > 0) return plural(intN);
@@ -104,11 +112,13 @@ export function diasRestantesTexto(in_objCaso: CasoDashboard): string {
 }
 
 // KPIs derivados de la lista completa de casos (siempre consistentes con los datos).
+// Cada KPI es un conteo directo por estado: estadoDeRequest() ya resuelve el umbral
+// de "Por Vencer" y el signo de mora de "Vencida" al mapear el caso.
 export function calcularKpis(in_lstCasos: CasoDashboard[]): KpisDashboard {
   return {
     abiertos:  in_lstCasos.filter((c) => c.estado === 'Abierta').length,
-    porVencer: in_lstCasos.filter((c) => c.estado === 'Abierta' && c.diasRestantes >= 0 && c.diasRestantes <= SCR013_SLA_UMBRAL_PROXIMO).length,
-    vencidos:  in_lstCasos.filter((c) => c.estado === 'Vencida' || (c.estado === 'Abierta' && c.diasRestantes < 0)).length,
+    porVencer: in_lstCasos.filter((c) => c.estado === 'Por Vencer').length,
+    vencidos:  in_lstCasos.filter((c) => c.estado === 'Vencida').length,
     cerrados:  in_lstCasos.filter((c) => c.estado === 'Cerrada').length,
   };
 }
@@ -122,11 +132,12 @@ export function casosToCSV(
   in_dicTipoMap: Record<string, string>,
   in_dicAreaMap: Record<string, string>,
 ): string {
-  const lstHeaders = ['# Caso', 'Tipo', 'Creación', 'Vencimiento', 'Días restantes', 'Estado', 'Área', 'Responsable', 'Descripción'];
+  const lstHeaders = ['# Caso', 'Tipo', 'Creación', 'SLA', 'Vencimiento', 'Días restantes', 'Estado', 'Área', 'Responsable', 'Descripción'];
   const lstFilas = in_lstCasos.map((c) => [
     c.numeroCaso,
     in_dicTipoMap[c.tipoSolicitud] ?? c.tipoSolicitud,
     c.fechaCreacion,
+    c.sla,
     c.fechaVencimiento,
     String(c.diasRestantes),
     c.estado,
@@ -145,12 +156,12 @@ export function casosToCSV(
 // colección no coincidirán con estos datos de ejemplo — es esperado en dev.
 // ---------------------------------------------------------------------------
 export const SAMPLE_CASES: CasoDashboard[] = [
-  { id: 1, numeroCaso: '001', tipoSolicitud: 'Queja', fechaCreacion: '10 abr. 2024', fechaVencimiento: '15 abr. 2024', diasRestantes: 1, estado: 'Abierta', areaResponsable: 'Siniestros Autos', responsable: 'Laura González', descripcion: 'Cliente reporta demora en la liquidación de siniestro de vehículo. Solicita respuesta urgente antes del vencimiento regulatorio.' },
-  { id: 2, numeroCaso: '002', tipoSolicitud: 'Petición', fechaCreacion: '15 abr. 2024', fechaVencimiento: '18 abr. 2024', diasRestantes: 3, estado: 'Cerrada', areaResponsable: '—', responsable: 'María Pérez', descripcion: 'Solicitud de actualización de datos de póliza resuelta satisfactoriamente dentro del plazo SLA.' },
-  { id: 3, numeroCaso: '003', tipoSolicitud: 'Derecho de petición', fechaCreacion: '20 mar. 2024', fechaVencimiento: '20 abr. 2024', diasRestantes: -3, estado: 'Vencida', areaResponsable: 'Siniestros Autos', responsable: 'Juan Martínez', descripcion: 'Derecho de petición por negación de cobertura. Caso excedió el plazo SFC. Requiere atención inmediata y posible escalamiento.' },
-  { id: 4, numeroCaso: '004', tipoSolicitud: 'Petición', fechaCreacion: '5 abr. 2024', fechaVencimiento: '20 abr. 2024', diasRestantes: 5, estado: 'Cancelada', areaResponsable: 'Siniestros Autos', responsable: 'Ana Ruiz', descripcion: 'Solicitud cancelada a petición del cliente. El asegurado retiró la solicitud voluntariamente antes del cierre.' },
-  { id: 5, numeroCaso: '005', tipoSolicitud: 'Queja', fechaCreacion: '28 mar. 2024', fechaVencimiento: '15 abr. 2024', diasRestantes: 2, estado: 'Abierta', areaResponsable: 'Siniestros Autos', responsable: 'Carla Torres', descripcion: 'Queja por atención deficiente en el proceso de inspección del vehículo. Cliente exige compensación y disculpa formal.' },
-  { id: 6, numeroCaso: '006', tipoSolicitud: 'Queja', fechaCreacion: '2 may. 2024', fechaVencimiento: '17 may. 2024', diasRestantes: 8, estado: 'Abierta', areaResponsable: 'Siniestros Vida', responsable: 'Pedro Ramírez', descripcion: 'Queja por retraso en el pago de indemnización por fallecimiento. Beneficiarios solicitan respuesta urgente.' },
-  { id: 7, numeroCaso: '007', tipoSolicitud: 'Reclamo', fechaCreacion: '18 abr. 2024', fechaVencimiento: '3 may. 2024', diasRestantes: -2, estado: 'Vencida', areaResponsable: 'Pagos y Cobros', responsable: 'Sandra Molina', descripcion: 'Reclamo por cobro indebido de prima adicional. SLA vencido. Área de Pagos debe emitir respuesta de manera inmediata.' },
-  { id: 8, numeroCaso: '008', tipoSolicitud: 'Petición', fechaCreacion: '30 abr. 2024', fechaVencimiento: '15 may. 2024', diasRestantes: 4, estado: 'Abierta', areaResponsable: 'SAC', responsable: 'Diego Herrera', descripcion: 'Petición de información sobre cobertura de póliza de hogar. Cliente requiere aclaración de condiciones contractuales.' },
+  { id: 1, numeroCaso: '001', tipoSolicitud: 'Queja', fechaCreacion: '10 abr. 2024', fechaVencimiento: '15 abr. 2024', sla: '15', diasRestantes: 1, estado: 'Por Vencer', areaResponsable: 'Siniestros Autos', responsable: 'Laura González', descripcion: 'Cliente reporta demora en la liquidación de siniestro de vehículo. Solicita respuesta urgente antes del vencimiento regulatorio.' },
+  { id: 2, numeroCaso: '002', tipoSolicitud: 'Petición', fechaCreacion: '15 abr. 2024', fechaVencimiento: '18 abr. 2024', sla: '15', diasRestantes: 3, estado: 'Cerrada', areaResponsable: '—', responsable: 'María Pérez', descripcion: 'Solicitud de actualización de datos de póliza resuelta satisfactoriamente dentro del plazo SLA.' },
+  { id: 3, numeroCaso: '003', tipoSolicitud: 'Derecho de petición', fechaCreacion: '20 mar. 2024', fechaVencimiento: '20 abr. 2024', sla: '15', diasRestantes: -3, estado: 'Vencida', areaResponsable: 'Siniestros Autos', responsable: 'Juan Martínez', descripcion: 'Derecho de petición por negación de cobertura. Caso excedió el plazo SFC. Requiere atención inmediata y posible escalamiento.' },
+  { id: 4, numeroCaso: '004', tipoSolicitud: 'Petición', fechaCreacion: '5 abr. 2024', fechaVencimiento: '20 abr. 2024', sla: '15', diasRestantes: 5, estado: 'Cancelada', areaResponsable: 'Siniestros Autos', responsable: 'Ana Ruiz', descripcion: 'Solicitud cancelada a petición del cliente. El asegurado retiró la solicitud voluntariamente antes del cierre.' },
+  { id: 5, numeroCaso: '005', tipoSolicitud: 'Queja', fechaCreacion: '28 mar. 2024', fechaVencimiento: '15 abr. 2024', sla: '15', diasRestantes: 2, estado: 'Por Vencer', areaResponsable: 'Siniestros Autos', responsable: 'Carla Torres', descripcion: 'Queja por atención deficiente en el proceso de inspección del vehículo. Cliente exige compensación y disculpa formal.' },
+  { id: 6, numeroCaso: '006', tipoSolicitud: 'Queja', fechaCreacion: '2 may. 2024', fechaVencimiento: '17 may. 2024', sla: '15', diasRestantes: 8, estado: 'Abierta', areaResponsable: 'Siniestros Vida', responsable: 'Pedro Ramírez', descripcion: 'Queja por retraso en el pago de indemnización por fallecimiento. Beneficiarios solicitan respuesta urgente.' },
+  { id: 7, numeroCaso: '007', tipoSolicitud: 'Reclamo', fechaCreacion: '18 abr. 2024', fechaVencimiento: '3 may. 2024', sla: '15', diasRestantes: -2, estado: 'Vencida', areaResponsable: 'Pagos y Cobros', responsable: 'Sandra Molina', descripcion: 'Reclamo por cobro indebido de prima adicional. SLA vencido. Área de Pagos debe emitir respuesta de manera inmediata.' },
+  { id: 8, numeroCaso: '008', tipoSolicitud: 'Petición', fechaCreacion: '30 abr. 2024', fechaVencimiento: '15 may. 2024', sla: '15', diasRestantes: 4, estado: 'Abierta', areaResponsable: 'SAC', responsable: 'Diego Herrera', descripcion: 'Petición de información sobre cobertura de póliza de hogar. Cliente requiere aclaración de condiciones contractuales.' },
 ];

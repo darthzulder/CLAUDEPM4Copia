@@ -3,7 +3,7 @@ import { useForm } from 'react-hook-form';
 import { useTask } from '../../../../core/useTask';
 import { scrollToFirstError } from '../../../../core/scrollToFirstError';
 import { pm4TasksUrl } from '../../../../core/useToken';
-import { useHolidaySet, diasHabilesRestantes, parsePm4Date } from '../../../../core/businessDays';
+import { useHolidaySet, diasHabilesRestantes, parsePm4Date, estadoSlaPorDiasRestantes, estadoSlaVariant } from '../../../../core/businessDays';
 import ScreenHeader from '../../../../components/ScreenHeader';
 import InfoBar from '../../../../components/InfoBar';
 import { ActionBar } from '../../../../components/ActionBar';
@@ -13,7 +13,7 @@ import { useCollection } from '../../../../core/useCollection';
 import { uploadAttachments, attachIdsToPayload } from '../../../../core/attachments';
 import { QD, QD_COLLECTIONS, SCR0051_DEFAULTS as DEFAULTS, SCR0051_SLA_UMBRAL_PRORROGA as SLA_UMBRAL_PRORROGA } from '../fields/fields';
 import type { DetalleReasignacionRespuestaFormData, AccionFlujoCombinado } from '../fields/fields';
-import SeccionDetalleCaso, { estadoVariant } from './SeccionDetalleCaso';
+import SeccionDetalleCaso from './SeccionDetalleCaso';
 import SeccionAsignacion from './SeccionAsignacion';
 import SeccionRespuesta from './SeccionRespuesta';
 import { buildRespuestaFinalHtml, fillRespuestaFinalHtml } from './respuestaFinalTemplate';
@@ -91,6 +91,11 @@ export default function DetalleReasignacionRespuesta() {
 
   // RUL-0051-03 — SLA crítico: habilita prórroga y banner rojo si slaRestante <= 2.
   const blnSlaCritical = blnHasTimeLeft && intTimeLeft <= SLA_UMBRAL_PRORROGA;
+
+  // Estado del caso por proximidad al vencimiento (Abierta/Por Vencer/Vencida), misma regla
+  // y mismo umbral que el dashboard SCR-013 (SLA_UMBRAL_PRORROGA = SCR013_SLA_UMBRAL_PROXIMO = 2).
+  // No distingue Cerrada/Cancelada: mientras esta pantalla está en pantalla, la tarea sigue activa.
+  const strEstadoSla = estadoSlaPorDiasRestantes(intTimeLeft, blnHasTimeLeft, SLA_UMBRAL_PRORROGA);
 
   // Datos del consumidor derivados de los campos granulares producidos por SCR-000.
   const strName = (objWatch[QD.strCompanyName] || `${objWatch[QD.strFirstName] ?? ''} ${objWatch[QD.strLastName] ?? ''}`).trim();
@@ -224,10 +229,12 @@ export default function DetalleReasignacionRespuesta() {
             ) : '—',
           },
           {
+            // Estado del caso por proximidad al vencimiento (Abierta/Por Vencer/Vencida),
+            // misma lógica y píldoras que el dashboard SCR-013.
             label: 'Estado',
             value: (
-              <ZdsStatusBadge variant={estadoVariant(objWatch[QD.strSsStatus] || '')}>
-                {objWatch[QD.strSsStatus] || 'Sin estado'}
+              <ZdsStatusBadge variant={estadoSlaVariant(strEstadoSla)}>
+                {strEstadoSla}
               </ZdsStatusBadge>
             ),
           },

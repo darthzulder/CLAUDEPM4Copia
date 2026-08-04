@@ -10,7 +10,7 @@ interface TablaCasosProps {
 }
 
 /**
- * Tabla consolidada de casos (SCR-013). Columnas: # Caso, Tipo, Creación, Vencimiento,
+ * Tabla consolidada de casos (SCR-013). Columnas: # Caso, Tipo, Creación, SLA, Vencimiento,
  * Días (semáforo), Estado (píldora DS), Área, Responsable, Acción (Ver).
  * Tipo y Área se muestran resolviendo el código de la colección a su descripción.
  */
@@ -27,6 +27,7 @@ export default function TablaCasos({ casos, tipoMap, areaMap, onVer }: TablaCaso
             <th># Caso</th>
             <th>Tipo</th>
             <th>Creación</th>
+            <th>SLA</th>
             <th>Vencimiento</th>
             <th>Días restantes</th>
             <th>Estado</th>
@@ -41,6 +42,7 @@ export default function TablaCasos({ casos, tipoMap, areaMap, onVer }: TablaCaso
                 <td><strong>{c.numeroCaso}</strong></td>
                 <td>{(tipoMap[c.tipoSolicitud] ?? c.tipoSolicitud) || '—'}</td>
                 <td>{c.fechaCreacion}</td>
+                <td>{c.sla ? `${c.sla} días` : '—'}</td>
                 <td>{c.fechaVencimiento}</td>
                 <td>{diasRestantesTexto(c)}</td>
                 <td>

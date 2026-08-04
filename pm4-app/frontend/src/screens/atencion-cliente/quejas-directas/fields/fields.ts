@@ -1242,8 +1242,12 @@ export const SCR0052_DEFAULTS: Partial<RespuestaAreaResponsableFormData> = {
 // SCR-013 — Dashboard — Gestión de Casos
 // ═══════════════════════════════════════════════════════════════════════════
 
-// Umbral de días hábiles para clasificar un caso abierto como "Próximo a vencer" (KPI warn).
-export const SCR013_SLA_UMBRAL_PROXIMO = 3;
+// Umbral de días hábiles restantes para que un caso activo pase a estado "Por Vencer"
+// (2 o menos días hábiles hasta el vencimiento). Pese al prefijo, se reutiliza en toda
+// pantalla que muestra este Estado en su InfoBar (SCR-013, SCR-0051, SCR-002) — ver
+// estadoSlaPorDiasRestantes() en core/businessDays.ts, mismo valor que
+// SCR0051_SLA_UMBRAL_PRORROGA (RUL-0051-03).
+export const SCR013_SLA_UMBRAL_PROXIMO = 2;
 
 // Tamaño de página de la tabla de casos (mockup muestra 8 filas por página).
 export const SCR013_PAGE_SIZE = 8;
@@ -1257,6 +1261,7 @@ export const SCR013_PROCESS_ID = SCR000_WEB_ENTRY_PROCESS_ID;
 export const SCR013_OPTIONS_ESTADO = [
   { value: '', label: 'Todos' },
   { value: 'Abierta', label: 'Abierta' },
+  { value: 'Por Vencer', label: 'Por Vencer' },
   { value: 'Cerrada', label: 'Cerrada' },
   { value: 'Vencida', label: 'Vencida' },
   { value: 'Cancelada', label: 'Cancelada' },

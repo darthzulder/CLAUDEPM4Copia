@@ -53,8 +53,9 @@ export interface CampoConError {
 }
 
 // SCR-013 — estado operativo del caso en el dashboard (derivado de request.status + SLA,
-// no es un catálogo PM4).
-export type EstadoCasoDashboard = 'Abierta' | 'Cerrada' | 'Vencida' | 'Cancelada';
+// no es un catálogo PM4). "Por Vencer" = caso activo con SCR013_SLA_UMBRAL_PROXIMO días
+// hábiles o menos hasta el vencimiento (ver estadoDeRequest() en dashboardHelpers.ts).
+export type EstadoCasoDashboard = 'Abierta' | 'Por Vencer' | 'Cerrada' | 'Vencida' | 'Cancelada';
 
 // SCR-013 — una fila de la tabla consolidada del dashboard (ya mapeada desde el request PM4).
 // NOTA: es un modelo de presentación DERIVADO (mezcla el id de sistema del request, valores
@@ -66,8 +67,9 @@ export interface CasoDashboard {
   id:               number;               // request id (clave estable)
   numeroCaso:       string;                // # Caso (código SFC o case_number)
   tipoSolicitud:    string;                // Tipo (CÓDIGO de la colección QD_COLLECTIONS.requestType)
-  fechaCreacion:    string;                // Creación (formateada)
+  fechaCreacion:    string;                // Creación (formateada, desde qd_strFilingDate)
   fechaVencimiento: string;                // Vencimiento (formateada o '—')
+  sla:              string;                // SLA asignado en días hábiles (qd_strSlaAssigned, crudo)
   diasRestantes:    number;                // Días hábiles restantes; < 0 = días de mora
   estado:           EstadoCasoDashboard;   // Estado operativo
   areaResponsable:  string;                // Área responsable (CÓDIGO de la colección QD_COLLECTIONS.area)
