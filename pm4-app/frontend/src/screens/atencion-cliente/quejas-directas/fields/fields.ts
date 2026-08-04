@@ -700,13 +700,105 @@ export const SCR003_UMBRAL_INTENTOS = 3; // RUL-003-02
 // ESCALAR_SOPORTE   → ACT-003-02 (deriva a Analista Técnico)
 export type AccionErrorFuncional = 'CORREGIR_REENVIAR' | 'ESCALAR_SOPORTE';
 
+// ═══ Editor del payload de Momento 2 — sección "Campos a Corregir" ═══════════
+// Mapa 1:1 con buildBodyMomento2() del script PHP de Momento 2 (mismo orden de
+// claves): cada campo del body que la SFC rechazó se corrige aquí sobre la
+// VARIABLE del caso de la que el script lo lee, para que el reenvío regenere el
+// body con el valor nuevo. Al enviar, SCR-003 vacía qd_strPayloadSent para que
+// opMomento2 reconstruya el body desde estos campos (si no, el script compara el
+// body regenerado con el payload viejo, ve diferencia y reenvía el VIEJO).
+// ⚠ CONTRATO con el script: mantener sincronizado con buildBodyMomento2.
+
+export type PayloadControl = 'text' | 'digits' | 'textarea' | 'date' | 'select' | 'sino' | 'readonly';
+
+export interface PayloadFieldDef {
+  /** Clave del body que se envía a la SFC ('—' en las filas auxiliares de cascada). */
+  key: string;
+  label: string;
+  /** Variable del caso que lee el script. null = constante del CORE o valor derivado. */
+  variable: QdFieldName | null;
+  control: PayloadControl;
+  /** Catálogo PM4 del que se elige el valor (control 'select'); guarda el código. */
+  collection?: keyof typeof QD_COLLECTIONS;
+  /** El motivo SFC se elige con la cascada cat_matriz_motivos, no con un catálogo plano. */
+  cascade?: 'matrizMotivos';
+  /** Variables aguas abajo que se desbloquean/revalidan al cambiar esta. */
+  unlocks?: QdFieldName[];
+  /** Fila auxiliar de la cascada del motivo: no es una clave del body. */
+  aux?: boolean;
+  note?: string;
+}
+
+export const SCR003_PAYLOAD_M2_FIELDS: readonly PayloadFieldDef[] = [
+  { key: 'tipo_entidad', label: 'Tipo de Entidad', variable: null, control: 'readonly',
+    note: 'Constante de la configuración del CORE (script SFC) — no editable.' },
+  { key: 'entidad_cod', label: 'Código de Entidad', variable: null, control: 'readonly',
+    note: 'Constante de la configuración del CORE (script SFC) — no editable.' },
+  { key: 'codigo_queja', label: 'Código de Queja', variable: null, control: 'readonly',
+    note: 'Derivado: tipo_entidad + entidad_cod + número de caso BPM.' },
+  { key: 'codigo_pais', label: 'País', variable: QD.strCountryCode, control: 'select', collection: 'countryCode' },
+  { key: 'departamento_cod', label: 'Departamento', variable: QD.strDepartment, control: 'select',
+    collection: 'department', unlocks: [QD.strCity] },
+  { key: 'municipio_cod', label: 'Municipio', variable: QD.strCity, control: 'select', collection: 'city',
+    note: 'Las opciones dependen del departamento seleccionado.' },
+  { key: 'canal_cod', label: 'Canal', variable: QD.strChannel, control: 'select', collection: 'channel' },
+  { key: 'producto_cod', label: 'Producto SFC (seguro)', variable: QD.strSfcProduct, control: 'select',
+    collection: 'sfcProduct', unlocks: [QD.strInteraction, QD.strServiceProvided, QD.strSfcReason] },
+  { key: '—', label: 'Momento (cascada del motivo)', variable: QD.strInteraction, control: 'select',
+    cascade: 'matrizMotivos', aux: true, unlocks: [QD.strServiceProvided, QD.strSfcReason],
+    note: 'No viaja en el body: filtra el motivo SFC en cat_matriz_motivos.' },
+  { key: '—', label: 'Servicio (cascada del motivo)', variable: QD.strServiceProvided, control: 'select',
+    cascade: 'matrizMotivos', aux: true, unlocks: [QD.strSfcReason],
+    note: 'Solo aplica cuando el momento es "Asistencias"; no viaja en el body.' },
+  { key: 'macro_motivo_cod', label: 'Macro motivo SFC', variable: QD.strSfcReason, control: 'select',
+    cascade: 'matrizMotivos', note: 'Se deriva de producto → momento → (servicio) en cat_matriz_motivos.' },
+  { key: 'fecha_creacion', label: 'Fecha de creación', variable: QD.strFilingDate, control: 'date',
+    note: 'Formato DD/MM/AAAA; el script lo convierte a ISO antes de enviarlo.' },
+  { key: 'nombres', label: 'Razón social', variable: QD.strCompanyName, control: 'text',
+    note: 'Si tiene valor, el script envía la razón social e IGNORA nombres y apellidos (sfcNombres).' },
+  { key: 'nombres', label: 'Nombres', variable: QD.strFirstName, control: 'text',
+    note: 'Se envía como "nombres" (nombre + apellido) solo si la razón social está vacía.' },
+  { key: 'nombres', label: 'Apellidos', variable: QD.strLastName, control: 'text',
+    note: 'Se envía como "nombres" (nombre + apellido) solo si la razón social está vacía.' },
+  { key: 'tipo_id_CF', label: 'Tipo de identificación', variable: QD.strIdType, control: 'select', collection: 'idType' },
+  { key: 'numero_id_CF', label: 'Número de identificación', variable: QD.strIdNumber, control: 'digits' },
+  { key: 'tipo_persona', label: 'Tipo de persona', variable: QD.strPersonType, control: 'select', collection: 'personType' },
+  { key: 'insta_recepcion', label: 'Instancia de recepción', variable: QD.strReceptionInstance, control: 'select',
+    collection: 'receptionInstance' },
+  { key: 'punto_recepcion', label: 'Punto de recepción', variable: QD.strReceptionPoint, control: 'select',
+    collection: 'receptionPoint' },
+  { key: 'admision', label: 'Admisión', variable: QD.strAdmission, control: 'select', collection: 'admission' },
+  { key: 'texto_queja', label: 'Texto de la queja', variable: QD.strComplaintText, control: 'textarea' },
+  { key: 'anexo_queja', label: '¿Anexo de la queja?', variable: QD.strFinalReplyAttach, control: 'sino',
+    note: 'El script lo envía como booleano (SI ⇒ true).' },
+  { key: 'ente_control', label: 'Ente de control', variable: QD.strControlEntity, control: 'select',
+    collection: 'controlEntity' },
+];
+
 export type CorreccionErrorFuncionalFormData = Omit<Pick<QdFields,
   | typeof QD.strSfcErrorCode | typeof QD.strAffectedField | typeof QD.strRejectedValue
   | typeof QD.strSfcErrorMessage | typeof QD.strM1M2AttemptNum | typeof QD.strRejectionDate
   | typeof QD.strFieldCorrection | typeof QD.strCorrectionJustif | typeof QD.lstAttemptHistory
+  // Diagnóstico que SÍ emite el script de Momento 2 (mismo juego que SCR-004): los
+  // FLD-040..045 de arriba no los escribe ningún script hoy, así que S1 cae a estos.
+  | typeof QD.strHttpCode | typeof QD.strErrorType | typeof QD.strApiTechMessage
+  | typeof QD.strCompleteLogAPI | typeof QD.strEndpointCalled | typeof QD.strAttemptNum
+  // Payload del reenvío: se muestra como referencia y se VACÍA al corregir.
+  | typeof QD.strPayloadSent | typeof QD.strPayloadAdjustNeeded
+  // Variables del body de Momento 2 (editor "Campos a Corregir", ver SCR003_PAYLOAD_M2_FIELDS)
+  | typeof QD.strBpmCaseId | typeof QD.strCountryCode | typeof QD.strDepartment | typeof QD.strCity
+  | typeof QD.strChannel | typeof QD.strSfcProduct | typeof QD.strSfcReason | typeof QD.strFilingDate
+  | typeof QD.strCompanyName | typeof QD.strFirstName | typeof QD.strLastName
+  | typeof QD.strIdType | typeof QD.strIdNumber | typeof QD.strPersonType
+  | typeof QD.strReceptionInstance | typeof QD.strReceptionPoint | typeof QD.strAdmission
+  | typeof QD.strComplaintText | typeof QD.strFinalReplyAttach | typeof QD.strControlEntity
+  // Auxiliares de la cascada cat_matriz_motivos (no viajan en el body de la SFC).
+  | typeof QD.strRequestType | typeof QD.strInteraction | typeof QD.strServiceProvided
   | typeof QD.strAction
 >, typeof QD.strAction> & { [QD.strAction]: AccionErrorFuncional };
 
+// Sin estas claves react-hook-form no registra los campos y NO viajarían en el
+// completeTask (mismo motivo documentado en SCR002_DEFAULTS).
 export const SCR003_DEFAULTS: Partial<CorreccionErrorFuncionalFormData> = {
   [QD.strSfcErrorCode]: '',
   [QD.strAffectedField]: '',
@@ -717,6 +809,40 @@ export const SCR003_DEFAULTS: Partial<CorreccionErrorFuncionalFormData> = {
   [QD.strFieldCorrection]: '',
   [QD.strCorrectionJustif]: '',
   [QD.lstAttemptHistory]: [],
+  // Diagnóstico real del script de Momento 2.
+  [QD.strHttpCode]: '',
+  [QD.strErrorType]: '',
+  [QD.strApiTechMessage]: '',
+  [QD.strCompleteLogAPI]: '',
+  [QD.strEndpointCalled]: '',
+  [QD.strAttemptNum]: '',
+  [QD.strPayloadSent]: '',
+  [QD.strPayloadAdjustNeeded]: 'NO',
+  // Variables del body de Momento 2.
+  [QD.strBpmCaseId]: '',
+  [QD.strCountryCode]: '',
+  [QD.strDepartment]: '',
+  [QD.strCity]: '',
+  [QD.strChannel]: '',
+  [QD.strSfcProduct]: '',
+  [QD.strSfcReason]: '',
+  [QD.strFilingDate]: '',
+  [QD.strCompanyName]: '',
+  [QD.strFirstName]: '',
+  [QD.strLastName]: '',
+  [QD.strIdType]: '',
+  [QD.strIdNumber]: '',
+  [QD.strPersonType]: '',
+  [QD.strReceptionInstance]: '',
+  [QD.strReceptionPoint]: '',
+  [QD.strAdmission]: '',
+  [QD.strComplaintText]: '',
+  [QD.strFinalReplyAttach]: '',
+  [QD.strControlEntity]: '',
+  // Auxiliares de la cascada del motivo.
+  [QD.strRequestType]: '',
+  [QD.strInteraction]: '',
+  [QD.strServiceProvided]: '',
   [QD.strAction]: 'CORREGIR_REENVIAR',
 };
 
