@@ -46,12 +46,14 @@ docker exec pm4-app-container sh -c "cd /app && npm run build --workspace=fronte
 Copy `pm4-app/.env.example` to `pm4-app/.env` and fill in the PM4 credentials:
 
 ```
-PM4_BASE_URL=https://mxzurich.dev.cloud.processmaker.net
+PM4_BASE_URL=https://<current-pm4-instance>   # see pm4-app/.env for the actual value in use
 PM4_TOKEN=eyJ...
 PORT=3001
 VITE_TASK_ID=123
 VITE_PM4_TOKEN=eyJ...
 ```
+
+`PM4_BASE_URL` identifies which PM4 instance the app talks to and **changes across environments/migrations** — never hardcode a specific instance hostname in code or docs; always defer to this variable.
 
 `.env` is git-ignored and must never be committed with a real token.
 

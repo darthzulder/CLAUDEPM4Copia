@@ -6,7 +6,7 @@ App React + Express que actúa como **iframe dentro de ProcessMaker 4** para Zur
 No es un form-builder: cada pantalla es un componente React que replica exactamente el formulario de PM4.
 Las pantallas se crean aquí con ayuda de Claude (este chat), **no dentro de PM4**.
 
-**PM4 instance:** `https://mxzurich.dev.cloud.processmaker.net`
+**PM4 instance:** la instancia activa es la que define `PM4_BASE_URL` en `pm4-app/.env` — este valor **cambia entre entornos y migraciones** (ya pasó una vez), nunca asumas ni hardcodees un hostname fijo en código o documentación; consulta siempre `.env` para saber contra qué instancia se está corriendo.
 **API base:** `/api/1.0`
 **Docs OpenAPI:** `../docs (4).json` (un nivel arriba de pm4-app)
 **Paquetes JSON de pantallas originales:** `../*.json` (un nivel arriba de pm4-app)
@@ -56,7 +56,7 @@ Si alguno falla con errores de TypeScript, lint o empaquetado, **corregir antes 
 ## Variables de entorno (`.env` en raíz de pm4-app)
 
 ```
-PM4_BASE_URL=https://mxzurich.dev.cloud.processmaker.net
+PM4_BASE_URL=https://<instancia-pm4-actual>   # instancia activa — ver valor real en .env, no lo copies aquí
 PM4_TOKEN=eyJ...          # Bearer token para dev (fallback del backend)
 PORT=3001
 VITE_TASK_ID=             # task_id fallback para frontend dev
@@ -190,16 +190,44 @@ await completeTask(payload);
 
 ---
 
-## Colecciones PM4 conocidas
+## Registro de IDs PM4 (colecciones, scripts, procesos)
 
-| ID | Contenido | label field | value field |
-|----|-----------|-------------|-------------|
-| 2 | NAIC (actividades) | `data.frm_actividad` | `data.frm_codigo` |
-| 4 | Intermediarios | `data.frm_nombre_entidad` | `id` |
-| 5 | Correos de intermediarios | `data.frm_mail_intermediario` | `data.frm_mail_intermediario` |
+**Los IDs numéricos de PM4 (colección, script, proceso/evento) son específicos de cada
+instancia y cambian al migrar/reimportar** (ya pasó una vez: la instancia de referencia
+cambió de `mxzurich...` a la que define `PM4_BASE_URL` hoy). Por eso el código **no
+hardcodea estos IDs directamente** — cada `CollectionDef`/script/proceso se resuelve a
+través de:
 
-> IDs basados en el paquete `COL - FF - Form - Cotizador Fast Flow`.
-> Verificar en cada instancia de PM4 si los IDs cambian.
+- **`frontend/src/config/pm4-registry.json`** — fuente de verdad única: mapea una clave
+  estable (slug de negocio, o `uuid` nativo de PM4 para scripts) al ID numérico de la
+  instancia activa. Incluye `title` (para detectar drift) y `note` (para colecciones/
+  scripts con problemas conocidos — ver notas `⚠️` en el propio JSON).
+- **`core/pm4Resolve.ts`** — `resolveCollectionId(slug, fallback)`, `resolveScriptId(slug,
+  fallback)`, `resolveProcessEvent(slug, fallback)`. Si el slug no está en el registro,
+  cae al `fallback` (el id que tenía el código antes) y avisa por consola — permite migrar
+  incremental sin romper nada.
+- **`scripts/pm4-registry-sync.mjs`** — script de mantenimiento que verifica/genera el
+  registro contra la instancia PM4 real (usa `PM4_BASE_URL`/`PM4_TOKEN` de `.env`):
+  ```bash
+  node scripts/pm4-registry-sync.mjs --check   # solo reporta drift, no escribe
+  node scripts/pm4-registry-sync.mjs --init    # primera generación / rellenar registro
+  node scripts/pm4-registry-sync.mjs --update  # aplica scripts resueltos por uuid
+  ```
+  Las **colecciones nunca se auto-escriben** (PM4 no expone un `uuid` nativo para ellas,
+  solo para scripts) — un `[MISMATCH]`/`[MISSING]` de colección siempre requiere revisar
+  y editar `pm4-registry.json` a mano.
+
+**OBLIGATORIO al migrar de instancia PM4:** correr `pm4-registry-sync.mjs --check`, revisar
+el reporte, y solo entonces `--update`/editar el registro. Nunca reintroducir IDs
+hardcodeados sueltos en `collections.ts`/`variables.ts`/`fields.ts` — todo pasa por el
+resolver.
+
+⚠️ Varias colecciones de FAST-FLOW (`naic`, `correosIntermediari`/`correosIntermediario`,
+`comerciales`, `suscriptores`, `actividadNaic`) y el script `consultarClienteTiaCuw` (id 50)
+están **verificadas como incorrectas/huérfanas** contra la instancia actual (no corresponden
+a ninguna colección/script real, o apuntan a uno con otro propósito) — es código legado,
+diferido para revisión de negocio aparte. Ver las notas `⚠️` en `pm4-registry.json` y los
+comentarios en `core/collections.ts`.
 
 ---
 

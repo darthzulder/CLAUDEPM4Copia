@@ -1,0 +1,247 @@
+{
+  "instance": "https://cozurich.dev.cloud.processmaker.net",
+  "generatedAt": "2026-08-04T21:57:25.745Z",
+  "collections": {
+    "intermediarios": {
+      "id": 4,
+      "title": "Listado_intermediarios"
+    },
+    "naic": {
+      "id": 2,
+      "title": "Configuraciones COL",
+      "note": "⚠️ conocido incorrecto — id 2 no tiene los campos que este slug espera (frm_actividad/frm_codigo). FAST-FLOW legado, revisión diferida (ver collections.ts)."
+    },
+    "correosIntermediari": {
+      "id": 5,
+      "title": "Actividades CIIU DO",
+      "note": "⚠️ conocido incorrecto — ninguna colección de la instancia tiene frm_mail_intermediario/frm_id_intermediario. FAST-FLOW legado, revisión diferida."
+    },
+    "actividadesCIIU_dyo": {
+      "id": 5,
+      "title": "Actividades CIIU DO"
+    },
+    "actividadesCIIU_cc": {
+      "id": 6,
+      "title": "Actividades CIIU Crime",
+      "note": "Asume 'cc' = línea Crime — no confirmado con negocio."
+    },
+    "actividadesCIIU_pdysi": {
+      "id": 7,
+      "title": "Actividades CIIU Cyber",
+      "note": "Asume 'pdysi' = línea Cyber — no confirmado con negocio."
+    },
+    "actividadesCIIU_pi": {
+      "id": 8,
+      "title": "Actividades CIIU PI"
+    },
+    "correosIntermediario": {
+      "id": 5,
+      "title": "Actividades CIIU DO",
+      "note": "⚠️ duplicado de correosIntermediari — mismo problema, mismo diferido."
+    },
+    "comerciales": {
+      "id": 5,
+      "title": "Actividades CIIU DO",
+      "note": "⚠️ conocido incorrecto — ninguna colección de la instancia tiene frm_nombre_comercial. FAST-FLOW legado, revisión diferida."
+    },
+    "suscriptores": {
+      "id": 25,
+      "title": "cat-prod-digital",
+      "note": "⚠️ conocido incorrecto — id 25 es en realidad cat-prod-digital (usado por digitalProduct); ninguna colección tiene frm_suscriptores. FAST-FLOW legado, revisión diferida."
+    },
+    "actividadNaic": {
+      "id": 6,
+      "title": "Actividades CIIU Crime",
+      "note": "⚠️ carga sin error pero apunta a la línea Crime, no a un NAIC genérico CO — ambiguo, revisión diferida."
+    },
+    "departamentosFF": {
+      "id": 14,
+      "title": "cat-dpto",
+      "note": "Corregido 2026-08-04 (era id 19 por copy-paste con receptionInstance)."
+    },
+    "municipiosTomador": {
+      "id": 15,
+      "title": "cat-mpio",
+      "note": "Corregido 2026-08-04 (era id 19 por copy-paste con receptionInstance)."
+    },
+    "municipiosAsegurado": {
+      "id": 15,
+      "title": "cat-mpio",
+      "note": "Corregido 2026-08-04 (era id 19 por copy-paste con receptionInstance)."
+    },
+    "requestType": {
+      "id": 18,
+      "title": "cat-tipo-sol"
+    },
+    "filerRole": {
+      "id": 39,
+      "title": "cat-rol-radicador"
+    },
+    "idType": {
+      "id": 11,
+      "title": "cat-tipo-id"
+    },
+    "countryCode": {
+      "id": 13,
+      "title": "cat-pais"
+    },
+    "department": {
+      "id": 14,
+      "title": "cat-dpto"
+    },
+    "city": {
+      "id": 15,
+      "title": "cat-mpio"
+    },
+    "specialCondition": {
+      "id": 24,
+      "title": "cat-cond-esp"
+    },
+    "sfcProduct": {
+      "id": 16,
+      "title": "cat-producto-sfc"
+    },
+    "sfcReason": {
+      "id": 17,
+      "title": "cat-motivo-sfc"
+    },
+    "admission": {
+      "id": 21,
+      "title": "cat-admision"
+    },
+    "complaintStatus": {
+      "id": 42,
+      "title": "cat-estado-queja"
+    },
+    "favorability": {
+      "id": 26,
+      "title": "cat-favorab"
+    },
+    "acceptance": {
+      "id": 27,
+      "title": "cat-aceptacion"
+    },
+    "marking": {
+      "id": 31,
+      "title": "cat-marcacion"
+    },
+    "expressComplaint": {
+      "id": 32,
+      "title": "cat-expres"
+    },
+    "fraudType": {
+      "id": 33,
+      "title": "cat-tipo-fraude"
+    },
+    "channel": {
+      "id": 10,
+      "title": "cat-canal"
+    },
+    "personType": {
+      "id": 12,
+      "title": "cat-tipo-persona"
+    },
+    "receptionInstance": {
+      "id": 19,
+      "title": "cat-instancia"
+    },
+    "receptionPoint": {
+      "id": 20,
+      "title": "cat-punto"
+    },
+    "controlEntity": {
+      "id": 22,
+      "title": "cat-ente"
+    },
+    "sex": {
+      "id": 23,
+      "title": "cat-sexo"
+    },
+    "digitalProduct": {
+      "id": 25,
+      "title": "cat-prod-digital"
+    },
+    "rectification": {
+      "id": 28,
+      "title": "cat-rectif"
+    },
+    "withdrawal": {
+      "id": 29,
+      "title": "cat-desist"
+    },
+    "tutela": {
+      "id": 30,
+      "title": "cat-tutela"
+    },
+    "fraudModality": {
+      "id": 34,
+      "title": "cat-mod-fraude"
+    },
+    "area": {
+      "id": 35,
+      "title": "cat-area"
+    },
+    "areaUsers": {
+      "id": 36,
+      "title": "cat-usuarios-role"
+    },
+    "reassignReason": {
+      "id": 37,
+      "title": "cat-motivo-reasig"
+    },
+    "extensionReason": {
+      "id": 38,
+      "title": "cat-motivo-prorr"
+    },
+    "productDetail": {
+      "id": 40,
+      "title": "cat-detalle-producto"
+    },
+    "lgbtiq": {
+      "id": 41,
+      "title": "cat-lgbtiq"
+    },
+    "alliance": {
+      "id": 44,
+      "title": "cat-alianza"
+    },
+    "matrixMotivos": {
+      "id": 45,
+      "title": "cat_matriz_motivos"
+    },
+    "holidaysColombia": {
+      "id": 48,
+      "title": "cat-feriados-colombia"
+    },
+    "paisesExportacionesCuw": {
+      "id": 36,
+      "title": "cat-usuarios-role",
+      "note": "⚠️ conocido incorrecto — id 36 no tiene pais_reg_pais. Ninguna colección de la instancia lo tiene. FAST-FLOW legado (DetalleExportaciones.tsx), revisión diferida."
+    }
+  },
+  "scripts": {
+    "consultarClienteTiaFastFlow": {
+      "id": 56,
+      "uuid": "a1e47abd-c833-4e04-94f7-bf3b07afa845",
+      "title": "COL - FF - Obtener cliente TIA"
+    },
+    "consultarClienteTiaCuw": {
+      "id": 50,
+      "uuid": "a071b67b-2c12-4f57-8996-607f72883e94",
+      "title": "Generar URL de WebEntry",
+      "note": "⚠️ mismatch conocido — el título real no corresponde a 'obtener cliente'. FAST-FLOW legado, revisión diferida (ver SolicitudCotizacionCuw.tsx)."
+    },
+    "similarCasesQuejas": {
+      "id": 70,
+      "uuid": "a23434ce-0eea-405f-9df7-aa781df863dc",
+      "title": "COL_QD_Check_Similitud"
+    }
+  },
+  "processes": {
+    "quejasDirectasWebEntry": {
+      "processId": 31,
+      "eventId": "node_661",
+      "title": "COL - Gestion de Quejas Directas - Proceso"
+    }
+  }
+}

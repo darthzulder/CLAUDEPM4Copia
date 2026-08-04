@@ -8,7 +8,7 @@ import FormSection from '../../../components/FormSection';
 import ScreenHeader from '../../../components/ScreenHeader';
 import { ZdsInput, ZdsSelect, ZdsDate, ZdsTextarea, ZrButton, ZrAlert, ZrLoader } from '../../../components/fields/ZdsFields';
 import ResultCard from '../../../components/ResultCard';
-import { OPTIONS, COLLECTION_DEFS, SolicitudCotizacionFormData } from './variables';
+import { OPTIONS, COLLECTION_DEFS, SolicitudCotizacionFormData, SCRIPT_OBTENER_CLIENTE } from './variables';
 import pm4 from '../../../api/pm4Client';
 import AseguradosAdicionales, { AseguradoAdicional } from './AseguradosAdicionales';
 import ValoresDeducibles, { ValorDeducible, INITIAL_VALORES } from './ValoresDeducibles';
@@ -27,8 +27,6 @@ interface TiaValue {
   contactInfo?: Array<{ contactInfoType: string; contactInfoDetail: string }>;
   partyType?: string;
 }
-
-const SCRIPT_OBTENER_CLIENTE = 50;
 
 // ---------------------------------------------------------------------------
 // Utilidades

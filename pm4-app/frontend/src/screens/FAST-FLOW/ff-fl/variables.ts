@@ -1,35 +1,36 @@
 import type { CollectionDef } from '../../../core/useCollection';
+import { resolveCollectionId, resolveScriptId } from '../../../core/pm4Resolve';
 
 // ---------------------------------------------------------------------------
 // Colecciones PM4
 // ---------------------------------------------------------------------------
 export const COLLECTION_DEFS = {
   intermediarios: {
-    id: 4,
+    id: resolveCollectionId('intermediarios', 4),
     labelField: 'data.frm_nombre_entidad',
     valueField: 'id',
   } satisfies CollectionDef,
 
   actividadesCIIU_dyo: {
-    id: 5,
+    id: resolveCollectionId('actividadesCIIU_dyo', 5),
     labelField: 'data.frm_actividad',
     valueField: 'data.frm_actividad',
   } satisfies CollectionDef,
 
   actividadesCIIU_cc: {
-    id: 6,
+    id: resolveCollectionId('actividadesCIIU_cc', 6),
     labelField: 'data.frm_actividad',
     valueField: 'data.frm_actividad',
   } satisfies CollectionDef,
 
   actividadesCIIU_pdysi: {
-    id: 7,
+    id: resolveCollectionId('actividadesCIIU_pdysi', 7),
     labelField: 'data.frm_actividad',
     valueField: 'data.frm_actividad',
   } satisfies CollectionDef,
 
   actividadesCIIU_pi: {
-    id: 8,
+    id: resolveCollectionId('actividadesCIIU_pi', 8),
     labelField: 'data.frm_actividad',
     valueField: 'data.frm_actividad',
   } satisfies CollectionDef,
@@ -424,7 +425,8 @@ export interface FfFlSolicitudFormData {
 // ---------------------------------------------------------------------------
 // Consulta de cliente en TIA — script PM4 configurable
 // ---------------------------------------------------------------------------
-export const CONSULTAR_CLIENTE_SCRIPT_ID = 56;
+// Verificado contra PM4 real (2026-08-04): id 56 = "COL - FF - Obtener cliente TIA" ✓
+export const CONSULTAR_CLIENTE_SCRIPT_ID = resolveScriptId('consultarClienteTiaFastFlow', 56);
 
 export function parseClienteTia(in_objRawOutput: unknown): Partial<FfFlSolicitudFormData> {
   const objTia = ((in_objRawOutput as Record<string, unknown> | null | undefined) ?? {}) as Record<string, unknown>;

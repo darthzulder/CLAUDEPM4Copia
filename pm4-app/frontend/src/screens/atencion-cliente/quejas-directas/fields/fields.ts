@@ -15,6 +15,7 @@
 // que el proceso PM4 emita/espere estos mismos nombres.
 
 import { GLOBAL_COLLECTIONS } from '../../../../core/collections';
+import { resolveProcessEvent, resolveScriptId } from '../../../../core/pm4Resolve';
 import type {
   IntentoHistorial, SoporteAdjunto, AsignacionHistorial, RespuestaAyuda, CampoConError,
   FiltrosDashboard,
@@ -514,13 +515,19 @@ export const QD_GLOBAL_DEFAULTS: Partial<QdFields> = {
 // SCR-000 — Formulario de Radicación PQRS (Autoservicio)
 // ═══════════════════════════════════════════════════════════════════════════
 
-export const SCR000_WEB_ENTRY_PROCESS_ID = Number(import.meta.env.WEB_ENTRY_PROCESS_ID || 31);
-export const SCR000_WEB_ENTRY_EVENT_ID = import.meta.env.WEB_ENTRY_EVENT_ID || 'node_661';
+// Verificado contra PM4 real (2026-08-04): processId 31 = "COL - Gestion de Quejas
+// Directas - Proceso", eventId 'node_661' = start event "Comenzar caso por WE" ✓
+// El registro (pm4-registry.json) es ahora el único mecanismo de override entre
+// instancias — ya no se leen VITE_/WEB_ENTRY_PROCESS_ID/EVENT_ID de .env.
+const _webEntry = resolveProcessEvent('quejasDirectasWebEntry', { processId: 31, eventId: 'node_661' });
+export const SCR000_WEB_ENTRY_PROCESS_ID = _webEntry.processId;
+export const SCR000_WEB_ENTRY_EVENT_ID = _webEntry.eventId;
 
 // Script PM4 que detecta casos similares/duplicados (motivo + producto + identificación).
 // Se ejecuta al enviar el formulario (post-captcha, pre-radicación) como watcher.
-// https://cozurich.dev.cloud.processmaker.net/designer/scripts/70/builder
-export const SCR000_SIMILAR_CASES_SCRIPT_ID = Number(import.meta.env.VITE_SIMILAR_CASES_SCRIPT_ID || 70);
+// Verificado contra PM4 real (2026-08-04): id 70 = "COL_QD_Check_Similitud" ✓
+// Ver instancia actual en https://<PM4_BASE_URL>/designer/scripts/70/builder
+export const SCR000_SIMILAR_CASES_SCRIPT_ID = resolveScriptId('similarCasesQuejas', 70);
 
 // Componentes fijos del código SFC (qd_strSfcCode), mismos valores que
 // SCR009_DEFAULT_ENTITY_TYPE/CODE (Excel Cierre #46/#47): tipo de entidad (13,

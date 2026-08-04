@@ -1,25 +1,39 @@
 import type { CollectionDef } from './useCollection';
+import { resolveCollectionId } from './pm4Resolve';
 
 export const GLOBAL_COLLECTIONS = {
   // ==========================================
   // FAST FLOW COLLECTIONS
   // ==========================================
   intermediarios: {
-    id: 4,
+    id: resolveCollectionId('intermediarios', 4),
     labelField: 'data.frm_nombre_entidad',
     valueField: 'id',
   } satisfies CollectionDef,
 
+  // ⚠️ VERIFICADO CONTRA PM4 REAL (2026-08-04) — id 2 es "Configuraciones COL"
+  // (frm_codigo/frm_valor: tabla chica de config tipo NUMERO_COTIZACION/VALOR_SMMLV),
+  // NO tiene los campos frm_actividad/frm_codigo que este CollectionDef espera. El id
+  // correcto no está confirmado — candidato plausible: id 3 "Actividades CIU" (tiene
+  // frm_actividad/frm_codigo/frm_pais/frm_productos, shape multi-país/multi-producto),
+  // pero requiere confirmación de negocio antes de cambiarlo. NO TOCAR sin confirmar.
   naic: {
-    id: 2,
+    id: resolveCollectionId('naic', 2),
     labelField: 'data.frm_actividad',
     valueField: 'data.frm_codigo',
     dependsOn: 'frm_gen_pais',
     pmqlTemplate: 'data.frm_pais = "{{frm_gen_pais}}"',
   } satisfies CollectionDef,
 
+  // ⚠️ VERIFICADO CONTRA PM4 REAL (2026-08-04) — id 5 es "Actividades CIIU DO" (ver
+  // actividadesCIIU_dyo abajo), NO tiene los campos frm_mail_intermediario/
+  // frm_id_intermediario que este CollectionDef espera. Se buscó en las 47 colecciones
+  // de la instancia y NINGUNA tiene esos campos — no hay un id correcto conocido hoy;
+  // puede que la colección de correos de intermediarios nunca se haya migrado/creado
+  // en esta instancia. Reportado al usuario — requiere decisión de negocio, no un
+  // simple cambio de id.
   correosIntermediari: {
-    id: 5,
+    id: resolveCollectionId('correosIntermediari', 5),
     labelField: 'data.frm_mail_intermediario',
     valueField: 'data.frm_mail_intermediario',
     dependsOn: 'frm_gen_intermediario_principal',
@@ -27,65 +41,88 @@ export const GLOBAL_COLLECTIONS = {
   } satisfies CollectionDef,
 
   actividadesCIIU_dyo: {
-    id: 5,
+    id: resolveCollectionId('actividadesCIIU_dyo', 5),
     labelField: 'data.frm_actividad',
     valueField: 'data.frm_actividad',
   } satisfies CollectionDef,
 
+  // Verificado (2026-08-04): id 6 = "Actividades CIIU Crime" en PM4 — shape correcta
+  // (frm_actividad/frm_codigo/frm_pais), asumiendo que "cc" = línea Crime.
   actividadesCIIU_cc: {
-    id: 6,
+    id: resolveCollectionId('actividadesCIIU_cc', 6),
     labelField: 'data.frm_actividad',
     valueField: 'data.frm_actividad',
   } satisfies CollectionDef,
 
+  // Verificado (2026-08-04): id 7 = "Actividades CIIU Cyber" en PM4 — shape correcta,
+  // asumiendo que "pdysi" = línea Cyber (nombre de negocio, no evidente desde el código).
   actividadesCIIU_pdysi: {
-    id: 7,
+    id: resolveCollectionId('actividadesCIIU_pdysi', 7),
     labelField: 'data.frm_actividad',
     valueField: 'data.frm_actividad',
   } satisfies CollectionDef,
 
   actividadesCIIU_pi: {
-    id: 8,
+    id: resolveCollectionId('actividadesCIIU_pi', 8),
     labelField: 'data.frm_actividad',
     valueField: 'data.frm_actividad',
   } satisfies CollectionDef,
 
+  // ⚠️ Duplicado de correosIntermediari (mismo id 5, mismo problema — ver comentario arriba).
   correosIntermediario: {
-    id: 5,
+    id: resolveCollectionId('correosIntermediario', 5),
     labelField: 'data.frm_mail_intermediario',
     valueField: 'data.frm_mail_intermediario',
     dependsOn: 'frm_gen_intermediario_principal',
     pmqlTemplate: 'data.frm_id_intermediario = "{{frm_gen_intermediario_principal}}"',
   } satisfies CollectionDef,
 
+  // ⚠️ VERIFICADO CONTRA PM4 REAL (2026-08-04) — id 5 (Actividades CIIU DO) no tiene
+  // frm_nombre_comercial. Ninguna de las 47 colecciones de la instancia lo tiene —
+  // mismo caso que correosIntermediari/correosIntermediario, requiere decisión de negocio.
   comerciales: {
-    id: 5,
+    id: resolveCollectionId('comerciales', 5),
     labelField: 'data.frm_nombre_comercial',
     valueField: 'id',
   } satisfies CollectionDef,
 
+  // ⚠️ VERIFICADO CONTRA PM4 REAL (2026-08-04) — id 25 es "cat-prod-digital"
+  // (codigo/descripcion, el mismo que usa correctamente QD/digitalProduct), NO tiene
+  // frm_suscriptores/frm_suscriptor_activo_flag. Ninguna de las 47 colecciones tiene
+  // esos campos — requiere decisión de negocio antes de asignar un id.
   suscriptores: {
-    id: 25,
+    id: resolveCollectionId('suscriptores', 25),
     labelField: 'data.frm_suscriptores',
     valueField: 'id',
     pmqlTemplate: 'data.frm_suscriptor_activo_flag = "SI"',
   } satisfies CollectionDef,
 
+  // ⚠️ VERIFICADO CONTRA PM4 REAL (2026-08-04) — id 6 es "Actividades CIIU Crime" (mismo
+  // shape frm_actividad/frm_codigo que este CollectionDef espera, así que TÉCNICAMENTE
+  // carga sin error), pero semánticamente es el catálogo de la línea "Crime", no un NAIC
+  // genérico Colombia. Puede ser intencional (coincide con actividadesCIIU_cc) o un
+  // copy-paste — requiere confirmar con negocio qué línea de producto debe usar este campo.
   actividadNaic: {
-    id: 6,
+    id: resolveCollectionId('actividadNaic', 6),
     labelField: 'data.frm_actividad',
     valueField: 'data.frm_codigo',
     pmqlTemplate: 'data.frm_pais = "CO"',
   } satisfies CollectionDef,
 
+  // FIX verificado contra PM4 real (2026-08-04): tenían id 19 (= cat-instancia, catálogo
+  // de "instancia de recepción" que SÍ usa correctamente QD/receptionInstance) por
+  // copy-paste. El catálogo geográfico real es id 14 (cat-dpto: codigo_departamento/
+  // nombre_departamento) e id 15 (cat-mpio: codigo_municipio/nombre_municipio/
+  // codigo_departamento) — confirmado por shape de campos y porque QD/department(14)
+  // y QD/city(15) ya los usan correctamente.
   departamentosFF: {
-    id: 19,
+    id: resolveCollectionId('departamentosFF', 14),
     labelField: 'data.nombre_departamento',
     valueField: 'data.codigo_departamento',
   } satisfies CollectionDef,
 
   municipiosTomador: {
-    id: 19,
+    id: resolveCollectionId('municipiosTomador', 15),
     labelField: 'data.nombre_municipio',
     valueField: 'data.codigo_municipio',
     dependsOn: 'frm_tom_departamento',
@@ -93,7 +130,7 @@ export const GLOBAL_COLLECTIONS = {
   } satisfies CollectionDef,
 
   municipiosAsegurado: {
-    id: 19,
+    id: resolveCollectionId('municipiosAsegurado', 15),
     labelField: 'data.nombre_municipio',
     valueField: 'data.codigo_municipio',
     dependsOn: 'frm_aseg_departamento',
@@ -107,37 +144,37 @@ export const GLOBAL_COLLECTIONS = {
   // claves son propiedades internas de configuración (como OPTIONS/COLLECTION_DEFS),
   // no viajan a PM4. Ver campos/MAPEO_qd_old_new.md para el detalle.
   requestType: {
-    id: 18,
+    id: resolveCollectionId('requestType', 18),
     labelField: 'data.descripcion',
     valueField: 'data.codigo',
   } satisfies CollectionDef,
 
   filerRole: {
-    id: 39,
+    id: resolveCollectionId('filerRole', 39),
     labelField: 'data.nombre_rol_radicador',
     valueField: 'data.codigo_rol_radicador',
   } satisfies CollectionDef,
 
   idType: {
-    id: 11,
+    id: resolveCollectionId('idType', 11),
     labelField: 'data.descripcion',
     valueField: 'data.codigo',
   } satisfies CollectionDef,
 
   countryCode: {
-    id: 13,
+    id: resolveCollectionId('countryCode', 13),
     labelField: 'data.descripcion',
     valueField: 'data.codigo',
   } satisfies CollectionDef,
 
   department: {
-    id: 14,
+    id: resolveCollectionId('department', 14),
     labelField: 'data.nombre_departamento',
     valueField: 'data.codigo_departamento',
   } satisfies CollectionDef,
 
   city: {
-    id: 15,
+    id: resolveCollectionId('city', 15),
     labelField: 'data.nombre_municipio',
     valueField: 'data.codigo_municipio',
     // dependsOn/pmqlTemplate referencian el campo real qd_strDepartment (ver
@@ -147,139 +184,139 @@ export const GLOBAL_COLLECTIONS = {
   } satisfies CollectionDef,
 
   specialCondition: {
-    id: 24,
+    id: resolveCollectionId('specialCondition', 24),
     labelField: 'data.descripcion',
     valueField: 'data.codigo',
   } satisfies CollectionDef,
 
   sfcProduct: {
-    id: 16,
+    id: resolveCollectionId('sfcProduct', 16),
     labelField: 'data.nombre_producto_sfc',
     valueField: 'data.codigo_producto_sfc',
   } satisfies CollectionDef,
 
   sfcReason: {
-    id: 17,
+    id: resolveCollectionId('sfcReason', 17),
     labelField: 'data.descripcion',
     valueField: 'data.codigo',
   } satisfies CollectionDef,
 
   admission: {
-    id: 21,
+    id: resolveCollectionId('admission', 21),
     labelField: 'data.descripcion',
     valueField: 'data.codigo',
   } satisfies CollectionDef,
 
   complaintStatus: {
-    id: 42,
+    id: resolveCollectionId('complaintStatus', 42),
     labelField: 'data.descripcion',
     valueField: 'data.codigo',
   } satisfies CollectionDef,
 
   favorability: {
-    id: 26,
+    id: resolveCollectionId('favorability', 26),
     labelField: 'data.descripcion',
     valueField: 'data.codigo',
   } satisfies CollectionDef,
 
   acceptance: {
-    id: 27,
+    id: resolveCollectionId('acceptance', 27),
     labelField: 'data.descripcion',
     valueField: 'data.codigo',
   } satisfies CollectionDef,
 
   marking: {
-    id: 31,
+    id: resolveCollectionId('marking', 31),
     labelField: 'data.descripcion',
     valueField: 'data.codigo',
   } satisfies CollectionDef,
 
   expressComplaint: {
-    id: 32,
+    id: resolveCollectionId('expressComplaint', 32),
     labelField: 'data.descripcion',
     valueField: 'data.codigo',
   } satisfies CollectionDef,
 
   fraudType: {
-    id: 33,
+    id: resolveCollectionId('fraudType', 33),
     labelField: 'data.descripcion',
     valueField: 'data.codigo',
   } satisfies CollectionDef,
 
   channel: {
-    id: 10,
+    id: resolveCollectionId('channel', 10),
     labelField: 'data.descripcion',
     valueField: 'data.codigo',
   } satisfies CollectionDef,
 
   personType: {
-    id: 12,
+    id: resolveCollectionId('personType', 12),
     labelField: 'data.descripcion',
     valueField: 'data.codigo',
   } satisfies CollectionDef,
 
   receptionInstance: {
-    id: 19,
+    id: resolveCollectionId('receptionInstance', 19),
     labelField: 'data.descripcion',
     valueField: 'data.codigo',
   } satisfies CollectionDef,
 
   receptionPoint: {
-    id: 20,
+    id: resolveCollectionId('receptionPoint', 20),
     labelField: 'data.descripcion',
     valueField: 'data.codigo',
   } satisfies CollectionDef,
 
   controlEntity: {
-    id: 22,
+    id: resolveCollectionId('controlEntity', 22),
     labelField: 'data.descripcion',
     valueField: 'data.codigo',
   } satisfies CollectionDef,
 
   sex: {
-    id: 23,
+    id: resolveCollectionId('sex', 23),
     labelField: 'data.descripcion',
     valueField: 'data.codigo',
   } satisfies CollectionDef,
 
   digitalProduct: {
-    id: 25,
+    id: resolveCollectionId('digitalProduct', 25),
     labelField: 'data.descripcion',
     valueField: 'data.codigo',
   } satisfies CollectionDef,
 
   rectification: {
-    id: 28,
+    id: resolveCollectionId('rectification', 28),
     labelField: 'data.descripcion',
     valueField: 'data.codigo',
   } satisfies CollectionDef,
 
   withdrawal: {
-    id: 29,
+    id: resolveCollectionId('withdrawal', 29),
     labelField: 'data.descripcion',
     valueField: 'data.codigo',
   } satisfies CollectionDef,
 
   tutela: {
-    id: 30,
+    id: resolveCollectionId('tutela', 30),
     labelField: 'data.descripcion',
     valueField: 'data.codigo',
   } satisfies CollectionDef,
 
   fraudModality: {
-    id: 34,
+    id: resolveCollectionId('fraudModality', 34),
     labelField: 'data.descripcion',
     valueField: 'data.codigo',
   } satisfies CollectionDef,
 
   area: {
-    id: 35,
+    id: resolveCollectionId('area', 35),
     labelField: 'data.nombre_area',
     valueField: 'data.codigo_area',
   } satisfies CollectionDef,
 
   areaUsers: {
-    id: 36,
+    id: resolveCollectionId('areaUsers', 36),
     labelField: 'data.nombre_usuario',
     valueField: 'data.usuario',
     // Shim interno: 'qd_strAreaCode' aquí es una convención de dependsOn/pmqlTemplate
@@ -290,19 +327,19 @@ export const GLOBAL_COLLECTIONS = {
   } satisfies CollectionDef,
 
   reassignReason: {
-    id: 37,
+    id: resolveCollectionId('reassignReason', 37),
     labelField: 'data.descripcion',
     valueField: 'data.codigo',
   } satisfies CollectionDef,
 
   extensionReason: {
-    id: 38,
+    id: resolveCollectionId('extensionReason', 38),
     labelField: 'data.descripcion',
     valueField: 'data.codigo',
   } satisfies CollectionDef,
 
   productDetail: {
-    id: 40,
+    id: resolveCollectionId('productDetail', 40),
     labelField: 'data.nombre_detalle_producto',
     valueField: 'data.codigo_detalle_producto',
     // dependsOn/pmqlTemplate apuntan a 'qd_strLegacyInsurance', que ya NO es el nombre
@@ -317,14 +354,14 @@ export const GLOBAL_COLLECTIONS = {
   } satisfies CollectionDef,
 
   lgbtiq: {
-    id: 41,
+    id: resolveCollectionId('lgbtiq', 41),
     labelField: 'data.descripcion',
     valueField: 'data.codigo',
   } satisfies CollectionDef,
 
   // Catálogo de alianzas comerciales (CATALOGOS v2). Creado pero aún sin uso en pantalla.
   alliance: {
-    id: 44,
+    id: resolveCollectionId('alliance', 44),
     labelField: 'data.alianza',
     valueField: 'data.codigo',
   } satisfies CollectionDef,
@@ -335,7 +372,7 @@ export const GLOBAL_COLLECTIONS = {
   // (queja procede / a favor del cliente) o la 10 (no procede / a favor de la compañía).
   // options → { value: HTML_completo, label: nombre_HTML }.
   emailTemplates: {
-    id: 46,
+    id: resolveCollectionId('emailTemplates', 46),
     labelField: 'data.nombre_HTML',
     valueField: 'data.HTML_completo',
   } satisfies CollectionDef,
@@ -353,7 +390,7 @@ export const GLOBAL_COLLECTIONS = {
   // labelField/valueField apuntan al motivo (única columna con código propio); las
   // demás columnas se leen directo del registro crudo (`records`).
   matrixMotivos: {
-    id: 45,
+    id: resolveCollectionId('matrixMotivos', 45),
     labelField: 'data.motivoSFC',
     valueField: 'data.codigoMotivoSFC',
   } satisfies CollectionDef,
@@ -365,7 +402,7 @@ export const GLOBAL_COLLECTIONS = {
   // COL_UTIL_Dias_Habiles (id 95) para excluirlos del cálculo de días hábiles.
   // Ver core/businessDays.ts.
   holidaysColombia: {
-    id: 48,
+    id: resolveCollectionId('holidaysColombia', 48),
     labelField: 'data.holyday_name',
     valueField: 'data.holyday_date', // 'YYYY-MM-DD'
   } satisfies CollectionDef,

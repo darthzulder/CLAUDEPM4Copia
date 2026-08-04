@@ -56,8 +56,8 @@
     "hash": "8568f3e5290d4069717b57590a643181"
   },
   "G:\\DockerProys\\CLAUDEPM4Copia\\pm4-app\\frontend\\src\\vite-env.d.ts": {
-    "mtime": 1783374074.1920297,
-    "hash": "3cbfad98e5f4c6de226fee7f871a3d92"
+    "mtime": 1785880428.9348962,
+    "hash": "7cf1d3d484e841e78e29512e8c6b4e9b"
   },
   "G:\\DockerProys\\CLAUDEPM4Copia\\pm4-app\\frontend\\src\\zds-layout.d.ts": {
     "mtime": 1782264699.0909588,
@@ -127,6 +127,10 @@
     "mtime": 1785530908.841631,
     "hash": "b8e27a3aa14dbc2f1419860e79c17c91"
   },
+  "G:\\DockerProys\\CLAUDEPM4Copia\\pm4-app\\frontend\\src\\config\\pm4Registry.types.ts": {
+    "mtime": 1785879989.1419346,
+    "hash": "3c7fee4d9632d7b8fac3df645e406938"
+  },
   "G:\\DockerProys\\CLAUDEPM4Copia\\pm4-app\\frontend\\src\\core\\attachments.ts": {
     "mtime": 1785352354.3224316,
     "hash": "9bf9af7e07c3a1c0a15d227cf2dd02da"
@@ -136,12 +140,16 @@
     "hash": "8fc1385cf75b3929ded3566cb9f03de2"
   },
   "G:\\DockerProys\\CLAUDEPM4Copia\\pm4-app\\frontend\\src\\core\\collections.ts": {
-    "mtime": 1785784061.5080464,
-    "hash": "3991a78bbfe076bbab180b68fd8dc849"
+    "mtime": 1785880209.05152,
+    "hash": "9278d6959b9d5f071148bb581dda808e"
   },
   "G:\\DockerProys\\CLAUDEPM4Copia\\pm4-app\\frontend\\src\\core\\fileHash.ts": {
     "mtime": 1785530908.841631,
     "hash": "6f8cd8b7430097593f9c54d2832525b2"
+  },
+  "G:\\DockerProys\\CLAUDEPM4Copia\\pm4-app\\frontend\\src\\core\\pm4Resolve.ts": {
+    "mtime": 1785880124.7800825,
+    "hash": "4683bb40c80bf0fbd8b386ad37b68cd2"
   },
   "G:\\DockerProys\\CLAUDEPM4Copia\\pm4-app\\frontend\\src\\core\\scrollToFirstError.ts": {
     "mtime": 1784926166.5289845,
@@ -272,8 +280,8 @@
     "hash": "f43cf6cca6bd08312604cbcb98896e23"
   },
   "G:\\DockerProys\\CLAUDEPM4Copia\\pm4-app\\frontend\\src\\screens\\atencion-cliente\\quejas-directas\\fields\\fields.ts": {
-    "mtime": 1785772924.5374405,
-    "hash": "6f08149665f72f1caf55850f366efa6c"
+    "mtime": 1785880413.500568,
+    "hash": "2e87c31c388dd9d290e4cc5d75f44b9c"
   },
   "G:\\DockerProys\\CLAUDEPM4Copia\\pm4-app\\frontend\\src\\screens\\atencion-cliente\\quejas-directas\\fields\\types.ts": {
     "mtime": 1783958902.288797,
@@ -308,8 +316,8 @@
     "hash": "489c7a72c24b86da9f2d68a392c1114f"
   },
   "G:\\DockerProys\\CLAUDEPM4Copia\\pm4-app\\frontend\\src\\screens\\FAST-FLOW\\cotizador-fast-flow\\variables.ts": {
-    "mtime": 1783546833.7978525,
-    "hash": "76153867b24cb6c4ef44e7f008a318fc"
+    "mtime": 1785880329.0960903,
+    "hash": "6ffb5568f3d86c30a126b816b92d4f88"
   },
   "G:\\DockerProys\\CLAUDEPM4Copia\\pm4-app\\frontend\\src\\screens\\FAST-FLOW\\estado-correo\\EstadoCorreo.tsx": {
     "mtime": 1783546833.7978525,
@@ -364,8 +372,8 @@
     "hash": "742a3784f118b5b3611794491e2ec6e0"
   },
   "G:\\DockerProys\\CLAUDEPM4Copia\\pm4-app\\frontend\\src\\screens\\FAST-FLOW\\ff-fl\\variables.ts": {
-    "mtime": 1783546833.8048708,
-    "hash": "32eed8d58da81150590cc70ba4a38150"
+    "mtime": 1785880346.1584814,
+    "hash": "2017e6635bfdc140d58223384a52ac5b"
   },
   "G:\\DockerProys\\CLAUDEPM4Copia\\pm4-app\\frontend\\src\\screens\\FAST-FLOW\\nota-cobertura\\variables.ts": {
     "mtime": 1781193419.8857732,
@@ -392,24 +400,24 @@
     "hash": "2e2b8f2bf69a5f4350f928e0c03776bb"
   },
   "G:\\DockerProys\\CLAUDEPM4Copia\\pm4-app\\frontend\\src\\screens\\FAST-FLOW\\solicitud-cotizacion-cuw\\AseguradosAdicionales.tsx": {
-    "mtime": 1784926166.5319853,
-    "hash": "ec7d47e8911aaed5dd74e363dfa6a331"
+    "mtime": 1785880943.8770475,
+    "hash": "32362e1dd27e1064014be5342d85d721"
   },
   "G:\\DockerProys\\CLAUDEPM4Copia\\pm4-app\\frontend\\src\\screens\\FAST-FLOW\\solicitud-cotizacion-cuw\\DetalleExportaciones.tsx": {
-    "mtime": 1784926166.5329854,
-    "hash": "95b532dc7ea538c602f1bba321f7438d"
+    "mtime": 1785880968.660474,
+    "hash": "25d848bb434a97c86a492b7b5bee922e"
   },
   "G:\\DockerProys\\CLAUDEPM4Copia\\pm4-app\\frontend\\src\\screens\\FAST-FLOW\\solicitud-cotizacion-cuw\\SolicitudCotizacionCuw.tsx": {
-    "mtime": 1784926166.5339866,
-    "hash": "0c4af524e72433fc933d75e23a768197"
+    "mtime": 1785880367.7669933,
+    "hash": "63e426faaf9bc12f1e2ae4ce2e03d229"
   },
   "G:\\DockerProys\\CLAUDEPM4Copia\\pm4-app\\frontend\\src\\screens\\FAST-FLOW\\solicitud-cotizacion-cuw\\ValoresDeducibles.tsx": {
     "mtime": 1784926166.5339866,
     "hash": "70ec3ab1a5c53755c01e967e450559b4"
   },
   "G:\\DockerProys\\CLAUDEPM4Copia\\pm4-app\\frontend\\src\\screens\\FAST-FLOW\\solicitud-cotizacion-cuw\\variables.ts": {
-    "mtime": 1782420578.9611866,
-    "hash": "29423332890eefcc8fe3deee540b8ef7"
+    "mtime": 1785880381.517345,
+    "hash": "6add81dda3232edbb5724099c69fe4bf"
   },
   "G:\\DockerProys\\CLAUDEPM4Copia\\pm4-app\\frontend\\src\\screens\\smartsupervision-api-docs\\SmartsupervisionApiDocs.tsx": {
     "mtime": 1784930567.3018591,
@@ -418,6 +426,10 @@
   "G:\\DockerProys\\CLAUDEPM4Copia\\pm4-app\\insumos\\index_anexo02.py": {
     "mtime": 1784930567.310894,
     "hash": "0bb60b8a0d4341d19329a9be5658ee70"
+  },
+  "G:\\DockerProys\\CLAUDEPM4Copia\\pm4-app\\scripts\\pm4-registry-sync.mjs": {
+    "mtime": 1785880621.9641807,
+    "hash": "21f67743d57e45bd93ee17df76ae8cc6"
   },
   "G:\\DockerProys\\CLAUDEPM4Copia\\CLAUDE.md": {
     "mtime": 1784735982.8668537,
@@ -436,20 +448,20 @@
     "hash": "eef290c9b663957d9c107e12a5abcadf"
   },
   "G:\\DockerProys\\CLAUDEPM4Copia\\MIGRACION_PANTALLAS.md": {
-    "mtime": 1781193419.6564975,
-    "hash": "bbd76e2d660da3f72a50e7fba9796296"
+    "mtime": 1785880687.5350385,
+    "hash": "a2b2606659155f7c10d56ab638dc7baa"
   },
   "G:\\DockerProys\\CLAUDEPM4Copia\\README.md": {
-    "mtime": 1784736330.3288355,
-    "hash": "704b7537c200f69309f67b4c85c76d80"
+    "mtime": 1785878266.324379,
+    "hash": "a39e36597eb94c0a5b3b302c9485bd19"
   },
   "G:\\DockerProys\\CLAUDEPM4Copia\\pm4-app\\CLAUDE.md": {
-    "mtime": 1784667930.0701182,
-    "hash": "d3f50604278536a26141cdb92a303039"
+    "mtime": 1785880672.929017,
+    "hash": "e8b1981d95de52a338cd5af716f59acb"
   },
   "G:\\DockerProys\\CLAUDEPM4Copia\\pm4-app\\Diagrama.md": {
-    "mtime": 1781193419.8678932,
-    "hash": "fab918f05255069b37a1171bcf11adf6"
+    "mtime": 1785878268.859654,
+    "hash": "57df9e43024b02ae3e9a5efd7d952527"
   },
   "G:\\DockerProys\\CLAUDEPM4Copia\\pm4-app\\render.yaml": {
     "mtime": 1783379764.062887,

@@ -1,4 +1,5 @@
 import type { CollectionDef } from '../../../core/useCollection';
+import { resolveCollectionId, resolveScriptId } from '../../../core/pm4Resolve';
 
 // ---------------------------------------------------------------------------
 // Definiciones de colecciones PM4
@@ -10,7 +11,7 @@ export const COLLECTION_DEFS = {
    * Todos los intermediarios registrados.
    */
   intermediarios: {
-    id: 4,
+    id: resolveCollectionId('intermediarios', 4),
     labelField: 'data.frm_nombre_entidad',
     valueField: 'id',
   } satisfies CollectionDef,
@@ -20,8 +21,10 @@ export const COLLECTION_DEFS = {
    * Actividades económicas. Depende del campo frm_gen_pais del formulario:
    * solo se carga cuando el país ya tiene valor y filtra por data.frm_pais.
    */
+  // ⚠️ VERIFICADO CONTRA PM4 REAL (2026-08-04) — mismo problema que en core/collections.ts:
+  // id 2 es "Configuraciones COL", no un catálogo de actividades. FAST-FLOW legado, diferido.
   naic: {
-    id: 2,
+    id: resolveCollectionId('naic', 2),
     labelField: 'data.frm_actividad',
     valueField: 'data.frm_codigo',
     dependsOn: 'frm_gen_pais',
@@ -33,8 +36,10 @@ export const COLLECTION_DEFS = {
    * Filtrado por el intermediario principal seleccionado.
    * Depende de frm_gen_intermediario_principal (ID del intermediario).
    */
+  // ⚠️ VERIFICADO CONTRA PM4 REAL (2026-08-04) — mismo problema: id 5 no tiene
+  // frm_mail_intermediario/frm_id_intermediario. FAST-FLOW legado, diferido.
   correosIntermediari: {
-    id: 5,
+    id: resolveCollectionId('correosIntermediari', 5),
     labelField: 'data.frm_mail_intermediario',
     valueField: 'data.frm_mail_intermediario',
     dependsOn: 'frm_gen_intermediario_principal',
@@ -129,7 +134,8 @@ export const WATCHERS = {
 // ---------------------------------------------------------------------------
 // Consulta de cliente en TIA — script PM4 configurable
 // ---------------------------------------------------------------------------
-export const CONSULTAR_CLIENTE_SCRIPT_ID = 56;
+// Verificado contra PM4 real (2026-08-04): id 56 = "COL - FF - Obtener cliente TIA" ✓
+export const CONSULTAR_CLIENTE_SCRIPT_ID = resolveScriptId('consultarClienteTiaFastFlow', 56);
 
 export function parseClienteTia(in_objRaw: unknown): Partial<CotizadorFormData> {
   const objTia = ((in_objRaw as Record<string, unknown> | null | undefined) ?? {}) as Record<string, unknown>;

@@ -4,6 +4,7 @@ import { ZdsInput, ZdsSelect, ZrModal, ZrButton, ZrTable } from '../../../compon
 import { useCollection } from '../../../core/useCollection';
 import type { CollectionDef } from '../../../core/useCollection';
 import { scrollToFirstError } from '../../../core/scrollToFirstError';
+import { resolveCollectionId } from '../../../core/pm4Resolve';
 
 // ---------------------------------------------------------------------------
 // Tipos
@@ -26,8 +27,11 @@ interface Props {
 // ---------------------------------------------------------------------------
 // Constantes
 // ---------------------------------------------------------------------------
+// ⚠️ VERIFICADO CONTRA PM4 REAL (2026-08-04) — id 6 es "Actividades CIIU Crime" (carga sin
+// error, mismo shape) pero no un NAIC genérico CO — mismo caso ambiguo que actividadNaic
+// en variables.ts. FAST-FLOW legado, diferido.
 const NAIC_ADIC_DEF: CollectionDef = {
-  id: 6,
+  id: resolveCollectionId('actividadNaic', 6),
   labelField: 'data.frm_actividad',
   valueField: 'data.frm_codigo',
   pmqlTemplate: 'data.frm_pais = "CO"',

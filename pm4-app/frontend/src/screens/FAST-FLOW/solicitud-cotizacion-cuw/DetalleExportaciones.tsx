@@ -4,6 +4,7 @@ import { ZdsInput, ZdsSelect, ZrModal, ZrButton, ZrTable } from '../../../compon
 import { useCollection } from '../../../core/useCollection';
 import type { CollectionDef } from '../../../core/useCollection';
 import { scrollToFirstError } from '../../../core/scrollToFirstError';
+import { resolveCollectionId } from '../../../core/pm4Resolve';
 
 // ---------------------------------------------------------------------------
 // Tipos
@@ -28,8 +29,13 @@ interface Props {
 // ---------------------------------------------------------------------------
 // Constantes
 // ---------------------------------------------------------------------------
+// ⚠️ VERIFICADO CONTRA PM4 REAL (2026-08-04) — NUEVO hallazgo: id 36 en la instancia
+// actual es "cat-usuarios-role" (codigo_area/nombre_usuario/rol/usuario), NO tiene
+// pais_reg_pais. Ninguna de las 47 colecciones de la instancia tiene ese campo — mismo
+// patrón que el resto de colecciones huérfanas de FAST-FLOW (ver core/collections.ts).
+// FAST-FLOW legado, diferido para revisión de negocio.
 const PAISES_DEF: CollectionDef = {
-  id: 36,
+  id: resolveCollectionId('paisesExportacionesCuw', 36),
   labelField: 'data.pais_reg_pais',
   valueField: 'id',
 };

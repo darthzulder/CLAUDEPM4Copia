@@ -2,6 +2,8 @@
 
 > **Para Claude Code**: Lee este documento COMPLETO antes de escribir cualquier código relacionado con la migración. Contiene la estructura real de los archivos de PM4 analizada de los exports existentes. Sigue los pasos en orden y **pregunta al usuario antes de ejecutar cada fase**.
 
+> **Nota cruzada:** este documento cubre la migración de **screens completas** entre instancias PM4 (con su propio `id-mapping.json` para `FormNestedScreen`). Para el problema paralelo de **IDs de colección/script/proceso** usados en runtime por la app (`GLOBAL_COLLECTIONS`, scripts de watchers, Web Entry), ver `pm4-app/frontend/src/config/pm4-registry.json` + `pm4-app/scripts/pm4-registry-sync.mjs`, documentado en `pm4-app/CLAUDE.md` § "Registro de IDs PM4".
+
 ---
 
 ## Lo que necesitas saber antes de empezar

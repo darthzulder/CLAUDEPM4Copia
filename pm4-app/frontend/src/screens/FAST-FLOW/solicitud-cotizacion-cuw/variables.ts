@@ -1,57 +1,65 @@
 import type { CollectionDef } from '../../../core/useCollection';
+import { resolveCollectionId, resolveScriptId } from '../../../core/pm4Resolve';
 
 // ---------------------------------------------------------------------------
 // Colecciones PM4
 // ---------------------------------------------------------------------------
 export const COLLECTION_DEFS = {
   intermediarios: {
-    id: 4,
+    id: resolveCollectionId('intermediarios', 4),
     labelField: 'data.frm_nombre_entidad',
     valueField: 'id',
   } satisfies CollectionDef,
 
-  // Correos del intermediario principal (depende de frm_gen_intermediario_principal)
+  // ⚠️ VERIFICADO CONTRA PM4 REAL (2026-08-04) — mismo problema que en core/collections.ts:
+  // id 5 es "Actividades CIIU DO", no tiene frm_mail_intermediario/frm_id_intermediario.
+  // Ninguna de las 47 colecciones de la instancia los tiene. FAST-FLOW legado, diferido.
   correosIntermediario: {
-    id: 5,
+    id: resolveCollectionId('correosIntermediario', 5),
     labelField: 'data.frm_mail_intermediario',
     valueField: 'data.frm_mail_intermediario',
     dependsOn: 'frm_gen_intermediario_principal',
     pmqlTemplate: 'data.frm_id_intermediario = "{{frm_gen_intermediario_principal}}"',
   } satisfies CollectionDef,
 
-  // Comerciales — colección 5, sin filtro (todos los comerciales)
+  // ⚠️ VERIFICADO CONTRA PM4 REAL (2026-08-04) — mismo problema: id 5 no tiene
+  // frm_nombre_comercial. FAST-FLOW legado, diferido.
   comerciales: {
-    id: 5,
+    id: resolveCollectionId('comerciales', 5),
     labelField: 'data.frm_nombre_comercial',
     valueField: 'id',
   } satisfies CollectionDef,
 
-  // Suscriptores activos — colección 25, filtro estático por activo
+  // ⚠️ VERIFICADO CONTRA PM4 REAL (2026-08-04) — id 25 es en realidad cat-prod-digital
+  // (usado por QD/digitalProduct), no tiene frm_suscriptores. FAST-FLOW legado, diferido.
   suscriptores: {
-    id: 25,
+    id: resolveCollectionId('suscriptores', 25),
     labelField: 'data.frm_suscriptores',
     valueField: 'id',
     pmqlTemplate: 'data.frm_suscriptor_activo_flag = "SI"',
   } satisfies CollectionDef,
 
-  // Actividad NAIC / CIIU — colección 6, filtro estático Colombia
+  // ⚠️ VERIFICADO CONTRA PM4 REAL (2026-08-04) — id 6 es "Actividades CIIU Crime" (carga
+  // sin error, pero semánticamente no es un NAIC genérico CO) — ambiguo, diferido.
   actividadNaic: {
-    id: 6,
+    id: resolveCollectionId('actividadNaic', 6),
     labelField: 'data.frm_actividad',
     valueField: 'data.frm_codigo',
     pmqlTemplate: 'data.frm_pais = "CO"',
   } satisfies CollectionDef,
 
-  // Departamentos Colombia (DataSource 19)
+  // FIX verificado contra PM4 real (2026-08-04): id 19 real es cat-instancia (QD), no
+  // geografía. Departamentos = id 14 (cat-dpto), Municipios = id 15 (cat-mpio) — mismo
+  // fix aplicado en core/collections.ts (departamentosFF/municipiosTomador/municipiosAsegurado).
   departamentos: {
-    id: 19,
+    id: resolveCollectionId('departamentosFF', 14),
     labelField: 'data.nombre_departamento',
     valueField: 'data.codigo_departamento',
   } satisfies CollectionDef,
 
   // Municipios tomador — filtrados por departamento seleccionado
   municipiosTomador: {
-    id: 19,
+    id: resolveCollectionId('municipiosTomador', 15),
     labelField: 'data.nombre_municipio',
     valueField: 'data.codigo_municipio',
     dependsOn: 'frm_tom_departamento',
@@ -60,13 +68,22 @@ export const COLLECTION_DEFS = {
 
   // Municipios asegurado — filtrados por departamento seleccionado
   municipiosAsegurado: {
-    id: 19,
+    id: resolveCollectionId('municipiosAsegurado', 15),
     labelField: 'data.nombre_municipio',
     valueField: 'data.codigo_municipio',
     dependsOn: 'frm_aseg_departamento',
     pmqlTemplate: 'data.codigo_departamento = "{{frm_aseg_departamento}}"',
   } satisfies CollectionDef,
 } as const;
+
+// ---------------------------------------------------------------------------
+// Consulta de cliente en TIA — script PM4 configurable
+// ---------------------------------------------------------------------------
+// ⚠️ VERIFICADO CONTRA PM4 REAL (2026-08-04) — id 50 en la instancia actual es
+// "Generar URL de WebEntry", NO un script de "obtener cliente". Mismatch previo a este
+// cambio (FAST-FLOW, código legado) — se deja igual y se reporta para revisión futura
+// junto con el resto de colecciones huérfanas de FAST-FLOW (ver core/collections.ts).
+export const SCRIPT_OBTENER_CLIENTE = resolveScriptId('consultarClienteTiaCuw', 50);
 
 // ---------------------------------------------------------------------------
 // Opciones estáticas

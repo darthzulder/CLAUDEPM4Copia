@@ -4,7 +4,7 @@ flowchart TD
     BROWSER["Navegador del usuario
     (iframe dentro de PM4)"]
 
-    subgraph PM4["  ProcessMaker 4 — mxzurich.dev.cloud.processmaker.net  "]
+    subgraph PM4["  ProcessMaker 4 — instancia definida por PM4_BASE_URL (.env)  "]
         PM4_PROC["Proceso BPM
         (nodo de tarea)"]
         PM4_API["API /api/1.0
