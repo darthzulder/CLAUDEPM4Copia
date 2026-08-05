@@ -225,27 +225,59 @@ export function ZdsTextarea<TFV extends FieldValues>({
 }
 
 // ─── ZdsCheckboxField — ZrCheckbox + Controller ───────────────────────────────
+// checkedValue/uncheckedValue: permite respaldar un campo que guarda un CONTRATO
+// de texto (p.ej. 'SI'/'NO') con un checkbox visual, en vez de un booleano puro.
+// Por defecto se comporta como checkbox booleano (true/false).
 export function ZdsCheckboxField<TFV extends FieldValues>({
-  control, name, label,
+  control, name, label, checkedValue, uncheckedValue,
 }: {
   control: Control<TFV>;
   name: FieldPath<TFV>;
   label: string;
+  checkedValue?: string;
+  uncheckedValue?: string;
 }) {
   return (
     <Controller
       name={name}
       control={control}
-      render={({ field }) => (
-        <ZrCheckbox
-          id={`field-${String(name)}`}
-          name={field.name}
-          model={!!field.value}
-          label={label}
-          onChange={(val: boolean | null) => field.onChange(val ?? false)}
-          onBlur={field.onBlur}
-        />
-      )}
+      render={({ field }) => {
+        const blnChecked = checkedValue !== undefined
+          ? field.value === checkedValue
+          : !!field.value;
+        return (
+          <ZrCheckbox
+            id={`field-${String(name)}`}
+            name={field.name}
+            label={label}
+            onChange={(val: boolean | null) => {
+              const blnNext = !!val;
+              if (checkedValue !== undefined || uncheckedValue !== undefined) {
+                field.onChange((blnNext ? checkedValue : uncheckedValue) as never);
+              } else {
+                field.onChange(blnNext as never);
+              }
+            }}
+            onBlur={field.onBlur}
+            {...({
+              // ⚠ Bug del vendor (@zurich/web-components, ver useCustomElement en
+              // dist/react/customElement.js): descarta CUALQUIER prop cuyo valor sea
+              // exactamente `=== false` (`continue`), así que `model={false}` nunca
+              // llega al custom element — el checkbox queda atascado en su último
+              // `true` interno y hace falta un clic extra para desmarcarlo visualmente.
+              // Un string 'false' NO sirve de workaround: para custom elements React
+              // asigna la prop como PROPIEDAD DIRECTA del nodo (no como atributo), así
+              // que Lit nunca pasa el string por su `converter` (eso solo aplica al
+              // parsear atributos) y guarda el string crudo — `_checked` queda con un
+              // string truthy y el checkbox se ve marcado. Workaround real: enviar el
+              // número `0` (falsy, pero `0 === false` es `false` en JS → sobrevive el
+              // filtro del vendor sin tocarlo) — Lit lo asigna tal cual a `model`/
+              // `_checked` y `input.checked = 0` sí coacciona a `false` nativamente.
+              model: blnChecked ? true : 0,
+            } as Record<string, unknown>)}
+          />
+        );
+      }}
     />
   );
 }
