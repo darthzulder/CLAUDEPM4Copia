@@ -55,6 +55,72 @@ interface Props {
   onClose: () => void;
 }
 
+// ─── RecaptchaWidget — el checkbox "No soy un robot" suelto ───────────────────
+// Renderiza el widget de Google en el flujo de la página (sin modal), para las
+// pantallas que muestran la validación de seguridad como un campo más del
+// formulario (SCR-000). `onExpired` avisa cuando el token caduca para que la
+// pantalla invalide el que ya tenía guardado.
+export function RecaptchaWidget({
+  onVerified, onExpired,
+}: {
+  onVerified: (token: string) => void;
+  onExpired?: () => void;
+}) {
+  const containerRef = useRef<HTMLDivElement>(null);
+  const widgetIdRef = useRef<number | null>(null);
+  // Refs a los callbacks para no re-ejecutar el effect (ni re-renderizar el widget).
+  const onVerifiedRef = useRef(onVerified);
+  onVerifiedRef.current = onVerified;
+  const onExpiredRef = useRef(onExpired);
+  onExpiredRef.current = onExpired;
+  const [strStatus, setStrStatus] = useState<'loading' | 'ready' | 'error'>('loading');
+
+  useEffect(() => {
+    if (!SITE_KEY) { setStrStatus('error'); return; }
+
+    let blnCancelled = false;
+    setStrStatus('loading');
+    loadRecaptcha()
+      .then(() => {
+        if (blnCancelled || !containerRef.current || widgetIdRef.current !== null) return;
+        try {
+          widgetIdRef.current = window.grecaptcha.render(containerRef.current, {
+            sitekey: SITE_KEY,
+            callback: (in_strToken: string) => onVerifiedRef.current(in_strToken),
+            'expired-callback': () => {
+              if (widgetIdRef.current !== null) window.grecaptcha.reset(widgetIdRef.current);
+              onExpiredRef.current?.();
+            },
+          });
+          setStrStatus('ready');
+        } catch (in_excError) {
+          console.error('[recaptcha] grecaptcha.render() falló:', in_excError);
+          if (!blnCancelled) setStrStatus('error');
+        }
+      })
+      .catch((in_excError) => {
+        console.error('[recaptcha] no se pudo cargar api.js:', in_excError);
+        if (!blnCancelled) setStrStatus('error');
+      });
+
+    return () => { blnCancelled = true; };
+  }, []);
+
+  return (
+    <div>
+      {strStatus === 'loading' && <ZrLoader />}
+      {strStatus === 'error' && (
+        <ZrAlert config="negative" {...({ 'hide-close': true } as object)}>
+          No se pudo cargar la validación de seguridad. Verifica tu conexión e inténtalo de nuevo.
+        </ZrAlert>
+      )}
+      {/* Google renderiza el checkbox dentro de este contenedor. Siempre visible:
+          en display:none, grecaptcha.render() puede fallar. */}
+      <div ref={containerRef} />
+    </div>
+  );
+}
+
 export default function RecaptchaModal({ open, onVerified, onClose }: Props) {
   const containerRef = useRef<HTMLDivElement>(null);
   const widgetIdRef = useRef<number | null>(null);

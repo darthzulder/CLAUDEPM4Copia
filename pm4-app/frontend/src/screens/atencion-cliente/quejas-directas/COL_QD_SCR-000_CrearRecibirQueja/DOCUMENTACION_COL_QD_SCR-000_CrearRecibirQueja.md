@@ -57,18 +57,21 @@ Catálogos implementados como **colecciones dinámicas PM4** (no listas estátic
 
 ## Campos Implementados
 
-**S1 — Tipo de Solicitud y Rol** (`CrearRecibirQueja.tsx`):
+**S1 — Tipo de solicitud y rol** (`CrearRecibirQueja.tsx`):
 
-> **Nota:** `qd_strBpmCaseId` (FLD-300) y `qd_fechaCreacion` (FLD-301) se retiraron del formulario:
-> el caso y su timestamp los genera y captura el BPM al radicar, no el usuario en la creación.
+> **Nota:** el número de caso (FLD-300) y la fecha/hora de creación (FLD-301) no son campos
+> editables: el caso y su timestamp los genera el BPM al radicar. Desde el rediseño del
+> maquetado (2026-08-04) se muestran como línea de solo lectura al inicio de la sección
+> ("Número de caso (ID BPM)" / "Fecha de la creación" / "Hora"); en radicación web el número
+> se resuelve al enviar y hasta entonces se lee "Se asigna al radicar".
 
 | Campo (UI) | Variable | Tipo | Obligatorio | Fuente |
 |---|---|---|---|---|
-| ¿A qué está asociado tu comentario? | `qd_strRequestType` | Select (CAT-TIPO-SOLIC-PQRS) | Sí | Anexo02 > SCR-000 > FLD-302 (fila 18) |
+| *(movido a S3, junto al motivo)* | `qd_strRequestType` | Select (CAT-TIPO-SOLIC-PQRS) | Sí | Anexo02 > SCR-000 > FLD-302 (fila 18) — reubicado en S3 por el maquetado web (2026-08-04) |
 | Selecciona tu rol | `qd_strFilerRole` | Select (CAT-ROL-RADICADOR) | Sí | Anexo02 > SCR-000 > FLD-303 (fila 19) — "Determina instancia y punto de recepción" |
 | *(back, no visible)* | `qd_strChannel` | Texto, computado desde el punto de recepción elegido (ver regla abajo) | Sí (al radicar) | Solicitud del usuario (2026-07-22) — deja de ser seleccionable/visible; antes Select (CAT-CANAL, colección 10) |
-| Punto de Recepción | `qd_strReceptionPoint` | Select (CAT-PUNTO, colección 20), default "Internet", excluye códigos 2 (Aplicación móvil), 6 (Audio respuesta) y 99 (Otros) | Sí | Anexo02 > SCR-000 > FLD-304 (fila 20) — ahora editable; exclusión de puntos a petición del usuario (2026-07-22) |
-| Instancia de Recepción | `qd_strReceptionInstance` | Texto, solo lectura (computado de rol) | Sí | Anexo02 > SCR-000 > FLD-305 (fila 21) |
+| Punto de recepción | `qd_strReceptionPoint` | Select (CAT-PUNTO, colección 20), default "Internet", excluye códigos 2 (Aplicación móvil), 6 (Audio respuesta) y 99 (Otros) | Sí | Anexo02 > SCR-000 > FLD-304 (fila 20) — ahora editable; exclusión de puntos a petición del usuario (2026-07-22) |
+| Instancia de recepción | `qd_strReceptionInstance` | Select (CAT-INSTANCIA) **deshabilitado** (lo asigna la RUL-000-01 según el rol) | Sí | Anexo02 > SCR-000 > FLD-305 (fila 21) — visible desde el maquetado web (2026-08-04) |
 | Alianza | `qd_strAlliance` | Select (CAT-ALIANZA), visible solo si rol = Empleado Zurich | No | Requerimiento — colección `qd_strAlliance` (id 44) |
 
 **S2 — Datos del Consumidor Financiero** (`SeccionConsumidor.tsx`):
@@ -77,52 +80,54 @@ Catálogos implementados como **colecciones dinámicas PM4** (no listas estátic
 |---|---|---|---|---|
 | Tipo de identificación | `qd_strIdType` | Select (CAT-TIPO-ID) con búsqueda | Sí | Anexo02 > SCR-000 > FLD-306 (fila 22) |
 | Número de identificación | `qd_strIdNumber` | Texto (alfanumérico 5–15) | Sí | Anexo02 > SCR-000 > FLD-307 (fila 23) |
-| ¿Cuáles son tus nombres? | `qd_strFirstName` | Texto, solo letras | Sí (si Natural) | Anexo02 > SCR-000 > FLD-308 (fila 24) |
-| ¿Cuáles son tus apellidos? | `qd_strLastName` | Texto, solo letras | Sí (si Natural) | Anexo02 > SCR-000 > FLD-309 (fila 25) |
+| Nombres | `qd_strFirstName` | Texto, solo letras | Sí (si Natural) | Anexo02 > SCR-000 > FLD-308 (fila 24) — el diseño muestra primer/segundo nombre por separado; el modelo de datos tiene un único campo |
+| Apellidos | `qd_strLastName` | Texto, solo letras | Sí (si Natural) | Anexo02 > SCR-000 > FLD-309 (fila 25) — ídem primer/segundo apellido |
 | Razón social | `qd_strCompanyName` | Texto | Sí (si Jurídica/NIT) | Anexo02 > SCR-000 > FLD-310 (fila 26) |
 | Nombres persona de contacto | `qd_strContactFirstName` | Texto, solo letras | Sí (si Jurídica) | Anexo02 > SCR-000 > FLD-311 (fila 27) |
 | Apellidos persona de contacto | `qd_strContactLastName` | Texto, solo letras | Sí (si Jurídica) | Anexo02 > SCR-000 > FLD-312 (fila 28) |
 | Celular | `qd_strPhone` | Tel (10 dígitos) | Sí | Anexo02 > SCR-000 > FLD-313 (fila 29) |
 | Correo electrónico | `qd_strEmail` | Email | Sí | Anexo02 > SCR-000 > FLD-314 (fila 30) |
-| Tipo de persona | `qd_strPersonType` | Texto, solo lectura (computado) | Sí | Anexo02 > SCR-000 > FLD-315 (fila 31) |
-| País | `qd_strCountryCode` | Select (CAT-PAIS), default `170` | Sí | Anexo02 > SCR-000 > FLD-316 (fila 32) |
+| Tipo de persona | `qd_strPersonType` | Línea de solo lectura (computado; muestra `_desc`) | Sí | Anexo02 > SCR-000 > FLD-315 (fila 31) |
+| *(back, no visible)* | `qd_strCountryCode` | Texto, fijo en `170` (Colombia) | Sí | Anexo02 > SCR-000 > FLD-316 (fila 32) — sin campo en el diseño web; oculto desde 2026-08-04 (RUL-000-10 lo mantiene en 170) |
 | Departamento | `qd_strDepartment` | Select (CAT-DPTO) con búsqueda | Sí | Anexo02 > SCR-000 > FLD-317 (fila 33) |
-| Ciudad | `qd_strCity` | Select (CAT-MPIO), dependiente | Sí | Anexo02 > SCR-000 > FLD-318 (fila 34) |
-| Dirección | `qd_strAddress` | Variable de back, **oculta** (no se muestra) | — | Anexo02 > SCR-000 > FLD-319 (fila 35) — "default vacío, pendiente API SFC" |
-| Sexo | `qd_strSex` | Variable de back, **oculta** (no se muestra), default "No Aplica" (CAT-SEXO, colección 23) | — | Anexo02 > SCR-000 > FLD-320 (fila 36) — corrección 2026-07-23: vuelve a oculta (editable en SCR-009) |
+| Municipio | `qd_strCity` | Select (CAT-MPIO), dependiente | Sí | Anexo02 > SCR-000 > FLD-318 (fila 34) |
+| Dirección | `qd_strAddress` | Variable de back, **oculta** (no se muestra) | — | Anexo02 > SCR-000 > FLD-319 (fila 35) — "default vacío, pendiente API SFC"; se ocultó de nuevo a petición del usuario (2026-08-05) |
+| Sexo / Género | `qd_strSex` | Variable de back, **oculta** (no se muestra), default "No Aplica" (CAT-SEXO, colección 23) | — | Anexo02 > SCR-000 > FLD-320 (fila 36) — se ocultó de nuevo a petición del usuario (2026-08-05); editable en SCR-009 |
 | LGBTIQ+ | `qd_strLgbtiq` | Variable de back, **oculta** (no se muestra), default "No" (CAT-LGBTIQ, colección 41) | — | Anexo02 > SCR-000 > FLD-321 (fila 37) — corrección 2026-07-23: vuelve a oculta (editable en SCR-009) |
-| Condición especial | `qd_strSpecialCondition` | Select (CAT-COND-ESP) | Sí | Anexo02 > SCR-000 > FLD-322 (fila 38) |
+| Condición especial | `qd_strSpecialCondition` | Variable de back, **oculta**, default "No aplica" (CAT-COND-ESP) | — | Anexo02 > SCR-000 > FLD-322 (fila 38) |
 
 **S3 — Detalle de la Queja** (`SeccionDetalleQueja.tsx`):
 
 | Campo (UI) | Variable | Tipo | Obligatorio | Fuente |
 |---|---|---|---|---|
-| Selecciona el seguro | `qd_strSfcProduct` | Select (CAT-PRODUCTO-SFC) con búsqueda | Sí | Anexo02 > SCR-000 > FLD-323 (fila 39) |
+| Producto | `qd_strSfcProduct` | Select (CAT-PRODUCTO-SFC) con búsqueda | Sí | Anexo02 > SCR-000 > FLD-323 (fila 39) |
+| Tipo de solicitud | `qd_strRequestType` | Select (CAT-TIPO-SOLIC-PQRS); primer eslabón de la cascada de `cat_matriz_motivos` | Sí | Anexo02 > SCR-000 > FLD-302 (fila 18) — el diseño web lo ubica junto al motivo (2026-08-04); antes estaba en S1 |
 | Ingrese la placa | `qd_strPlate` | Texto, visible solo si producto = "Autos" | Sí (si Autos) | Anexo02 > FormularioCreaciónPQRS #25 — "Si la pregunta 24 es = Autos" |
 | Detalle del producto | `qd_strProductDetail` | Texto, solo lectura (back) | Sí | Anexo02 > SCR-000 > FLD-324 (fila 40) |
 | ¿Ya habías radicado / es reconsideración? | `qd_strReply` | Radio Sí/No | Sí | Anexo02 > SCR-000 > FLD-325 (fila 41) — Réplica SFC |
 | Argumento de la réplica | `qd_strReplyArgument` | Textarea (máx 2000) | No (visible si réplica=Sí) | Anexo02 > SCR-000 > FLD-326 (fila 42) |
-| Escalamiento al Defensor del Consumidor | `qd_strOmbudsmanEscalation` | Texto, solo lectura (computado desde `cat_matriz_motivos.escalamientoAdministrador`) | Sí | Anexo02 > SCR-000 > FLD-327 (fila 43) |
-| Selecciona el momento | `qd_strInteraction` | Select (`cat_matriz_motivos.interaccion`, cascada), deshabilitado hasta elegir seguro | Sí | Anexo02 > FormularioCreaciónPQRS #30 — "columna interaccion" |
-| Selecciona el servicio | `qd_strServiceProvided` | Select (`cat_matriz_motivos.servicioPrestado`), visible solo si momento = "Asistencias" | Sí (si Asistencias) | Anexo02 > FormularioCreaciónPQRS #31 — "columna servicioPrestado" |
-| Cuéntanos el motivo | `qd_strSfcReason` | Select (`cat_matriz_motivos`: value=`codigoMotivoSFC`, label=`motivoSFC`, cascada), deshabilitado hasta completar momento/servicio | Sí | Anexo02 > SCR-000 > FLD-328 (fila 44) — "crítico: condiciona fraude en M3" |
+| *(back, no visible)* | `qd_strOmbudsmanEscalation` | Texto, computado desde `cat_matriz_motivos.escalamientoAdministrador` | Sí (al radicar) | Anexo02 > SCR-000 > FLD-327 (fila 43) — se ocultó a petición del usuario (2026-08-05) |
+| Momento | `qd_strInteraction` | Select (`cat_matriz_motivos.interaccion`, cascada), deshabilitado hasta elegir tipo de solicitud **y** producto | Sí | Anexo02 > FormularioCreaciónPQRS #30 — "columna interaccion" |
+| Servicio | `qd_strServiceProvided` | Select (`cat_matriz_motivos.servicioPrestado`), visible solo si momento = "Asistencias" | Sí (si Asistencias) | Anexo02 > FormularioCreaciónPQRS #31 — "columna servicioPrestado" |
+| Motivo de la queja | `qd_strSfcReason` | Select (`cat_matriz_motivos`: value=`codigoMotivoSFC`, label=`motivoSFC`, cascada), deshabilitado hasta completar momento/servicio | Sí | Anexo02 > SCR-000 > FLD-328 (fila 44) — "crítico: condiciona fraude en M3" |
 | *(back, no visible)* | `qd_strResponsableRole` | Texto, computado desde `cat_matriz_motivos.rolResponsable` | Sí (al radicar) | Solicitud del usuario (2026-07-09) — rol sugerido para ruteo BPM, distinto del `qd_strAssigneeRole` post-radicación (S6) |
 | *(back, no visible)* | `qd_strCompensation` | Texto, computado desde `cat_matriz_motivos.resarcimientoAdministrador` | Sí (al radicar) | Solicitud del usuario (2026-07-09) |
 | *(back, no visible)* | `qd_strSlaAssigned` | Texto, computado desde `cat_matriz_motivos.sla` | Sí (al radicar) | Solicitud del usuario (2026-07-09) — mismo campo que consumen SCR-002/008/0051 |
 | Ingresa el detalle | `qd_strComplaintText` | Textarea (50–2000) | Sí | Anexo02 > SCR-000 > FLD-329 (fila 45) |
-| Ingresa archivos adjuntos | `qd_strAttach01…05` | Upload multi (máx 5) | Sí | Anexo02 > SCR-000 > FLD-330 (fila 46) — "pdf, jpg, png, docx. Máx 5 MB" |
-| Admisión | `qd_strAdmission` | Select (CAT-ADMISION), visible solo si rol = Defensor (código '4' de CAT-ROL-RADICADOR); oculto y fijo en "No aplica" (código 9) en los demás roles | Sí (si rol = Defensor) | Anexo02 > SCR-000 > FLD-331 (fila 47) — corregido 2026-07-09 (ver Suposiciones) |
-| *(back, no visible)* | `qd_strControlEntity` | Texto, computado (back), default "Otros" | Sí | Anexo02 > SCR-000 > FLD-332 (fila 48) — sin campo visible desde 2026-07-09 |
-| *(back, no visible)* | `qd_strTutela` | Texto, computado (back), default "No" | Sí | Anexo02 > SCR-000 > FLD-333 (fila 49) — sin campo visible desde 2026-07-09 |
-| *(back, no visible)* | `qd_strExpressComplaint` | Texto, computado (back), default "No" | Sí | Anexo02 > SCR-000 > FLD-334 (fila 50) — sin campo visible desde 2026-07-09 |
+| ¿Incluye anexos a la queja? | *(estado de UI, no viaja a PM4)* | Checkbox que revela el cargador de adjuntos; al apagarlo se descartan los archivos ya seleccionados | No | Diseño web (switch al pie de la sección) |
+| Ingresa archivos adjuntos | `qd_strAttach01…05` | Upload multi (máx 5), visible solo si el switch de anexos está encendido | No | Anexo02 > SCR-000 > FLD-330 (fila 46) — "pdf, jpg, png, docx. Máx 5 MB" |
+| Admisión | `qd_strAdmission` | Select (CAT-ADMISION), visible solo si rol = Defensor (código '4' de CAT-ROL-RADICADOR); oculto y fijo en "No aplica" (código 9) en los demás roles | Sí (si rol = Defensor) | Anexo02 > SCR-000 > FLD-331 (fila 47) — corregido 2026-07-09; render condicional restaurado el 2026-08-05 |
+| *(back, no visible)* | `qd_strControlEntity` | Texto, computado (back), default "Otros" | Sí (al radicar) | Anexo02 > SCR-000 > FLD-332 (fila 48) — oculto a petición del usuario (2026-08-05) |
+| *(back, no visible)* | `qd_strTutela` | Texto, computado (back), default "No" | Sí (al radicar) | Anexo02 > SCR-000 > FLD-333 (fila 49) — oculto a petición del usuario (2026-08-05) |
+| *(back, no visible)* | `qd_strExpressComplaint` | Texto, computado (back), default "No" | Sí (al radicar) | Anexo02 > SCR-000 > FLD-334 (fila 50) — oculto a petición del usuario (2026-08-05) |
 
-**S4 — Autorización y Envío** (`CrearRecibirQueja.tsx`):
+**S4 — Autorización y envío** (`CrearRecibirQueja.tsx`):
 
 | Campo (UI) | Variable | Tipo | Obligatorio | Fuente |
 |---|---|---|---|---|
 | Autorización de tratamiento de datos | `qd_blnDataAuth` | Checkbox | Sí | Anexo02 > SCR-000 > FLD-335 (fila 51) |
-| Captcha (validación de seguridad) | `qd_blnCaptcha` | Checkbox (placeholder de captcha) | Sí | Anexo02 > SCR-000 > FLD-336 (fila 52) |
-| ¿Enviar copia de la respuesta a otro correo? | `qd_strCcEmail` | Email | No | Anexo02 > SCR-000 > FLD-337 (fila 53) |
+| No soy un robot (validación de seguridad) | `qd_blnCaptcha` | reCAPTCHA v2 **en línea** dentro de la sección (`RecaptchaWidget`); el token se verifica server-side al radicar y `qd_blnCaptcha` viaja en `true` | Sí | Anexo02 > SCR-000 > FLD-336 (fila 52) — pasa de modal a inline con el maquetado web (2026-08-04) |
+| Correo (copia de la respuesta) | `qd_strCcEmail` | Email | No | Anexo02 > SCR-000 > FLD-337 (fila 53) |
 
 **S5 — Estado ante la SFC** y **S6 — Responsable Asignado** (post-radicación, solo lectura, render condicional):
 
@@ -176,8 +181,8 @@ Catálogos implementados como **colecciones dinámicas PM4** (no listas estátic
 | Tipo de documento define el tipo de persona | `esJuridica = tipoIdentificacion === 'NIT'`; `useEffect` fija `qd_strPersonType` = Jurídica/Natural | Anexo02 > 05_Reglas > **RUL-000-02 / RUL-000-03** (filas 37–38); FLD-315 |
 | País precargado a Colombia (`170`) | `DEFAULTS.qd_strCountryCode = '170'` | Anexo02 > 05_Reglas > **RUL-000-10** (fila 40); FLD-316 |
 | El correo es el destino de la respuesta final → obligatorio y validado | `required` + `pattern` en `qd_strEmail` | Anexo02 > SCR-000 FLD-314; Matrices > 2. Directrices fila 3 (P01-T01, 🟠 Control) |
-| Admisión visible (select) solo si rol = Defensor (código '4'); oculta y fija en "No aplica" (código 9) en los demás roles | Render condicional en `SeccionDetalleQueja`: `ZdsSelect` si rol = Defensor; sin campo + default forzado si rol ≠ Defensor | Corregido 2026-07-09 a petición del usuario (restaura la regla original RUL-000-01, además de corregir el bug de comparación de `blnIsDefender` contra `'DEFENSOR'` en vez del código `'4'`) — Anexo02 > 05_Reglas > RUL-000-01 (fila 36); SCR-000 FLD-331 |
-| Escalamiento al Defensor computado | `useEffect`: Defensor → "Sí", resto → "No" (readonly) | Anexo02 > SCR-000 > FLD-327 (fila 43) |
+| Admisión visible (select) solo si rol = Defensor (código '4'); oculta y fija en "No aplica" (código 9) en los demás roles | Render condicional `blnIsDefender` en `SeccionDetalleQueja`: `ZdsSelect` obligatorio si rol = Defensor; sin campo + default forzado por `useEffect` en los demás roles | Anexo02 > 05_Reglas > RUL-000-01 (fila 36); SCR-000 FLD-331 — corregido 2026-07-09, confirmado por el usuario el 2026-08-05 |
+| Escalamiento al Defensor computado (sin campo visible) | `useEffect` que lo toma de `cat_matriz_motivos.escalamientoAdministrador` al elegir el motivo | Anexo02 > SCR-000 > FLD-327 (fila 43); oculto a petición del usuario (2026-08-05) |
 | Campos regulatorios asignados por back (defaults, sin campo visible), `qd_strAdmission` resuelto por rol | `qd_strControlEntity='Otros'`, `qd_strTutela='No'`, `qd_strExpressComplaint='No'`, `qd_strSex='No aplica'`, `qd_strLgbtiq='No aplica'`, `qd_strAddress=''`, `qd_strAdmission='No aplica'` (código 9) si Defensor / select manual si no | Anexo02 > SCR-000 FLD-319/320/321/331/332/333/334 (filas 35–52) |
 | Motivo SFC condiciona campos de fraude en M3 | `qd_strSfcReason` obligatorio (la activación de fraude ocurre en SCR-009/SCR-010, fuera de esta pantalla) | Anexo02 > SCR-000 > FLD-328 (fila 44) |
 | Canal derivado del punto de recepción (sin campo visible) | `useEffect` en `CrearRecibirQueja.tsx` (`CHANNEL_BY_RECEPTION_POINT`): punto 5 (Call center) → canal 5; puntos 1/3/7 (Internet/Correo electrónico/Redes sociales) → canal 13; punto 4 (Oficina) → canal 14. Sin regla → canal vacío (no ocurre con los puntos actualmente ofrecidos, ya que 2/6/99 están ocultos) | Solicitud del usuario (2026-07-22) |
@@ -188,7 +193,8 @@ Catálogos implementados como **colecciones dinámicas PM4** (no listas estátic
 
 | Comportamiento | Implementación | Fuente |
 |---|---|---|
-| S1–S4 siempre visibles | `FormSection` × 4 | Anexo02 > 02_Secciones SEC-041…SEC-044 (filas 45–48) — "Visible: Siempre" |
+| Maquetado de página pública (nav navy + banner azul + hoja de secciones + footer corporativo) | `PqrPage` / `PqrSection` / `PqrReadonly` (`PqrPage.tsx`) sobre las clases `.pqr-*` de `shared.css`, tokenizadas. Es el único screen que no usa `ScreenHeader`/`FormSection` (las pantallas de tarea PM4 sí) | Maqueta HTML de radicación PQRs (2026-08-04) |
+| S1–S4 siempre visibles | `PqrSection` × 4 | Anexo02 > 02_Secciones SEC-041…SEC-044 (filas 45–48) — "Visible: Siempre" |
 | S5 (Estado SFC) y S6 (Responsable) visibles solo tras radicación | Render condicional `tieneEstadoSFC` / `tieneResponsable` | Anexo02 > 02_Secciones SEC-045/SEC-046 (filas 49–50) — "Visible tras la radicación/asignación" |
 | Campos de persona natural vs. jurídica alternados | Render condicional `esJuridica` (NIT) | Anexo02 > 05_Reglas RUL-000-02/03 (filas 37–38) |
 | Ciudad deshabilitada hasta seleccionar Departamento | `disabled={!w.qd_strDepartment}` + placeholder dinámico | Anexo02 > 05_Reglas RUL-000-09 (fila 39); SCR-000 FLD-318 |
@@ -196,12 +202,12 @@ Catálogos implementados como **colecciones dinámicas PM4** (no listas estátic
 | Placa visible solo si producto = "Autos" | Render condicional `blnIsAutos` (label del seguro) + limpieza al salir de Autos | Anexo02 > FormularioCreaciónPQRS #25 |
 | Servicio visible solo si momento = "Asistencias"; momento/motivo deshabilitados en cascada | Render condicional `blnIsAsistencias` + `disabled` encadenado en momento/servicio/motivo | Anexo02 > FormularioCreaciónPQRS #30/#31/#32 |
 | Estado SmartSupervision como semáforo de color | `ZdsStatusBadge` + `estadoVariant()` (success/danger/info/neutral) | Anexo02 > SCR-000 FLD-338 (fila 54) — "Color tipo semáforo" |
-| Botón "Enviar PQRS" (primaria) habilitado solo con autorización + captcha | `disabled={... || !puedeEnviar}` | Anexo02 > 04_Acciones > **ACT-000-01** (fila 36) — condición de habilitación |
-| Botón "Limpiar Formulario" (secundaria) | `limpiarFormulario()` → `reset(DEFAULTS)` + limpia adjuntos | Anexo02 > 04_Acciones > **ACT-000-02** (fila 37) |
-| Botón "Cancelar" (destructiva) | `window.history.back()` | Anexo02 > 04_Acciones > **ACT-000-03** (fila 38) |
+| Botón "Enviar PQR" (primaria, ícono `send:line`) habilitado solo con autorización + captcha resuelto | `disabled={... || !blnCanSubmit}` (`blnCanSubmit` = `qd_blnDataAuth` && token de captcha) | Anexo02 > 04_Acciones > **ACT-000-01** (fila 36) — condición de habilitación |
+| Botón "Limpiar queja" (secundaria) | `limpiarFormulario()` → `reset(DEFAULTS)` + limpia adjuntos | Anexo02 > 04_Acciones > **ACT-000-02** (fila 37) |
+| Botón "Cancelar" retirado | La maqueta web solo contempla dos acciones (limpiar + enviar); ACT-000-03 queda sin botón | Maqueta HTML de radicación PQRs (2026-08-04) |
 | Pantalla de confirmación tras envío | Estado `sent` → `ZrAlert` positivo de radicación exitosa | Anexo02 > 06_Mensajes MSG-000-08 (fila 58); 10_Trazabilidad_BPMN (compuerta) |
-| Adjuntos: PDF/JPG/PNG/DOCX, máx 5, 5 MB | `DocSupportUploader` con `ADJUNTO_KEYS` (5 claves), `max={5}` | Anexo02 > SCR-000 FLD-330 (fila 46); RUL-000-11 |
-| Banner informativo de instrucciones | `ZrAlert config="info"` en S1 | Derivado de la historia de usuario / criterio de aceptación (ver Suposiciones) |
+| Adjuntos: PDF/JPG/PNG/DOCX, máx 5, 5 MB | `DocSupportUploader` con `ADJUNTO_KEYS` (5 claves), `max={5}`, tras el switch "¿Incluye anexos a la queja?" | Anexo02 > SCR-000 FLD-330 (fila 46); RUL-000-11 |
+| Instrucciones de radicación | Descripción del banner azul (`PqrPage intro`), no alerta dentro de S1 | Maqueta HTML de radicación PQRs (2026-08-04) |
 
 ---
 

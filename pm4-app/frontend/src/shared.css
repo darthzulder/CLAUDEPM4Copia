@@ -1245,3 +1245,221 @@ z-table :is(th, td)[config*="right"] {
   max-height: min(62vh, 620px);
   overflow-y: auto;
 }
+
+/* ── PÁGINA PÚBLICA DE RADICACIÓN (maquetado web Zurich) ───────────────────
+   Chrome de página pública: barra de navegación, banner, hoja de secciones y
+   footer corporativo. Es el maquetado del sitio Zurich (no el chrome de una
+   tarea PM4, que usa .screen-header / .form-section-card).
+   Equivalencias de color del diseño → tokens DS:
+     #23366F navy → --zc-blue-dark   ·  #2167AE azul → --zc-blue-zurich
+     #ECEEEF gris → --zg-white-zurich ·  #828A8B borde → --zg-6 · #ABABAB → --zg-8 */
+.pqr-page {
+  min-height: 100vh;
+  background: var(--z-bg);
+}
+
+/* Barra de navegación superior: 80px, navy, logo a la derecha. */
+.pqr-topnav {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  height: 80px;
+  padding: var(--zs-100) var(--zs-200);
+  background: var(--zc-blue-dark);
+}
+
+.pqr-topnav-links {
+  display: flex;
+  align-items: center;
+  gap: var(--zs-200);
+  font: var(--zf-body-14);
+  color: var(--zg-white-zurich);
+}
+
+.pqr-topnav-logo {
+  height: 42px;
+  width: auto;
+  object-fit: contain;
+}
+
+/* Banner azul: titular 48px light + descripción 18px, con círculos decorativos. */
+.pqr-banner {
+  position: relative;
+  overflow: hidden;
+  display: flex;
+  align-items: flex-start;
+  min-height: 246px;
+  background: var(--z-blue);
+}
+
+.pqr-banner-content {
+  position: relative;
+  z-index: 1;
+  max-width: 1014px;
+  padding: var(--zs-400) var(--zs-1000);
+}
+
+.pqr-banner-title {
+  margin: 0 0 var(--zs-50);
+  font: var(--zf-h-48);
+  color: var(--zg-white);
+}
+
+.pqr-banner-text {
+  margin: 0;
+  font: var(--zf-body-18);
+  color: var(--zg-white-zurich);
+}
+
+/* Círculos decorativos del banner (asomados por el borde derecho). */
+.pqr-banner-shapes {
+  position: absolute;
+  top: 102px;
+  right: 0;
+  width: 144px;
+  height: 144px;
+}
+
+.pqr-banner-shapes::before,
+.pqr-banner-shapes::after {
+  content: '';
+  position: absolute;
+  border-radius: 50%;
+  border: 2px solid color-mix(in srgb, var(--zg-white) 25%, transparent);
+}
+
+.pqr-banner-shapes::before {
+  width: 113px;
+  height: 113px;
+  right: -105px;
+  top: -71px;
+}
+
+.pqr-banner-shapes::after {
+  width: 58px;
+  height: 58px;
+  right: -144px;
+  top: -16px;
+}
+
+@media (max-width: 1200px) {
+  .pqr-banner-content { padding: var(--zs-300) var(--zs-200); }
+  .pqr-banner-title   { font: var(--zf-h-32); }
+}
+
+/* Hoja de formulario: columna central de 1130px sobre el fondo gris. */
+.pqr-form {
+  width: min(1130px, 100%);
+  margin: var(--zs-200) auto 0;
+  padding: 0 var(--zs-200);
+}
+
+/* Sección: card blanco con título azul 24px y divisoria navy. Las secciones se
+   apilan sin separación para leerse como una sola hoja (igual que el diseño). */
+.pqr-section {
+  background: var(--zg-white);
+  padding: 0 var(--zs-200) var(--zs-200);
+}
+
+.pqr-section-title {
+  margin: 0;
+  padding-top: var(--zs-200);
+  font: var(--zf-h-24);
+  font-weight: 400;
+  color: var(--z-blue);
+}
+
+.pqr-section-divider {
+  border: none;
+  height: 1px;
+  background: var(--zc-blue-dark);
+  margin: var(--zs-50) 0 var(--zs-200);
+}
+
+/* Campo de solo lectura en línea: etiqueta 12px azul + valor 18px navy subrayado. */
+.pqr-readonly {
+  display: flex;
+  flex-direction: column;
+}
+
+.pqr-readonly-label {
+  font: var(--zf-capt-12--500);
+  color: var(--z-blue);
+}
+
+.pqr-readonly-value {
+  padding: var(--zs-12) 0 var(--zs-25);
+  border-bottom: 1px solid var(--zg-6);
+  font: var(--zf-body-18--300);
+  color: var(--zc-blue-dark);
+}
+
+/* Texto de apoyo dentro de una sección (18px navy, como el diseño). */
+.pqr-note {
+  margin: var(--zs-150) 0 var(--zs-75);
+  font: var(--zf-body-18);
+  color: var(--zc-blue-dark);
+}
+
+/* Fila de switch/checkbox suelto dentro de una sección. */
+.pqr-toggle-row {
+  margin-top: var(--zs-100);
+}
+
+/* Barra de acciones de la página pública: botones alineados a la derecha. */
+.pqr-actions {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: var(--zs-100);
+  width: min(1130px, 100%);
+  margin: 0 auto;
+  padding: var(--zs-200);
+}
+
+/* Footer corporativo: dos columnas de enlaces, divisoria vertical y legales. */
+.pqr-footer {
+  display: flex;
+  align-items: center;
+  gap: var(--zs-150);
+  flex-wrap: wrap;
+  min-height: 92px;
+  padding: var(--zs-100) var(--zs-150);
+  background: var(--zg-white);
+}
+
+.pqr-footer-col {
+  display: flex;
+  flex-direction: column;
+}
+
+.pqr-footer-link {
+  font: var(--zf-body-16);
+  color: var(--zc-blue-dark);
+  text-decoration: none;
+}
+
+.pqr-footer-link--sub {
+  font: var(--zf-body-14--300);
+}
+
+.pqr-footer-divider {
+  width: 1px;
+  height: 48px;
+  background: var(--zc-blue-dark);
+  margin: 0 var(--zs-150);
+}
+
+.pqr-footer-legal {
+  display: flex;
+  align-items: center;
+  gap: var(--zs-150);
+  margin-left: auto;
+  font: var(--zf-body-14--300);
+  color: var(--zc-blue-dark);
+}
+
+.pqr-footer-legal a {
+  color: inherit;
+  text-decoration: none;
+}

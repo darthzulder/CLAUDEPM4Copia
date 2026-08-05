@@ -73,6 +73,27 @@ libera para que los dropdowns no se recorten.
 
 ---
 
+## 5b. Página pública de radicación (`.pqr-*`)
+
+Chrome del sitio web Zurich, usado **solo** por `COL_QD_SCR-000_CrearRecibirQueja`
+(las pantallas de tarea PM4 siguen con `.screen-header`/`.form-section-card`).
+Los consumen `PqrPage` / `PqrSection` / `PqrReadonly` (en la carpeta de la pantalla).
+
+| Clase | Qué hace |
+|---|---|
+| `.pqr-page` | raíz de la página pública (fondo `--z-bg`) |
+| `.pqr-topnav`, `.pqr-topnav-links`, `.pqr-topnav-logo` | barra navy de 80px con logo Zurich |
+| `.pqr-banner`, `.pqr-banner-content`, `.pqr-banner-title`, `.pqr-banner-text`, `.pqr-banner-shapes` | banner azul de 246px (titular `--zf-h-48`, descripción `--zf-body-18`, círculos decorativos vía `::before/::after`) |
+| `.pqr-form` | columna central de 1130px sobre el fondo gris |
+| `.pqr-section`, `.pqr-section-title`, `.pqr-section-divider` | sección blanca con título azul 24px + divisoria navy (se apilan sin separación) |
+| `.pqr-readonly`, `.pqr-readonly-label`, `.pqr-readonly-value` | campo de solo lectura en línea (etiqueta 12px azul + valor 18px subrayado) |
+| `.pqr-note` | párrafo de apoyo 18px navy dentro de una sección |
+| `.pqr-toggle-row` | fila de checkbox/switch suelto |
+| `.pqr-actions` | barra de acciones alineada a la derecha (equivalente a `.action-bar` en esta página) |
+| `.pqr-footer`, `.pqr-footer-col`, `.pqr-footer-link(--sub)`, `.pqr-footer-divider`, `.pqr-footer-legal` | footer corporativo de dos columnas + legales |
+
+---
+
 ## 6. Estilos por pantalla ya existentes (revisa antes de duplicar)
 
 Cotizador/tomador (`.billing-*`, `.checkbox-grid`, `.policyholder-create-body`, `.lookup-wrapper`),

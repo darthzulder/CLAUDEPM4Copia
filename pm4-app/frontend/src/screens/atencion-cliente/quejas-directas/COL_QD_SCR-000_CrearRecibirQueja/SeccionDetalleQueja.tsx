@@ -1,12 +1,12 @@
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import type { MutableRefObject } from 'react';
 import type { FieldPath, UseFormReturn } from 'react-hook-form';
-import FormSection from '../../../../components/FormSection';
 import DocSupportUploader from '../../../../components/DocSupportUploader';
-import { ZdsInput, ZdsSelect, ZdsRadio, ZdsTextarea } from '../../../../components/fields/ZdsFields';
+import { ZdsInput, ZdsSelect, ZdsRadio, ZdsTextarea, ZrCheckbox } from '../../../../components/fields/ZdsFields';
 import { useCollection, useSyncDesc, toUiOptions, uiValueFromCode, codeFromUiValue, labelFromUiValue } from '../../../../core/useCollection';
 import { QD, QD_COLLECTIONS, OPTIONS_SI_NO, SCR000_ADJUNTO_KEYS as ADJUNTO_KEYS } from '../fields/fields';
 import type { CrearRecibirQuejaFormData } from '../fields/fields';
+import { PqrSection } from './PqrPage';
 
 interface Props {
   form: UseFormReturn<CrearRecibirQuejaFormData>;
@@ -48,8 +48,8 @@ export default function SeccionDetalleQueja({ form, fileRegistry }: Props) {
   // preexistente, preservado — ver fields/MAPEO_qd_old_new.md #3). Solo se renombra
   // la lectura del campo real.
   const { options: cllProductDetail } = useCollection(QD_COLLECTIONS.productDetail, { qd_strProductFilter: objWatch[QD.strSfcProduct] });
-  // Catálogo de tipo de solicitud: lo necesitamos para resolver el LABEL seleccionado
-  // (la matriz filtra por texto "Queja"/"Vida", no por el código que guarda el form).
+  // Catálogo de tipo de solicitud: su selector vive en esta sección (el diseño lo ubica
+  // junto al motivo) y además resuelve el LABEL con el que la matriz filtra por texto.
   const { options: cllRequestType } = useCollection(QD_COLLECTIONS.requestType);
   // Matriz cat_matriz_motivos (id 45) COMPLETA. La cascada momento → servicio → motivo
   // se deriva en cliente (abajo) por columnas de texto con espacios sobrantes.
@@ -61,7 +61,7 @@ export default function SeccionDetalleQueja({ form, fileRegistry }: Props) {
 
   // Determinamos si el rol radicador es el Defensor del Consumidor (CAT-ROL-RADICADOR
   // código '4' — mismo código que usa la RUL-000-01 en CrearRecibirQueja.tsx para
-  // resolver la instancia de recepción).
+  // resolver la instancia de recepción). Solo ese rol elige la admisión.
   const blnIsDefender = String(objWatch[QD.strFilerRole]) === '4';
 
   // FLD-323 — Selecciona el seguro: el catálogo (colección 16) repite el mismo código
@@ -125,6 +125,10 @@ export default function SeccionDetalleQueja({ form, fileRegistry }: Props) {
   // variables de ruteo/negocio que se envían al radicar (ver useEffect abajo).
   const objSelectedReasonRow = cllRowsForReason.find((r) =>
     normalizar(leerColumna(r, 'codigoMotivoSFC')) === normalizar(objWatch[QD.strSfcReason]));
+
+  // La cascada arranca en tipo de solicitud + seguro: hasta tenerlos, la matriz no
+  // puede ofrecer momentos (el diseño ubica el tipo de solicitud junto al motivo).
+  const blnCascadeReady = !!objWatch[QD.strRequestType] && !!objWatch[QD.strSfcProduct];
 
   // RUL cascada — al cambiar un eslabón aguas arriba se limpia lo de aguas abajo para
   // forzar la reselección coherente (mismo patrón que ciudad↔departamento en S2).
@@ -218,16 +222,36 @@ export default function SeccionDetalleQueja({ form, fileRegistry }: Props) {
   useSyncDesc(form, QD.strTutela, cllGuardianship);
   useSyncDesc(form, QD.strExpressComplaint, cllExpressComplaint);
 
+  // ── Anexos (switch "¿Incluye anexos a la queja?") ──────────────────────────
+  // El cargador de documentos solo aparece si el radicador declara que adjunta
+  // archivos. Al apagarlo se descartan los archivos ya seleccionados para que no
+  // viajen a PM4. No es una variable del caso: es estado de UI.
+  const blnHasAnyAttachment = ADJUNTO_KEYS.some((strKey) => !!objWatch[strKey]);
+  const [blnShowAttachments, setBlnShowAttachments] = useState(false);
+
+  // Si el caso llega con adjuntos precargados (apertura como tarea), el switch parte encendido.
+  useEffect(() => {
+    if (blnHasAnyAttachment) setBlnShowAttachments(true);
+  }, [blnHasAnyAttachment]);
+
+  const toggleAttachments = (in_blnOn: boolean) => {
+    setBlnShowAttachments(in_blnOn);
+    if (!in_blnOn) {
+      fileRegistry.current.clear();
+      ADJUNTO_KEYS.forEach((strKey) => setValue(strKey, ''));
+    }
+  };
+
   // Atajo para leer el mensaje de error de un campo.
   const err = (in_strName: keyof CrearRecibirQuejaFormData) => errors[in_strName]?.message;
 
   return (
-    <FormSection title="Detalle de la Queja">
+    <PqrSection title="Detalle de la queja">
       <div className="form-row cols-2">
         <ZdsSelect
           name={QD.strSfcProduct}
           control={control}
-          label="Selecciona el seguro"
+          label="Producto"
           options={cllInsuranceUi}
           rules={{ required: 'Campo requerido' }}
           required
@@ -237,8 +261,9 @@ export default function SeccionDetalleQueja({ form, fileRegistry }: Props) {
           fromPickerValue={codeFromUiValue}
           onPickerChange={(strUiValue) => setValue(strSfcProductDescField, labelFromUiValue(strUiValue) as never)}
         />
-        {/* FLD-324 — Detalle del producto: variable de back (se deriva del seguro
-            elegido vía el effect de CAT-DETALLE-PRODUCTO), oculto por requerimiento. */}
+        {/* Escalamiento al Defensor del Consumidor (qd_strOmbudsmanEscalation): variable
+            de back, oculta por requerimiento. La deriva cat_matriz_motivos (columna
+            escalamientoAdministrador) al elegir el motivo. */}
         <div />
       </div>
 
@@ -262,41 +287,9 @@ export default function SeccionDetalleQueja({ form, fileRegistry }: Props) {
         </div>
       )}
 
-      {/* Anexo02 #30/#31 — cascada cat_matriz_motivos: momento y (si aplica) servicio.
-          El servicio solo aparece cuando el momento es "Asistencias". */}
-      <div className="form-row cols-2">
-        <ZdsSelect
-          name={QD.strInteraction}
-          control={control}
-          label="Selecciona el momento"
-          options={cllInteraction}
-          rules={{ required: 'Campo requerido' }}
-          required
-          withSearch
-          disabled={!objWatch[QD.strSfcProduct]}
-          placeholder={objWatch[QD.strSfcProduct] ? 'Seleccione el momento...' : 'Seleccione primero el seguro'}
-          error={err(QD.strInteraction)}
-        />
-        {blnIsAsistencias ? (
-          <ZdsSelect
-            name={QD.strServiceProvided}
-            control={control}
-            label="Selecciona el servicio"
-            options={cllService}
-            rules={{ required: 'Campo requerido' }}
-            required
-            withSearch
-            error={err(QD.strServiceProvided)}
-          />
-        ) : (
-          <div />
-        )}
-      </div>
-
-      {/* Escalamiento al Defensor del Consumidor (qd_strOmbudsmanEscalation): variable
-          de back (se deriva de cat_matriz_motivos.escalamientoAdministrador vía el effect),
-          oculto por requerimiento. */}
-      <div className="form-row cols-2">
+      {/* Réplica / reconsideración: el modelo de datos tiene una sola variable
+          (qd_strReply) para las dos preguntas del diseño. */}
+      <div className="form-row cols-1">
         <ZdsRadio
           name={QD.strReply}
           control={control}
@@ -307,7 +300,6 @@ export default function SeccionDetalleQueja({ form, fileRegistry }: Props) {
           inline
           error={err(QD.strReply)}
         />
-        <div />
       </div>
 
       {/* RUL-000-12 — argumento visible solo si réplica = Sí */}
@@ -322,11 +314,42 @@ export default function SeccionDetalleQueja({ form, fileRegistry }: Props) {
         </div>
       )}
 
-      <div className="form-row cols-1">
+      {/* Anexo02 #30/#31 — cascada cat_matriz_motivos: momento y (si aplica) servicio,
+          antesala del motivo. El servicio solo aparece cuando el momento es "Asistencias". */}
+      <div className="form-row cols-2">
+        <ZdsSelect
+          name={QD.strInteraction}
+          control={control}
+          label="Momento"
+          options={cllInteraction}
+          rules={{ required: 'Campo requerido' }}
+          required
+          withSearch
+          disabled={!blnCascadeReady}
+          placeholder={blnCascadeReady ? 'Seleccione el momento...' : 'Seleccione primero el tipo de solicitud y el producto'}
+          error={err(QD.strInteraction)}
+        />
+        {blnIsAsistencias ? (
+          <ZdsSelect
+            name={QD.strServiceProvided}
+            control={control}
+            label="Servicio"
+            options={cllService}
+            rules={{ required: 'Campo requerido' }}
+            required
+            withSearch
+            error={err(QD.strServiceProvided)}
+          />
+        ) : (
+          <div />
+        )}
+      </div>
+
+      <div className="form-row cols-2">
         <ZdsSelect
           name={QD.strSfcReason}
           control={control}
-          label="Cuéntanos el motivo"
+          label="Motivo de la queja"
           options={cllReason}
           rules={{ required: 'Campo requerido' }}
           required
@@ -335,6 +358,17 @@ export default function SeccionDetalleQueja({ form, fileRegistry }: Props) {
           placeholder={objWatch[QD.strInteraction] ? 'Seleccione el motivo...' : 'Complete primero el momento'}
           error={err(QD.strSfcReason)}
         />
+        {/* Tipo de solicitud: primer eslabón de la cascada de la matriz. El diseño lo
+            ubica aquí, junto al motivo. */}
+        <ZdsSelect
+          name={QD.strRequestType}
+          control={control}
+          label="Tipo de solicitud"
+          options={cllRequestType}
+          rules={{ required: 'Campo requerido' }}
+          required
+          error={err(QD.strRequestType)}
+        />
       </div>
 
       <div className="form-row cols-1">
@@ -342,6 +376,7 @@ export default function SeccionDetalleQueja({ form, fileRegistry }: Props) {
           name={QD.strComplaintText}
           control={control}
           label="Ingresa el detalle"
+          placeholder="Por favor ingresa el detalle de la queja"
           rules={{
             required: 'Campo requerido',
             minLength: { value: 50, message: 'Mínimo 50 caracteres' },
@@ -353,19 +388,10 @@ export default function SeccionDetalleQueja({ form, fileRegistry }: Props) {
         />
       </div>
 
-      {/* FLD-330 — adjuntos múltiples (pdf, jpg, png, docx · máx 5 MB c/u) */}
-      <DocSupportUploader
-        form={form}
-        fileRegistry={fileRegistry}
-        docKeys={ADJUNTO_KEYS}
-        max={5}
-        title="Ingresa archivos adjuntos"
-        intro="Formatos permitidos: PDF, JPG, PNG, DOCX. Máximo 5 MB por archivo. Puede agregar hasta 5 documentos."
-      />
-
-      {/* Admisión: visible solo cuando el rol es Defensor; en los demás roles se oculta
-          y queda fija en "No aplica" (código 9). Ente de control, Tutela y Queja Exprés
-          son variables de back (se calculan y envían sin campo visible). */}
+      {/* FLD-331 — Admisión: solo la elige el Defensor del Consumidor; en los demás
+          roles no se muestra y queda fija en "No aplica" (código 9). Ente de control
+          (FLD-332), Tutela (FLD-333) y Queja exprés (FLD-334) son variables de back
+          sin campo visible: viajan con su default (ver los effects de arriba). */}
       {blnIsDefender && (
         <div className="form-row cols-2">
           <ZdsSelect
@@ -380,6 +406,28 @@ export default function SeccionDetalleQueja({ form, fileRegistry }: Props) {
           <div />
         </div>
       )}
-    </FormSection>
+
+      {/* FLD-330 — adjuntos múltiples (pdf, jpg, png, docx · máx 5 MB c/u), tras el
+          switch del diseño. */}
+      <div className="pqr-toggle-row">
+        <ZrCheckbox
+          id="pqr-has-attachments"
+          name="pqr-has-attachments"
+          model={blnShowAttachments}
+          label="¿Incluye anexos a la queja?"
+          onChange={(in_blnValue: boolean | null) => toggleAttachments(!!in_blnValue)}
+        />
+      </div>
+      {blnShowAttachments && (
+        <DocSupportUploader
+          form={form}
+          fileRegistry={fileRegistry}
+          docKeys={ADJUNTO_KEYS}
+          max={5}
+          title="Ingresa archivos adjuntos"
+          intro="Formatos permitidos: PDF, JPG, PNG, DOCX. Máximo 5 MB por archivo. Puede agregar hasta 5 documentos."
+        />
+      )}
+    </PqrSection>
   );
 }
