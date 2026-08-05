@@ -7,7 +7,7 @@ import { useHolidaySet, diasHabilesRestantes, parsePm4Date, estadoSlaPorDiasRest
 import ScreenHeader from '../../../../components/ScreenHeader';
 import InfoBar from '../../../../components/InfoBar';
 import { ActionBar } from '../../../../components/ActionBar';
-import { ZrButton, ZrAlert, ZrModal, ZrLoader, ZdsStatusBadge } from '../../../../components/fields/ZdsFields';
+import { ZrButton, ZrAlert, ZrLoader, ZdsStatusBadge } from '../../../../components/fields/ZdsFields';
 import PreviewModal from '../../../../components/PreviewModal';
 import { useCollection } from '../../../../core/useCollection';
 import { uploadAttachments, attachIdsToPayload } from '../../../../core/attachments';
@@ -16,6 +16,7 @@ import type { DetalleReasignacionRespuestaFormData, AccionFlujoCombinado } from 
 import SeccionDetalleCaso from './SeccionDetalleCaso';
 import SeccionAsignacion from './SeccionAsignacion';
 import SeccionRespuesta from './SeccionRespuesta';
+import ExpedienteCompletoModal from './ExpedienteCompletoModal';
 import { buildRespuestaFinalHtml, fillRespuestaFinalHtml } from './respuestaFinalTemplate';
 
 // Correos de la colección 46 (Mails BPM) para la respuesta final. La favorabilidad
@@ -205,6 +206,38 @@ export default function DetalleReasignacionRespuesta() {
   // Habilita el envío solo con respuesta al cliente y destinatario del fallo definidos.
   const blnCanSubmit = !!objWatch[QD.strClientResponse]?.trim() && !!objWatch[QD.strFavorability];
 
+  // Cabecera del caso — se reusa tal cual en el InfoBar y en el header del Expediente
+  // Completo (ACT-0051-06), para no duplicar el cálculo de SLA/estado/radicación.
+  const arrInfoItems = [
+    { label: 'Case', value: objWatch[QD.strBpmCaseId] || '—' },
+    {
+      label: 'SLA',
+      value: objWatch[QD.strSlaAssigned] ? (
+        <>
+          {objWatch[QD.strSlaAssigned]} días hábiles
+          {blnHasTimeLeft && (
+            <>
+              <br />
+              <span className="Capt-12">({intTimeLeft} días restantes)</span>
+            </>
+          )}
+        </>
+      ) : '—',
+    },
+    {
+      // Estado del caso por proximidad al vencimiento (Abierta/Por Vencer/Vencida),
+      // misma lógica y píldoras que el dashboard SCR-013.
+      label: 'Estado',
+      value: (
+        <ZdsStatusBadge variant={estadoSlaVariant(strEstadoSla)}>
+          {strEstadoSla}
+        </ZdsStatusBadge>
+      ),
+    },
+    { label: 'SmartSupervision', value: objWatch[QD.strSfcCode] || '—' },
+    { label: 'Radicación SFC', value: objWatch[QD.strFilingDate] || '—' },
+  ];
+
   return (
     <div className="screen-wrapper">
       <ScreenHeader
@@ -212,35 +245,7 @@ export default function DetalleReasignacionRespuesta() {
       />
 
       <div className="screen-content">
-        <InfoBar items={[
-          { label: 'Case', value: objWatch[QD.strBpmCaseId] || '—' },
-          {
-            label: 'SLA',
-            value: objWatch[QD.strSlaAssigned] ? (
-              <>
-                {objWatch[QD.strSlaAssigned]} días hábiles
-                {blnHasTimeLeft && (
-                  <>
-                    <br />
-                    <span className="Capt-12">({intTimeLeft} días restantes)</span>
-                  </>
-                )}
-              </>
-            ) : '—',
-          },
-          {
-            // Estado del caso por proximidad al vencimiento (Abierta/Por Vencer/Vencida),
-            // misma lógica y píldoras que el dashboard SCR-013.
-            label: 'Estado',
-            value: (
-              <ZdsStatusBadge variant={estadoSlaVariant(strEstadoSla)}>
-                {strEstadoSla}
-              </ZdsStatusBadge>
-            ),
-          },
-          { label: 'SmartSupervision', value: objWatch[QD.strSfcCode] || '—' },
-          { label: 'Radicación SFC', value: objWatch[QD.strFilingDate] || '—' },
-        ]} />
+        <InfoBar items={arrInfoItems} />
 
         {/* RUL-0051-03 / MSG-0051-01 — banner SLA crítico. */}
         {blnSlaCritical && (
@@ -288,18 +293,14 @@ export default function DetalleReasignacionRespuesta() {
 
       {/* ACT-0051-06 · Ver Expediente Completo */}
       {blnShowExpediente && (
-        <ZrModal model={blnShowExpediente} onChange={(open: boolean) => setBlnShowExpediente(open)}>
-          <h3 style={{ margin: '0 0 var(--zs-75)', font: 'var(--zf-h-20--700)', color: 'var(--z-text)' }}>
-            Expediente del caso
-          </h3>
-          <p className="subsection-note">
-            {strName} · {strIdentification} · {objWatch[QD.strSfcProduct]} · {objWatch[QD.strSfcReason]}
-          </p>
-          <p style={{ font: 'var(--zf-cap-14)' }}>{objWatch[QD.strComplaintText] || 'Sin descripción.'}</p>
-          <div z-flex="75" z-align="right:center" style={{ marginTop: 'var(--zs-100)' }}>
-            <ZrButton config="secondary:s" onClick={() => setBlnShowExpediente(false)}>Cerrar</ZrButton>
-          </div>
-        </ZrModal>
+        <ExpedienteCompletoModal
+          data={objWatch}
+          infoItems={arrInfoItems}
+          nombre={strName}
+          identificacion={strIdentification}
+          requestId={task?.process_request_id ?? null}
+          onClose={() => setBlnShowExpediente(false)}
+        />
       )}
 
       {/* ACT-0051-05 · Vista Previa Respuesta Final (visor ancho reutilizado) */}
