@@ -1,21 +1,11 @@
 import { useEffect } from 'react';
 import type { FieldPath, UseFormReturn } from 'react-hook-form';
 import FormSection from '../../../../components/FormSection';
-import { ZdsInput, ZdsSelect, ZdsTextarea, ZdsStatusBadge } from '../../../../components/fields/ZdsFields';
+import { ZdsInput, ZdsSelect, ZdsTextarea } from '../../../../components/fields/ZdsFields';
 import { useCollection, descOf, useSyncDesc, toUiOptions, uiValueFromCode, codeFromUiValue, labelFromUiValue } from '../../../../core/useCollection';
 import { QD, QD_COLLECTIONS, SCR000_ADJUNTO_KEYS } from '../fields/fields';
 import type { DetalleReasignacionRespuestaFormData } from '../fields/fields';
 import DocumentosRadicador from './DocumentosRadicador';
-
-// Mapea el estado SmartSupervision (FLD-079) al color del semáforo.
-export function estadoVariant(in_strStatus: string): 'success' | 'danger' | 'info' | 'neutral' {
-  const strStatus = in_strStatus.toLowerCase();
-  if (strStatus.includes('cerrad') || strStatus.includes('200') || strStatus.includes('verde')) return 'success';
-  if (strStatus.includes('radicad') || strStatus.includes('201')) return 'success';
-  if (strStatus.includes('rechaz') || strStatus.includes('400') || strStatus.includes('error')) return 'danger';
-  if (strStatus.includes('pendiente') || strStatus.includes('proceso')) return 'info';
-  return 'neutral';
-}
 
 // ── Helpers de la matriz cat_matriz_motivos (id 45) ──────────────────────────
 // Misma lógica que SCR-000/SeccionDetalleQueja: los datos vienen "sucios" (espacios
@@ -43,14 +33,13 @@ function opcionesUnicas(in_cll: { value: string; label: string }[]): { value: st
 
 interface Props {
   form: UseFormReturn<DetalleReasignacionRespuestaFormData>;
-  estado: string;
   nombre: string;          // derivado de qd_strFirstName+qd_strLastName / qd_strCompanyName
   identificacion: string;  // derivado de qd_strIdType+qd_strIdNumber
   requestId: number | null; // request del caso, para listar los adjuntos del radicador
 }
 
-/** S1–S4 · Expediente del caso. La Clasificación Regulatoria (S2) es re-editable en M3. */
-export default function SeccionDetalleCaso({ form, estado, nombre, identificacion, requestId }: Props) {
+/** S1–S3 · Expediente del caso. La Clasificación Regulatoria (S2) es re-editable en M3. */
+export default function SeccionDetalleCaso({ form, nombre, identificacion, requestId }: Props) {
   const { control, watch, setValue, formState: { errors } } = form;
   // Tomamos una foto de los valores actuales del formulario.
   const objWatch = watch();
@@ -323,22 +312,6 @@ export default function SeccionDetalleCaso({ form, estado, nombre, identificacio
         </div>
         <div className="form-row cols-1">
           <DocumentosRadicador requestId={requestId} docKeys={SCR000_ADJUNTO_KEYS} />
-        </div>
-      </FormSection>
-
-      {/* ── S4 · Estado SmartSupervision (SEC-050) ── */}
-      <FormSection title="Estado SmartSupervision">
-        <div className="form-row cols-3">
-          <div className="zds-field-wrap">
-            <span className="info-bar-label">Estado SmartSupervision</span>
-            <div style={{ marginTop: 'var(--zs-50)' }}>
-              <ZdsStatusBadge variant={estadoVariant(estado || '')}>
-                {estado || 'Sin estado'}
-              </ZdsStatusBadge>
-            </div>
-          </div>
-          <ZdsInput name={QD.strM1M2Attempts} control={control} label="Intentos M1/M2" readOnly />
-          <ZdsInput name={QD.strFilingDate} control={control} label="Fecha/Hora radicación SFC" readOnly />
         </div>
       </FormSection>
     </>

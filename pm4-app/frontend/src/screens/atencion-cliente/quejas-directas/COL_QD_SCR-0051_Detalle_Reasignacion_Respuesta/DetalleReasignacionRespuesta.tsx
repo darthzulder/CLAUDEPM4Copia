@@ -239,6 +239,7 @@ export default function DetalleReasignacionRespuesta() {
             ),
           },
           { label: 'SmartSupervision', value: objWatch[QD.strSfcCode] || '—' },
+          { label: 'Radicación SFC', value: objWatch[QD.strFilingDate] || '—' },
         ]} />
 
         {/* RUL-0051-03 / MSG-0051-01 — banner SLA crítico. */}
@@ -250,7 +251,7 @@ export default function DetalleReasignacionRespuesta() {
         )}
 
         <form onSubmit={onEnviar} noValidate>
-          <SeccionDetalleCaso form={form} estado={objWatch[QD.strSsStatus] || ''} nombre={strName} identificacion={strIdentification} requestId={task?.process_request_id ?? null} />
+          <SeccionDetalleCaso form={form} nombre={strName} identificacion={strIdentification} requestId={task?.process_request_id ?? null} />
           <SeccionAsignacion form={form} err={err} onConfirmarReasignacion={onReasignarQueja} onSolicitarAyuda={onSolicitarAyuda} submitting={submitting} />
           <SeccionRespuesta
             form={form} fileRegistry={fileRegistry} err={err}

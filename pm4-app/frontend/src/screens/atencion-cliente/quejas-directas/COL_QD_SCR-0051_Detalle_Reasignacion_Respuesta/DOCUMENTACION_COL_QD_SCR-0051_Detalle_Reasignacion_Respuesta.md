@@ -25,8 +25,8 @@
 ## 2. Resumen
 
 Vista integrada que centraliza la gestión SP2 de una queja radicada: muestra el expediente
-completo (datos del consumidor, clasificación regulatoria M1, descripción y estado
-SmartSupervision, todo solo lectura), permite **asignar** un responsable (primera vez),
+completo (datos del consumidor, clasificación regulatoria M1 y descripción, todo solo
+lectura), permite **asignar** un responsable (primera vez),
 **reasignar / solicitar ayuda** a otras áreas (hasta 4 ayudantes con historial), y **elaborar el
 borrador de respuesta** al cliente con sus soportes internos. Reemplaza la navegación entre
 PAN-05/06/07. El cierre habitual es "Enviar" (→ "En revisión SAC"); también permite guardar
@@ -56,8 +56,9 @@ borrador y solicitar prórroga regulatoria cuando el SLA es crítico.
 |---|---|---|---|
 | Case | `qd_strBpmCaseId` | `InfoBar` | FLD-300 en SCR-000 (unificado con SCR-002) |
 | SLA | `qd_strSlaAssigned` | `InfoBar` ("N días hábiles") | Inferido de RUL-0051-03 (§10), unificado con SCR-002/008 |
-| Estado | `qd_strSsStatus` | `InfoBar` + `ZdsStatusBadge` (`estadoVariant()`) | FLD-079 |
+| Estado | (SLA por proximidad al vencimiento) | `InfoBar` + `ZdsStatusBadge` (`estadoSlaVariant()`) | Misma regla que el dashboard SCR-013 |
 | SmartSupervision | `qd_strSfcCode` | `InfoBar` | FLD-120/140/173 en SCR-008/009/010 |
+| Radicación SFC | `qd_strFilingDate` | `InfoBar` | FLD-081 — antes en S4 (eliminada, ago-2026) |
 
 ### S1 — Datos del Consumidor (SEC-047, solo lectura) — `SeccionDetalleCaso.tsx`
 
@@ -113,14 +114,12 @@ seleccionada, evitando vaciar los valores heredados de M1 mientras la matriz aú
 | Asunto de la Queja | `qd_strSfcReason` | `ZdsInput` readOnly | FLD-076 |
 | Descripción / Texto de la Queja | `qd_strComplaintText` | `ZdsTextarea` readOnly | FLD-077 |
 
-### S4 — Estado SmartSupervision (SEC-050, solo lectura)
-
-| Campo (UI) | Variable | Tipo | Fuente |
-|---|---|---|---|
-| Estado SmartSupervision | `qd_strSsStatus` | `ZdsStatusBadge` (semáforo) | FLD-079 |
-| Intentos M1/M2 | `qd_strM1M2Attempts` | `ZdsInput` readOnly | FLD-080 |
-| Fecha/Hora radicación SFC | `qd_strFilingDate` | `ZdsInput` readOnly | FLD-081 |
-| Días hábiles SLA restantes | `qd_strSlaAssigned` | (sistema, alimenta RUL-0051-03) | Inferido de RUL-0051-03 (§10) |
+> **S4 — Estado SmartSupervision (SEC-050) eliminada (ago-2026):** mostraba Estado
+> SmartSupervision (`qd_strSsStatus`), Intentos M1/M2 (`qd_strM1M2Attempts`) y Fecha/Hora
+> radicación SFC (`qd_strFilingDate`), todo solo lectura. Se retiró la sección completa por
+> pedido del usuario; `qd_strFilingDate` se movió a la cabecera (`InfoBar`, ver arriba).
+> `qd_strSsStatus`/`qd_strM1M2Attempts` ya no se muestran en esta pantalla (los campos siguen
+> viajando en `task.data` por si se necesitan más adelante).
 
 ### S5 — Asignación de Responsable (SEC-051, condicional) — `SeccionAsignacion.tsx`
 
@@ -223,8 +222,7 @@ seleccionada, evitando vaciar los valores heredados de M1 mientras la matriz aú
 
 | Comportamiento | Implementación | Fuente |
 |---|---|---|
-| Expediente completo solo lectura (S1-S4) | `SeccionDetalleCaso` con `ZdsInput/ZdsTextarea readOnly` + badge | SEC-047..050 |
-| Semáforo de estado SFC | `ZdsStatusBadge` con `estadoVariant()` | FLD-079 |
+| Expediente completo solo lectura (S1-S3) | `SeccionDetalleCaso` con `ZdsInput/ZdsTextarea readOnly` | SEC-047..049 |
 | Añadir ayudante a historial | "Confirmar Reasignación" hace `push` a `qd_lstAssignHistory` y limpia el draft | ACT-0051-03 · FLD-095 |
 | Responsable autocompletado por área | `useEffect` → `RESPONSABLE_POR_AREA[areaDestino]` | FLD-092 |
 | Acciones Tomadas condicional | render condicional por `qd_strFavorability` | RUL-0051-09 |
@@ -295,8 +293,8 @@ seleccionada, evitando vaciar los valores heredados de M1 mientras la matriz aú
 
 | Categoría | Cobertura | Observación |
 |---|---|---|
-| Campos (FLD-066..350) | 29/29 (100%) | Todos implementados (incl. `slaRestante`/toggle como inferidos) |
-| Secciones (SEC-047..056) | 10/10 (100%) | S1-S10 |
+| Campos (FLD-066..350) | 27/29 | FLD-079/080 (Estado SS / Intentos M1-M2) retirados de UI, ago-2026 — ver nota en S4 |
+| Secciones (SEC-047..056) | 9/10 | S1-S3, S5-S10 — SEC-050 (S4) eliminada, ago-2026 |
 | Acciones (ACT-0051-01..08) | 8/8 (100%) | Asignar, Reasignar(toggle), Confirmar Reasig., Prórroga, Vista Previa, Expediente, Borrador, Enviar |
 | Reglas (RUL-0051-01..09) | 9/9 (100%) | RUL-0051-06 cubierta parcialmente (catálogo placeholder) |
 | Mensajes (MSG-0051-01..06) | 4/6 en UI | MSG-0051-04/05 los emite el BPM |
