@@ -1,4 +1,4 @@
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { useTask } from '../../../../core/useTask';
 import { scrollToFirstError } from '../../../../core/scrollToFirstError';
@@ -6,15 +6,16 @@ import ScreenHeader from '../../../../components/ScreenHeader';
 import FormSection from '../../../../components/FormSection';
 import { ActionBar } from '../../../../components/ActionBar';
 import {
-  ZdsInput, ZdsTextarea,
-  ZrButton, ZrAlert, ZrLoader,
+  ZdsInput, ZdsTextarea, ZdsRadio,
+  ZrButton, ZrAlert, ZrModal, ZrLoader,
 } from '../../../../components/fields/ZdsFields';
-import { QD, SCR011_DEFAULTS as DEFAULTS } from '../fields/fields';
+import { QD, SCR011_DEFAULTS as DEFAULTS, OPTIONS_SI_NO } from '../fields/fields';
 import type { RevisionErrorTecnicoProrrogaFormData, AccionErrorTecnicoProrroga } from '../fields/fields';
 
 export default function RevisionErrorTecnicoProrroga() {
   // Cargamos la tarea y su estado desde PM4
   const { task, loading, error, submitting, completeTask } = useTask();
+  const [blnShowLog, setBlnShowLog] = useState(false);
 
   // Inicializamos el formulario con los valores por defecto
   const form = useForm<RevisionErrorTecnicoProrrogaFormData>({ defaultValues: DEFAULTS });
@@ -33,8 +34,28 @@ export default function RevisionErrorTecnicoProrroga() {
     return String(objFieldError.message);
   };
 
+  // Indica si el analista debe ajustar el payload antes de reenviar.
+  const blnAdjustPayload = objWatch[QD.strPayloadAdjustNeeded] === 'SI';
+
+  // El script de Momento 3 solo reenvía el payload editado si es un objeto JSON
+  // válido; si no lo es lo descarta y reconstruye el body desde los campos del
+  // caso. Validamos aquí para que el analista no crea que su edición viajó.
+  const blnPayloadJsonOk = (() => {
+    if (!blnAdjustPayload) return true;
+    try {
+      const genParsed: unknown = JSON.parse(objWatch[QD.strPayloadSent] ?? '');
+      return !!genParsed && typeof genParsed === 'object' && !Array.isArray(genParsed);
+    } catch {
+      return false;
+    }
+  })();
+
   // RUL-011-01 (🔴 BLOQUEA): causa raíz y corrección obligatorias para autorizar.
-  const blnCanAuthorize = !!objWatch[QD.strExtRootCause]?.trim() && !!objWatch[QD.strExtCorrection]?.trim();
+  // Se suma el payload: con ajuste marcado, el JSON debe ser válido.
+  const blnCanAuthorize =
+    !!objWatch[QD.strRootCause]?.trim()
+    && !!objWatch[QD.strCorrectionApplied]?.trim()
+    && blnPayloadJsonOk;
 
   // Enviamos la tarea con la accion seleccionada
   const enviarCon = (in_strAction: AccionErrorTecnicoProrroga) => (in_objData: RevisionErrorTecnicoProrrogaFormData) =>
@@ -68,27 +89,53 @@ export default function RevisionErrorTecnicoProrroga() {
         <form onSubmit={onAutorizar} noValidate>
 
           {/* ── S1 · Detalle del Error Técnico — Prórroga (SEC-037, solo lectura) ── */}
-          <FormSection title="Detalle del Error Técnico — Prórroga" color="var(--z-red)">
+          <FormSection
+            title="Detalle del Error Técnico — Prórroga"
+            color="var(--z-red)"
+            action={
+              <ZrButton config="link" icon="file-text:line" onClick={() => setBlnShowLog(true)}>
+                Ver Log Completo
+              </ZrButton>
+            }
+          >
             <ZrAlert config="negative" {...({ 'hide-close': true } as object)}>
               El envío de la <strong>solicitud de prórroga</strong> a SmartSupervision falló por un
               error técnico. Revise el detalle, registre la corrección y autorice el reenvío.
-              {objWatch[QD.strExtAttempt] && <> — Intento de prórroga <strong>#{objWatch[QD.strExtAttempt]}</strong>.</>}
+              {objWatch[QD.strAttemptNum] && <> — Intento acumulado <strong>#{objWatch[QD.strAttemptNum]}</strong>.</>}
             </ZrAlert>
 
             <div className="form-row cols-3">
-              <ZdsInput name={QD.strExtHttpCode} control={control} label="Código HTTP prórroga" readOnly />
-              <ZdsInput name={QD.strExtErrorType} control={control} label="Tipo de Error" readOnly />
-              <ZdsInput name={QD.strExtAttempt} control={control} label="Número de intento prórroga" readOnly />
+              <ZdsInput name={QD.strHttpCode} control={control} label="Código HTTP prórroga" readOnly />
+              <ZdsInput name={QD.strErrorType} control={control} label="Tipo de Error" readOnly />
+              <ZdsInput name={QD.strAttemptNum} control={control} label="Número de intento prórroga" readOnly />
             </div>
 
             <div className="form-row cols-1">
-              <ZdsTextarea name={QD.strExtTechMessage} control={control} label="Mensaje técnico de la API" readOnly
-                helpText="Stack trace o mensaje técnico completo devuelto por la API — solo lectura." />
+              <ZdsInput name={QD.strEndpointCalled} control={control} label="Endpoint Invocado" readOnly />
             </div>
 
             <div className="form-row cols-1">
-              <ZdsTextarea name={QD.strExtPayload} control={control} label="Payload de prórroga enviado" readOnly
-                helpText="JSON del payload de prórroga del intento fallido — solo lectura." />
+              <ZdsTextarea
+                name={QD.strApiTechMessage}
+                control={control}
+                label="Mensaje técnico de la API"
+                readOnly
+                helpText='Mensaje devuelto por la API — solo lectura. El log técnico completo está en "Ver Log Completo".'
+              />
+            </div>
+
+            <div className="form-row cols-1">
+              <ZdsTextarea
+                name={QD.strPayloadSent}
+                control={control}
+                label="Payload de prórroga enviado (JSON)"
+                readOnly={!blnAdjustPayload}
+                helpText={
+                  blnAdjustPayload
+                    ? 'Ajuste el JSON del body: si difiere del que genera el BPM, se reenviará este.'
+                    : 'JSON del payload de prórroga del intento fallido — solo lectura.'
+                }
+              />
             </div>
           </FormSection>
 
@@ -96,20 +143,48 @@ export default function RevisionErrorTecnicoProrroga() {
           <FormSection title="Registro de Corrección — Prórroga">
             <div className="form-row cols-1">
               <ZdsTextarea
-                name={QD.strExtRootCause} control={control} label="Causa Raíz"
+                name={QD.strRootCause} control={control} label="Causa Raíz"
                 required maxLength={2000}
                 rules={{ required: 'Campo requerido', maxLength: { value: 2000, message: 'Máximo 2000 caracteres' } }}
-                error={err(QD.strExtRootCause)}
+                error={err(QD.strRootCause)}
               />
             </div>
             <div className="form-row cols-1">
               <ZdsTextarea
-                name={QD.strExtCorrection} control={control} label="Corrección Aplicada"
+                name={QD.strCorrectionApplied} control={control} label="Corrección Aplicada"
                 required maxLength={2000}
                 rules={{ required: 'Campo requerido', maxLength: { value: 2000, message: 'Máximo 2000 caracteres' } }}
-                error={err(QD.strExtCorrection)}
+                error={err(QD.strCorrectionApplied)}
               />
             </div>
+
+            <div className="form-row cols-1">
+              <ZdsRadio
+                label="¿Requiere ajuste en payload?"
+                name={QD.strPayloadAdjustNeeded}
+                control={control}
+                options={OPTIONS_SI_NO}
+                inline
+                rules={{ required: 'Campo requerido' }}
+                required
+                error={err(QD.strPayloadAdjustNeeded)}
+              />
+            </div>
+
+            {blnAdjustPayload && (
+              <ZrAlert config="alert" {...({ 'hide-close': true } as object)}>
+                Edite el <strong>Payload de prórroga enviado (JSON)</strong> en la sección superior
+                antes de autorizar: el reenvío usará el payload corregido.
+              </ZrAlert>
+            )}
+
+            {blnAdjustPayload && !blnPayloadJsonOk && (
+              <ZrAlert config="negative" {...({ 'hide-close': true } as object)}>
+                El <strong>Payload de prórroga enviado (JSON)</strong> no es un objeto JSON válido.
+                Corríjalo para poder autorizar el reenvío — de lo contrario la edición se descartaría
+                y se reenviarían los datos del caso sin sus ajustes.
+              </ZrAlert>
+            )}
 
             {/* RUL-011-01 / MSG-011-01 — causa y corrección obligatorias. */}
             {!blnCanAuthorize && (
@@ -132,6 +207,24 @@ export default function RevisionErrorTecnicoProrroga() {
           </ActionBar>
         </form>
       </div>
+
+      {/* Ver Log Completo — un único campo con el log que emite el script de
+          Momento 2/3 en qd_strCompleteLogAPI. */}
+      {blnShowLog && (
+        <ZrModal model={blnShowLog} onChange={(open: boolean) => setBlnShowLog(open)}>
+          <div className="modal-wide">
+            <h3 style={{ margin: '0 0 var(--zs-75)', font: 'var(--zf-h-20--700)', color: 'var(--z-text)' }}>
+              Log completo del error técnico
+            </h3>
+            <div className="modal-scroll-body">
+              <ZdsTextarea name={QD.strCompleteLogAPI} control={control} label="Log Completo" readOnly />
+            </div>
+            <div z-flex="75" z-align="right:center" style={{ marginTop: 'var(--zs-100)' }}>
+              <ZrButton config="secondary:s" onClick={() => setBlnShowLog(false)}>Cerrar</ZrButton>
+            </div>
+          </div>
+        </ZrModal>
+      )}
     </div>
   );
 }

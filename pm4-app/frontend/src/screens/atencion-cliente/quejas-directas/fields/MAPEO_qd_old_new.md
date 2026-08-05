@@ -128,13 +128,13 @@ un token/propiedad interna, y su estado actual).
 | SCR-010 | qd_fechaCierre | qd_strClosureDate | string |
 | SCR-010 | qd_validacionNomenclatura | qd_strNamingValidation | string |
 | SCR-010 | qd_adjuntoRespuestaFinal | qd_strFinalReplyAttach | string |
-| SCR-011 | qd_codigoHTTPProrroga | qd_strExtHttpCode | string |
-| SCR-011 | qd_tipoErrorProrroga | qd_strExtErrorType | string |
-| SCR-011 | qd_mensajeTecnicoProrroga | qd_strExtTechMessage | string |
-| SCR-011 | qd_payloadProrroga | qd_strExtPayload | string |
-| SCR-011 | qd_intentoProrroga | qd_strExtAttempt | string |
-| SCR-011 | qd_causaRaizProrroga | qd_strExtRootCause | string |
-| SCR-011 | qd_correccionProrroga | qd_strExtCorrection | string |
+| SCR-011 | qd_codigoHTTPProrroga | qd_strHttpCode | string |
+| SCR-011 | qd_tipoErrorProrroga | qd_strErrorType | string |
+| SCR-011 | qd_mensajeTecnicoProrroga | qd_strApiTechMessage | string |
+| SCR-011 | qd_payloadProrroga | qd_strPayloadSent | string |
+| SCR-011 | qd_intentoProrroga | qd_strAttemptNum | string |
+| SCR-011 | qd_causaRaizProrroga | qd_strRootCause | string |
+| SCR-011 | qd_correccionProrroga | qd_strCorrectionApplied | string |
 | SCR-012 | qd_codigoErrorProrroga | qd_strExtErrorCode | string |
 | SCR-012 | qd_campoAfectadoProrroga | qd_strExtAffectedField | string |
 | SCR-012 | qd_mensajeErrorProrroga | qd_strExtErrorMessage | string |
@@ -203,7 +203,7 @@ y `qd_strServiceProvided` guardan el texto de `interaccion`/`servicioPrestado`.
 - **`Tutela`** se conserva sin traducir (figura jurídica constitucional colombiana,
   sin equivalente seguro en inglés) → `qd_strTutela`.
 - **`Prorroga` → `Extension`**, con prefijo `Ext` en los campos de detalle de error
-  para evitar nombres >20 chars (`qd_strExtHttpCode`, no `qd_strExtensionHttpCode`).
+  para evitar nombres >20 chars (`qd_strExtErrorCode`, no `qd_strExtensionErrorCode`).
 - **Numerados** (`_01".."05`/`_10`) conservan el índice como sufijo: `qd_strAttach01`,
   `qd_strSupport01`.
 - **`qd_accion`**: el campo físico es el mismo en las 8 pantallas que lo usan, pero
@@ -215,6 +215,15 @@ y `qd_strServiceProvided` guardan el texto de `interaccion`/`servicioPrestado`.
   009/010/0051), `qd_estadoQueja`/`qd_favorabilidad`/`qd_aceptacion`/`qd_marcacion`
   (SCR-009/010), `qd_areaResponsable`/`qd_usuarioResponsable` (SCR-0051/0052),
   `qd_motivoProrroga`→`qd_strExtensionReason` (SCR-012/0051).
+- **Unificación SCR-004 ↔ SCR-011** (jul-2026): los campos de detalle de error técnico
+  de prórroga (FLD-190..196, `qd_strExt{HttpCode,ErrorType,TechMessage,Payload,Attempt,
+  RootCause,Correction}`) se retiraron y SCR-011 pasó a usar el juego de SCR-004
+  (`qd_strHttpCode`, `qd_strErrorType`, `qd_strApiTechMessage`, `qd_strCompleteLogAPI`,
+  `qd_strEndpointCalled`, `qd_strPayloadSent`, `qd_strAttemptNum`, `qd_strRootCause`,
+  `qd_strCorrectionApplied`, `qd_strPayloadAdjustNeeded`). Motivo: los scripts de
+  Momento 2/3 escriben siempre esas variables ante un fallo de la API — la prórroga
+  viaja como `prorroga_queja` dentro del body de cierre, no en una llamada aparte —
+  así que las variantes `Ext*` nunca se poblaban.
 
 ## Fuera de alcance del rename de campos PM4 (no cuentan hacia los 143)
 

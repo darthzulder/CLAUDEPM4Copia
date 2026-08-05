@@ -4,11 +4,12 @@ import { ActionBar } from '../../../../components/ActionBar';
 import FormSection from '../../../../components/FormSection';
 import InfoBar from '../../../../components/InfoBar';
 import ScreenHeader from '../../../../components/ScreenHeader';
-import { ZdsInput, ZrAlert, ZrButton, ZrLoader } from '../../../../components/fields/ZdsFields';
+import { ZdsInput, ZrAlert, ZrButton, ZrLoader, ZdsStatusBadge } from '../../../../components/fields/ZdsFields';
 import { useTask } from '../../../../core/useTask';
 import { scrollToFirstError } from '../../../../core/scrollToFirstError';
 import { pm4TasksUrl } from '../../../../core/useToken';
-import { QD, SCR002_DEFAULTS as DEFAULTS, SCR002_ERRORES_EJEMPLO as ERRORES_EJEMPLO } from '../fields/fields';
+import { useHolidaySet, diasHabilesRestantes, parsePm4Date, estadoSlaPorDiasRestantes, estadoSlaVariant } from '../../../../core/businessDays';
+import { QD, SCR002_DEFAULTS as DEFAULTS, SCR002_ERRORES_EJEMPLO as ERRORES_EJEMPLO, SCR013_SLA_UMBRAL_PROXIMO as SLA_UMBRAL_PROXIMO } from '../fields/fields';
 import type { CorregirDatosFormData } from '../fields/fields';
 import type { CampoConError } from '../fields/types';
 import SeccionErroresValidacion from './SeccionErroresValidacion';
@@ -28,6 +29,17 @@ export default function CorregirDatosFormulario() {
   const { control, handleSubmit, reset, trigger, watch, formState: { errors } } = form;
   // Tomamos una foto de los valores actuales del formulario.
   const objWatch = watch();
+
+  // Estado del caso por proximidad al vencimiento (Abierta/Por Vencer/Vencida), misma lógica
+  // que SCR-013/SCR-0051. qd_strFilingDate no es un campo propio de esta pantalla (no se
+  // radica aquí) pero puede llegar poblado si el caso vuelve a esta tarea tras una corrección
+  // posterior a la radicación SFC — por eso se lee de objWatch sin tiparlo en CorregirDatosFormData.
+  const { holidays } = useHolidaySet();
+  const intSla = Number.parseInt(objWatch[QD.strSlaAssigned] ?? '', 10);
+  const dtFilingDate = parsePm4Date((objWatch as Record<string, unknown>)[QD.strFilingDate] as string | undefined);
+  const blnHasTimeLeft = !!dtFilingDate && Number.isFinite(intSla);
+  const intTimeLeft = blnHasTimeLeft ? diasHabilesRestantes(dtFilingDate!, intSla, holidays) : NaN;
+  const strEstadoSla = estadoSlaPorDiasRestantes(intTimeLeft, blnHasTimeLeft, SLA_UMBRAL_PROXIMO);
 
   // Error list: proveniente de qd_strErrorsJson (BPM) o del fallback de desarrollo
   const lstFieldsWithError = useMemo<CampoConError[]>(() => {
@@ -112,7 +124,16 @@ export default function CorregirDatosFormulario() {
         <InfoBar items={[
           { label: 'Caso',              value: objWatch[QD.strBpmCaseId] || '—' },
           { label: 'SLA Restante',      value: objWatch[QD.strSlaAssigned] || '—' },
-          { label: 'Estado',            value: 'En corrección preventiva' },
+          {
+            // Estado del caso por proximidad al vencimiento (Abierta/Por Vencer/Vencida),
+            // misma lógica y píldoras que SCR-013/SCR-0051. '—' si el caso aún no tiene
+            // fecha de radicación SFC (no ha llegado a esa etapa).
+            label: 'Estado',
+            value: blnHasTimeLeft ? (
+              <ZdsStatusBadge variant={estadoSlaVariant(strEstadoSla)}>{strEstadoSla}</ZdsStatusBadge>
+            ) : '—',
+          },
+          { label: 'Etapa del proceso', value: 'En corrección preventiva' },
           { label: 'Errores pendientes', value: `${intPendingErrors} de ${lstFieldsWithError.length}` },
         ]} />
 

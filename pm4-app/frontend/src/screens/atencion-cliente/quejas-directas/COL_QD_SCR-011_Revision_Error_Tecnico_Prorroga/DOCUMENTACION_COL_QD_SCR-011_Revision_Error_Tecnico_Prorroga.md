@@ -13,9 +13,15 @@
 | Acción de cierre | Autorizar Reenvío Prórroga → SP4-T01 |
 | Slug / `?screen=` | `COL_QD_SCR-011_Revision_Error_Tecnico_Prorroga` |
 | Archivos de implementación | `RevisionErrorTecnicoProrroga.tsx` (config centralizada en fields/fields.ts) |
-| Versión | 1.0 — 2026-06-30 |
+| Versión | 1.1 — 2026-08-03 |
 
 > Es el análogo, para el flujo de **prórroga (SP4)**, de SCR-004 (error técnico de radicación).
+> Desde la v1.1 **comparte exactamente las mismas variables que SCR-004**: los scripts de
+> Momento 2/3 escriben siempre `qd_strHttpCode`, `qd_strErrorType`, `qd_strApiTechMessage`,
+> `qd_strCompleteLogAPI`, `qd_strEndpointCalled`, `qd_strPayloadSent`, `qd_strAttemptNum`
+> ante un fallo de la API — la prórroga viaja como `prorroga_queja` dentro del body de cierre,
+> no en una llamada aparte — por lo que las variantes `qd_strExt*` (FLD-190..196) nunca se
+> poblaban y se retiraron. Solo cambian los textos y las acciones de la pantalla.
 
 ---
 
@@ -49,18 +55,21 @@ raíz** y la **corrección aplicada** (obligatorias) y **autoriza el reenvío** 
 
 | Campo (UI) | Variable | Tipo | Fuente |
 |---|---|---|---|
-| Código HTTP prórroga | `qd_strExtHttpCode` | `ZdsInput` readOnly | FLD-190 |
-| Tipo de Error | `qd_strExtErrorType` | `ZdsInput` readOnly | FLD-191 |
-| Mensaje técnico de la API | `qd_strExtTechMessage` | `ZdsTextarea` readOnly | FLD-192 |
-| Payload de prórroga enviado | `qd_strExtPayload` | `ZdsTextarea` readOnly | FLD-193 |
-| Número de intento prórroga | `qd_strExtAttempt` | `ZdsInput` readOnly | FLD-194 |
+| Código HTTP prórroga | `qd_strHttpCode` | `ZdsInput` readOnly | FLD-190 ≡ FLD-050 |
+| Tipo de Error | `qd_strErrorType` | `ZdsInput` readOnly | FLD-191 ≡ FLD-051 |
+| Número de intento prórroga | `qd_strAttemptNum` | `ZdsInput` readOnly | FLD-194 ≡ FLD-055 |
+| Endpoint Invocado | `qd_strEndpointCalled` | `ZdsInput` readOnly | FLD-053 (paridad SCR-004) |
+| Mensaje técnico de la API | `qd_strApiTechMessage` | `ZdsTextarea` readOnly | FLD-192 ≡ FLD-052 |
+| Payload de prórroga enviado (JSON) | `qd_strPayloadSent` | `ZdsTextarea` (editable si requiere ajuste) | FLD-193 ≡ FLD-054 |
+| Log Completo (modal) | `qd_strCompleteLogAPI` | `ZdsTextarea` readOnly | sin FLD · script M2/M3 |
 
 ### S2 — Registro de Corrección — Prórroga (SEC-038, editable)
 
 | Campo (UI) | Variable | Tipo | Obligatorio | Fuente |
 |---|---|---|---|---|
-| Causa Raíz | `qd_strExtRootCause` | `ZdsTextarea` | **Sí** | FLD-195 |
-| Corrección Aplicada | `qd_strExtCorrection` | `ZdsTextarea` | **Sí** | FLD-196 |
+| Causa Raíz | `qd_strRootCause` | `ZdsTextarea` | **Sí** | FLD-195 ≡ FLD-056 |
+| Corrección Aplicada | `qd_strCorrectionApplied` | `ZdsTextarea` | **Sí** | FLD-196 ≡ FLD-057 |
+| ¿Requiere ajuste en payload? | `qd_strPayloadAdjustNeeded` | `ZdsRadio` SÍ/NO | **Sí** | FLD-058 (paridad SCR-004) |
 
 ### Metadato de flujo (no visible)
 
@@ -76,7 +85,8 @@ raíz** y la **corrección aplicada** (obligatorias) y **autoriza el reenvío** 
 |---|---|---|
 | Causa raíz obligatoria | `rules.required` + `maxLength 2000` | FLD-195 · RUL-011-01 |
 | Corrección aplicada obligatoria | `rules.required` + `maxLength 2000` | FLD-196 · RUL-011-01 |
-| Autorizar solo con ambos campos | `puedeAutorizar` deshabilita el botón + alerta MSG-011-01 | RUL-011-01 |
+| Autorizar solo con ambos campos | `blnCanAuthorize` deshabilita el botón + alerta MSG-011-01 | RUL-011-01 |
+| Payload JSON válido si requiere ajuste | Con `qd_strPayloadAdjustNeeded='SI'`, `qd_strPayloadSent` debe parsear como objeto JSON; si no, se bloquea autorizar | Paridad SCR-004 · script M2/M3 descarta payload inválido |
 
 ---
 
@@ -93,7 +103,8 @@ raíz** y la **corrección aplicada** (obligatorias) y **autoriza el reenvío** 
 
 | Regla | Implementación | Fuente |
 |---|---|---|
-| RUL-011-01 (🔴 BLOQUEA) — no autorizar sin causa y corrección | `puedeAutorizar` deshabilita el botón + alerta MSG-011-01 | SCR-011 > RUL-011-01 |
+| RUL-011-01 (🔴 BLOQUEA) — no autorizar sin causa y corrección | `blnCanAuthorize` deshabilita el botón + alerta MSG-011-01 | SCR-011 > RUL-011-01 |
+| Payload editado debe ser objeto JSON | `blnPayloadJsonOk` se suma a `blnCanAuthorize` + alerta negativa | Paridad SCR-004 (script M2/M3) |
 
 ---
 
@@ -112,7 +123,9 @@ raíz** y la **corrección aplicada** (obligatorias) y **autoriza el reenvío** 
 
 | Campo Origen | Campo Dependiente | Comportamiento | Fuente |
 |---|---|---|---|
-| `qd_strExtRootCause` + `qd_strExtCorrection` | Botón "Autorizar Reenvío Prórroga" | Habilita autorizar solo si ambos están completos | RUL-011-01 |
+| `qd_strRootCause` + `qd_strCorrectionApplied` | Botón "Autorizar Reenvío Prórroga" | Habilita autorizar solo si ambos están completos | RUL-011-01 |
+| `qd_strPayloadAdjustNeeded` | `qd_strPayloadSent` | `SI` ⇒ el payload pasa a editable + alerta de ajuste; `NO` ⇒ solo lectura | Paridad SCR-004 |
+| `qd_strPayloadSent` | Botón "Autorizar Reenvío Prórroga" | Con ajuste marcado, JSON inválido bloquea autorizar | Paridad SCR-004 |
 
 ---
 
@@ -120,13 +133,17 @@ raíz** y la **corrección aplicada** (obligatorias) y **autoriza el reenvío** 
 
 - **Slug** `COL_QD_SCR-011_Revision_Error_Tecnico_Prorroga` — coincide con el solicitado (ASCII),
   con código SCR consistente con las hermanas.
-- **Nombres `data_name` (`qd_*`)** provisionales — Anexo03 no tiene variables para SP4-T05 (tarea
-  de Usuario). Se actualizarán con el diccionario final.
+- **Nombres `data_name` (`qd_*`)** — ya no son propios de SCR-011: se reusan los de SCR-004
+  porque son las variables que realmente escribe el script de Momento 2/3 ante un fallo de la
+  API (incluido el fallo al enviar la prórroga). Anexo03 no define variables para SP4-T05
+  (tarea de Usuario), por lo que FLD-190..196 quedan mapeados a los FLD-050..058 de SCR-004.
 - **`qd_strAction`** (metadato): no es un FLD; se deriva del botón presionado (ACT-011-01/02).
 - **`maxLength=2000`** en causa/corrección: límite estándar del proyecto, no especificado en el insumo.
 - **MSG-011-02** (éxito) lo emite el BPM tras `completeTask`; no se renderiza en la pantalla.
-- **No hay "Ver Log Completo"** en el insumo de SCR-011 (a diferencia de SCR-004): el mensaje
-  técnico y el payload se muestran directamente en S1, sin modal.
+- **"Ver Log Completo"** no figura en el insumo de SCR-011, pero se agregó por paridad con
+  SCR-004: el log lo emite el mismo script en `qd_strCompleteLogAPI` y sin el modal el analista
+  técnico perdería el detalle (paso fallido, cURL, cuerpo crudo). Igual criterio para
+  "Endpoint Invocado" y "¿Requiere ajuste en payload?".
 
 ---
 
@@ -134,11 +151,12 @@ raíz** y la **corrección aplicada** (obligatorias) y **autoriza el reenvío** 
 
 | Categoría | Cobertura | Observación |
 |---|---|---|
-| Campos (FLD-190..196) | 7/7 (100%) | Todos implementados |
+| Campos (FLD-190..196) | 7/7 (100%) | Implementados con las variables de SCR-004 (+3 campos de paridad: endpoint, log completo, ajuste de payload) |
 | Secciones (SEC-037/038) | 2/2 (100%) | S1-S2 |
 | Acciones (ACT-011-01/02) | 2/2 (100%) | Autorizar Reenvío, Escalar a Proveedor |
 | Reglas (RUL-011-01) | 1/1 (100%) | Causa + corrección obligatorias |
 | Mensajes (MSG-011-01/02) | 1/2 en UI | MSG-011-02 lo emite el BPM |
 | Catálogos | N/A | La pantalla no usa catálogos |
 
-**Elementos inferidos:** prefijo `qd_*`, metadato `qd_strAction`, `maxLength=2000`.
+**Elementos inferidos:** prefijo `qd_*`, metadato `qd_strAction`, `maxLength=2000`, reuso de las
+variables de SCR-004 y los 3 campos de paridad (endpoint, log completo, ajuste de payload).

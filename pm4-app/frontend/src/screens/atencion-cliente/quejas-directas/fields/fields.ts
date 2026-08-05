@@ -130,16 +130,20 @@ export const QD = {
   // ── Metadato de flujo (compartido por varias pantallas, unión por screen) ─
   strAction: 'qd_strAction',                           // antes qd_accion
 
-  // ── SCR-004 · Revisión Error Técnico API ──────────────────────────────────
-  strHttpCode: 'qd_strHttpCode',                       // FLD-050 · antes qd_codigoHTTP
-  strErrorType: 'qd_strErrorType',                     // FLD-051 · antes qd_tipoError
-  strApiTechMessage: 'qd_strApiTechMessage',           // FLD-052 · antes qd_mensajeTecnicoAPI (mismo valor que qd_SSHTTPSP3_message)
-  strCompleteLogAPI: 'qd_strCompleteLogAPI',           // sin FLD · log técnico completo del script M3 (modal "Ver Log Completo")
+  // ── SCR-004 / SCR-011 · Revisión Error Técnico API y Prórroga ─────────────
+  // Los scripts de Momento 2/3 escriben SIEMPRE estas variables cuando la API
+  // de SmartSupervision falla — también cuando el paso fallido es la prórroga
+  // (viaja como prorroga_queja dentro del body de cierre). SCR-011 comparte por
+  // eso el mismo juego de campos (FLD-190..196 quedan unificados aquí).
+  strHttpCode: 'qd_strHttpCode',                       // FLD-050/190 · antes qd_codigoHTTP / qd_strExtHttpCode
+  strErrorType: 'qd_strErrorType',                     // FLD-051/191 · antes qd_tipoError / qd_strExtErrorType
+  strApiTechMessage: 'qd_strApiTechMessage',           // FLD-052/192 · antes qd_mensajeTecnicoAPI / qd_strExtTechMessage (mismo valor que qd_SSHTTPSP3_message)
+  strCompleteLogAPI: 'qd_strCompleteLogAPI',           // sin FLD · log técnico completo del script M2/M3 (modal "Ver Log Completo")
   strEndpointCalled: 'qd_strEndpointCalled',           // FLD-053 · antes qd_endpointInvocado
-  strPayloadSent: 'qd_strPayloadSent',                 // FLD-054 · antes qd_payloadEnviado
-  strAttemptNum: 'qd_strAttemptNum',                   // FLD-055 · antes qd_numeroIntento
-  strRootCause: 'qd_strRootCause',                     // FLD-056 · antes qd_causaRaiz
-  strCorrectionApplied: 'qd_strCorrectionApplied',     // FLD-057 · antes qd_correccionAplicada
+  strPayloadSent: 'qd_strPayloadSent',                 // FLD-054/193 · antes qd_payloadEnviado / qd_strExtPayload
+  strAttemptNum: 'qd_strAttemptNum',                   // FLD-055/194 · antes qd_numeroIntento / qd_strExtAttempt
+  strRootCause: 'qd_strRootCause',                     // FLD-056/195 · antes qd_causaRaiz / qd_strExtRootCause
+  strCorrectionApplied: 'qd_strCorrectionApplied',     // FLD-057/196 · antes qd_correccionAplicada / qd_strExtCorrection
   strPayloadAdjustNeeded: 'qd_strPayloadAdjustNeeded', // FLD-058 · antes qd_requiereAjustePayload
 
   // ── SCR-008 · Revisión Respuesta SAC ──────────────────────────────────────
@@ -184,13 +188,8 @@ export const QD = {
   strEntityCode: 'qd_strEntityCode',                   // Excel Cierre #47 · código entidad (default "9", envío M3 SFC)
 
   // ── SCR-011 · Revisión Error Técnico Prórroga ─────────────────────────────
-  strExtHttpCode: 'qd_strExtHttpCode',                 // FLD-190 · antes qd_codigoHTTPProrroga
-  strExtErrorType: 'qd_strExtErrorType',               // FLD-191 · antes qd_tipoErrorProrroga
-  strExtTechMessage: 'qd_strExtTechMessage',           // FLD-192 · antes qd_mensajeTecnicoProrroga
-  strExtPayload: 'qd_strExtPayload',                   // FLD-193 · antes qd_payloadProrroga
-  strExtAttempt: 'qd_strExtAttempt',                   // FLD-194 · antes qd_intentoProrroga
-  strExtRootCause: 'qd_strExtRootCause',               // FLD-195 · antes qd_causaRaizProrroga
-  strExtCorrection: 'qd_strExtCorrection',             // FLD-196 · antes qd_correccionProrroga
+  // Sin campos propios: reusa el juego de SCR-004 (arriba). Las variantes
+  // qd_strExt* (FLD-190..196) se retiraron porque ningún script las escribía.
 
   // ── SCR-012 · Corrección Error Funcional Prórroga ─────────────────────────
   strExtErrorCode: 'qd_strExtErrorCode',               // FLD-200 · antes qd_codigoErrorProrroga
@@ -326,7 +325,7 @@ export interface QdFields {
   // Metadato de flujo compartido
   qd_strAction: string;
 
-  // SCR-004
+  // SCR-004 / SCR-011 (mismo juego de variables)
   qd_strHttpCode: string;
   qd_strErrorType: string;
   qd_strApiTechMessage: string;
@@ -379,14 +378,7 @@ export interface QdFields {
   qd_strEntityType: string;
   qd_strEntityCode: string;
 
-  // SCR-011
-  qd_strExtHttpCode: string;
-  qd_strExtErrorType: string;
-  qd_strExtTechMessage: string;
-  qd_strExtPayload: string;
-  qd_strExtAttempt: string;
-  qd_strExtRootCause: string;
-  qd_strExtCorrection: string;
+  // SCR-011 → sin campos propios (usa los de SCR-004)
 
   // SCR-012
   qd_strExtErrorCode: string;
@@ -715,13 +707,105 @@ export const SCR003_UMBRAL_INTENTOS = 3; // RUL-003-02
 // ESCALAR_SOPORTE   → ACT-003-02 (deriva a Analista Técnico)
 export type AccionErrorFuncional = 'CORREGIR_REENVIAR' | 'ESCALAR_SOPORTE';
 
+// ═══ Editor del payload de Momento 2 — sección "Campos a Corregir" ═══════════
+// Mapa 1:1 con buildBodyMomento2() del script PHP de Momento 2 (mismo orden de
+// claves): cada campo del body que la SFC rechazó se corrige aquí sobre la
+// VARIABLE del caso de la que el script lo lee, para que el reenvío regenere el
+// body con el valor nuevo. Al enviar, SCR-003 vacía qd_strPayloadSent para que
+// opMomento2 reconstruya el body desde estos campos (si no, el script compara el
+// body regenerado con el payload viejo, ve diferencia y reenvía el VIEJO).
+// ⚠ CONTRATO con el script: mantener sincronizado con buildBodyMomento2.
+
+export type PayloadControl = 'text' | 'digits' | 'textarea' | 'date' | 'select' | 'sino' | 'readonly';
+
+export interface PayloadFieldDef {
+  /** Clave del body que se envía a la SFC ('—' en las filas auxiliares de cascada). */
+  key: string;
+  label: string;
+  /** Variable del caso que lee el script. null = constante del CORE o valor derivado. */
+  variable: QdFieldName | null;
+  control: PayloadControl;
+  /** Catálogo PM4 del que se elige el valor (control 'select'); guarda el código. */
+  collection?: keyof typeof QD_COLLECTIONS;
+  /** El motivo SFC se elige con la cascada cat_matriz_motivos, no con un catálogo plano. */
+  cascade?: 'matrizMotivos';
+  /** Variables aguas abajo que se desbloquean/revalidan al cambiar esta. */
+  unlocks?: QdFieldName[];
+  /** Fila auxiliar de la cascada del motivo: no es una clave del body. */
+  aux?: boolean;
+  note?: string;
+}
+
+export const SCR003_PAYLOAD_M2_FIELDS: readonly PayloadFieldDef[] = [
+  { key: 'tipo_entidad', label: 'Tipo de Entidad', variable: null, control: 'readonly',
+    note: 'Constante de la configuración del CORE (script SFC) — no editable.' },
+  { key: 'entidad_cod', label: 'Código de Entidad', variable: null, control: 'readonly',
+    note: 'Constante de la configuración del CORE (script SFC) — no editable.' },
+  { key: 'codigo_queja', label: 'Código de Queja', variable: null, control: 'readonly',
+    note: 'Derivado: tipo_entidad + entidad_cod + número de caso BPM.' },
+  { key: 'codigo_pais', label: 'País', variable: QD.strCountryCode, control: 'select', collection: 'countryCode' },
+  { key: 'departamento_cod', label: 'Departamento', variable: QD.strDepartment, control: 'select',
+    collection: 'department', unlocks: [QD.strCity] },
+  { key: 'municipio_cod', label: 'Municipio', variable: QD.strCity, control: 'select', collection: 'city',
+    note: 'Las opciones dependen del departamento seleccionado.' },
+  { key: 'canal_cod', label: 'Canal', variable: QD.strChannel, control: 'select', collection: 'channel' },
+  { key: 'producto_cod', label: 'Producto SFC (seguro)', variable: QD.strSfcProduct, control: 'select',
+    collection: 'sfcProduct', unlocks: [QD.strInteraction, QD.strServiceProvided, QD.strSfcReason] },
+  { key: '—', label: 'Momento (cascada del motivo)', variable: QD.strInteraction, control: 'select',
+    cascade: 'matrizMotivos', aux: true, unlocks: [QD.strServiceProvided, QD.strSfcReason],
+    note: 'No viaja en el body: filtra el motivo SFC en cat_matriz_motivos.' },
+  { key: '—', label: 'Servicio (cascada del motivo)', variable: QD.strServiceProvided, control: 'select',
+    cascade: 'matrizMotivos', aux: true, unlocks: [QD.strSfcReason],
+    note: 'Solo aplica cuando el momento es "Asistencias"; no viaja en el body.' },
+  { key: 'macro_motivo_cod', label: 'Macro motivo SFC', variable: QD.strSfcReason, control: 'select',
+    cascade: 'matrizMotivos', note: 'Se deriva de producto → momento → (servicio) en cat_matriz_motivos.' },
+  { key: 'fecha_creacion', label: 'Fecha de creación', variable: QD.strFilingDate, control: 'date',
+    note: 'Formato DD/MM/AAAA; el script lo convierte a ISO antes de enviarlo.' },
+  { key: 'nombres', label: 'Razón social', variable: QD.strCompanyName, control: 'text',
+    note: 'Si tiene valor, el script envía la razón social e IGNORA nombres y apellidos (sfcNombres).' },
+  { key: 'nombres', label: 'Nombres', variable: QD.strFirstName, control: 'text',
+    note: 'Se envía como "nombres" (nombre + apellido) solo si la razón social está vacía.' },
+  { key: 'nombres', label: 'Apellidos', variable: QD.strLastName, control: 'text',
+    note: 'Se envía como "nombres" (nombre + apellido) solo si la razón social está vacía.' },
+  { key: 'tipo_id_CF', label: 'Tipo de identificación', variable: QD.strIdType, control: 'select', collection: 'idType' },
+  { key: 'numero_id_CF', label: 'Número de identificación', variable: QD.strIdNumber, control: 'digits' },
+  { key: 'tipo_persona', label: 'Tipo de persona', variable: QD.strPersonType, control: 'select', collection: 'personType' },
+  { key: 'insta_recepcion', label: 'Instancia de recepción', variable: QD.strReceptionInstance, control: 'select',
+    collection: 'receptionInstance' },
+  { key: 'punto_recepcion', label: 'Punto de recepción', variable: QD.strReceptionPoint, control: 'select',
+    collection: 'receptionPoint' },
+  { key: 'admision', label: 'Admisión', variable: QD.strAdmission, control: 'select', collection: 'admission' },
+  { key: 'texto_queja', label: 'Texto de la queja', variable: QD.strComplaintText, control: 'textarea' },
+  { key: 'anexo_queja', label: '¿Anexo de la queja?', variable: QD.strFinalReplyAttach, control: 'sino',
+    note: 'El script lo envía como booleano (SI ⇒ true).' },
+  { key: 'ente_control', label: 'Ente de control', variable: QD.strControlEntity, control: 'select',
+    collection: 'controlEntity' },
+];
+
 export type CorreccionErrorFuncionalFormData = Omit<Pick<QdFields,
   | typeof QD.strSfcErrorCode | typeof QD.strAffectedField | typeof QD.strRejectedValue
   | typeof QD.strSfcErrorMessage | typeof QD.strM1M2AttemptNum | typeof QD.strRejectionDate
   | typeof QD.strFieldCorrection | typeof QD.strCorrectionJustif | typeof QD.lstAttemptHistory
+  // Diagnóstico que SÍ emite el script de Momento 2 (mismo juego que SCR-004): los
+  // FLD-040..045 de arriba no los escribe ningún script hoy, así que S1 cae a estos.
+  | typeof QD.strHttpCode | typeof QD.strErrorType | typeof QD.strApiTechMessage
+  | typeof QD.strCompleteLogAPI | typeof QD.strEndpointCalled | typeof QD.strAttemptNum
+  // Payload del reenvío: se muestra como referencia y se VACÍA al corregir.
+  | typeof QD.strPayloadSent | typeof QD.strPayloadAdjustNeeded
+  // Variables del body de Momento 2 (editor "Campos a Corregir", ver SCR003_PAYLOAD_M2_FIELDS)
+  | typeof QD.strBpmCaseId | typeof QD.strCountryCode | typeof QD.strDepartment | typeof QD.strCity
+  | typeof QD.strChannel | typeof QD.strSfcProduct | typeof QD.strSfcReason | typeof QD.strFilingDate
+  | typeof QD.strCompanyName | typeof QD.strFirstName | typeof QD.strLastName
+  | typeof QD.strIdType | typeof QD.strIdNumber | typeof QD.strPersonType
+  | typeof QD.strReceptionInstance | typeof QD.strReceptionPoint | typeof QD.strAdmission
+  | typeof QD.strComplaintText | typeof QD.strFinalReplyAttach | typeof QD.strControlEntity
+  // Auxiliares de la cascada cat_matriz_motivos (no viajan en el body de la SFC).
+  | typeof QD.strRequestType | typeof QD.strInteraction | typeof QD.strServiceProvided
   | typeof QD.strAction
 >, typeof QD.strAction> & { [QD.strAction]: AccionErrorFuncional };
 
+// Sin estas claves react-hook-form no registra los campos y NO viajarían en el
+// completeTask (mismo motivo documentado en SCR002_DEFAULTS).
 export const SCR003_DEFAULTS: Partial<CorreccionErrorFuncionalFormData> = {
   [QD.strSfcErrorCode]: '',
   [QD.strAffectedField]: '',
@@ -732,6 +816,40 @@ export const SCR003_DEFAULTS: Partial<CorreccionErrorFuncionalFormData> = {
   [QD.strFieldCorrection]: '',
   [QD.strCorrectionJustif]: '',
   [QD.lstAttemptHistory]: [],
+  // Diagnóstico real del script de Momento 2.
+  [QD.strHttpCode]: '',
+  [QD.strErrorType]: '',
+  [QD.strApiTechMessage]: '',
+  [QD.strCompleteLogAPI]: '',
+  [QD.strEndpointCalled]: '',
+  [QD.strAttemptNum]: '',
+  [QD.strPayloadSent]: '',
+  [QD.strPayloadAdjustNeeded]: 'NO',
+  // Variables del body de Momento 2.
+  [QD.strBpmCaseId]: '',
+  [QD.strCountryCode]: '',
+  [QD.strDepartment]: '',
+  [QD.strCity]: '',
+  [QD.strChannel]: '',
+  [QD.strSfcProduct]: '',
+  [QD.strSfcReason]: '',
+  [QD.strFilingDate]: '',
+  [QD.strCompanyName]: '',
+  [QD.strFirstName]: '',
+  [QD.strLastName]: '',
+  [QD.strIdType]: '',
+  [QD.strIdNumber]: '',
+  [QD.strPersonType]: '',
+  [QD.strReceptionInstance]: '',
+  [QD.strReceptionPoint]: '',
+  [QD.strAdmission]: '',
+  [QD.strComplaintText]: '',
+  [QD.strFinalReplyAttach]: '',
+  [QD.strControlEntity]: '',
+  // Auxiliares de la cascada del motivo.
+  [QD.strRequestType]: '',
+  [QD.strInteraction]: '',
+  [QD.strServiceProvided]: '',
   [QD.strAction]: 'CORREGIR_REENVIAR',
 };
 
@@ -915,20 +1033,28 @@ export const SCR009_DEFAULTS: Partial<FormularioSuperintendenciaFormData> = {
 // AUTORIZAR_REENVIO → ACT-011-01 (ejecuta SP4-T01) · ESCALAR_PROVEEDOR → ACT-011-02.
 export type AccionErrorTecnicoProrroga = 'AUTORIZAR_REENVIO' | 'ESCALAR_PROVEEDOR';
 
+// Mismas variables que SCR-004: el error de prórroga lo reporta el mismo script
+// de Momento 2/3 (la prórroga viaja como prorroga_queja en el body de cierre),
+// así que los diagnósticos llegan en qd_strHttpCode / qd_strErrorType / etc.
 export type RevisionErrorTecnicoProrrogaFormData = Omit<Pick<QdFields,
-  | typeof QD.strExtHttpCode | typeof QD.strExtErrorType | typeof QD.strExtTechMessage
-  | typeof QD.strExtPayload | typeof QD.strExtAttempt | typeof QD.strExtRootCause | typeof QD.strExtCorrection
+  | typeof QD.strHttpCode | typeof QD.strErrorType | typeof QD.strApiTechMessage
+  | typeof QD.strCompleteLogAPI
+  | typeof QD.strEndpointCalled | typeof QD.strPayloadSent | typeof QD.strAttemptNum
+  | typeof QD.strRootCause | typeof QD.strCorrectionApplied | typeof QD.strPayloadAdjustNeeded
   | typeof QD.strAction
 >, typeof QD.strAction> & { [QD.strAction]: AccionErrorTecnicoProrroga };
 
 export const SCR011_DEFAULTS: Partial<RevisionErrorTecnicoProrrogaFormData> = {
-  [QD.strExtHttpCode]: '',
-  [QD.strExtErrorType]: '',
-  [QD.strExtTechMessage]: '',
-  [QD.strExtPayload]: '',
-  [QD.strExtAttempt]: '',
-  [QD.strExtRootCause]: '',
-  [QD.strExtCorrection]: '',
+  [QD.strHttpCode]: '',
+  [QD.strErrorType]: '',
+  [QD.strApiTechMessage]: '',
+  [QD.strCompleteLogAPI]: '',
+  [QD.strEndpointCalled]: '',
+  [QD.strPayloadSent]: '',
+  [QD.strAttemptNum]: '',
+  [QD.strRootCause]: '',
+  [QD.strCorrectionApplied]: '',
+  [QD.strPayloadAdjustNeeded]: 'NO',
   [QD.strAction]: 'AUTORIZAR_REENVIO',
 };
 
@@ -1123,8 +1249,12 @@ export const SCR0052_DEFAULTS: Partial<RespuestaAreaResponsableFormData> = {
 // SCR-013 — Dashboard — Gestión de Casos
 // ═══════════════════════════════════════════════════════════════════════════
 
-// Umbral de días hábiles para clasificar un caso abierto como "Próximo a vencer" (KPI warn).
-export const SCR013_SLA_UMBRAL_PROXIMO = 3;
+// Umbral de días hábiles restantes para que un caso activo pase a estado "Por Vencer"
+// (2 o menos días hábiles hasta el vencimiento). Pese al prefijo, se reutiliza en toda
+// pantalla que muestra este Estado en su InfoBar (SCR-013, SCR-0051, SCR-002) — ver
+// estadoSlaPorDiasRestantes() en core/businessDays.ts, mismo valor que
+// SCR0051_SLA_UMBRAL_PRORROGA (RUL-0051-03).
+export const SCR013_SLA_UMBRAL_PROXIMO = 2;
 
 // Tamaño de página de la tabla de casos (mockup muestra 8 filas por página).
 export const SCR013_PAGE_SIZE = 8;
@@ -1132,12 +1262,20 @@ export const SCR013_PAGE_SIZE = 8;
 // Proceso PM4 de Gestión de Quejas Directas (mismo default que el Web Entry de SCR-000).
 export const SCR013_PROCESS_ID = SCR000_WEB_ENTRY_PROCESS_ID;
 
+// case_title exacto que PM4 asigna a todo request de este proceso, RAÍZ o SUB-PROCESO
+// (SP1/SP2/SP3…) — lo comparten porque el título es del "caso", no del proceso puntual.
+// Se usa como filtro de seguridad al cruzar tareas activas por case_number (ver
+// useCasosDashboard.ts): PM4 numera case_number por colaboración, así que sin este filtro
+// un case_number de OTRA colección de procesos podría coincidir por accidente con uno QD.
+export const SCR013_CASE_TITLE = 'COL - Gestion de Quejas Directas - Proceso';
+
 // Opciones estáticas del filtro Estado. Estado es un valor OPERATIVO derivado de
 // request.status + SLA (no un catálogo); por eso no viene de una colección. Tipo y
 // Área sí usan colecciones (QD_COLLECTIONS.requestType / QD_COLLECTIONS.area).
 export const SCR013_OPTIONS_ESTADO = [
   { value: '', label: 'Todos' },
   { value: 'Abierta', label: 'Abierta' },
+  { value: 'Por Vencer', label: 'Por Vencer' },
   { value: 'Cerrada', label: 'Cerrada' },
   { value: 'Vencida', label: 'Vencida' },
   { value: 'Cancelada', label: 'Cancelada' },

@@ -75,7 +75,7 @@ const err = (n) => fieldError(errors, n, w[n], isSubmitted);
 | `ZrLoader` | dimensionable con `--z-loader--size` | spinner oficial; no crear CSS |
 | `ZrTable`, `ZrTabs`, `ZrCard`, `ZrForm`, `ZrSidebar`, `ZrTile`, `ZrTooltip`, `ZrInputGroup`, `ZrFieldset`, `ZrChip`, `ZrTag`, `ZrBadge`, `ZrProgressBar`, `ZrSegmentedControl` | ver `ZdsFields.tsx` / ficha en `outputs/react/` | — |
 
-`ZdsStatusBadge` (sobre `ZrTag`): `variant: 'success' \| 'danger' \| 'info' \| 'neutral'`.
+`ZdsStatusBadge` (sobre `ZrTag`): `variant: 'success' \| 'danger' \| 'info' \| 'neutral' \| 'warning'`.
 `ZrBadge` NO sirve standalone (es overlay `position:absolute`).
 
 ---

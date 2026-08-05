@@ -34,6 +34,7 @@ export default function DetalleCasoModal({ caso, tipoMap, areaMap, onClose }: De
           { label: 'Estado', value: <ZdsStatusBadge variant={estadoVariante(caso.estado)}>{caso.estado}</ZdsStatusBadge> },
           { label: 'Tipo de solicitud', value: tipo },
           { label: 'Fecha de creación', value: caso.fechaCreacion },
+          { label: 'SLA asignado', value: caso.sla ? `${caso.sla} días hábiles` : '—' },
           { label: 'Fecha de vencimiento', value: caso.fechaVencimiento },
           { label: 'Días restantes', value: diasRestantesTexto(caso) },
           { label: 'Área responsable', value: area },
