@@ -4,7 +4,7 @@ import { useTask } from '../../../../core/useTask';
 import { scrollToFirstError } from '../../../../core/scrollToFirstError';
 import {
   ZdsInput, ZdsSelect, ZdsCheckboxField,
-  ZdsStatusBadge, ZrButton, ZrAlert, ZrLoader, ZrModal,
+  ZrButton, ZrAlert, ZrLoader, ZrModal,
 } from '../../../../components/fields/ZdsFields';
 import pm4 from '../../../../api/pm4Client';
 import { useCollection, useSyncDesc } from '../../../../core/useCollection';
@@ -19,7 +19,7 @@ import {
 import type { CrearRecibirQuejaFormData } from '../fields/fields';
 import SeccionConsumidor from './SeccionConsumidor';
 import SeccionDetalleQueja from './SeccionDetalleQueja';
-import { PqrPage, PqrSection, PqrReadonly } from './PqrPage';
+import { PqrPage, PqrSection } from './PqrPage';
 import { RecaptchaWidget } from '../../../../components/RecaptchaModal';
 
 // Puntos de recepción (CAT-PUNTO, colección 20) que ya no deben ofrecerse en el
@@ -46,15 +46,6 @@ const BANNER_INTRO = 'Radica tu petición, queja, reclamo, sugerencia o felicita
   + 'Completa los campos obligatorios, acepta el tratamiento de datos y valida el captcha '
   + 'para presionar Enviar PQRS.';
 
-// Mapea el estado SmartSupervision (FLD-338) al color del semáforo.
-function estadoVariant(in_strStatus: string): 'success' | 'danger' | 'info' | 'neutral' {
-  const strStatus = in_strStatus.toLowerCase();
-  if (strStatus.includes('acept') || strStatus.includes('verde') || strStatus.includes('ok')) return 'success';
-  if (strStatus.includes('rechaz') || strStatus.includes('error') || strStatus.includes('rojo')) return 'danger';
-  if (strStatus.includes('proceso') || strStatus.includes('pendiente') || strStatus.includes('amarillo')) return 'info';
-  return 'neutral';
-}
-
 export default function CrearRecibirQueja() {
   const { task, loading, error, submitting, completeTask, isWebEntry } = useTask();
   const fileRegistry = useRef(new Map<string, File>());
@@ -78,10 +69,6 @@ export default function CrearRecibirQueja() {
   } | null>(null);
   // Salida del watcher (qd_arridSimilarCases, etc.) que se fusiona en el payload al radicar.
   const [objPendingSimilar, setObjPendingSimilar] = useState<Partial<CrearRecibirQuejaFormData>>({});
-  // Fecha y hora que se muestran como "creación" en la cabecera de datos del caso (S1).
-  // En radicación web el caso todavía no existe: se toma el momento en que se abrió el
-  // formulario, que es el instante en el que se radicará.
-  const [dtmOpenedAt] = useState(() => new Date());
 
   const form = useForm<CrearRecibirQuejaFormData>({
     mode: 'onTouched',
@@ -103,8 +90,6 @@ export default function CrearRecibirQueja() {
 
   // Sincroniza la variable compañera <campo>_desc con la descripción del código guardado.
   // El campo base guarda el CÓDIGO (numérico); _desc viaja junto a PM4 para lectura.
-  // qd_strRequestType se sincroniza aquí aunque su selector viva en la sección de
-  // detalle de la queja (el diseño lo ubica junto al motivo).
   useSyncDesc(form, QD.strRequestType, cllRequestType);
   useSyncDesc(form, QD.strFilerRole, cllRole);
   useSyncDesc(form, QD.strChannel, cllChannel);
@@ -342,11 +327,15 @@ export default function CrearRecibirQueja() {
     setObjPendingSimilar({});
   };
 
-  // Reinicia el formulario y limpia los adjuntos cargados.
+  // Reinicia el formulario y limpia los adjuntos cargados, y devuelve al usuario al
+  // inicio de la página (si no, queda viendo la mitad del form ya vacío más abajo).
+  // setTimeout(0), no requestAnimationFrame: rAF puede quedar suspendido si el
+  // iframe no está en primer plano en el momento del clic (ver scrollToFirstError).
   const limpiarFormulario = () => {
     reset({ ...DEFAULTS });
     fileRegistry.current.clear();
     ADJUNTO_KEYS.forEach((strKey) => form.setValue(strKey, ''));
+    setTimeout(() => window.scrollTo({ top: 0, behavior: 'smooth' }));
   };
 
   if (blnSent) {
@@ -386,16 +375,8 @@ export default function CrearRecibirQueja() {
   const err = (in_strName: keyof CrearRecibirQuejaFormData) => errors[in_strName]?.message;
   // Habilita el envío solo si el usuario autorizó el tratamiento de datos y resolvió el captcha.
   const blnCanSubmit = !!objWatch[QD.blnDataAuth] && !!strCaptchaToken;
-  // Indica si el caso ya tiene estado ante la SFC.
-  const blnHasSfcStatus = !!objWatch[QD.strSmartSupStatus] || !!objWatch[QD.strSfcFilingDate];
   // Indica si el caso ya tiene responsable asignado.
   const blnHasAssignee = !!objWatch[QD.strAssigneeRole] || !!objWatch[QD.strAssignee];
-  // Datos del caso que encabezan la primera sección (número de caso BPM + creación).
-  // El número de caso solo existe si la pantalla se abre como tarea; en radicación web
-  // lo asigna PM4 al enviar (ver sendToPm4).
-  const strBpmCaseId = String((task?.data as Record<string, unknown> | undefined)?.[QD.strBpmCaseId] ?? '');
-  const strCreatedDate = dtmOpenedAt.toLocaleDateString('es-CO', { day: '2-digit', month: '2-digit', year: 'numeric' });
-  const strCreatedTime = dtmOpenedAt.toLocaleTimeString('es-CO', { hour12: false });
 
   return (
     <PqrPage title={BANNER_TITLE} intro={BANNER_INTRO}>
@@ -412,12 +393,16 @@ export default function CrearRecibirQueja() {
 
         {/* ── S1: Tipo de solicitud y rol ── */}
         <PqrSection title="Tipo de solicitud y rol">
-          {/* Datos del caso en solo lectura, encabezando la sección. */}
-          <div className="form-row cols-3">
-            <PqrReadonly label="Número de caso (ID BPM)" value={strBpmCaseId || 'Se asigna al radicar'} />
-            <PqrReadonly label="Fecha de la creación" value={strCreatedDate} />
-            <PqrReadonly label="Hora" value={strCreatedTime} />
+          {/* Tipo de solicitud: primer campo del formulario, en su propia fila. */}
+          <div className="form-row cols-1">
+            <ZdsSelect name={QD.strRequestType} control={control} label="¿A qué está asociado tu comentario?"
+              options={cllRequestType} rules={{ required: 'Campo requerido' }} required
+              error={err(QD.strRequestType)} />
           </div>
+          {/* Número de caso (ID BPM) + fecha/hora de creación se quitaron: SCR-000 es
+              la pantalla que CREA el caso, así que en este punto ninguno de los tres
+              existe todavía (PM4 los asigna recién al radicar) — mostrarlos, aunque
+              sea con un placeholder, es confuso. */}
           {/* Canal de recepción ya no existe como campo: se deriva del punto de
               recepción (ver CHANNEL_BY_RECEPTION_POINT). */}
           <div className="form-row cols-2">
@@ -485,22 +470,11 @@ export default function CrearRecibirQueja() {
           </div>
         </PqrSection>
 
-        {/* ── S5: Estado ante la SFC (post-radicación) ── */}
-        {blnHasSfcStatus && (
-          <PqrSection title="Estado ante la SFC">
-            <div className="form-row cols-2">
-              <div className="zds-field-wrap">
-                <span className="pqr-readonly-label">Estado SmartSupervision</span>
-                <div style={{ marginTop: 'var(--zs-50)' }}>
-                  <ZdsStatusBadge variant={estadoVariant(objWatch[QD.strSmartSupStatus] || '')}>
-                    {objWatch[QD.strSmartSupStatus] || 'Sin estado'}
-                  </ZdsStatusBadge>
-                </div>
-              </div>
-              <ZdsInput name={QD.strSfcFilingDate} control={control} label="Fecha y hora radicación SFC" readOnly />
-            </div>
-          </PqrSection>
-        )}
+        {/* S5 "Estado ante la SFC" (Estado SmartSupervision + Fecha y hora radicación
+            SFC) se eliminó: SCR-000 es la pantalla que CREA el caso, así que al
+            mostrarse todavía no existe estado ante la SFC ni fecha de radicación —
+            esos datos solo pueden existir después de radicar (mismo criterio ya
+            aplicado en SCR-0051, ver DetalleReasignacionRespuesta.tsx). */}
 
         {/* ── S6: Responsable Asignado (post-radicación) ── */}
         {blnHasAssignee && (

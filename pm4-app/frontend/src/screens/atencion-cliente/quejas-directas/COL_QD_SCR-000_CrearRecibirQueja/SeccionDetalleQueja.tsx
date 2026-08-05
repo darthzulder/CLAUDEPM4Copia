@@ -2,9 +2,9 @@ import { useEffect, useState } from 'react';
 import type { MutableRefObject } from 'react';
 import type { FieldPath, UseFormReturn } from 'react-hook-form';
 import DocSupportUploader from '../../../../components/DocSupportUploader';
-import { ZdsInput, ZdsSelect, ZdsRadio, ZdsTextarea, ZrCheckbox } from '../../../../components/fields/ZdsFields';
+import { ZdsInput, ZdsSelect, ZdsCheckboxField, ZdsTextarea, ZrCheckbox } from '../../../../components/fields/ZdsFields';
 import { useCollection, useSyncDesc, toUiOptions, uiValueFromCode, codeFromUiValue, labelFromUiValue } from '../../../../core/useCollection';
-import { QD, QD_COLLECTIONS, OPTIONS_SI_NO, SCR000_ADJUNTO_KEYS as ADJUNTO_KEYS } from '../fields/fields';
+import { QD, QD_COLLECTIONS, SCR000_ADJUNTO_KEYS as ADJUNTO_KEYS } from '../fields/fields';
 import type { CrearRecibirQuejaFormData } from '../fields/fields';
 import { PqrSection } from './PqrPage';
 
@@ -48,8 +48,9 @@ export default function SeccionDetalleQueja({ form, fileRegistry }: Props) {
   // preexistente, preservado — ver fields/MAPEO_qd_old_new.md #3). Solo se renombra
   // la lectura del campo real.
   const { options: cllProductDetail } = useCollection(QD_COLLECTIONS.productDetail, { qd_strProductFilter: objWatch[QD.strSfcProduct] });
-  // Catálogo de tipo de solicitud: su selector vive en esta sección (el diseño lo ubica
-  // junto al motivo) y además resuelve el LABEL con el que la matriz filtra por texto.
+  // Catálogo de tipo de solicitud: su selector vive en S1 (CrearRecibirQueja.tsx, primer
+  // campo del formulario); aquí solo se usa para resolver el LABEL con el que la matriz
+  // filtra por texto.
   const { options: cllRequestType } = useCollection(QD_COLLECTIONS.requestType);
   // Matriz cat_matriz_motivos (id 45) COMPLETA. La cascada momento → servicio → motivo
   // se deriva en cliente (abajo) por columnas de texto con espacios sobrantes.
@@ -288,17 +289,16 @@ export default function SeccionDetalleQueja({ form, fileRegistry }: Props) {
       )}
 
       {/* Réplica / reconsideración: el modelo de datos tiene una sola variable
-          (qd_strReply) para las dos preguntas del diseño. */}
+          (qd_strReply) para las dos preguntas del diseño. Checkbox — guarda el mismo
+          contrato de texto 'SI'/'NO' que antes (CONTRATO con PM4), solo cambia el
+          control visual de radio a checkbox. */}
       <div className="form-row cols-1">
-        <ZdsRadio
+        <ZdsCheckboxField
           name={QD.strReply}
           control={control}
           label="¿Ya habías radicado previamente la misma queja o es una reconsideración?"
-          options={OPTIONS_SI_NO}
-          rules={{ required: 'Campo requerido' }}
-          required
-          inline
-          error={err(QD.strReply)}
+          checkedValue="SI"
+          uncheckedValue="NO"
         />
       </div>
 
@@ -345,7 +345,9 @@ export default function SeccionDetalleQueja({ form, fileRegistry }: Props) {
         )}
       </div>
 
-      <div className="form-row cols-2">
+      {/* Tipo de solicitud (primer eslabón de la cascada de la matriz) se muestra en
+          S1, como primer campo del formulario — no se repite el selector aquí. */}
+      <div className="form-row cols-1">
         <ZdsSelect
           name={QD.strSfcReason}
           control={control}
@@ -357,17 +359,6 @@ export default function SeccionDetalleQueja({ form, fileRegistry }: Props) {
           disabled={!objWatch[QD.strInteraction] || (blnIsAsistencias && !objWatch[QD.strServiceProvided])}
           placeholder={objWatch[QD.strInteraction] ? 'Seleccione el motivo...' : 'Complete primero el momento'}
           error={err(QD.strSfcReason)}
-        />
-        {/* Tipo de solicitud: primer eslabón de la cascada de la matriz. El diseño lo
-            ubica aquí, junto al motivo. */}
-        <ZdsSelect
-          name={QD.strRequestType}
-          control={control}
-          label="Tipo de solicitud"
-          options={cllRequestType}
-          rules={{ required: 'Campo requerido' }}
-          required
-          error={err(QD.strRequestType)}
         />
       </div>
 
@@ -413,9 +404,16 @@ export default function SeccionDetalleQueja({ form, fileRegistry }: Props) {
         <ZrCheckbox
           id="pqr-has-attachments"
           name="pqr-has-attachments"
-          model={blnShowAttachments}
           label="¿Incluye anexos a la queja?"
           onChange={(in_blnValue: boolean | null) => toggleAttachments(!!in_blnValue)}
+          {...({
+            // ⚠ Mismo bug del vendor que en ZdsCheckboxField (ver ZdsFields.tsx):
+            // useCustomElement() descarta cualquier prop `=== false`, así que
+            // `model={false}` nunca llega al custom element y desmarcar requiere un
+            // clic extra. Workaround: `0` en vez de `false` (falsy mismo, pero
+            // `0 === false` es `false` en JS → sobrevive el filtro).
+            model: blnShowAttachments ? true : 0,
+          } as Record<string, unknown>)}
         />
       </div>
       {blnShowAttachments && (
