@@ -209,6 +209,10 @@
       "id": 45,
       "title": "cat_matriz_motivos"
     },
+    "emailTemplates": {
+      "id": 46,
+      "title": "COL - QD - Lista de correos"
+    },
     "holidaysColombia": {
       "id": 48,
       "title": "cat-feriados-colombia"
