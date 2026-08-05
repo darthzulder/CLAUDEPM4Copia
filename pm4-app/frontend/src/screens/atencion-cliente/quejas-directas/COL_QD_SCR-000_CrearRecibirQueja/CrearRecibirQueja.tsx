@@ -19,7 +19,7 @@ import {
 import type { CrearRecibirQuejaFormData } from '../fields/fields';
 import SeccionConsumidor from './SeccionConsumidor';
 import SeccionDetalleQueja from './SeccionDetalleQueja';
-import { PqrPage, PqrSection } from './PqrPage';
+import { PqrPage, PqrSection, PqrReadonly } from './PqrPage';
 import { RecaptchaWidget } from '../../../../components/RecaptchaModal';
 
 // Puntos de recepción (CAT-PUNTO, colección 20) que ya no deben ofrecerse en el
@@ -50,6 +50,9 @@ export default function CrearRecibirQueja() {
   const { task, loading, error, submitting, completeTask, isWebEntry } = useTask();
   const fileRegistry = useRef(new Map<string, File>());
   const [blnSent, setBlnSent] = useState(false);
+  // Número de caso (case_number BPM) del request recién creado, para mostrarlo en la
+  // pantalla de éxito (MSG-000-08: "...Número de caso: [ID]").
+  const [numCreatedCaseNumber, setNumCreatedCaseNumber] = useState<number | undefined>(undefined);
   // FLD-336 — token del reCAPTCHA resuelto en el propio formulario (sección
   // "Autorización y envío"). Se verifica server-side al radicar; si caduca, Google
   // resetea el widget y lo limpiamos para exigir una nueva validación.
@@ -216,6 +219,7 @@ export default function CrearRecibirQueja() {
             await pm4.put(`/requests/${intNewRequestId}`, { data: objExtraData });
           }
         }
+        setNumCreatedCaseNumber(numBpmCaseId);
         setBlnSent(true);
       } else {
         const intRequestId = task?.process_request_id;
@@ -231,6 +235,7 @@ export default function CrearRecibirQueja() {
           ...attachIdsToPayload(dicUploadedIds),
           ...(numBpmCaseId ? { [QD.strSfcCode]: buildSfcCode(numBpmCaseId) } : {}),
         } as unknown as Record<string, unknown>);
+        setNumCreatedCaseNumber(numBpmCaseId);
         setBlnSent(true);
       }
     } catch (exc) {
@@ -344,8 +349,12 @@ export default function CrearRecibirQueja() {
         <div className="pqr-form">
           <PqrSection title="Radicación exitosa">
             <ZrAlert config="positive" {...({ 'hide-close': true } as object)}>
-              Tu solicitud fue radicada exitosamente. Recibirás una confirmación en el correo registrado.
+              Tu solicitud fue radicada exitosamente{numCreatedCaseNumber ? ` con el número de caso ${numCreatedCaseNumber}` : ''}.
+              Recibirás una confirmación en el correo registrado.
             </ZrAlert>
+            {numCreatedCaseNumber && (
+              <PqrReadonly label="Número de caso" value={numCreatedCaseNumber} />
+            )}
           </PqrSection>
         </div>
       </PqrPage>
@@ -516,9 +525,16 @@ export default function CrearRecibirQueja() {
           <ul style={{ margin: 'var(--zs-100) 0', paddingLeft: 'var(--zs-150)', color: 'var(--z-text)', font: 'var(--zf-body-14--400)' }}>
             {(objSimilarPrompt.cases.length > 0
               ? objSimilarPrompt.cases.map((objCase) => {
-                  const strNumber = (objCase.case_number ?? objCase.id) as string | number;
-                  const strStatus = objCase.status as string | undefined;
-                  const strDate = objCase.created_at as string | undefined;
+                  // El watcher devuelve cada caso con la forma de PM4 (`_request` anida
+                  // el id interno y el case_number reales, ver nota de fetchCaseNumber
+                  // arriba); algunos casos vienen "planos" sin ese anidado. Se prioriza
+                  // siempre case_number (número de caso visible) sobre el id interno.
+                  const objReq = (objCase._request ?? {}) as Record<string, unknown>;
+                  const strNumber = (
+                    objReq.case_number ?? objCase.case_number ?? objReq.id ?? objCase.id
+                  ) as string | number;
+                  const strStatus = (objCase.status ?? objReq.status) as string | undefined;
+                  const strDate = (objCase.created_at ?? objReq.created_at) as string | undefined;
                   return `Caso #${strNumber}${strStatus ? ` · ${strStatus}` : ''}${strDate ? ` · ${strDate.slice(0, 10)}` : ''}`;
                 })
               : objSimilarPrompt.ids.map((intId) => `Caso #${intId}`)

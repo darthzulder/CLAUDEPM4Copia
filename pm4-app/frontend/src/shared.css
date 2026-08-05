@@ -1254,6 +1254,8 @@ z-table :is(th, td)[config*="right"] {
      #23366F navy → --zc-blue-dark   ·  #2167AE azul → --zc-blue-zurich
      #ECEEEF gris → --zg-white-zurich ·  #828A8B borde → --zg-6 · #ABABAB → --zg-8 */
 .pqr-page {
+  display: flex;
+  flex-direction: column;
   min-height: 100vh;
   background: var(--z-bg);
 }
@@ -1426,6 +1428,10 @@ z-table :is(th, td)[config*="right"] {
   min-height: 92px;
   padding: var(--zs-100) var(--zs-150);
   background: var(--zg-white);
+  /* .pqr-page es flex-column: esto ancla el footer al fondo cuando el contenido
+     (p.ej. la pantalla de éxito/error, mucho más corta que el formulario) no
+     alcanza a llenar el viewport, en vez de quedar flotando a media página. */
+  margin-top: auto;
 }
 
 .pqr-footer-col {
