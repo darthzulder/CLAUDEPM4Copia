@@ -245,6 +245,7 @@
     "quejasDirectasWebEntry": {
       "processId": 31,
       "eventId": "node_661",
+      "eventName": "Comenzar caso por WE",
       "title": "COL - Gestion de Quejas Directas - Proceso"
     }
   }

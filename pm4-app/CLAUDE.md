@@ -209,16 +209,21 @@ través de:
 - **`scripts/pm4-registry-sync.mjs`** — script de mantenimiento que verifica/genera el
   registro contra la instancia PM4 real (usa `PM4_BASE_URL`/`PM4_TOKEN` de `.env`):
   ```bash
-  node scripts/pm4-registry-sync.mjs --check   # solo reporta drift, no escribe
-  node scripts/pm4-registry-sync.mjs --init    # primera generación / rellenar registro
-  node scripts/pm4-registry-sync.mjs --update  # aplica scripts resueltos por uuid
+  node scripts/pm4-registry-sync.mjs --check    # solo reporta, no escribe
+  node scripts/pm4-registry-sync.mjs --update   # resuelve y escribe todo automáticamente
   ```
-  Las **colecciones nunca se auto-escriben** (PM4 no expone un `uuid` nativo para ellas,
-  solo para scripts) — un `[MISMATCH]`/`[MISSING]` de colección siempre requiere revisar
-  y editar `pm4-registry.json` a mano.
+  **Supuesto de automatización (confirmado por el usuario):** el proceso de migración de
+  este proyecto entre instancias PM4 preserva los NOMBRES exactos (título de colección,
+  nombre de proceso, nombre de evento BPMN) — solo cambian los IDs numéricos. Si en origen
+  hay un nombre que colisionaría con uno ya existente en destino, se renombra en origen
+  **antes** de migrar para que los nombres sigan siendo idénticos 1:1. Bajo ese supuesto,
+  `--update` resuelve y reescribe **todo** por nombre (collections, processes/eventos por
+  `eventName`) o por `uuid` (scripts, aún más confiable) — sin edición manual en el caso
+  normal. Si un nombre no se encuentra en destino, sale como `[MISSING]`/`[EVENTO NO
+  RESUELTO]` — eso sí requiere revisión humana (o indica que el supuesto no se cumplió).
 
-**OBLIGATORIO al migrar de instancia PM4:** correr `pm4-registry-sync.mjs --check`, revisar
-el reporte, y solo entonces `--update`/editar el registro. Nunca reintroducir IDs
+**OBLIGATORIO al migrar de instancia PM4:** correr `pm4-registry-sync.mjs --check` primero
+para ver el diff, y luego `--update` para aplicarlo. Nunca reintroducir IDs
 hardcodeados sueltos en `collections.ts`/`variables.ts`/`fields.ts` — todo pasa por el
 resolver.
 

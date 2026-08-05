@@ -38,6 +38,14 @@ export interface Pm4RegistryProcessEntry {
   eventId: string;
   /** Título del proceso en PM4. */
   title: string;
+  /**
+   * Nombre del start event BPMN (ej. "Comenzar caso por WE") — permite que
+   * pm4-registry-sync.mjs resuelva `eventId` automáticamente por nombre al migrar de
+   * instancia (mismo supuesto que collections/processes: el nombre se preserva, el id
+   * numérico interno del nodo no está garantizado). Sin este campo, el eventId solo se
+   * verifica (no se auto-resuelve) si cambia.
+   */
+  eventName?: string;
   note?: string;
 }
 

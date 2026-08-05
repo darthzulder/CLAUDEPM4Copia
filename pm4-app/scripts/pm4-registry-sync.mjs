@@ -3,17 +3,26 @@
 // la instancia PM4 real (PM4_BASE_URL + PM4_TOKEN de pm4-app/.env).
 //
 // Modos:
-//   --check   (default) reporta drift, NUNCA escribe el registro.
-//   --init    primera generación — igual que --check, pero además escribe los scripts
-//             resueltos automáticamente por uuid (las collections nunca se auto-escriben,
-//             no hay uuid nativo para confirmarlas sin ojo humano).
-//   --update  aplica los mismatches de scripts resueltos por uuid al registro existente.
-//             Los mismatches de collections (por nombre) NUNCA se auto-aplican — siempre
-//             requieren edición manual de pm4-registry.json tras revisar el reporte.
+//   --check          reporta drift, NUNCA escribe el registro.
+//   --init/--update  resuelve y ESCRIBE automáticamente collections/scripts/processes
+//                    en el registro (mismo comportamiento en ambos flags — se mantienen
+//                    los dos nombres por costumbre de uso, no hay diferencia funcional).
+//
+// ⚠️ SUPUESTO DE AUTOMATIZACIÓN (asumido explícitamente por el usuario del proyecto):
+// la migración entre instancias PM4 preserva los NOMBRES exactos (título de colección,
+// nombre de proceso, nombre de evento BPMN) — solo los IDs numéricos cambian. Si en
+// origen hay un nombre que ya existe en destino (colisión), se debe renombrar en origen
+// ANTES de migrar para que los nombres sigan siendo idénticos 1:1 entre instancias.
+// Bajo ese supuesto, el nombre es una clave de resolución confiable y este script
+// resuelve TODO por nombre (collections, processes) o por uuid (scripts, más confiable
+// aún cuando existe) sin pedir confirmación humana.
+//
+// Si esa garantía no se cumple en algún caso puntual (nombre duplicado no resuelto,
+// colección renombrada sin querer, etc.), el reporte igual lo muestra como [MISSING]
+// (nombre no encontrado en destino) — no falla en silencio.
 //
 // Uso:
 //   node scripts/pm4-registry-sync.mjs --check
-//   node scripts/pm4-registry-sync.mjs --init
 //   node scripts/pm4-registry-sync.mjs --update
 //
 // Ver frontend/src/config/pm4Registry.types.ts para el shape del registro y
@@ -28,11 +37,10 @@ const ROOT = join(__dirname, '..');
 const REGISTRY_PATH = join(ROOT, 'frontend', 'src', 'config', 'pm4-registry.json');
 const ENV_PATH = join(ROOT, '.env');
 
-const MODE = process.argv.includes('--init')
-  ? 'init'
-  : process.argv.includes('--update')
-    ? 'update'
-    : 'check';
+// --init se acepta como alias de --update (mismo comportamiento) por costumbre de uso.
+const MODE = (process.argv.includes('--init') || process.argv.includes('--update'))
+  ? 'update'
+  : 'check';
 
 // ── .env mínimo (sin dependencias) — solo necesitamos PM4_BASE_URL y PM4_TOKEN ──────
 function loadEnv(path) {
@@ -91,31 +99,28 @@ function saveRegistry(objRegistry) {
   console.log(`\n✓ ${REGISTRY_PATH} actualizado.`);
 }
 
-// ── Collections — sin uuid nativo, match por título ─────────────────────────────────
+// ── Collections — sin uuid nativo, resolución por título (nombre garantizado estable
+// entre instancias — ver supuesto documentado arriba) ───────────────────────────────
 async function syncCollections(objRegistry) {
   console.log('\n=== Collections ===');
   const objList = await pm4Get('/collections', { per_page: 200 });
   const lstRemote = objList.data ?? [];
-  const dicRemoteById = new Map(lstRemote.map((c) => [c.id, c]));
   const dicRemoteByTitle = new Map(lstRemote.map((c) => [c.name ?? c.title, c]));
 
   const lstOk = [];
-  const lstMismatched = [];
+  const lstUpdated = [];
   const lstMissing = [];
-  const lstDriftCandidates = [];
 
   for (const [strSlug, objEntry] of Object.entries(objRegistry.collections)) {
-    const objRemote = dicRemoteById.get(objEntry.id);
+    const objRemote = dicRemoteByTitle.get(objEntry.title);
     if (!objRemote) {
-      lstMissing.push({ slug: strSlug, expectedId: objEntry.id, expectedTitle: objEntry.title });
+      lstMissing.push({ slug: strSlug, expectedTitle: objEntry.title, lastKnownId: objEntry.id });
       continue;
     }
-    const strRemoteTitle = objRemote.name ?? objRemote.title;
-    if (strRemoteTitle !== objEntry.title) {
-      lstMismatched.push({ slug: strSlug, id: objEntry.id, expectedTitle: objEntry.title, actualTitle: strRemoteTitle });
-      const objCandidate = dicRemoteByTitle.get(objEntry.title);
-      if (objCandidate && objCandidate.id !== objEntry.id) {
-        lstDriftCandidates.push({ slug: strSlug, oldId: objEntry.id, newId: objCandidate.id, title: objEntry.title });
+    if (objRemote.id !== objEntry.id) {
+      lstUpdated.push({ slug: strSlug, title: objEntry.title, oldId: objEntry.id, newId: objRemote.id });
+      if (MODE === 'update') {
+        objRegistry.collections[strSlug].id = objRemote.id;
       }
     } else {
       lstOk.push(strSlug);
@@ -123,19 +128,15 @@ async function syncCollections(objRegistry) {
   }
 
   console.log(`[OK] ${lstOk.length} colecciones sin cambios.`);
-  for (const m of lstMismatched) {
-    console.log(`[MISMATCH] collections.${m.slug}\n  id registrado: ${m.id}\n  título esperado: "${m.expectedTitle}"\n  título real en id=${m.id}: "${m.actualTitle}"`);
+  for (const u of lstUpdated) {
+    const strAction = MODE === 'update' ? ' → actualizado en el registro.' : ' → correr con --update para aplicar.';
+    console.log(`[RESUELTO POR NOMBRE] collections.${u.slug} — "${u.title}": id ${u.oldId} → ${u.newId}${strAction}`);
   }
   for (const m of lstMissing) {
-    console.log(`[MISSING] collections.${m.slug}\n  id registrado: ${m.expectedId} (título esperado "${m.expectedTitle}") ya no existe en esta instancia.`);
-  }
-  for (const d of lstDriftCandidates) {
-    console.log(`[DRIFT CANDIDATE] collections.${d.slug} — "${d.title}" ahora está en id=${d.newId} (era ${d.oldId}). Revisar manualmente antes de aplicar.`);
+    console.log(`[MISSING] collections.${m.slug} — título "${m.expectedTitle}" (último id conocido ${m.lastKnownId}) no existe en esta instancia. Requiere revisión manual — ¿no se migró, o cambió de nombre?`);
   }
 
-  // Las collections NUNCA se auto-escriben — siempre requieren edición manual de
-  // pm4-registry.json tras revisar el reporte (no hay uuid nativo que garantice el match).
-  return { ok: lstOk.length, mismatched: lstMismatched, missing: lstMissing, driftCandidates: lstDriftCandidates };
+  return { ok: lstOk.length, updated: lstUpdated, missing: lstMissing };
 }
 
 // ── Scripts — resolución por uuid ────────────────────────────────────────────────────
@@ -175,7 +176,7 @@ async function syncScripts(objRegistry) {
     }
     if (objResolved.id !== objEntry.id) {
       lstMismatched.push({ slug: strSlug, uuid: objEntry.uuid, oldId: objEntry.id, newId: objResolved.id, title: objResolved.title });
-      if (MODE === 'init' || MODE === 'update') {
+      if (MODE === 'update') {
         objRegistry.scripts[strSlug].id = objResolved.id;
         objRegistry.scripts[strSlug].title = objResolved.title;
       }
@@ -186,7 +187,7 @@ async function syncScripts(objRegistry) {
 
   console.log(`[OK] ${lstOk.length} scripts sin cambios.`);
   for (const m of lstMismatched) {
-    const strAction = MODE === 'init' || MODE === 'update' ? ' → actualizado en el registro.' : ' → correr con --init/--update para aplicar.';
+    const strAction = MODE === 'update' ? ' → actualizado en el registro.' : ' → correr con --update para aplicar.';
     console.log(`[MISMATCH] scripts.${m.slug} — uuid ${m.uuid}: id ${m.oldId} → ${m.newId} ("${m.title}")${strAction}`);
   }
   for (const n of lstNotFound) {
@@ -199,38 +200,71 @@ async function syncScripts(objRegistry) {
   return { ok: lstOk.length, mismatched: lstMismatched, notFound: lstNotFound, skippedNoUuid: lstSkippedNoUuid };
 }
 
-// ── Processes — verificación simple por id + presencia del eventId entre start_events ──
+// ── Processes — resolución por nombre (proceso y evento), igual supuesto que collections ──
+// El processId es una PK de la instancia (cambia al migrar) — se resuelve por `title`.
+// El eventId ('node_661') es un id interno de nodo BPMN — para resolverlo con la misma
+// confianza que el proceso, el registro puede declarar `eventName` (nombre del start event,
+// ej. "Comenzar caso por WE") y este script lo busca por nombre entre los start_events del
+// proceso ya resuelto. Si `eventName` no está declarado, solo se verifica que el eventId
+// registrado siga existiendo (no se puede auto-resolver sin un nombre de referencia).
 async function syncProcesses(objRegistry) {
   console.log('\n=== Processes ===');
+  const objList = await pm4Get('/processes', { per_page: 500 });
+  const lstRemote = objList.data ?? [];
+  const dicRemoteByTitle = new Map(lstRemote.map((p) => [p.name ?? p.title, p]));
+
   const lstOk = [];
-  const lstIssues = [];
+  const lstUpdated = [];
+  const lstMissing = [];
+  const lstEventIssues = [];
 
   for (const [strSlug, objEntry] of Object.entries(objRegistry.processes)) {
-    try {
-      const objProcess = await pm4Get(`/processes/${objEntry.processId}`);
-      const strRemoteTitle = objProcess.name ?? objProcess.title;
-      const lstStartEvents = objProcess.start_events ?? [];
-      const blnEventExists = lstStartEvents.some((e) => e.id === objEntry.eventId);
-      if (strRemoteTitle !== objEntry.title || !blnEventExists) {
-        lstIssues.push({ slug: strSlug, processId: objEntry.processId, expectedTitle: objEntry.title, actualTitle: strRemoteTitle, eventFound: blnEventExists });
-      } else {
-        lstOk.push(strSlug);
-      }
-    } catch (excError) {
-      lstIssues.push({ slug: strSlug, processId: objEntry.processId, error: excError.message });
+    const objProcess = dicRemoteByTitle.get(objEntry.title);
+    if (!objProcess) {
+      lstMissing.push({ slug: strSlug, expectedTitle: objEntry.title, lastKnownId: objEntry.processId });
+      continue;
     }
+
+    let blnChanged = false;
+    if (objProcess.id !== objEntry.processId) {
+      lstUpdated.push({ slug: strSlug, title: objEntry.title, field: 'processId', oldValue: objEntry.processId, newValue: objProcess.id });
+      if (MODE === 'update') { objRegistry.processes[strSlug].processId = objProcess.id; }
+      blnChanged = true;
+    }
+
+    const lstStartEvents = objProcess.start_events ?? [];
+    if (objEntry.eventName) {
+      const objEvent = lstStartEvents.find((e) => e.name === objEntry.eventName);
+      if (!objEvent) {
+        lstEventIssues.push({ slug: strSlug, eventName: objEntry.eventName, reason: 'no se encontró ningún start event con ese nombre' });
+      } else if (objEvent.id !== objEntry.eventId) {
+        lstUpdated.push({ slug: strSlug, title: objEntry.title, field: 'eventId', oldValue: objEntry.eventId, newValue: objEvent.id });
+        if (MODE === 'update') { objRegistry.processes[strSlug].eventId = objEvent.id; }
+        blnChanged = true;
+      }
+    } else {
+      const blnEventExists = lstStartEvents.some((e) => e.id === objEntry.eventId);
+      if (!blnEventExists) {
+        lstEventIssues.push({ slug: strSlug, eventName: null, reason: `eventId "${objEntry.eventId}" ya no existe entre los start_events y no hay "eventName" declarado para resolverlo por nombre — agregarlo al registro` });
+      }
+    }
+
+    if (!blnChanged && lstEventIssues.every((i) => i.slug !== strSlug)) lstOk.push(strSlug);
   }
 
   console.log(`[OK] ${lstOk.length} procesos sin cambios.`);
-  for (const i of lstIssues) {
-    if (i.error) {
-      console.log(`[MISSING] processes.${i.slug} — process ${i.processId}: ${i.error}`);
-    } else {
-      console.log(`[MISMATCH] processes.${i.slug} — process ${i.processId}: título esperado "${i.expectedTitle}", real "${i.actualTitle}", eventId "${objRegistry.processes[i.slug].eventId}" encontrado=${i.eventFound}`);
-    }
+  for (const u of lstUpdated) {
+    const strAction = MODE === 'update' ? ' → actualizado en el registro.' : ' → correr con --update para aplicar.';
+    console.log(`[RESUELTO POR NOMBRE] processes.${u.slug}.${u.field} — "${u.title}": ${u.oldValue} → ${u.newValue}${strAction}`);
+  }
+  for (const m of lstMissing) {
+    console.log(`[MISSING] processes.${m.slug} — título "${m.expectedTitle}" (último processId conocido ${m.lastKnownId}) no existe en esta instancia.`);
+  }
+  for (const e of lstEventIssues) {
+    console.log(`[EVENTO NO RESUELTO] processes.${e.slug} — ${e.reason}`);
   }
 
-  return { ok: lstOk.length, issues: lstIssues };
+  return { ok: lstOk.length, updated: lstUpdated, missing: lstMissing, eventIssues: lstEventIssues };
 }
 
 async function main() {
@@ -241,22 +275,22 @@ async function main() {
   const objScriptsReport = await syncScripts(objRegistry);
   const objProcessesReport = await syncProcesses(objRegistry);
 
-  if (MODE === 'init' || MODE === 'update') {
+  if (MODE === 'update') {
     saveRegistry(objRegistry);
   } else {
-    console.log('\n(modo --check: no se escribió nada. Usar --init o --update para aplicar los scripts resueltos por uuid.)');
+    console.log('\n(modo --check: no se escribió nada. Usar --update para aplicar todo lo resuelto por nombre/uuid.)');
   }
 
   const blnHasBlockingIssues =
-    objCollectionsReport.mismatched.length > 0 ||
     objCollectionsReport.missing.length > 0 ||
     objScriptsReport.notFound.length > 0 ||
-    objProcessesReport.issues.length > 0;
+    objProcessesReport.missing.length > 0 ||
+    objProcessesReport.eventIssues.length > 0;
 
   console.log('\n=== Resumen ===');
-  console.log(`Collections: ${objCollectionsReport.ok} OK, ${objCollectionsReport.mismatched.length} mismatch, ${objCollectionsReport.missing.length} missing`);
-  console.log(`Scripts:     ${objScriptsReport.ok} OK, ${objScriptsReport.mismatched.length} mismatch, ${objScriptsReport.notFound.length} not-found, ${objScriptsReport.skippedNoUuid.length} sin uuid`);
-  console.log(`Processes:   ${objProcessesReport.ok} OK, ${objProcessesReport.issues.length} con problema`);
+  console.log(`Collections: ${objCollectionsReport.ok} OK, ${objCollectionsReport.updated.length} resueltas por nombre, ${objCollectionsReport.missing.length} missing`);
+  console.log(`Scripts:     ${objScriptsReport.ok} OK, ${objScriptsReport.mismatched.length} resueltos por uuid, ${objScriptsReport.notFound.length} not-found, ${objScriptsReport.skippedNoUuid.length} sin uuid`);
+  console.log(`Processes:   ${objProcessesReport.ok} OK, ${objProcessesReport.updated.length} resueltos por nombre, ${objProcessesReport.missing.length} missing, ${objProcessesReport.eventIssues.length} eventos sin resolver`);
 
   process.exitCode = blnHasBlockingIssues ? 1 : 0;
 }
