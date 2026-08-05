@@ -1255,6 +1255,13 @@ export const SCR013_PAGE_SIZE = 8;
 // Proceso PM4 de Gestión de Quejas Directas (mismo default que el Web Entry de SCR-000).
 export const SCR013_PROCESS_ID = SCR000_WEB_ENTRY_PROCESS_ID;
 
+// case_title exacto que PM4 asigna a todo request de este proceso, RAÍZ o SUB-PROCESO
+// (SP1/SP2/SP3…) — lo comparten porque el título es del "caso", no del proceso puntual.
+// Se usa como filtro de seguridad al cruzar tareas activas por case_number (ver
+// useCasosDashboard.ts): PM4 numera case_number por colaboración, así que sin este filtro
+// un case_number de OTRA colección de procesos podría coincidir por accidente con uno QD.
+export const SCR013_CASE_TITLE = 'COL - Gestion de Quejas Directas - Proceso';
+
 // Opciones estáticas del filtro Estado. Estado es un valor OPERATIVO derivado de
 // request.status + SLA (no un catálogo); por eso no viene de una colección. Tipo y
 // Área sí usan colecciones (QD_COLLECTIONS.requestType / QD_COLLECTIONS.area).
