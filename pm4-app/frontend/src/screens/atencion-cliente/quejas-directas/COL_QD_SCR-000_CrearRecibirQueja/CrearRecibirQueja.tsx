@@ -2,9 +2,6 @@ import { useEffect, useRef, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { useTask } from '../../../../core/useTask';
 import { scrollToFirstError } from '../../../../core/scrollToFirstError';
-import ScreenHeader from '../../../../components/ScreenHeader';
-import FormSection from '../../../../components/FormSection';
-import { ActionBar } from '../../../../components/ActionBar';
 import {
   ZdsInput, ZdsSelect, ZdsCheckboxField,
   ZdsStatusBadge, ZrButton, ZrAlert, ZrLoader, ZrModal,
@@ -22,7 +19,8 @@ import {
 import type { CrearRecibirQuejaFormData } from '../fields/fields';
 import SeccionConsumidor from './SeccionConsumidor';
 import SeccionDetalleQueja from './SeccionDetalleQueja';
-import RecaptchaModal from '../../../../components/RecaptchaModal';
+import { PqrPage, PqrSection, PqrReadonly } from './PqrPage';
+import { RecaptchaWidget } from '../../../../components/RecaptchaModal';
 
 // Puntos de recepción (CAT-PUNTO, colección 20) que ya no deben ofrecerse en el
 // selector: 2 (Aplicación móvil), 6 (Audio respuesta), 99 (Otros Puntos de recepción).
@@ -42,6 +40,12 @@ const CHANNEL_BY_RECEPTION_POINT: Record<string, string> = {
   '4': '14',
 };
 
+// Titular y descripción del banner de la página pública de radicación.
+const BANNER_TITLE = 'Radicación PQRs';
+const BANNER_INTRO = 'Radica tu petición, queja, reclamo, sugerencia o felicitación. '
+  + 'Completa los campos obligatorios, acepta el tratamiento de datos y valida el captcha '
+  + 'para presionar Enviar PQRS.';
+
 // Mapea el estado SmartSupervision (FLD-338) al color del semáforo.
 function estadoVariant(in_strStatus: string): 'success' | 'danger' | 'info' | 'neutral' {
   const strStatus = in_strStatus.toLowerCase();
@@ -55,15 +59,18 @@ export default function CrearRecibirQueja() {
   const { task, loading, error, submitting, completeTask, isWebEntry } = useTask();
   const fileRegistry = useRef(new Map<string, File>());
   const [blnSent, setBlnSent] = useState(false);
-  const [blnCaptchaOpen, setBlnCaptchaOpen] = useState(false);
+  // FLD-336 — token del reCAPTCHA resuelto en el propio formulario (sección
+  // "Autorización y envío"). Se verifica server-side al radicar; si caduca, Google
+  // resetea el widget y lo limpiamos para exigir una nueva validación.
+  const [strCaptchaToken, setStrCaptchaToken] = useState('');
   const [strCaptchaError, setStrCaptchaError] = useState('');
   const [objPendingData, setObjPendingData] = useState<CrearRecibirQuejaFormData | null>(null);
-  // Overlay de "enviando": cubre el lapso captcha-verificado → verify + envío a PM4,
-  // hasta que aparece la pantalla de éxito.
+  // Overlay de "enviando": cubre el lapso submit → chequeo de similares → verify +
+  // envío a PM4, hasta que aparece la pantalla de éxito.
   const [blnSending, setBlnSending] = useState(false);
   // Cuando el watcher (script 70) detecta casos similares (qd_intCountSimilarCases > 0),
   // guardamos aquí el detalle para mostrar el modal de confirmación. El flujo queda en
-  // pausa hasta que el usuario decida continuar (y recién ahí sigue al captcha).
+  // pausa hasta que el usuario decida continuar.
   const [objSimilarPrompt, setObjSimilarPrompt] = useState<{
     ids: number[];
     count: number;
@@ -71,6 +78,10 @@ export default function CrearRecibirQueja() {
   } | null>(null);
   // Salida del watcher (qd_arridSimilarCases, etc.) que se fusiona en el payload al radicar.
   const [objPendingSimilar, setObjPendingSimilar] = useState<Partial<CrearRecibirQuejaFormData>>({});
+  // Fecha y hora que se muestran como "creación" en la cabecera de datos del caso (S1).
+  // En radicación web el caso todavía no existe: se toma el momento en que se abrió el
+  // formulario, que es el instante en el que se radicará.
+  const [dtmOpenedAt] = useState(() => new Date());
 
   const form = useForm<CrearRecibirQuejaFormData>({
     mode: 'onTouched',
@@ -92,6 +103,8 @@ export default function CrearRecibirQueja() {
 
   // Sincroniza la variable compañera <campo>_desc con la descripción del código guardado.
   // El campo base guarda el CÓDIGO (numérico); _desc viaja junto a PM4 para lectura.
+  // qd_strRequestType se sincroniza aquí aunque su selector viva en la sección de
+  // detalle de la queja (el diseño lo ubica junto al motivo).
   useSyncDesc(form, QD.strRequestType, cllRequestType);
   useSyncDesc(form, QD.strFilerRole, cllRole);
   useSyncDesc(form, QD.strChannel, cllChannel);
@@ -152,35 +165,10 @@ export default function CrearRecibirQueja() {
     return data?.case_number;
   };
 
-  // Paso 1 — el submit valida el formulario (react-hook-form) y, si es válido,
-  // ejecuta el watcher de casos similares (script 70) ANTES del captcha:
-  //  · si hay casos similares → abre el modal de confirmación y espera decisión.
-  //  · si no hay → abre directamente el captcha.
-  // El envío real NO ocurre hasta pasar captcha.
-  const requestCaptcha = async (in_objData: CrearRecibirQuejaFormData) => {
-    setStrCaptchaError('');
-    setObjPendingData(in_objData);
-    setBlnSending(true); // overlay mientras corre el chequeo
-    const objSimilar = await checkSimilarCases(in_objData);
-    setObjPendingSimilar(objSimilar);
-    setBlnSending(false);
-
-    const intCount = Number(objSimilar[QD.intCountSimilarCases] ?? 0);
-    if (intCount > 0) {
-      setObjSimilarPrompt({
-        ids: (objSimilar[QD.arridSimilarCases] ?? []) as number[],
-        count: intCount,
-        cases: (objSimilar[QD.arrSimilarCases] ?? []) as Record<string, unknown>[],
-      });
-      return; // esperamos la decisión del usuario en el modal
-    }
-    setBlnCaptchaOpen(true);
-  };
-
   // Watcher pre-envío — ejecuta el script PM4 (id 70) que detecta casos ACTIVOS
   // del mismo proceso con idéntico motivo + producto + identificación. Se corre
-  // al enviar (antes del captcha); su salida (qd_arridSimilarCases,
-  // qd_intCountSimilarCases, qd_arrSimilarCases) se fusiona en el payload al radicar.
+  // al enviar; su salida (qd_arridSimilarCases, qd_intCountSimilarCases,
+  // qd_arrSimilarCases) se fusiona en el payload al radicar.
   // Es best-effort: si el script falla, se registra y la radicación continúa.
   const checkSimilarCases = async (
     in_objData: CrearRecibirQuejaFormData,
@@ -266,29 +254,29 @@ export default function CrearRecibirQueja() {
     }
   };
 
-  // Paso 3 — el usuario resolvió el checkbox "No soy un robot": verificamos el
-  // token contra Google (backend) y recién ahí enviamos a PM4, fusionando la
-  // salida del watcher de casos similares (ya obtenida en el paso 1).
-  const handleCaptchaVerified = async (in_strToken: string) => {
-    setBlnCaptchaOpen(false);
-    const objData = objPendingData;
-    if (!objData) return;
-    setObjPendingData(null);
+  // Paso final — verifica el token del captcha contra Google (backend) y recién
+  // ahí envía a PM4, fusionando la salida del watcher de casos similares.
+  const radicar = async (
+    in_objData: CrearRecibirQuejaFormData,
+    in_objSimilar: Partial<CrearRecibirQuejaFormData>,
+  ) => {
     setBlnSending(true);
     try {
-      const { data: objVerify } = await pm4.post<{ success: boolean }>('/recaptcha/verify', { token: in_strToken });
+      const { data: objVerify } = await pm4.post<{ success: boolean }>('/recaptcha/verify', { token: strCaptchaToken });
       if (!objVerify?.success) {
-        setStrCaptchaError('No pudimos validar la seguridad. Vuelve a intentarlo.');
+        setStrCaptchaError('No pudimos validar la seguridad. Vuelve a marcar "No soy un robot".');
+        setStrCaptchaToken('');
         setBlnSending(false);
         return;
       }
     } catch {
-      setStrCaptchaError('No pudimos validar la seguridad. Vuelve a intentarlo.');
+      setStrCaptchaError('No pudimos validar la seguridad. Vuelve a marcar "No soy un robot".');
+      setStrCaptchaToken('');
       setBlnSending(false);
       return;
     }
-    const intSimilarCount = Number(objPendingSimilar[QD.intCountSimilarCases] ?? 0);
-    const blnIsReply = objData[QD.strReply] === 'SI';
+    const intSimilarCount = Number(in_objSimilar[QD.intCountSimilarCases] ?? 0);
+    const blnIsReply = in_objData[QD.strReply] === 'SI';
     // Escalamiento de reconsideración a SAC (valor booleano): el radicador declaró que
     // ya había radicado la misma queja (réplica "Sí") pero el chequeo de casos similares
     // NO disparó la advertencia (0 casos abiertos coincidentes) → SAC debe escalarla a mano.
@@ -296,11 +284,11 @@ export default function CrearRecibirQueja() {
     // Marcación (qd_strMarking = '1'): réplica "Sí" Y el chequeo de casos similares NO
     // encontró coincidencias (el detector automático no "atrapó" la duplicidad) → misma
     // condición que blnReconsiderationEscalation, para que quede marcada y SAC la revise a mano.
-    const strMarking = blnIsReply && intSimilarCount === 0 ? '1' : objData[QD.strMarking];
+    const strMarking = blnIsReply && intSimilarCount === 0 ? '1' : in_objData[QD.strMarking];
     await sendToPm4({
-      ...objData,
+      ...in_objData,
       [QD.blnCaptcha]: true,
-      ...objPendingSimilar,
+      ...in_objSimilar,
       [QD.strReconsiderationSacEscalation]: blnReconsiderationEscalation,
       [QD.strMarking]: strMarking,
       // Siempre false al radicar desde SCR-000: la solicitud aún no tiene caso SmartSupervision.
@@ -311,11 +299,40 @@ export default function CrearRecibirQueja() {
     setBlnSending(false);
   };
 
-  // Paso 2 — tras ver los casos similares, el usuario decide radicar de todas
-  // formas: cerramos el modal y avanzamos al captcha.
-  const handleConfirmSimilar = () => {
+  // Paso 1 — el submit valida el formulario (react-hook-form) y, si es válido,
+  // ejecuta el watcher de casos similares (script 70) antes de radicar:
+  //  · si hay casos similares → abre el modal de confirmación y espera decisión.
+  //  · si no hay → radica directamente.
+  const onSubmit = async (in_objData: CrearRecibirQuejaFormData) => {
+    setStrCaptchaError('');
+    if (!strCaptchaToken) {
+      setStrCaptchaError('Marca "No soy un robot" para completar la validación de seguridad.');
+      return;
+    }
+    setObjPendingData(in_objData);
+    setBlnSending(true); // overlay mientras corre el chequeo
+    const objSimilar = await checkSimilarCases(in_objData);
+    setObjPendingSimilar(objSimilar);
+    setBlnSending(false);
+
+    const intCount = Number(objSimilar[QD.intCountSimilarCases] ?? 0);
+    if (intCount > 0) {
+      setObjSimilarPrompt({
+        ids: (objSimilar[QD.arridSimilarCases] ?? []) as number[],
+        count: intCount,
+        cases: (objSimilar[QD.arrSimilarCases] ?? []) as Record<string, unknown>[],
+      });
+      return; // esperamos la decisión del usuario en el modal
+    }
+    await radicar(in_objData, objSimilar);
+  };
+
+  // Paso 2 — tras ver los casos similares, el usuario decide radicar de todas formas.
+  const handleConfirmSimilar = async () => {
     setObjSimilarPrompt(null);
-    setBlnCaptchaOpen(true);
+    const objData = objPendingData;
+    if (!objData) return;
+    await radicar(objData, objPendingSimilar);
   };
 
   // El usuario decide NO continuar: cerramos el modal y lo dejamos en el formulario.
@@ -334,39 +351,54 @@ export default function CrearRecibirQueja() {
 
   if (blnSent) {
     return (
-      <div className="screen-wrapper">
-        <ScreenHeader title="Radicación de PQRS" />
-        <div className="screen-content">
-          <ZrAlert config="positive" {...({ 'hide-close': true } as object)}>
-            Tu solicitud fue radicada exitosamente. Recibirás una confirmación en el correo registrado.
-          </ZrAlert>
+      <PqrPage title={BANNER_TITLE} intro={BANNER_INTRO}>
+        <div className="pqr-form">
+          <PqrSection title="Radicación exitosa">
+            <ZrAlert config="positive" {...({ 'hide-close': true } as object)}>
+              Tu solicitud fue radicada exitosamente. Recibirás una confirmación en el correo registrado.
+            </ZrAlert>
+          </PqrSection>
         </div>
-      </div>
+      </PqrPage>
     );
   }
 
   if (loading) {
-    return <div className="screen-wrapper"><div className="screen-loading"><ZrLoader /></div></div>;
+    return (
+      <PqrPage title={BANNER_TITLE} intro={BANNER_INTRO}>
+        <div className="pqr-form"><div className="screen-loading"><ZrLoader /></div></div>
+      </PqrPage>
+    );
   }
   if (error) {
     return (
-      <div className="screen-wrapper">
-        <ZrAlert config="negative" {...({ 'hide-close': true } as object)}>Error al cargar el formulario: {error}</ZrAlert>
-      </div>
+      <PqrPage title={BANNER_TITLE} intro={BANNER_INTRO}>
+        <div className="pqr-form">
+          <PqrSection title="Radicación PQRs">
+            <ZrAlert config="negative" {...({ 'hide-close': true } as object)}>Error al cargar el formulario: {error}</ZrAlert>
+          </PqrSection>
+        </div>
+      </PqrPage>
     );
   }
 
   // Atajo para leer el mensaje de error de un campo.
   const err = (in_strName: keyof CrearRecibirQuejaFormData) => errors[in_strName]?.message;
-  // Habilita el envío solo si el usuario autorizó el tratamiento de datos.
-  const blnCanSubmit = !!objWatch[QD.blnDataAuth];
+  // Habilita el envío solo si el usuario autorizó el tratamiento de datos y resolvió el captcha.
+  const blnCanSubmit = !!objWatch[QD.blnDataAuth] && !!strCaptchaToken;
   // Indica si el caso ya tiene estado ante la SFC.
   const blnHasSfcStatus = !!objWatch[QD.strSmartSupStatus] || !!objWatch[QD.strSfcFilingDate];
   // Indica si el caso ya tiene responsable asignado.
   const blnHasAssignee = !!objWatch[QD.strAssigneeRole] || !!objWatch[QD.strAssignee];
+  // Datos del caso que encabezan la primera sección (número de caso BPM + creación).
+  // El número de caso solo existe si la pantalla se abre como tarea; en radicación web
+  // lo asigna PM4 al enviar (ver sendToPm4).
+  const strBpmCaseId = String((task?.data as Record<string, unknown> | undefined)?.[QD.strBpmCaseId] ?? '');
+  const strCreatedDate = dtmOpenedAt.toLocaleDateString('es-CO', { day: '2-digit', month: '2-digit', year: 'numeric' });
+  const strCreatedTime = dtmOpenedAt.toLocaleTimeString('es-CO', { hour12: false });
 
   return (
-    <div className="screen-wrapper">
+    <PqrPage title={BANNER_TITLE} intro={BANNER_INTRO}>
       {blnSending && (
         <div className="loading-overlay">
           <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 'var(--zs-100)' }}>
@@ -375,166 +407,157 @@ export default function CrearRecibirQueja() {
           </div>
         </div>
       )}
-      <ScreenHeader
-        title="Radicación de PQRS"
-      />
 
-      <div className="screen-content">
-        <form onSubmit={handleSubmit(requestCaptcha, scrollToFirstError)} noValidate>
+      <form className="pqr-form" onSubmit={handleSubmit(onSubmit, scrollToFirstError)} noValidate>
 
-          {/* ── S1: Tipo de Solicitud y Rol ── */}
-          <FormSection title="Tipo de Solicitud y Rol">
-            <ZrAlert config="info" {...({ 'hide-close': true } as object)}>
-              Radica tu petición, queja, reclamo, sugerencia o felicitación. Completa los campos obligatorios
-              y acepta el tratamiento de datos. Al presionar <strong>Enviar PQRS</strong> se te pedirá una
-              validación de seguridad (captcha) antes de radicar.
-            </ZrAlert>
-            <div className="form-row cols-2">
-              <ZdsSelect name={QD.strRequestType} control={control} label="¿A qué está asociado tu comentario?"
-                options={cllRequestType} rules={{ required: 'Campo requerido' }} required
-                error={err(QD.strRequestType)} />
-              <ZdsSelect name={QD.strFilerRole} control={control} label="Selecciona tu rol"
-                options={cllRole} rules={{ required: 'Campo requerido' }} required
-                error={err(QD.strFilerRole)} />
-            </div>
-            <div className="form-row cols-2">
-              <ZdsSelect name={QD.strReceptionPoint} control={control} label="Punto de Recepción"
-                options={cllReceptionPointVisible} rules={{ required: 'Campo requerido' }} required
-                error={err(QD.strReceptionPoint)} />
-              {/* Canal (qd_strChannel) ya no es seleccionable: se deriva automáticamente
-                  del punto de recepción elegido (ver CHANNEL_BY_RECEPTION_POINT). */}
-              <div />
-            </div>
-            {/* Instancia de Recepción (qd_strReceptionInstance): variable de back
-                (se asigna automáticamente según el rol vía el effect de RUL-000-01),
-                oculta por requerimiento. */}
-            <div className="form-row cols-2">
-              {blnIsZurichEmp ? (
-                <ZdsSelect name={QD.strAlliance} control={control} label="Alianza"
-                  options={cllAlliance} error={err(QD.strAlliance)} />
-              ) : (
-                <div />
-              )}
-              <div />
-            </div>
-          </FormSection>
-
-          {/* ── S2: Datos del Consumidor Financiero ── */}
-          <SeccionConsumidor form={form} />
-
-          {/* ── S3: Detalle de la Queja ── */}
-          <SeccionDetalleQueja form={form} fileRegistry={fileRegistry} />
-
-          {/* ── S4: Autorización y Envío ── */}
-          <FormSection title="Autorización y Envío">
-            <div className="form-row cols-1">
-              <ZdsCheckboxField name={QD.blnDataAuth} control={control}
-                label="Autorizo el tratamiento de mis datos personales conforme a la política de privacidad." />
-            </div>
-            {isSubmitted && !objWatch[QD.blnDataAuth] && (
-              <ZrAlert config="alert" {...({ 'hide-close': true } as object)}>
-                Debe aceptar el tratamiento de datos personales para poder radicar su solicitud.
-              </ZrAlert>
-            )}
-            {/* FLD-336 — validación de seguridad: reCAPTCHA v2 (checkbox) en un modal
-                que se abre al presionar "Enviar PQRS". Ver RecaptchaModal más abajo. */}
-            {strCaptchaError && (
-              <ZrAlert config="negative" {...({ 'hide-close': true } as object)}>
-                {strCaptchaError}
-              </ZrAlert>
-            )}
-          </FormSection>
-
-          {/* ── S5: Estado ante la SFC (post-radicación) ── */}
-          {blnHasSfcStatus && (
-            <FormSection title="Estado ante la SFC">
-              <div className="form-row cols-2">
-                <div className="zds-field-wrap">
-                  <span className="info-bar-label">Estado SmartSupervision</span>
-                  <div style={{ marginTop: 'var(--zs-50)' }}>
-                    <ZdsStatusBadge variant={estadoVariant(objWatch[QD.strSmartSupStatus] || '')}>
-                      {objWatch[QD.strSmartSupStatus] || 'Sin estado'}
-                    </ZdsStatusBadge>
-                  </div>
-                </div>
-                <ZdsInput name={QD.strSfcFilingDate} control={control} label="Fecha y hora radicación SFC" readOnly />
-              </div>
-            </FormSection>
-          )}
-
-          {/* ── S6: Responsable Asignado (post-radicación) ── */}
-          {blnHasAssignee && (
-            <FormSection title="Responsable Asignado">
-              <div className="form-row cols-2">
-                <ZdsInput name={QD.strAssigneeRole} control={control} label="Rol (Grupo)" readOnly />
-                <ZdsInput name={QD.strAssignee} control={control} label="Responsable" readOnly />
-              </div>
-            </FormSection>
-          )}
-
-          {/* Copia de la respuesta a otro correo — fuera del formulario de
-              autorización y envío, justo encima de los botones. */}
+        {/* ── S1: Tipo de solicitud y rol ── */}
+        <PqrSection title="Tipo de solicitud y rol">
+          {/* Datos del caso en solo lectura, encabezando la sección. */}
+          <div className="form-row cols-3">
+            <PqrReadonly label="Número de caso (ID BPM)" value={strBpmCaseId || 'Se asigna al radicar'} />
+            <PqrReadonly label="Fecha de la creación" value={strCreatedDate} />
+            <PqrReadonly label="Hora" value={strCreatedTime} />
+          </div>
+          {/* Canal de recepción ya no existe como campo: se deriva del punto de
+              recepción (ver CHANNEL_BY_RECEPTION_POINT). */}
           <div className="form-row cols-2">
-            <ZdsInput name={QD.strCcEmail} control={control} label="¿Quieres enviar copia de la respuesta a otro correo?"
+            <ZdsSelect name={QD.strReceptionPoint} control={control} label="Punto de recepción"
+              options={cllReceptionPointVisible} rules={{ required: 'Campo requerido' }} required
+              error={err(QD.strReceptionPoint)} />
+            {/* Instancia de recepción: la asigna la RUL-000-01 según el rol, se
+                muestra deshabilitada para que el usuario la vea sin poder cambiarla. */}
+            <ZdsSelect name={QD.strReceptionInstance} control={control} label="Instancia de recepción"
+              options={cllInstance} disabled
+              helpText="Se asigna automáticamente según tu rol." />
+          </div>
+          <div className="form-row cols-2">
+            <ZdsSelect name={QD.strFilerRole} control={control} label="Selecciona tu rol"
+              options={cllRole} rules={{ required: 'Campo requerido' }} required
+              error={err(QD.strFilerRole)} />
+            {blnIsZurichEmp ? (
+              <ZdsSelect name={QD.strAlliance} control={control} label="Alianza"
+                options={cllAlliance} error={err(QD.strAlliance)} />
+            ) : (
+              <div />
+            )}
+          </div>
+        </PqrSection>
+
+        {/* ── S2: Datos del Consumidor Financiero ── */}
+        <SeccionConsumidor form={form} />
+
+        {/* ── S3: Detalle de la queja ── */}
+        <SeccionDetalleQueja form={form} fileRegistry={fileRegistry} />
+
+        {/* ── S4: Autorización y envío ── */}
+        <PqrSection title="Autorización y envío">
+          <ZdsCheckboxField name={QD.blnDataAuth} control={control}
+            label="Autorizo el tratamiento de mis datos personales de conformidad a la Política de Privacidad" />
+          {isSubmitted && !objWatch[QD.blnDataAuth] && (
+            <ZrAlert config="alert" {...({ 'hide-close': true } as object)}>
+              Debe aceptar el tratamiento de datos personales para poder radicar su solicitud.
+            </ZrAlert>
+          )}
+
+          {/* FLD-336 — validación de seguridad: reCAPTCHA v2 (checkbox) dentro del
+              formulario; el token se verifica server-side al radicar. */}
+          <div className="pqr-toggle-row">
+            <RecaptchaWidget
+              onVerified={(in_strToken) => { setStrCaptchaToken(in_strToken); setStrCaptchaError(''); }}
+              onExpired={() => setStrCaptchaToken('')}
+            />
+          </div>
+          {strCaptchaError && (
+            <ZrAlert config="negative" {...({ 'hide-close': true } as object)}>
+              {strCaptchaError}
+            </ZrAlert>
+          )}
+
+          <p className="pqr-note">
+            Si deseas recibir una copia de la respuesta en otro correo electrónico, ingrésalo a continuación
+          </p>
+          <div className="form-row cols-2">
+            <ZdsInput name={QD.strCcEmail} control={control} label="Correo"
               inputType="email"
               rules={{ pattern: { value: /^[^\s@]+@[^\s@]+\.[^\s@]+$/, message: 'Formato esperado: usuario@dominio.com' } }}
               error={err(QD.strCcEmail)} />
             <div />
           </div>
+        </PqrSection>
 
-          {/* ── Acciones ── */}
-          <ActionBar>
-            <ZrButton config="secondary" onClick={limpiarFormulario}>Limpiar Formulario</ZrButton>
-            <ZrButton config="secondary" onClick={() => window.history.back()}>Cancelar</ZrButton>
-            <ZrButton
-              config="positive"
-              onClick={() => handleSubmit(requestCaptcha, scrollToFirstError)()}
-              loading={submitting}
-              disabled={submitting || !blnCanSubmit}
-            >
-              Enviar PQRS
-            </ZrButton>
-          </ActionBar>
-        </form>
-
-        <RecaptchaModal
-          open={blnCaptchaOpen}
-          onVerified={handleCaptchaVerified}
-          onClose={() => { setBlnCaptchaOpen(false); setObjPendingData(null); }}
-        />
-
-        {/* Confirmación de casos similares — el watcher (script 70) detectó PQRS
-            activas con el mismo motivo + producto + identificación. */}
-        {objSimilarPrompt && (
-          <ZrModal model={!!objSimilarPrompt} onChange={(open: boolean) => { if (!open) handleCancelSimilar(); }}>
-            <h3 style={{ margin: '0 0 var(--zs-75)', font: 'var(--zf-h-20--700)', color: 'var(--z-text)' }}>
-              Encontramos casos similares
-            </h3>
-            <ZrAlert config="alert" {...({ 'hide-close': true } as object)}>
-              {objSimilarPrompt.count === 1
-                ? 'Ya existe 1 caso activo con el mismo motivo, producto e identificación. Revisa antes de radicar uno nuevo.'
-                : `Ya existen ${objSimilarPrompt.count} casos activos con el mismo motivo, producto e identificación. Revisa antes de radicar uno nuevo.`}
-            </ZrAlert>
-            <ul style={{ margin: 'var(--zs-100) 0', paddingLeft: 'var(--zs-150)', color: 'var(--z-text)', font: 'var(--zf-body-14--400)' }}>
-              {(objSimilarPrompt.cases.length > 0
-                ? objSimilarPrompt.cases.map((objCase) => {
-                    const strNumber = (objCase.case_number ?? objCase.id) as string | number;
-                    const strStatus = objCase.status as string | undefined;
-                    const strDate = objCase.created_at as string | undefined;
-                    return `Caso #${strNumber}${strStatus ? ` · ${strStatus}` : ''}${strDate ? ` · ${strDate.slice(0, 10)}` : ''}`;
-                  })
-                : objSimilarPrompt.ids.map((intId) => `Caso #${intId}`)
-              ).map((strLine, intIdx) => (
-                <li key={intIdx}>{strLine}</li>
-              ))}
-            </ul>
-            <div z-flex="75" z-align="right:center" style={{ marginTop: 'var(--zs-100)' }}>
-              <ZrButton config="secondary" onClick={handleCancelSimilar}>No continuar</ZrButton>
-              <ZrButton config="positive" onClick={handleConfirmSimilar}>Continuar</ZrButton>
+        {/* ── S5: Estado ante la SFC (post-radicación) ── */}
+        {blnHasSfcStatus && (
+          <PqrSection title="Estado ante la SFC">
+            <div className="form-row cols-2">
+              <div className="zds-field-wrap">
+                <span className="pqr-readonly-label">Estado SmartSupervision</span>
+                <div style={{ marginTop: 'var(--zs-50)' }}>
+                  <ZdsStatusBadge variant={estadoVariant(objWatch[QD.strSmartSupStatus] || '')}>
+                    {objWatch[QD.strSmartSupStatus] || 'Sin estado'}
+                  </ZdsStatusBadge>
+                </div>
+              </div>
+              <ZdsInput name={QD.strSfcFilingDate} control={control} label="Fecha y hora radicación SFC" readOnly />
             </div>
-          </ZrModal>
+          </PqrSection>
         )}
-      </div>
-    </div>
+
+        {/* ── S6: Responsable Asignado (post-radicación) ── */}
+        {blnHasAssignee && (
+          <PqrSection title="Responsable asignado">
+            <div className="form-row cols-2">
+              <ZdsInput name={QD.strAssigneeRole} control={control} label="Rol (Grupo)" readOnly />
+              <ZdsInput name={QD.strAssignee} control={control} label="Responsable" readOnly />
+            </div>
+          </PqrSection>
+        )}
+
+        {/* ── Acciones ── */}
+        <div className="pqr-actions">
+          <ZrButton config="secondary" onClick={limpiarFormulario}>Limpiar queja</ZrButton>
+          <ZrButton
+            config="positive"
+            icon="send:line"
+            onClick={() => handleSubmit(onSubmit, scrollToFirstError)()}
+            loading={submitting}
+            disabled={submitting || !blnCanSubmit}
+          >
+            Enviar PQR
+          </ZrButton>
+        </div>
+      </form>
+
+      {/* Confirmación de casos similares — el watcher (script 70) detectó PQRS
+          activas con el mismo motivo + producto + identificación. */}
+      {objSimilarPrompt && (
+        <ZrModal model={!!objSimilarPrompt} onChange={(open: boolean) => { if (!open) handleCancelSimilar(); }}>
+          <h3 style={{ margin: '0 0 var(--zs-75)', font: 'var(--zf-h-20--700)', color: 'var(--z-text)' }}>
+            Encontramos casos similares
+          </h3>
+          <ZrAlert config="alert" {...({ 'hide-close': true } as object)}>
+            {objSimilarPrompt.count === 1
+              ? 'Ya existe 1 caso activo con el mismo motivo, producto e identificación. Revisa antes de radicar uno nuevo.'
+              : `Ya existen ${objSimilarPrompt.count} casos activos con el mismo motivo, producto e identificación. Revisa antes de radicar uno nuevo.`}
+          </ZrAlert>
+          <ul style={{ margin: 'var(--zs-100) 0', paddingLeft: 'var(--zs-150)', color: 'var(--z-text)', font: 'var(--zf-body-14--400)' }}>
+            {(objSimilarPrompt.cases.length > 0
+              ? objSimilarPrompt.cases.map((objCase) => {
+                  const strNumber = (objCase.case_number ?? objCase.id) as string | number;
+                  const strStatus = objCase.status as string | undefined;
+                  const strDate = objCase.created_at as string | undefined;
+                  return `Caso #${strNumber}${strStatus ? ` · ${strStatus}` : ''}${strDate ? ` · ${strDate.slice(0, 10)}` : ''}`;
+                })
+              : objSimilarPrompt.ids.map((intId) => `Caso #${intId}`)
+            ).map((strLine, intIdx) => (
+              <li key={intIdx}>{strLine}</li>
+            ))}
+          </ul>
+          <div z-flex="75" z-align="right:center" style={{ marginTop: 'var(--zs-100)' }}>
+            <ZrButton config="secondary" onClick={handleCancelSimilar}>No continuar</ZrButton>
+            <ZrButton config="positive" onClick={handleConfirmSimilar}>Continuar</ZrButton>
+          </div>
+        </ZrModal>
+      )}
+    </PqrPage>
   );
 }

@@ -1,10 +1,10 @@
 import { useEffect } from 'react';
 import type { FieldPath, UseFormReturn } from 'react-hook-form';
-import FormSection from '../../../../components/FormSection';
 import { ZdsInput, ZdsSelect } from '../../../../components/fields/ZdsFields';
 import { useCollection, useSyncDesc } from '../../../../core/useCollection';
 import { QD, QD_COLLECTIONS, LOCK_COUNTRY, DEFAULT_COUNTRY_CODE } from '../fields/fields';
 import type { CrearRecibirQuejaFormData } from '../fields/fields';
+import { PqrSection, PqrReadonly } from './PqrPage';
 
 interface Props {
   form: UseFormReturn<CrearRecibirQuejaFormData>;
@@ -17,7 +17,6 @@ export default function SeccionConsumidor({ form }: Props) {
 
   // Cargamos los catalogos de los datos del consumidor.
   const { options: cllIdType, rawMap: dicIdType } = useCollection(QD_COLLECTIONS.idType);
-  const { options: cllCountry } = useCollection(QD_COLLECTIONS.countryCode);
   const { options: cllDepartment } = useCollection(QD_COLLECTIONS.department);
   const { options: cllCity } = useCollection(QD_COLLECTIONS.city, objWatch as unknown as Record<string, unknown>);
   const { options: cllSpecialCond } = useCollection(QD_COLLECTIONS.specialCondition);
@@ -28,7 +27,6 @@ export default function SeccionConsumidor({ form }: Props) {
   // Sincroniza la variable compañera <campo>_desc con la descripción del código guardado.
   // El campo base guarda el CÓDIGO (numérico, catálogos PM4 actualizados); _desc viaja a PM4.
   useSyncDesc(form, QD.strIdType, cllIdType);
-  useSyncDesc(form, QD.strCountryCode, cllCountry);
   useSyncDesc(form, QD.strDepartment, cllDepartment);
   useSyncDesc(form, QD.strCity, cllCity);
   useSyncDesc(form, QD.strSex, cllSex);
@@ -36,12 +34,13 @@ export default function SeccionConsumidor({ form }: Props) {
   useSyncDesc(form, QD.strSpecialCondition, cllSpecialCond);
   useSyncDesc(form, QD.strPersonType, cllPersonType);
 
-  // Nombre de la variable compañera de descripción para el input read-only de tipo de persona
-  // (el campo base guarda el código; se muestra el _desc legible).
+  // Nombre de la variable compañera de descripción del tipo de persona (el campo base
+  // guarda el código; se muestra el _desc legible en el campo de solo lectura).
   const strPersonTypeDesc = `${QD.strPersonType}_desc` as FieldPath<CrearRecibirQuejaFormData>;
+  const strPersonTypeLabel = (objWatch as Record<string, unknown>)[strPersonTypeDesc] as string | undefined;
 
-  // FLD-320 — Sexo oculto (back); default "No Aplica", resuelto desde CAT-SEXO.
-  // La variable compañera qd_strSex_desc se sincroniza sola vía useSyncDesc de arriba.
+  // FLD-320 — Sexo/Género: el diseño lo muestra como selector, con default "No Aplica"
+  // resuelto desde CAT-SEXO. La variable compañera qd_strSex_desc se sincroniza sola.
   useEffect(() => {
     if (objWatch[QD.strSex] || cllSex.length === 0) return;
     const objDefault = cllSex.find((o) => /no aplica/i.test(o.label));
@@ -83,7 +82,8 @@ export default function SeccionConsumidor({ form }: Props) {
     setValue(QD.strCity, '');
   }, [objWatch[QD.strDepartment], setValue]);
 
-  // RUL-000-10 — país por ahora en read-only y fijado en Colombia (170)
+  // RUL-000-10 — país fijado en Colombia (170). No tiene campo en el diseño: viaja
+  // como variable de back con el default de SCR000_DEFAULTS.
   useEffect(() => {
     if (LOCK_COUNTRY && objWatch[QD.strCountryCode] !== DEFAULT_COUNTRY_CODE) {
       setValue(QD.strCountryCode, DEFAULT_COUNTRY_CODE);
@@ -94,12 +94,13 @@ export default function SeccionConsumidor({ form }: Props) {
   const err = (in_strName: keyof CrearRecibirQuejaFormData) => errors[in_strName]?.message;
 
   return (
-    <FormSection title="Datos del Consumidor Financiero">
-      <div className="form-row cols-2">
+    <PqrSection title="Datos del Consumidor Financiero">
+      {/* Identificación + tipo de persona derivado (solo lectura), en una fila. */}
+      <div className="form-row cols-3">
         <ZdsSelect
           name={QD.strIdType}
           control={control}
-          label="Selecciona tu tipo de identificación"
+          label="Tipo de identificación"
           options={cllIdType}
           rules={{ required: 'Campo requerido' }}
           required
@@ -118,15 +119,17 @@ export default function SeccionConsumidor({ form }: Props) {
           required
           error={err(QD.strIdNumber)}
         />
+        <PqrReadonly label="Tipo de persona" value={strPersonTypeLabel} />
       </div>
 
-      {/* Persona natural (RUL-000-03) */}
+      {/* Persona natural (RUL-000-03) — el modelo de datos guarda nombres y apellidos
+          completos (un campo cada uno), no primer/segundo por separado. */}
       {!blnIsLegalEntity && (
         <div className="form-row cols-2">
           <ZdsInput
             name={QD.strFirstName}
             control={control}
-            label="¿Cuáles son tus nombres?"
+            label="Nombres"
             rules={{ required: 'Campo requerido', pattern: { value: /^[A-Za-zÀ-ÿ\s]+$/, message: 'Solo letras' } }}
             required
             error={err(QD.strFirstName)}
@@ -134,7 +137,7 @@ export default function SeccionConsumidor({ form }: Props) {
           <ZdsInput
             name={QD.strLastName}
             control={control}
-            label="¿Cuáles son tus apellidos?"
+            label="Apellidos"
             rules={{ required: 'Campo requerido', pattern: { value: /^[A-Za-zÀ-ÿ\s]+$/, message: 'Solo letras' } }}
             required
             error={err(QD.strLastName)}
@@ -176,7 +179,16 @@ export default function SeccionConsumidor({ form }: Props) {
         </>
       )}
 
-      <div className="form-row cols-3">
+      <div className="form-row cols-2">
+        <ZdsInput
+          name={QD.strEmail}
+          control={control}
+          label="Correo"
+          inputType="email"
+          rules={{ required: 'Campo requerido', pattern: { value: /^[^\s@]+@[^\s@]+\.[^\s@]+$/, message: 'Formato esperado: usuario@dominio.com' } }}
+          required
+          error={err(QD.strEmail)}
+        />
         <ZdsInput
           name={QD.strPhone}
           control={control}
@@ -186,35 +198,9 @@ export default function SeccionConsumidor({ form }: Props) {
           required
           error={err(QD.strPhone)}
         />
-        <ZdsInput
-          name={QD.strEmail}
-          control={control}
-          label="Correo electrónico"
-          inputType="email"
-          rules={{ required: 'Campo requerido', pattern: { value: /^[^\s@]+@[^\s@]+\.[^\s@]+$/, message: 'Formato esperado: usuario@dominio.com' } }}
-          required
-          error={err(QD.strEmail)}
-        />
-        <ZdsInput
-          name={strPersonTypeDesc}
-          control={control}
-          label="Tipo de persona"
-          readOnly
-          helpText="Asignado automáticamente según el tipo de documento (CAT-TIPO-PERSONA)."
-        />
       </div>
 
-      <div className="form-row cols-3">
-        <ZdsSelect
-          name={QD.strCountryCode}
-          control={control}
-          label="País"
-          options={cllCountry}
-          rules={{ required: 'Campo requerido' }}
-          required
-          disabled={LOCK_COUNTRY}
-          error={err(QD.strCountryCode)}
-        />
+      <div className="form-row cols-2">
         <ZdsSelect
           name={QD.strDepartment}
           control={control}
@@ -228,22 +214,21 @@ export default function SeccionConsumidor({ form }: Props) {
         <ZdsSelect
           name={QD.strCity}
           control={control}
-          label="Ciudad"
+          label="Municipio"
           options={cllCity}
           rules={{ required: 'Campo requerido' }}
           required
           disabled={!objWatch[QD.strDepartment]}
           withSearch
-          placeholder={objWatch[QD.strDepartment] ? 'Seleccione ciudad...' : 'Seleccione primero el departamento'}
+          placeholder={objWatch[QD.strDepartment] ? 'Seleccione municipio...' : 'Seleccione primero el departamento'}
           error={err(QD.strCity)}
         />
       </div>
 
-      {/* FLD-319 (Dirección), FLD-320 (Sexo), FLD-321 (LGBTIQ+) y FLD-322
-          (Condición especial) — ocultos por requerimiento: son variables de
-          back (Dirección queda vacía pendiente API SFC; Sexo/LGBTIQ+/Condición
-          especial se precargan con su default vía los effects de arriba), no
-          se muestran en el formulario. */}
-    </FormSection>
+      {/* Variables de back sin campo visible (viajan con su default vía los effects de
+          arriba): País (RUL-000-10, fijo en Colombia), Dirección (FLD-319, vacía
+          pendiente API SFC), Género/Sexo (FLD-320, "No Aplica"), LGBTIQ+ (FLD-321, "No")
+          y Condición especial (FLD-322, "No aplica"). */}
+    </PqrSection>
   );
 }
