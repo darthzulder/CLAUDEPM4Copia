@@ -115,6 +115,11 @@ export default function FormularioSuperintendencia() {
       [QD.strEntityType]: objData[QD.strEntityType] || SCR009_DEFAULT_ENTITY_TYPE,
       [QD.strEntityCode]: objData[QD.strEntityCode] || SCR009_DEFAULT_ENTITY_CODE,
       [QD.strFinalReplyAttach]: 'SI',
+      // Estado de la Queja o Reclamo ya no se muestra ni se edita en esta pantalla:
+      // como SCR-009 es el cierre regulatorio, se fuerza a "Cerrada" = '4'
+      // (colección 42: 1=Recibida, 2=Abierta, 4=Cerrada). Sin esto viajaría el '2'
+      // que dejó la radicación en SCR-000.
+      [QD.strComplaintStatus]: '4',
       [QD.strUpdateDate]: strHoyISO,
       [QD.strClosureDate]: strHoyISO,
     });
@@ -226,31 +231,27 @@ export default function FormularioSuperintendencia() {
             </div>
           </FormSection>
 
-          {/* ── S3 · Condición de la Queja (SEC-030) — Back/solo lectura, salvo:
-                 Estado de la Queja (ZdsSelect colección 42, default "Cerrada"='4')
-                 y Marcación (ZdsSelect colección 31, opción inicial "-" sin valor). ── */}
+          {/* ── S3 · Condición de la Queja (SEC-030) — Back/solo lectura, salvo
+                 Marcación (ZdsSelect colección 31, opción inicial "-" sin valor).
+                 Estado de la Queja o Reclamo NO se muestra: el campo sigue viajando
+                 en el payload (se fuerza a "Cerrada"='4' en el reset) pero el gestor
+                 no lo ve ni lo edita. ── */}
           <FormSection title="Condición de la Queja">
             <div className="form-row cols-3">
-              <ZdsSelect name={QD.strComplaintStatus} control={control} label="Estado de la Queja o Reclamo"
-                options={cllComplaintStatus} />
               <Ro label="Favorabilidad" value={descOf(cllFavorability, objWatch[QD.strFavorability])} />
               <Ro label="Aceptación" value={descOf(cllAcceptance, objWatch[QD.strAcceptance])} />
+              <Ro label="Rectificación" value={descOf(cllRectification, objWatch[QD.strRectification])} />
             </div>
             <div className="form-row cols-3">
-              <Ro label="Rectificación" value={descOf(cllRectification, objWatch[QD.strRectification])} />
               <Ro label="Desistimiento" value={descOf(cllWithdrawal, objWatch[QD.strWithdrawal])} />
               <Ro label="Tutela" value={descOf(cllTutela, objWatch[QD.strTutela])} />
+              <Ro label="Queja Exprés" value={descOf(cllExpressComplaint, objWatch[QD.strExpressComplaint])} />
             </div>
             {/* Marcación tiene etiquetas de opción largas → a ancho completo (cols-1)
                 para que el dropdown no trunque el texto. */}
             <div className="form-row cols-1">
               <ZdsSelect name={QD.strMarking} control={control} label="Marcación"
                 options={cllMarking} placeholder="-" />
-            </div>
-            <div className="form-row cols-3">
-              <Ro label="Queja Exprés" value={descOf(cllExpressComplaint, objWatch[QD.strExpressComplaint])} />
-              <div />
-              <div />
             </div>
           </FormSection>
 

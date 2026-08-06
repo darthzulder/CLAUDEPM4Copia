@@ -78,7 +78,7 @@ mostrarlos de nuevo como solo lectura aquí. Se removió el bloque `ZdsInput rea
 
 | Campo (UI) | Variable | Presentación | Origen (Back) |
 |---|---|---|---|
-| **Estado de la Queja o Reclamo** | `qd_strComplaintStatus` (+ `qd_strComplaintStatus_desc` compañera) | `ZdsSelect` (colección 42): muestra la descripción, guarda el código | 🟢 Editable aquí; default "Cerrada" = código `'4'` (1=Recibida, 2=Abierta, 4=Cerrada) |
+| ~~Estado de la Queja o Reclamo~~ | `qd_strComplaintStatus` (+ `qd_strComplaintStatus_desc` compañera) | ⛔ **No se muestra** en la pantalla | Se fuerza a "Cerrada" = código `'4'` en el `reset()` (colección 42: 1=Recibida, 2=Abierta, 4=Cerrada) y viaja en el payload; `useSyncDesc` mantiene su `_desc` |
 | Favorabilidad | `qd_strFavorability` | label resuelto (info-bar) | Derivada de `qd_strReplyFavorOf`: Cliente→1, Compañía→3 |
 | Aceptación | `qd_strAcceptance` | label resuelto (info-bar) | Default "1" (Excel #51) |
 | Rectificación | `qd_strRectification` | label resuelto (info-bar) | Default 1, solo si Defensor (Excel #52) |
@@ -95,7 +95,7 @@ Los campos marcados con valor por default en el Excel deben **existir y estar ll
 
 | Campo | Default (código) | Fuente |
 |---|---|---|
-| Estado de la Queja (`qd_strComplaintStatus`) | `4` (= "Cerrada") | colección 42 (1=Recibida, 2=Abierta, 4=Cerrada) |
+| Estado de la Queja (`qd_strComplaintStatus`) | `4` (= "Cerrada") — **forzado siempre** en el `reset()`, no solo cuando llega vacío (campo oculto en la UI) | colección 42 (1=Recibida, 2=Abierta, 4=Cerrada) |
 | Aceptación (`qd_strAcceptance`) | `1` | Excel #51 · Lista_Aceptación |
 | Rectificación (`qd_strRectification`) | `1` | Excel #52 · Lista_Rectificación |
 | Desistimiento (`qd_strWithdrawal`) | `2` | Excel #53 · Lista_Desistimiento |
