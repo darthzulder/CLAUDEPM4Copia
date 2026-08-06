@@ -222,9 +222,22 @@ través de:
   normal. Si un nombre no se encuentra en destino, sale como `[MISSING]`/`[EVENTO NO
   RESUELTO]` — eso sí requiere revisión humana (o indica que el supuesto no se cumplió).
 
+**Enganchado al build (`prebuild` en `package.json`):** cada `npm run build` (local o en
+Render) corre primero `node scripts/pm4-registry-sync.mjs --update --ci` — el flag `--ci`
+hace que **nunca bloquee el deploy**: si PM4 no responde (red, token vencido, instancia
+caída) o faltan `PM4_BASE_URL`/`PM4_TOKEN` en el entorno, se omite el sync y sigue con el
+`pm4-registry.json` ya commiteado; si hay entradas sin resolver, imprime un banner bien
+visible en el log de build pero igual continúa. Esto significa que **en Render, mientras
+`PM4_BASE_URL`/`PM4_TOKEN` estén configurados como env vars** (ya lo están, ver
+`render.yaml`, disponibles en build y runtime), cada deploy resuelve el registro contra la
+instancia real automáticamente — no hace falta correr `--update` a mano antes de un deploy
+normal. Sí seguí corriendo `--check` manualmente después de migrar de instancia para revisar
+el reporte con calma antes de confiar ciegamente en el próximo deploy.
+
 **OBLIGATORIO al migrar de instancia PM4:** correr `pm4-registry-sync.mjs --check` primero
-para ver el diff, y luego `--update` para aplicarlo. Nunca reintroducir IDs
-hardcodeados sueltos en `collections.ts`/`variables.ts`/`fields.ts` — todo pasa por el
+para ver el diff, y luego `--update` para aplicarlo (o simplemente re-deployar — el
+`prebuild` lo hace solo). Nunca reintroducir IDs hardcodeados sueltos en
+`collections.ts`/`variables.ts`/`fields.ts` — todo pasa por el
 resolver.
 
 ⚠️ Varias colecciones de FAST-FLOW (`naic`, `correosIntermediari`/`correosIntermediario`,

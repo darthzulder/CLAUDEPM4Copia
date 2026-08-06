@@ -16,7 +16,7 @@
     "hash": "2c8f9fb1b7d5e30d56f80e12fa36c7c9"
   },
   "G:\\DockerProys\\CLAUDEPM4Copia\\pm4-app\\backend\\src\\routes\\pm4.routes.ts": {
-    "mtime": 1785969453.5465965,
+    "mtime": 1786030440.964512,
     "hash": "ba3e6ea72d7bb5a09753ba0d8e1eece8"
   },
   "G:\\DockerProys\\CLAUDEPM4Copia\\pm4-app\\backend\\src\\routes\\recaptcha.routes.ts": {
@@ -32,11 +32,11 @@
     "hash": "2ce8045ea1c8d64e67a9db3850106c6a"
   },
   "G:\\DockerProys\\CLAUDEPM4Copia\\pm4-app\\cotizador-service\\tests\\test_calc.py": {
-    "mtime": 1785969617.270404,
-    "hash": "b72fc3687f552d643b37b47518db20ee"
+    "mtime": 1786030440.964512,
+    "hash": "c4ba92dbd8d000639dfa1bbce850ca9c"
   },
   "G:\\DockerProys\\CLAUDEPM4Copia\\pm4-app\\cotizador-service\\tests\\__init__.py": {
-    "mtime": 1785969597.6647751,
+    "mtime": 1786030440.964512,
     "hash": "d41d8cd98f00b204e9800998ecf8427e"
   },
   "G:\\DockerProys\\CLAUDEPM4Copia\\pm4-app\\frontend\\eslint.config.mjs": {
@@ -48,11 +48,11 @@
     "hash": "9c77b29faba58b909eae9b073f395bb5"
   },
   "G:\\DockerProys\\CLAUDEPM4Copia\\pm4-app\\frontend\\vitest.config.ts": {
-    "mtime": 1785969739.1820598,
-    "hash": "f1d91780cc36662e7557ae98c699325f"
+    "mtime": 1786030440.9675126,
+    "hash": "a0f8094d31d6e23a5bd0bd62862e7973"
   },
   "G:\\DockerProys\\CLAUDEPM4Copia\\pm4-app\\frontend\\src\\App.tsx": {
-    "mtime": 1785969510.9992995,
+    "mtime": 1786030440.9665139,
     "hash": "364614f38a13d50d6fa08a9deefb7312"
   },
   "G:\\DockerProys\\CLAUDEPM4Copia\\pm4-app\\frontend\\src\\main.tsx": {
@@ -72,7 +72,7 @@
     "hash": "7b92e21c8ab25ef1f3598b8b4dafaf23"
   },
   "G:\\DockerProys\\CLAUDEPM4Copia\\pm4-app\\frontend\\src\\api\\pm4Client.ts": {
-    "mtime": 1785969528.8978508,
+    "mtime": 1786030440.9665139,
     "hash": "15bc00ff4272a983fbf26320398d7457"
   },
   "G:\\DockerProys\\CLAUDEPM4Copia\\pm4-app\\frontend\\src\\components\\ActionBar.tsx": {
@@ -160,16 +160,16 @@
     "hash": "a00aa2d8ca84f699d588a8d5408df150"
   },
   "G:\\DockerProys\\CLAUDEPM4Copia\\pm4-app\\frontend\\src\\core\\useCollection.test.ts": {
-    "mtime": 1785969756.9093874,
-    "hash": "027fffab8c2f782926302aa2541df370"
+    "mtime": 1786030440.9675126,
+    "hash": "7bd3322276698b3f5d3caa6a1d013d69"
   },
   "G:\\DockerProys\\CLAUDEPM4Copia\\pm4-app\\frontend\\src\\core\\useCollection.ts": {
     "mtime": 1785244518.8644266,
     "hash": "ad7e0eca1059e18ffa151e13e57522c6"
   },
   "G:\\DockerProys\\CLAUDEPM4Copia\\pm4-app\\frontend\\src\\core\\useCotizador.test.ts": {
-    "mtime": 1785969770.042194,
-    "hash": "8ca5099268cb6d94af2b93e223fea54e"
+    "mtime": 1786030440.9675126,
+    "hash": "a03c5a2de447a8c920325b3ea75e8c43"
   },
   "G:\\DockerProys\\CLAUDEPM4Copia\\pm4-app\\frontend\\src\\core\\useCotizador.ts": {
     "mtime": 1783546833.7947114,
@@ -240,8 +240,8 @@
     "hash": "f6d018d2d2cd04536cad79b2c22ce7a4"
   },
   "G:\\DockerProys\\CLAUDEPM4Copia\\pm4-app\\frontend\\src\\screens\\atencion-cliente\\quejas-directas\\COL_QD_SCR-0051_Detalle_Reasignacion_Respuesta\\respuestaFinalTemplate.test.ts": {
-    "mtime": 1785969802.8893502,
-    "hash": "e75c923e7a5e5f0c8015d23b948a875c"
+    "mtime": 1786030440.9675126,
+    "hash": "e66c5df83a5bf41d11c7c86569626505"
   },
   "G:\\DockerProys\\CLAUDEPM4Copia\\pm4-app\\frontend\\src\\screens\\atencion-cliente\\quejas-directas\\COL_QD_SCR-0051_Detalle_Reasignacion_Respuesta\\respuestaFinalTemplate.ts": {
     "mtime": 1784939615.3189151,
@@ -460,8 +460,8 @@
     "hash": "0bb60b8a0d4341d19329a9be5658ee70"
   },
   "G:\\DockerProys\\CLAUDEPM4Copia\\pm4-app\\scripts\\pm4-registry-sync.mjs": {
-    "mtime": 1785941695.972888,
-    "hash": "998a0978ba9a23344e838317572f23cd"
+    "mtime": 1786044886.0588734,
+    "hash": "2a89ddd881f63dd0f3b2c0943da1b18a"
   },
   "G:\\DockerProys\\CLAUDEPM4Copia\\CLAUDE.md": {
     "mtime": 1784735982.8668537,
@@ -480,40 +480,32 @@
     "hash": "a2b2606659155f7c10d56ab638dc7baa"
   },
   "G:\\DockerProys\\CLAUDEPM4Copia\\README.md": {
-    "mtime": 1785969823.5022943,
+    "mtime": 1786030440.935355,
     "hash": "e98e311eb16986f70ee39e14b052c257"
   },
   "G:\\DockerProys\\CLAUDEPM4Copia\\docs\\archive\\INSTRUCCIONES_CLAUDE_CODE.md": {
-    "mtime": 1781193419.655491,
+    "mtime": 1786030440.9363556,
     "hash": "eef290c9b663957d9c107e12a5abcadf"
   },
   "G:\\DockerProys\\CLAUDEPM4Copia\\pm4-app\\CLAUDE.md": {
-    "mtime": 1785941695.9657414,
-    "hash": "13a6ff5809647b6bf40f635a29390500"
+    "mtime": 1786044949.1184793,
+    "hash": "f1c3dd7f6dca1cb909fb0f7d0f6d6563"
   },
   "G:\\DockerProys\\CLAUDEPM4Copia\\pm4-app\\render.yaml": {
     "mtime": 1783379764.062887,
     "hash": "99d4c800e902f7b9f6b3e9e60185586b"
   },
-  "G:\\DockerProys\\CLAUDEPM4Copia\\pm4-app\\_b.txt": {
-    "mtime": 1784672394.8084667,
-    "hash": "b01b447534e594ded71de02385529651"
-  },
-  "G:\\DockerProys\\CLAUDEPM4Copia\\pm4-app\\_t.txt": {
-    "mtime": 1784672394.8090632,
-    "hash": "985d712049699a6ef8f22850b0211ede"
-  },
   "G:\\DockerProys\\CLAUDEPM4Copia\\pm4-app\\cotizador-service\\requirements-dev.txt": {
-    "mtime": 1785969594.0660877,
-    "hash": "1ee36231c9169125103b3cac57927e8b"
+    "mtime": 1786030440.964512,
+    "hash": "388e8bd6e0418dc9025266f280685172"
   },
   "G:\\DockerProys\\CLAUDEPM4Copia\\pm4-app\\cotizador-service\\requirements.txt": {
     "mtime": 1781193419.8693984,
     "hash": "510b0113808da9723374eee625d9b5e2"
   },
   "G:\\DockerProys\\CLAUDEPM4Copia\\pm4-app\\docs\\architecture\\Diagrama.md": {
-    "mtime": 1786025126.2866597,
-    "hash": "48c2866056b24ae0db3841cd8fa3df13"
+    "mtime": 1786030440.9655132,
+    "hash": "c0997b16fb218b44b11c4798fc340994"
   },
   "G:\\DockerProys\\CLAUDEPM4Copia\\pm4-app\\frontend\\index.html": {
     "mtime": 1781193419.8699472,
@@ -824,7 +816,7 @@
     "hash": "734c6f201a9b24dac90737cb6a0783ce"
   },
   "G:\\DockerProys\\CLAUDEPM4Copia\\pm4-app\\docs\\architecture\\pm4_render_integration.svg": {
-    "mtime": 1786025598.5179884,
+    "mtime": 1786030440.9655132,
     "hash": "5e8ee27cf85e781feecee6b2d0b085da"
   },
   "G:\\DockerProys\\CLAUDEPM4Copia\\pm4-app\\frontend\\src\\resources\\zurich\\ZurichLogo_Horz_Black_CMYK_no_R.jpeg": {
