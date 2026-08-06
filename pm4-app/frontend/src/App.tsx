@@ -1,29 +1,33 @@
-import { Component, type ErrorInfo, type ReactNode } from 'react';
-import CotizadorFastFlow from './screens/FAST-FLOW/cotizador-fast-flow/CotizadorFastFlow';
-import SolicitudCotizacionCuw from './screens/FAST-FLOW/solicitud-cotizacion-cuw/SolicitudCotizacionCuw';
-import SolicitudFfFl from './screens/FAST-FLOW/ff-fl/SolicitudFfFl';
-import CotizacionFfFl from './screens/FAST-FLOW/ff-fl/CotizacionFfFl';
-import RespuestaCotizacion from './screens/FAST-FLOW/respuesta-cotizacion/RespuestaCotizacion';
-import OpcionesCotizacion from './screens/FAST-FLOW/opciones-cotizacion/OpcionesCotizacion';
-import VisualizarDocumentos from './screens/FAST-FLOW/nota-cobertura/VisualizarDocumentos';
-import DocSARLAFT from './screens/FAST-FLOW/col-emision/DocSARLAFT';
-import RevSARLAFT from './screens/FAST-FLOW/col-emision/RevSARLAFT';
-import SolDocEmi from './screens/FAST-FLOW/col-emision/SolDocEmi';
-import VerDocEmi from './screens/FAST-FLOW/col-emision/VerDocEmi';
-import EstadoCorreo from './screens/FAST-FLOW/estado-correo/EstadoCorreo';
-import CorregirDatosFormulario from './screens/atencion-cliente/quejas-directas/COL_QD_SCR-002_corregir-datos-formulario/CorregirDatosFormulario';
-import CrearRecibirQueja from './screens/atencion-cliente/quejas-directas/COL_QD_SCR-000_CrearRecibirQueja/CrearRecibirQueja';
-import DsCatalog from './screens/ds-catalog/DsCatalog';
-import RevisionErrorTecnicoApi from './screens/atencion-cliente/quejas-directas/COL_QD_SCR-004_Revision_Error_Tecnico_API/RevisionErrorTecnicoApi';
-import CorreccionErrorFuncional from './screens/atencion-cliente/quejas-directas/COL_QD_SCR-003_Correccion_Error_Funcional/CorreccionErrorFuncional';
-import DetalleReasignacionRespuesta from './screens/atencion-cliente/quejas-directas/COL_QD_SCR-0051_Detalle_Reasignacion_Respuesta/DetalleReasignacionRespuesta';
-import RespuestaAreaResponsable from './screens/atencion-cliente/quejas-directas/COL_QD_SCR-0052_Respuesta_Area_Responsable/RespuestaAreaResponsable';
-import RevisionRespuestaSac from './screens/atencion-cliente/quejas-directas/COL_QD_SCR-008_Revision_Respuesta_SAC/RevisionRespuestaSac';
-import FormularioSuperintendencia from './screens/atencion-cliente/quejas-directas/COL_QD_SCR-009_Formulario_Superintendencia/FormularioSuperintendencia';
-import RevisionErrorTecnicoProrroga from './screens/atencion-cliente/quejas-directas/COL_QD_SCR-011_Revision_Error_Tecnico_Prorroga/RevisionErrorTecnicoProrroga';
-import ErrorFuncionalProrroga from './screens/atencion-cliente/quejas-directas/COL_QD_SCR-012_Revision_Error_Funcional_Prorroga/ErrorFuncionalProrroga';
-import DashboardGestionCasos from './screens/atencion-cliente/quejas-directas/COL_QD_SCR-013_Dashboard_Gestion_Casos/DashboardGestionCasos';
-import SmartsupervisionApiDocs from './screens/smartsupervision-api-docs/SmartsupervisionApiDocs';
+import { Component, lazy, Suspense, type ErrorInfo, type ReactNode } from 'react';
+import { ZrLoader } from './components/fields/ZdsFields';
+
+// Cada pantalla se carga bajo demanda: el iframe solo renderiza una a la vez
+// (?screen=), así que no tiene sentido descargar las ~27 en un único bundle.
+const CotizadorFastFlow = lazy(() => import('./screens/FAST-FLOW/cotizador-fast-flow/CotizadorFastFlow'));
+const SolicitudCotizacionCuw = lazy(() => import('./screens/FAST-FLOW/solicitud-cotizacion-cuw/SolicitudCotizacionCuw'));
+const SolicitudFfFl = lazy(() => import('./screens/FAST-FLOW/ff-fl/SolicitudFfFl'));
+const CotizacionFfFl = lazy(() => import('./screens/FAST-FLOW/ff-fl/CotizacionFfFl'));
+const RespuestaCotizacion = lazy(() => import('./screens/FAST-FLOW/respuesta-cotizacion/RespuestaCotizacion'));
+const OpcionesCotizacion = lazy(() => import('./screens/FAST-FLOW/opciones-cotizacion/OpcionesCotizacion'));
+const VisualizarDocumentos = lazy(() => import('./screens/FAST-FLOW/nota-cobertura/VisualizarDocumentos'));
+const DocSARLAFT = lazy(() => import('./screens/FAST-FLOW/col-emision/DocSARLAFT'));
+const RevSARLAFT = lazy(() => import('./screens/FAST-FLOW/col-emision/RevSARLAFT'));
+const SolDocEmi = lazy(() => import('./screens/FAST-FLOW/col-emision/SolDocEmi'));
+const VerDocEmi = lazy(() => import('./screens/FAST-FLOW/col-emision/VerDocEmi'));
+const EstadoCorreo = lazy(() => import('./screens/FAST-FLOW/estado-correo/EstadoCorreo'));
+const CorregirDatosFormulario = lazy(() => import('./screens/atencion-cliente/quejas-directas/COL_QD_SCR-002_corregir-datos-formulario/CorregirDatosFormulario'));
+const CrearRecibirQueja = lazy(() => import('./screens/atencion-cliente/quejas-directas/COL_QD_SCR-000_CrearRecibirQueja/CrearRecibirQueja'));
+const DsCatalog = lazy(() => import('./screens/ds-catalog/DsCatalog'));
+const RevisionErrorTecnicoApi = lazy(() => import('./screens/atencion-cliente/quejas-directas/COL_QD_SCR-004_Revision_Error_Tecnico_API/RevisionErrorTecnicoApi'));
+const CorreccionErrorFuncional = lazy(() => import('./screens/atencion-cliente/quejas-directas/COL_QD_SCR-003_Correccion_Error_Funcional/CorreccionErrorFuncional'));
+const DetalleReasignacionRespuesta = lazy(() => import('./screens/atencion-cliente/quejas-directas/COL_QD_SCR-0051_Detalle_Reasignacion_Respuesta/DetalleReasignacionRespuesta'));
+const RespuestaAreaResponsable = lazy(() => import('./screens/atencion-cliente/quejas-directas/COL_QD_SCR-0052_Respuesta_Area_Responsable/RespuestaAreaResponsable'));
+const RevisionRespuestaSac = lazy(() => import('./screens/atencion-cliente/quejas-directas/COL_QD_SCR-008_Revision_Respuesta_SAC/RevisionRespuestaSac'));
+const FormularioSuperintendencia = lazy(() => import('./screens/atencion-cliente/quejas-directas/COL_QD_SCR-009_Formulario_Superintendencia/FormularioSuperintendencia'));
+const RevisionErrorTecnicoProrroga = lazy(() => import('./screens/atencion-cliente/quejas-directas/COL_QD_SCR-011_Revision_Error_Tecnico_Prorroga/RevisionErrorTecnicoProrroga'));
+const ErrorFuncionalProrroga = lazy(() => import('./screens/atencion-cliente/quejas-directas/COL_QD_SCR-012_Revision_Error_Funcional_Prorroga/ErrorFuncionalProrroga'));
+const DashboardGestionCasos = lazy(() => import('./screens/atencion-cliente/quejas-directas/COL_QD_SCR-013_Dashboard_Gestion_Casos/DashboardGestionCasos'));
+const SmartsupervisionApiDocs = lazy(() => import('./screens/smartsupervision-api-docs/SmartsupervisionApiDocs'));
 
 class ErrorBoundary extends Component<{ children: ReactNode }, { error: Error | null }> {
   state = { error: null };
@@ -159,7 +163,9 @@ export default function App() {
   return (
     <>
       <ErrorBoundary>
-        <Screen />
+        <Suspense fallback={<div className="loading-overlay"><ZrLoader /></div>}>
+          <Screen />
+        </Suspense>
       </ErrorBoundary>
       {blnUsingDebugToken && (
         <div style={DEBUG_BANNER_STYLE}>⚠ Usando token de debug — no usar en producción</div>

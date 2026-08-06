@@ -1,3 +1,10 @@
+# Diagrama de integración — PM4 App
+
+Arquitectura actual (frontend + backend/proxy + microservicio de cotización + verificación
+reCAPTCHA + resolución de IDs por nombre). Fuente Mermaid renderizada a
+[`pm4_render_integration.svg`](pm4_render_integration.svg) con `@mermaid-js/mermaid-cli`.
+
+```mermaid
 %%{init: {'flowchart': {'curve': 'linear'}} }%%
 flowchart TD
 
@@ -20,11 +27,13 @@ flowchart TD
         subgraph FRONTEND["  Frontend — React + Vite  "]
             APP["App.tsx
             router ?screen="]
-            SCREEN["SolicitudCotizacionCuw
-            formulario React"]
+            SCREEN["Pantalla React
+            (una de 26 registradas)"]
             HOOKS["useTask · useCollection · useToken"]
             DOCS["Seccion Documentos
             file inputs"]
+            RECAPTCHA["RecaptchaModal
+            checkbox v2"]
         end
 
         subgraph BACKEND["  Backend — Express  "]
@@ -32,8 +41,20 @@ flowchart TD
             inyecta Bearer token"]
             FILE_PROXY["Proxy multipart
             /api/requests/id/files"]
+            RESOLVE["pm4Resolve()
+            ID por nombre via pm4-registry.json"]
+            RECAPTCHA_VERIFY["POST /api/recaptcha/verify"]
         end
 
+    end
+
+    subgraph COTIZADOR["  cotizador-service — Flask (contenedor aparte)  "]
+        COT_CALC["POST /calcular
+        lookup en tables.json"]
+    end
+
+    subgraph GOOGLE["  Google — reCAPTCHA siteverify  "]
+        GOOGLE_API["siteverify API"]
     end
 
     PM4_PROC  -->|"iframe URL  ?token=eyJ...  &task_id=..."| BROWSER
@@ -41,9 +62,12 @@ flowchart TD
     APP       --> SCREEN
     SCREEN    --> HOOKS
     SCREEN    --> DOCS
+    SCREEN    --> RECAPTCHA
 
     HOOKS     -->|"GET tasks · GET collections · POST scripts
     Header: x-pm4-token"| PROXY
+    PROXY     -.->|"resuelve collection/script/process
+    por nombre, no por ID fijo"| RESOLVE
     PROXY     -->|"Bearer token"| PM4_API
     PM4_API   ---  PM4_DB
     PM4_API   -->|"task.data — campos del caso"| PROXY
@@ -56,6 +80,15 @@ flowchart TD
     PM4_FILES -->|"file_id · file_name · url"| FILE_PROXY
     FILE_PROXY-->|"referencia del archivo"| DOCS
 
+    RECAPTCHA -->|"grecaptcha token"| RECAPTCHA_VERIFY
+    RECAPTCHA_VERIFY -->|"secret + response"| GOOGLE_API
+    GOOGLE_API -->|"success: true/false"| RECAPTCHA_VERIFY
+    RECAPTCHA_VERIFY -->|"verified: true/false"| RECAPTCHA
+
+    SCREEN    -->|"POST /api/cotizador/calcular"| PROXY
+    PROXY     -->|"reenvia payload"| COT_CALC
+    COT_CALC  -->|"primas · deducibles"| PROXY
+
     SCREEN    -->|"PUT /api/tasks/id
     status: COMPLETED
     data: frm_* + arrays + docs"| PROXY
@@ -67,3 +100,6 @@ flowchart TD
     style FRONTEND  fill:#1b4332,color:#fff,stroke:#52b788
     style BACKEND   fill:#1b4332,color:#fff,stroke:#52b788
     style BROWSER   fill:#374151,color:#fff,stroke:#9ca3af
+    style COTIZADOR fill:#4a3728,color:#fff,stroke:#d97706
+    style GOOGLE    fill:#3a3a1b,color:#fff,stroke:#eab308
+```

@@ -8,6 +8,9 @@ const upload = multer({ storage: multer.memoryStorage() });
 
 const router = Router();
 
+// Gate de logs de depuración (token/body) — igual que server.ts, apagado en producción.
+const blnIsProd = process.env.NODE_ENV === 'production';
+
 function decryptToken(in_strBlob: string): string {
   // Leemos la llave de encriptacion desde el entorno
   const strKeyRaw = process.env.IFRAME_ENCRYPTION_KEY;
@@ -39,9 +42,11 @@ function getToken(req: Request): string {
   // Tomamos el token del header o del entorno como respaldo
   const strRaw = (req.headers['x-pm4-token'] as string | undefined) ?? process.env.PM4_TOKEN ?? '';
 
-  // TODO: eliminar estos logs antes de producción
-  console.log('[token] raw header:', strRaw ? strRaw.slice(0, 40) + '…' : '(vacío)');
-  console.log('[token] tipo:', !strRaw ? 'vacío' : strRaw.startsWith('eyJ') ? 'JWT directo' : 'blob encriptado');
+  // Logs de diagnóstico — solo en dev (nunca imprimen token/datos en producción).
+  if (!blnIsProd) {
+    console.log('[token] raw header:', strRaw ? strRaw.slice(0, 40) + '…' : '(vacío)');
+    console.log('[token] tipo:', !strRaw ? 'vacío' : strRaw.startsWith('eyJ') ? 'JWT directo' : 'blob encriptado');
+  }
 
   // JWTs empiezan con "eyJ" — pasar directo (dev local con VITE_PM4_TOKEN)
   if (!strRaw || strRaw.startsWith('eyJ')) return strRaw;
@@ -49,8 +54,7 @@ function getToken(req: Request): string {
   // Cualquier otra cosa → blob AES encriptado desde PM4
   try {
     const strDecrypted = decryptToken(strRaw);
-    // TODO: eliminar este log antes de producción
-    console.log('[token] 🔓 desencriptado:', strDecrypted.slice(0, 40) + '…');
+    if (!blnIsProd) console.log('[token] 🔓 desencriptado:', strDecrypted.slice(0, 40) + '…');
     return strDecrypted;
   } catch (excError) {
     console.warn('[token] decrypt failed:', (excError as Error).message);
@@ -67,9 +71,11 @@ async function pm4Request(method: string, path: string, req: Request, res: Respo
   const strToken = getToken(req);
   const strUrl = `${pm4Base()}/api/1.0${path}`;
 
-  console.log(`[proxy] ${method} ${strUrl}`);
-  if (['POST', 'PUT', 'PATCH'].includes(method)) {
-    console.log('[proxy] body →', JSON.stringify(req.body).slice(0, 400));
+  if (!blnIsProd) {
+    console.log(`[proxy] ${method} ${strUrl}`);
+    if (['POST', 'PUT', 'PATCH'].includes(method)) {
+      console.log('[proxy] body →', JSON.stringify(req.body).slice(0, 400));
+    }
   }
 
   try {
