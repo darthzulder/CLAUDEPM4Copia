@@ -4,7 +4,7 @@ import { useTask } from '../../../../core/useTask';
 import { scrollToFirstError } from '../../../../core/scrollToFirstError';
 import {
   ZdsInput, ZdsSelect, ZdsCheckboxField,
-  ZrButton, ZrAlert, ZrLoader, ZrModal,
+  ZrButton, ZrAlert, ZrLoader, ZrModal, ZrIcon,
 } from '../../../../components/fields/ZdsFields';
 import pm4 from '../../../../api/pm4Client';
 import { useCollection, useSyncDesc } from '../../../../core/useCollection';
@@ -19,7 +19,7 @@ import {
 import type { CrearRecibirQuejaFormData } from '../fields/fields';
 import SeccionConsumidor from './SeccionConsumidor';
 import SeccionDetalleQueja from './SeccionDetalleQueja';
-import { PqrPage, PqrSection, PqrReadonly } from './PqrPage';
+import { PqrPage, PqrSection } from './PqrPage';
 import { RecaptchaWidget } from '../../../../components/RecaptchaModal';
 
 // Puntos de recepción (CAT-PUNTO, colección 20) que ya no deben ofrecerse en el
@@ -46,6 +46,16 @@ const BANNER_INTRO = 'Radica tu petición, queja, reclamo, sugerencia o felicita
   + 'Completa los campos obligatorios, acepta el tratamiento de datos y valida el captcha '
   + 'para presionar Enviar PQRS.';
 
+// Fecha de creación mostrada en el resumen de éxito (MSG-000-08): se toma al momento
+// de radicar, formateada 'DD/MM/YYYY' (misma convención con la que viajan las fechas
+// de PM4, ver qd_strFilingDate).
+const formatFechaHoy = (): string => {
+  const objHoy = new Date();
+  const strDia = String(objHoy.getDate()).padStart(2, '0');
+  const strMes = String(objHoy.getMonth() + 1).padStart(2, '0');
+  return `${strDia}/${strMes}/${objHoy.getFullYear()}`;
+};
+
 export default function CrearRecibirQueja() {
   const { task, loading, error, submitting, completeTask, isWebEntry } = useTask();
   const fileRegistry = useRef(new Map<string, File>());
@@ -53,6 +63,8 @@ export default function CrearRecibirQueja() {
   // Número de caso (case_number BPM) del request recién creado, para mostrarlo en la
   // pantalla de éxito (MSG-000-08: "...Número de caso: [ID]").
   const [numCreatedCaseNumber, setNumCreatedCaseNumber] = useState<number | undefined>(undefined);
+  // Fecha de creación mostrada en el resumen de éxito (ver formatFechaHoy arriba).
+  const [strFechaCreacion, setStrFechaCreacion] = useState('');
   // FLD-336 — token del reCAPTCHA resuelto en el propio formulario (sección
   // "Autorización y envío"). Se verifica server-side al radicar; si caduca, Google
   // resetea el widget y lo limpiamos para exigir una nueva validación.
@@ -220,6 +232,7 @@ export default function CrearRecibirQueja() {
           }
         }
         setNumCreatedCaseNumber(numBpmCaseId);
+        setStrFechaCreacion(formatFechaHoy());
         setBlnSent(true);
       } else {
         const intRequestId = task?.process_request_id;
@@ -236,6 +249,7 @@ export default function CrearRecibirQueja() {
           ...(numBpmCaseId ? { [QD.strSfcCode]: buildSfcCode(numBpmCaseId) } : {}),
         } as unknown as Record<string, unknown>);
         setNumCreatedCaseNumber(numBpmCaseId);
+        setStrFechaCreacion(formatFechaHoy());
         setBlnSent(true);
       }
     } catch (exc) {
@@ -343,20 +357,61 @@ export default function CrearRecibirQueja() {
     setTimeout(() => window.scrollTo({ top: 0, behavior: 'smooth' }));
   };
 
+  // "Ir al inicio" del modal de confirmación: cierra el modal y deja el formulario
+  // listo para una nueva radicación (mismo criterio que limpiarFormulario).
+  const handleGoHome = () => {
+    setBlnSent(false);
+    setNumCreatedCaseNumber(undefined);
+    setStrFechaCreacion('');
+    limpiarFormulario();
+  };
+
   if (blnSent) {
+    // Resumen del caso recién radicado (MSG-000-08), leído de las variables
+    // compañeras `_desc` ya sincronizadas por useSyncDesc / el picker de producto.
+    const dicWatch = objWatch as Record<string, unknown>;
+    const lstResumen: { label: string; value: string }[] = [
+      { label: 'Número de caso', value: numCreatedCaseNumber ? String(numCreatedCaseNumber) : '—' },
+      { label: 'Fecha de creación', value: strFechaCreacion || '—' },
+      { label: 'Tipo de solicitud', value: String(dicWatch[`${QD.strRequestType}_desc`] ?? '') || '—' },
+      { label: 'Producto', value: String(dicWatch[`${QD.strSfcProduct}_desc`] ?? '') || '—' },
+      { label: 'Motivo de la queja', value: String(dicWatch[`${QD.strSfcReason}_desc`] ?? '') || '—' },
+      { label: 'Canal de recepción', value: String(dicWatch[`${QD.strChannel}_desc`] ?? '') || '—' },
+    ];
     return (
       <PqrPage title={BANNER_TITLE} intro={BANNER_INTRO}>
-        <div className="pqr-form">
-          <PqrSection title="Radicación exitosa">
-            <ZrAlert config="positive" {...({ 'hide-close': true } as object)}>
-              Tu solicitud fue radicada exitosamente{numCreatedCaseNumber ? ` con el número de caso ${numCreatedCaseNumber}` : ''}.
-              Recibirás una confirmación en el correo registrado.
-            </ZrAlert>
-            {numCreatedCaseNumber && (
-              <PqrReadonly label="Número de caso" value={numCreatedCaseNumber} />
-            )}
-          </PqrSection>
-        </div>
+        <div className="pqr-form" />
+        <ZrModal model={blnSent} onChange={(open: boolean) => { if (!open) handleGoHome(); }}>
+          <div className="pqr-success-head">
+            <span className="pqr-success-icon">
+              <ZrIcon icon="check:line" config="l" style={{ color: 'var(--z-blue-dark)' } as object} />
+            </span>
+            <div>
+              <h3 className="pqr-success-title">¡PQR enviada exitosamente!</h3>
+              <p className="pqr-success-text">
+                Tu solicitud ha sido radicada con éxito. A continuación el resumen:
+              </p>
+            </div>
+          </div>
+
+          <div className="pqr-summary">
+            {lstResumen.map((objRow) => (
+              <div className="pqr-summary-row" key={objRow.label}>
+                <span className="pqr-summary-label">{objRow.label}</span>
+                <span className="pqr-summary-value">{objRow.value}</span>
+              </div>
+            ))}
+          </div>
+
+          <ZrButton
+            config="primary:l"
+            icon="arrow-right:line"
+            onClick={handleGoHome}
+            {...({ wide: true, 'icon-right': true } as object)}
+          >
+            Ir al inicio
+          </ZrButton>
+        </ZrModal>
       </PqrPage>
     );
   }

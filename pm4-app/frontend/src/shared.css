@@ -1469,3 +1469,72 @@ z-table :is(th, td)[config*="right"] {
   color: inherit;
   text-decoration: none;
 }
+
+/* Modal de confirmación de envío (SCR-000, MSG-000-08): ícono + título + resumen
+   del caso + CTA "Ir al inicio". Reemplaza el antiguo ZrAlert verde inline. */
+.pqr-success-head {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--zs-150);
+  margin-bottom: var(--zs-200);
+}
+
+.pqr-success-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex: 0 0 auto;
+  width: 64px;
+  height: 64px;
+  border-radius: 50%;
+  background: var(--z-blue-light);
+}
+
+.pqr-success-title {
+  margin: 0 0 var(--zs-50);
+  font: var(--zf-h-20--700);
+  color: var(--z-blue-dark);
+}
+
+.pqr-success-text {
+  margin: 0;
+  font: var(--zf-body-16);
+  color: var(--z-text);
+}
+
+/* Tarjeta gris con los datos del caso, fila por dato con divisoria fina.
+   Usa el token crudo --zg-white-zurich (no el alias --z-bg): dentro de ZrModal
+   el DS redefine --z-bg a blanco para el contenido proyectado, y el alias
+   perdería el gris. */
+.pqr-summary {
+  display: flex;
+  flex-direction: column;
+  background: var(--zg-white-zurich);
+  border-radius: var(--zs-100);
+  padding: 0 var(--zs-150);
+  margin-bottom: var(--zs-200);
+}
+
+.pqr-summary-row {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: var(--zs-150);
+  padding: var(--zs-100) 0;
+  border-bottom: 1px solid var(--z-border);
+  font: var(--zf-body-16);
+}
+
+.pqr-summary-row:last-child {
+  border-bottom: none;
+}
+
+.pqr-summary-label {
+  font-weight: 500;
+  color: var(--z-blue-dark);
+}
+
+.pqr-summary-value {
+  color: var(--z-text);
+  text-align: right;
+}
