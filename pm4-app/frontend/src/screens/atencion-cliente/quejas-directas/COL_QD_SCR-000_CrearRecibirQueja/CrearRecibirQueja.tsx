@@ -165,6 +165,26 @@ export default function CrearRecibirQueja() {
     return data?.case_number;
   };
 
+  // El watcher (script 70) solo devuelve los IDs internos de los casos similares
+  // (qd_arrSimilarCases viene comentado/vacío en el script PM4) — para mostrar en el
+  // modal el número de caso real y la fecha de radicación, hay que resolver cada id
+  // contra GET /requests/{id}?include=data (mismo patrón que fetchCaseNumber arriba).
+  // Best-effort: si una consulta falla, se omite ese caso puntual.
+  const fetchSimilarCaseDetails = async (
+    in_arrIds: number[],
+  ): Promise<Record<string, unknown>[]> => {
+    const arrResults = await Promise.all(in_arrIds.map(async (intId) => {
+      try {
+        const { data } = await pm4.get<Record<string, unknown>>(`/requests/${intId}`, { params: { include: 'data' } });
+        return data;
+      } catch (exc) {
+        console.warn(`[casos-similares] no se pudo leer el request ${intId}:`, exc);
+        return null;
+      }
+    }));
+    return arrResults.filter((objCase): objCase is Record<string, unknown> => objCase !== null);
+  };
+
   // Watcher pre-envío — ejecuta el script PM4 (id 70) que detecta casos ACTIVOS
   // del mismo proceso con idéntico motivo + producto + identificación. Se corre
   // al enviar; su salida (qd_arridSimilarCases, qd_intCountSimilarCases,
@@ -191,11 +211,15 @@ export default function CrearRecibirQueja() {
       // La salida puede venir en .response, .output o directamente en .data.
       const objRaw = objRes.data as Record<string, unknown>;
       const objOut = (objRaw?.response ?? objRaw?.output ?? objRaw) as Record<string, unknown>;
+      const arrIds = (objOut[QD.arridSimilarCases] ?? []) as number[];
+      // qd_arrSimilarCases del script viene vacío (ver nota de fetchSimilarCaseDetails);
+      // se resuelve aquí mismo para no depender de que el script PM4 cambie.
+      const arrCasesDetail = arrIds.length > 0 ? await fetchSimilarCaseDetails(arrIds) : [];
       return {
         [QD.strSimilarCheckStatus]: objOut[QD.strSimilarCheckStatus] as string,
-        [QD.arridSimilarCases]: (objOut[QD.arridSimilarCases] ?? []) as number[],
+        [QD.arridSimilarCases]: arrIds,
         [QD.intCountSimilarCases]: (objOut[QD.intCountSimilarCases] ?? 0) as number,
-        [QD.arrSimilarCases]: (objOut[QD.arrSimilarCases] ?? []) as Record<string, unknown>[],
+        [QD.arrSimilarCases]: arrCasesDetail,
       };
     } catch (exc) {
       // No bloqueamos la radicación por un fallo del chequeo de duplicados.
@@ -586,17 +610,19 @@ export default function CrearRecibirQueja() {
           <div className="pqr-summary">
             {(objSimilarPrompt.cases.length > 0
               ? objSimilarPrompt.cases.map((objCase) => {
-                  // El watcher devuelve cada caso con la forma de PM4 (`_request` anida
-                  // el id interno y el case_number reales, ver nota de fetchCaseNumber
-                  // arriba); algunos casos vienen "planos" sin ese anidado. Se prioriza
-                  // siempre case_number (número de caso visible) sobre el id interno.
-                  const objReq = (objCase._request ?? {}) as Record<string, unknown>;
+                  // Cada caso viene de GET /requests/{id}?include=data (ver
+                  // fetchSimilarCaseDetails): el número de caso visible es
+                  // qd_strBpmCaseId (misma variable que muestra el InfoBar en
+                  // SCR-0051/SCR-002), no el id interno del request; se cae a
+                  // case_number/id solo si ese caso aún no lo tiene sincronizado.
+                  const objData = (objCase.data ?? {}) as Record<string, unknown>;
                   const strNumber = (
-                    objReq.case_number ?? objCase.case_number ?? objReq.id ?? objCase.id
+                    objData[QD.strBpmCaseId] || objCase.case_number || objCase.id
                   ) as string | number;
-                  const strStatus = (objCase.status ?? objReq.status) as string | undefined;
-                  const strDate = (objCase.created_at ?? objReq.created_at) as string | undefined;
-                  return `Caso #${strNumber}${strStatus ? ` · ${strStatus}` : ''}${strDate ? ` · ${strDate.slice(0, 10)}` : ''}`;
+                  const strStatus = objCase.status as string | undefined;
+                  // qd_strFilingDate (fecha de radicación) ya viaja en 'DD/MM/YYYY'.
+                  const strDate = objData[QD.strFilingDate] as string | undefined;
+                  return `Caso #${strNumber}${strStatus ? ` · ${strStatus}` : ''}${strDate ? ` · ${strDate}` : ''}`;
                 })
               : objSimilarPrompt.ids.map((intId) => `Caso #${intId}`)
             ).map((strLine, intIdx) => (
