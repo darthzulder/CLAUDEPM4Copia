@@ -102,7 +102,18 @@ docker exec pm4-app-container sh -c "cd /app && npm run build --workspace=backen
 docker exec pm4-app-container sh -c "cd /app && npm run lint --workspace=frontend"
 ```
 
-There is no automated test suite at this time; verification is done via manual testing of the screen inside the PM4 iframe (or directly at `http://localhost:5173/?screen=...`) and the `?screen=ds-catalog` live component reference.
+There is an initial automated test suite covering the highest-risk **pure logic** (premium
+calculations, payload/template transforms) — it does not replace manual verification of the
+screens themselves, which is still done inside the PM4 iframe (or directly at
+`http://localhost:5173/?screen=...`) and via the `?screen=ds-catalog` live component reference:
+
+```bash
+# Frontend — Vitest, lógica pura de core/*.ts y utilidades de pantalla
+docker exec pm4-app-container sh -c "cd /app && npm run test --workspace=frontend"
+
+# Cotizador — pytest, funciones calc_dyo/cc/pdysi/pi de cotizador-service/app.py
+docker exec cotizador-service-container sh -c "cd /app && pip install -r requirements-dev.txt && pytest -q"
+```
 
 # Contribute
 

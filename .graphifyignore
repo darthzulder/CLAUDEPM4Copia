@@ -1,0 +1,4 @@
+# Vendored/minified third-party bundles — no son código propio y contaminan los
+# "god nodes" del reporte con símbolos genéricos (createElement, call, forEach,
+# isArray, ...) que vienen del bundle, no de useTask/useCollection/ZdsInput.
+pm4-app/frontend/public/docs/swagger/
