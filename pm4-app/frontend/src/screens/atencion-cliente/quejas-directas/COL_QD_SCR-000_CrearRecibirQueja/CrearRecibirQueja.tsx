@@ -382,13 +382,13 @@ export default function CrearRecibirQueja() {
       <PqrPage title={BANNER_TITLE} intro={BANNER_INTRO}>
         <div className="pqr-form" />
         <ZrModal model={blnSent} onChange={(open: boolean) => { if (!open) handleGoHome(); }}>
-          <div className="pqr-success-head">
-            <span className="pqr-success-icon">
+          <div className="pqr-modal-head">
+            <span className="pqr-modal-icon pqr-modal-icon--info">
               <ZrIcon icon="check:line" config="l" style={{ color: 'var(--z-blue-dark)' } as object} />
             </span>
             <div>
-              <h3 className="pqr-success-title">¡PQR enviada exitosamente!</h3>
-              <p className="pqr-success-text">
+              <h3 className="pqr-modal-title">¡PQR enviada exitosamente!</h3>
+              <p className="pqr-modal-text">
                 Tu solicitud ha sido radicada con éxito. A continuación el resumen:
               </p>
             </div>
@@ -569,15 +569,21 @@ export default function CrearRecibirQueja() {
           activas con el mismo motivo + producto + identificación. */}
       {objSimilarPrompt && (
         <ZrModal model={!!objSimilarPrompt} onChange={(open: boolean) => { if (!open) handleCancelSimilar(); }}>
-          <h3 style={{ margin: '0 0 var(--zs-75)', font: 'var(--zf-h-20--700)', color: 'var(--z-text)' }}>
-            Encontramos casos similares
-          </h3>
-          <ZrAlert config="alert" {...({ 'hide-close': true } as object)}>
-            {objSimilarPrompt.count === 1
-              ? 'Ya existe 1 caso activo con el mismo motivo, producto e identificación. Revisa antes de radicar uno nuevo.'
-              : `Ya existen ${objSimilarPrompt.count} casos activos con el mismo motivo, producto e identificación. Revisa antes de radicar uno nuevo.`}
-          </ZrAlert>
-          <ul style={{ margin: 'var(--zs-100) 0', paddingLeft: 'var(--zs-150)', color: 'var(--z-text)', font: 'var(--zf-body-14--400)' }}>
+          <div className="pqr-modal-head">
+            <span className="pqr-modal-icon pqr-modal-icon--warning">
+              <ZrIcon icon="alert-triangle:line" config="l" style={{ color: 'var(--z-warning-deep)' } as object} />
+            </span>
+            <div>
+              <h3 className="pqr-modal-title">Encontramos casos similares</h3>
+              <p className="pqr-modal-text">
+                {objSimilarPrompt.count === 1
+                  ? 'Ya existe 1 caso activo con el mismo motivo, producto e identificación. Revisa antes de radicar uno nuevo.'
+                  : `Ya existen ${objSimilarPrompt.count} casos activos con el mismo motivo, producto e identificación. Revisa antes de radicar uno nuevo.`}
+              </p>
+            </div>
+          </div>
+
+          <div className="pqr-summary">
             {(objSimilarPrompt.cases.length > 0
               ? objSimilarPrompt.cases.map((objCase) => {
                   // El watcher devuelve cada caso con la forma de PM4 (`_request` anida
@@ -594,10 +600,11 @@ export default function CrearRecibirQueja() {
                 })
               : objSimilarPrompt.ids.map((intId) => `Caso #${intId}`)
             ).map((strLine, intIdx) => (
-              <li key={intIdx}>{strLine}</li>
+              <div className="pqr-summary-row pqr-summary-row--single" key={intIdx}>{strLine}</div>
             ))}
-          </ul>
-          <div z-flex="75" z-align="right:center" style={{ marginTop: 'var(--zs-100)' }}>
+          </div>
+
+          <div z-flex="75" z-align="right:center">
             <ZrButton config="secondary" onClick={handleCancelSimilar}>No continuar</ZrButton>
             <ZrButton config="positive" onClick={handleConfirmSimilar}>Continuar</ZrButton>
           </div>

@@ -1470,16 +1470,17 @@ z-table :is(th, td)[config*="right"] {
   text-decoration: none;
 }
 
-/* Modal de confirmación de envío (SCR-000, MSG-000-08): ícono + título + resumen
-   del caso + CTA "Ir al inicio". Reemplaza el antiguo ZrAlert verde inline. */
-.pqr-success-head {
+/* Cabecera de modal (SCR-000): ícono circular + título + texto de apoyo. La
+   comparten el modal de confirmación de envío (MSG-000-08) y el de casos
+   similares — solo cambia el color del ícono (modificador --info/--warning). */
+.pqr-modal-head {
   display: flex;
   align-items: flex-start;
   gap: var(--zs-150);
   margin-bottom: var(--zs-200);
 }
 
-.pqr-success-icon {
+.pqr-modal-icon {
   display: flex;
   align-items: center;
   justify-content: center;
@@ -1487,16 +1488,26 @@ z-table :is(th, td)[config*="right"] {
   width: 64px;
   height: 64px;
   border-radius: 50%;
+}
+
+.pqr-modal-icon--info {
   background: var(--z-blue-light);
 }
 
-.pqr-success-title {
+.pqr-modal-icon--warning {
+  background: var(--zc-lemon-20);
+}
+
+.pqr-modal-title {
   margin: 0 0 var(--zs-50);
-  font: var(--zf-h-20--700);
+  /* Body-20 en negrita, no un token --zf-h-* (esa escala no lleva sufijo de peso —
+     --zf-h-20--700 no existe y invalida todo el shorthand `font`). Mismo criterio
+     que el título de ResultCard.tsx (--zf-body-20--700). */
+  font: var(--zf-body-20--700);
   color: var(--z-blue-dark);
 }
 
-.pqr-success-text {
+.pqr-modal-text {
   margin: 0;
   font: var(--zf-body-16);
   color: var(--z-text);
@@ -1527,6 +1538,13 @@ z-table :is(th, td)[config*="right"] {
 
 .pqr-summary-row:last-child {
   border-bottom: none;
+}
+
+/* Fila de una sola columna (p.ej. cada caso similar en su propia línea, sin
+   par etiqueta/valor). */
+.pqr-summary-row--single {
+  justify-content: flex-start;
+  color: var(--z-text);
 }
 
 .pqr-summary-label {
