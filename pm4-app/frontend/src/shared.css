@@ -1354,7 +1354,14 @@ z-table :is(th, td)[config*="right"] {
   padding: var(--zs-200);
 }
 
-/* Footer corporativo: dos columnas de enlaces, divisoria vertical y legales. */
+/* Footer corporativo: dos columnas de enlaces, divisoria vertical y legales.
+   Investigado 2026-08-06: ZrFooter (habilitado en ZdsFields.tsx) NO calza —
+   su render() real pinta `columns[].header` como <h4> de texto plano, nunca
+   envuelto en z-link, y los dos "encabezados" de columna de este diseño SÍ
+   son links clickeables ("Zurich Compañía de Seguros", "¿Tienes
+   problemas?"); migrar rompería esa interacción. La alternativa (`footer`,
+   fila plana) tampoco sirve: solo admite un listado y ya está reservada
+   para la fila de legales. CSS de dominio confirmado, se mantiene. */
 .pqr-footer {
   display: flex;
   align-items: center;
