@@ -1,5 +1,6 @@
 import type { ReactNode } from 'react';
 import zurichLogo from '../../../../resources/zurich/ZurichLogo_Horz_White_CMYK_no_R.png';
+import { ZrNavigation } from '../../../../components/fields/ZdsFields';
 
 // Chrome de la página pública de radicación (maquetado del sitio Zurich): barra de
 // navegación navy, banner azul con titular + descripción, hoja de secciones y footer
@@ -16,10 +17,15 @@ interface PageProps {
 export function PqrPage({ title, intro, children }: PageProps) {
   return (
     <div className="pqr-page">
-      <nav className="pqr-topnav">
-        <div className="pqr-topnav-links" />
-        <img src={zurichLogo} alt="Zurich" className="pqr-topnav-logo" />
-      </nav>
+      {/* ZrNavigation (habilitado 2026-08-06, ver outputs/react/navigation/zurich-navigation.md).
+          Sin `routes`/`menu`: el diseño actual es una barra estática solo con el logo (el div
+          `.pqr-topnav-links` que reemplaza estaba vacío, sin links reales). El header del
+          componente usa el token global `--z-bg` para su fondo (no expone un custom token propio
+          para eso — confirmado en el CSS real) — se sobreescribe local al navbar, sin afectar el
+          resto de la página. */}
+      <ZrNavigation style={{ ['--z-bg' as never]: 'var(--zc-blue-dark)' }}>
+        <img slot="logo" src={zurichLogo} alt="Zurich" className="pqr-topnav-logo" />
+      </ZrNavigation>
 
       <header className="pqr-banner">
         <div className="pqr-banner-content">

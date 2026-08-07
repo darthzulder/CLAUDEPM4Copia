@@ -1210,24 +1210,9 @@ z-table :is(th, td)[config*="right"] {
   background: var(--z-bg);
 }
 
-/* Barra de navegación superior: 80px, navy, logo a la derecha. */
-.pqr-topnav {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  height: 80px;
-  padding: var(--zs-100) var(--zs-200);
-  background: var(--zc-blue-dark);
-}
-
-.pqr-topnav-links {
-  display: flex;
-  align-items: center;
-  gap: var(--zs-200);
-  font: var(--zf-body-14);
-  color: var(--zg-white-zurich);
-}
-
+/* .pqr-topnav/.pqr-topnav-links → migrados a ZrNavigation 2026-08-06 (ver
+   PqrPage.tsx). .pqr-topnav-logo se mantiene: sigue dimensionando el <img>
+   del logo dentro del slot "logo" del componente. */
 .pqr-topnav-logo {
   height: 42px;
   width: auto;
