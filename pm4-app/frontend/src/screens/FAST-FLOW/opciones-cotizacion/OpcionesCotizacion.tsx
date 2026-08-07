@@ -157,11 +157,17 @@ export default function OpcionesCotizacion() {
         ]}
       />
 
-      {/* Cuerpo: PDF (izquierda) + Panel decisión (derecha) */}
-      <div className="screen-body">
+      {/* Cuerpo: PDF (izquierda) + Panel decisión (derecha). z-grid="main"+column
+          (habilitado 2026-08-06, Fase "screen-body" del plan de reducción de shared.css) —
+          diferencia aceptada vs. el diseño anterior: el aside ya no es 380px fijo sino
+          ~290-350px variable por breakpoint (ancho real de los 4 tracks de z-grid), y el
+          punto de colapso a 1 columna se movió de 1024px a 767px (grid mobile de z-grid).
+          Ver nota residual en shared.css (.screen-body: align-items + colapso mobile, ya
+          que JSX no admite un segundo atributo `column` para el prefijo `m:`). */}
+      <section z-grid="main" className="screen-body">
 
         {/* Área de slips con tabs por línea */}
-        <div z-flex="col:75">
+        <div column="1:8" z-flex="col:75">
           {lstActiveLines.length > 1 && (
             <ZrTabs
               model={Math.max(1, lstActiveLines.findIndex((objLine) => objLine.key === strActiveTab) + 1)}
@@ -186,7 +192,7 @@ export default function OpcionesCotizacion() {
         </div>
 
         {/* Panel de decisión */}
-        <form onSubmit={handleSubmit(onSubmit, scrollToFirstError)} noValidate>
+        <form column="9:12" onSubmit={handleSubmit(onSubmit, scrollToFirstError)} noValidate>
           <FormSection
             title="Decisión de Cotización"
             footer={
@@ -245,7 +251,7 @@ export default function OpcionesCotizacion() {
             )}
           </FormSection>
         </form>
-      </div>
+      </section>
     </div>
   );
 }
