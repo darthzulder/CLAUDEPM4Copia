@@ -26,12 +26,24 @@ When a user asks you to build something with the **Zurich Design System**:
 
 ---
 
+## 0.1 Vendor Component Catalog (116 componentes, índice liviano)
+
+> **[`react/VENDOR_COMPONENT_CATALOG.md`](./react/VENDOR_COMPONENT_CATALOG.md)** — lista de **todos**
+> los componentes que trae el vendor `@zurich/web-components` 0.8.1 (no solo los ~28 ya expuestos
+> en `ZdsFields.tsx` ni los ~9 con ficha completa abajo), con estado (✅ expuesto / 📄 documentado /
+> sin documentar), props/eventos clave y propósito inferido. **Consultarlo antes de asumir que
+> "Zurich no tiene esto"** — es un índice de descubrimiento, no reemplaza la ficha completa
+> (§6.2) que sigue siendo obligatoria antes de consumir un componente nuevo en código.
+
+---
+
 ## 1. Folder Structure
 
 ```
 outputs/
 ├── zurich-index.md                       ← you are here (master index)
 └── react/                                ← React design system
+    ├── VENDOR_COMPONENT_CATALOG.md       ← índice liviano de los 116 componentes del vendor (ver §0.1)
     ├── foundations/                      ← Design tokens & guidelines (CSS vars + HTML attrs)
     │   ├── zurich-typography.md          ← fonts (Zurich Sans, Ogg), emoji setup
     │   ├── zurich-typography-styles.md   ← --zf-h-*, --zf-ht-*, --zf-body-*, --zf-capt-*, z-heading
@@ -59,15 +71,23 @@ outputs/
     │   ├── zurich-radioselect.md
     │   └── zurich-stepper.md
     ├── molecules/                        ← Category: composite content surfaces
-    │   └── zurich-tile.md
-    └── layout/                           ← Category: containers & structural surfaces
-        ├── zurich-form.md
-        ├── zurich-card.md
-        ├── zurich-modal.md
-        ├── zurich-table.md
-        ├── zurich-sidebar.md
-        ├── zurich-tabs.md
-        └── zurich-inputgroup.md
+    │   ├── zurich-tile.md
+    │   ├── zurich-kpivalue.md            ← ⚠️ desde paquete vendorizado, no paste web (ver §2.3)
+    │   ├── zurich-emptystate.md          ← idem
+    │   ├── zurich-stagebanner.md         ← idem
+    │   └── zurich-promo.md               ← idem
+    ├── layout/                           ← Category: containers & structural surfaces
+    │   ├── zurich-form.md
+    │   ├── zurich-card.md
+    │   ├── zurich-modal.md
+    │   ├── zurich-table.md
+    │   ├── zurich-sidebar.md
+    │   ├── zurich-tabs.md
+    │   ├── zurich-inputgroup.md
+    │   ├── zurich-pagination.md          ← ⚠️ desde paquete vendorizado, no paste web
+    │   └── zurich-footer.md              ← idem
+    └── navigation/                       ← Category: navigation bars (nueva, ver §6.4)
+        └── zurich-navigation.md          ← ⚠️ desde paquete vendorizado, no paste web
 ```
 
 > Everything lives under `react/`. Foundations, atoms, inputs, molecules, layouts — all of them.
@@ -119,6 +139,10 @@ outputs/
 | Component       | File                                                                              | Status         | Purpose                                                         |
 |-----------------|-----------------------------------------------------------------------------------|----------------|-----------------------------------------------------------------|
 | `ZrTile`        | [`react/molecules/zurich-tile.md`](./react/molecules/zurich-tile.md)              | ⚠️ Experimental | Promo / article tile with header + image + content + actions.   |
+| `ZrKpiValue`    | [`react/molecules/zurich-kpivalue.md`](./react/molecules/zurich-kpivalue.md)      | ⚠️ Vendor-only¹ | KPI card: `amount` + `header` + `description` + `difference` (2-state trend arrow). |
+| `ZrEmptyState`  | [`react/molecules/zurich-emptystate.md`](./react/molecules/zurich-emptystate.md)  | ⚠️ Vendor-only¹ | Empty-state block: pictogram/image + header + content + actions. |
+| `ZrStageBanner` | [`react/molecules/zurich-stagebanner.md`](./react/molecules/zurich-stagebanner.md)| ⚠️ Vendor-only¹ | Centered hero banner with pictogram/image + decorative `shape` (1-7). |
+| `ZrPromo`       | [`react/molecules/zurich-promo.md`](./react/molecules/zurich-promo.md)            | ⚠️ Vendor-only¹ | Asymmetric image+text banner (`config="left"` flips sides), decorative `shape` overlaid on image. |
 
 ### 2.4 React → Layout *(containers & structural surfaces)*
 
@@ -131,6 +155,16 @@ outputs/
 | `ZrTable`       | [`react/layout/zurich-table.md`](./react/layout/zurich-table.md)        | ⚠️ Experimental | Tabular display (matrix / object / embedded modes; zebra).      |
 | `ZrTabs`        | [`react/layout/zurich-tabs.md`](./react/layout/zurich-tabs.md)          | ⚠️ Experimental | 1-based panel switcher (object / option / slot definition).     |
 | `ZrInputGroup`  | [`react/layout/zurich-inputgroup.md`](./react/layout/zurich-inputgroup.md) | ⚠️ Experimental | Cluster of related inputs with shared config/size and `<output>` separators. |
+| `ZrPagination`  | [`react/layout/zurich-pagination.md`](./react/layout/zurich-pagination.md) | ⚠️ Vendor-only¹ | Controlled `model`/`pages` list pagination with edge buttons.   |
+| `ZrFooter`      | [`react/layout/zurich-footer.md`](./react/layout/zurich-footer.md)      | ⚠️ Vendor-only¹ | Corporate footer: link columns (2-4) + social + legal row.      |
+
+### 2.5 React → Navigation *(nueva categoría — nav bars)*
+
+| Component       | File                                                                            | Status         | Purpose                                                         |
+|-----------------|-----------------------------------------------------------------------------------|----------------|-----------------------------------------------------------------|
+| `ZrNavigation`  | [`react/navigation/zurich-navigation.md`](./react/navigation/zurich-navigation.md) | ⚠️ Vendor-only¹ | Top navbar with logo + direct routes + responsive side-panel menu. |
+
+¹ **Vendor-only:** documentado directamente desde los `.d.ts`/`.css` del paquete vendorizado (`frontend/vendor/zurich-*-0.8.1.tgz`), no desde un paste de la web oficial de Zurich (a diferencia del resto de esta tabla). Ver detalle en cada archivo. Origen: análisis exhaustivo del vendor pedido por el usuario el 2026-08-06 para verificar si ciertos patrones de `shared.css` (`.kpi-card`, `.pqr-banner*`, `.pqr-footer*`, `.pqr-topnav*`, `.no-docs-card`, `.dashboard-pagination`) tenían equivalente real en Zurich DS — sí lo tienen, pero **no estaban expuestos** en `ZdsFields.tsx` ni en `zds-cheatsheet.md`.
 
 > Update these tables every time a new component file is created, and add the row under the **right category**.
 
