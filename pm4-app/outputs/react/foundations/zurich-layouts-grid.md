@@ -19,8 +19,8 @@ When the user asks about **page layout**, **12-column grid**, **responsive colum
    column="<start>:<end>"   or   column="<span>"
    ```
    - `<start>` and `<end>` are 1-based column indexes from the 12-column grid.
-   - `column="2"` means **span 2 columns** from the next available position.
-   - `column="1:8"` means **start at column 1, end at column 8** (occupies columns 1 through 8).
+   - `column="2"` means **place the item's start line at absolute column 2** (`grid-column: 2`) — ⚠️ **verified against the compiled CSS: this is an absolute line position, not a reusable "span N columns" helper.** See §5.1 note.
+   - `column="1:8"` means **start at column 1, end at column 8** (occupies columns 1 through 8) — this range form is confirmed correct (`grid-column-start`/`grid-column-end`).
 4. **Column syntax — Mobile-first (prefix with `m:`):**
    ```
    column="m:<start>:<end>"
@@ -104,14 +104,14 @@ Apply on **children of a `z-grid` container** to assign their column span.
 
 | Syntax           | Meaning                                                              |
 |------------------|----------------------------------------------------------------------|
-| `column="N"`     | Span N columns at the next available position.                       |
-| `column="A:B"`   | Start at column A, end at column B (inclusive, 1-based, 1–12).       |
+| `column="N"`     | ⚠️ **Places the item's start line at absolute grid column N** (`grid-column: N`) — **not** a reusable "span N columns" helper. Verified against the compiled CSS of `zurich-css-components` 0.8.1 (`base.css`): `[z-grid=main]>*[column="N"]{grid-column:N}`. Do not rely on this for repeated equal-width rows (e.g. N form fields per row) — use the project's own `.form-row.cols-N` pattern for that instead (see `pm4-app/CLAUDE.md`, Eje B). |
+| `column="A:B"`   | Start at column A, end at column B (inclusive, 1-based, 1–12). Confirmed correct: `[z-grid=main]>*[column^="A:"]{grid-column-start:A}` / `[column$=":B"]{grid-column-end:B+1}`. |
 
 ```html
 <section z-grid="main">
   <div column="1:8">Header — columns 1..8</div>
   <div column="10:12">Sidebar — columns 10..12</div>
-  <div column="2">Spans 2 columns</div>
+  <div column="2">Starts at absolute column 2 (not "spans 2 columns")</div>
   <div column="4:12">Long block — columns 4..12</div>
   <div column="4:6">Item A — columns 4..6</div>
   <div column="7:9">Item B — columns 7..9</div>
@@ -124,7 +124,7 @@ Use `m:` to target the **mobile breakpoint** (6-column grid). At mobile, indexes
 
 | Syntax              | Meaning                                                            |
 |---------------------|--------------------------------------------------------------------|
-| `column="m:N"`      | Span N columns starting at the next available position (mobile).   |
+| `column="m:N"`      | ⚠️ Same caveat as the desktop form — places the start line at absolute mobile column N, not a span. Not verified separately against the compiled CSS (the `m:` prefix wasn't in the extracted `base.css` sample checked), but the non-range `column="N"` mechanism is confirmed line-based, not span-based, on desktop — treat this analogously until confirmed. |
 | `column="m:A:B"`    | Start at mobile column A, end at mobile column B (1–6).            |
 
 ```html
