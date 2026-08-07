@@ -464,7 +464,11 @@ z-table :is(th, td)[config*="right"] {
   flex-shrink: 0;
 }
 
-/* Component: FormSection */
+/* Component: FormSection — investigado 2026-08-06: ni ZrCard (un solo slot
+   `content`, sin slot de header) ni ZrTile (header como texto plano dentro
+   de `main`, mismo fondo que el resto de la tile) permiten una franja de
+   color sólido full-width separada del cuerpo — CSS de dominio confirmado,
+   FormSection.tsx se mantiene igual. */
 .form-section-card {
   margin-bottom: var(--zs-250);
   background: var(--zg-white);
@@ -533,7 +537,13 @@ z-table :is(th, td)[config*="right"] {
   display: block;
 }
 
-/* Component: InfoBar */
+/* Component: InfoBar — investigado 2026-08-06: ZrListItem invierte la
+   jerarquía tipográfica (header grande/primario, content chico/secundario,
+   al revés de label chico + valor grande), sin borde+sombra de contenedor
+   propios. ZrInputGroup solo fusiona inputs reales adyacentes, no pares
+   texto label/valor. ZrTile es de tamaño fijo con panel de imagen, para 1
+   imagen+texto, no N pares en fila. Sin componente ZDS equivalente,
+   InfoBar.tsx se mantiene igual. */
 .info-bar {
   display: flex;
   flex-wrap: wrap;
@@ -751,10 +761,8 @@ z-table :is(th, td)[config*="right"] {
 /* ── 6. DISEÑOS ESPECÍFICOS DE LAS PANTALLAS (Keep DRY) ──────────────────── */
 
 /* ---- Cotizador y tomador ---- */
-.lookup-wrapper {
-  display: flex;
-  align-items: flex-end;
-}
+/* .lookup-wrapper → migrado a z-flex z-align="left:bottom" 2026-08-06
+   (layout trivial sin estilo visual propio, Eje B escalón 1). */
 
 .form-group--billing {
   margin-top: var(--zs-25);
@@ -793,6 +801,12 @@ z-table :is(th, td)[config*="right"] {
   line-height: 1.3;
 }
 
+/* Investigado 2026-08-06: ActionCard/Tile son cards de tamaño fijo con
+   imagen/pictograma obligatorio, no pensadas para envolver un ZdsSelect
+   real de react-hook-form. SelectableCards/MultiSelectableCards extienden
+   BaseInput_Props (su propio model/options tipados) — son inputs de
+   selección de tarjeta con estado propio, incompatibles con envolver un
+   campo de formulario externo. Sin componente ZDS equivalente. */
 .billing-grid {
   display: grid;
   gap: var(--zs-100);
@@ -862,12 +876,8 @@ z-table :is(th, td)[config*="right"] {
   font-style: italic;
 }
 
-.si-no-select-all {
-  display: flex;
-  gap: var(--zs-50);
-  justify-content: flex-end;
-  margin-bottom: var(--zs-50);
-}
+/* .si-no-select-all → migrado a z-flex="50" z-align="right" + style inline
+   (margin-bottom, único resto sin primitivo) 2026-08-06. */
 
 .doc-row {
   display: flex;
@@ -895,11 +905,8 @@ z-table :is(th, td)[config*="right"] {
 }
 
 /* Tables / Records */
-.record-table-header {
-  display: flex;
-  justify-content: flex-end;
-  margin-bottom: var(--zs-50);
-}
+/* .record-table-header → migrado a z-flex z-align="right" + style inline
+   (margin-bottom) 2026-08-06. */
 
 .record-empty {
   text-align: center;
@@ -923,11 +930,8 @@ z-table :is(th, td)[config*="right"] {
   margin-bottom: var(--zs-50);
 }
 
-.cover-note-toggle {
-  display: flex;
-  align-items: center;
-  gap: var(--zs-75);
-}
+/* .cover-note-toggle → migrado a z-flex="75" z-align="left:center" 2026-08-06
+   (layout trivial sin estilo visual propio). */
 
 /* Stack de label + control con gap 4px: --zs-25 no existe como gap de z-flex
    (cuyo mínimo es 50 = 8px), por eso se mantiene como clase. */
@@ -942,7 +946,14 @@ z-table :is(th, td)[config*="right"] {
   margin-left: var(--zs-25);
 }
 
-/* Resumen de cotizaciones (preview) */
+/* Resumen de cotizaciones (preview). Investigado 2026-08-06: el componente
+   `Quote` del vendor (categoría molecules) es un FALSO AMIGO — sus props
+   reales (`quote-src`/`author-name`/`content`/`description`) son las de
+   una cita/testimonio, no una cotización de seguros. Ni ActionCard ni Tile
+   tienen una franja de header con color sólido full-width separada del
+   cuerpo (mismo hallazgo que FormSection, arriba) — el cuerpo tabular ya
+   usa ZrTable/z-table; solo el header de color + contenedor con
+   border-radius/overflow quedan sin equivalente ZDS. */
 .quote-summary-body {
   padding: var(--zs-150) var(--zs-200);
   display: flex;
@@ -988,11 +999,8 @@ z-table :is(th, td)[config*="right"] {
   align-items: center;
 }
 
-.result-actions {
-  margin-top: var(--zs-200);
-  display: flex;
-  justify-content: center;
-}
+/* .result-actions → migrado a z-flex z-align="center" + style inline
+   (margin-top) 2026-08-06. */
 
 /* Opciones cotización screen */
 .screen-body {
@@ -1120,10 +1128,8 @@ z-table :is(th, td)[config*="right"] {
   color: var(--zc-peach-aa);
 }
 
-.email-status-actions {
-  display: flex;
-  justify-content: center;
-}
+/* .email-status-actions → migrado a z-flex z-align="center" 2026-08-06
+   (layout trivial sin estilo visual propio). */
 
 .email-status-overlay {
   position: fixed;
@@ -1170,14 +1176,11 @@ z-table :is(th, td)[config*="right"] {
    punto-semáforo de días y barras de encabezado/paginación.
    ===================================================== */
 
-/* ── Barra superior: título de trabajo + acción "Nuevo caso" ── */
-.dashboard-toolbar {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: var(--zs-100);
-  margin: var(--zs-100) 0;
-}
+/* .dashboard-toolbar → migrado a z-flex="100" z-align="between:center" +
+   style inline (margin) 2026-08-06. z-align sí soporta "between"
+   (justify-content:space-between) — confirmado contra el CSS real; la nota
+   de DOCUMENTACION_COL_QD_SCR-013...md que decía lo contrario está
+   desactualizada, corregida en el mismo commit. */
 
 /* .kpi-grid / .kpi-card / .dashboard-pagination → migrados a ZrKpiValue/ZrPagination
    2026-08-06 (ver outputs/react/molecules/zurich-kpivalue.md y

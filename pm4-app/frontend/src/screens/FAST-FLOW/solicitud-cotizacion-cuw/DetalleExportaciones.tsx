@@ -167,7 +167,7 @@ export default function DetalleExportaciones({ value, onChange }: Props) {
 
   return (
     <div>
-      <div className="record-table-header">
+      <div z-flex z-align="right" style={{ marginBottom: 'var(--zs-50)' }}>
         <ZrButton config="secondary:s" icon="plus:line" onClick={() => { setIntEditIndex(null); setBlnModalOpen(true); }}>AGREGAR</ZrButton>
       </div>
 

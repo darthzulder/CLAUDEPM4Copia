@@ -210,7 +210,7 @@ export default function AseguradosAdicionales({ value, onChange }: Props) {
 
   return (
     <div>
-      <div className="record-table-header">
+      <div z-flex z-align="right" style={{ marginBottom: 'var(--zs-50)' }}>
         <ZrButton config="secondary:s" icon="plus:line" onClick={handleAdd}>AGREGAR</ZrButton>
       </div>
 

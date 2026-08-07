@@ -109,7 +109,7 @@ function NcToggle({ form, name }: { form: Form; name: keyof CotizFfFlFormData })
 function CardFooter({ form, ncField }: { form: Form; ncField: keyof CotizFfFlFormData }) {
   return (
     <div className="card-footer">
-      <div className="cover-note-toggle">
+      <div z-flex="75" z-align="left:center">
         <span className="cover-note-label">¿Enviar nota de cobertura?</span>
         <NcToggle form={form} name={ncField} />
       </div>

@@ -105,7 +105,7 @@ export default function DashboardGestionCasos() {
         )}
 
         {/* Barra superior: título de trabajo + Descargar reporte. */}
-        <div className="dashboard-toolbar">
+        <div z-flex="100" z-align="between:center" style={{ margin: 'var(--zs-100) 0' }}>
           <h2 className="section-title" style={{ margin: 0 }}>Gestión de Casos</h2>
           <ZrButton
             config="primary:s"

@@ -280,7 +280,7 @@ function InfoTomador({
       <div className="form-row cols-3 row-align-bottom">
         <ZdsSelect label="Tipo de documento" name="frm_tom_tipo_documento" control={control} rules={{ required: 'Campo requerido' }} options={OPTIONS.tipoDocumento} required error={fe('frm_tom_tipo_documento')} />
         <ZdsInput label="Nro. de documento" name="frm_tom_num_documento" control={control} rules={{ required: 'Campo requerido', minLength: { value: 5, message: 'Mínimo 5 caracteres' } }} required error={fe('frm_tom_num_documento')} />
-        <div className="form-group lookup-wrapper">
+        <div className="form-group" z-flex z-align="left:bottom">
           <ZrButton config="secondary" icon="search:line" onClick={onConsultar} loading={tiaStatus === 'loading'} disabled={tiaStatus === 'loading'}>
             Consultar Cliente
           </ZrButton>
@@ -388,7 +388,7 @@ function InfoAsegurado({
       <div className="form-row cols-3 row-align-bottom">
         <ZdsSelect label="Tipo de documento" name="frm_aseg_tipo_documento" control={control} rules={{ required: 'Campo requerido' }} options={OPTIONS.tipoDocumento} required error={fe('frm_aseg_tipo_documento')} />
         <ZdsInput label="Nro. de documento" name="frm_aseg_num_documento" control={control} rules={{ required: 'Campo requerido', minLength: { value: 5, message: 'Mínimo 5 caracteres' } }} required error={fe('frm_aseg_num_documento')} />
-        <div className="form-group lookup-wrapper">
+        <div className="form-group" z-flex z-align="left:bottom">
           <ZrButton config="secondary" icon="search:line" onClick={onConsultar} loading={tiaStatus === 'loading'} disabled={tiaStatus === 'loading'}>
             Consultar Cliente
           </ZrButton>

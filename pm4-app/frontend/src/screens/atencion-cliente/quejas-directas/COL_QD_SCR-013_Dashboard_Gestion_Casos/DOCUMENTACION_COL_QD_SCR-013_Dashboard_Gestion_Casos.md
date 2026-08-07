@@ -197,8 +197,8 @@ El modal de detalle es solo lectura con un único botón "Cerrar".
 | Elemento del mockup | Componente / clase usada | Tipo de decisión |
 |---|---|---|
 | Alerta informativa superior | `ZrAlert config="info"` | Componente DS (fachada) |
-| Barra título + "Descargar reporte" | `.dashboard-toolbar` + `.section-title` + `ZrButton config="primary:s" icon="download:line"` | Layout dominio (space-between) + DS |
-| Tarjetas KPI | `.kpi-grid` / `.kpi-card` / `.kpi-card--{warn,danger,ok}` | **Dominio tokenizado** (sin componente KPI en DS) |
+| Barra título + "Descargar reporte" | `z-flex="100" z-align="between:center"` + `.section-title` + `ZrButton config="primary:s" icon="download:line"` | Primitivos DS + DS |
+| Tarjetas KPI | `ZrKpiValue` (con `style` override de `--z-kpi-value--color` por el semáforo de 3 colores) | Componente DS (habilitado 2026-08-06) |
 | Filtros (selects) | `ZdsSelect` (Controller) + `useCollection` (Tipo id 18, Área id 35) | Wrapper DS + colecciones PM4 |
 | Filtro búsqueda | `ZdsInput icon="search:line"` | Wrapper DS |
 | Botones Aplicar/Limpiar | `ZrButton` + `z-flex`/`z-align` | DS + primitivos de layout |
@@ -207,9 +207,7 @@ El modal de detalle es solo lectura con un único botón "Cerrar".
 | Píldora de estado | `ZdsStatusBadge variant=…` | Wrapper DS |
 | Días restantes | Texto plano (`diasRestantesTexto`) en la celda | Sin componente ni CSS (texto) |
 | Botón "Ver" | `ZrButton config="secondary:s"` | DS |
-| Paginación | `.dashboard-pagination` + `ZrButton` | Layout dominio + DS |
+| Paginación | `ZrPagination` | Componente DS (habilitado 2026-08-06) |
 | Modal de detalle | `ZrModal` + `InfoBar` + `ZdsStatusBadge` | Componentes DS / propios |
 
-**Quedó como dominio tokenizado y por qué:**
-- **KPI cards** (`.kpi-*`): el DS 0.8.1 no expone un componente de KPI/estadística; se construyó con tokens (`--zg-white`, `--z-card-border`, `--z-card-shadow`, `--zf-h-28`, `--z-orange/red/green`).
-- **Layout `.dashboard-toolbar` / `.dashboard-pagination`**: patrones `space-between` no expresables con `z-flex`/`z-align` (que no ofrecen "between"); clases nombradas por componente, con tokens de espaciado.
+**Actualizado 2026-08-06** (ver `outputs/react/VENDOR_COMPONENT_CATALOG.md` y el plan de reducción de `shared.css`): `.kpi-*` y `.dashboard-pagination` no eran gaps reales del DS — `ZrKpiValue`/`ZrPagination` existían en el vendor pero no estaban expuestos en `ZdsFields.tsx`. Y la nota sobre `.dashboard-toolbar` estaba **equivocada**: `z-align` sí soporta `"between"` (`justify-content:space-between`), confirmado contra el CSS real compilado — no había necesidad de una clase propia para ese layout.
