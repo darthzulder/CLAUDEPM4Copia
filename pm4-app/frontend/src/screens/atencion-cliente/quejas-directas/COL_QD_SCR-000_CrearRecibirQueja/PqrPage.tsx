@@ -1,6 +1,7 @@
 import type { ReactNode } from 'react';
 import zurichLogo from '../../../../resources/zurich/ZurichLogo_Horz_White_CMYK_no_R.png';
-import { ZrNavigation } from '../../../../components/fields/ZdsFields';
+import pqrBannerDummy from '../../../../resources/placeholders/pqr-banner-dummy.svg';
+import { ZrNavigation, ZrPromo } from '../../../../components/fields/ZdsFields';
 
 // Chrome de la página pública de radicación (maquetado del sitio Zurich): barra de
 // navegación navy, banner azul con titular + descripción, hoja de secciones y footer
@@ -27,13 +28,23 @@ export function PqrPage({ title, intro, children }: PageProps) {
         <img slot="logo" src={zurichLogo} alt="Zurich" className="pqr-topnav-logo" />
       </ZrNavigation>
 
-      <header className="pqr-banner">
-        <div className="pqr-banner-content">
-          <h1 className="pqr-banner-title">{title}</h1>
-          <p className="pqr-banner-text">{intro}</p>
-        </div>
-        <div className="pqr-banner-shapes" />
-      </header>
+      {/* ZrPromo (habilitado 2026-08-06, ver outputs/react/molecules/zurich-promo.md) con
+          imagen DUMMY (resources/placeholders/pqr-banner-dummy.svg) — el diseño actual de
+          este banner no tiene imagen/pictograma (solo título+texto+círculos decorativos), y
+          tanto ZrPromo como ZrStageBanner requieren uno. Reemplazar `pqrBannerDummy` por el
+          asset final de diseño en cuanto esté disponible; no hace falta tocar nada más de
+          este componente para el swap (Fase 3b del plan de reducción de shared.css). `shape`
+          es un valor de muestra (1-7) — ajustar cuando haya diseño real que comparar. */}
+      <ZrPromo
+        header={title}
+        content={intro}
+        shape="3"
+        {...({ 'image-src': pqrBannerDummy } as Record<string, unknown>)}
+        style={{
+          ['--z-promo--bg' as never]: 'var(--z-blue)',
+          ['--z-promo--color' as never]: 'var(--zg-white-zurich)',
+        }}
+      />
 
       {children}
 

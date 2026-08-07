@@ -1222,70 +1222,11 @@ z-table :is(th, td)[config*="right"] {
   object-fit: contain;
 }
 
-/* Banner azul: titular 48px light + descripción 18px, con círculos decorativos. */
-.pqr-banner {
-  position: relative;
-  overflow: hidden;
-  display: flex;
-  align-items: flex-start;
-  min-height: 246px;
-  background: var(--z-blue);
-}
-
-.pqr-banner-content {
-  position: relative;
-  z-index: 1;
-  max-width: 1014px;
-  padding: var(--zs-400) var(--zs-1000);
-}
-
-.pqr-banner-title {
-  margin: 0 0 var(--zs-50);
-  font: var(--zf-h-48);
-  color: var(--zg-white);
-}
-
-.pqr-banner-text {
-  margin: 0;
-  font: var(--zf-body-18);
-  color: var(--zg-white-zurich);
-}
-
-/* Círculos decorativos del banner (asomados por el borde derecho). */
-.pqr-banner-shapes {
-  position: absolute;
-  top: 102px;
-  right: 0;
-  width: 144px;
-  height: 144px;
-}
-
-.pqr-banner-shapes::before,
-.pqr-banner-shapes::after {
-  content: '';
-  position: absolute;
-  border-radius: 50%;
-  border: 2px solid color-mix(in srgb, var(--zg-white) 25%, transparent);
-}
-
-.pqr-banner-shapes::before {
-  width: 113px;
-  height: 113px;
-  right: -105px;
-  top: -71px;
-}
-
-.pqr-banner-shapes::after {
-  width: 58px;
-  height: 58px;
-  right: -144px;
-  top: -16px;
-}
-
-@media (max-width: 1200px) {
-  .pqr-banner-content { padding: var(--zs-300) var(--zs-200); }
-  .pqr-banner-title   { font: var(--zf-h-32); }
-}
+/* .pqr-banner/.pqr-banner-content/.pqr-banner-title/.pqr-banner-text/
+   .pqr-banner-shapes → migrados a ZrPromo 2026-08-06 (ver PqrPage.tsx).
+   Imagen DUMMY hasta tener el asset final de diseño (Fase 3b del plan de
+   reducción de shared.css) — el responsive de ZrPromo es interno
+   (@container), no hace falta replicar el breakpoint de 1200px a mano. */
 
 /* Hoja de formulario: columna central de 1130px sobre el fondo gris. */
 .pqr-form {
