@@ -75,9 +75,13 @@ export default function RequestFileList({
       <span className="info-bar-label">{label}</span>
 
       {loading && (
-        <div className="no-docs-card">
+        <div
+          z-flex="col:75"
+          z-align="center:center"
+          style={{ padding: 'var(--zs-300) var(--zs-200)', color: 'var(--z-muted)', textAlign: 'center' }}
+        >
           <ZrLoader style={{ ['--z-loader--size' as never]: '20px' }} />
-          <p>{loadingText}</p>
+          <p style={{ margin: 0 }}>{loadingText}</p>
         </div>
       )}
 

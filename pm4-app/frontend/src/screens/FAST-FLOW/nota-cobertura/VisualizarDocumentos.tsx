@@ -162,9 +162,13 @@ export default function VisualizarDocumentos() {
           }
         >
           {filesLoading && (
-            <div className="no-docs-card">
+            <div
+              z-flex="col:75"
+              z-align="center:center"
+              style={{ padding: 'var(--zs-300) var(--zs-200)', color: 'var(--z-muted)', textAlign: 'center' }}
+            >
               <ZrLoader style={{ ['--z-loader--size' as never]: '20px' }} />
-              <p>Buscando documentos del caso…</p>
+              <p style={{ margin: 0 }}>Buscando documentos del caso…</p>
             </div>
           )}
 

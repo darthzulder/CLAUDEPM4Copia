@@ -1075,20 +1075,10 @@ z-table :is(th, td)[config*="right"] {
   background: var(--zg-white-zurich);
 }
 
-.no-docs-card {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  padding: var(--zs-300) var(--zs-200);
-  gap: var(--zs-75);
-  color: var(--z-muted);
-  text-align: center;
-}
-
-.no-docs-card p {
-  margin: 0;
-}
+/* .no-docs-card → migrado a z-flex="col:75" z-align="center:center" + style
+   inline (tokens) 2026-08-06 — no era un "estado vacío" (eso ya usaba ZrAlert
+   config="info"), sino el bloque de carga (ZrLoader + texto); no calzaba con
+   ZrEmptyState. Ver RequestFileList.tsx y VisualizarDocumentos.tsx. */
 
 /* Estado Correo screen */
 .email-status-content {
