@@ -1185,53 +1185,9 @@ z-table :is(th, td)[config*="right"] {
   margin: var(--zs-100) 0;
 }
 
-/* ── KPIs de SLA (4 tarjetas) ── */
-.kpi-grid {
-  display: grid;
-  grid-template-columns: repeat(4, 1fr);
-  gap: var(--zs-100);
-  margin-bottom: var(--zs-150);
-}
-
-@media (max-width: 900px) { .kpi-grid { grid-template-columns: repeat(2, 1fr); } }
-@media (max-width: 600px) { .kpi-grid { grid-template-columns: 1fr; } }
-
-.kpi-card {
-  display: flex;
-  flex-direction: column;
-  gap: var(--zs-25);
-  background: var(--zg-white);
-  border: 1px solid var(--z-card-border);
-  border-radius: 8px;
-  padding: var(--zs-100) var(--zs-150);
-  box-shadow: var(--z-card-shadow);
-}
-
-.kpi-card-label {
-  font: var(--zf-capt-12--700);
-  color: var(--z-muted);
-}
-
-.kpi-card-value {
-  font: var(--zf-h-28);
-  font-weight: 700;
-  line-height: 1.1;
-  color: var(--z-text);
-}
-
-.kpi-card--warn   .kpi-card-value { color: var(--z-orange); }
-.kpi-card--danger .kpi-card-value { color: var(--z-red); }
-.kpi-card--ok     .kpi-card-value { color: var(--z-green); }
-
-/* ── Paginación de la tabla de casos ── */
-.dashboard-pagination {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  flex-wrap: wrap;
-  gap: var(--zs-75);
-  margin-top: var(--zs-100);
-}
+/* .kpi-grid / .kpi-card / .dashboard-pagination → migrados a ZrKpiValue/ZrPagination
+   2026-08-06 (ver outputs/react/molecules/zurich-kpivalue.md y
+   outputs/react/layout/zurich-pagination.md). Layout con z-flex, sin clase propia. */
 
 /* ── Modal ancho con cuerpo desplazable (logs, textos largos) ──────────────
    Mismo ancho que .preview-modal para que todos los modales grandes coincidan.
