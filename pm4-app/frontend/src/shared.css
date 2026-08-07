@@ -1097,6 +1097,10 @@ z-table :is(th, td)[config*="right"] {
   padding-top: var(--zs-100);
 }
 
+/* Investigado 2026-08-06: ZrTag (radius --zs-150=24px, sin word-break) y
+   ZrChip (siempre interactivo, con botón de cierre integrado) no calzan con
+   un correo electrónico completo de solo lectura que necesita quebrarse —
+   CSS de dominio confirmado, sin componente ZDS equivalente. */
 .email-status-badge {
   display: inline-block;
   margin: var(--zs-75) 0;
@@ -1418,7 +1422,10 @@ z-table :is(th, td)[config*="right"] {
 
 /* Cabecera de modal (SCR-000): ícono circular + título + texto de apoyo. La
    comparten el modal de confirmación de envío (MSG-000-08) y el de casos
-   similares — solo cambia el color del ícono (modificador --info/--warning). */
+   similares — solo cambia el color del ícono (modificador --info/--warning).
+   Investigado 2026-08-06 contra el vendor real (ListItem/EventListItem/Avatar/
+   Alert/ActionCard): ninguno ofrece ícono circular de tamaño libre + fila
+   flex-start — CSS de dominio confirmado, sin componente ZDS equivalente. */
 .pqr-modal-head {
   display: flex;
   align-items: flex-start;
@@ -1462,7 +1469,9 @@ z-table :is(th, td)[config*="right"] {
 /* Tarjeta gris con los datos del caso, fila por dato con divisoria fina.
    Usa el token crudo --zg-white-zurich (no el alias --z-bg): dentro de ZrModal
    el DS redefine --z-bg a blanco para el contenido proyectado, y el alias
-   perdería el gris. */
+   perdería el gris. Investigado 2026-08-06: z-table/InputGroup/ListItem no
+   ofrecen "card + fila con borde solo entre filas + label/valor" — sin
+   componente ZDS equivalente confirmado. */
 .pqr-summary {
   display: flex;
   flex-direction: column;
