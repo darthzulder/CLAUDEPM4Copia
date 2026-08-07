@@ -147,6 +147,18 @@ function KpiCasosVencidos({ count, deltaVsAyer }: { count: number; deltaVsAyer: 
 
 ## 8. Behavior Rules (for the AI)
 
+- ❗ **BUG del vendor (confirmado en runtime, 0.8.1):** el wrapper React de este componente
+  (`dist/react/kpi-value.js`) **no incluye** el `<ReactSlots>` interno que sí tienen todos sus
+  hermanos (`ZrEmptyState`, `ZrNavigation`, `ZrFooter`, `ZrPromo`, `ZrStageBanner`). Como
+  `header`/`description`/`difference` están declaradas como slots del componente, pasar
+  `header="texto"` como prop plano se **descarta en silencio** (`useCustomElement()` excluye
+  cualquier prop cuya key esté en la lista de slots y no sea un array) — se ve el número pero
+  la etiqueta desaparece por completo, sin error en consola. **La fachada `ZdsFields.tsx` ya
+  parchea esto** (reasigna `header`/`description`/`difference` como `<span slot="...">` en los
+  children, igual que hace `<ReactSlots>` internamente) — usar `ZrKpiValue` **solo desde
+  `ZdsFields.tsx`**, nunca importar `@zurich/web-components/react/kpi-value` directo, o se
+  vuelve a romper.
+
 - ❗ **`config` solo tiene 2 estados** (`positive`/`negative`) — no inventar `'warning'`/`'neutral'`; si el diseño pide 3+ estados de color, se resuelve con `style` + `--z-kpi-value--diff--pos/neg` (u override completo de `--z-kpi-value--color`), nunca con un valor de `config` no listado.
 - ❗ **No pasar contenido a `header`/`description` vía `slot="..."` en un `<span>` hijo** — el mecanismo verificado es prop plano o `ZrKpiValue.Header`/`.Description`.
 - ❗ **Es puramente presentacional** — no tiene eventos; no envolver en `onClick` esperando comportamiento nativo.
