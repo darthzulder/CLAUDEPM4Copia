@@ -33,6 +33,13 @@
 | Botón | `ZrButton` | `config`, `icon`, `loading`, `disabled` |
 | Tabla | `ZrTable` / `z-table` | estilos en shared.css |
 | Modal | `ZrModal` | controlado por `model` |
+| Tarjeta de KPI (valor + variación) | `ZrKpiValue` | `amount`+`header`+`description`+`difference`; `config` solo 2 estados (positive/negative) — para semáforo de 3+ colores usar `style` + `--z-kpi-value--color` |
+| Estado vacío (sin resultados/documentos) | `ZrEmptyState` | `pictogram`/`image-src`+`header`+`content`+slot `actions` |
+| Paginación de lista/tabla | `ZrPagination` | `model`+`pages`+`show-edges`+evento `change`; sin `.css` propio documentado |
+| Footer corporativo | `ZrFooter` | `columns`(2-4)+`social`+`footer`(legales); sin slots, sin divisor vertical nativo |
+| Navbar superior con menú lateral | `ZrNavigation` | `menu`(array de arrays)+`routes`+slots `logo`/`nav` |
+| Banner hero centrado con figura decorativa | `ZrStageBanner` | `pictogram`/`image-src`+`shape`(1-7)+`category`+`content` |
+| Banner asimétrico imagen+texto | `ZrPromo` | `header`+`content`+`category`+`shape`+`image-src`; `config="left"` invierte lados |
 
 Si **ninguno** cumple la función → dominio tokenizado (último recurso). Si necesitas un
 componente DS **que no está en la fachada** → DETENTE y consulta (ver jerarquía en CLAUDE.md).
@@ -74,6 +81,7 @@ const err = (n) => fieldError(errors, n, w[n], isSubmitted);
 | `ZrModal` | controlado por `model`; el wrapper restaura `overflow` al desmontar | no montar con `cond && <ZrModal>` sin cuidado |
 | `ZrLoader` | dimensionable con `--z-loader--size` | spinner oficial; no crear CSS |
 | `ZrTable`, `ZrTabs`, `ZrCard`, `ZrForm`, `ZrSidebar`, `ZrTile`, `ZrTooltip`, `ZrInputGroup`, `ZrFieldset`, `ZrChip`, `ZrTag`, `ZrBadge`, `ZrProgressBar`, `ZrSegmentedControl` | ver `ZdsFields.tsx` / ficha en `outputs/react/` | — |
+| `ZrKpiValue`, `ZrEmptyState`, `ZrPagination`, `ZrFooter`, `ZrNavigation`, `ZrStageBanner`, `ZrPromo` | ver fichas en `outputs/react/molecules/`, `outputs/react/layout/`, `outputs/react/navigation/` | Habilitados 2026-08-06, documentados desde el vendor (no paste web) — ver notas de cada ficha antes de usar |
 
 `ZdsStatusBadge` (sobre `ZrTag`): `variant: 'success' \| 'danger' \| 'info' \| 'neutral' \| 'warning'`.
 `ZrBadge` NO sirve standalone (es overlay `position:absolute`).

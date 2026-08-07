@@ -1,12 +1,14 @@
 import { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import FormSection from '../../components/FormSection';
+import zurichLogo from '../../resources/zurich/ZurichLogo_Horz_White_CMYK_no_R.png';
 import {
   ZdsInput, ZdsSelect, ZdsRadio, ZdsDate, ZdsTextarea, ZdsCheckboxField,
   ZdsSegmented, ZdsStepper, ZdsCalendar, ZdsStatusBadge,
   ZrButton, ZrAlert, ZrProgressBar, ZrTag, ZrChip, ZrBadge, ZrLoader,
   ZrCard, ZrTile, ZrTabs, ZrTable, ZrTooltip, ZrInputGroup,
   ZrModal, ZrSidebar, ZrTextInput,
+  ZrKpiValue, ZrEmptyState, ZrPagination, ZrFooter, ZrNavigation, ZrStageBanner, ZrPromo,
 } from '../../components/fields/ZdsFields';
 
 /**
@@ -41,6 +43,7 @@ export default function DsCatalog() {
   const [intTab, setIntTab] = useState(1);
   const [blnModal, setBlnModal] = useState(false);
   const [blnDrawer, setBlnDrawer] = useState(false);
+  const [intPage, setIntPage] = useState(1);
 
   return (
     <div className="screen-wrapper">
@@ -158,6 +161,50 @@ export default function DsCatalog() {
             </ZrCard>
             <ZrTile header="ZrTile" content="Superficie de contenido estructurada (header + body + media)." />
           </div>
+        </FormSection>
+
+        {/* ── Habilitados 2026-08-06 (vendor, ver VENDOR_COMPONENT_CATALOG.md) ── */}
+        <FormSection title="KPI, estado vacío y paginación">
+          <div z-flex="wrap:100">
+            <ZrKpiValue amount={12} header="Casos abiertos" />
+            <ZrKpiValue amount={3} header="Próximos a vencer" style={{ ['--z-kpi-value--color' as never]: 'var(--z-orange)' }} />
+            <ZrKpiValue amount={1} header="Vencidos" style={{ ['--z-kpi-value--color' as never]: 'var(--z-red)' }} />
+            <ZrKpiValue amount={45} header="Cerrados" style={{ ['--z-kpi-value--color' as never]: 'var(--z-green)' }} />
+          </div>
+          <ZrEmptyState header="Sin resultados" content="No hay registros que coincidan con el filtro aplicado." />
+          <div z-flex="75" z-align="between:center">
+            <span className="field-hint">Página {intPage} de 5</span>
+            <ZrPagination
+              model={intPage}
+              pages={5}
+              onChange={(n: number) => setIntPage(n)}
+              {...({ 'show-edges': true } as object)}
+            />
+          </div>
+        </FormSection>
+
+        <FormSection title="Navegación y banners (vendor)">
+          <ZrNavigation
+            {...({
+              routes: [{ text: 'Inicio' }, { text: 'Contacto' }],
+            } as Record<string, unknown>)}
+          >
+            <img slot="logo" src={zurichLogo} alt="Zurich" style={{ height: '28px' }} />
+          </ZrNavigation>
+          <ZrStageBanner
+            {...({ shape: '3', category: 'Atención al cliente', content: 'Ejemplo de banner hero centrado (ZrStageBanner).', 'image-src': zurichLogo } as Record<string, unknown>)}
+          />
+          <ZrPromo
+            header="Radica tu PQR"
+            content="Ejemplo de banner asimétrico (ZrPromo)."
+            {...({ category: 'Atención al cliente', shape: '3', 'image-src': zurichLogo } as Record<string, unknown>)}
+          />
+          <ZrFooter
+            {...({
+              columns: [{ header: 'Ayuda', items: [{ to: '#', text: 'PQR' }, { to: '#', text: 'Contacto' }] }],
+              footer: [{ to: '#', text: 'Aviso legal' }],
+            } as Record<string, unknown>)}
+          />
         </FormSection>
 
         {/* ── Overlays ────────────────────────────────────────── */}

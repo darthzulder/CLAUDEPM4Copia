@@ -1,6 +1,6 @@
 import { Controller } from 'react-hook-form';
 import type { Control, RegisterOptions, FieldPath, FieldValues, UseFormSetValue, UseFormSetError, UseFormClearErrors } from 'react-hook-form';
-import { useEffect, type ComponentProps, type ReactNode, type MutableRefObject } from 'react';
+import { useEffect, useRef, type ComponentProps, type ReactNode, type MutableRefObject } from 'react';
 import { ZrModal as ZrModalRaw } from '@zurich/web-components/react/modal';
 import { ZrTextInput }        from '@zurich/web-components/react/text-input';
 import { ZrCheckbox }         from '@zurich/web-components/react/checkbox';
@@ -54,6 +54,65 @@ export { ZrTooltip }     from '@zurich/web-components/react/tooltip';
 export { ZrInputGroup }  from '@zurich/web-components/react/input-group';
 export { ZrFieldset }    from '@zurich/web-components/react/fieldset';
 export { ZrLoader }      from '@zurich/web-components/react/loader';
+
+// Habilitados 2026-08-06 (ver outputs/react/VENDOR_COMPONENT_CATALOG.md): existían en el
+// vendor pero no estaban expuestos en la fachada. Fichas completas en outputs/react/.
+export { ZrKpiValue }    from '@zurich/web-components/react/kpi-value';
+export { ZrEmptyState }  from '@zurich/web-components/react/empty-state';
+export { ZrPagination }  from '@zurich/web-components/react/pagination';
+export { ZrStageBanner } from '@zurich/web-components/react/stage-banner';
+export { ZrPromo }       from '@zurich/web-components/react/promo';
+
+// ZrNavigation/ZrFooter: sus props array/objeto (`menu`/`routes`/`footer`/`social`/
+// `columns`) llegan rotas desde el vendor. `useCustomElement()` (dist/react/customElement.js)
+// hace JSON.stringify() de cualquier prop objeto/array antes de pasarla como atributo —
+// pero como el custom element YA declara esas props como reactive properties de Lit
+// (@property({type: Array})), React las asigna como PROPIEDAD del nodo (no como atributo,
+// porque `key in el` es true), y la propiedad queda con el string crudo del
+// JSON.stringify en vez de la reparsear — revienta `this.routes?.map(...)` dentro del
+// componente. Confirmado comparando con tabs.js: ZrTabs SÍ funciona con su prop `tabs`
+// (también array) porque, al declarar un evento (`onChange`), usa
+// `useCustomElementWithEvents()`, que además reasigna la propiedad real por ref en un
+// useEffect tras el montaje — Navigation/Footer no declaran eventos, así que el vendor no
+// aplica ese fix. Replicamos el mismo parche aquí para estas dos props array/objeto.
+import { ZrNavigation as ZrNavigationRaw } from '@zurich/web-components/react/navigation';
+import { ZrFooter as ZrFooterRaw } from '@zurich/web-components/react/footer';
+
+// (el tipo `ref` declarado en ZrNavigation_Type/ZrFooter_Type no es asignable vía JSX —
+// evitamos pelear con eso envolviendo en un <div display:contents> y buscando el custom
+// element por querySelector, en vez de forwardear un ref al wrapper del vendor.)
+export function ZrNavigation({ menu, routes, footer, social, ...rest }: ComponentProps<typeof ZrNavigationRaw>) {
+  const containerRef = useRef<HTMLDivElement>(null);
+  useEffect(() => {
+    const el = containerRef.current?.querySelector('z-navigation') as Record<string, unknown> | null | undefined;
+    if (!el) return;
+    el.menu = menu;
+    el.routes = routes;
+    el.footer = footer;
+    el.social = social;
+  }, [menu, routes, footer, social]);
+  return (
+    <div ref={containerRef} style={{ display: 'contents' }}>
+      <ZrNavigationRaw {...rest} />
+    </div>
+  );
+}
+
+export function ZrFooter({ columns, footer, social, ...rest }: ComponentProps<typeof ZrFooterRaw>) {
+  const containerRef = useRef<HTMLDivElement>(null);
+  useEffect(() => {
+    const el = containerRef.current?.querySelector('z-footer') as Record<string, unknown> | null | undefined;
+    if (!el) return;
+    el.columns = columns;
+    el.footer = footer;
+    el.social = social;
+  }, [columns, footer, social]);
+  return (
+    <div ref={containerRef} style={{ display: 'contents' }}>
+      <ZrFooterRaw {...rest} />
+    </div>
+  );
+}
 
 // ─── Píldora de estado: ZrTag del DS (pill en-flujo) con semántica por variante ─
 // El DS no tiene "status pill" dedicada; ZrTag es la pill en-flujo. Mapeamos la
