@@ -17,6 +17,7 @@
 | Lista desplegable (con/sin búsqueda) | `ZdsSelect` | `withSearch`, `placeholder`, `disabled`, `loading` |
 | Grupo de radios | `ZdsRadio` | `inline` |
 | Checkbox booleano | `ZdsCheckboxField` | solo `name/control/label` |
+| Interruptor/switch booleano (sin binding a react-hook-form) | `ZrSwitch` | `model`+`onChange`; mismo bug `model={false}` que `ZrCheckbox` → usar `model={valor ? true : 0}` |
 | Toggle segmentado (SÍ/NO…) | `ZdsSegmented` | opciones con `icon` opcional |
 | Selector de fecha (campo) | `ZdsDate` | `min` |
 | Calendario inline (grilla de mes) | `ZdsCalendar` | `min/max/wide` |
@@ -38,7 +39,7 @@
 | Paginación de lista/tabla | `ZrPagination` | `model`+`pages`+`show-edges`+evento `change`; sin `.css` propio documentado |
 | Footer corporativo | `ZrFooter` | `columns`(2-4)+`social`+`footer`(legales); sin slots, sin divisor vertical nativo |
 | Navbar superior con menú lateral | `ZrNavigation` | `menu`(array de arrays)+`routes`+slots `logo`/`nav` |
-| Banner hero centrado con figura decorativa | `ZrStageBanner` | `pictogram`/`image-src`+`shape`(1-7)+`category`+`content` |
+| Banner hero centrado con figura decorativa (o sin imagen, solo texto+figura) | `ZrStageBanner` | `pictogram`/`image-src`+`shape`(1-6, no 7 pese al tipo declarado)+`category`+`content`; sin imagen/pictograma alinea el texto a la izquierda automáticamente |
 | Banner asimétrico imagen+texto | `ZrPromo` | `header`+`content`+`category`+`shape`+`image-src`; `config="left"` invierte lados |
 
 Si **ninguno** cumple la función → dominio tokenizado (último recurso). Si necesitas un

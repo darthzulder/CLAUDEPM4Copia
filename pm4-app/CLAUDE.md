@@ -382,7 +382,7 @@ descontinuado) y una actualización involuntaria perdería el parche.
 | `ZdsStepper` | `ZrStepper` + Controller | Contador de pasos 1-based en `[1, steps]` (wizard/paginador) |
 | `ZdsCalendar` | `ZrCalendar` + Controller | Calendario inline (grilla de mes), modelo ISO `YYYY-MM-DD` |
 | `ZdsStatusBadge` | `ZrBadge` | Píldora de estado por variante (`success`/`danger`/`info`/`neutral`) |
-| Re-exports directos | — | `ZrButton`, `ZrIcon`, `ZrModal`, `ZrForm`, `ZrCard`, `ZrTabs`, `ZrTable`, `ZrAlert`, `ZrBadge`, `ZrChip`, `ZrTag`, `ZrProgressBar`, `ZrFileInput`, `ZrSegmentedControl`, `ZrSidebar`, `ZrTile`, `ZrTooltip`, `ZrInputGroup`, `ZrFieldset`, `ZrStepper`, `ZrCalendar`, `ZrLoader`, `ZrKpiValue`, `ZrEmptyState`, `ZrPagination`, `ZrFooter`, `ZrNavigation`, `ZrStageBanner`, `ZrPromo` — componentes DS que no requieren Controller |
+| Re-exports directos | — | `ZrButton`, `ZrIcon`, `ZrModal`, `ZrForm`, `ZrCard`, `ZrTabs`, `ZrTable`, `ZrAlert`, `ZrBadge`, `ZrChip`, `ZrTag`, `ZrProgressBar`, `ZrFileInput`, `ZrSegmentedControl`, `ZrSidebar`, `ZrTile`, `ZrTooltip`, `ZrInputGroup`, `ZrFieldset`, `ZrStepper`, `ZrCalendar`, `ZrLoader`, `ZrKpiValue`, `ZrEmptyState`, `ZrPagination`, `ZrFooter`, `ZrNavigation`, `ZrStageBanner`, `ZrPromo`, `ZrCheckbox`, `ZrSwitch` — componentes DS que no requieren Controller (`ZrCheckbox`/`ZrSwitch` comparten el bug de vendor `model={false}` descartado en silencio — usar `model={valor ? true : 0}`) |
 
 ### Patrón de formulario (react-hook-form + ZdsFields)
 

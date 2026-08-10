@@ -94,7 +94,7 @@
 | `selection-tag` | — | | `model, checked, content, name, disabled, invalid, custom, change, blur, restarted, validated` | Chip seleccionable tipo checkbox. |
 | `slider` | — | | `model, range, min, max, show-max, show-min, icon-right, icon-left, change, blur, restarted` | Slider de un solo valor. |
 | `stepper` | `ZrStepper` | ✅ | `model, steps, label, config, custom, change, restarted` | Contador de pasos 1-based. |
-| `switch` | — | | `custom, change, blur, validated, restarted` | Interruptor booleano tipo toggle switch. |
+| `switch` | `ZrSwitch` | ✅ | `model, label, name, help-text, disabled, required, invalid, custom, change, blur, validated, restarted` | Interruptor booleano tipo toggle switch. |
 | `tags-select` | — | | `model, options, custom, change, restarted` | Select con opciones en forma de tags. |
 | `text-input` | `ZrTextInput` | ✅ | `model, pattern, input-type, max-length, no-counter, min-length, align-right, data-list, placeholder, icon, change, enter, select, blur, validated, restarted` | Input de texto de 1 línea. |
 | `textarea` | `ZrTextarea` | ✅ | `model, max-length, placeholder, elastic, pattern, custom, change, enter, blur, validated, restarted` | Texto multilínea. |

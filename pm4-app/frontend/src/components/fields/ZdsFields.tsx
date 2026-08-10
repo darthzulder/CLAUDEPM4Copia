@@ -4,6 +4,7 @@ import { useEffect, useRef, type ComponentProps, type ReactNode, type MutableRef
 import { ZrModal as ZrModalRaw } from '@zurich/web-components/react/modal';
 import { ZrTextInput }        from '@zurich/web-components/react/text-input';
 import { ZrCheckbox }         from '@zurich/web-components/react/checkbox';
+import { ZrSwitch }           from '@zurich/web-components/react/switch';
 import { ZrSelect }           from '@zurich/web-components/react/select';
 import { ZrDateInput }        from '@zurich/web-components/react/date-input';
 import { ZrTextarea }         from '@zurich/web-components/react/textarea';
@@ -18,6 +19,13 @@ export { ZrTextInput };
 export { ZrTextarea };
 export { ZrSelect };
 export { ZrCheckbox };
+// ZrSwitch (habilitado 2026-08-10, ver outputs/react/input/zurich-switch.md — documentado
+// desde el paquete vendorizado, componente no expuesto por la web oficial de ZDS
+// decomisionada). Comparte base class (ZBooleanInput) y wrapper React
+// (useCustomElementWithEvents → useCustomElement) con ZrCheckbox: MISMO bug del vendor,
+// `model={false}` se descarta en silencio — usar `model={valor ? true : 0}` (ver ejemplo
+// de uso en SeccionDetalleQueja.tsx).
+export { ZrSwitch };
 export { ZrDateInput };
 export { ZrRadioSelect };
 export { ZrSegmentedControl };

@@ -129,6 +129,7 @@ outputs/
 | `ZrSelect`         | [`react/input/zurich-select.md`](./react/input/zurich-select.md)                    | ⚠️ Experimental | Dropdown / searchable select with options + slots.              |
 | `ZrRadioSelect`    | [`react/input/zurich-radioselect.md`](./react/input/zurich-radioselect.md)          | ⚠️ Experimental | Single-choice radio group (stacked / inline) with rich slots.   |
 | `ZrCheckbox`       | [`react/input/zurich-checkbox.md`](./react/input/zurich-checkbox.md)                | ⚠️ Experimental | Boolean checkbox with indeterminate, required, invalid states.  |
+| `ZrSwitch`         | [`react/input/zurich-switch.md`](./react/input/zurich-switch.md)                    | ⚠️ Experimental | Boolean toggle/switch (same base as `ZrCheckbox`, no indeterminate). |
 | `ZrDateInput`      | [`react/input/zurich-dateinput.md`](./react/input/zurich-dateinput.md)              | ⚠️ Experimental | Date / month / week / datetime field (ISO 8601, optional `custom-ui`). |
 | `ZrCalendar`       | [`react/input/zurich-calendar.md`](./react/input/zurich-calendar.md)                | ⚠️ Experimental | Inline month-grid date selector (no input field).               |
 | `ZrRangeDateInput` | [`react/input/zurich-rangedateinput.md`](./react/input/zurich-rangedateinput.md)    | ⚠️ Experimental | Date-range field (`[from, to]` ISO tuple) with bounds.          |
