@@ -9,7 +9,15 @@
 
 ## 1. AI Implementation Instructions
 
-Usar cuando el usuario pida un **banner asimétrico** (imagen/figura circular a un lado + título + texto + CTA al otro) — segundo candidato (junto a `ZrStageBanner`) para reemplazar `.pqr-banner*`, más cercano al layout **rectangular con texto a la izquierda e imagen/figura al lado derecho** que ya tiene el diseño aprobado.
+Usar cuando el usuario pida un **banner asimétrico** (imagen/figura circular a un lado + título + texto + CTA al otro).
+
+❗ **Requiere imagen SIEMPRE, no es opcional.** Confirmado leyendo el fuente vendorizado
+(`web-components/dist/react/promo.js` → `_renderImage({ forceImage: true })`): aunque no
+se pase `image-src`, el componente fuerza un `<z-image blank-fallback>` dentro de `aside`
+— sin foto real, muestra un círculo sólido rellenado con `--z-promo--img-bg` (por defecto
+`--z-bg-brand`), ocupando igual `--_height: 25rem` / hasta `18.75rem` de ancho. **No usar
+si la regla de negocio exige "sin imagen"** — para eso ver `ZrStageBanner`, que sí tiene
+una rama sin imagen (ver `zurich-stagebanner.md`).
 
 1. Import:
    ```tsx
@@ -145,7 +153,11 @@ type ZrPromoProps = {
 
 ## 11. Composition Patterns
 
-### 11.1 Candidato de reemplazo de `.pqr-banner*` (layout rectangular actual)
+### 11.1 `.pqr-banner*` — descartado a favor de `ZrStageBanner`
+El banner público de PQR (`PqrPage.tsx`) migró a `ZrStageBanner` (2026-08-10), no a
+`ZrPromo`: la regla de negocio pedía **sin imagen**, y `ZrPromo` siempre fuerza un círculo
+de imagen (ver arriba, §1). Layout rectangular con imagen real a un lado sí sería un buen
+caso para `ZrPromo` — este ejemplo queda como referencia para ese escenario:
 ```tsx
 <ZrPromo
   category="Atención al cliente"
@@ -159,5 +171,3 @@ type ZrPromoProps = {
   }}
 />
 ```
-
-> Este es el candidato **más cercano** al diseño actual de `.pqr-banner` (rectangular, texto a la izquierda, figura decorativa asomando a la derecha) — más cercano que `ZrStageBanner` (que es centrado/hero). Confirmar visualmente ambos contra el diseño aprobado antes de decidir cuál migrar.

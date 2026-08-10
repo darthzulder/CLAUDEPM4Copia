@@ -9,13 +9,20 @@
 
 ## 1. AI Implementation Instructions
 
-Usar cuando el usuario pida un **banner hero centrado** con pictograma/imagen circular + título + descripción + figura decorativa — candidato directo a reemplazar `.pqr-banner*` en `shared.css`, **específicamente el patrón de círculos decorativos hecho a mano con `::before`/`::after`** (`.pqr-banner-shapes`).
+Usar cuando el usuario pida un **banner hero centrado** con pictograma/imagen circular + título + descripción + figura decorativa, **o un banner de texto puro (sin imagen) con figura decorativa flotando en una esquina** — este segundo caso reemplazó `.pqr-banner*` en `shared.css` (2026-08-10, ver `PqrPage.tsx`), específicamente el patrón de círculos decorativos hecho a mano con `::before`/`::after` (`.pqr-banner-shapes`).
+
+❗ **Sin `pictogram`/`image-src`/imagen slotted, el componente entra en una rama distinta**
+(confirmado en `web-components/dist/stage-banner.js`, getter privado `isShapedConfig`):
+renderiza únicamente `main` (texto) + `<z-shape>`, sin ningún contenedor de imagen — y el
+CSS alinea el texto a la izquierda automáticamente (`:not([pictogram]):not([image-src])...`
+→ `justify-content:flex-start;text-align:left`). Es la vía correcta cuando el diseño no
+lleva imagen — no forzar un `image-src` vacío ni ocultar la imagen por CSS.
 
 1. Import:
    ```tsx
    import { ZrStageBanner } from '@zurich/web-components/react/stage-banner';
    ```
-2. **`shape` es la prop clave para el reemplazo**: acepta un valor de figura decorativa `1`–`7` (`ZShape_Value = '1'|'2'|...|'7'`, con modificador opcional `flip`). Esto sustituye directamente los círculos dibujados a mano con `::before`/`::after` en `.pqr-banner-shapes`.
+2. **`shape` es la prop clave para el reemplazo**: acepta un valor de figura decorativa (con modificador opcional `flip`). Esto sustituye directamente los círculos dibujados a mano con `::before`/`::after` en `.pqr-banner-shapes`. ❗ El tipo declarado es `ZShape_Value = '1'|'2'|...|'7'`, pero en el CSS real de este vendor (0.8.1) **solo existen `--z-shape--1` a `--z-shape--6`** (`web-components/dist/shape.js`) — `shape="7"` no tiene regla CSS que lo defina. Verificar visualmente contra `?screen=ds-catalog` antes de asumir un valor.
 3. `pictogram` o `image-src` (mutuamente alternativos, mismo patrón que `ZrEmptyState`) — imagen/ícono circular centrado sobre el banner (el CSS fuerza `border-radius: 50%` en `image-src`).
 4. `content` = descripción del banner; el título usa `category` (más pequeño, `--zf-body-20--600`) — **ojo:** en este componente `category` es el "titular chico" (`<h6>`), no hay un prop `header`/título grande — el texto grande (`--zf-h-48`) es el nodo `<h3>` que sale del contenido, revisar el DOM compilado si el mapeo prop→elemento no es evidente en runtime.
 5. `config` acepta `'left'` | `'center'` (encadenable) — controla la alineación del texto y la posición de la figura decorativa (`shape`).
@@ -37,9 +44,9 @@ import { ZrStageBanner } from '@zurich/web-components/react/stage-banner';
 |-----------------|------------------------------------------------------|---------|----------|-----------------------------------------------------------------------|
 | `config`        | `'left'` \| `'center'` (encadenable)                 | —       | No       | Alineación del texto y posición de la figura decorativa.               |
 | `pictogram`     | `PictogramName` (+ `dark`)                           | —       | No       | Ícono circular centrado (alternativo a `image-src`).                   |
-| `shape`         | `'1'..'7'` (+ `flip`)                                | —       | No       | **Figura geométrica decorativa** — reemplazo directo de `.pqr-banner-shapes`. |
+| `shape`         | `'1'..'6'` (+ `flip`; tipo declara hasta `'7'` pero no existe en el CSS de este vendor) | — | No | **Figura geométrica decorativa** — reemplazo directo de `.pqr-banner-shapes`. Sin `pictogram`/`image-src`, flota sola junto al texto (sin imagen). |
 | `category`      | `string`                                              | —       | No       | Titular pequeño sobre el título principal.                             |
-| `content`       | `string`                                              | —       | No       | Descripción del banner.                                                |
+| `content`       | `string \| ReactNode`                                 | —       | No       | Descripción del banner (o título+descripción compuestos, si no hay slot de título grande — ver §8). |
 | `image-src`     | `ZurichImageName` \| URL                             | —       | No       | Imagen circular alternativa al pictograma.                             |
 | `image-alt`     | `string`                                              | —       | No       | Alt text de la imagen.                                                 |
 | `custom`        | `CustomTokens<'color'\|'bg'>`                        | —       | No       | Override de color/fondo.                                               |
@@ -105,8 +112,9 @@ Tokens internos fijos por CSS (no vía prop, pero relevantes al migrar tamaños)
 ## 8. Behavior Rules (for the AI)
 
 - ❗ **`pictogram` e `image-src` son alternativos**, no combinar.
-- ❗ **`shape` es la figura decorativa** — no reconstruirla con `::before`/`::after` a mano si se adopta este componente; usar el valor `1..7` que más se acerque visualmente al diseño (confirmar contra `?screen=ds-catalog` o el catálogo de figuras si existe una ficha `zurich-shape.md`).
-- ❗ **No hay prop de título grande explícito** — el `<h3>` grande sale del slot de contenido por defecto según el CSS compilado; verificar en runtime (DevTools) qué nodo hijo produce el `--zf-h-48` antes de asumir que es `content`.
+- ❗ **`shape` es la figura decorativa** — no reconstruirla con `::before`/`::after` a mano si se adopta este componente; usar el valor `1..6` (no `7`, ver §3) que más se acerque visualmente al diseño (confirmar contra `?screen=ds-catalog` o inyectando el custom element directo en devtools).
+- ❗ **`shape` se voltea (`rotateY(180deg)`) automáticamente según `config`**: internamente se le agrega el sufijo `:flip` salvo que `config` empiece con `"left"` (`this.config?.startsWith("left") ? "" : ":flip"`, fuente: `stage-banner.js`). Con `config` sin definir (caso por defecto, figura en la esquina derecha) el flip queda activado; con `config="left"` (figura en la esquina izquierda) queda desactivado. Si la figura se ve "girada" respecto al diseño aprobado, es este mecanismo — no un bug — probar el otro `config` o comparar visualmente los shapes 1-6 antes de descartar el componente.
+- ❗ **No hay prop de título grande explícito** — el `<h3>` grande sale del slot de contenido por defecto según el CSS compilado; verificar en runtime (DevTools) qué nodo hijo produce el `--zf-h-48` antes de asumir que es `content`. Solo hay dos niveles de texto (`category` chico arriba, `content` grande abajo) — si el diseño necesita título grande **arriba** + párrafo normal **debajo** (orden inverso al de `category`/`content`), componer ambos dentro de `content` como `ReactNode` con su propio `font` inline (tokens `--zf-*`), ver `PqrPage.tsx`.
 - ❗ **No replicar breakpoints a mano** — maneja su propio `@container`.
 
 ---
@@ -141,13 +149,25 @@ type ZrStageBannerProps = {
 
 ## 11. Composition Patterns
 
-### 11.1 Candidato de reemplazo de `.pqr-banner*`
+### 11.1 Reemplazo real de `.pqr-banner*` (implementado en `PqrPage.tsx`, 2026-08-10)
+Sin imagen/pictograma → rama `isShapedConfig` → texto alineado a la izquierda + `shape`
+flotando en la esquina, full-width (no centrado/hero). Título grande y párrafo compuestos
+juntos dentro de `content` (ver §8 — solo hay dos slots de texto y el orden no encaja con
+"título arriba, párrafo abajo" usando `category`+`content` por separado):
 ```tsx
 <ZrStageBanner
   shape="3"
-  category="Radicación de PQR"
-  content="Cuéntanos qué pasó y te ayudamos a resolverlo."
+  content={
+    <>
+      <span style={{ font: 'var(--zf-h-44)', display: 'block' }}>{title}</span>
+      <p style={{ font: 'var(--zf-body-20--300)', margin: 'var(--zs-75) 0 0' }}>{intro}</p>
+    </>
+  }
+  style={{
+    ['--z-stage-banner--bg' as never]: 'var(--z-blue)',
+    ['--z-stage-banner--color' as never]: 'var(--zg-white-zurich)',
+  }}
 />
 ```
-
-> Diferencia con el diseño actual: `.pqr-banner` es **rectangular full-width** (no centrado/hero) con el texto a la izquierda y las figuras asomando por el borde derecho — `ZrStageBanner` es un patrón hero **centrado**. Si el diseño aprobado exige el layout rectangular asimétrico actual, revisar primero `ZrPromo` (abajo) — su `config="left"` con `aside`/`main` en fila puede ser un calce más cercano.
+`shape="3"` se eligió comparando visualmente los 6 valores disponibles contra el diseño
+aprobado — no hay una regla objetiva para elegirlo, es criterio visual caso por caso.

@@ -1220,10 +1220,13 @@ z-table :is(th, td)[config*="right"] {
 }
 
 /* .pqr-banner/.pqr-banner-content/.pqr-banner-title/.pqr-banner-text/
-   .pqr-banner-shapes → migrados a ZrPromo 2026-08-06 (ver PqrPage.tsx).
-   Imagen DUMMY hasta tener el asset final de diseño (Fase 3b del plan de
-   reducción de shared.css) — el responsive de ZrPromo es interno
-   (@container), no hace falta replicar el breakpoint de 1200px a mano. */
+   .pqr-banner-shapes → migrados a ZrStageBanner 2026-08-10 (ver PqrPage.tsx),
+   sin imagen (regla de negocio: este banner no lleva imagen/pictograma).
+   ZrPromo se descartó porque fuerza un círculo de imagen aunque no se le
+   pase `image-src` (`forceImage:true` en su fuente vendorizado); ZrStageBanner
+   sin `pictogram`/`image-src` renderiza solo texto + `<z-shape>`. El
+   responsive es interno del componente (@container), no hace falta
+   replicar breakpoints a mano. */
 
 /* Hoja de formulario: columna central de 1130px sobre el fondo gris. */
 .pqr-form {
