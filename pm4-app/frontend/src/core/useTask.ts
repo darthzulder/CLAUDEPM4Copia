@@ -7,6 +7,12 @@ export interface TaskData {
   status: string;
   process_request_id: number;
   data: Record<string, unknown>;
+  // Metadatos de la tarea que devuelve PM4 (ISO 8601, UTC). created_at es el instante en
+  // que el BPM creó ESTA tarea, es decir cuándo llegó a la bandeja del responsable —
+  // SCR-008 lo usa como respaldo de la fecha de elaboración del borrador.
+  created_at?: string;
+  updated_at?: string;
+  due_at?: string;
 }
 
 export function useTask() {

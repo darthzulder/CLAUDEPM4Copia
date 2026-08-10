@@ -4,6 +4,7 @@ import { useTask } from '../../../../core/useTask';
 import { scrollToFirstError } from '../../../../core/scrollToFirstError';
 import { pm4TasksUrl } from '../../../../core/useToken';
 import { useHolidaySet, diasHabilesRestantes, parsePm4Date, estadoSlaPorDiasRestantes, estadoSlaVariant } from '../../../../core/businessDays';
+import { selloFechaHora } from '../../../../core/fechaHora';
 import ScreenHeader from '../../../../components/ScreenHeader';
 import InfoBar from '../../../../components/InfoBar';
 import { ActionBar } from '../../../../components/ActionBar';
@@ -31,16 +32,6 @@ const EMAIL_TPL_NO_PROCEDE_PREFIX = '10';
 const CLASSIFICATION_FIELDS = [
   QD.strSfcProduct, QD.strInteraction, QD.strServiceProvided, QD.strPlate, QD.strSfcReason,
 ] as const;
-
-// Sello local "YYYY-MM-DD HH:mm" del momento en que el área envía el borrador a revisión.
-// Se guarda en qd_strDraftDate y es lo que SCR-008 rotula como "Fecha de elaboración del
-// borrador". Guardar Borrador no lo sella: solo cuenta el envío efectivo.
-const selloAhora = (): string => {
-  const dtNow = new Date();
-  const pad = (in_intValue: number) => String(in_intValue).padStart(2, '0');
-  return `${dtNow.getFullYear()}-${pad(dtNow.getMonth() + 1)}-${pad(dtNow.getDate())} `
-    + `${pad(dtNow.getHours())}:${pad(dtNow.getMinutes())}`;
-};
 
 // Versión del borrador que revisa el SAC (qd_strRevisionVersion): cada ENVIAR desde esta
 // pantalla publica una versión nueva — v1 el primer envío, v2 tras la primera devolución
@@ -170,7 +161,7 @@ export default function DetalleReasignacionRespuesta() {
         ...attachIdsToPayload(dicUploadedIds),
         [QD.strAction]: in_strAction,
         ...(in_strAction === 'ENVIAR' ? {
-          [QD.strDraftDate]: selloAhora(),
+          [QD.strDraftDate]: selloFechaHora(),
           [QD.strRevisionVersion]: siguienteVersion(in_objData[QD.strRevisionVersion]),
         } : {}),
       } as unknown as Record<string, unknown>;

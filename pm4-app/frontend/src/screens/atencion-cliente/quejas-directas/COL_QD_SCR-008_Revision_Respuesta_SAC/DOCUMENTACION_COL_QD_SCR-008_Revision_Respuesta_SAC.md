@@ -65,10 +65,14 @@ vista previa de la carta final. Las observaciones son obligatorias solo para dev
 >   en el payload.
 > - **Fecha de elaboración del borrador** la **sella SCR-0051** al presionar *Enviar*
 >   (`qd_strDraftDate` = `YYYY-MM-DD HH:mm` local del envío). *Guardar Borrador* no la sella.
+>   **Respaldo:** si el caso no trae `qd_strDraftDate` (casos ya en curso, o un reenvío desde un
+>   flujo que no la escribe), la pantalla usa el `created_at` de **su propia tarea** de revisión —
+>   el BPM la crea en el mismo instante en que el área envía el borrador. Ambos valores se
+>   persisten en el caso al aprobar/devolver.
 > - **Versión bajo revisión** (`qd_strRevisionVersion`) la **incrementa SCR-0051** en cada
 >   *Enviar*: `v1` en el primer envío, `v2` tras la primera devolución con observaciones del SAC,
->   y así sucesivamente. Se renderiza como texto plano (sin input) y muestra `—` si el caso aún
->   no tiene versión (borrador nunca enviado).
+>   y así sucesivamente. Se renderiza como texto plano (sin input). **Respaldo:** si el caso no
+>   trae contador, muestra `v1` — lo que el SAC tiene enfrente es la primera versión del borrador.
 
 ### S2 — Respuesta del Área (SEC-026, solo lectura)
 

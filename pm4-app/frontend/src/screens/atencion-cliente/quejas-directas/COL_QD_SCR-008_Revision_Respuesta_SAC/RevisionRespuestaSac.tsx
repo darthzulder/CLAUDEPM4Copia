@@ -12,6 +12,7 @@ import {
   ZrButton, ZrAlert, ZrLoader,
 } from '../../../../components/fields/ZdsFields';
 import { useCollection } from '../../../../core/useCollection';
+import { selloFechaHoraDesdeIso } from '../../../../core/fechaHora';
 import { QD, QD_COLLECTIONS, SCR0051_ADJUNTO_KEYS as ADJUNTO_KEYS, SCR000_ADJUNTO_KEYS, SCR008_DEFAULTS as DEFAULTS, SCR008_SLA_UMBRAL_CRITICO as SLA_UMBRAL_CRITICO } from '../fields/fields';
 import type { RevisionRespuestaSacFormData, AccionRevisionSAC } from '../fields/fields';
 import { buildRespuestaFinalHtml, fillRespuestaFinalHtml } from '../COL_QD_SCR-0051_Detalle_Reasignacion_Respuesta/respuestaFinalTemplate';
@@ -45,6 +46,15 @@ export default function RevisionRespuestaSac() {
       // la SFC (momentos posteriores); en SP2 aún no existe, así que mostramos el # de
       // caso BPM (qd_strBpmCaseId) como respaldo para que el campo no quede vacío.
       [QD.strSfcCode]: (objData[QD.strSfcCode] as string) || (objData[QD.strBpmCaseId] as string) || '',
+      // "Fecha de elaboración del borrador": la sella SCR-0051 al enviar (qd_strDraftDate).
+      // Como respaldo —casos ya en curso, o borradores enviados desde un flujo que no la
+      // escribe— usamos la fecha de creación de ESTA tarea de revisión: el BPM la crea en el
+      // mismo instante en que el área envía el borrador, que es justo lo que se quiere mostrar.
+      [QD.strDraftDate]: (objData[QD.strDraftDate] as string)?.trim()
+        || selloFechaHoraDesdeIso(task.created_at),
+      // "Versión bajo revisión": la sube SCR-0051 en cada envío (v1, v2, v3…). Si el caso no
+      // trae contador, lo que el SAC tiene enfrente es la primera versión del borrador.
+      [QD.strRevisionVersion]: (objData[QD.strRevisionVersion] as string)?.trim() || 'v1',
     });
   }, [task, reset]);
 
