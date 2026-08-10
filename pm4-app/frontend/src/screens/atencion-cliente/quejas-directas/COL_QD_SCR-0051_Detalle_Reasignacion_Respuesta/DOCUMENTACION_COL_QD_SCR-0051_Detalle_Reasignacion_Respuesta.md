@@ -172,6 +172,8 @@ seleccionada, evitando vaciar los valores heredados de M1 mientras la matriz aú
 | Campo | Variable | Fuente |
 |---|---|---|
 | Acción/decisión BPMN | `qd_strAction` (`CONFIRMAR_ASIGNACION` \| `SOLICITAR_PRORROGA` \| `GUARDAR_BORRADOR` \| `ENVIAR`) | Inferido de ACT-0051-01/04/07/08 (§10) |
+| Fecha de elaboración del borrador | `qd_strDraftDate` — se sella con `YYYY-MM-DD HH:mm` (hora local del navegador) **solo al ENVIAR** (ACT-0051-08); *Guardar Borrador* no la toca | Solicitud del usuario (2026-08-10): es lo que SCR-008 muestra como "Fecha de elaboración del borrador" |
+| Versión bajo revisión | `qd_strRevisionVersion` — sube una versión en cada ENVIAR (`v1`, `v2`, `v3`…); v1 en el primer envío, v2 tras la primera devolución con observaciones del SAC, etc. Tolera el valor previo con o sin `v` (`'2'` ⇒ `v3`). Las demás acciones (borrador, prórroga, ayuda, reasignar) no la tocan | Solicitud del usuario (2026-08-10): es lo que SCR-008 muestra como "Versión bajo revisión" |
 
 ---
 

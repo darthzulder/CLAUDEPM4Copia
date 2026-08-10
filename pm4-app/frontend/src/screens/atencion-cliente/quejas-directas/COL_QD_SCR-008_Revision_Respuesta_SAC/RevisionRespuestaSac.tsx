@@ -160,10 +160,17 @@ export default function RevisionRespuestaSac() {
             <div className="form-row cols-3">
               <ZdsInput name={QD.strSfcCode} control={control} label="ID Caso / Código SFC" readOnly />
               <ZdsInput name={QD.strSlaAssigned} control={control} label="SLA: Días hábiles restantes" readOnly />
-              <ZdsInput name={QD.strRevisionVersion} control={control} label="Versión bajo revisión" readOnly />
+              {/* Versión bajo revisión: solo texto, no es un campo del formulario. */}
+              <div className="zds-field-wrap">
+                <span className="info-bar-label">Versión bajo revisión</span>
+                <div className="info-bar-value" style={{ marginTop: 'var(--zs-50)' }}>{objWatch[QD.strRevisionVersion] || '—'}</div>
+              </div>
             </div>
             <div className="form-row cols-2">
-              <ZdsInput name={QD.strAssigneeArea} control={control} label="Área Responsable" readOnly />
+              {/* Área Responsable = rol responsable derivado de cat_matriz_motivos en M1
+                  (qd_strResponsableRole), no el grupo PM4 de asignación. */}
+              <ZdsInput name={QD.strResponsableRole} control={control} label="Área Responsable" readOnly />
+              {/* Sellada por SCR-0051 al enviar el borrador a revisión (qd_strDraftDate). */}
               <ZdsInput name={QD.strDraftDate} control={control} label="Fecha de elaboración del borrador" readOnly />
             </div>
           </FormSection>
@@ -246,7 +253,8 @@ export default function RevisionRespuestaSac() {
               <ZdsTextarea name={QD.strActionsTaken} control={control} label="Acciones Tomadas" maxLength={5000} />
             </div>
             <div className="form-row cols-1">
-              <ZdsInput name={QD.strAcknowledgment} control={control} label="¿Reconocimiento al cliente?" readOnly />
+              {/* Resarcimiento al administrador heredado de cat_matriz_motivos (qd_strCompensation). */}
+              <ZdsInput name={QD.strCompensation} control={control} label="¿Reconocimiento al cliente?" readOnly />
             </div>
 
             {/* FLD-130 — soportes internos adjuntos (previsualizar + descargar).

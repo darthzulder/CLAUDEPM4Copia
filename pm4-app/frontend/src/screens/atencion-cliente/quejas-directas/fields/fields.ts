@@ -893,7 +893,10 @@ export type AccionRevisionSAC = 'APROBAR' | 'DEVOLVER' | 'REASIGNAR';
 
 export type RevisionRespuestaSacFormData = Omit<Pick<QdFields,
   | typeof QD.strSfcCode | typeof QD.strSlaAssigned | typeof QD.strRevisionVersion
-  | typeof QD.strAssigneeArea | typeof QD.strDraftDate
+  // Área Responsable se muestra desde qd_strResponsableRole (rol responsable extraído de
+  // cat_matriz_motivos en M1); qd_strAssigneeArea sigue viajando en el payload como el
+  // grupo PM4 al que se asignó/reasignó el caso, pero no es lo que se rotula aquí.
+  | typeof QD.strAssigneeArea | typeof QD.strResponsableRole | typeof QD.strDraftDate
   // Clasificación Regulatoria + Descripción de la Queja (solo lectura, referencia
   // heredada de M1; mismo bloque que muestra SCR-0051).
   | typeof QD.strChannel | typeof QD.strReceptionInstance | typeof QD.strAdmission | typeof QD.strControlEntity
@@ -902,7 +905,10 @@ export type RevisionRespuestaSacFormData = Omit<Pick<QdFields,
   // final (misma plantilla de correo 09/10 que SCR-0051).
   | typeof QD.strBpmCaseId | typeof QD.strRequestType | typeof QD.strEmail | typeof QD.strFavorability
   | typeof QD.strFirstName | typeof QD.strLastName | typeof QD.strCompanyName
-  | typeof QD.strClientResponse | typeof QD.strActionsTaken | typeof QD.strAcknowledgment | typeof QD.lstSupportAttach
+  // "¿Reconocimiento al cliente?" se muestra desde qd_strCompensation (resarcimiento
+  // administrador de cat_matriz_motivos); qd_strAcknowledgment se mantiene en el payload.
+  | typeof QD.strClientResponse | typeof QD.strActionsTaken | typeof QD.strAcknowledgment
+  | typeof QD.strCompensation | typeof QD.lstSupportAttach
   | typeof QD.strSacRemarks | typeof QD.blnSacApproved | typeof QD.strAction
 >, typeof QD.strAction> & { [QD.strAction]: AccionRevisionSAC };
 
@@ -911,7 +917,8 @@ export const SCR008_DEFAULTS: Partial<RevisionRespuestaSacFormData> = {
   [QD.strSlaAssigned]: '',
   [QD.strRevisionVersion]: '',
   [QD.strAssigneeArea]: '',
-  [QD.strDraftDate]: '',
+  [QD.strResponsableRole]: '', // Área Responsable en pantalla (viene de M1 / cat_matriz_motivos.rolResponsable)
+  [QD.strDraftDate]: '',       // Sellado por SCR-0051 al enviar el borrador a revisión
   // Clasificación Regulatoria + Descripción de la Queja (solo lectura).
   [QD.strChannel]: '',
   [QD.strReceptionInstance]: '',
@@ -932,6 +939,7 @@ export const SCR008_DEFAULTS: Partial<RevisionRespuestaSacFormData> = {
   [QD.strClientResponse]: '',
   [QD.strActionsTaken]: '',
   [QD.strAcknowledgment]: '',
+  [QD.strCompensation]: '',  // "¿Reconocimiento al cliente?" en pantalla
   [QD.lstSupportAttach]: [],
   [QD.strSacRemarks]: '',
   [QD.blnSacApproved]: false,
@@ -1126,6 +1134,10 @@ export type DetalleReasignacionRespuestaFormData = Omit<Pick<QdFields,
   | typeof QD.strReceptionInstance | typeof QD.strReceptionPoint | typeof QD.strAdmission | typeof QD.strControlEntity
   | typeof QD.strComplaintText
   | typeof QD.strSsStatus | typeof QD.strM1M2Attempts | typeof QD.strFilingDate | typeof QD.strSlaAssigned
+  // Fecha/hora en que el área envió el borrador a revisión y número de versión del
+  // borrador; los sella esta pantalla al ENVIAR y los lee SCR-008 ("Fecha de elaboración
+  // del borrador" / "Versión bajo revisión").
+  | typeof QD.strDraftDate | typeof QD.strRevisionVersion
   | typeof QD.blnHasAssignee | typeof QD.strAssigneeArea | typeof QD.strAssigneeUser | typeof QD.strAssignmentRemarks
   | typeof QD.strNeedsOtherAreas | typeof QD.strCurrentAssignee | typeof QD.strTargetArea | typeof QD.strNewAssignee
   | typeof QD.strReassignReason | typeof QD.strReassignRemarks
@@ -1167,6 +1179,8 @@ export const SCR0051_DEFAULTS: Partial<DetalleReasignacionRespuestaFormData> = {
   [QD.strM1M2Attempts]: '',
   [QD.strFilingDate]: '',
   [QD.strSlaAssigned]: '',
+  [QD.strDraftDate]: '',       // Se sella al ENVIAR el borrador a revisión SAC (SCR-008)
+  [QD.strRevisionVersion]: '', // v1, v2, v3… — sube una versión en cada ENVIAR
   [QD.blnHasAssignee]: false,
   [QD.strNeedsOtherAreas]: 'NO',
   [QD.strAssigneeArea]: '',

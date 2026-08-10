@@ -53,9 +53,22 @@ vista previa de la carta final. Las observaciones son obligatorias solo para dev
 |---|---|---|---|
 | ID Caso / Código SFC | `qd_strSfcCode` | `ZdsInput` readOnly | FLD-120 |
 | SLA: Días hábiles restantes | `qd_strSlaAssigned` | `ZdsInput` readOnly | FLD-121 |
-| Versión bajo revisión | `qd_strRevisionVersion` | `ZdsInput` readOnly | FLD-122 |
-| Área Responsable | `qd_strAssigneeArea` | `ZdsInput` readOnly | FLD-123 |
+| Versión bajo revisión | `qd_strRevisionVersion` | Texto plano (label + valor, sin input) | FLD-122 |
+| Área Responsable | `qd_strResponsableRole` | `ZdsInput` readOnly | FLD-123 |
 | Fecha de elaboración del borrador | `qd_strDraftDate` | `ZdsInput` readOnly | FLD-124 |
+
+> **Origen de los campos de contexto (2026-08-10, solicitud del usuario).** Estos tres campos
+> llegaban vacíos porque leían variables que nadie escribe en el flujo:
+> - **Área Responsable** ahora lee `qd_strResponsableRole` (rol responsable derivado de
+>   `cat_matriz_motivos.rolResponsable` en M1), no `qd_strAssigneeArea` (grupo PM4 de asignación,
+>   que solo existe si hubo asignación/reasignación explícita). `qd_strAssigneeArea` sigue viajando
+>   en el payload.
+> - **Fecha de elaboración del borrador** la **sella SCR-0051** al presionar *Enviar*
+>   (`qd_strDraftDate` = `YYYY-MM-DD HH:mm` local del envío). *Guardar Borrador* no la sella.
+> - **Versión bajo revisión** (`qd_strRevisionVersion`) la **incrementa SCR-0051** en cada
+>   *Enviar*: `v1` en el primer envío, `v2` tras la primera devolución con observaciones del SAC,
+>   y así sucesivamente. Se renderiza como texto plano (sin input) y muestra `—` si el caso aún
+>   no tiene versión (borrador nunca enviado).
 
 ### S2 — Respuesta del Área (SEC-026, solo lectura)
 
@@ -63,7 +76,7 @@ vista previa de la carta final. Las observaciones son obligatorias solo para dev
 |---|---|---|---|
 | Respuesta al Cliente | `qd_strClientResponse` | `ZdsTextarea` readOnly | FLD-127 |
 | Acciones Tomadas | `qd_strActionsTaken` | `ZdsTextarea` readOnly | FLD-128 |
-| ¿Reconocimiento al cliente? | `qd_strAcknowledgment` | `ZdsInput` readOnly | FLD-129 |
+| ¿Reconocimiento al cliente? | `qd_strCompensation` | `ZdsInput` readOnly | FLD-129 |
 | Soportes internos adjuntos | `qd_lstSupportAttach` | Lista de `.file-name-chip` (solo visualización) | FLD-130 |
 
 ### S3 — Decisión del Analista SAC (SEC-027)

@@ -32,6 +32,25 @@ const CLASSIFICATION_FIELDS = [
   QD.strSfcProduct, QD.strInteraction, QD.strServiceProvided, QD.strPlate, QD.strSfcReason,
 ] as const;
 
+// Sello local "YYYY-MM-DD HH:mm" del momento en que el área envía el borrador a revisión.
+// Se guarda en qd_strDraftDate y es lo que SCR-008 rotula como "Fecha de elaboración del
+// borrador". Guardar Borrador no lo sella: solo cuenta el envío efectivo.
+const selloAhora = (): string => {
+  const dtNow = new Date();
+  const pad = (in_intValue: number) => String(in_intValue).padStart(2, '0');
+  return `${dtNow.getFullYear()}-${pad(dtNow.getMonth() + 1)}-${pad(dtNow.getDate())} `
+    + `${pad(dtNow.getHours())}:${pad(dtNow.getMinutes())}`;
+};
+
+// Versión del borrador que revisa el SAC (qd_strRevisionVersion): cada ENVIAR desde esta
+// pantalla publica una versión nueva — v1 el primer envío, v2 tras la primera devolución
+// con observaciones del SAC, y así sucesivamente. Tolera valores previos con o sin "v"
+// ('2' ⇒ 'v3') y arranca en v1 si el caso aún no traía versión.
+const siguienteVersion = (in_strCurrent: string | undefined): string => {
+  const intCurrent = Number.parseInt(String(in_strCurrent ?? '').replace(/^\s*v/i, ''), 10);
+  return `v${(Number.isFinite(intCurrent) && intCurrent > 0 ? intCurrent : 0) + 1}`;
+};
+
 export default function DetalleReasignacionRespuesta() {
   const { task, loading, error, submitting, completeTask, saveDraft, reassignTask } = useTask();
   const fileRegistry = useRef(new Map<string, File>());
@@ -143,10 +162,17 @@ export default function DetalleReasignacionRespuesta() {
         ? await uploadAttachments(intRequestId, fileRegistry.current)
         : {};
       // Marca la acción del flujo en qd_strAction (p. ej. el botón "Enviar" ⇒ 'ENVIAR').
+      // Al ENVIAR sellamos además qd_strDraftDate con el momento del envío y subimos
+      // qd_strRevisionVersion a la siguiente versión: son la "Fecha de elaboración del
+      // borrador" y la "Versión bajo revisión" que muestra SCR-008 al revisor SAC.
       const objPayload = {
         ...in_objData,
         ...attachIdsToPayload(dicUploadedIds),
         [QD.strAction]: in_strAction,
+        ...(in_strAction === 'ENVIAR' ? {
+          [QD.strDraftDate]: selloAhora(),
+          [QD.strRevisionVersion]: siguienteVersion(in_objData[QD.strRevisionVersion]),
+        } : {}),
       } as unknown as Record<string, unknown>;
       if (in_strAction === 'GUARDAR_BORRADOR') {
         await saveDraft(objPayload);
