@@ -83,7 +83,7 @@ Los consumen `PqrPage` / `PqrSection` / `PqrReadonly` (en la carpeta de la panta
 |---|---|
 | `.pqr-page` | raíz de la página pública (fondo `--z-bg`) |
 | `.pqr-topnav`, `.pqr-topnav-links`, `.pqr-topnav-logo` | barra navy de 80px con logo Zurich |
-| `.pqr-banner`, `.pqr-banner-content`, `.pqr-banner-title`, `.pqr-banner-text`, `.pqr-banner-shapes` | banner azul de 246px (titular `--zf-h-48`, descripción `--zf-body-18`, círculos decorativos vía `::before/::after`) |
+| ~~`.pqr-banner`, `.pqr-banner-content`, `.pqr-banner-title`, `.pqr-banner-text`, `.pqr-banner-shapes`~~ | eliminadas — el banner ahora es `ZrStageBanner` (sin imagen, `shape="3"`), ver `PqrPage.tsx` |
 | `.pqr-form` | columna central de 1130px sobre el fondo gris |
 | `.pqr-section`, `.pqr-section-title`, `.pqr-section-divider` | sección blanca con título azul 24px + divisoria navy (se apilan sin separación) |
 | `.pqr-readonly`, `.pqr-readonly-label`, `.pqr-readonly-value` | campo de solo lectura en línea (etiqueta 12px azul + valor 18px subrayado) |

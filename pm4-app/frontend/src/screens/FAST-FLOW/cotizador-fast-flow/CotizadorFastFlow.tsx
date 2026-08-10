@@ -184,7 +184,7 @@ function InfoTomador({
             required
             error={fe('frm_tomador_numDoc')}
           />
-          <div className="form-group lookup-wrapper">
+          <div className="form-group" z-flex z-align="left:bottom">
             <ZrButton config="secondary" icon="search:line" onClick={onConsultarCliente} loading={consultarLoading} disabled={consultarLoading}>
               Consultar Cliente
             </ZrButton>

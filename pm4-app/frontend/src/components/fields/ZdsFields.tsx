@@ -1,9 +1,10 @@
 import { Controller } from 'react-hook-form';
 import type { Control, RegisterOptions, FieldPath, FieldValues, UseFormSetValue, UseFormSetError, UseFormClearErrors } from 'react-hook-form';
-import { useEffect, type ComponentProps, type ReactNode, type MutableRefObject } from 'react';
+import { useEffect, useRef, type ComponentProps, type ReactNode, type MutableRefObject } from 'react';
 import { ZrModal as ZrModalRaw } from '@zurich/web-components/react/modal';
 import { ZrTextInput }        from '@zurich/web-components/react/text-input';
 import { ZrCheckbox }         from '@zurich/web-components/react/checkbox';
+import { ZrSwitch }           from '@zurich/web-components/react/switch';
 import { ZrSelect }           from '@zurich/web-components/react/select';
 import { ZrDateInput }        from '@zurich/web-components/react/date-input';
 import { ZrTextarea }         from '@zurich/web-components/react/textarea';
@@ -18,6 +19,13 @@ export { ZrTextInput };
 export { ZrTextarea };
 export { ZrSelect };
 export { ZrCheckbox };
+// ZrSwitch (habilitado 2026-08-10, ver outputs/react/input/zurich-switch.md — documentado
+// desde el paquete vendorizado, componente no expuesto por la web oficial de ZDS
+// decomisionada). Comparte base class (ZBooleanInput) y wrapper React
+// (useCustomElementWithEvents → useCustomElement) con ZrCheckbox: MISMO bug del vendor,
+// `model={false}` se descarta en silencio — usar `model={valor ? true : 0}` (ver ejemplo
+// de uso en SeccionDetalleQueja.tsx).
+export { ZrSwitch };
 export { ZrDateInput };
 export { ZrRadioSelect };
 export { ZrSegmentedControl };
@@ -54,6 +62,89 @@ export { ZrTooltip }     from '@zurich/web-components/react/tooltip';
 export { ZrInputGroup }  from '@zurich/web-components/react/input-group';
 export { ZrFieldset }    from '@zurich/web-components/react/fieldset';
 export { ZrLoader }      from '@zurich/web-components/react/loader';
+
+// Habilitados 2026-08-06 (ver outputs/react/VENDOR_COMPONENT_CATALOG.md): existían en el
+// vendor pero no estaban expuestos en la fachada. Fichas completas en outputs/react/.
+export { ZrEmptyState }  from '@zurich/web-components/react/empty-state';
+export { ZrPagination }  from '@zurich/web-components/react/pagination';
+export { ZrStageBanner } from '@zurich/web-components/react/stage-banner';
+export { ZrPromo }       from '@zurich/web-components/react/promo';
+
+// ZrKpiValue: bug del vendor — su wrapper React (dist/react/kpi-value.js) NO incluye el
+// componente interno <ReactSlots> que sí tienen todos sus hermanos (ZrEmptyState,
+// ZrNavigation, ZrFooter, ZrPromo, ZrStageBanner — confirmado leyendo los 6 wrappers reales).
+// `header`/`description`/`difference` están declaradas como slots del componente
+// (zKpiValueSlots), y `useCustomElement()` DESCARTA cualquier prop cuya key esté en la lista
+// de slots y cuyo valor no sea un array (`slots.includes(key) && !Array.isArray(prop)` →
+// skip) — el mecanismo normal para compensar eso es `<ReactSlots>`, que reinyecta esos
+// valores como `<span slot="...">` en los children; kpi-value.js nunca la monta. Resultado:
+// pasar `header="Casos abiertos"` como prop plano se pierde en silencio — se ve el número
+// pero no la etiqueta. Reproducimos acá lo que `<ReactSlots>` hace para las 3 props
+// afectadas.
+import { ZrKpiValue as ZrKpiValueRaw } from '@zurich/web-components/react/kpi-value';
+
+export function ZrKpiValue({ header, description, difference, children, ...rest }: ComponentProps<typeof ZrKpiValueRaw>) {
+  const lstSlotted = [
+    header != null ? <span slot="header" key="header">{header}</span> : null,
+    description != null ? <span slot="description" key="description">{description}</span> : null,
+    difference != null ? <span slot="difference" key="difference">{difference}</span> : null,
+    children,
+  ].filter(Boolean);
+  return (
+    <ZrKpiValueRaw {...rest} {...({ children: lstSlotted } as Record<string, unknown>)} />
+  );
+}
+
+// ZrNavigation/ZrFooter: sus props array/objeto (`menu`/`routes`/`footer`/`social`/
+// `columns`) llegan rotas desde el vendor. `useCustomElement()` (dist/react/customElement.js)
+// hace JSON.stringify() de cualquier prop objeto/array antes de pasarla como atributo —
+// pero como el custom element YA declara esas props como reactive properties de Lit
+// (@property({type: Array})), React las asigna como PROPIEDAD del nodo (no como atributo,
+// porque `key in el` es true), y la propiedad queda con el string crudo del
+// JSON.stringify en vez de la reparsear — revienta `this.routes?.map(...)` dentro del
+// componente. Confirmado comparando con tabs.js: ZrTabs SÍ funciona con su prop `tabs`
+// (también array) porque, al declarar un evento (`onChange`), usa
+// `useCustomElementWithEvents()`, que además reasigna la propiedad real por ref en un
+// useEffect tras el montaje — Navigation/Footer no declaran eventos, así que el vendor no
+// aplica ese fix. Replicamos el mismo parche aquí para estas dos props array/objeto.
+import { ZrNavigation as ZrNavigationRaw } from '@zurich/web-components/react/navigation';
+import { ZrFooter as ZrFooterRaw } from '@zurich/web-components/react/footer';
+
+// (el tipo `ref` declarado en ZrNavigation_Type/ZrFooter_Type no es asignable vía JSX —
+// evitamos pelear con eso envolviendo en un <div display:contents> y buscando el custom
+// element por querySelector, en vez de forwardear un ref al wrapper del vendor.)
+export function ZrNavigation({ menu, routes, footer, social, ...rest }: ComponentProps<typeof ZrNavigationRaw>) {
+  const containerRef = useRef<HTMLDivElement>(null);
+  useEffect(() => {
+    const el = containerRef.current?.querySelector('z-navigation') as Record<string, unknown> | null | undefined;
+    if (!el) return;
+    el.menu = menu;
+    el.routes = routes;
+    el.footer = footer;
+    el.social = social;
+  }, [menu, routes, footer, social]);
+  return (
+    <div ref={containerRef} style={{ display: 'contents' }}>
+      <ZrNavigationRaw {...rest} />
+    </div>
+  );
+}
+
+export function ZrFooter({ columns, footer, social, ...rest }: ComponentProps<typeof ZrFooterRaw>) {
+  const containerRef = useRef<HTMLDivElement>(null);
+  useEffect(() => {
+    const el = containerRef.current?.querySelector('z-footer') as Record<string, unknown> | null | undefined;
+    if (!el) return;
+    el.columns = columns;
+    el.footer = footer;
+    el.social = social;
+  }, [columns, footer, social]);
+  return (
+    <div ref={containerRef} style={{ display: 'contents' }}>
+      <ZrFooterRaw {...rest} />
+    </div>
+  );
+}
 
 // ─── Píldora de estado: ZrTag del DS (pill en-flujo) con semántica por variante ─
 // El DS no tiene "status pill" dedicada; ZrTag es la pill en-flujo. Mapeamos la

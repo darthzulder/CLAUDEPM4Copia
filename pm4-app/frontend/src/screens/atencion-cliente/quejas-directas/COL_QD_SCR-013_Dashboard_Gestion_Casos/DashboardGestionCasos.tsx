@@ -3,7 +3,7 @@ import { useForm } from 'react-hook-form';
 import { useCollection, type CollectionOption } from '../../../../core/useCollection';
 import ScreenHeader from '../../../../components/ScreenHeader';
 import FormSection from '../../../../components/FormSection';
-import { ZdsSelect, ZdsInput, ZrButton, ZrAlert, ZrLoader } from '../../../../components/fields/ZdsFields';
+import { ZdsSelect, ZdsInput, ZrButton, ZrAlert, ZrLoader, ZrKpiValue, ZrPagination } from '../../../../components/fields/ZdsFields';
 import TablaCasos from './TablaCasos';
 import DetalleCasoModal from './DetalleCasoModal';
 import { useCasosDashboard } from './useCasosDashboard';
@@ -105,7 +105,7 @@ export default function DashboardGestionCasos() {
         )}
 
         {/* Barra superior: título de trabajo + Descargar reporte. */}
-        <div className="dashboard-toolbar">
+        <div z-flex="100" z-align="between:center" style={{ margin: 'var(--zs-100) 0' }}>
           <h2 className="section-title" style={{ margin: 0 }}>Gestión de Casos</h2>
           <ZrButton
             config="primary:s"
@@ -117,24 +117,15 @@ export default function DashboardGestionCasos() {
           </ZrButton>
         </div>
 
-        {/* KPIs de SLA. */}
-        <div className="kpi-grid">
-          <div className="kpi-card">
-            <span className="kpi-card-label">Casos abiertos</span>
-            <span className="kpi-card-value">{kpis.abiertos}</span>
-          </div>
-          <div className="kpi-card kpi-card--warn">
-            <span className="kpi-card-label">Próximos a vencer</span>
-            <span className="kpi-card-value">{kpis.porVencer}</span>
-          </div>
-          <div className="kpi-card kpi-card--danger">
-            <span className="kpi-card-label">Vencidos</span>
-            <span className="kpi-card-value">{kpis.vencidos}</span>
-          </div>
-          <div className="kpi-card kpi-card--ok">
-            <span className="kpi-card-label">Cerrados</span>
-            <span className="kpi-card-value">{kpis.cerrados}</span>
-          </div>
+        {/* KPIs de SLA — ZrKpiValue (habilitado 2026-08-06, ver outputs/react/molecules/zurich-kpivalue.md).
+            `config` solo cubre 2 estados de color (positive/negative) y afecta a `difference`,
+            no al valor — no hay `difference` aquí, así que el semáforo se logra sobreescribiendo
+            `--z-kpi-value--color` directamente (patrón documentado en la ficha §6/§8). */}
+        <div z-flex="wrap:100">
+          <ZrKpiValue amount={kpis.abiertos} header="Casos abiertos" />
+          <ZrKpiValue amount={kpis.porVencer} header="Próximos a vencer" style={{ ['--z-kpi-value--color' as never]: 'var(--z-orange)' }} />
+          <ZrKpiValue amount={kpis.vencidos} header="Vencidos" style={{ ['--z-kpi-value--color' as never]: 'var(--z-red)' }} />
+          <ZrKpiValue amount={kpis.cerrados} header="Cerrados" style={{ ['--z-kpi-value--color' as never]: 'var(--z-green)' }} />
         </div>
 
         {/* Filtros. */}
@@ -154,30 +145,19 @@ export default function DashboardGestionCasos() {
         {/* Tabla de casos. */}
         <TablaCasos casos={pagina} tipoMap={tipo.map} areaMap={area.map} onVer={setCasoSel} />
 
-        {/* Paginación. */}
-        <div className="dashboard-pagination">
+        {/* Paginación — ZrPagination (habilitado 2026-08-06, ver outputs/react/layout/zurich-pagination.md). */}
+        <div z-flex="wrap:75" z-align="between:center">
           <span className="field-hint">
             {filtrados.length === 0
               ? 'Sin casos'
               : `Mostrando ${inicio + 1}–${Math.min(inicio + PAGE_SIZE, filtrados.length)} de ${filtrados.length} casos`}
           </span>
-          <div z-flex="50" z-align="right:center">
-            <ZrButton config="secondary:s" disabled={paginaActual <= 1} onClick={() => setPage(paginaActual - 1)}>
-              ‹ Anterior
-            </ZrButton>
-            {Array.from({ length: totalPaginas }, (_, i) => i + 1).map((n) => (
-              <ZrButton
-                key={n}
-                config={n === paginaActual ? 'primary:s' : 'secondary:s'}
-                onClick={() => setPage(n)}
-              >
-                {String(n)}
-              </ZrButton>
-            ))}
-            <ZrButton config="secondary:s" disabled={paginaActual >= totalPaginas} onClick={() => setPage(paginaActual + 1)}>
-              Siguiente ›
-            </ZrButton>
-          </div>
+          <ZrPagination
+            model={paginaActual}
+            pages={totalPaginas}
+            onChange={(n: number) => setPage(n)}
+            {...({ 'show-edges': true } as object)}
+          />
         </div>
       </div>
 

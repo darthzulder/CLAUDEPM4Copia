@@ -2,7 +2,8 @@ import { useMemo, useState } from 'react';
 import pm4 from '../api/pm4Client';
 import { useRequestFiles, type Pm4File } from '../core/useRequestFiles';
 import PreviewModal from './PreviewModal';
-import { ZrButton, ZrIcon, ZrAlert, ZrLoader } from './fields/ZdsFields';
+import DocCard from './DocCard';
+import { ZrButton, ZrAlert, ZrLoader } from './fields/ZdsFields';
 
 interface Props {
   /** request (caso) del cual listar los adjuntos. */
@@ -75,9 +76,13 @@ export default function RequestFileList({
       <span className="info-bar-label">{label}</span>
 
       {loading && (
-        <div className="no-docs-card">
+        <div
+          z-flex="col:75"
+          z-align="center:center"
+          style={{ padding: 'var(--zs-300) var(--zs-200)', color: 'var(--z-muted)', textAlign: 'center' }}
+        >
           <ZrLoader style={{ ['--z-loader--size' as never]: '20px' }} />
-          <p>{loadingText}</p>
+          <p style={{ margin: 0 }}>{loadingText}</p>
         </div>
       )}
 
@@ -96,14 +101,12 @@ export default function RequestFileList({
       {!loading && lstDocs.length > 0 && (
         <div z-flex="col:75" style={{ marginTop: 'var(--zs-50)' }}>
           {lstDocs.map((objFile) => (
-            <div key={objFile.id} className="doc-card">
-              <div className="doc-card-header">
-                <ZrIcon icon="file-blank:line" config="l" />
-                <div className="doc-info">
-                  <div className="doc-name">{objFile.file_name}</div>
-                  <div className="doc-meta">{formatBytes(objFile.size)}</div>
-                </div>
-                <div className="doc-actions">
+            <DocCard
+              key={objFile.id}
+              fileName={objFile.file_name}
+              meta={formatBytes(objFile.size)}
+              actions={(
+                <>
                   <ZrButton
                     config="secondary:s"
                     icon="visibility-on:line"
@@ -117,9 +120,9 @@ export default function RequestFileList({
                   >
                     Descargar
                   </ZrButton>
-                </div>
-              </div>
-            </div>
+                </>
+              )}
+            />
           ))}
         </div>
       )}

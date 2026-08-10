@@ -327,6 +327,7 @@ Al construir UI hay **dos ejes** con escaleras distintas. Recorre cada una **de 
 | `PdfViewer` | `components/PdfViewer` | Visor de PDF/archivo PM4 vía blob |
 | `ResultCard` | `components/ResultCard` | Card centrado de resultado/confirmación (variantes) |
 | `DocList` / `DocItem` | `components/DocList`, `components/DocItem` | Lista/fila de documentos (modo upload o validación) |
+| `DocCard` | `components/DocCard` | Card de un archivo ya existente (ícono+nombre+meta+acciones), con cuerpo expandible opcional — no confundir con `DocItem` (checklist de documentos requeridos) |
 | `RequestFileList` | `components/RequestFileList` | Lista de solo lectura de archivos ya subidos al request (filtra por `data_name`), con previsualizar + descargar |
 | `DocSupportUploader` | `components/DocSupportUploader` | Bloque de carga de documentos de soporte |
 | `RecaptchaModal` | `components/RecaptchaModal` | Modal con reCAPTCHA v2 (checkbox); `onVerified(token)` al pasar. Site key en `VITE_RECAPTCHA_SITE_KEY`, verificación server-side en `/api/recaptcha/verify` |
@@ -381,7 +382,7 @@ descontinuado) y una actualización involuntaria perdería el parche.
 | `ZdsStepper` | `ZrStepper` + Controller | Contador de pasos 1-based en `[1, steps]` (wizard/paginador) |
 | `ZdsCalendar` | `ZrCalendar` + Controller | Calendario inline (grilla de mes), modelo ISO `YYYY-MM-DD` |
 | `ZdsStatusBadge` | `ZrBadge` | Píldora de estado por variante (`success`/`danger`/`info`/`neutral`) |
-| Re-exports directos | — | `ZrButton`, `ZrIcon`, `ZrModal`, `ZrForm`, `ZrCard`, `ZrTabs`, `ZrTable`, `ZrAlert`, `ZrBadge`, `ZrChip`, `ZrTag`, `ZrProgressBar`, `ZrFileInput`, `ZrSegmentedControl`, `ZrSidebar`, `ZrTile`, `ZrTooltip`, `ZrInputGroup`, `ZrFieldset`, `ZrStepper`, `ZrCalendar`, `ZrLoader` — componentes DS que no requieren Controller |
+| Re-exports directos | — | `ZrButton`, `ZrIcon`, `ZrModal`, `ZrForm`, `ZrCard`, `ZrTabs`, `ZrTable`, `ZrAlert`, `ZrBadge`, `ZrChip`, `ZrTag`, `ZrProgressBar`, `ZrFileInput`, `ZrSegmentedControl`, `ZrSidebar`, `ZrTile`, `ZrTooltip`, `ZrInputGroup`, `ZrFieldset`, `ZrStepper`, `ZrCalendar`, `ZrLoader`, `ZrKpiValue`, `ZrEmptyState`, `ZrPagination`, `ZrFooter`, `ZrNavigation`, `ZrStageBanner`, `ZrPromo`, `ZrCheckbox`, `ZrSwitch` — componentes DS que no requieren Controller (`ZrCheckbox`/`ZrSwitch` comparten el bug de vendor `model={false}` descartado en silencio — usar `model={valor ? true : 0}`) |
 
 ### Patrón de formulario (react-hook-form + ZdsFields)
 

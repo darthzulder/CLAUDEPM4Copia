@@ -3,7 +3,8 @@ import { ActionBar } from '../../../components/ActionBar';
 import { useTask } from '../../../core/useTask';
 import { useRequestFiles, type Pm4File } from '../../../core/useRequestFiles';
 import PdfViewer from '../../../components/PdfViewer';
-import { ZrButton, ZrAlert, ZrIcon, ZrLoader } from '../../../components/fields/ZdsFields';
+import DocCard from '../../../components/DocCard';
+import { ZrButton, ZrAlert, ZrLoader } from '../../../components/fields/ZdsFields';
 import ResultCard from '../../../components/ResultCard';
 import FormSection from '../../../components/FormSection';
 import ScreenHeader from '../../../components/ScreenHeader';
@@ -35,32 +36,22 @@ function DocumentCard({ file }: { file: Pm4File }) {
   const [blnOpen, setBlnOpen] = useState(false);
 
   return (
-    <div className={`doc-card${blnOpen ? ' is-open' : ''}`}>
-      <div className="doc-card-header">
-        <ZrIcon icon="file-blank:line" config="l" />
-        <div className="doc-info">
-          <div className="doc-name">{file.file_name}</div>
-          <div className="doc-meta">
-            {formatBytes(file.size)} · {formatDate(file.created_at)}
-          </div>
-        </div>
-        <div className="doc-actions">
-          <ZrButton
-            config="secondary:s"
-            icon={blnOpen ? 'visibility-off:line' : 'visibility-on:line'}
-            onClick={() => setBlnOpen((blnPrev) => !blnPrev)}
-          >
-            {blnOpen ? 'Ocultar' : 'Ver PDF'}
-          </ZrButton>
-        </div>
-      </div>
-
-      {blnOpen && (
-        <div className="doc-viewer">
-          <PdfViewer fileId={file.id} label={file.file_name} height={640} />
-        </div>
+    <DocCard
+      fileName={file.file_name}
+      meta={`${formatBytes(file.size)} · ${formatDate(file.created_at)}`}
+      isOpen={blnOpen}
+      actions={(
+        <ZrButton
+          config="secondary:s"
+          icon={blnOpen ? 'visibility-off:line' : 'visibility-on:line'}
+          onClick={() => setBlnOpen((blnPrev) => !blnPrev)}
+        >
+          {blnOpen ? 'Ocultar' : 'Ver PDF'}
+        </ZrButton>
       )}
-    </div>
+    >
+      <PdfViewer fileId={file.id} label={file.file_name} height={640} />
+    </DocCard>
   );
 }
 
@@ -162,9 +153,13 @@ export default function VisualizarDocumentos() {
           }
         >
           {filesLoading && (
-            <div className="no-docs-card">
+            <div
+              z-flex="col:75"
+              z-align="center:center"
+              style={{ padding: 'var(--zs-300) var(--zs-200)', color: 'var(--z-muted)', textAlign: 'center' }}
+            >
               <ZrLoader style={{ ['--z-loader--size' as never]: '20px' }} />
-              <p>Buscando documentos del caso…</p>
+              <p style={{ margin: 0 }}>Buscando documentos del caso…</p>
             </div>
           )}
 

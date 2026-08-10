@@ -464,7 +464,11 @@ z-table :is(th, td)[config*="right"] {
   flex-shrink: 0;
 }
 
-/* Component: FormSection */
+/* Component: FormSection — investigado 2026-08-06: ni ZrCard (un solo slot
+   `content`, sin slot de header) ni ZrTile (header como texto plano dentro
+   de `main`, mismo fondo que el resto de la tile) permiten una franja de
+   color sólido full-width separada del cuerpo — CSS de dominio confirmado,
+   FormSection.tsx se mantiene igual. */
 .form-section-card {
   margin-bottom: var(--zs-250);
   background: var(--zg-white);
@@ -533,7 +537,13 @@ z-table :is(th, td)[config*="right"] {
   display: block;
 }
 
-/* Component: InfoBar */
+/* Component: InfoBar — investigado 2026-08-06: ZrListItem invierte la
+   jerarquía tipográfica (header grande/primario, content chico/secundario,
+   al revés de label chico + valor grande), sin borde+sombra de contenedor
+   propios. ZrInputGroup solo fusiona inputs reales adyacentes, no pares
+   texto label/valor. ZrTile es de tamaño fijo con panel de imagen, para 1
+   imagen+texto, no N pares en fila. Sin componente ZDS equivalente,
+   InfoBar.tsx se mantiene igual. */
 .info-bar {
   display: flex;
   flex-wrap: wrap;
@@ -751,10 +761,8 @@ z-table :is(th, td)[config*="right"] {
 /* ── 6. DISEÑOS ESPECÍFICOS DE LAS PANTALLAS (Keep DRY) ──────────────────── */
 
 /* ---- Cotizador y tomador ---- */
-.lookup-wrapper {
-  display: flex;
-  align-items: flex-end;
-}
+/* .lookup-wrapper → migrado a z-flex z-align="left:bottom" 2026-08-06
+   (layout trivial sin estilo visual propio, Eje B escalón 1). */
 
 .form-group--billing {
   margin-top: var(--zs-25);
@@ -793,6 +801,12 @@ z-table :is(th, td)[config*="right"] {
   line-height: 1.3;
 }
 
+/* Investigado 2026-08-06: ActionCard/Tile son cards de tamaño fijo con
+   imagen/pictograma obligatorio, no pensadas para envolver un ZdsSelect
+   real de react-hook-form. SelectableCards/MultiSelectableCards extienden
+   BaseInput_Props (su propio model/options tipados) — son inputs de
+   selección de tarjeta con estado propio, incompatibles con envolver un
+   campo de formulario externo. Sin componente ZDS equivalente. */
 .billing-grid {
   display: grid;
   gap: var(--zs-100);
@@ -862,12 +876,8 @@ z-table :is(th, td)[config*="right"] {
   font-style: italic;
 }
 
-.si-no-select-all {
-  display: flex;
-  gap: var(--zs-50);
-  justify-content: flex-end;
-  margin-bottom: var(--zs-50);
-}
+/* .si-no-select-all → migrado a z-flex="50" z-align="right" + style inline
+   (margin-bottom, único resto sin primitivo) 2026-08-06. */
 
 .doc-row {
   display: flex;
@@ -895,11 +905,8 @@ z-table :is(th, td)[config*="right"] {
 }
 
 /* Tables / Records */
-.record-table-header {
-  display: flex;
-  justify-content: flex-end;
-  margin-bottom: var(--zs-50);
-}
+/* .record-table-header → migrado a z-flex z-align="right" + style inline
+   (margin-bottom) 2026-08-06. */
 
 .record-empty {
   text-align: center;
@@ -923,11 +930,8 @@ z-table :is(th, td)[config*="right"] {
   margin-bottom: var(--zs-50);
 }
 
-.cover-note-toggle {
-  display: flex;
-  align-items: center;
-  gap: var(--zs-75);
-}
+/* .cover-note-toggle → migrado a z-flex="75" z-align="left:center" 2026-08-06
+   (layout trivial sin estilo visual propio). */
 
 /* Stack de label + control con gap 4px: --zs-25 no existe como gap de z-flex
    (cuyo mínimo es 50 = 8px), por eso se mantiene como clase. */
@@ -942,7 +946,14 @@ z-table :is(th, td)[config*="right"] {
   margin-left: var(--zs-25);
 }
 
-/* Resumen de cotizaciones (preview) */
+/* Resumen de cotizaciones (preview). Investigado 2026-08-06: el componente
+   `Quote` del vendor (categoría molecules) es un FALSO AMIGO — sus props
+   reales (`quote-src`/`author-name`/`content`/`description`) son las de
+   una cita/testimonio, no una cotización de seguros. Ni ActionCard ni Tile
+   tienen una franja de header con color sólido full-width separada del
+   cuerpo (mismo hallazgo que FormSection, arriba) — el cuerpo tabular ya
+   usa ZrTable/z-table; solo el header de color + contenedor con
+   border-radius/overflow quedan sin equivalente ZDS. */
 .quote-summary-body {
   padding: var(--zs-150) var(--zs-200);
   display: flex;
@@ -988,24 +999,24 @@ z-table :is(th, td)[config*="right"] {
   align-items: center;
 }
 
-.result-actions {
-  margin-top: var(--zs-200);
-  display: flex;
-  justify-content: center;
-}
+/* .result-actions → migrado a z-flex z-align="center" + style inline
+   (margin-top) 2026-08-06. */
 
-/* Opciones cotización screen */
+/* Opciones cotización screen. .screen-body → migrado a z-grid="main"+column
+   2026-08-06 (ver OpcionesCotizacion.tsx) — resto mínimo: align-items (grid
+   por defecto es stretch) y el colapso a 1 columna bajo 767px (grid mobile
+   de z-grid es de 6 columnas fijas; el atributo `column` del hijo no se
+   puede duplicar en JSX para agregar el prefijo `m:`, así que el colapso se
+   fuerza acá por atributo). Diferencia aceptada: el aside pasa de 380px fijo
+   a ~290-350px variable por breakpoint, y el punto de colapso se mueve de
+   1024px a 767px. */
 .screen-body {
-  padding: var(--zs-150) var(--zs-200);
-  display: grid;
-  grid-template-columns: 1fr 380px;
-  gap: var(--zs-150);
   align-items: start;
 }
 
-@media (max-width: 1024px) {
-  .screen-body {
-    grid-template-columns: 1fr;
+@media (max-width: 767px) {
+  .screen-body > [column] {
+    grid-column: 1 / -1;
   }
 }
 
@@ -1014,12 +1025,6 @@ z-table :is(th, td)[config*="right"] {
   display: flex;
   justify-content: flex-end;
   border-top: 1px solid var(--z-border);
-}
-
-@media (max-width: 600px) {
-  .screen-body {
-    padding: var(--zs-100) var(--zs-150);
-  }
 }
 
 /* Nota Cobertura screen */
@@ -1075,20 +1080,10 @@ z-table :is(th, td)[config*="right"] {
   background: var(--zg-white-zurich);
 }
 
-.no-docs-card {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  padding: var(--zs-300) var(--zs-200);
-  gap: var(--zs-75);
-  color: var(--z-muted);
-  text-align: center;
-}
-
-.no-docs-card p {
-  margin: 0;
-}
+/* .no-docs-card → migrado a z-flex="col:75" z-align="center:center" + style
+   inline (tokens) 2026-08-06 — no era un "estado vacío" (eso ya usaba ZrAlert
+   config="info"), sino el bloque de carga (ZrLoader + texto); no calzaba con
+   ZrEmptyState. Ver RequestFileList.tsx y VisualizarDocumentos.tsx. */
 
 /* Estado Correo screen */
 .email-status-content {
@@ -1107,6 +1102,10 @@ z-table :is(th, td)[config*="right"] {
   padding-top: var(--zs-100);
 }
 
+/* Investigado 2026-08-06: ZrTag (radius --zs-150=24px, sin word-break) y
+   ZrChip (siempre interactivo, con botón de cierre integrado) no calzan con
+   un correo electrónico completo de solo lectura que necesita quebrarse —
+   CSS de dominio confirmado, sin componente ZDS equivalente. */
 .email-status-badge {
   display: inline-block;
   margin: var(--zs-75) 0;
@@ -1126,10 +1125,8 @@ z-table :is(th, td)[config*="right"] {
   color: var(--zc-peach-aa);
 }
 
-.email-status-actions {
-  display: flex;
-  justify-content: center;
-}
+/* .email-status-actions → migrado a z-flex z-align="center" 2026-08-06
+   (layout trivial sin estilo visual propio). */
 
 .email-status-overlay {
   position: fixed;
@@ -1176,62 +1173,15 @@ z-table :is(th, td)[config*="right"] {
    punto-semáforo de días y barras de encabezado/paginación.
    ===================================================== */
 
-/* ── Barra superior: título de trabajo + acción "Nuevo caso" ── */
-.dashboard-toolbar {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: var(--zs-100);
-  margin: var(--zs-100) 0;
-}
+/* .dashboard-toolbar → migrado a z-flex="100" z-align="between:center" +
+   style inline (margin) 2026-08-06. z-align sí soporta "between"
+   (justify-content:space-between) — confirmado contra el CSS real; la nota
+   de DOCUMENTACION_COL_QD_SCR-013...md que decía lo contrario está
+   desactualizada, corregida en el mismo commit. */
 
-/* ── KPIs de SLA (4 tarjetas) ── */
-.kpi-grid {
-  display: grid;
-  grid-template-columns: repeat(4, 1fr);
-  gap: var(--zs-100);
-  margin-bottom: var(--zs-150);
-}
-
-@media (max-width: 900px) { .kpi-grid { grid-template-columns: repeat(2, 1fr); } }
-@media (max-width: 600px) { .kpi-grid { grid-template-columns: 1fr; } }
-
-.kpi-card {
-  display: flex;
-  flex-direction: column;
-  gap: var(--zs-25);
-  background: var(--zg-white);
-  border: 1px solid var(--z-card-border);
-  border-radius: 8px;
-  padding: var(--zs-100) var(--zs-150);
-  box-shadow: var(--z-card-shadow);
-}
-
-.kpi-card-label {
-  font: var(--zf-capt-12--700);
-  color: var(--z-muted);
-}
-
-.kpi-card-value {
-  font: var(--zf-h-28);
-  font-weight: 700;
-  line-height: 1.1;
-  color: var(--z-text);
-}
-
-.kpi-card--warn   .kpi-card-value { color: var(--z-orange); }
-.kpi-card--danger .kpi-card-value { color: var(--z-red); }
-.kpi-card--ok     .kpi-card-value { color: var(--z-green); }
-
-/* ── Paginación de la tabla de casos ── */
-.dashboard-pagination {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  flex-wrap: wrap;
-  gap: var(--zs-75);
-  margin-top: var(--zs-100);
-}
+/* .kpi-grid / .kpi-card / .dashboard-pagination → migrados a ZrKpiValue/ZrPagination
+   2026-08-06 (ver outputs/react/molecules/zurich-kpivalue.md y
+   outputs/react/layout/zurich-pagination.md). Layout con z-flex, sin clase propia. */
 
 /* ── Modal ancho con cuerpo desplazable (logs, textos largos) ──────────────
    Mismo ancho que .preview-modal para que todos los modales grandes coincidan.
@@ -1260,94 +1210,23 @@ z-table :is(th, td)[config*="right"] {
   background: var(--z-bg);
 }
 
-/* Barra de navegación superior: 80px, navy, logo a la derecha. */
-.pqr-topnav {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  height: 80px;
-  padding: var(--zs-100) var(--zs-200);
-  background: var(--zc-blue-dark);
-}
-
-.pqr-topnav-links {
-  display: flex;
-  align-items: center;
-  gap: var(--zs-200);
-  font: var(--zf-body-14);
-  color: var(--zg-white-zurich);
-}
-
+/* .pqr-topnav/.pqr-topnav-links → migrados a ZrNavigation 2026-08-06 (ver
+   PqrPage.tsx). .pqr-topnav-logo se mantiene: sigue dimensionando el <img>
+   del logo dentro del slot "logo" del componente. */
 .pqr-topnav-logo {
   height: 42px;
   width: auto;
   object-fit: contain;
 }
 
-/* Banner azul: titular 48px light + descripción 18px, con círculos decorativos. */
-.pqr-banner {
-  position: relative;
-  overflow: hidden;
-  display: flex;
-  align-items: flex-start;
-  min-height: 246px;
-  background: var(--z-blue);
-}
-
-.pqr-banner-content {
-  position: relative;
-  z-index: 1;
-  max-width: 1014px;
-  padding: var(--zs-400) var(--zs-1000);
-}
-
-.pqr-banner-title {
-  margin: 0 0 var(--zs-50);
-  font: var(--zf-h-48);
-  color: var(--zg-white);
-}
-
-.pqr-banner-text {
-  margin: 0;
-  font: var(--zf-body-18);
-  color: var(--zg-white-zurich);
-}
-
-/* Círculos decorativos del banner (asomados por el borde derecho). */
-.pqr-banner-shapes {
-  position: absolute;
-  top: 102px;
-  right: 0;
-  width: 144px;
-  height: 144px;
-}
-
-.pqr-banner-shapes::before,
-.pqr-banner-shapes::after {
-  content: '';
-  position: absolute;
-  border-radius: 50%;
-  border: 2px solid color-mix(in srgb, var(--zg-white) 25%, transparent);
-}
-
-.pqr-banner-shapes::before {
-  width: 113px;
-  height: 113px;
-  right: -105px;
-  top: -71px;
-}
-
-.pqr-banner-shapes::after {
-  width: 58px;
-  height: 58px;
-  right: -144px;
-  top: -16px;
-}
-
-@media (max-width: 1200px) {
-  .pqr-banner-content { padding: var(--zs-300) var(--zs-200); }
-  .pqr-banner-title   { font: var(--zf-h-32); }
-}
+/* .pqr-banner/.pqr-banner-content/.pqr-banner-title/.pqr-banner-text/
+   .pqr-banner-shapes → migrados a ZrStageBanner 2026-08-10 (ver PqrPage.tsx),
+   sin imagen (regla de negocio: este banner no lleva imagen/pictograma).
+   ZrPromo se descartó porque fuerza un círculo de imagen aunque no se le
+   pase `image-src` (`forceImage:true` en su fuente vendorizado); ZrStageBanner
+   sin `pictogram`/`image-src` renderiza solo texto + `<z-shape>`. El
+   responsive es interno del componente (@container), no hace falta
+   replicar breakpoints a mano. */
 
 /* Hoja de formulario: columna central de 1130px sobre el fondo gris. */
 .pqr-form {
@@ -1419,7 +1298,14 @@ z-table :is(th, td)[config*="right"] {
   padding: var(--zs-200);
 }
 
-/* Footer corporativo: dos columnas de enlaces, divisoria vertical y legales. */
+/* Footer corporativo: dos columnas de enlaces, divisoria vertical y legales.
+   Investigado 2026-08-06: ZrFooter (habilitado en ZdsFields.tsx) NO calza —
+   su render() real pinta `columns[].header` como <h4> de texto plano, nunca
+   envuelto en z-link, y los dos "encabezados" de columna de este diseño SÍ
+   son links clickeables ("Zurich Compañía de Seguros", "¿Tienes
+   problemas?"); migrar rompería esa interacción. La alternativa (`footer`,
+   fila plana) tampoco sirve: solo admite un listado y ya está reservada
+   para la fila de legales. CSS de dominio confirmado, se mantiene. */
 .pqr-footer {
   display: flex;
   align-items: center;
@@ -1472,7 +1358,10 @@ z-table :is(th, td)[config*="right"] {
 
 /* Cabecera de modal (SCR-000): ícono circular + título + texto de apoyo. La
    comparten el modal de confirmación de envío (MSG-000-08) y el de casos
-   similares — solo cambia el color del ícono (modificador --info/--warning). */
+   similares — solo cambia el color del ícono (modificador --info/--warning).
+   Investigado 2026-08-06 contra el vendor real (ListItem/EventListItem/Avatar/
+   Alert/ActionCard): ninguno ofrece ícono circular de tamaño libre + fila
+   flex-start — CSS de dominio confirmado, sin componente ZDS equivalente. */
 .pqr-modal-head {
   display: flex;
   align-items: flex-start;
@@ -1516,7 +1405,9 @@ z-table :is(th, td)[config*="right"] {
 /* Tarjeta gris con los datos del caso, fila por dato con divisoria fina.
    Usa el token crudo --zg-white-zurich (no el alias --z-bg): dentro de ZrModal
    el DS redefine --z-bg a blanco para el contenido proyectado, y el alias
-   perdería el gris. */
+   perdería el gris. Investigado 2026-08-06: z-table/InputGroup/ListItem no
+   ofrecen "card + fila con borde solo entre filas + label/valor" — sin
+   componente ZDS equivalente confirmado. */
 .pqr-summary {
   display: flex;
   flex-direction: column;

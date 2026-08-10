@@ -40,7 +40,7 @@ export function SiNoSelectAll({ form, prefix, count }: {
     `${prefix}${String(i + 1).padStart(2, '0')}` as keyof FfFlSolicitudFormData
   );
   return (
-    <div className="si-no-select-all">
+    <div z-flex="50" z-align="right" style={{ marginBottom: 'var(--zs-50)' }}>
       <ZrButton config="secondary:s" icon="check:line" onClick={() => lstKeys.forEach((strKey) => setValue(strKey, 'SI'))}>
         Marcar todas SÍ
       </ZrButton>

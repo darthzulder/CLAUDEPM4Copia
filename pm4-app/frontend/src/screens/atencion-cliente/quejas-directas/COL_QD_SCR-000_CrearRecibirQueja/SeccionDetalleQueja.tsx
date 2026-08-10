@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import type { MutableRefObject } from 'react';
 import type { FieldPath, UseFormReturn } from 'react-hook-form';
 import DocSupportUploader from '../../../../components/DocSupportUploader';
-import { ZdsInput, ZdsSelect, ZdsCheckboxField, ZdsTextarea, ZrCheckbox } from '../../../../components/fields/ZdsFields';
+import { ZdsInput, ZdsSelect, ZdsCheckboxField, ZdsTextarea, ZrSwitch } from '../../../../components/fields/ZdsFields';
 import { useCollection, useSyncDesc, toUiOptions, uiValueFromCode, codeFromUiValue, labelFromUiValue } from '../../../../core/useCollection';
 import { QD, QD_COLLECTIONS, SCR000_ADJUNTO_KEYS as ADJUNTO_KEYS } from '../fields/fields';
 import type { CrearRecibirQuejaFormData } from '../fields/fields';
@@ -399,9 +399,10 @@ export default function SeccionDetalleQueja({ form, fileRegistry }: Props) {
       )}
 
       {/* FLD-330 — adjuntos múltiples (pdf, jpg, png, docx · máx 5 MB c/u), tras el
-          switch del diseño. */}
+          switch del diseño (antes maquetado con ZrCheckbox a falta de ZrSwitch en la
+          fachada — ver outputs/react/input/zurich-switch.md). */}
       <div className="pqr-toggle-row">
-        <ZrCheckbox
+        <ZrSwitch
           id="pqr-has-attachments"
           name="pqr-has-attachments"
           label="¿Incluye anexos a la queja?"

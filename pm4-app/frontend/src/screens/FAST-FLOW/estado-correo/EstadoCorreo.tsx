@@ -130,7 +130,7 @@ export default function EstadoCorreo() {
           </ResultCard>
         )}
 
-        <div className="email-status-actions">
+        <div z-flex z-align="center">
           <ZrButton
             config="primary:l"
             icon="arrow-long-right:line"

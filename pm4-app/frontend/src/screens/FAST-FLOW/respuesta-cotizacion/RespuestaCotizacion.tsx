@@ -183,7 +183,7 @@ export default function RespuestaCotizacion() {
           </ResultCard>
         )}
 
-        <div className="result-actions">
+        <div z-flex z-align="center" style={{ marginTop: 'var(--zs-200)' }}>
           <ZrButton
             config="primary:l"
             disabled={submitting}
