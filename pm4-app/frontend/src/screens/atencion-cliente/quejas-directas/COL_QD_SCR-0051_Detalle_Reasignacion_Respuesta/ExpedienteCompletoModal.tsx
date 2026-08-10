@@ -87,92 +87,96 @@ export default function ExpedienteCompletoModal({ data, infoItems, nombre, ident
   const blnHasSoportes = SCR0051_ADJUNTO_KEYS.some((strKey) => !!objWatch[strKey]);
 
   return (
-    <ZrModal model onChange={(open: boolean) => { if (!open) onClose(); }} style={{ width: 'min(880px, 92vw)' }}>
-      <h3 style={{ margin: '0 0 var(--zs-25)', font: 'var(--zf-h-20--700)', color: 'var(--z-text)' }}>
-        Expediente del Caso
-      </h3>
-      <p className="subsection-note" style={{ margin: '0 0 var(--zs-150)' }}>
-        {nombre}{identificacion ? ` · ${identificacion}` : ''}
-      </p>
+    <ZrModal model onChange={(open: boolean) => { if (!open) onClose(); }}>
+      <div className="modal-wide">
+        <h3 style={{ margin: '0 0 var(--zs-25)', font: 'var(--zf-h-20--700)', color: 'var(--z-text)' }}>
+          Expediente del Caso
+        </h3>
+        <p className="subsection-note" style={{ margin: '0 0 var(--zs-150)' }}>
+          {nombre}{identificacion ? ` · ${identificacion}` : ''}
+        </p>
 
-      <InfoBar items={infoItems} />
+        <div className="modal-scroll-body">
+          <InfoBar items={infoItems} />
 
-      <DocSection title="Datos del Consumidor" items={[
-        { label: 'Nombre del Consumidor', value: nombre },
-        { label: 'Tipo y N.° de Identificación', value: identificacion },
-        { label: 'Correo Electrónico', value: data[QD.strEmail] },
-        { label: 'Tipo de Persona', value: desc(objWatch, QD.strPersonType) },
-      ]} />
+          <DocSection title="Datos del Consumidor" items={[
+            { label: 'Nombre del Consumidor', value: nombre },
+            { label: 'Tipo y N.° de Identificación', value: identificacion },
+            { label: 'Correo Electrónico', value: data[QD.strEmail] },
+            { label: 'Tipo de Persona', value: desc(objWatch, QD.strPersonType) },
+          ]} />
 
-      <DocSection title="Clasificación Regulatoria" items={[
-        { label: 'Producto SFC', value: desc(objWatch, QD.strSfcProduct) },
-        { label: 'Momento', value: data[QD.strInteraction] },
-        { label: 'Servicio', value: data[QD.strServiceProvided] },
-        { label: 'Placa', value: data[QD.strPlate] },
-        { label: 'Motivo SFC', value: desc(objWatch, QD.strSfcReason) },
-        { label: 'Canal de Recepción', value: desc(objWatch, QD.strChannel) },
-        { label: 'Instancia de Recepción', value: desc(objWatch, QD.strReceptionInstance) },
-        { label: 'Admisión', value: desc(objWatch, QD.strAdmission) },
-        { label: 'Ente de Control', value: desc(objWatch, QD.strControlEntity) },
-        { label: 'Escalamiento Defensor', value: data[QD.strOmbudsmanEscalation] },
-        { label: 'Compensación', value: data[QD.strCompensation] },
-        { label: 'Relación con Fraude', value: data[QD.strFraudRelated] },
-      ]} />
+          <DocSection title="Clasificación Regulatoria" items={[
+            { label: 'Producto SFC', value: desc(objWatch, QD.strSfcProduct) },
+            { label: 'Momento', value: data[QD.strInteraction] },
+            { label: 'Servicio', value: data[QD.strServiceProvided] },
+            { label: 'Placa', value: data[QD.strPlate] },
+            { label: 'Motivo SFC', value: desc(objWatch, QD.strSfcReason) },
+            { label: 'Canal de Recepción', value: desc(objWatch, QD.strChannel) },
+            { label: 'Instancia de Recepción', value: desc(objWatch, QD.strReceptionInstance) },
+            { label: 'Admisión', value: desc(objWatch, QD.strAdmission) },
+            { label: 'Ente de Control', value: desc(objWatch, QD.strControlEntity) },
+            { label: 'Escalamiento Defensor', value: data[QD.strOmbudsmanEscalation] },
+            { label: 'Compensación', value: data[QD.strCompensation] },
+            { label: 'Relación con Fraude', value: data[QD.strFraudRelated] },
+          ]} />
 
-      <DocSection title="Descripción de la Queja" items={[
-        { label: 'Descripción / Texto de la Queja', value: data[QD.strComplaintText] },
-      ]} />
+          <DocSection title="Descripción de la Queja" items={[
+            { label: 'Descripción / Texto de la Queja', value: data[QD.strComplaintText] },
+          ]} />
 
-      <OptionalSection show={blnHasRadicadorDocs} title="Documentos del Radicador">
-        <DocumentosRadicador requestId={requestId} docKeys={SCR000_ADJUNTO_KEYS} />
-      </OptionalSection>
+          <OptionalSection show={blnHasRadicadorDocs} title="Documentos del Radicador">
+            <DocumentosRadicador requestId={requestId} docKeys={SCR000_ADJUNTO_KEYS} />
+          </OptionalSection>
 
-      <DocSection title="Asignación / Reasignación" items={[
-        { label: 'Área a Cargo', value: data[QD.strAssigneeArea] },
-        { label: 'Usuario Responsable', value: desc(objWatch, QD.strAssigneeUser) },
-        { label: 'Comentario de Reasignación', value: data[QD.strAssignmentRemarks] },
-      ]} />
+          <DocSection title="Asignación / Reasignación" items={[
+            { label: 'Área a Cargo', value: data[QD.strAssigneeArea] },
+            { label: 'Usuario Responsable', value: desc(objWatch, QD.strAssigneeUser) },
+            { label: 'Comentario de Reasignación', value: data[QD.strAssignmentRemarks] },
+          ]} />
 
-      <OptionalSection show={lstHistory.length > 0} title="Historial de Asignaciones">
-        <ZrTable zebra>
-          <table>
-            <thead>
-              <tr><th>Fecha</th><th>De</th><th>Para</th><th>Observaciones</th><th>Respondió</th></tr>
-            </thead>
-            <tbody>
-              {lstHistory.map((objRow, intIndex) => (
-                <tr key={intIndex}>
-                  <td>{objRow.fecha}</td>
-                  <td>{objRow.de}</td>
-                  <td>{objRow.para}</td>
-                  <td>{objRow.observaciones}</td>
-                  <td>{objRow.respondio === 'si' ? <ZdsStatusBadge variant="success">✓</ZdsStatusBadge> : '—'}</td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </ZrTable>
-      </OptionalSection>
+          <OptionalSection show={lstHistory.length > 0} title="Historial de Asignaciones">
+            <ZrTable zebra>
+              <table>
+                <thead>
+                  <tr><th>Fecha</th><th>De</th><th>Para</th><th>Observaciones</th><th>Respondió</th></tr>
+                </thead>
+                <tbody>
+                  {lstHistory.map((objRow, intIndex) => (
+                    <tr key={intIndex}>
+                      <td>{objRow.fecha}</td>
+                      <td>{objRow.de}</td>
+                      <td>{objRow.para}</td>
+                      <td>{objRow.observaciones}</td>
+                      <td>{objRow.respondio === 'si' ? <ZdsStatusBadge variant="success">✓</ZdsStatusBadge> : '—'}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </ZrTable>
+          </OptionalSection>
 
-      <DocSection title="Respuesta" items={[
-        { label: 'Respuesta a favor de', value: strFavorLabel },
-        { label: 'Observaciones SAC', value: data[QD.strSacRemarks] },
-        { label: 'Respuesta al Cliente', value: data[QD.strClientResponse] },
-        { label: 'Acciones Tomadas', value: data[QD.strActionsTaken] },
-      ]} />
+          <DocSection title="Respuesta" items={[
+            { label: 'Respuesta a favor de', value: strFavorLabel },
+            { label: 'Observaciones SAC', value: data[QD.strSacRemarks] },
+            { label: 'Respuesta al Cliente', value: data[QD.strClientResponse] },
+            { label: 'Acciones Tomadas', value: data[QD.strActionsTaken] },
+          ]} />
 
-      <OptionalSection show={blnHasSoportes} title="Soportes Internos">
-        <RequestFileList
-          requestId={requestId}
-          docKeys={SCR0051_ADJUNTO_KEYS}
-          label="Adjuntos de soporte"
-          emptyText="Sin soportes internos cargados."
-          loadingText="Buscando soportes internos del caso…"
-        />
-      </OptionalSection>
+          <OptionalSection show={blnHasSoportes} title="Soportes Internos">
+            <RequestFileList
+              requestId={requestId}
+              docKeys={SCR0051_ADJUNTO_KEYS}
+              label="Adjuntos de soporte"
+              emptyText="Sin soportes internos cargados."
+              loadingText="Buscando soportes internos del caso…"
+            />
+          </OptionalSection>
+        </div>
 
-      <div z-flex="75" z-align="right:center" style={{ marginTop: 'var(--zs-200)' }}>
-        <ZrButton config="secondary:s" onClick={onClose}>Cerrar</ZrButton>
+        <div z-flex="75" z-align="right:center" style={{ marginTop: 'var(--zs-200)' }}>
+          <ZrButton config="secondary:s" onClick={onClose}>Cerrar</ZrButton>
+        </div>
       </div>
     </ZrModal>
   );
