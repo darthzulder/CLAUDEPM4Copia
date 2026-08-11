@@ -4,7 +4,7 @@
 paquetes `@zurich/*` ya no reciben soporte y solo resuelven del npm público, sin registro
 privado. Vendorizarlos hace la build inmune a un eventual *unpublish*, y permite parchear
 `web-components` para que funcione con React 19 (ver más abajo). Detalle completo del porqué
-y las etapas de migración: [`../../outputs/migracion-react19-plan.md`](../../outputs/migracion-react19-plan.md)
+y las etapas de migración (archivada, completada 2026-07-01): [`../../../docs/archive/react19-migration.md`](../../../docs/archive/react19-migration.md)
 (Anexo A) y la memoria de proyecto `project-zds-decommission`.
 
 ## Contenido (todos 0.8.1, empaquetados desde `node_modules` con `npm pack`)
