@@ -375,13 +375,13 @@ donde un fallo es silencioso y caro:
   para no re-probar esa red; `RecaptchaModal` stubea `window.grecaptcha` (si no,
   `loadRecaptcha()` espera el script real de Google o expira a los 10s).
 
-- **9 de 24 pantallas registradas** ya tienen smoke test (antes solo `SCR-0052`):
-  `ds-catalog`, `smartsupervision-api-docs`, `SCR-003`, `SCR-004`, `SCR-008`, `SCR-011`,
-  `SCR-012`, `SCR-013`. `FAST-FLOW/*` queda deliberadamente fuera de esta tanda (se va a
-  eliminar/reemplazar).
+- **10 de 24 pantallas registradas** ya tienen smoke test (antes solo `SCR-0052`):
+  `ds-catalog`, `smartsupervision-api-docs`, `SCR-003`, `SCR-004`, `SCR-008`, `SCR-009`,
+  `SCR-011`, `SCR-012`, `SCR-013`. `FAST-FLOW/*` queda deliberadamente fuera de esta tanda
+  (se va a eliminar/reemplazar).
 
-**Lo que sigue en deuda:** `SCR-000`, `SCR-0051`, `SCR-009` (las pantallas más grandes de
-Quejas Directas) y todo `FAST-FLOW/*`.
+**Lo que sigue en deuda:** `SCR-000` y `SCR-0051` (las dos pantallas más grandes de Quejas
+Directas) y todo `FAST-FLOW/*`.
 
 Qué implica en la práctica:
 - **Lo que toques, lo cubrís.** No hace falta un backfill masivo antes de poder trabajar; sí
