@@ -94,17 +94,19 @@ The container has no HMR against the Windows-mounted volume, so after editing CS
 docker restart pm4-app-container
 ```
 
-**Before every commit/push**, run the full build + lint and confirm there are no TypeScript, lint, or bundling errors — do not commit a broken build:
+**Before every commit/push**, run the full build + lint + tests and confirm there are no TypeScript, lint, bundling, or test errors — do not commit a broken build or a red suite:
 
 ```bash
 docker exec pm4-app-container sh -c "cd /app && npm run build --workspace=frontend"
 docker exec pm4-app-container sh -c "cd /app && npm run build --workspace=backend"
 docker exec pm4-app-container sh -c "cd /app && npm run lint --workspace=frontend"
+docker exec pm4-app-container sh -c "cd /app && npm run test --workspace=frontend"
 ```
 
-There is an initial automated test suite covering the highest-risk **pure logic** (premium
-calculations, payload/template transforms) — it does not replace manual verification of the
-screens themselves, which is still done inside the PM4 iframe (or directly at
+Automated tests are **mandatory** for new or modified pure logic, own components, and screens
+— see [docs/guides/testing-conventions.md](docs/guides/testing-conventions.md) for what needs a
+test and the ZDS-specific gotchas. They do not replace manual verification of the screens
+themselves, which is still done inside the PM4 iframe (or directly at
 `http://localhost:5173/?screen=...`) and via the `?screen=ds-catalog` live component reference:
 
 ```bash
@@ -123,6 +125,6 @@ docker exec cotizador-service-container sh -c "cd /app && pip install -r require
 - Never import `@zurich/web-components` directly in a screen — always go through the `ZdsFields` facade (`pm4-app/frontend/src/components/fields/ZdsFields.tsx`).
 - Do not modify `.env` (only add variables), `pm4-app/backend/src/routes/pm4.routes.ts`'s core proxy logic, `docs (4).json`, or the exported PM4 packages under `PM4 Backup/` — treat these as read-only references.
 - After modifying code, run `graphify update .` to keep `graphify-out/` (the project's knowledge graph) current.
-- Run the full build + lint (see above) before opening a pull request.
+- Run the full build + lint + tests (see above) before opening a pull request.
 
 For more on writing good READMEs, see the [Azure DevOps guidelines](https://docs.microsoft.com/en-us/azure/devops/repos/git/create-a-readme?view=azure-devops). Inspiration: [ASP.NET Core](https://github.com/aspnet/Home), [Visual Studio Code](https://github.com/Microsoft/vscode), [Chakra Core](https://github.com/Microsoft/ChakraCore).
