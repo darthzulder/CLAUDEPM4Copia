@@ -1,17 +1,22 @@
 # Documentación Funcional — Pantalla `COL_QD_SCR-000_CrearRecibirQueja`
 
-**Pantalla (insumo):** SCR-000 · PAN-01.2 — Formulario de Radicación PQRS (Autoservicio)
-**Tarea BPMN:** P01-T00 — Radicar PQRS por autoservicio (portal público)
-**Proceso:** P01 — Gestión de Quejas Directas (ACZ-QD-001)
-**Rol responsable:** Consumidor Financiero (Cliente / Intermediario / Empleado Zurich / Defensor del Consumidor)
-**Versión del diseño:** TO-BE v3.0
-**Archivos de implementación:** `CrearRecibirQueja.tsx`, `SeccionConsumidor.tsx`, `SeccionDetalleQueja.tsx`, `errorHelper.ts` (config centralizada en `fields/fields.ts`)
+## 1. Encabezado
 
-> ⚠️ **Nota de nomenclatura.** La carpeta y la pantalla implementada corresponden a **SCR-000 (PQRS Autoservicio / P01-T00)** del insumo v3.0 — campos FLD-300…FLD-341, reglas RUL-000-*, mensajes MSG-000-*. **No** es la SCR-001 (Crear/Recibir Queja, P01-T01, rol Gestor de Experiencia). Ver [Suposiciones realizadas](#suposiciones-realizadas).
+| Atributo | Valor |
+|---|---|
+| Pantalla (insumo) | **SCR-000** · **PAN-01.2** — Formulario de Radicación PQRS (Autoservicio) |
+| Tarea BPMN | **P01-T00** — Radicar PQRS por autoservicio (portal público) |
+| Proceso | **P01** — Gestión de Quejas Directas (`ACZ-QD-001`) |
+| Rol responsable | Consumidor Financiero (Cliente / Intermediario / Empleado Zurich / Defensor del Consumidor) |
+| Versión del diseño | TO-BE v3.0 |
+| Slug / carpeta | `COL_QD_SCR-000_CrearRecibirQueja` |
+| Archivos de implementación | `CrearRecibirQueja.tsx`, `SeccionConsumidor.tsx`, `SeccionDetalleQueja.tsx`, `errorHelper.ts` (config centralizada en `fields/fields.ts`) |
+
+> ⚠️ **Nota de nomenclatura.** La carpeta y la pantalla implementada corresponden a **SCR-000 (PQRS Autoservicio / P01-T00)** del insumo v3.0 — campos FLD-300…FLD-341, reglas RUL-000-*, mensajes MSG-000-*. **No** es la SCR-001 (Crear/Recibir Queja, P01-T01, rol Gestor de Experiencia). Ver [Suposiciones realizadas](#10-suposiciones-realizadas).
 
 ---
 
-## Resumen
+## 2. Resumen
 
 Formulario **público de autoservicio** mediante el cual un Consumidor Financiero radica directamente su PQRS (petición, queja, reclamo, sugerencia o felicitación). Está organizado en 6 secciones: Tipo de Solicitud y Rol, Datos del Consumidor Financiero, Detalle de la Queja, Autorización y Envío, y dos secciones de solo lectura post-radicación (Estado ante la SFC y Responsable Asignado).
 
@@ -19,7 +24,7 @@ El usuario completa los campos obligatorios, acepta el tratamiento de datos, val
 
 ---
 
-## Archivos de Insumo Analizados
+## 3. Archivos de Insumo Analizados
 
 Todos en `pm4-app/insumos/` (versión vigente **v3.0**).
 
@@ -50,12 +55,12 @@ Catálogos implementados como **colecciones dinámicas PM4** (no listas estátic
 | CAT-COND-ESP | `qd_strSpecialCondition` (24) | `qd_strSpecialCondition` |
 | CAT-PRODUCTO-SFC | `qd_strSfcProduct` (16) | `qd_strSfcProduct` |
 | cat_matriz_motivos | `qd_matrizMotivos` (45, carga completa; cascada momento/servicio/motivo derivada **en cliente**) | `qd_strInteraction`, `qd_strServiceProvided`, `qd_strSfcReason`, `qd_strResponsableRole`, `qd_strOmbudsmanEscalation`, `qd_strCompensation`, `qd_strSlaAssigned` |
-| CAT-MOTIVO-SFC *(legacy id 17)* | `qd_strSfcReason` (17, ya no lo usa SCR-000; sí SCR-002/0051/0052 en modo display) | `qd_strSfcReason` |
+| CAT-MOTIVO-SFC *(legacy id 17)* | `qd_strSfcReason` (17, ya no lo usa SCR-000; sí SCR-0051/0052 en modo display) | `qd_strSfcReason` |
 | CAT-ADMISION | `qd_strAdmission` (21) | `qd_strAdmission` |
 
 ---
 
-## Campos Implementados
+## 4. Campos Implementados
 
 **S1 — Tipo de solicitud y rol** (`CrearRecibirQueja.tsx`):
 
@@ -112,7 +117,7 @@ Catálogos implementados como **colecciones dinámicas PM4** (no listas estátic
 | Motivo de la queja | `qd_strSfcReason` | Select (`cat_matriz_motivos`: value=`codigoMotivoSFC`, label=`motivoSFC`, cascada), deshabilitado hasta completar momento/servicio | Sí | Anexo02 > SCR-000 > FLD-328 (fila 44) — "crítico: condiciona fraude en M3" |
 | *(back, no visible)* | `qd_strResponsableRole` | Texto, computado desde `cat_matriz_motivos.rolResponsable` | Sí (al radicar) | Solicitud del usuario (2026-07-09) — rol sugerido para ruteo BPM, distinto del `qd_strAssigneeRole` post-radicación (S6) |
 | *(back, no visible)* | `qd_strCompensation` | Texto, computado desde `cat_matriz_motivos.resarcimientoAdministrador` | Sí (al radicar) | Solicitud del usuario (2026-07-09) |
-| *(back, no visible)* | `qd_strSlaAssigned` | Texto, computado desde `cat_matriz_motivos.sla` | Sí (al radicar) | Solicitud del usuario (2026-07-09) — mismo campo que consumen SCR-002/008/0051 |
+| *(back, no visible)* | `qd_strSlaAssigned` | Texto, computado desde `cat_matriz_motivos.sla` | Sí (al radicar) | Solicitud del usuario (2026-07-09) — mismo campo que consumen SCR-008/0051 |
 | Ingresa el detalle | `qd_strComplaintText` | Textarea (50–2000) | Sí | Anexo02 > SCR-000 > FLD-329 (fila 45) |
 | ¿Incluye anexos a la queja? | *(estado de UI, no viaja a PM4)* | Checkbox que revela el cargador de adjuntos; al apagarlo se descartan los archivos ya seleccionados | No | Diseño web (switch al pie de la sección) |
 | Ingresa archivos adjuntos | `qd_strAttach01…05` | Upload multi (máx 5), visible solo si el switch de anexos está encendido | No | Anexo02 > SCR-000 > FLD-330 (fila 46) — "pdf, jpg, png, docx. Máx 5 MB" |
@@ -140,7 +145,7 @@ Catálogos implementados como **colecciones dinámicas PM4** (no listas estátic
 
 ---
 
-## Validaciones Implementadas
+## 5. Validaciones Implementadas
 
 | Validación | Comportamiento implementado | Fuente |
 |---|---|---|
@@ -158,7 +163,7 @@ Catálogos implementados como **colecciones dinámicas PM4** (no listas estátic
 
 ---
 
-## Mensajes de Error
+## 6. Mensajes de Error
 
 | Mensaje | Condición | Implementación | Fuente |
 |---|---|---|---|
@@ -173,7 +178,7 @@ Catálogos implementados como **colecciones dinámicas PM4** (no listas estátic
 
 ---
 
-## Reglas de Negocio
+## 7. Reglas de Negocio
 
 | Regla | Implementación | Fuente |
 |---|---|---|
@@ -189,7 +194,7 @@ Catálogos implementados como **colecciones dinámicas PM4** (no listas estátic
 
 ---
 
-## Comportamientos de UI
+## 8. Comportamientos de UI
 
 | Comportamiento | Implementación | Fuente |
 |---|---|---|
@@ -211,7 +216,7 @@ Catálogos implementados como **colecciones dinámicas PM4** (no listas estátic
 
 ---
 
-## Dependencias Entre Campos
+## 9. Dependencias Entre Campos
 
 | Campo Origen | Campo Dependiente | Comportamiento | Fuente |
 |---|---|---|---|
@@ -228,7 +233,7 @@ Catálogos implementados como **colecciones dinámicas PM4** (no listas estátic
 
 ---
 
-## Suposiciones Realizadas
+## 10. Suposiciones Realizadas
 
 1. **Nomenclatura SCR-000.** La carpeta y los archivos se denominan `COL_QD_SCR-000_CrearRecibirQueja` dado que el código y los IDs de campo (FLD-300…341) corresponden a **SCR-000 (PQRS Autoservicio, P01-T00)** del insumo v3.0. El encabezado de subtítulo de la pantalla muestra "SCR-000 · P01-T00", confirmando la correspondencia.
 
@@ -267,7 +272,7 @@ Catálogos implementados como **colecciones dinámicas PM4** (no listas estátic
 
 17. **`qd_blnSmartSupervisionCase` se envía en `false` al radicar (2026-07-30).** A petición del usuario, se agrega esta variable (no listada entre los 42 campos de SCR-000) al payload de radicación con valor fijo `false`, tanto en Web Entry como en modo tarea normal: la solicitud recién creada desde SCR-000 nunca tiene todavía un caso SmartSupervision asociado. Definida en `QD.blnSmartSupervisionCase` (`fields/fields.ts`), con default `false` en `SCR000_DEFAULTS` y forzada explícitamente (igual que `qd_blnCaptcha`) en el payload de `handleCaptchaVerified` (`CrearRecibirQueja.tsx`) para garantizar el valor sin depender del estado del formulario.
 
-## Cobertura de Trazabilidad
+## 11. Cobertura de Trazabilidad
 
 | Elemento | Cobertura | Observación |
 |---|---|---|

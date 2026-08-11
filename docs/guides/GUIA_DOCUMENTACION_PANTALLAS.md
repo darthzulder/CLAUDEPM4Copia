@@ -1,7 +1,7 @@
 # Guía — Generación de Documentación Funcional por Pantalla
 
 > **Cómo usar este archivo:** al pedir a Claude que cree (o termine) una pantalla, referenciar este documento.
-> Ejemplo: *"Crea la pantalla `corregir-datos` siguiendo `GUIA_DOCUMENTACION_PANTALLAS.md` y genera también su documentación."*
+> Ejemplo: *"Crea la pantalla `<slug-nuevo>` siguiendo `docs/guides/GUIA_DOCUMENTACION_PANTALLAS.md` y genera también su documentación."*
 > El objetivo es que **cada pantalla** tenga un archivo `DOCUMENTACION_<slug>.md` con **trazabilidad completa** entre lo implementado y los archivos de Insumos.
 
 ---
@@ -32,6 +32,20 @@ Antes de leer cualquier archivo de insumos (`.xlsx`, `.pdf`, u otro), **verifica
 - Solo recurrir al archivo original si el `.md` no existe o si la información requerida no está cubierta en él.
 
 > Esta regla aplica a **cualquier archivo** de la carpeta `insumos/`, no solo a los `.xlsx`. Si mañana hay un `.pdf` con un `.md` equivalente al lado, la misma lógica aplica.
+
+### Regla de versión (obligatoria) — nunca usar un derivado sin confirmar que es el vigente
+
+El repo acumula **versiones históricas** del mismo insumo (p. ej. `Anexo02_Mockups_TOBE_QuejaDirectas_v2_0`, `v3_0`, `v3_0_backup_preqd`, `v3_1`, `v3_2`), tanto en `insumos/` como en cachés derivadas (`graphify-out/converted/`). Un `.md`/`.html` con nombre parecido **no garantiza que sea el vigente**. Antes de confiar en cualquier derivado:
+
+1. **Identificar la versión vigente** mirando qué `.xlsx`/`.docx` vive hoy en `pm4-app/insumos/` (sin sufijo `backup`/`preqd`/versión antigua) — o, para el Anexo02, confiar en [`pm4-app/insumos/Anexo02_Index/`](../../pm4-app/insumos/Anexo02_Index/README.md), que se regenera desde ese archivo vigente y es el índice autoritativo.
+2. **Comparar el nombre del derivado contra esa versión.** Si el derivado lleva una versión distinta (`v2_0`, `v3_0`, `v3_1`, `backup_preqd`, etc.) o no se puede confirmar que corresponde a la vigente, **no usarlo como fuente** — es histórico, no autoritativo.
+3. Si un derivado vigente no existe pero sí un `.xlsx` vigente, leer el `.xlsx` directamente (paso 3 de la sección siguiente) en vez de conformarse con un derivado desactualizado.
+
+**Por qué esta regla existe:** una pantalla de este proyecto se documentó contra
+`Anexo02_..._v2_0.html` porque fue el primer archivo con nombre similar que se encontró —
+para cuando se escribió, el insumo vigente ya era `v3_2` y esa pantalla ni siquiera seguía
+en el alcance del proceso. La pantalla y su documentación fueron retiradas; no repetir el
+error de origen.
 
 ### Cómo leer los insumos — orden de preferencia
 
@@ -109,8 +123,9 @@ El archivo `DOCUMENTACION_<slug>.md` debe contener, en este orden:
 10. **Suposiciones Realizadas** — toda decisión NO definida explícitamente en los insumos (ver reglas abajo).
 11. **Cobertura de Trazabilidad** — % estimado por categoría + lista de elementos inferidos.
 
-> Aún no hay ningún `DOCUMENTACION_<slug>.md` generado en el proyecto; el primero que se
-> cree con esta estructura queda como referencia para los siguientes.
+> Hay 10 `DOCUMENTACION_<slug>.md` ya generados siguiendo esta estructura — úsalos como
+> referencia, por ejemplo [`DOCUMENTACION_COL_QD_SCR-0051_Detalle_Reasignacion_Respuesta.md`](../../pm4-app/frontend/src/screens/atencion-cliente/quejas-directas/COL_QD_SCR-0051_Detalle_Reasignacion_Respuesta/DOCUMENTACION_COL_QD_SCR-0051_Detalle_Reasignacion_Respuesta.md),
+> que cubre las 11 secciones completas.
 
 ---
 
