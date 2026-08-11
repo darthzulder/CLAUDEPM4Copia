@@ -361,8 +361,21 @@ donde un fallo es silencioso y caro:
 - Backend: `lib/recaptcha.ts` (el **fail-open** siempre con `verified:false`) y `lib/tasks.ts`
   (el selector de tarea activa y su fallback).
 
-**Lo que sigue en deuda:** ~1 de 15 componentes y ~1 de 24 pantallas tienen smoke test. El
-hook `useTask` completo (con su contrato de dos PUT para reasignar) sigue sin cubrir.
+**Tanda 2 en curso (ago-2026):**
+- `core/useTask.test.tsx` cubre el hook completo (no solo una función pura extraída) —
+  carga inicial por `task_id` y por `case_id`, el error con y sin `response.data.message`,
+  y las cuatro mutaciones (`completeTask`, `saveDraft`, `startProcess`, y el **contrato de
+  dos PUT de `reassignTask`**: el primero SOLO con `user_id` y el segundo a
+  `/requests/{id}` con los datos, que se omite si no hay `process_request_id`). Se mockean
+  `api/pm4Client` y los cuatro resolvers de `core/useToken.ts`; el archivo es `.test.tsx`
+  (no `.test.ts`) porque `renderHook` necesita DOM.
+- **Los 14 componentes de `components/*.tsx` ya tienen smoke test** (antes solo
+  `ActionBar`). Los que pegan a PM4 (`PdfViewer`, `RequestFileList`) mockean
+  `api/pm4Client`/`core/useRequestFiles`; `PreviewModal` mockea su propio `PdfViewer` hijo
+  para no re-probar esa red; `RecaptchaModal` stubea `window.grecaptcha` (si no,
+  `loadRecaptcha()` espera el script real de Google o expira a los 10s).
+
+**Lo que sigue en deuda:** ~1 de 24 pantallas tiene smoke test (`SCR-0052`).
 
 Qué implica en la práctica:
 - **Lo que toques, lo cubrís.** No hace falta un backfill masivo antes de poder trabajar; sí
