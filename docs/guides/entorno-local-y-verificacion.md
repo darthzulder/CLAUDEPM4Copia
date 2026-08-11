@@ -50,37 +50,41 @@ nvm use 24
 node -v          # debe imprimir v24.x
 ```
 
-### ⚠️ Si `node -v` no funciona en una terminal nueva
+### ⚠️ Si `node -v` no funciona: **reiniciá la terminal (y el IDE)**
 
-El instalador de nvm-windows agrega al PATH de usuario las entradas **`%NVM_HOME%`** y
-**`%NVM_SYMLINK%`** — con la indirección de variable, no la ruta literal. En algunos equipos
-Windows **no expande esas variables** al construir el bloque de entorno de un proceso nuevo,
-así que quedan como nombres de carpeta literales que no existen y `node`/`npm` resultan
-invisibles aunque estén perfectamente instalados.
+El instalador de nvm-windows deja el PATH con la indirección **`%NVM_HOME%;%NVM_SYMLINK%`**
+(en el PATH de máquina, y define ambas variables también a nivel máquina). Eso **funciona
+bien** — Windows las expande al construir el bloque de entorno de un proceso nuevo;
+verificado en este proyecto con Node 24.19.0.
 
-Verificar qué hay realmente en el PATH persistido:
-
-```powershell
-[Environment]::GetEnvironmentVariable("PATH","User") -split ';' | Where-Object { $_ -match 'nvm' }
-```
-
-Si imprime `%NVM_HOME%` / `%NVM_SYMLINK%` en vez de rutas, reemplazarlas por las literales:
+La causa real de "instalé Node y `node -v` no existe" es casi siempre mucho más simple: **el
+proceso que estás usando arrancó antes de la instalación**. Un proceso hereda su bloque de
+entorno al nacer y no se refresca nunca. Aplica a la terminal, y también al IDE o a cualquier
+agente que la haya lanzado — cerrar solo la pestaña no alcanza si el proceso padre sigue
+siendo el viejo.
 
 ```powershell
-$home_ = [Environment]::GetEnvironmentVariable("NVM_HOME","User")
-$link  = [Environment]::GetEnvironmentVariable("NVM_SYMLINK","User")
-$p     = [Environment]::GetEnvironmentVariable("PATH","User")
-$nuevo = $p.Replace('%NVM_HOME%', $home_).Replace('%NVM_SYMLINK%', $link)
-Set-ItemProperty -Path 'HKCU:\Environment' -Name PATH -Value $nuevo -Type ExpandString
+# Comprobar el PATH PERSISTIDO (crudo, sin expandir) en vez del de la sesión:
+(Get-Item 'HKCU:\Environment').GetValue('PATH','','DoNotExpandEnvironmentNames') -split ';' |
+  Where-Object { $_ -match 'nvm|NVM' }
 ```
 
-La ruta del symlink (`C:\nvm4w\nodejs` por defecto) es **estable**: `nvm use <versión>` la
-repunta, así que poner la ruta literal no rompe el cambio de versiones.
+Si ahí aparecen `%NVM_HOME%` y `%NVM_SYMLINK%`, la instalación está bien: reiniciá la
+terminal/IDE y listo. **No hace falta reemplazarlas por rutas literales** — hacerlo solo
+desvía la config del default del instalador.
 
-> **Ojo con `[Environment]::SetEnvironmentVariable(...,"User")` para escribir el PATH:**
-> convierte el valor de registro de `REG_EXPAND_SZ` a `REG_SZ`, y ahí Windows deja de
-> expandir cualquier `%VAR%` que haya en el PATH. Usar `Set-ItemProperty ... -Type
-> ExpandString` como arriba.
+> **Si igual necesitás escribir el PATH desde PowerShell, no uses
+> `[Environment]::SetEnvironmentVariable(..., "User")`:** convierte el valor de registro de
+> `REG_EXPAND_SZ` a `REG_SZ`, y ahí Windows **deja de expandir** cualquier `%VAR%` del PATH —
+> rompe justamente la indirección de nvm. Usar
+> `Set-ItemProperty -Path 'HKCU:\Environment' -Name PATH -Value <v> -Type ExpandString`.
+
+### Sobre la versión exacta
+
+El host puede quedar en un patch distinto al del contenedor (p. ej. host `v24.19.0` vs
+contenedor `v24.18.0`) y **eso está bien**: tanto `pm4-app/Dockerfile` (`node:24-alpine`)
+como el CI (`node-version: '24'`) flotan dentro del major. Lo que hay que mantener alineado
+es el **major 24**; un major distinto (winget publica Node 26) sí es el drift a evitar.
 
 Instalar dependencias en el host:
 
