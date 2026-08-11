@@ -19,8 +19,33 @@ Un test de lógica pura va en `.test.ts`; un test que renderiza JSX va en `.test
 Vitest lo enruta automáticamente al project correcto por la extensión, no hace falta
 configurar nada por archivo.
 
-Comandos: `npm run test --workspace=frontend` (Vitest, ambos projects) ·
-`pytest -q` desde `cotizador-service/` (Python).
+Comandos: `npm run verify` (el gate completo) · `npm run test --workspace=frontend`
+(Vitest, ambos projects) · `npm run test --workspace=backend` · `pytest -q` desde
+`cotizador-service/`.
+
+### Tres consecuencias de esa configuración que muerden
+
+1. **El project `logic` no tiene DOM ni `test-setup.ts`.** Un `.test.ts` que toque `window`,
+   `document` o `localStorage` falla con `x is not defined`. Si lo necesitás: nombralo
+   `.test.tsx`, o poné el docblock `// @vitest-environment jsdom` al inicio del archivo.
+   Afecta a lo que se testee de `core/useToken.ts` y `core/scrollToFirstError.ts`.
+2. **Los tests los type-checkea el build.** `tsconfig.json` incluye todo `src` y `npm run
+   build` corre `tsc` antes de Vite, con `strict` y `noUnusedLocals`. Un import sin usar en un
+   test **rompe el build**, no solo el lint.
+3. **Un helper compartido no puede llamarse `*.test.ts`/`*.test.tsx`** — los globs lo
+   recogerían como suite y fallaría por no tener tests. Usar `src/test-utils/<algo>.ts`
+   (`.tsx` si lleva JSX).
+
+### La zona horaria está fijada — no la quites
+
+Ambos `vitest.config.ts` fijan `env: { TZ: 'America/Bogota' }`. Sin eso, toda aserción de
+fecha depende de la máquina: pasa en local (UTC-5) y falla en CI (UTC). Se eligió la zona de
+negocio, no UTC, porque `fechaHora.ts` convierte UTC→local a propósito para mostrar; y
+Colombia no tiene DST, así que es determinista todo el año.
+
+`core/fechaHora.test.ts` tiene un **test de guardia** que asserta el offset −5: si alguien
+quita el `env`, falla ese test primero y con un mensaje claro, en vez de que fallen los de
+conversión ISO con un off-by-hours indescifrable.
 
 ---
 
@@ -86,11 +111,20 @@ const OBJ_USE_TASK = {
 };
 vi.mock('../../../../core/useTask', () => ({ useTask: () => OBJ_USE_TASK }));
 
-const CLL_VACIO: never[] = [];   // referencia estable, NO `options: []` inline
+// ⚠️ La firma de useCollection es { options, loading, rawMap, records } — NO existe ningún
+// campo `error`, y omitir `records`/`rawMap` revienta en las pantallas que sí los usan
+// (SCR-000, SCR-003 y SCR-0051 llaman `records.filter(...)` y leen `rawMap`).
+const CLL_VACIO: never[] = [];   // referencias estables, NO literales inline
+const OBJ_RAW_MAP_VACIO: Record<string, Record<string, unknown>> = {};
+const CLL_RECORDS_VACIO: Record<string, unknown>[] = [];
+const OBJ_USE_COLLECTION = {
+  options: CLL_VACIO, loading: false, rawMap: OBJ_RAW_MAP_VACIO, records: CLL_RECORDS_VACIO,
+};
+
 vi.mock('../../../../core/useCollection', async (in_fnImportOriginal) => {
-  // descOf/useSyncDesc son lógica pura ya testeada — se dejan reales.
+  // descOf/useSyncDesc/resolvePmql son lógica pura ya testeada — se dejan reales.
   const objActual = await in_fnImportOriginal<typeof import('../../../../core/useCollection')>();
-  return { ...objActual, useCollection: () => ({ options: CLL_VACIO, loading: false, error: null }) };
+  return { ...objActual, useCollection: () => OBJ_USE_COLLECTION };
 });
 ```
 

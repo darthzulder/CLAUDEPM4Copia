@@ -344,19 +344,33 @@ Los tests automatizados **no reemplazan** la verificación manual del flujo de d
 
 ### Estado actual — la cobertura es deuda, no un hecho cumplido
 
-Esta regla es un **estándar hacia adelante**, no una descripción del repo. Al momento de
-escribirla la cobertura real era baja: ~1 de 15 componentes, ~1 de 24 pantallas, y ~3 de 13
-módulos de `core/`. El backend acababa de recibir su primer test (`lib/token.ts`).
+Esta regla es un **estándar hacia adelante**, no una descripción del repo.
+
+**Tanda 1 pagada (ago-2026): 315 tests en 13 archivos** (desde 43 en 5). Se cubrió la lógica
+donde un fallo es silencioso y caro:
+- `core/businessDays.ts` — `parsePm4Date` (la trampa `DD/MM` vs `MM/DD`) y toda la
+  matemática de días hábiles/SLA. Es una **réplica en cliente del script PM4
+  `COL_UTIL_Dias_Habiles` (id 95)**: dos implementaciones de la misma regla, así que estos
+  tests fijan el lado cliente.
+- `core/pm4Resolve.ts` — la rama de *fallback*, que hoy está muerta (todos los slugs
+  resuelven) y se activa en la próxima migración de instancia.
+- `core/collections.test.ts` — **guarda de migración**: valida las 52 colecciones contra
+  `pm4-registry.json`, así que un slug que se caiga se ve en el test y no en un `console.warn`
+  que nadie mira.
+- `core/fechaHora.ts`, `resolveFileId`, `resolvePmql`/`resolvePath`.
+- Backend: `lib/recaptcha.ts` (el **fail-open** siempre con `verified:false`) y `lib/tasks.ts`
+  (el selector de tarea activa y su fallback).
+
+**Lo que sigue en deuda:** ~1 de 15 componentes y ~1 de 24 pantallas tienen smoke test. El
+hook `useTask` completo (con su contrato de dos PUT para reasignar) sigue sin cubrir.
 
 Qué implica en la práctica:
 - **Lo que toques, lo cubrís.** No hace falta un backfill masivo antes de poder trabajar; sí
   hace falta que todo cambio nuevo llegue con su test.
 - **Si vas a modificar un módulo sin tests**, escribirle el test primero (o en el mismo
   commit) es parte del cambio, no un extra opcional.
-- Los módulos de `core/` sin cobertura y con más riesgo son los de fechas y resolución de
-  IDs (`businessDays.ts`, `fechaHora.ts`, `pm4Resolve.ts`): manejan la trampa
-  `DD/MM/YYYY` vs `MM/DD/YYYY` y el fallback del registro PM4. Son los primeros candidatos
-  cuando haya margen.
+- Al testear fechas, recordá que la zona horaria está **fijada** en `vitest.config.ts`
+  (`America/Bogota`) — ver `docs/guides/testing-conventions.md`.
 
 ---
 
