@@ -361,7 +361,7 @@ donde un fallo es silencioso y caro:
 - Backend: `lib/recaptcha.ts` (el **fail-open** siempre con `verified:false`) y `lib/tasks.ts`
   (el selector de tarea activa y su fallback).
 
-**Tanda 2 en curso (ago-2026):**
+**Tanda 2 pagada (ago-2026):**
 - `core/useTask.test.tsx` cubre el hook completo (no solo una función pura extraída) —
   carga inicial por `task_id` y por `case_id`, el error con y sin `response.data.message`,
   y las cuatro mutaciones (`completeTask`, `saveDraft`, `startProcess`, y el **contrato de
@@ -369,19 +369,24 @@ donde un fallo es silencioso y caro:
   `/requests/{id}` con los datos, que se omite si no hay `process_request_id`). Se mockean
   `api/pm4Client` y los cuatro resolvers de `core/useToken.ts`; el archivo es `.test.tsx`
   (no `.test.ts`) porque `renderHook` necesita DOM.
-- **Los 14 componentes de `components/*.tsx` ya tienen smoke test** (antes solo
-  `ActionBar`). Los que pegan a PM4 (`PdfViewer`, `RequestFileList`) mockean
+- **Los 14 componentes de `components/*.tsx` tienen smoke test** (antes solo `ActionBar`).
+  Los que pegan a PM4 (`PdfViewer`, `RequestFileList`) mockean
   `api/pm4Client`/`core/useRequestFiles`; `PreviewModal` mockea su propio `PdfViewer` hijo
   para no re-probar esa red; `RecaptchaModal` stubea `window.grecaptcha` (si no,
   `loadRecaptcha()` espera el script real de Google o expira a los 10s).
+- **Las 12 pantallas de Quejas Directas tienen smoke test** (antes solo `SCR-0052`):
+  `ds-catalog`, `smartsupervision-api-docs`, `SCR-000`, `SCR-003`, `SCR-004`, `SCR-008`,
+  `SCR-009`, `SCR-0051`, `SCR-011`, `SCR-012`, `SCR-013`. `SCR-000`
+  (`CrearRecibirQueja.test.tsx`) NO cubre el flujo end-to-end de envío exitoso
+  (`checkSimilarCases` → `recaptcha/verify` → `completeTask`/`process_events`): exige ~20
+  campos obligatorios repartidos en selects del DS no interactuables vía `fireEvent` en
+  jsdom, y además el Municipio se limpia deliberadamente cada vez que cambia el
+  Departamento (RUL-000-09) — incluida la precarga inicial desde `task.data` — así que ni
+  con un fixture queda satisfecho; se cubre el gate de envío (`blnCanSubmit`) y las
+  secciones condicionales, no el submit real.
 
-- **11 de 24 pantallas registradas** ya tienen smoke test (antes solo `SCR-0052`):
-  `ds-catalog`, `smartsupervision-api-docs`, `SCR-003`, `SCR-004`, `SCR-008`, `SCR-009`,
-  `SCR-0051`, `SCR-011`, `SCR-012`, `SCR-013`. `FAST-FLOW/*` queda deliberadamente fuera de
-  esta tanda (se va a eliminar/reemplazar).
-
-**Lo que sigue en deuda:** `SCR-000` (la pantalla más grande de Quejas Directas) y todo
-`FAST-FLOW/*`.
+**`FAST-FLOW/*` queda deliberadamente fuera de esta tanda** (se va a eliminar/reemplazar) —
+es la única cobertura de pantallas que sigue en deuda.
 
 Qué implica en la práctica:
 - **Lo que toques, lo cubrís.** No hace falta un backfill masivo antes de poder trabajar; sí
