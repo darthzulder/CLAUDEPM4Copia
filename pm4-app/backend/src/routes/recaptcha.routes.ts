@@ -1,13 +1,20 @@
 import { Router, Request, Response } from 'express';
 import axios from 'axios';
+import {
+  STR_SITEVERIFY_URL,
+  decidirVerificacion,
+  ipDesdeForwardedFor,
+  respuestaFailOpen,
+} from '../lib/recaptcha';
 
 // Verificación server-side del token de reCAPTCHA v2 contra Google.
 // El frontend obtiene el token con el checkbox "No soy un robot" y lo envía aquí
 // ANTES de completar la tarea en PM4. La clave secreta nunca sale del backend.
+//
+// Las decisiones puras (qué hacer sin token / sin secret, y de dónde sacar la IP) viven en
+// lib/recaptcha.ts, donde están testeadas.
 
 const router = Router();
-
-const SITEVERIFY_URL = 'https://www.google.com/recaptcha/api/siteverify';
 
 interface SiteVerifyResponse {
   success: boolean;
@@ -17,35 +24,34 @@ interface SiteVerifyResponse {
 router.post('/verify', async (req: Request, res: Response) => {
   // Leemos el token del cuerpo y la clave secreta del entorno
   const strToken = (req.body?.token ?? '') as string;
-  const strSecret = process.env.RECAPTCHA_SECRET_KEY;
+  const objDecision = decidirVerificacion(strToken, process.env.RECAPTCHA_SECRET_KEY);
 
   // Sin token no hay nada que verificar
-  if (!strToken) {
+  if (objDecision.kind === 'missing-token') {
     res.status(400).json({ success: false, message: 'Falta el token de reCAPTCHA' });
     return;
   }
 
   // Sin secret configurado no podemos verificar. Fail-open explícito para no
   // bloquear el flujo en dev, pero avisando fuerte: en producción DEBE estar seteada.
-  if (!strSecret) {
+  if (objDecision.kind === 'fail-open') {
     console.warn(
       '[recaptcha] RECAPTCHA_SECRET_KEY no está configurada — se omite la verificación ' +
       'server-side. NO usar así en producción.',
     );
-    res.json({ success: true, verified: false, reason: 'secret-not-configured' });
+    res.json(respuestaFailOpen());
     return;
   }
 
   try {
     // Armamos los parametros del siteverify de Google
-    const objParams = new URLSearchParams({ secret: strSecret, response: strToken });
+    const objParams = new URLSearchParams({ secret: objDecision.secret, response: strToken });
     // Adjuntamos la ip del cliente si viene en los headers
-    const genFwd = req.headers['x-forwarded-for'];
-    const strIp = (Array.isArray(genFwd) ? genFwd[0] : genFwd)?.split(',')[0]?.trim() || req.socket.remoteAddress;
+    const strIp = ipDesdeForwardedFor(req.headers['x-forwarded-for']) ?? req.socket.remoteAddress;
     if (strIp) objParams.append('remoteip', strIp);
 
     // Consultamos a Google si el token es valido
-    const { data: dicData } = await axios.post<SiteVerifyResponse>(SITEVERIFY_URL, objParams.toString(), {
+    const { data: dicData } = await axios.post<SiteVerifyResponse>(STR_SITEVERIFY_URL, objParams.toString(), {
       headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
     });
 

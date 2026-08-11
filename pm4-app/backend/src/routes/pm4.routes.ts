@@ -3,6 +3,7 @@ import axios, { AxiosError } from 'axios';
 import multer from 'multer';
 import FormData from 'form-data';
 import { pm4Base, resolveToken } from '../lib/token';
+import { pickActiveTask } from '../lib/tasks';
 
 const upload = multer({ storage: multer.memoryStorage() });
 
@@ -100,10 +101,9 @@ router.get('/cases/:case_id/task', async (req, res) => {
 
     const lstTasks: Record<string, unknown>[] = objResponse.data?.data ?? [];
 
-    // Filtrar la activa (status ACTIVE o IN_PROGRESS según PM4)
-    const dicActiveTask = lstTasks.find(dicTask =>
-      ['ACTIVE', 'OPEN', 'IN_PROGRESS'].includes(String(dicTask['status'] ?? '').toUpperCase())
-    ) ?? lstTasks[0];
+    // Filtrar la activa (status ACTIVE o IN_PROGRESS según PM4) — ver lib/tasks.ts, donde
+    // está testeado, incluido el fallback a la primera tarea cuando ninguna matchea.
+    const dicActiveTask = pickActiveTask(lstTasks);
 
     if (!dicActiveTask) {
       res.status(404).json({ message: `No hay tarea activa para el caso ${strCaseId}` });
