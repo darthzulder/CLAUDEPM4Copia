@@ -56,11 +56,15 @@ dist/
 downloads/
 eggs/
 .eggs/
-lib/
-lib64/
-parts/
+# Anclados a la raíz a propósito: sin la barra inicial, `lib/`, `var/` y `parts/` son
+# patrones GLOBALES que se tragan cualquier carpeta con ese nombre en cualquier nivel —
+# p. ej. el código fuente de backend/src/lib/. Son output de setuptools en la raíz; los
+# `lib/` de un virtualenv ya quedan cubiertos por venv/ .venv/ env/ ENV/.
+/lib/
+/lib64/
+/parts/
 sdist/
-var/
+/var/
 wheels/
 share/python-wheels/
 *.egg-info/

@@ -1,0 +1,42 @@
+#!/bin/sh
+#
+# Gate de verificación antes de cada commit: build + lint + tests (frontend y backend).
+# Versionado en .githooks/ y activado con `npm run setup:hooks` desde pm4-app/
+# (= `git config core.hooksPath .githooks`). No usa husky: no hace falta una dependencia
+# para esto.
+#
+# Corre `npm run verify`, que hace los builds POR WORKSPACE a propósito — el script `build`
+# de la raíz dispara `prebuild` (pm4-registry-sync contra la instancia PM4 real), que haría
+# una llamada de red y podría reescribir pm4-registry.json en medio del commit.
+#
+# Runner: npm del host si existe; si no, el contenedor. Si no hay ninguno, avisa y NO
+# bloquea — el gate autoritativo es GitHub Actions (.github/workflows/ci.yml), que no se
+# puede saltar. Este hook es feedback rápido, no la última línea de defensa.
+#
+# Para saltarlo en un commit de trabajo en progreso: git commit --no-verify
+
+set -e
+
+STR_CONTAINER="pm4-app-container"
+
+echo "[pre-commit] Verificando: build + lint + tests…"
+
+if command -v npm >/dev/null 2>&1; then
+  # Ruta nativa (requiere Node 24 en el host, igual que el contenedor y Render).
+  echo "[pre-commit] runner: npm del host ($(node -v 2>/dev/null || echo 'node ?'))"
+  cd "$(git rev-parse --show-toplevel)/pm4-app"
+  npm run verify
+
+elif command -v docker >/dev/null 2>&1 && docker ps --format '{{.Names}}' 2>/dev/null | grep -qx "$STR_CONTAINER"; then
+  # Respaldo: sin npm en el host, usamos el contenedor si está arriba.
+  echo "[pre-commit] runner: docker exec $STR_CONTAINER"
+  docker exec "$STR_CONTAINER" sh -c "cd /app && npm run verify"
+
+else
+  echo "[pre-commit] ⚠️  No hay forma de verificar: ni npm en el host ni el contenedor '$STR_CONTAINER' arriba."
+  echo "[pre-commit] ⚠️  Se permite el commit, pero CI (GitHub Actions) sí va a correr el gate."
+  echo "[pre-commit] ⚠️  Para verificar en local: instalar Node 24 (nvm install 24) o levantar el contenedor."
+  exit 0
+fi
+
+echo "[pre-commit] ✅ Todo verde."
