@@ -50,6 +50,38 @@ nvm use 24
 node -v          # debe imprimir v24.x
 ```
 
+### ⚠️ Si `node -v` no funciona en una terminal nueva
+
+El instalador de nvm-windows agrega al PATH de usuario las entradas **`%NVM_HOME%`** y
+**`%NVM_SYMLINK%`** — con la indirección de variable, no la ruta literal. En algunos equipos
+Windows **no expande esas variables** al construir el bloque de entorno de un proceso nuevo,
+así que quedan como nombres de carpeta literales que no existen y `node`/`npm` resultan
+invisibles aunque estén perfectamente instalados.
+
+Verificar qué hay realmente en el PATH persistido:
+
+```powershell
+[Environment]::GetEnvironmentVariable("PATH","User") -split ';' | Where-Object { $_ -match 'nvm' }
+```
+
+Si imprime `%NVM_HOME%` / `%NVM_SYMLINK%` en vez de rutas, reemplazarlas por las literales:
+
+```powershell
+$home_ = [Environment]::GetEnvironmentVariable("NVM_HOME","User")
+$link  = [Environment]::GetEnvironmentVariable("NVM_SYMLINK","User")
+$p     = [Environment]::GetEnvironmentVariable("PATH","User")
+$nuevo = $p.Replace('%NVM_HOME%', $home_).Replace('%NVM_SYMLINK%', $link)
+Set-ItemProperty -Path 'HKCU:\Environment' -Name PATH -Value $nuevo -Type ExpandString
+```
+
+La ruta del symlink (`C:\nvm4w\nodejs` por defecto) es **estable**: `nvm use <versión>` la
+repunta, así que poner la ruta literal no rompe el cambio de versiones.
+
+> **Ojo con `[Environment]::SetEnvironmentVariable(...,"User")` para escribir el PATH:**
+> convierte el valor de registro de `REG_EXPAND_SZ` a `REG_SZ`, y ahí Windows deja de
+> expandir cualquier `%VAR%` que haya en el PATH. Usar `Set-ItemProperty ... -Type
+> ExpandString` como arriba.
+
 Instalar dependencias en el host:
 
 ```bash
