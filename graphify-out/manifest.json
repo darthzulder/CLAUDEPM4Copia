@@ -96,8 +96,8 @@
     "hash": "9c77b29faba58b909eae9b073f395bb5"
   },
   "G:\\DockerProys\\CLAUDEPM4Copia\\pm4-app\\frontend\\vitest.config.ts": {
-    "mtime": 1786030440.9675126,
-    "hash": "a0f8094d31d6e23a5bd0bd62862e7973"
+    "mtime": 1786417432.0394971,
+    "hash": "9840cc699bc4339f9101f1d37375839c"
   },
   "G:\\DockerProys\\CLAUDEPM4Copia\\pm4-app\\frontend\\src\\App.tsx": {
     "mtime": 1786408557.2754872,
@@ -106,6 +106,10 @@
   "G:\\DockerProys\\CLAUDEPM4Copia\\pm4-app\\frontend\\src\\main.tsx": {
     "mtime": 1782325755.1621861,
     "hash": "8568f3e5290d4069717b57590a643181"
+  },
+  "G:\\DockerProys\\CLAUDEPM4Copia\\pm4-app\\frontend\\src\\test-setup.ts": {
+    "mtime": 1786418452.9749873,
+    "hash": "9b2e4f669c832f3f6a4fdba3436ac64d"
   },
   "G:\\DockerProys\\CLAUDEPM4Copia\\pm4-app\\frontend\\src\\vite-env.d.ts": {
     "mtime": 1785941695.972293,
@@ -122,6 +126,10 @@
   "G:\\DockerProys\\CLAUDEPM4Copia\\pm4-app\\frontend\\src\\api\\pm4Client.ts": {
     "mtime": 1786030440.9665139,
     "hash": "15bc00ff4272a983fbf26320398d7457"
+  },
+  "G:\\DockerProys\\CLAUDEPM4Copia\\pm4-app\\frontend\\src\\components\\ActionBar.test.tsx": {
+    "mtime": 1786417291.7092764,
+    "hash": "37aac78270ebeaa7f778deec721d8ec5"
   },
   "G:\\DockerProys\\CLAUDEPM4Copia\\pm4-app\\frontend\\src\\components\\ActionBar.tsx": {
     "mtime": 1782354348.41595,
@@ -306,6 +314,10 @@
   "G:\\DockerProys\\CLAUDEPM4Copia\\pm4-app\\frontend\\src\\screens\\atencion-cliente\\quejas-directas\\COL_QD_SCR-0051_Detalle_Reasignacion_Respuesta\\SeccionRespuesta.tsx": {
     "mtime": 1785782644.4394982,
     "hash": "e62d15c3e776956b8a760e2d4de4e292"
+  },
+  "G:\\DockerProys\\CLAUDEPM4Copia\\pm4-app\\frontend\\src\\screens\\atencion-cliente\\quejas-directas\\COL_QD_SCR-0052_Respuesta_Area_Responsable\\RespuestaAreaResponsable.test.tsx": {
+    "mtime": 1786418584.1593552,
+    "hash": "2f2421991451d15e88fa0fd2dfd44101"
   },
   "G:\\DockerProys\\CLAUDEPM4Copia\\pm4-app\\frontend\\src\\screens\\atencion-cliente\\quejas-directas\\COL_QD_SCR-0052_Respuesta_Area_Responsable\\RespuestaAreaResponsable.tsx": {
     "mtime": 1785352447.817738,
@@ -520,8 +532,8 @@
     "hash": "0b8355592bd3a2b05475bc02c48b7f13"
   },
   "G:\\DockerProys\\CLAUDEPM4Copia\\README.md": {
-    "mtime": 1786409120.6757483,
-    "hash": "ac12dd0b52def5494a887a450cf836a8"
+    "mtime": 1786418677.4006064,
+    "hash": "72a955bdadca9967fc557aac84324f8e"
   },
   "G:\\DockerProys\\CLAUDEPM4Copia\\docs\\archive\\INSTRUCCIONES_CLAUDE_CODE.md": {
     "mtime": 1786408872.4207544,
@@ -539,6 +551,10 @@
     "mtime": 1786408934.2136095,
     "hash": "bd7caab040fa073517e35e4c5906088d"
   },
+  "G:\\DockerProys\\CLAUDEPM4Copia\\docs\\guides\\testing-conventions.md": {
+    "mtime": 1786418634.0897093,
+    "hash": "4367c019a5c785012716a2de27d79cef"
+  },
   "G:\\DockerProys\\CLAUDEPM4Copia\\docs\\reference\\pm4-export-format.md": {
     "mtime": 1786408851.2629673,
     "hash": "f29373b8fca2a3946d6893075f838d67"
@@ -548,8 +564,8 @@
     "hash": "f785e9ae1084d2bbf0dd993dbced50d8"
   },
   "G:\\DockerProys\\CLAUDEPM4Copia\\pm4-app\\CLAUDE.md": {
-    "mtime": 1786409132.9090078,
-    "hash": "4bae15dab258be75ac28af63a8337dbe"
+    "mtime": 1786418697.8869264,
+    "hash": "fb9094ac894de3e0febde242d35e31bf"
   },
   "G:\\DockerProys\\CLAUDEPM4Copia\\pm4-app\\render.yaml": {
     "mtime": 1783379764.062887,
