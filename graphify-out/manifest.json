@@ -59,13 +59,17 @@
     "mtime": 1783546833.832533,
     "hash": "3e5070e01a4fddc0fd2e694ec37aac78"
   },
+  "G:\\DockerProys\\CLAUDEPM4Copia\\pm4-app\\backend\\vitest.config.ts": {
+    "mtime": 1786455908.5717309,
+    "hash": "5ec3fdced5bba034dd4b7a7db6161c62"
+  },
   "G:\\DockerProys\\CLAUDEPM4Copia\\pm4-app\\backend\\src\\server.ts": {
     "mtime": 1783546833.7892053,
     "hash": "2c8f9fb1b7d5e30d56f80e12fa36c7c9"
   },
   "G:\\DockerProys\\CLAUDEPM4Copia\\pm4-app\\backend\\src\\routes\\pm4.routes.ts": {
-    "mtime": 1786030440.964512,
-    "hash": "ba3e6ea72d7bb5a09753ba0d8e1eece8"
+    "mtime": 1786455894.714336,
+    "hash": "0aee0eb2e374c67ad6a1fa8144fcafaa"
   },
   "G:\\DockerProys\\CLAUDEPM4Copia\\pm4-app\\backend\\src\\routes\\recaptcha.routes.ts": {
     "mtime": 1783546833.7892053,
@@ -532,8 +536,8 @@
     "hash": "0b8355592bd3a2b05475bc02c48b7f13"
   },
   "G:\\DockerProys\\CLAUDEPM4Copia\\README.md": {
-    "mtime": 1786418677.4006064,
-    "hash": "72a955bdadca9967fc557aac84324f8e"
+    "mtime": 1786456159.361286,
+    "hash": "69f482f7f81cb28f064a3509b6d5c547"
   },
   "G:\\DockerProys\\CLAUDEPM4Copia\\docs\\archive\\INSTRUCCIONES_CLAUDE_CODE.md": {
     "mtime": 1786408872.4207544,
@@ -542,6 +546,10 @@
   "G:\\DockerProys\\CLAUDEPM4Copia\\docs\\archive\\react19-migration.md": {
     "mtime": 1786409019.111512,
     "hash": "1bb59f000ba82e8bd1ff944873701589"
+  },
+  "G:\\DockerProys\\CLAUDEPM4Copia\\docs\\guides\\entorno-local-y-verificacion.md": {
+    "mtime": 1786456077.593631,
+    "hash": "adff9502b2c953e9ad18aa13732a4548"
   },
   "G:\\DockerProys\\CLAUDEPM4Copia\\docs\\guides\\GUIA_DOCUMENTACION_PANTALLAS.md": {
     "mtime": 1786409147.5851984,
@@ -564,8 +572,8 @@
     "hash": "f785e9ae1084d2bbf0dd993dbced50d8"
   },
   "G:\\DockerProys\\CLAUDEPM4Copia\\pm4-app\\CLAUDE.md": {
-    "mtime": 1786418697.8869264,
-    "hash": "fb9094ac894de3e0febde242d35e31bf"
+    "mtime": 1786456150.3016088,
+    "hash": "d1f89b92ac9fb39963584b5393b6b7f9"
   },
   "G:\\DockerProys\\CLAUDEPM4Copia\\pm4-app\\render.yaml": {
     "mtime": 1783379764.062887,
