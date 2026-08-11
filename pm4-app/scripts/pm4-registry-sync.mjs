@@ -37,7 +37,8 @@
 //   node scripts/pm4-registry-sync.mjs --update --ci   # invocado por `npm run prebuild`
 //
 // Ver frontend/src/config/pm4Registry.types.ts para el shape del registro y
-// MIGRACION_PANTALLAS.md para el mecanismo paralelo de id-mapping.json (screens completas).
+// docs/reference/pm4-export-format.md para el problema paralelo de remapeo de IDs dentro
+// de un `config` de screen exportado (sin herramienta construida en este repo).
 
 import { readFileSync, writeFileSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';

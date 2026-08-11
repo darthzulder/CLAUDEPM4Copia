@@ -5,8 +5,8 @@
 // processes) al ID NUMÉRICO de la instancia PM4 actual (PM4_BASE_URL). Cambiar de
 // instancia = editar este archivo, no perseguir IDs por +15 archivos de código.
 //
-// Ver MIGRACION_PANTALLAS.md (raíz del repo) para el mecanismo paralelo de id-mapping.json
-// usado al migrar screens completas entre instancias.
+// Ver docs/reference/pm4-export-format.md para el problema paralelo de remapeo de IDs
+// dentro de un `config` de screen exportado (sin herramienta construida en este repo).
 
 export interface Pm4RegistryCollectionEntry {
   /** ID numérico de la colección en la instancia PM4 actual. */

@@ -53,7 +53,10 @@ Eres un asistente que va a construir un proyecto desde cero. **No empieces a cod
 ### Bloque 3 — Pantallas existentes
 
 9. **¿Tienes pantallas existentes en PM4 que quieras migrar/visualizar en esta app?**
-   - Si SÍ: Lee y sigue el archivo `MIGRACION_PANTALLAS.md` que viene junto a estas instrucciones ANTES de continuar.
+   - Si SÍ: Lee `docs/reference/pm4-export-format.md` (estructura de un export PM4) antes de continuar.
+     *(Nota de archivado: el `MIGRACION_PANTALLAS.md` que este documento mencionaba originalmente
+     describía una herramienta de importación masiva que nunca se construyó; el proyecto real
+     replica pantallas una por una — ver `pm4-app/CLAUDE.md`.)*
    - Si NO: Continuamos con proyecto limpio.
 
 10. **¿Cuántas pantallas aproximadamente tienes en PM4?**
