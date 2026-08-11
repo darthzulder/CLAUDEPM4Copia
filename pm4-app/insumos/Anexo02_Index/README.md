@@ -58,7 +58,8 @@ Este índice se autogenera a partir del archivo Excel utilizando un script de Py
    ```bash
    pip install pandas openpyxl
    ```
-2. Ejecuta el script de indexación desde este directorio:
+2. El script vive un nivel arriba (`pm4-app/insumos/index_anexo02.py`), no en este directorio. Ejecútalo desde `pm4-app/insumos/`:
    ```bash
+   cd ..
    python index_anexo02.py
    ```

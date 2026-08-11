@@ -42,6 +42,8 @@ When a user asks you to build something with the **Zurich Design System**:
 ```
 outputs/
 ├── zurich-index.md                       ← you are here (master index)
+├── zds-cheatsheet.md                     ← lectura OBLIGATORIA para construir pantallas (ver §0)
+├── shared-css-catalog.md                 ← lectura OBLIGATORIA — clases CSS que ya existen (ver §0)
 └── react/                                ← React design system
     ├── VENDOR_COMPONENT_CATALOG.md       ← índice liviano de los 116 componentes del vendor (ver §0.1)
     ├── foundations/                      ← Design tokens & guidelines (CSS vars + HTML attrs)
@@ -69,7 +71,8 @@ outputs/
     │   ├── zurich-rangedateinput.md
     │   ├── zurich-textarea.md
     │   ├── zurich-radioselect.md
-    │   └── zurich-stepper.md
+    │   ├── zurich-stepper.md
+    │   └── zurich-switch.md
     ├── molecules/                        ← Category: composite content surfaces
     │   ├── zurich-tile.md
     │   ├── zurich-kpivalue.md            ← ⚠️ desde paquete vendorizado, no paste web (ver §2.3)

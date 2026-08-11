@@ -4,6 +4,9 @@ LocalFiles/
 .LocalFiles/
 *.local.json
 
+# Archivos de bloqueo de Excel (se crean al tener un .xlsx abierto)
+~$*
+
 # Claude Code — configuración local personal
 .claude/settings.local.json
 
