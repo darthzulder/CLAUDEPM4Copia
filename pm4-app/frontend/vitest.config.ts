@@ -10,6 +10,12 @@ import { defineConfig } from 'vitest/config';
 // docs/guides/testing-conventions.md).
 export default defineConfig({
   test: {
+    // Zona horaria FIJA para toda la suite. Sin esto, cualquier aserción de fecha depende de
+    // la zona de la máquina: pasa en local (Colombia, UTC-5) y falla en CI (UTC). Se elige
+    // America/Bogota y no UTC porque es la zona de negocio y porque `fechaHora.ts` convierte
+    // UTC→local a propósito para mostrar; además no tiene DST, así que es determinista todo
+    // el año. Verificado por el test de guardia en core/fechaHora.test.ts.
+    env: { TZ: 'America/Bogota' },
     projects: [
       {
         extends: true,
