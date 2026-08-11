@@ -1,0 +1,82 @@
+name: CI
+
+# Gate real de verificación: es lo único que no se puede saltar con `git commit --no-verify`.
+# El hook de .githooks/pre-commit corre lo mismo en local, pero como feedback rápido — la
+# autoridad es este workflow.
+on:
+  push:
+    branches: ['**']
+  pull_request:
+
+# Si se pushea de nuevo a la misma rama, cancelar la corrida anterior en vez de acumular.
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  verify:
+    name: Build · Lint · Test
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      # Node 24 fijo, igual que pm4-app/Dockerfile (node:24-alpine) y que el runtime de
+      # Render. No usar 'lts/*' ni 'latest': un major distinto al del contenedor es
+      # exactamente el drift que este proyecto ya sufrió al migrar de Node 20 a 24.
+      - name: Setup Node 24
+        uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+          cache: 'npm'
+          cache-dependency-path: pm4-app/package-lock.json
+
+      # `npm ci` resuelve @zurich/* desde los .tgz vendorizados y commiteados en
+      # frontend/vendor/, así que no depende del registro de ZDS (decomisionado en
+      # dic-2025) ni de credenciales.
+      - name: Install
+        working-directory: pm4-app
+        run: npm ci
+
+      # Los builds se corren por workspace, salteando el script `build` de la raíz: ese
+      # dispara `prebuild` (pm4-registry-sync contra la instancia PM4 real), que en CI no
+      # tiene PM4_BASE_URL/PM4_TOKEN y no aporta nada a la verificación.
+      - name: Build frontend
+        working-directory: pm4-app
+        run: npm run build --workspace=frontend
+
+      - name: Build backend
+        working-directory: pm4-app
+        run: npm run build --workspace=backend
+
+      - name: Lint
+        working-directory: pm4-app
+        run: npm run lint --workspace=frontend
+
+      - name: Test frontend
+        working-directory: pm4-app
+        run: npm run test --workspace=frontend
+
+      - name: Test backend
+        working-directory: pm4-app
+        run: npm run test --workspace=backend
+
+  cotizador:
+    name: Cotizador (pytest)
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.13'
+
+      - name: Install deps
+        working-directory: pm4-app/cotizador-service
+        run: pip install -r requirements-dev.txt
+
+      - name: Test
+        working-directory: pm4-app/cotizador-service
+        run: pytest -q
