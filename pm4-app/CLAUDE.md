@@ -18,6 +18,29 @@ Las pantallas se crean aquí con ayuda de Claude (este chat), **no dentro de PM4
 
 ---
 
+## Reglas obligatorias para cualquier tarea (LEER PRIMERO)
+
+Aplican a **todo** cambio de código en este proyecto, no solo a pantallas nuevas:
+
+1. **Nomenclatura de campos `qd_*`** — prefijo de tipo + CamelCase inglés, fechas como `str`.
+   Ver [`../docs/guides/nomenclatura-variables.md`](../docs/guides/nomenclatura-variables.md).
+2. **Nunca inventar UI** — seguir la [Jerarquía de decisión de UI](#jerarquía-de-decisión-de-ui-obligatorio)
+   y, si vas a crear algo, revisar primero `frontend/vendor/*.tgz` (contenido real del DS) vía
+   [`outputs/react/VENDOR_COMPONENT_CATALOG.md`](outputs/react/VENDOR_COMPONENT_CATALOG.md).
+3. **Arquitectura BFF** — toda llamada externa (PM4, `cotizador-service`, futuras APIs) pasa
+   por `backend/`, nunca directo desde una pantalla. Ver [Principio arquitectónico: BFF](#principio-arquitectónico-backend-for-frontend-bff).
+4. **Tests automatizados obligatorios** para lógica nueva/modificada y para componentes/
+   pantallas propios. Ver [Tests automatizados (OBLIGATORIO)](#tests-automatizados-obligatorio)
+   y [`../docs/guides/testing-conventions.md`](../docs/guides/testing-conventions.md).
+5. **Antes de dar una tarea por terminada:** build + lint + **tests** verdes, nada roto. Ver
+   la sección "⚠️ Antes de hacer commit / push a git — OBLIGATORIO" más abajo.
+6. **Llamadas a PM4 siempre por nombre, nunca por ID hardcodeado** — se resuelven a id/uuid
+   vía el registro. Ver [Registro de IDs PM4](#registro-de-ids-pm4-colecciones-scripts-procesos).
+7. **Comentarios técnicos profesionales en el código** — explican el porqué y el contrato,
+   no repiten el nombre de la función. Ver [Comentarios y documentación técnica en el código](#comentarios-y-documentación-técnica-en-el-código).
+
+---
+
 ## Cómo se ejecuta
 
 ```bash
@@ -43,9 +66,18 @@ Siempre ejecutar el build completo antes de lanzar a git para garantizar que el 
 npm run build --workspace=frontend   # tsc + vite
 npm run build --workspace=backend    # tsc
 npm run lint  --workspace=frontend   # eslint
+npm run test  --workspace=frontend   # vitest (lógica pura + componentes/pantallas)
 ```
 
-Si alguno falla con errores de TypeScript, lint o empaquetado, **corregir antes de commitear**. No commitear con builds rotos.
+Si tocaste `cotizador-service/`, correr también:
+
+```bash
+docker exec cotizador-service-container sh -c "cd /app && pytest -q"
+```
+
+Si alguno falla con errores de TypeScript, lint, empaquetado o **tests**, **corregir antes
+de commitear**. No commitear con builds rotos ni con tests en rojo — tampoco con un test
+preexistente que dejó de pasar por el cambio actual.
 
 > Según el entorno de cada dev, `npm` corre en local o dentro del contenedor. Si usas
 > Docker, antepón `docker exec -w /app pm4-app-container ` a cada comando y, como no hay
@@ -95,6 +127,26 @@ pm4-app/
             ├── variables.ts      ← OPTIONS estáticas, COLLECTIONS ids, tipos TS, WATCHERS
             └── NombrePantalla.tsx  ← Componente React. No crear styles.css por pantalla (DRY).
 ```
+
+---
+
+## Principio arquitectónico: Backend For Frontend (BFF)
+
+`backend/` **ya es** un BFF puro hoy — proxy + inyección de token, cero llamadas directas
+del frontend a PM4 o al `cotizador-service`. Esta sección existe para que **se mantenga
+así**:
+
+- Toda integración externa nueva (PM4, `cotizador-service`, cualquier API futura) se agrega
+  como ruta en `backend/src/routes/`, nunca se llama directo desde una pantalla.
+- El frontend solo habla con rutas **relativas** `/api/*` a través de `api/pm4Client.ts`
+  (o el cliente equivalente que corresponda) — nunca un `fetch`/`axios` a un host externo
+  desde `screens/` o `components/`.
+- El token PM4 y cualquier credencial viven y se resuelven **solo** en `backend/`; el
+  frontend nunca los maneja en texto plano más allá del header `x-pm4-token` que ya inyecta
+  `pm4Client.ts`.
+- **Excepción documentada:** el `<script src="https://www.google.com/recaptcha/api.js">`
+  de `RecaptchaModal.tsx` carga un script de terceros (sin credenciales), no es una llamada
+  de datos — la verificación del token sí pasa por `backend/` (`POST /api/recaptcha/verify`).
 
 ---
 
@@ -192,11 +244,14 @@ await completeTask(payload);
 
 ## Registro de IDs PM4 (colecciones, scripts, procesos)
 
-**Los IDs numéricos de PM4 (colección, script, proceso/evento) son específicos de cada
-instancia y cambian al migrar/reimportar** (ya pasó una vez: la instancia de referencia
-cambió de `mxzurich...` a la que define `PM4_BASE_URL` hoy). Por eso el código **no
-hardcodea estos IDs directamente** — cada `CollectionDef`/script/proceso se resuelve a
-través de:
+**Regla permanente, no solo de migración:** los IDs numéricos de PM4 (colección, script,
+proceso/evento) son específicos de cada instancia y cambian al migrar/reimportar (ya pasó
+una vez: la instancia de referencia cambió de `mxzurich...` a la que define `PM4_BASE_URL`
+hoy). Por eso **cualquier código nuevo** que necesite referenciar una colección/script/
+proceso de PM4 se resuelve **por nombre desde el primer día** — no solo cuando toca migrar
+de instancia. El código **no debe hardcodear estos IDs directamente** (queda deuda legada
+que aún lo hace; no la tomes como precedente) — cada `CollectionDef`/script/proceso se
+resuelve a través de:
 
 - **`frontend/src/config/pm4-registry.json`** — fuente de verdad única: mapea una clave
   estable (slug de negocio, o `uuid` nativo de PM4 para scripts) al ID numérico de la
@@ -236,9 +291,14 @@ el reporte con calma antes de confiar ciegamente en el próximo deploy.
 
 **OBLIGATORIO al migrar de instancia PM4:** correr `pm4-registry-sync.mjs --check` primero
 para ver el diff, y luego `--update` para aplicarlo (o simplemente re-deployar — el
-`prebuild` lo hace solo). Nunca reintroducir IDs hardcodeados sueltos en
-`collections.ts`/`variables.ts`/`fields.ts` — todo pasa por el
-resolver.
+`prebuild` lo hace solo).
+
+**OBLIGATORIO en cualquier código nuevo, no solo al migrar:** nunca introducir un ID
+hardcodeado suelto en `collections.ts`/`variables.ts`/`fields.ts` (ni en un `WATCHERS`,
+`dataSourceId`, `scriptId` o similar) — todo pasa por `resolveCollectionId`/
+`resolveScriptId`/`resolveProcessEvent`, con el ID que tendrías puesto de todos modos como
+`fallback`. Un ID suelto que hoy "funciona" porque coincide con la instancia activa es
+exactamente el tipo de deuda que rompe en la próxima migración sin avisar.
 
 ⚠️ Varias colecciones de FAST-FLOW (`naic`, `correosIntermediari`/`correosIntermediario`,
 `comerciales`, `suscriptores`, `actividadNaic`) y el script `consultarClienteTiaCuw` (id 50)
@@ -246,6 +306,32 @@ están **verificadas como incorrectas/huérfanas** contra la instancia actual (n
 a ninguna colección/script real, o apuntan a uno con otro propósito) — es código legado,
 diferido para revisión de negocio aparte. Ver las notas `⚠️` en `pm4-registry.json` y los
 comentarios en `core/collections.ts`.
+
+---
+
+## Tests automatizados (OBLIGATORIO)
+
+Toda función/hook de lógica pura nueva o modificada (`core/*.ts`, helpers,
+`cotizador-service/app.py`) necesita su test Vitest/pytest — mismo patrón que
+`core/useCollection.test.ts`/`useCotizador.test.ts`/`cotizador-service/tests/test_calc.py`
+ya siguen. Todo componente propio y pantalla nueva o modificada necesita al menos un smoke
+test con React Testing Library (`.test.tsx`, project `components` de Vitest — confirmado
+compatible con los custom elements de `@zurich/web-components`, ver
+`components/ActionBar.test.tsx`).
+
+Comandos:
+```bash
+npm run test --workspace=frontend   # vitest — projects 'logic' (node) y 'components' (jsdom)
+pytest -q                           # desde cotizador-service/
+```
+
+Detalle completo (qué necesita test, cómo mockear `useTask`/`pm4Client` para pantallas, por
+qué hay dos "projects" en `vitest.config.ts`): ver
+[`../docs/guides/testing-conventions.md`](../docs/guides/testing-conventions.md).
+
+Los tests automatizados **no reemplazan** la verificación manual del flujo de datos real
+(precarga desde PM4, watchers, subida de archivos) — esa sigue siendo en Docker vía
+`?screen=<slug>`, como ya se practica.
 
 ---
 
@@ -265,8 +351,11 @@ comentarios en `core/collections.ts`.
 1. Crear carpeta: `frontend/src/screens/{slug}/`
 2. Crear `variables.ts` con:
    - `OPTIONS` — opciones estáticas de selects/radios
-   - `COLLECTIONS` — IDs de colecciones PM4 que usan los selects dinámicos
-   - `WATCHERS` — definición de watchers (campo que observan, script ID, run_onload)
+   - `COLLECTIONS` — colecciones PM4 de los selects dinámicos, **resueltas por nombre** con
+     `resolveCollectionId('slug', fallback)`; nunca un id numérico suelto (ver
+     [Registro de IDs PM4](#registro-de-ids-pm4-colecciones-scripts-procesos))
+   - `WATCHERS` — definición de watchers (campo que observan, script vía
+     `resolveScriptId('slug', fallback)`, `run_onload`)
    - Interface TypeScript de los datos del formulario
 3. **No crear `styles.css` local.** Sigue la **Jerarquía de decisión de UI** (sección abajo): reusar componentes/elementos del DS antes de crear, y CSS custom solo como último recurso. Todo estilo nuevo va **al final de `shared.css`**, DRY y **con tokens** (`--zs-*`, `--zf-*`, `--z-*`/`--zc-*`/`--zg-*`), nunca px/hex crudos. `shared.css` es la única hoja de estilos global permitida.
 4. Crear `NombrePantalla.tsx` — componente React (<300 líneas por archivo)
@@ -425,6 +514,31 @@ const { control, handleSubmit, reset, formState: { errors } } = useForm<MiFormDa
 
 Esto significa que al renderizar, los campos ya tienen sus valores. No hay pantalla en blanco.
 Las pantallas de solo lectura (resultado, resumen) **no usan `react-hook-form`**; leen directamente de `task.data` y solo muestran información.
+
+---
+
+## Comentarios y documentación técnica en el código
+
+Esto es sobre **comentarios/docstrings que viven en el código**, no sobre generar un `.md`
+nuevo por cada cambio. El proyecto ya tiene un estilo de comentario definido — natural,
+español, corto (ver `docs/guides/nomenclatura-variables.md`) — y sigue siendo el correcto
+para pasos triviales dentro de una función (`// inicializamos la variable`). Esta regla
+agrega un requisito adicional para lo **no trivial**:
+
+- Toda función/hook/módulo **exportado** en `core/`, `backend/src/routes/`, y lógica de
+  negocio no obvia (cálculos, transformaciones, reglas) necesita un comentario que explique
+  **el porqué y el contrato** — no repita el nombre de la función. Explicar: qué asume, qué
+  devuelve en casos límite, y cualquier gotcha (formato de fecha, un campo que viaja como
+  string aunque parezca número, un efecto secundario no evidente). Ejemplos ya en el
+  proyecto: los comentarios de `fields.ts` (`// FLD-xxx · antes qd_nombreViejo`), el bloque
+  de cabecera de `pm4Resolve.ts`, o el comentario de `reassignTask` en `useTask.ts` que
+  explica por qué el PUT de reasignación va separado del de guardar datos.
+- La regla aplica a la **firma pública** de módulos/funciones exportadas, no a cada línea
+  interna — no conviertas comentarios naturales cortos en documentación formal excesiva.
+- Un `.md` nuevo en `docs/reference/` sigue reservado para lo que **no cabe** como
+  comentario de código: una convención transversal, un formato de datos externo (como
+  `docs/reference/pm4-export-format.md`), o un módulo cuya arquitectura hay que explicar
+  antes de leer el código — no es el default para cada función nueva.
 
 ---
 
