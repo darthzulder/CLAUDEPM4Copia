@@ -271,6 +271,7 @@ comentarios en `core/collections.ts`.
 3. **No crear `styles.css` local.** Sigue la **Jerarquía de decisión de UI** (sección abajo): reusar componentes/elementos del DS antes de crear, y CSS custom solo como último recurso. Todo estilo nuevo va **al final de `shared.css`**, DRY y **con tokens** (`--zs-*`, `--zf-*`, `--z-*`/`--zc-*`/`--zg-*`), nunca px/hex crudos. `shared.css` es la única hoja de estilos global permitida.
 4. Crear `NombrePantalla.tsx` — componente React (<300 líneas por archivo)
 5. Registrar en `App.tsx` en el objeto `SCREENS`
+6. Generar `DOCUMENTACION_<slug>.md` en la misma carpeta — no es opcional, es parte del entregable. Ver `../docs/guides/GUIA_DOCUMENTACION_PANTALLAS.md` para la estructura y las reglas de trazabilidad contra `insumos/`.
 
 **Para pedirle a Claude que cree una nueva pantalla**, proporcionar:
 - Screenshot del formulario en PM4
@@ -413,6 +414,7 @@ const { control, handleSubmit, reset, formState: { errors } } = useForm<MiFormDa
 - `OPTIONS` en `variables.ts` usan `as const` → pasarlos directamente a los campos (aceptan `readonly`)
 - Componente principal < 300 líneas; secciones grandes van como funciones locales en el mismo archivo o archivos separados en la misma carpeta
 - **Convención `_desc` (campos de colección):** todo campo respaldado por una colección PM4 guarda el **código** y viaja con una variable compañera `<campo>_desc` con la descripción legible (p.ej. `qd_strChannel="13"` + `qd_strChannel_desc="Internet"`). Se sincroniza con `useSyncDesc(form, campo, options)` (`core/useCollection.ts`) junto al `useCollection` del campo; el resolver de solo lectura es `descOf(options, code)`. Detalle completo en `screens/atencion-cliente/quejas-directas/fields/MAPEO_qd_old_new.md`.
+- **Nomenclatura de campos `qd_*`** (prefijo de tipo + CamelCase inglés, fechas como `str`, comentarios en español natural): ver `../docs/guides/nomenclatura-variables.md`.
 
 ### Datos pre-cargados desde PM4
 
@@ -428,18 +430,13 @@ Las pantallas de solo lectura (resultado, resumen) **no usan `react-hook-form`**
 
 ## Estructura de un paquete PM4 exportado
 
-```json
-{
-  "type": "screen_package",
-  "version": 2,
-  "screens": [ { "title": "...", "config": [], "computed": [], "watchers": [], "custom_css": "..." } ],
-  "scripts": [ { "id": 4, "language": "php", "code": "..." } ]
-}
-```
-
 Componentes PM4 que existen: `FormInput`, `FormMultiColumn`, `FormHtmlViewer`, `FormNestedScreen`, `FormSelectList`, `FormDatePicker`, `BWrapperComponent`.
 
 `FormMultiColumn.items` es un **array de arrays** (columnas → items por columna).
+
+Detalle completo del formato de export (`screen_package`, `config`/`computed`/`watchers`/
+`scripts`, dedup por `uuid`, remapeo de IDs entre instancias, qué nunca modificar): ver
+`../docs/reference/pm4-export-format.md`.
 
 ---
 

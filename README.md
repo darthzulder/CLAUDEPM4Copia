@@ -119,6 +119,7 @@ docker exec cotizador-service-container sh -c "cd /app && pip install -r require
 
 - Read [pm4-app/CLAUDE.md](pm4-app/CLAUDE.md) first — it documents the file architecture, data flow, ZDS conventions, and the mandatory "UI decision hierarchy" (reuse existing components/DS before writing custom CSS).
 - New screens go under `pm4-app/frontend/src/screens/{slug}/` with a `variables.ts` (options/collections/watchers/types) and a `NombrePantalla.tsx` component, then get registered in `App.tsx`'s `SCREENS` map. Do not create a per-screen `styles.css` — shared styling lives in `shared.css` only, using design tokens (`--zs-*`, `--zf-*`, `--z-*`/`--zc-*`/`--zg-*`).
+- Every screen must ship a `DOCUMENTACION_<slug>.md` alongside it, tracing every implemented field/rule/message back to its source in `pm4-app/insumos/` — see [docs/guides/GUIA_DOCUMENTACION_PANTALLAS.md](docs/guides/GUIA_DOCUMENTACION_PANTALLAS.md) for the required structure and traceability rules.
 - Never import `@zurich/web-components` directly in a screen — always go through the `ZdsFields` facade (`pm4-app/frontend/src/components/fields/ZdsFields.tsx`).
 - Do not modify `.env` (only add variables), `pm4-app/backend/src/routes/pm4.routes.ts`'s core proxy logic, `docs (4).json`, or the exported PM4 packages under `PM4 Backup/` — treat these as read-only references.
 - After modifying code, run `graphify update .` to keep `graphify-out/` (the project's knowledge graph) current.
