@@ -15,7 +15,6 @@ const RevSARLAFT = lazy(() => import('./screens/FAST-FLOW/col-emision/RevSARLAFT
 const SolDocEmi = lazy(() => import('./screens/FAST-FLOW/col-emision/SolDocEmi'));
 const VerDocEmi = lazy(() => import('./screens/FAST-FLOW/col-emision/VerDocEmi'));
 const EstadoCorreo = lazy(() => import('./screens/FAST-FLOW/estado-correo/EstadoCorreo'));
-const CorregirDatosFormulario = lazy(() => import('./screens/atencion-cliente/quejas-directas/COL_QD_SCR-002_corregir-datos-formulario/CorregirDatosFormulario'));
 const CrearRecibirQueja = lazy(() => import('./screens/atencion-cliente/quejas-directas/COL_QD_SCR-000_CrearRecibirQueja/CrearRecibirQueja'));
 const DsCatalog = lazy(() => import('./screens/ds-catalog/DsCatalog'));
 const RevisionErrorTecnicoApi = lazy(() => import('./screens/atencion-cliente/quejas-directas/COL_QD_SCR-004_Revision_Error_Tecnico_API/RevisionErrorTecnicoApi'));
@@ -61,7 +60,6 @@ const SCREENS: Record<string, React.ComponentType> = {
   'sol-doc-emi': SolDocEmi,
   'ver-doc-emi': VerDocEmi,
   'estado-correo': EstadoCorreo,
-  'COL_QD_SCR-002_corregir-datos-formulario': CorregirDatosFormulario,
   'COL_QD_SCR-000_CrearRecibirQueja': CrearRecibirQueja,
   'COL_QD_SCR-004_Revision_Error_Tecnico_API': RevisionErrorTecnicoApi,
   'COL_QD_SCR-003_Correccion_Error_Funcional': CorreccionErrorFuncional,

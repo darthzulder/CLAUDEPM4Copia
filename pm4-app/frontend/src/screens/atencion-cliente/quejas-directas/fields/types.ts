@@ -42,16 +42,6 @@ export interface RespuestaAyuda {
   adjuntoFileId?: number; // file_id devuelto por PM4 al subir (para descarga exacta)
 }
 
-// SCR-002 — descriptor de campo con error, array inyectado por el BPM vía
-// qd_strErrorsJson (validación preventiva P01-T06).
-export interface CampoConError {
-  campo: string;           // nombre físico del campo (uno de los valores de QD, ej. QD.strEmail)
-  fldId: string;           // ID del insumo (p.ej. 'FLD-007')
-  etiqueta: string;        // etiqueta visible para el gestor
-  valorRechazado: string;  // valor original que fue rechazado por la validación preventiva
-  mensajeError: string;    // descripción del error para el gestor
-}
-
 // SCR-013 — estado operativo del caso en el dashboard (derivado de request.status + SLA,
 // no es un catálogo PM4). "Por Vencer" = caso activo con SCR013_SLA_UMBRAL_PROXIMO días
 // hábiles o menos hasta el vencimiento (ver estadoDeRequest() en dashboardHelpers.ts).
@@ -62,7 +52,7 @@ export type EstadoCasoDashboard = 'Abierta' | 'Por Vencer' | 'Cerrada' | 'Vencid
 // crudos de campos PM4 y valores COMPUTADOS en el cliente como diasRestantes/estado) — no es
 // un conjunto de variables PM4 reales, así que sus miembros NO llevan el prefijo `qd_` ni el
 // prefijo de tipo RPA, igual que el resto de tipos de fila de este archivo (AsignacionHistorial,
-// RespuestaAyuda, SoporteAdjunto, CampoConError).
+// RespuestaAyuda, SoporteAdjunto).
 export interface CasoDashboard {
   id:               number;               // request id (clave estable)
   numeroCaso:       string;                // # Caso (código SFC o case_number)

@@ -17,7 +17,7 @@
 import { GLOBAL_COLLECTIONS } from '../../../../core/collections';
 import { resolveProcessEvent, resolveScriptId } from '../../../../core/pm4Resolve';
 import type {
-  IntentoHistorial, SoporteAdjunto, AsignacionHistorial, RespuestaAyuda, CampoConError,
+  IntentoHistorial, SoporteAdjunto, AsignacionHistorial, RespuestaAyuda,
   FiltrosDashboard,
 } from './types';
 
@@ -111,10 +111,9 @@ export const QD = {
   // En SCR-0051 este mismo campo se recalcula a '2' si el analista cambia la clasificación
   // regulatoria (ver DetalleReasignacionRespuesta.tsx).
 
-  // ── SCR-002 · Corrección de Datos (encabezado + metadata) ─────────────────
+  // ── Encabezado y metadata del caso — compartido (SCR-000/008/0051/013) ────
   strBpmCaseId: 'qd_strBpmCaseId',                     // antes qd_idCasoBPM
   strSlaAssigned: 'qd_strSlaAssigned',               // antes qd_slaRestante (corregido: el campo es el SLA asignado, no el restante)
-  strErrorsJson: 'qd_strErrorsJson',                   // antes qd_errores_json — ⚠ ver informe (script BPM debe emitir nombres nuevos)
 
   // ── SCR-003 · Corrección Error Funcional M1/M2 ────────────────────────────
   strSfcErrorCode: 'qd_strSfcErrorCode',               // FLD-040 · antes qd_codigoErrorSFC
@@ -306,10 +305,9 @@ export interface QdFields {
   qd_arrSimilarCases: Record<string, unknown>[];
   qd_strReconsiderationSACEscalation: boolean; // derivada al radicar (ver QD.strReconsiderationSacEscalation)
 
-  // SCR-002
+  // Encabezado y metadata del caso — compartido
   qd_strBpmCaseId: string;
   qd_strSlaAssigned: string;
-  qd_strErrorsJson: string;
 
   // SCR-003
   qd_strSfcErrorCode: string;
@@ -446,7 +444,7 @@ export const QD_COLLECTIONS = {
   lgbtiq: GLOBAL_COLLECTIONS.lgbtiq,
   sfcProduct: GLOBAL_COLLECTIONS.sfcProduct,
   productDetail: GLOBAL_COLLECTIONS.productDetail,
-  sfcReason: GLOBAL_COLLECTIONS.sfcReason, // Legacy (id 17) — usado por SCR-002/0051/0052 en modo display.
+  sfcReason: GLOBAL_COLLECTIONS.sfcReason, // Legacy (id 17) — usado por SCR-0051/0052 en modo display.
   // cat_matriz_motivos (id 45): matriz completa; SCR-000 deriva en cliente momento →
   // servicio → motivo (ver SeccionDetalleQueja).
   matrixMotivos: GLOBAL_COLLECTIONS.matrixMotivos,
@@ -630,74 +628,6 @@ export const SCR000_DEFAULTS = {
 } as const;
 
 // ═══════════════════════════════════════════════════════════════════════════
-// SCR-002 — Corrección de Datos del Formulario
-// ═══════════════════════════════════════════════════════════════════════════
-
-export type CorregirDatosFormData = Pick<QdFields,
-  | typeof QD.strBpmCaseId | typeof QD.strChannel | typeof QD.strSlaAssigned
-  | typeof QD.strFirstName | typeof QD.strLastName | typeof QD.strCompanyName
-  | typeof QD.strIdType | typeof QD.strIdNumber | typeof QD.strEmail | typeof QD.strPersonType
-  | typeof QD.strCountryCode | typeof QD.strDepartment | typeof QD.strCity
-  | typeof QD.strSfcProduct | typeof QD.strSfcReason | typeof QD.strRequestType
-  | typeof QD.strReceptionInstance | typeof QD.strReceptionPoint | typeof QD.strAdmission
-  | typeof QD.strControlEntity | typeof QD.strComplaintText | typeof QD.strErrorsJson
->;
-
-// Sin este objeto, react-hook-form no registra ningún campo hasta que
-// SeccionErroresValidacion monta su Controller (solo ocurre si el campo aparece en
-// qd_strErrorsJson) — cualquier campo no listado como erróneo quedaría ausente del
-// payload de completeTask/saveDraft en vez de viajar con su valor precargado.
-export const SCR002_DEFAULTS: Partial<CorregirDatosFormData> = {
-  [QD.strBpmCaseId]: '',
-  [QD.strChannel]: '',
-  [QD.strSlaAssigned]: '',
-  [QD.strFirstName]: '',
-  [QD.strLastName]: '',
-  [QD.strCompanyName]: '',
-  [QD.strIdType]: '',
-  [QD.strIdNumber]: '',
-  [QD.strEmail]: '',
-  [QD.strPersonType]: '',
-  [QD.strCountryCode]: '',
-  [QD.strDepartment]: '',
-  [QD.strCity]: '',
-  [QD.strSfcProduct]: '',
-  [QD.strSfcReason]: '',
-  [QD.strRequestType]: '',
-  [QD.strReceptionInstance]: '',
-  [QD.strReceptionPoint]: '',
-  [QD.strAdmission]: '',
-  [QD.strControlEntity]: '',
-  [QD.strComplaintText]: '',
-  [QD.strErrorsJson]: '',
-};
-
-// Fallback de desarrollo (se usa cuando task.data no tiene qd_strErrorsJson)
-export const SCR002_ERRORES_EJEMPLO: CampoConError[] = [
-  {
-    campo: QD.strEmail,
-    fldId: 'FLD-007',
-    etiqueta: 'Correo Electrónico',
-    valorRechazado: 'juan.perez@',
-    mensajeError: 'El correo no tiene formato válido (RFC 5321). Formato esperado: usuario@dominio.com',
-  },
-  {
-    campo: QD.strIdNumber,
-    fldId: 'FLD-006',
-    etiqueta: 'Número de Identificación',
-    valorRechazado: '12 34 56',
-    mensajeError: 'Contiene espacios. Solo se aceptan dígitos sin separadores. Mín. 6, máx. 15 caracteres.',
-  },
-  {
-    campo: QD.strCity,
-    fldId: 'FLD-011',
-    etiqueta: 'Municipio',
-    valorRechazado: '',
-    mensajeError: 'El municipio seleccionado no pertenece al departamento configurado. Seleccione un municipio de la lista habilitada.',
-  },
-];
-
-// ═══════════════════════════════════════════════════════════════════════════
 // SCR-003 — Corrección Error Funcional M1/M2
 // ═══════════════════════════════════════════════════════════════════════════
 
@@ -805,7 +735,7 @@ export type CorreccionErrorFuncionalFormData = Omit<Pick<QdFields,
 >, typeof QD.strAction> & { [QD.strAction]: AccionErrorFuncional };
 
 // Sin estas claves react-hook-form no registra los campos y NO viajarían en el
-// completeTask (mismo motivo documentado en SCR002_DEFAULTS).
+// completeTask/saveDraft — mismo patrón en cada *_DEFAULTS de este archivo.
 export const SCR003_DEFAULTS: Partial<CorreccionErrorFuncionalFormData> = {
   [QD.strSfcErrorCode]: '',
   [QD.strAffectedField]: '',
@@ -1265,7 +1195,7 @@ export const SCR0052_DEFAULTS: Partial<RespuestaAreaResponsableFormData> = {
 
 // Umbral de días hábiles restantes para que un caso activo pase a estado "Por Vencer"
 // (2 o menos días hábiles hasta el vencimiento). Pese al prefijo, se reutiliza en toda
-// pantalla que muestra este Estado en su InfoBar (SCR-013, SCR-0051, SCR-002) — ver
+// pantalla que muestra este Estado en su InfoBar (SCR-013, SCR-0051) — ver
 // estadoSlaPorDiasRestantes() en core/businessDays.ts, mismo valor que
 // SCR0051_SLA_UMBRAL_PRORROGA (RUL-0051-03).
 export const SCR013_SLA_UMBRAL_PROXIMO = 2;

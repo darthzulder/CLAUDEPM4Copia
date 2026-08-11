@@ -613,7 +613,7 @@ export default function CrearRecibirQueja() {
                   // Cada caso viene de GET /requests/{id}?include=data (ver
                   // fetchSimilarCaseDetails): el número de caso visible es
                   // qd_strBpmCaseId (misma variable que muestra el InfoBar en
-                  // SCR-0051/SCR-002), no el id interno del request; se cae a
+                  // SCR-0051), no el id interno del request; se cae a
                   // case_number/id solo si ese caso aún no lo tiene sincronizado.
                   const objData = (objCase.data ?? {}) as Record<string, unknown>;
                   const strNumber = (

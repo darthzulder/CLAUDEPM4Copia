@@ -54,8 +54,8 @@ borrador y solicitar prórroga regulatoria cuando el SLA es crítico.
 
 | Campo (UI) | Variable | Tipo | Fuente |
 |---|---|---|---|
-| Case | `qd_strBpmCaseId` | `InfoBar` | FLD-300 en SCR-000 (unificado con SCR-002) |
-| SLA | `qd_strSlaAssigned` | `InfoBar` ("N días hábiles") | Inferido de RUL-0051-03 (§10), unificado con SCR-002/008 |
+| Case | `qd_strBpmCaseId` | `InfoBar` | FLD-300 en SCR-000 |
+| SLA | `qd_strSlaAssigned` | `InfoBar` ("N días hábiles") | Inferido de RUL-0051-03 (§10), unificado con SCR-008 |
 | Estado | (SLA por proximidad al vencimiento) | `InfoBar` + `ZdsStatusBadge` (`estadoSlaVariant()`) | Misma regla que el dashboard SCR-013 |
 | SmartSupervision | `qd_strSfcCode` | `InfoBar` | FLD-120/140/173 en SCR-008/009/010 |
 | Radicación SFC | `qd_strFilingDate` | `InfoBar` | FLD-081 — antes en S4 (eliminada, ago-2026) |

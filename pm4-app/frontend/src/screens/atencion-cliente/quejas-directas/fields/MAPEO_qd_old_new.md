@@ -73,9 +73,8 @@ un token/propiedad interna, y su estado actual).
 | SCR-000 | qd_fechaRadicacionSFC | qd_strSfcFilingDate | string |
 | SCR-000 | qd_rolResponsable | qd_strAssigneeRole | string |
 | SCR-000 | qd_responsable | qd_strAssignee | string |
-| SCR-002, 0051 | qd_idCasoBPM | qd_strBpmCaseId | string |
-| SCR-002, 008, 0051 | qd_slaRestante | qd_strSlaAssigned | string ⚠ corrección semántica: el campo es el SLA asignado, no el restante |
-| SCR-002 | qd_errores_json | qd_strErrorsJson | string ⚠ ver informe |
+| SCR-0051 | qd_idCasoBPM | qd_strBpmCaseId | string |
+| SCR-008, 0051 | qd_slaRestante | qd_strSlaAssigned | string ⚠ corrección semántica: el campo es el SLA asignado, no el restante |
 | SCR-003 | qd_codigoErrorSFC | qd_strSfcErrorCode | string |
 | SCR-003 | qd_campoAfectado | qd_strAffectedField | string |
 | SCR-003 | qd_valorRechazado | qd_strRejectedValue | string |
@@ -194,7 +193,7 @@ servicio → motivo. Se carga completa y la cascada se filtra **en cliente**
 (camelCase, bajo `data.*`): `tipoSolicitud`, `productoZurich`, `interaccion`,
 `servicioPrestado`, `codigoMotivoSFC`, `motivoSFC`. Reapunta el motivo
 (`qd_strSfcReason`) de la colección legacy id 17 a esta matriz **solo en SCR-000**
-(SCR-002/0051/0052 siguen con id 17 en modo display). `qd_strSfcReason` guarda el
+(SCR-0051/0052 siguen con id 17 en modo display). `qd_strSfcReason` guarda el
 código `codigoMotivoSFC` (se preserva el código, igual que con id 17); `qd_strInteraction`
 y `qd_strServiceProvided` guardan el texto de `interaccion`/`servicioPrestado`.
 
@@ -260,11 +259,11 @@ pmqlTemplate: 'data.codigo_departamento = "{{qd_departamento}}"' → '...{{qd_st
 `useCollection(COLLECTION_DEFS.ciudad, objWatch as unknown as Record<string, unknown>)`
 — pasa el **objeto real de watch del formulario**. El `dependsOn` lee
 `objWatch['qd_departamento']` directamente, así que DEBE coincidir con el nombre
-real del campo tras el rename. Impacta 2 call sites (deben actualizarse en el mismo
+real del campo tras el rename. Impactó 2 call sites en su momento (actualizados en el mismo
 commit): `SCR-000/SeccionConsumidor.tsx` (`objWatch.qd_departamento` → `.qd_strDepartment`)
-y `SCR-002/SeccionErroresValidacion.tsx` (`watch('qd_departamento')` → `watch(QD.strDepartment)`,
-y su shim `{ qd_departamento: strDepartment }` → `{ qd_strDepartment: strDepartment }` para
-seguir coincidiendo con el `dependsOn` renombrado).
+y `SCR-002/SeccionErroresValidacion.tsx` (la pantalla SCR-002 se eliminó posteriormente del
+proyecto — no forma parte del insumo v3.2 — y esta referencia queda solo como registro
+histórico del rename).
 
 **LEFT-side de PMQL sin cambios:** `data.codigo_departamento` es una columna de la
 colección PM4 (id 15), no un campo del formulario — no se toca.
@@ -304,21 +303,6 @@ en `collections.ts`, y `qd_productoSFC` → `qd_strProductFilter` en el call sit
 deliberadamente distintos, para no alterar el comportamiento actual ni de casualidad
 hacerlo funcionar. **Se notifica al usuario para que decida si corregir este bug por
 separado** (fuera del alcance de este refactor de nomenclatura).
-
-## Hallazgo adicional — `qd_errores_json` transporta nombres de campo en runtime
-
-`SCR-002` recibe de PM4 (script BPM de validación preventiva) un JSON en
-`qd_strErrorsJson` (antes `qd_errores_json`) con la forma `CampoConError[]`, donde
-`campo: string` es **el nombre del campo RHF como dato en runtime**, no un tipo
-estático — p. ej. `{ campo: 'qd_correoElectronico', ... }`. `SeccionErroresValidacion.tsx`
-compara este string contra literales (`CAMPOS_CONOCIDOS`, `esCampoCorregido`).
-
-**Esto es contrato con PM4 más allá de PMQL:** el script BPM que genera este JSON
-también debe emitir los nombres NUEVOS (`'qd_strEmail'`, `'qd_strIdNumber'`,
-`'qd_strCity'`, `'qd_strDepartment'`) tras la migración, o las comparaciones fallarán
-en silencio (no lo detecta `tsc`, es una comparación de string contra dato dinámico).
-Se incluye este script en el alcance de la migración PM4 recomendada, junto con
-gateways/scripts/SFC ya mencionados en el plan.
 
 ## Convención `_desc` — código + descripción para campos de colección
 
