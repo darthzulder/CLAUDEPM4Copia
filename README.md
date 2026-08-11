@@ -94,14 +94,13 @@ The container has no HMR against the Windows-mounted volume, so after editing CS
 docker restart pm4-app-container
 ```
 
-**Before every commit/push**, run the full build + lint + tests and confirm there are no TypeScript, lint, bundling, or test errors — do not commit a broken build or a red suite:
+**Before every commit/push**, run the full gate — build + lint + tests — and confirm there are no TypeScript, lint, bundling, or test errors:
 
 ```bash
-docker exec pm4-app-container sh -c "cd /app && npm run build --workspace=frontend"
-docker exec pm4-app-container sh -c "cd /app && npm run build --workspace=backend"
-docker exec pm4-app-container sh -c "cd /app && npm run lint --workspace=frontend"
-docker exec pm4-app-container sh -c "cd /app && npm run test --workspace=frontend"
+docker exec pm4-app-container sh -c "cd /app && npm run verify"
 ```
+
+This is enforced in two layers (setup in [docs/guides/entorno-local-y-verificacion.md](docs/guides/entorno-local-y-verificacion.md)): a versioned `pre-commit` hook in `.githooks/` (enable once with `npm run setup:hooks`), and **GitHub Actions** on every push/PR — the latter is the authoritative gate, since a local hook can be bypassed with `--no-verify`.
 
 Automated tests are **mandatory** for new or modified pure logic, own components, and screens
 — see [docs/guides/testing-conventions.md](docs/guides/testing-conventions.md) for what needs a

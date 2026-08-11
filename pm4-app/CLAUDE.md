@@ -29,11 +29,12 @@ Aplican a **todo** cambio de código en este proyecto, no solo a pantallas nueva
    [`outputs/react/VENDOR_COMPONENT_CATALOG.md`](outputs/react/VENDOR_COMPONENT_CATALOG.md).
 3. **Arquitectura BFF** — toda llamada externa (PM4, `cotizador-service`, futuras APIs) pasa
    por `backend/`, nunca directo desde una pantalla. Ver [Principio arquitectónico: BFF](#principio-arquitectónico-backend-for-frontend-bff).
-4. **Tests automatizados obligatorios** para lógica nueva/modificada y para componentes/
-   pantallas propios. Ver [Tests automatizados (OBLIGATORIO)](#tests-automatizados-obligatorio)
+4. **Tests automatizados obligatorios** para lógica nueva/modificada (frontend y backend) y
+   para componentes/pantallas propios. Ver [Tests automatizados (OBLIGATORIO)](#tests-automatizados-obligatorio)
    y [`../docs/guides/testing-conventions.md`](../docs/guides/testing-conventions.md).
-5. **Antes de dar una tarea por terminada:** build + lint + **tests** verdes, nada roto. Ver
-   la sección "⚠️ Antes de hacer commit / push a git — OBLIGATORIO" más abajo.
+5. **Antes de dar una tarea por terminada:** `npm run verify` (build + lint + tests) verde,
+   nada roto. Lo fuerzan CI y el hook `pre-commit` — ver
+   [`../docs/guides/entorno-local-y-verificacion.md`](../docs/guides/entorno-local-y-verificacion.md).
 6. **Llamadas a PM4 siempre por nombre, nunca por ID hardcodeado** — se resuelven a id/uuid
    vía el registro. Ver [Registro de IDs PM4](#registro-de-ids-pm4-colecciones-scripts-procesos).
 7. **Comentarios técnicos profesionales en el código** — explican el porqué y el contrato,
@@ -63,10 +64,7 @@ http://localhost:5173/?screen=cotizador-fast-flow&task_id=123&token=eyJ...
 Siempre ejecutar el build completo antes de lanzar a git para garantizar que el deploy funcione correctamente:
 
 ```bash
-npm run build --workspace=frontend   # tsc + vite
-npm run build --workspace=backend    # tsc
-npm run lint  --workspace=frontend   # eslint
-npm run test  --workspace=frontend   # vitest (lógica pura + componentes/pantallas)
+npm run verify   # build (frontend + backend) + lint + tests, todo en un comando
 ```
 
 Si tocaste `cotizador-service/`, correr también:
@@ -75,9 +73,15 @@ Si tocaste `cotizador-service/`, correr también:
 docker exec cotizador-service-container sh -c "cd /app && pytest -q"
 ```
 
-Si alguno falla con errores de TypeScript, lint, empaquetado o **tests**, **corregir antes
-de commitear**. No commitear con builds rotos ni con tests en rojo — tampoco con un test
+Si algo falla con errores de TypeScript, lint, empaquetado o **tests**, **corregir antes de
+commitear**. No commitear con builds rotos ni con tests en rojo — tampoco con un test
 preexistente que dejó de pasar por el cambio actual.
+
+Esto está **automatizado en dos capas** (setup y detalle en
+[`../docs/guides/entorno-local-y-verificacion.md`](../docs/guides/entorno-local-y-verificacion.md)):
+el hook `pre-commit` de `.githooks/` lo corre en local (activar una vez con
+`npm run setup:hooks`), y **GitHub Actions** lo corre en cada push/PR — ese último es el gate
+real, porque el hook se puede saltar con `--no-verify`.
 
 > Según el entorno de cada dev, `npm` corre en local o dentro del contenedor. Si usas
 > Docker, antepón `docker exec -w /app pm4-app-container ` a cada comando y, como no hay
@@ -311,27 +315,48 @@ comentarios en `core/collections.ts`.
 
 ## Tests automatizados (OBLIGATORIO)
 
-Toda función/hook de lógica pura nueva o modificada (`core/*.ts`, helpers,
-`cotizador-service/app.py`) necesita su test Vitest/pytest — mismo patrón que
-`core/useCollection.test.ts`/`useCotizador.test.ts`/`cotizador-service/tests/test_calc.py`
-ya siguen. Todo componente propio y pantalla nueva o modificada necesita al menos un smoke
-test con React Testing Library (`.test.tsx`, project `components` de Vitest — confirmado
-compatible con los custom elements de `@zurich/web-components`, ver
-`components/ActionBar.test.tsx`).
+Necesitan test, si son nuevos o los estás modificando:
+- **Lógica pura** — `core/*.ts`, helpers, `backend/src/lib/*.ts`, `cotizador-service/app.py`.
+- **Componentes propios** (`components/*.tsx`) y **pantallas** — al menos un smoke test con
+  React Testing Library (`.test.tsx`, project `components` de Vitest; confirmado compatible
+  con los custom elements de `@zurich/web-components`).
+- **Rutas nuevas del backend** (`backend/src/routes/`) — la lógica no trivial se extrae a
+  `backend/src/lib/` y se testea ahí, como se hizo con `lib/token.ts`. Es donde la
+  [regla de BFF](#principio-arquitectónico-backend-for-frontend-bff) manda toda integración
+  externa nueva, así que es donde más importa.
 
 Comandos:
 ```bash
+npm run verify                      # build + lint + tests (frontend y backend) — el gate completo
 npm run test --workspace=frontend   # vitest — projects 'logic' (node) y 'components' (jsdom)
+npm run test --workspace=backend    # vitest — lib/*.ts
 pytest -q                           # desde cotizador-service/
 ```
 
-Detalle completo (qué necesita test, cómo mockear `useTask`/`pm4Client` para pantallas, por
-qué hay dos "projects" en `vitest.config.ts`): ver
-[`../docs/guides/testing-conventions.md`](../docs/guides/testing-conventions.md).
+- Qué necesita test y cómo escribirlo (incluidas las 4 trampas de testear controles del DS
+  bajo jsdom): [`../docs/guides/testing-conventions.md`](../docs/guides/testing-conventions.md).
+- Cómo se fuerza que corran (CI + hook `pre-commit`) y setup del entorno local:
+  [`../docs/guides/entorno-local-y-verificacion.md`](../docs/guides/entorno-local-y-verificacion.md).
 
 Los tests automatizados **no reemplazan** la verificación manual del flujo de datos real
 (precarga desde PM4, watchers, subida de archivos) — esa sigue siendo en Docker vía
 `?screen=<slug>`, como ya se practica.
+
+### Estado actual — la cobertura es deuda, no un hecho cumplido
+
+Esta regla es un **estándar hacia adelante**, no una descripción del repo. Al momento de
+escribirla la cobertura real era baja: ~1 de 15 componentes, ~1 de 24 pantallas, y ~3 de 13
+módulos de `core/`. El backend acababa de recibir su primer test (`lib/token.ts`).
+
+Qué implica en la práctica:
+- **Lo que toques, lo cubrís.** No hace falta un backfill masivo antes de poder trabajar; sí
+  hace falta que todo cambio nuevo llegue con su test.
+- **Si vas a modificar un módulo sin tests**, escribirle el test primero (o en el mismo
+  commit) es parte del cambio, no un extra opcional.
+- Los módulos de `core/` sin cobertura y con más riesgo son los de fechas y resolución de
+  IDs (`businessDays.ts`, `fechaHora.ts`, `pm4Resolve.ts`): manejan la trampa
+  `DD/MM/YYYY` vs `MM/DD/YYYY` y el fallback del registro PM4. Son los primeros candidatos
+  cuando haya margen.
 
 ---
 
@@ -524,6 +549,13 @@ nuevo por cada cambio. El proyecto ya tiene un estilo de comentario definido —
 español, corto (ver `docs/guides/nomenclatura-variables.md`) — y sigue siendo el correcto
 para pasos triviales dentro de una función (`// inicializamos la variable`). Esta regla
 agrega un requisito adicional para lo **no trivial**:
+
+> **No confundir con `DOCUMENTACION_<slug>.md`.** Son dos entregables distintos y
+> **complementarios**, no alternativas: la ficha por pantalla es **trazabilidad funcional**
+> contra los insumos del cliente (qué FLD/RUL/MSG del Anexo02 implementa cada campo), algo
+> que un comentario de código no puede cubrir y que se audita del lado del negocio. Los
+> comentarios de esta sección son **contrato técnico** para quien lee el código. Ambos siguen
+> siendo obligatorios en su ámbito.
 
 - Toda función/hook/módulo **exportado** en `core/`, `backend/src/routes/`, y lógica de
   negocio no obvia (cálculos, transformaciones, reglas) necesita un comentario que explique
