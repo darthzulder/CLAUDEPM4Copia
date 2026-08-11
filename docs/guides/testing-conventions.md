@@ -143,6 +143,10 @@ const objTextarea = document.querySelector('z-textarea#field-qd_strComplaintText
 expect((objTextarea as unknown as { model?: string })?.model).toBe('Ejemplo');
 ```
 Los wrappers de `ZdsFields` ponen `id={`field-${name}`}`, así que ese selector es estable.
+El tag NO siempre coincide con el nombre del wrapper — `ZdsInput` (que envuelve
+`ZrTextInput`) renderiza `z-text-input`, no `z-input`. Verificar el tag real en
+`node_modules/@zurich/web-components/dist/react/<componente>.js` (busca el string literal
+que se pasa a `jsxRuntimeExports.jsx(...)`) antes de asumirlo por el nombre del wrapper.
 
 **4. `disabled` es propiedad, no atributo.** React 19 asigna las props que coinciden con
 propiedades del custom element como propiedades → `hasAttribute('disabled')` da `false`
