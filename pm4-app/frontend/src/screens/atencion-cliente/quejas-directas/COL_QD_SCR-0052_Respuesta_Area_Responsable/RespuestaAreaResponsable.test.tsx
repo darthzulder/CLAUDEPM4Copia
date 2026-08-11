@@ -36,17 +36,31 @@ const OBJ_USE_TASK = {
 
 vi.mock('../../../../core/useTask', () => ({ useTask: () => OBJ_USE_TASK }));
 
-// ⚠️ La referencia devuelta por useCollection DEBE ser estable entre renders. Si se
-// devuelve un `[]` literal nuevo cada llamada, useSyncDesc lo ve como cambio de
-// dependencia, vuelve a setear el campo, provoca otro render, y el ciclo no termina:
-// el test se cuelga y muere con "JavaScript heap out of memory".
+// ⚠️ DOS cosas críticas acá:
+//
+// 1. Las referencias devueltas DEBEN ser estables entre renders. Si se devuelve un `[]`
+//    literal nuevo en cada llamada, useSyncDesc lo ve como cambio de dependencia, vuelve a
+//    setear el campo, provoca otro render, y el ciclo no termina: el test se cuelga y muere
+//    con "JavaScript heap out of memory".
+// 2. El objeto debe tener la firma COMPLETA de useCollection:
+//    `{ options, loading, rawMap, records }`. No existe ningún campo `error`. Omitir
+//    `records`/`rawMap` revienta en las pantallas que sí los usan (SCR-000, SCR-003,
+//    SCR-0051 llaman `records.filter(...)` y leen `rawMap`).
 const CLL_VACIO: never[] = [];
+const OBJ_RAW_MAP_VACIO: Record<string, Record<string, unknown>> = {};
+const CLL_RECORDS_VACIO: Record<string, unknown>[] = [];
+const OBJ_USE_COLLECTION = {
+  options: CLL_VACIO,
+  loading: false,
+  rawMap: OBJ_RAW_MAP_VACIO,
+  records: CLL_RECORDS_VACIO,
+};
 
 vi.mock('../../../../core/useCollection', async (in_fnImportOriginal) => {
-  // descOf/useSyncDesc son lógica pura ya cubierta por useCollection.test.ts — se conservan
-  // reales y solo se stubea useCollection, que es el que dispara la petición HTTP.
+  // descOf/useSyncDesc/resolvePmql son lógica pura ya cubierta por useCollection.test.ts — se
+  // conservan reales y solo se stubea useCollection, que es el que dispara la petición HTTP.
   const objActual = await in_fnImportOriginal<typeof import('../../../../core/useCollection')>();
-  return { ...objActual, useCollection: () => ({ options: CLL_VACIO, loading: false, error: null }) };
+  return { ...objActual, useCollection: () => OBJ_USE_COLLECTION };
 });
 
 describe('RespuestaAreaResponsable (SCR-0052)', () => {
