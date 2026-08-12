@@ -1,11 +1,27 @@
 name: CI
 
-# Gate real de verificación: es lo único que no se puede saltar con `git commit --no-verify`.
-# El hook de .githooks/pre-commit corre lo mismo en local, pero como feedback rápido — la
-# autoridad es este workflow.
+# ANILLO 4 — el único gate que no se puede saltar con `--no-verify`.
+#
+# Los anillos 2 (.githooks/pre-commit) y 3 (.githooks/pre-push) corren EXACTAMENTE lo mismo en
+# local (`npm run verify` → pm4-app/scripts/verify.mjs) como feedback rápido. La autoridad es
+# este workflow, por una razón que ningún hook local puede cubrir:
+#
+#   En eventos `pull_request`, GitHub hace checkout de la MERGE COMMIT (main + la rama, ya
+#   integradas) y corre la suite sobre eso. Un `git merge` local seguido de push a main nunca
+#   prueba esa combinación: probaste tu rama sola, antes de integrar. Los *semantic conflicts*
+#   —main renombra un campo `qd_*`, la rama agrega un uso del nombre viejo, ambos verdes por
+#   separado— solo aparecen acá.
+#
+# Para que esto sea un gate de verdad y no un reporte post-mortem, `main` tiene que estar
+# protegido: checks requeridos + "require branches to be up to date" + push directo prohibido.
+# Los pasos exactos están en docs/guides/entorno-local-y-verificacion.md.
+
 on:
+  # Solo main en `push`: las ramas de trabajo se verifican vía `pull_request`, que además
+  # prueba el resultado del merge. Cubrir ambas con '**' duplicaría cada corrida sin agregar
+  # información.
   push:
-    branches: ['**']
+    branches: [main]
   pull_request:
 
 # Si se pushea de nuevo a la misma rama, cancelar la corrida anterior en vez de acumular.
@@ -15,7 +31,7 @@ concurrency:
 
 jobs:
   verify:
-    name: Build · Lint · Test
+    name: Verificación (anillo 4)
     runs-on: ubuntu-latest
 
     steps:
@@ -31,52 +47,75 @@ jobs:
           cache: 'npm'
           cache-dependency-path: pm4-app/package-lock.json
 
-      # `npm ci` resuelve @zurich/* desde los .tgz vendorizados y commiteados en
-      # frontend/vendor/, así que no depende del registro de ZDS (decomisionado en
-      # dic-2025) ni de credenciales.
-      - name: Install
-        working-directory: pm4-app
-        run: npm ci
-
-      # Los builds se corren por workspace, salteando el script `build` de la raíz: ese
-      # dispara `prebuild` (pm4-registry-sync contra la instancia PM4 real), que en CI no
-      # tiene PM4_BASE_URL/PM4_TOKEN y no aporta nada a la verificación.
-      - name: Build frontend
-        working-directory: pm4-app
-        run: npm run build --workspace=frontend
-
-      - name: Build backend
-        working-directory: pm4-app
-        run: npm run build --workspace=backend
-
-      - name: Lint
-        working-directory: pm4-app
-        run: npm run lint --workspace=frontend
-
-      - name: Test frontend
-        working-directory: pm4-app
-        run: npm run test --workspace=frontend
-
-      - name: Test backend
-        working-directory: pm4-app
-        run: npm run test --workspace=backend
-
-  cotizador:
-    name: Cotizador (pytest)
-    runs-on: ubuntu-latest
-
-    steps:
-      - uses: actions/checkout@v4
-
-      - name: Setup Python
+      # Python + pytest tienen que estar ANTES de `verify`: el script sondea el intérprete y,
+      # si no lo encuentra, salta el paso del cotizador con un aviso. En CI ese salto no es
+      # aceptable — acá es donde la verificación tiene que ser completa.
+      - name: Setup Python 3.13
         uses: actions/setup-python@v5
         with:
           python-version: '3.13'
 
-      - name: Install deps
+      # `npm ci` resuelve @zurich/* desde los .tgz vendorizados y commiteados en
+      # frontend/vendor/, así que no depende del registro de ZDS (decomisionado en
+      # dic-2025) ni de credenciales.
+      - name: Install (Node)
+        working-directory: pm4-app
+        run: npm ci
+
+      - name: Install (Python)
         working-directory: pm4-app/cotizador-service
         run: pip install -r requirements-dev.txt
 
-      - name: Test
-        working-directory: pm4-app/cotizador-service
-        run: pytest -q
+      # Un solo paso a propósito. Antes este workflow enumeraba build/lint/test por su cuenta y
+      # ya había divergido del hook local (el hook no corría pytest), con el resultado clásico
+      # de "en mi máquina pasaba". Ahora los tres anillos ejecutan el mismo script.
+      - name: Verify
+        working-directory: pm4-app
+        run: npm run verify:verbose
+
+      # Salvaguarda de la corrección que saca los tests de dist/: el build del backend emite a
+      # dist/ y eso es lo que Render despliega. Si alguien vuelve a incluir los *.test.ts en
+      # tsconfig.json, acá se corta.
+      - name: Verificar que no se despliegan tests
+        working-directory: pm4-app
+        run: |
+          if find backend/dist -name '*.test.js' -print -quit | grep -q .; then
+            echo "::error::backend/dist contiene archivos de test — revisá el 'exclude' de backend/tsconfig.json"
+            find backend/dist -name '*.test.js'
+            exit 1
+          fi
+          echo "backend/dist limpio de tests."
+
+  coverage:
+    name: Cobertura del diff
+    runs-on: ubuntu-latest
+    # Solo en PRs: la pregunta que responde ("qué de MI cambio quedó sin ejercitar") necesita
+    # una base contra la que comparar. Es una SEÑAL, no un gate — no la pongas como check
+    # requerido: un umbral de cobertura obligatorio premia tests que ejecutan líneas sin
+    # asertar nada, que es justo el problema que este proyecto ya tuvo.
+    if: github.event_name == 'pull_request'
+
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          # El script necesita el historial para diffear contra la base del PR.
+          fetch-depth: 0
+
+      - name: Setup Node 24
+        uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+          cache: 'npm'
+          cache-dependency-path: pm4-app/package-lock.json
+
+      - name: Install
+        working-directory: pm4-app
+        run: npm ci
+
+      - name: Coverage
+        working-directory: pm4-app
+        run: npm run coverage
+
+      - name: Cobertura de las líneas del diff
+        working-directory: pm4-app
+        run: node scripts/coverage-diff.mjs --base "origin/${{ github.base_ref }}" --summary "$GITHUB_STEP_SUMMARY"

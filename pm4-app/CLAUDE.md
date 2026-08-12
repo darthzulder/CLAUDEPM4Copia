@@ -61,27 +61,36 @@ http://localhost:5173/?screen=cotizador-fast-flow&task_id=123&token=eyJ...
 
 ## ⚠️ Antes de hacer commit / push a git — OBLIGATORIO
 
-Siempre ejecutar el build completo antes de lanzar a git para garantizar que el deploy funcione correctamente:
-
 ```bash
-npm run verify   # build (frontend + backend) + lint + tests, todo en un comando
+npm run verify   # lint front+back · typecheck · builds · tests front+back · pytest cotizador
 ```
 
-Si tocaste `cotizador-service/`, correr también:
-
-```bash
-docker exec cotizador-service-container sh -c "cd /app && pytest -q"
-```
-
-Si algo falla con errores de TypeScript, lint, empaquetado o **tests**, **corregir antes de
-commitear**. No commitear con builds rotos ni con tests en rojo — tampoco con un test
+Un solo comando: es la **única definición de verde** del proyecto
+(`pm4-app/scripts/verify.mjs`) e incluye el `pytest` del cotizador. Si algo falla —TypeScript,
+lint, empaquetado o **tests**— **corregir antes de commitear**. Tampoco commitear con un test
 preexistente que dejó de pasar por el cambio actual.
 
-Esto está **automatizado en dos capas** (setup y detalle en
+Está automatizado en **cuatro anillos** (setup y detalle en
 [`../docs/guides/entorno-local-y-verificacion.md`](../docs/guides/entorno-local-y-verificacion.md)):
-el hook `pre-commit` de `.githooks/` lo corre en local (activar una vez con
-`npm run setup:hooks`), y **GitHub Actions** lo corre en cada push/PR — ese último es el gate
-real, porque el hook se puede saltar con `--no-verify`.
+
+| # | Anillo | Responde |
+|---|---|---|
+| 1 | `npm run test:watch` | ¿rompí esto que estoy escribiendo? |
+| 2 | `pre-commit` | ¿rompí lo que toqué? |
+| 3 | `pre-push` | ¿rompí el proyecto? + aviso si la rama quedó detrás de `origin/main` |
+| 4 | **GitHub Actions en el PR** | **¿rompo `main` al MERGEAR?** ← el único que no se puede saltar |
+
+Los anillos 2 y 3 se activan una vez con `npm run setup:hooks`.
+
+**El proyecto integra por PR, no con `git merge` local.** No es preferencia de estilo: en un PR,
+GitHub corre la suite sobre la **merge commit** (`main` + la rama ya integradas). Un merge local
+prueba la rama *aislada*, así que los conflictos semánticos —`main` renombra un campo `qd_*`, la
+rama agrega un uso del nombre viejo, ambos verdes por separado— no aparecen hasta que `main` ya
+está roto.
+
+Para saber **qué parte de un cambio quedó sin ejercitar**: `npm run coverage && npm run
+coverage:diff` (en un PR sale solo en el job summary). Es una señal, no un gate — que una línea
+esté cubierta no significa que esté asertada.
 
 > Según el entorno de cada dev, `npm` corre en local o dentro del contenedor. Si usas
 > Docker, antepón `docker exec -w /app pm4-app-container ` a cada comando y, como no hay
