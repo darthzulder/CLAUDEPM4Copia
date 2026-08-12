@@ -1,0 +1,22 @@
+# Master Sheet: 06_Mensajes
+
+| ID Mensaje | SCR | Tipo Mensaje | Título | Texto | Se muestra cuando | Acción del Usuario | Resultado BPMN |
+| --- | --- | --- | --- | --- | --- | --- | --- |
+| MSG-003-01 | SCR-003 | Error | Análisis requerido | Debe documentar el análisis o resolución antes de confirmar la atención. | analisisTecnico vacío | Documente el análisis | Bloquea avance |
+| MSG-004-01 | SCR-004 | Advertencia | Reporte SIC — Pendiente Validación Legal | ⚠️ El reporte a la SIC bajo Ley 1581/2012 requiere autorización del área legal de Zurich. Confirme que el área legal ha validado esta decisión antes de continuar. | requiereReporteSIC = Sí | Confirmar o cancelar | Pending legal review |
+| MSG-005-01 | SCR-005 | Error | Medida de contención requerida | El plan de mitigación debe incluir al menos una medida de contención inmediata bajo Ley 1581/2012. | medidaContencion vacía | Documente la medida | Bloquea avance |
+| MSG-005-02 | SCR-005 | Error | Medida preventiva requerida | El plan de mitigación debe incluir al menos una medida preventiva de recurrencia bajo Ley 1581/2012. | medidaPreventiva vacía | Documente la medida | Bloquea avance |
+| MSG-006-01 | SCR-006 | Error | Plantilla corporativa requerida | No se permite redactar respuestas en texto libre sin seleccionar una plantilla corporativa aprobada. | plantillaSeleccionada vacía | Seleccione plantilla | Bloquea avance |
+| MSG-006-02 | SCR-006 | Error | Respuesta muy corta | La respuesta final debe tener al menos 100 caracteres para garantizar un contenido de fondo al cliente. | respuestaFinal < 100 car. | Amplíe la respuesta | Bloquea avance |
+| MSG-006-03 | SCR-006 | Error | Responsable requerido | Debe seleccionar un usuario responsable antes de confirmar la asignación. | usuarioResponsable sin seleccionar | Seleccione responsable | Bloquea confirmación |
+| MSG-006-04 | SCR-006 | Error | Respuesta al DP incompleta | La respuesta al Derecho de Petición debe abordar todos los puntos del peticionario y tener al menos 100 caracteres. | respuestaDP < 100 car. | Amplíe la respuesta | Bloquea avance |
+| MSG-007-01 | SCR-007 | Error | Respuesta incompleta | La respuesta al Derecho de Petición debe abordar todos los puntos del peticionario y tener al menos 100 caracteres. | respuestaDP < 100 car. | Amplíe la respuesta | Bloquea avance |
+| MSG-008-01 | SCR-008 | Error | Responsable requerido | Debe seleccionar un usuario responsable antes de enviar la solicitud de información adicional. | usuarioResponsable sin seleccionar | Seleccione responsable | Bloquea envío |
+| MSG-009-01 | SCR-009 | Error | Motivo de no viabilidad requerido | Debe documentar el motivo por el cual la modificación no es viable. | modificacionViable = No y motivo vacío | Documente el motivo | Bloquea avance |
+| MSG-009-02 | SCR-009 | Error | Evidencia requerida | Debe adjuntar evidencia de la modificación ejecutada en el sistema. | modificacionViable = Sí y evidencia vacía | Adjunte la evidencia | Bloquea avance |
+| MSG-009-03 | SCR-009 | Error | Responsable requerido | Debe seleccionar un usuario responsable antes de enviar la solicitud de información adicional. | usuarioResponsable sin seleccionar | Seleccione responsable | Bloquea envío |
+| MSG-010-01 | SCR-010 | Error | Plantilla corporativa requerida | No se permite redactar respuestas en texto libre sin seleccionar una plantilla corporativa aprobada. | plantillaSeleccionada vacía | Seleccione plantilla | Bloquea avance |
+| MSG-010-02 | SCR-010 | Error | Respuesta muy corta | La respuesta final debe tener al menos 100 caracteres para garantizar un contenido de fondo al cliente. | respuestaFinal < 100 car. | Amplíe la respuesta | Bloquea avance |
+| MSG-012-01 | SCR-012 | Error | Observaciones requeridas | Debe documentar las observaciones de devolución para que el gestor pueda corregir la respuesta. | obsLiderSAC vacío al devolver | Documente observaciones | Bloquea acción |
+| MSG-SP06-01 | SP06 | Error | Estado incorrecto | No se puede enviar la respuesta al cliente. El estado del caso debe ser 'Respuesta Aprobada'. | estadoCaso != 'Respuesta Aprobada' | Revisar estado del caso | Bloquea envío |
+| MSG-SP06-02 | SP06 | Advertencia | Correo previo detectado | Se detectó que ya se envió un correo de respuesta al cliente para este caso. ¿Confirma que desea enviar un segundo correo? | Caso reabierto y correo previo enviado | Confirmar o cancelar | Solicita confirmación |
