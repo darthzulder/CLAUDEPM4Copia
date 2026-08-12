@@ -1,7 +1,7 @@
 {
   "version": 1,
   "instance": "https://cozurich.dev.cloud.processmaker.net",
-  "generatedAt": "2026-08-12T20:17:53.097Z",
+  "generatedAt": "2026-08-12T20:45:19.582Z",
   "normalization": {
     "encoding": "utf-8",
     "bom": false,
@@ -123,8 +123,8 @@
       "title": "COL_UTIL_Dias_Habiles",
       "language": "php",
       "lastKnownId": 95,
-      "sha256": "e781ec57d44463759390da515f6df3f4bf846efaf8123174010de7165fb9ad18",
-      "capturadoEn": "2026-08-12T20:17:53.097Z"
+      "sha256": "66e8df8c9faecf1071df97de0bb5ce4291f89dd3e3b5168e2e8dd534818df573",
+      "capturadoEn": "2026-08-12T20:45:19.580Z"
     }
   }
 }
