@@ -374,7 +374,8 @@ donde un fallo es silencioso y caro:
   `api/pm4Client`/`core/useRequestFiles`; `PreviewModal` mockea su propio `PdfViewer` hijo
   para no re-probar esa red; `RecaptchaModal` stubea `window.grecaptcha` (si no,
   `loadRecaptcha()` espera el script real de Google o expira a los 10s).
-- **Las 12 pantallas de Quejas Directas tienen smoke test** (antes solo `SCR-0052`):
+- **Las 10 pantallas de Quejas Directas tienen smoke test** (antes solo `SCR-0052`), más
+  `ds-catalog` y `smartsupervision-api-docs`, que no son de Quejas Directas:
   `ds-catalog`, `smartsupervision-api-docs`, `SCR-000`, `SCR-003`, `SCR-004`, `SCR-008`,
   `SCR-009`, `SCR-0051`, `SCR-011`, `SCR-012`, `SCR-013`. `SCR-000`
   (`CrearRecibirQueja.test.tsx`) NO cubre el flujo end-to-end de envío exitoso

@@ -22,10 +22,28 @@ describe('FormSection', () => {
   });
 
   it('sin action/footer no los renderiza', () => {
-    render(<FormSection title="Título"><span>Body</span></FormSection>);
+    // Se asserta contra la ESTRUCTURA que el componente sí produce, no contra los strings
+    // 'Ayuda'/'Pie': esos solo existían como props del test anterior, así que buscar su
+    // ausencia pasaba igual con un <div/> vacío.
+    // - `action` se monta como un 2º <span> dentro de .form-section-header.
+    // - `footer` se monta como hermano de .form-section-body dentro de .form-section-card.
+    const { container } = render(<FormSection title="Título"><span>Body</span></FormSection>);
 
-    expect(screen.queryByText('Ayuda')).not.toBeInTheDocument();
-    expect(screen.queryByText('Pie')).not.toBeInTheDocument();
+    expect(container.querySelectorAll('.form-section-header span')).toHaveLength(1);
+    expect(container.querySelector('.form-section-card')?.children).toHaveLength(2);
+  });
+
+  it('con action y footer sí los monta en su lugar', () => {
+    // Contraparte del anterior: sin esto, el test de arriba no distingue "no se montan
+    // porque no se pasaron" de "no se montan nunca".
+    const { container } = render(
+      <FormSection title="Título" action={<button>Ayuda</button>} footer={<div>Pie</div>}>
+        <span>Body</span>
+      </FormSection>,
+    );
+
+    expect(container.querySelectorAll('.form-section-header span')).toHaveLength(2);
+    expect(container.querySelector('.form-section-card')?.children).toHaveLength(3);
   });
 
   it('usa el color por defecto (--z-blue) en el header si no se pasa color', () => {

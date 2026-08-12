@@ -1,4 +1,4 @@
-import { render, screen } from '@testing-library/react';
+import { fireEvent, render, screen } from '@testing-library/react';
 import { describe, expect, it, vi } from 'vitest';
 import DocItem from './DocItem';
 
@@ -57,17 +57,19 @@ describe('DocItem — modo validation', () => {
     expect((objBtn as unknown as { disabled?: boolean })?.disabled).toBe(true);
   });
 
-  it('con fileId muestra el nombre del archivo y habilita "Ver"', () => {
+  it('con fileId muestra el nombre del archivo y "Ver" dispara la previsualización', () => {
+    // Se asserta la CONSECUENCIA (que el click llame a onPreview) en vez de
+    // `?.disabled).not.toBe(true)`, que lo satisfacen `false`, `undefined` Y que
+    // `closest('z-button')` devuelva null — un pase de tres vías que no prueba nada.
+    const fnPreview = vi.fn();
     render(
-      <DocItem index={1} descripcion="RUT" mode="validation" onPreview={vi.fn()} fileId={42} fileName="rut.pdf" />,
+      <DocItem index={1} descripcion="RUT" mode="validation" onPreview={fnPreview} fileId={42} fileName="rut.pdf" />,
     );
 
     expect(screen.getByText('rut.pdf')).toBeInTheDocument();
-    // `disabled={false}` en el mount inicial: React no siempre asigna la propiedad
-    // explícitamente cuando coincide con el default del custom element (queda
-    // `undefined`, no `false`) — lo verificable es que NO quedó en `true`.
-    const objBtn = screen.getByText('Ver').closest('z-button');
-    expect((objBtn as unknown as { disabled?: boolean })?.disabled).not.toBe(true);
+
+    fireEvent.click(screen.getByText('Ver'));
+    expect(fnPreview).toHaveBeenCalledTimes(1);
   });
 
   it('sin onValidacion no renderiza el select de validación', () => {

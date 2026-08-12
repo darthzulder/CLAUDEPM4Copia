@@ -15,9 +15,24 @@ describe('HelpModal', () => {
     expect(screen.getByText('Subtítulo')).toBeInTheDocument();
   });
 
-  it('sin subtitle no renderiza ningún span extra en el bloque de título', () => {
-    render(<HelpModal title="Título"><span>Body</span></HelpModal>);
-    // Solo el <strong> del título y el children — nada más en el primer z-flex.
-    expect(screen.queryByText('Subtítulo')).not.toBeInTheDocument();
+  it('sin subtitle no renderiza el span del bloque de título', () => {
+    // Se cuenta el <span> real dentro del bloque de título, en vez de buscar la ausencia del
+    // string 'Subtítulo' (que el componente nunca puede emitir por sí solo, así que esa
+    // aserción pasaba igual con un <div/> vacío).
+    const { container } = render(<HelpModal title="Título"><span>Body</span></HelpModal>);
+    const objBloqueTitulo = container.querySelector('[z-flex="col:50"]');
+
+    expect(objBloqueTitulo?.querySelector('strong')?.textContent).toBe('Título');
+    expect(objBloqueTitulo?.querySelectorAll('span')).toHaveLength(0);
+  });
+
+  it('con subtitle sí monta el span junto al título', () => {
+    const { container } = render(
+      <HelpModal title="Título" subtitle="Subtítulo"><span>Body</span></HelpModal>,
+    );
+    const objBloqueTitulo = container.querySelector('[z-flex="col:50"]');
+
+    expect(objBloqueTitulo?.querySelectorAll('span')).toHaveLength(1);
+    expect(objBloqueTitulo?.querySelector('span')?.textContent).toBe('Subtítulo');
   });
 });

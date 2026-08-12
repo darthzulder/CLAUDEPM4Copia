@@ -99,9 +99,10 @@ describe('FormularioSuperintendencia (SCR-009)', () => {
     OBJ_USE_TASK.task = makeTask({ qd_strSpecialCondition: 'X' });
     render(<FormularioSuperintendencia />);
 
-    const objBtn = screen.getByText(/Enviar a SmartSupervision/).closest('z-button');
-    expect((objBtn as unknown as { disabled?: boolean })?.disabled).not.toBe(true);
-
+    // No se asserta `?.disabled).not.toBe(true)`: lo satisfacen `false`, `undefined` Y que
+    // `closest()` devuelva null. Que el click abra el popup (abajo) ya prueba que el botón
+    // estaba habilitado.
+    //
     // onSolicitarEnvio es handleSubmit(...) de react-hook-form: react-hook-form valida de
     // forma asíncrona antes de abrir el popup, así que el cambio de estado no es
     // sincrónico con el click — hay que esperarlo con waitFor.

@@ -125,9 +125,10 @@ describe('DetalleReasignacionRespuesta (SCR-0051)', () => {
     });
     render(<DetalleReasignacionRespuesta />);
 
-    const objBtn = screen.getByText('Enviar ▶').closest('z-button');
-    expect((objBtn as unknown as { disabled?: boolean })?.disabled).not.toBe(true);
-
+    // No se asserta `?.disabled).not.toBe(true)`: lo satisfacen `false`, `undefined` Y que
+    // `closest()` devuelva null. Que el click complete la tarea (abajo) ya prueba que el
+    // botón estaba habilitado, y lo prueba de verdad.
+    //
     // onEnviar es handleSubmit(...) de react-hook-form: valida de forma ASÍNCRONA antes de
     // llamar al callback — el registro de la llamada no es sincrónico con el click.
     fireEvent.click(screen.getByText('Enviar ▶'));

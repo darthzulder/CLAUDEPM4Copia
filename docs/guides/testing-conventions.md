@@ -35,6 +35,53 @@ Comandos: `npm run verify` (el gate completo) · `npm run test --workspace=front
 3. **Un helper compartido no puede llamarse `*.test.ts`/`*.test.tsx`** — los globs lo
    recogerían como suite y fallaría por no tener tests. Usar `src/test-utils/<algo>.ts`
    (`.tsx` si lleva JSX).
+4. **`clearMocks: true` está activo, y es a propósito `clearMocks` y no `mockReset`.**
+   `clearMocks` limpia `mock.calls` entre tests pero **conserva la implementación**;
+   `mockReset` la borraría, y varios tests declaran a nivel de módulo
+   `completeTask: vi.fn(() => Promise.resolve({}))` porque la pantalla encadena `.catch()`
+   sobre el resultado. Con `mockReset` esas pantallas explotarían con
+   *"cannot read .catch of undefined"*.
+
+### Aislamiento: fixture fresco por test, nunca restaurar al final del cuerpo
+
+El patrón correcto es un `makeTask()` que devuelve un objeto nuevo, reasignado en un
+`beforeEach`:
+
+```tsx
+const makeTask = (in_dicOverrides = {}) => ({ ...OBJ_TASK, data: { ...OBJ_TASK.data, ...in_dicOverrides } });
+beforeEach(() => { OBJ_USE_TASK.task = makeTask(); });
+```
+
+**Antipatrón** (estuvo en varios archivos): mutar un fixture compartido y restaurarlo en la
+última línea del test. Si una aserción intermedia falla, el restore **no corre** y todos los
+tests siguientes del archivo quedan con datos corruptos — un fallo se convierte en cascada.
+Tampoco llamar `render()` dos veces en un mismo `it()`: ambas instancias quedan en el
+`document.body` y las consultas buscan entre las dos.
+
+### Dos trampas más de los controles del DS (verificadas)
+
+**5. Un `z-button` deshabilitado SÍ dispara su `onClick` en jsdom.** No es un `<button>`
+nativo, así que el DOM no bloquea el evento. Consecuencia: **nunca** pruebes "no hace X"
+clickeando un botón bloqueado — el handler corre igual y el test falla de forma confusa.
+Para verificar un bloqueo, asserta la propiedad `disabled` y el mensaje que lo explica:
+
+```tsx
+const objBtn = screen.getByText(/Autorizar/).closest('z-button');
+expect((objBtn as unknown as { disabled?: boolean })?.disabled).toBe(true);
+expect(screen.getByText(/antes de autorizar/)).toBeInTheDocument();
+```
+
+**6. `?.disabled` es un pase de TRES vías cuando el botón está habilitado.** React deja la
+propiedad en `undefined` (no en `false`) al habilitar, así que
+`expect(x?.disabled).not.toBe(true)` lo satisfacen `false`, `undefined` **y que
+`closest('z-button')` devuelva `null`** — o sea, también pasa si el botón no existe. Para
+"está habilitado", asserta la **consecuencia observable** (el click llama al handler /
+completa la tarea / abre el modal) o la **transición** (antes `true`, después ya no).
+
+**7. Los props de un componente del DS no siempre son propiedades.** En `ZrKpiValue`,
+`amount` sí es propiedad del elemento, pero el encabezado se renderiza como
+`<span slot="header">`. Ante la duda, volcá el `outerHTML` del elemento en un test
+descartable antes de escribir la aserción.
 
 ### La zona horaria está fijada — no la quites
 
@@ -128,7 +175,7 @@ vi.mock('../../../../core/useCollection', async (in_fnImportOriginal) => {
 });
 ```
 
-**2. La profundidad del path importa y falla en silencio.** Las 11 pantallas de Quejas
+**2. La profundidad del path importa y falla en silencio.** Las 10 pantallas de Quejas
 Directas están 4 niveles bajo `src/` → **`'../../../../core/useTask'`**. Las de
 `screens/FAST-FLOW/<slug>/` están a 3 → `'../../../core/useTask'`. Un path que no resuelve
 **no lanza error**: `vi.mock` registra un mock que nadie importa, corre el hook real, y el

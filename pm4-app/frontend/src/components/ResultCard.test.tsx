@@ -10,10 +10,18 @@ describe('ResultCard', () => {
     expect(screen.getByText('Detalle')).toBeInTheDocument();
   });
 
-  it('sin children no revienta y no renderiza el bloque de children', () => {
+  it('sin children solo muestra el título, sin bloque de detalle', () => {
+    // Antes se contaba `div > div` con `<= 1`, que se satisface con 0 y por tanto pasa
+    // incluso con un componente vacío. El texto renderizado es la evidencia directa: si el
+    // bloque de children se montara igual, aparecería contenido extra.
     const { container } = render(<ResultCard title="Título" />);
-    // El div de children solo se monta cuando hay children (`children && (...)`).
-    expect(container.querySelectorAll('div > div').length).toBeLessThanOrEqual(1);
+    expect(container.textContent).toBe('Título');
+  });
+
+  it('con children monta el bloque de detalle además del título', () => {
+    const { container } = render(<ResultCard title="Título">Detalle</ResultCard>);
+    expect(container.textContent).toContain('Título');
+    expect(container.textContent).toContain('Detalle');
   });
 
   it.each([
