@@ -30,8 +30,12 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
+  # NO ponerle `name:` a este job. Sin override, el check se llama `verify` (el id del job), y ese
+  # string es el que hay que escribir EXACTO en la protección de `main` como check requerido. Un
+  # nombre con acentos o paréntesis se matchea igual, pero se tipea mal con facilidad, y una
+  # protección que apunta a un check inexistente no bloquea nada: queda esperando para siempre.
+  # Nombre corto y ASCII a propósito.
   verify:
-    name: Verificación (anillo 4)
     runs-on: ubuntu-latest
 
     steps:

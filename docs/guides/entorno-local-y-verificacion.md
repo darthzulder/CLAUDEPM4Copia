@@ -95,23 +95,48 @@ mergear una rama roja ni pushear directo a `main`.
 En GitHub → *Settings* → *Branches* → *Add branch protection rule* para `main`:
 
 - ✅ **Require a pull request before merging** — es lo que fuerza que se pruebe el merge.
-- ✅ **Require status checks to pass before merging** → agregar **`Verificación (anillo 4)`**.
+- ✅ **Require status checks to pass before merging** → agregar el check **`verify`**.
 - ✅ **Require branches to be up to date before merging** — sin esto, el check puede ser de una
   base vieja y el *semantic conflict* pasa igual.
 - ✅ **Do not allow bypassing the above settings** — si el admin puede saltarlo, no es un gate.
 
-Con `gh` instalado, el equivalente por API:
+### El orden importa: primero un PR, después la protección
+
+**`Require branches to be up to date` no se configura por separado.** Es un modificador del check
+requerido (el propio GitHub lo advierte: *"will not take effect unless at least one status check is
+enabled"*). Marcarlo sin agregar un check no hace nada.
+
+Y el buscador de checks **solo lista los que reportaron en los últimos 7 días**, así que en un
+repo donde el workflow nunca corrió aparece vacío ("No checks have been added") y no hay nada que
+seleccionar. La secuencia que funciona:
+
+1. Pushear la rama y **abrir un PR** → CI corre y el check `verify` queda registrado.
+2. Volver a *Settings → Branches* → ahora sí aparece al escribir `verify` → seleccionarlo.
+3. Guardar. Desde ese momento el gate está activo (incluido el PR que ya está abierto).
+
+> ⚠️ **Con un solo colaborador, NO marques *Require approvals*.** GitHub no te deja aprobar tu
+> propio PR, así que un mínimo de 1 aprobación en un repo de una sola persona bloquea *todos* los
+> merges sin salida. La protección útil acá es el check, no la revisión.
+
+Con `gh` instalado se puede saltear la espera del paso 1, porque la API acepta un nombre de check
+que todavía no reportó:
 
 ```bash
 gh api -X PUT repos/:owner/:repo/branches/main/protection --input - <<'JSON'
 {
-  "required_status_checks": { "strict": true, "contexts": ["Verificación (anillo 4)"] },
+  "required_status_checks": { "strict": true, "contexts": ["verify"] },
   "required_pull_request_reviews": null,
   "enforce_admins": true,
   "restrictions": null
 }
 JSON
 ```
+
+`"strict": true` **es** *require branches to be up to date*; `"contexts"` son los checks
+requeridos, y el nombre tiene que coincidir exacto con el del job en `ci.yml`. Por eso ese job no
+tiene `name:`: sin override el check se llama `verify` —el id del job—, corto y sin acentos ni
+paréntesis que tipear mal. Una protección apuntada a un check inexistente no bloquea: queda
+esperando un reporte que nunca llega.
 
 > **No pongas `Cobertura del diff` como check requerido.** Es una señal, no un gate: un umbral
 > de cobertura obligatorio premia el test que ejecuta la línea sin asertar nada, que es
