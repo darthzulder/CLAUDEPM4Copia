@@ -47,7 +47,10 @@ class ErrorBoundary extends Component<{ children: ReactNode }, { error: Error | 
   }
 }
 
-const SCREENS: Record<string, React.ComponentType> = {
+// Exportado solo para el smoke test de arranque (App.smoke.test.tsx), que monta cada pantalla
+// registrada y verifica que no revienta. La exportación es lo que le permite comparar su lista
+// contra esta y ponerse en rojo si se agrega una pantalla sin cubrirla; no es API para nadie más.
+export const SCREENS: Record<string, React.ComponentType> = {
   'cotizador-fast-flow': CotizadorFastFlow,
   'solicitud-cotizacion-cuw': SolicitudCotizacionCuw,
   'ff-fl': SolicitudFfFl,

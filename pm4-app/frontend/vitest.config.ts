@@ -9,6 +9,10 @@ import { defineConfig } from 'vitest/config';
 // componentes/pantallas con React Testing Library corren en 'jsdom' (ver
 // docs/guides/testing-conventions.md).
 export default defineConfig({
+  // `__COMMIT_HASH__` lo inyecta vite.config.ts en el build real; acá se define para que el
+  // índice de pantallas (App.tsx → ScreenIndex, que lo imprime) pueda renderizarse en el smoke
+  // test. Sin esto sería un ReferenceError.
+  define: { __COMMIT_HASH__: '"test"' },
   test: {
     // Zona horaria FIJA para toda la suite. Sin esto, cualquier aserción de fecha depende de
     // la zona de la máquina: pasa en local (Colombia, UTC-5) y falla en CI (UTC). Se elige
@@ -33,6 +37,28 @@ export default defineConfig({
     // cargadas y en el runner de CI. No enmascara cuelgues reales: un bucle de render
     // infinito revienta antes por memoria (OOM), no por timeout.
     testTimeout: 15_000,
+    // Cobertura para `npm run coverage`. NO hay `thresholds` a propósito: el gate de este
+    // proyecto es que el test se ponga rojo cuando se rompe el código (ver
+    // docs/guides/testing-conventions.md), y un umbral obligatorio premia justo lo contrario —
+    // tests que ejecutan líneas sin asertar nada, que es la deuda que ya se pagó una vez.
+    // El lcov lo consume scripts/coverage-diff.mjs para reportar solo las líneas del diff.
+    coverage: {
+      provider: 'v8',
+      reporter: ['text-summary', 'lcov'],
+      include: ['src/**/*.{ts,tsx}'],
+      // Nada de esto es código de producto cuya cobertura signifique algo: los *.test.* son
+      // el instrumento de medición, `main.tsx`/`zds-setup.ts` son bootstrap que solo corre en
+      // el navegador real, los `*.types.ts` no emiten runtime, y FAST-FLOW está marcado para
+      // reemplazo y fuera de alcance por decisión del proyecto.
+      exclude: [
+        'src/**/*.test.{ts,tsx}',
+        'src/test-setup.ts',
+        'src/main.tsx',
+        'src/zds-setup.ts',
+        'src/**/*.types.ts',
+        'src/screens/FAST-FLOW/**',
+      ],
+    },
     projects: [
       {
         extends: true,
