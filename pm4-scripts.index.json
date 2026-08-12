@@ -1,0 +1,130 @@
+{
+  "version": 1,
+  "instance": "https://cozurich.dev.cloud.processmaker.net",
+  "generatedAt": "2026-08-12T20:17:53.097Z",
+  "normalization": {
+    "encoding": "utf-8",
+    "bom": false,
+    "eol": "lf",
+    "finalNewline": true
+  },
+  "scripts": {
+    "a233d362-f3ed-47cb-8756-9b230f630f2b": {
+      "slug": "col-qd-recibir-datos-queja",
+      "file": "proceso-31/col-qd-recibir-datos-queja.php",
+      "title": "COL_QD_Recibir_datos_queja",
+      "language": "php",
+      "lastKnownId": 69,
+      "sha256": "2daf77b62833c2a8f742fd11fb60971d9cc84eb32dc75f38ac95de3fac66d497",
+      "capturadoEn": "2026-08-12T20:17:53.097Z"
+    },
+    "a23434ce-0eea-405f-9df7-aa781df863dc": {
+      "slug": "col-qd-check-similitud",
+      "file": "proceso-31/col-qd-check-similitud.php",
+      "title": "COL_QD_Check_Similitud",
+      "language": "php",
+      "lastKnownId": 70,
+      "sha256": "d69c9808dbd42f968ad0b3bcd4139db945e6193baf8412744315c478e39fdf5a",
+      "capturadoEn": "2026-08-12T20:17:53.097Z"
+    },
+    "a23469c1-3607-482e-933d-feea61fb63fa": {
+      "slug": "col-qd-asignar-sla",
+      "file": "proceso-31/col-qd-asignar-sla.php",
+      "title": "COL_QD_Asignar_SLA",
+      "language": "php",
+      "lastKnownId": 71,
+      "sha256": "3458f8ea368de68785cb0f68fd28bcae461f057d3c46ee564494dc6289574d66",
+      "capturadoEn": "2026-08-12T20:17:53.097Z"
+    },
+    "a2382e80-41da-4f02-83a4-93b678e71688": {
+      "slug": "col-qd-revisar-datos-y-asignar-usuario",
+      "file": "proceso-31/col-qd-revisar-datos-y-asignar-usuario.php",
+      "title": "COL QD - Revisar datos y Asignar usuario",
+      "language": "php",
+      "lastKnownId": 76,
+      "sha256": "f016865be02dde6b392b2cb0bc18db72a4915a2d1b35eb49d222b947136192fb",
+      "capturadoEn": "2026-08-12T20:17:53.097Z"
+    },
+    "a239dc49-0a73-4486-ab11-ff6723c68ba6": {
+      "slug": "col-qd-check-sla-expire",
+      "file": "proceso-31/col-qd-check-sla-expire.php",
+      "title": "COL_QD_Check_SLA_Expire",
+      "language": "php",
+      "lastKnownId": 77,
+      "sha256": "ceb8a9d8852e41127327681fe80a14ef4ee0629dec39a11b4c40e7b21b692b6f",
+      "capturadoEn": "2026-08-12T20:17:53.097Z"
+    },
+    "a23a4ff1-568a-4bf8-8bbb-5ec4ad75d746": {
+      "slug": "col-qd-ss-sla-prolongation",
+      "file": "proceso-31/col-qd-ss-sla-prolongation.php",
+      "title": "COL_QD_SS_Sla_Prolongation",
+      "language": "php",
+      "lastKnownId": 78,
+      "sha256": "9afc92ad59c35e85d35aefb13a5e06c2a09ff819a41490232e6aa625d158c7cc",
+      "capturadoEn": "2026-08-12T20:17:53.097Z"
+    },
+    "a2400ccf-ecf0-4aa9-b5ec-101811d5c006": {
+      "slug": "col-qd-docs-to-pdf-libreoffice-7-6",
+      "file": "proceso-31/col-qd-docs-to-pdf-libreoffice-7-6.php",
+      "title": "COL - QD - Docs to PDF - LibreOffice 7.6",
+      "language": "php",
+      "lastKnownId": 80,
+      "sha256": "a6c002b192d78a1f516057fd18008673513eb062d8a28ac24e3f2cbcf294ca43",
+      "capturadoEn": "2026-08-12T20:17:53.097Z"
+    },
+    "a24010fe-7be7-4efc-b086-b2f3bd5d59ae": {
+      "slug": "col-qd-enviar-correos-quejas-directas",
+      "file": "proceso-31/col-qd-enviar-correos-quejas-directas.php",
+      "title": "COL - QD - Enviar correos Quejas Directas",
+      "language": "php",
+      "lastKnownId": 81,
+      "sha256": "5a8cedb1bbc5252a5558f04430c4603ebad7424eb04d8f15148a20128d5a2195",
+      "capturadoEn": "2026-08-12T20:17:53.097Z"
+    },
+    "a254515e-c624-47da-9f7e-ade64ecf467b": {
+      "slug": "col-qd-crear-queja-sfc-m2",
+      "file": "proceso-31/col-qd-crear-queja-sfc-m2.php",
+      "title": "COL - QD - Crear Queja SFC - M2",
+      "language": "php",
+      "lastKnownId": 83,
+      "sha256": "e88d9cf14d9d5fd17fd3fe51c4e6e929985e20577a3cfff95cd6a20a55f3786d",
+      "capturadoEn": "2026-08-12T20:17:53.097Z"
+    },
+    "a2560610-9409-4931-bcc7-172aa91f56a9": {
+      "slug": "col-qd-core-sfc",
+      "file": "proceso-31/col-qd-core-sfc.php",
+      "title": "COL - QD - Core SFC",
+      "language": "php",
+      "lastKnownId": 84,
+      "sha256": "12dd15bf2b1a19fe08192d14ef1281b142e816ee1d5bde43a66497e9ed1b4fb9",
+      "capturadoEn": "2026-08-12T20:17:53.097Z"
+    },
+    "a25e26d3-45ed-483e-8c15-58a37609bc20": {
+      "slug": "col-qd-obtener-queja-sfc-m1",
+      "file": "proceso-31/col-qd-obtener-queja-sfc-m1.php",
+      "title": "COL - QD - Obtener Queja SFC - M1",
+      "language": "php",
+      "lastKnownId": 86,
+      "sha256": "ecd03dd2c21d0831a5be666fcc127f546e0bddf51a7dfaad5921239f7d3643bc",
+      "capturadoEn": "2026-08-12T20:17:53.097Z"
+    },
+    "a2600e02-3d46-4bd2-8907-88aaa913b474": {
+      "slug": "col-qd-cierre-m3",
+      "file": "proceso-31/col-qd-cierre-m3.php",
+      "title": "COL - QD - Cierre - M3",
+      "language": "php",
+      "lastKnownId": 89,
+      "sha256": "14aa4f36566ed098f23dcc59fb32edd3fe419a5873cb7d77c4124c6113647d37",
+      "capturadoEn": "2026-08-12T20:17:53.096Z"
+    },
+    "a26a713d-ea78-48b3-b829-5ddce63cfbd2": {
+      "slug": "col-util-dias-habiles",
+      "file": "proceso-31/col-util-dias-habiles.php",
+      "title": "COL_UTIL_Dias_Habiles",
+      "language": "php",
+      "lastKnownId": 95,
+      "sha256": "e781ec57d44463759390da515f6df3f4bf846efaf8123174010de7165fb9ad18",
+      "capturadoEn": "2026-08-12T20:17:53.097Z"
+    }
+  }
+}
