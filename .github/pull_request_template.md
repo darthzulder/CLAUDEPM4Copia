@@ -1,8 +1,12 @@
 <!--
 Este proyecto integra por PR, no con `git merge` local. El motivo es concreto: en un PR,
-GitHub corre la suite sobre la MERGE COMMIT (main + esta rama, ya integradas). Un merge local
-solo prueba la rama aislada, y los conflictos semánticos —main renombra un campo `qd_*`, la
+GitHub corre la suite sobre la MERGE COMMIT (la base + esta rama, ya integradas). Un merge local
+solo prueba la rama aislada, y los conflictos semánticos —la base renombra un campo `qd_*`, la
 rama agrega un uso del nombre viejo, ambos verdes por separado— únicamente aparecen así.
+
+Base correcta según el tipo de cambio:
+  · trabajo normal (feat/… fix/… chore/…)  →  dev    (se despliega en el Render de desarrollo)
+  · release / versión estable              →  main   (se despliega en el Render de producción)
 -->
 
 ## Qué cambia y por qué
@@ -17,7 +21,7 @@ rama agrega un uso del nombre viejo, ambos verdes por separado— únicamente ap
 
 - [ ] `npm run verify` verde en local
 - [ ] Tests nuevos/actualizados para la lógica que toqué, y verifiqué que fallan si rompo el código
-- [ ] La rama contiene `origin/main` (lo que verifiqué es el resultado integrado)
+- [ ] La rama contiene la base de este PR (lo que verifiqué es el resultado integrado)
 
 ## Reglas obligatorias que aplican
 

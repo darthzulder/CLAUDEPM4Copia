@@ -8,13 +8,19 @@
 #   1. Verifica lo que REALMENTE se va a pushear, no lo que había en el índice de un commit
 #      suelto. Un `git commit --no-verify` (el escape documentado para trabajo en progreso)
 #      se salta el anillo 2; acá se lo alcanza igual.
-#   2. Avisa si la rama quedó detrás de `origin/main`. Un commit puede estar perfectamente
-#      verde contra la foto de main que tenías al empezar y romperse al integrarse: main
-#      renombró un campo `qd_*`, tu rama agregó un uso del nombre viejo, ambos verdes por
-#      separado. Eso es un *semantic conflict* y no lo detecta ninguna suite corrida sobre una
-#      sola de las dos ramas.
+#   2. Avisa si la rama quedó detrás de su rama BASE de integración (`dev` para las ramas de
+#      trabajo, `main` para dev/release/hotfix — ver pm4-app/scripts/integration-base.mjs). Un
+#      commit puede estar perfectamente verde contra la foto de la base que tenías al empezar y
+#      romperse al integrarse: la base renombró un campo `qd_*`, tu rama agregó un uso del
+#      nombre viejo, ambos verdes por separado. Eso es un *semantic conflict* y no lo detecta
+#      ninguna suite corrida sobre una sola de las dos ramas.
 #
-# El aviso de (2) NO bloquea a propósito: obligar a traer main en cada push volvería
+# La base se CALCULA, no está cableada. Cuando estaba fija en `main`, este chequeo era un falso
+# verde: como `dev` contiene todo `main`, cualquier rama salida de `dev` cumplía "contiene main"
+# por construcción y el hook felicitaba sin haber mirado nada, mientras la pregunta real —¿estoy
+# atrás de `dev`?— quedaba sin responder.
+#
+# El aviso de (2) NO bloquea a propósito: obligar a traer la base en cada push volvería
 # insoportable trabajar en una rama larga. Quien bloquea de verdad es el anillo 4 (branch
 # protection en GitHub, con "require branches to be up to date before merging"), donde el
 # chequeo importa porque ahí sí estás por integrar. Ver docs/guides/entorno-local-y-verificacion.md.
@@ -44,23 +50,36 @@ if [ "$blnHayCommits" -eq 0 ]; then
   exit 0
 fi
 
-# ── (2) ¿La rama contiene origin/main? ────────────────────────────────────────────────────
-# El fetch puede fallar por estar sin red o sin credenciales; en ese caso se avisa y se sigue.
-# Este chequeo es informativo, así que nunca debe ser el motivo de que no puedas pushear.
-if [ "$STR_RAMA" != "main" ]; then
-  if git fetch --quiet origin main 2>/dev/null; then
-    if git rev-parse --verify --quiet origin/main >/dev/null 2>&1; then
-      if git merge-base --is-ancestor origin/main HEAD 2>/dev/null; then
-        echo "[pre-push] ✅ La rama contiene origin/main: lo que verificás es el resultado integrado."
+# ── (2) ¿La rama contiene a su base de integración? ───────────────────────────────────────
+# La base la resuelve scripts/integration-base.mjs (única fuente de verdad de la regla, también
+# usada por coverage-diff.mjs). Sale vacía cuando la rama no se integra en ninguna —`main`, que es
+# la punta del flujo— y en ese caso no hay nada que chequear.
+#
+# Si no hay node, se salta el chequeo en vez de adivinar una base: un aviso con la rama equivocada
+# es peor que no avisar. La verificación de (1) sigue corriendo igual (vía contenedor si hace falta).
+STR_BASE=""
+if command -v node >/dev/null 2>&1; then
+  STR_BASE="$(node "$STR_RAIZ/pm4-app/scripts/integration-base.mjs" "$STR_RAMA" 2>/dev/null || true)"
+else
+  echo "[pre-push] ⚠️  Sin node en el host: no se puede determinar la rama base, se salta ese chequeo."
+fi
+
+if [ -n "$STR_BASE" ]; then
+  # El fetch puede fallar por estar sin red o sin credenciales; en ese caso se avisa y se sigue.
+  # Este chequeo es informativo, así que nunca debe ser el motivo de que no puedas pushear.
+  if git fetch --quiet origin "$STR_BASE" 2>/dev/null; then
+    if git rev-parse --verify --quiet "origin/$STR_BASE" >/dev/null 2>&1; then
+      if git merge-base --is-ancestor "origin/$STR_BASE" HEAD 2>/dev/null; then
+        echo "[pre-push] ✅ La rama contiene origin/$STR_BASE: lo que verificás es el resultado integrado."
       else
-        INT_DETRAS="$(git rev-list --count HEAD..origin/main 2>/dev/null || echo '?')"
-        echo "[pre-push] ⚠️  La rama está $INT_DETRAS commit(s) DETRÁS de origin/main."
+        INT_DETRAS="$(git rev-list --count "HEAD..origin/$STR_BASE" 2>/dev/null || echo '?')"
+        echo "[pre-push] ⚠️  La rama está $INT_DETRAS commit(s) DETRÁS de origin/$STR_BASE."
         echo "[pre-push] ⚠️  El verde de abajo prueba tu rama aislada, NO el resultado del merge."
-        echo "[pre-push] ⚠️  Antes de mergear: git merge origin/main  (y volver a verificar)."
+        echo "[pre-push] ⚠️  Antes de mergear: git merge origin/$STR_BASE  (y volver a verificar)."
       fi
     fi
   else
-    echo "[pre-push] ⚠️  No se pudo hacer fetch de origin/main (sin red o sin credenciales):"
+    echo "[pre-push] ⚠️  No se pudo hacer fetch de origin/$STR_BASE (sin red o sin credenciales):"
     echo "[pre-push] ⚠️  no se puede saber si la rama está al día."
   fi
 fi

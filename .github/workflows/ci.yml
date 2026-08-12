@@ -17,11 +17,16 @@ name: CI
 # Los pasos exactos están en docs/guides/entorno-local-y-verificacion.md.
 
 on:
-  # Solo main en `push`: las ramas de trabajo se verifican vía `pull_request`, que además
-  # prueba el resultado del merge. Cubrir ambas con '**' duplicaría cada corrida sin agregar
-  # información.
+  # Solo las dos ramas de larga vida en `push`, porque las dos son entornos DESPLEGADOS:
+  # `dev` → Render de desarrollo, `main` → Render de producción. Un rojo ahí significa que un
+  # entorno quedó roto, así que la corrida post-merge es la señal que importa.
+  #
+  # Las ramas de trabajo no van acá: se verifican vía `pull_request`, que además prueba el
+  # resultado del merge. Cubrirlas con '**' duplicaría cada corrida sin agregar información.
   push:
-    branches: [main]
+    branches: [main, dev]
+  # Sin filtro de `branches` a propósito: dispara para PRs con cualquier base, así que cubre
+  # igual los `feat/… → dev` del día a día y los `dev → main` de release.
   pull_request:
 
 # Si se pushea de nuevo a la misma rama, cancelar la corrida anterior en vez de acumular.

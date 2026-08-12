@@ -77,16 +77,27 @@ Está automatizado en **cuatro anillos** (setup y detalle en
 |---|---|---|
 | 1 | `npm run test:watch` | ¿rompí esto que estoy escribiendo? |
 | 2 | `pre-commit` | ¿rompí lo que toqué? |
-| 3 | `pre-push` | ¿rompí el proyecto? + aviso si la rama quedó detrás de `origin/main` |
-| 4 | **GitHub Actions en el PR** | **¿rompo `main` al MERGEAR?** ← el único que no se puede saltar |
+| 3 | `pre-push` | ¿rompí el proyecto? + aviso si la rama quedó detrás de su base |
+| 4 | **GitHub Actions en el PR** | **¿rompo la rama base al MERGEAR?** ← el único que no se puede saltar |
 
 Los anillos 2 y 3 se activan una vez con `npm run setup:hooks`.
 
+### Modelo de ramas: las dos de larga vida son entornos desplegados
+
+```
+feat/…  fix/…  chore/…  ──PR──►  dev   ──►  Render de DESARROLLO
+                    dev  ──PR──►  main  ──►  Render de PRODUCCIÓN
+```
+
+La **base** de un cambio es `dev` para el trabajo normal y `main` para un release o `hotfix/*`. La
+regla está en [`scripts/integration-base.mjs`](scripts/integration-base.mjs) y la consumen el hook
+`pre-push` y el informe de cobertura — no la dupliques al escribir tooling nuevo.
+
 **El proyecto integra por PR, no con `git merge` local.** No es preferencia de estilo: en un PR,
-GitHub corre la suite sobre la **merge commit** (`main` + la rama ya integradas). Un merge local
-prueba la rama *aislada*, así que los conflictos semánticos —`main` renombra un campo `qd_*`, la
-rama agrega un uso del nombre viejo, ambos verdes por separado— no aparecen hasta que `main` ya
-está roto.
+GitHub corre la suite sobre la **merge commit** (la base + la rama ya integradas). Un merge local
+prueba la rama *aislada*, así que los conflictos semánticos —la base renombra un campo `qd_*`, la
+rama agrega un uso del nombre viejo, ambos verdes por separado— no aparecen hasta que la rama base
+ya está rota, con un entorno desplegado detrás.
 
 Para saber **qué parte de un cambio quedó sin ejercitar**: `npm run coverage && npm run
 coverage:diff` (en un PR sale solo en el job summary). Es una señal, no un gate — que una línea

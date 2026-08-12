@@ -1,7 +1,27 @@
 # Entorno local y gate de verificación
 
 Cómo responder, con evidencia, a la pregunta *"¿mi rama rompió algo del proyecto?"* — antes de
-commitear y antes de mergear a `main`.
+commitear y antes de integrar.
+
+## El modelo de ramas
+
+Dos ramas de larga vida, y **cada una es un entorno desplegado**. Eso es lo que decide dónde va
+cada gate: un rojo en cualquiera de las dos significa que un entorno quedó roto.
+
+```
+feat/…  fix/…  chore/…  ──PR──►  dev   ──►  Render de DESARROLLO (pruebas)
+                    dev  ──PR──►  main  ──►  Render de PRODUCCIÓN
+```
+
+De ahí sale la **rama base** de cada cambio: `dev` para el trabajo normal, `main` para un release
+o un `hotfix/*`. La regla vive en un solo lugar —[`pm4-app/scripts/integration-base.mjs`](../../pm4-app/scripts/integration-base.mjs)—
+y la consumen el hook `pre-push` y el informe de cobertura, para que no haya dos versiones de la
+verdad. Se puede pisar en local con `git config pm4.integrationBase <rama>`.
+
+> **Por qué se calcula en vez de estar fija.** Cablearla a `main` daba un falso verde: `dev`
+> contiene todo `main`, así que cualquier rama salida de `dev` cumple "contiene main" por
+> construcción, y el chequeo felicitaba sin haber mirado nada — mientras la pregunta real, *¿estoy
+> atrás de `dev`?*, quedaba sin responder.
 
 ## Los cuatro anillos
 
@@ -13,20 +33,24 @@ definición de verde**: `pm4-app/scripts/verify.mjs`.
 | 1 | `npm run test:watch` | "¿rompí esto que estoy escribiendo?" | instantáneo | — |
 | 2 | `.githooks/pre-commit` | "¿rompí lo que toqué?" | ~30 s | sí: `git commit --no-verify` |
 | 3 | `.githooks/pre-push` | "¿rompí el proyecto?" | ~30 s (se saltea si el anillo 2 ya verificó este árbol) | sí: `git push --no-verify` |
-| 4 | GitHub Actions en el PR | **"¿rompo `main` al MERGEAR?"** | ~2 min | **no** |
+| 4 | GitHub Actions en el PR | **"¿rompo la rama base al MERGEAR?"** | ~2 min | **no** |
 
 ### Por qué el anillo 4 no es reemplazable por ninguno local
 
-En eventos `pull_request`, GitHub hace checkout de la **merge commit** — `main` y tu rama ya
-integradas — y corre la suite sobre eso. Ningún hook local puede hacerlo: cuando corrés
-`verify` en tu máquina, estás probando **tu rama sola**.
+En eventos `pull_request`, GitHub hace checkout de la **merge commit** — la rama base y la tuya ya
+integradas — y corre la suite sobre eso. Ningún hook local puede hacerlo: cuando corrés `verify` en
+tu máquina, estás probando **tu rama sola**.
 
-La diferencia importa para una clase entera de roturas. `main` renombra un campo `qd_*`; tu
-rama, salida de antes, agrega un uso del nombre viejo. Las dos están verdes por separado. La
-combinación no compila. Eso es un *semantic conflict*, y **solo aparece al probar el merge**.
+La diferencia importa para una clase entera de roturas. `dev` renombra un campo `qd_*`; tu rama,
+salida de antes, agrega un uso del nombre viejo. Las dos están verdes por separado. La combinación
+no compila. Eso es un *semantic conflict*, y **solo aparece al probar el merge**.
 
 Por eso este proyecto integra por PR y no con `git merge` local: un merge local seguido de push
-a `main` nunca prueba esa combinación, y CI llega después de que `main` ya está roto.
+nunca prueba esa combinación, y CI llega después de que la rama base ya está rota — con un entorno
+desplegado detrás.
+
+El trigger `pull_request` **no tiene filtro de ramas**, así que esto vale igual para los
+`feat/… → dev` del día a día y para los `dev → main` de release.
 
 ### Una sola definición de verde
 
@@ -77,28 +101,42 @@ Ambos eligen runner solos:
 1. **Alcanza los commits hechos con `--no-verify`.** Ese escape es legítimo para trabajo en
    progreso, pero deja código sin verificar; el anillo 3 lo agarra antes de que salga de la
    máquina.
-2. **Avisa si la rama quedó detrás de `origin/main`**, con el número de commits. El aviso **no
-   bloquea** a propósito: obligar a traer `main` en cada push volvería insoportable trabajar en
-   una rama larga. Quien bloquea es el anillo 4, con *"require branches to be up to date"*,
-   donde el chequeo importa porque ahí sí estás por integrar.
+2. **Avisa si la rama quedó detrás de su base** (`dev` para las ramas de trabajo, `main` para
+   `dev`/`release/*`/`hotfix/*`), con el número de commits. El aviso **no bloquea** a propósito:
+   obligar a traer la base en cada push volvería insoportable trabajar en una rama larga. Quien
+   bloquea es el anillo 4, con *"require branches to be up to date"*, donde el chequeo importa
+   porque ahí sí estás por integrar.
+
+   En `dev` la base es `main`, y no porque haya que mergear a producción en cada push: es para
+   detectar que un `hotfix` aplicado directo sobre `main` dejó a `dev` sin ese arreglo. Sin ese
+   aviso, el próximo release lo pisa en silencio.
 
 **No repite trabajo.** Si el `pre-commit` ya verificó exactamente este árbol, el `pre-push` lo
 saltea. La marca vive en `.git/pm4-verified-tree` y guarda el hash del árbol verificado; solo se
 escribe cuando no había cambios sin stagear (si los hubiera, lo verificado y lo commiteado no
 serían lo mismo y la marca mentiría). Mismo árbol ⇒ mismo resultado.
 
-## Protección de `main` (el anillo 4, y hay que activarlo a mano)
+## Protección de ramas (el anillo 4, y hay que activarlo a mano)
 
 **Sin esto, CI es un reporte post-mortem, no un gate.** El workflow existe, pero nada impide
-mergear una rama roja ni pushear directo a `main`.
+mergear una rama roja ni pushear directo a una rama desplegada.
 
-En GitHub → *Settings* → *Branches* → *Add branch protection rule* para `main`:
+Hacen falta **dos reglas**, una por rama de larga vida. Proteger solo `main` no alcanza: la
+integración diaria pasa por `dev`, así que sin protegerla se puede romper el entorno de desarrollo
+todos los días y `main` recién se enteraría en el release, con todos los commits mezclados encima.
+
+En GitHub → *Settings* → *Branches* → *Add branch protection rule*, una para `dev` y otra para
+`main`, con la misma configuración:
 
 - ✅ **Require a pull request before merging** — es lo que fuerza que se pruebe el merge.
 - ✅ **Require status checks to pass before merging** → agregar el check **`verify`**.
 - ✅ **Require branches to be up to date before merging** — sin esto, el check puede ser de una
   base vieja y el *semantic conflict* pasa igual.
 - ✅ **Do not allow bypassing the above settings** — si el admin puede saltarlo, no es un gate.
+
+> Con un solo desarrollador, *up to date* casi no genera fricción: `dev` no se mueve mientras tenés
+> un PR abierto. Con varios contribuyentes en paralelo sí obliga a actualizar la rama antes de
+> mergear — que es exactamente el punto.
 
 ### El orden importa: primero un PR, después la protección
 
@@ -119,10 +157,11 @@ seleccionar. La secuencia que funciona:
 > merges sin salida. La protección útil acá es el check, no la revisión.
 
 Con `gh` instalado se puede saltear la espera del paso 1, porque la API acepta un nombre de check
-que todavía no reportó:
+que todavía no reportó. Hay que correrlo **para cada rama**:
 
 ```bash
-gh api -X PUT repos/:owner/:repo/branches/main/protection --input - <<'JSON'
+for STR_RAMA in dev main; do
+  gh api -X PUT "repos/:owner/:repo/branches/$STR_RAMA/protection" --input - <<'JSON'
 {
   "required_status_checks": { "strict": true, "contexts": ["verify"] },
   "required_pull_request_reviews": null,
@@ -130,6 +169,7 @@ gh api -X PUT repos/:owner/:repo/branches/main/protection --input - <<'JSON'
   "restrictions": null
 }
 JSON
+done
 ```
 
 `"strict": true` **es** *require branches to be up to date*; `"contexts"` son los checks
@@ -144,16 +184,43 @@ esperando un reporte que nunca llega.
 
 ## El flujo, de punta a punta
 
+### Trabajo normal → `dev` (Render de desarrollo)
+
 ```bash
-git switch -c feat/lo-que-sea      # nunca trabajar sobre main
+git switch dev && git pull          # partir de la base actualizada
+git switch -c feat/lo-que-sea       # nunca trabajar sobre dev ni main
 # … código + sus tests …
 git commit                          # anillo 2 (~30 s)
-git merge origin/main               # traer main ANTES de pushear para integrar
+git merge origin/dev                # traer la base ANTES de pushear, para integrar
 npm run verify                      # verificar el resultado integrado
-git push -u origin feat/lo-que-sea  # anillo 3
-gh pr create                        # o el botón en GitHub → anillo 4 sobre la merge commit
-# check verde ⇒ Merge. Nunca `git merge` local a main.
+git push -u origin feat/lo-que-sea  # anillo 3 (avisa si quedaste detrás de dev)
+gh pr create --base dev             # o el botón en GitHub → anillo 4 sobre la merge commit
+# check verde ⇒ Merge. Nunca `git merge` local a dev.
 ```
+
+### Release → `main` (Render de producción)
+
+```bash
+git switch dev && git pull
+npm run verify                      # dev tiene que estar verde ANTES de proponer el release
+git push                            # si hubiera algo local sin pushear
+gh pr create --base main --head dev --title "release: …"
+# CI corre sobre main+dev integrados ⇒ check verde ⇒ Merge ⇒ deploy a producción
+```
+
+> **Si alguna vez aplicás un `hotfix` directo sobre `main`, mergealo de vuelta a `dev`.** Si no,
+> `dev` queda sin ese arreglo y el próximo release lo revierte en silencio. El `pre-push` te lo
+> avisa cuando pushees `dev` (ahí su base es `main`), pero el aviso no bloquea: la disciplina es
+> tuya.
+
+### Qué parte de mi cambio quedó sin probar
+
+```bash
+npm run coverage && npm run coverage:diff
+```
+
+Sin `--base`, compara contra la base de integración de tu rama (`dev` para las ramas de trabajo),
+no contra `main`. En un PR sale solo, con la base real del PR.
 
 ## Node en el host — opcional, pero recomendado
 

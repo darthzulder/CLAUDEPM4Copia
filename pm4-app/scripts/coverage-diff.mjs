@@ -16,9 +16,13 @@
  * señala dónde mirar.
  *
  * Uso:
- *   node scripts/coverage-diff.mjs                          # compara contra origin/main
- *   node scripts/coverage-diff.mjs --base origin/develop
+ *   node scripts/coverage-diff.mjs                          # base = la de integración de la rama
+ *   node scripts/coverage-diff.mjs --base origin/main
  *   node scripts/coverage-diff.mjs --summary "$GITHUB_STEP_SUMMARY"   # además escribe Markdown
+ *
+ * La base por defecto NO es `main`: la resuelve integration-base.mjs según la rama (`dev` para las
+ * ramas de trabajo). Cuando estaba fija en `main`, una rama salida de `dev` se llevaba puestos como
+ * "propios" todos los commits que `dev` tiene de más que `main`, y el informe era inservible.
  *
  * Sin dependencias ni actions de terceros: parsea lcov (formato trivial) y usa git.
  */
@@ -27,6 +31,7 @@ import { spawnSync } from 'node:child_process';
 import { appendFileSync, existsSync, readFileSync } from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { baseEfectiva, STR_RAMA_DESARROLLO } from './integration-base.mjs';
 
 const STR_DIR_RAIZ = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const STR_DIR_REPO = path.resolve(STR_DIR_RAIZ, '..');
@@ -73,7 +78,10 @@ function leerArg(in_strFlag, in_strDefecto) {
   return intIdx !== -1 && process.argv[intIdx + 1] ? process.argv[intIdx + 1] : in_strDefecto;
 }
 
-const STR_BASE = leerArg('--base', 'origin/main');
+// Sin `--base`, la base sale de la rama actual. Si el HEAD está desprendido o la rama es la punta
+// del flujo (`main`), no hay base deducible: se cae a `dev`, que es contra lo que se integra el
+// trabajo diario, en vez de fallar.
+const STR_BASE = leerArg('--base', `origin/${baseEfectiva() ?? STR_RAMA_DESARROLLO}`);
 const STR_SUMMARY = leerArg('--summary', null);
 
 function git(...in_cllArgs) {
