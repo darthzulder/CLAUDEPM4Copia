@@ -1,0 +1,15 @@
+{
+  // Chequeo de tipos que SÍ incluye los tests, sin emitir nada.
+  //
+  // `tsconfig.json` los excluye para que no acaben en `dist/` (y de ahí a producción), pero
+  // sin este archivo el precio sería quedarse sin type-checking de los propios tests: un
+  // fixture con la forma equivocada, un mock que ya no coincide con la firma real, o un
+  // `expect` sobre una propiedad inexistente pasarían inadvertidos hasta la ejecución.
+  // Vitest transpila sin chequear tipos, así que el único que los mira es este paso.
+  "extends": "./tsconfig.json",
+  "compilerOptions": {
+    "noEmit": true
+  },
+  "include": ["src/**/*"],
+  "exclude": ["node_modules", "dist"]
+}
