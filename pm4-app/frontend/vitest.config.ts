@@ -26,6 +26,13 @@ export default defineConfig({
     // pantalla encadena `.catch()` sobre el resultado; con `mockReset` esa implementación
     // desaparecería y esas pantallas explotarían con "cannot read .catch of undefined".
     clearMocks: true,
+    // El default de Vitest (5s) alcanza justo para las pantallas más pesadas y se vuelve
+    // intermitente bajo carga: SCR-003 monta SeccionCamposPayload + useMatrizMotivos (3
+    // useCollection) sobre jsdom, y con varios workers en paralelo su primer render llegó a
+    // rozar los 5s y tumbó el gate sin que nada estuviera roto. 15s da margen en máquinas
+    // cargadas y en el runner de CI. No enmascara cuelgues reales: un bucle de render
+    // infinito revienta antes por memoria (OOM), no por timeout.
+    testTimeout: 15_000,
     projects: [
       {
         extends: true,

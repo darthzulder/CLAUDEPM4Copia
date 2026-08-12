@@ -1,5 +1,5 @@
 import { fireEvent, render, screen } from '@testing-library/react';
-import { describe, expect, it, vi } from 'vitest';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
 import RevisionErrorTecnicoProrroga from './RevisionErrorTecnicoProrroga';
 
 // Smoke test de pantalla: solo depende de useTask (no consume useCollection). Es el
@@ -22,8 +22,14 @@ const OBJ_TASK = {
   },
 };
 
+/** Fixture fresco por test, para pisar campos sin contaminar los siguientes. */
+const makeTask = (in_dicOverrides: Record<string, unknown> = {}) => ({
+  ...OBJ_TASK,
+  data: { ...OBJ_TASK.data, ...in_dicOverrides },
+});
+
 const OBJ_USE_TASK = {
-  task: OBJ_TASK,
+  task: makeTask(),
   loading: false,
   error: null,
   submitting: false,
@@ -36,6 +42,10 @@ const OBJ_USE_TASK = {
 };
 
 vi.mock('../../../../core/useTask', () => ({ useTask: () => OBJ_USE_TASK }));
+
+beforeEach(() => {
+  OBJ_USE_TASK.task = makeTask();
+});
 
 describe('RevisionErrorTecnicoProrroga (SCR-011)', () => {
   it('renderiza la pantalla y precarga el detalle del error de prórroga', () => {
@@ -53,17 +63,50 @@ describe('RevisionErrorTecnicoProrroga (SCR-011)', () => {
     expect((objBtn as unknown as { disabled?: boolean })?.disabled).toBe(true);
   });
 
-  it('"Escalar a Proveedor" está siempre disponible y completa la tarea con esa acción', () => {
+  it('"Escalar a Proveedor" completa la tarea con esa acción sin exigir causa/corrección', () => {
+    // Se quitó la aserción `?.disabled).not.toBe(true)`: la satisfacen `false`, `undefined`
+    // Y que `closest()` devuelva null, así que no probaba nada. Que el click complete la
+    // tarea con el fixture VACÍO (sin causa raíz ni corrección) es la prueba real de que
+    // esta acción no está sujeta a RUL-011-01, a diferencia de Autorizar.
     render(<RevisionErrorTecnicoProrroga />);
-
-    const objBtnEscalar = screen.getByText('Escalar a Proveedor').closest('z-button');
-    expect((objBtnEscalar as unknown as { disabled?: boolean })?.disabled).not.toBe(true);
 
     fireEvent.click(screen.getByText('Escalar a Proveedor'));
 
     expect(OBJ_USE_TASK.completeTask).toHaveBeenCalledWith(
       expect.objectContaining({ qd_strAction: 'ESCALAR_PROVEEDOR' }),
     );
+  });
+
+  it('con causa raíz y corrección, "Autorizar Reenvío Prórroga" completa con AUTORIZAR_REENVIO', async () => {
+    OBJ_USE_TASK.task = makeTask({
+      qd_strRootCause: 'Formato de fecha incorrecto',
+      qd_strCorrectionApplied: 'Se normalizó a DD/MM/YYYY',
+    });
+    render(<RevisionErrorTecnicoProrroga />);
+
+    fireEvent.click(screen.getByText(/Autorizar Reenvío Prórroga/));
+
+    await vi.waitFor(() => {
+      expect(OBJ_USE_TASK.completeTask).toHaveBeenCalledWith(
+        expect.objectContaining({ qd_strAction: 'AUTORIZAR_REENVIO' }),
+      );
+    });
+  });
+
+  it('con ajuste de payload marcado y JSON inválido, Autorizar queda bloqueado', () => {
+    // Bloqueo se asserta por la propiedad + la alerta, NO clickeando: en jsdom un z-button
+    // deshabilitado no es un <button> nativo y `fireEvent.click` dispara igual su onClick.
+    OBJ_USE_TASK.task = makeTask({
+      qd_strRootCause: 'causa',
+      qd_strCorrectionApplied: 'corrección',
+      qd_strPayloadAdjustNeeded: 'SI',
+      qd_strPayloadSent: '{roto',
+    });
+    render(<RevisionErrorTecnicoProrroga />);
+
+    const objBtn = screen.getByText(/Autorizar Reenvío Prórroga/).closest('z-button');
+    expect((objBtn as unknown as { disabled?: boolean })?.disabled).toBe(true);
+    expect(screen.getByText(/antes de autorizar el reenvío de la prórroga/)).toBeInTheDocument();
   });
 
   it('"Ver Log Completo" abre el modal con el log técnico', () => {

@@ -1,6 +1,15 @@
 import { fireEvent, render, screen } from '@testing-library/react';
-import { describe, expect, it, vi } from 'vitest';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
 import ErrorFuncionalProrroga from './ErrorFuncionalProrroga';
+
+/** Fecha ISO desplazada N días respecto de hoy, para probar la regla sin fechas fijas
+ *  (un literal se volvería pasado con el tiempo y el test empezaría a fallar solo). */
+const isoDesplazado = (in_intDias: number): string => {
+  const dtFecha = new Date();
+  dtFecha.setDate(dtFecha.getDate() + in_intDias);
+  return dtFecha.toISOString().slice(0, 10);
+};
+const STR_HOY = isoDesplazado(0);
 
 // Smoke test de pantalla: depende de useTask Y useCollection (catálogo de motivo de
 // prórroga). Referencias ESTABLES entre renders — ver las 4 trampas de
@@ -21,8 +30,22 @@ const OBJ_TASK = {
   },
 };
 
+/** Fixture fresco por test, para pisar campos sin contaminar los siguientes. */
+const makeTask = (in_dicOverrides: Record<string, unknown> = {}) => ({
+  ...OBJ_TASK,
+  data: { ...OBJ_TASK.data, ...in_dicOverrides },
+});
+
+/** Todos los obligatorios completos salvo la fecha, que la decide cada test. */
+const conFecha = (in_strFecha: string) => makeTask({
+  qd_strExtensionReason: '1',
+  qd_strExtensionCounter: '2',
+  qd_strExtensionJustif: 'Se requiere más tiempo para el análisis',
+  qd_strNewDeadline: in_strFecha,
+});
+
 const OBJ_USE_TASK = {
-  task: OBJ_TASK,
+  task: makeTask(),
   loading: false,
   error: null,
   submitting: false,
@@ -48,6 +71,10 @@ vi.mock('../../../../core/useCollection', async (in_fnImportOriginal) => {
   return { ...objActual, useCollection: () => OBJ_USE_COLLECTION };
 });
 
+beforeEach(() => {
+  OBJ_USE_TASK.task = makeTask();
+});
+
 describe('ErrorFuncionalProrroga (SCR-012)', () => {
   it('renderiza la pantalla y precarga el panel de error de prórroga', () => {
     render(<ErrorFuncionalProrroga />);
@@ -64,7 +91,8 @@ describe('ErrorFuncionalProrroga (SCR-012)', () => {
     expect((objBtn as unknown as { disabled?: boolean })?.disabled).toBe(true);
   });
 
-  it('"Cancelar Prórroga" está siempre disponible y completa la tarea con esa acción', () => {
+  it('"Cancelar Prórroga" completa con CANCELAR aunque falten los obligatorios', () => {
+    // Con el fixture vacío: prueba que CANCELAR no está sujeta a RUL-012-01.
     render(<ErrorFuncionalProrroga />);
 
     fireEvent.click(screen.getByText('Cancelar Prórroga'));
@@ -72,5 +100,48 @@ describe('ErrorFuncionalProrroga (SCR-012)', () => {
     expect(OBJ_USE_TASK.completeTask).toHaveBeenCalledWith(
       expect.objectContaining({ qd_strAction: 'CANCELAR' }),
     );
+  });
+});
+
+// RUL-012-01 — la nueva fecha límite debe ser POSTERIOR a hoy. Antes no había ningún test:
+// el fixture dejaba qd_strNewDeadline vacío, así que "deshabilitado" no distinguía "la regla
+// de fecha funciona" de "faltan todos los campos".
+describe('ErrorFuncionalProrroga — RUL-012-01 (nueva fecha límite)', () => {
+  const expectBloqueadoPorFecha = () => {
+    // El bloqueo se asserta por la propiedad + MSG-012-01, no clickeando: en jsdom un
+    // z-button deshabilitado no es un <button> nativo y el click dispara igual su onClick.
+    const objBtn = screen.getByText(/Reenviar Prórroga/).closest('z-button');
+    expect((objBtn as unknown as { disabled?: boolean })?.disabled).toBe(true);
+    expect(screen.getByText(/posterior a la fecha actual/)).toBeInTheDocument();
+  };
+
+  it('una fecha pasada bloquea el reenvío y muestra MSG-012-01', () => {
+    OBJ_USE_TASK.task = conFecha(isoDesplazado(-1));
+    render(<ErrorFuncionalProrroga />);
+    expectBloqueadoPorFecha();
+  });
+
+  it('la fecha de HOY también bloquea: la regla es "posterior", no "hoy o posterior"', () => {
+    // Este es el borde que delata un `>=` puesto donde va un `>`. Con el resto de los
+    // obligatorios completos, lo único que puede estar bloqueando es la fecha.
+    OBJ_USE_TASK.task = conFecha(STR_HOY);
+    render(<ErrorFuncionalProrroga />);
+    expectBloqueadoPorFecha();
+  });
+
+  it('con fecha futura y el resto completo, "Reenviar Prórroga" completa con REENVIAR', async () => {
+    OBJ_USE_TASK.task = conFecha(isoDesplazado(7));
+    render(<ErrorFuncionalProrroga />);
+
+    // Ya no aparece el mensaje de fecha inválida.
+    expect(screen.queryByText(/posterior a la fecha actual/)).not.toBeInTheDocument();
+
+    fireEvent.click(screen.getByText(/Reenviar Prórroga/));
+
+    await vi.waitFor(() => {
+      expect(OBJ_USE_TASK.completeTask).toHaveBeenCalledWith(
+        expect.objectContaining({ qd_strAction: 'REENVIAR' }),
+      );
+    });
   });
 });

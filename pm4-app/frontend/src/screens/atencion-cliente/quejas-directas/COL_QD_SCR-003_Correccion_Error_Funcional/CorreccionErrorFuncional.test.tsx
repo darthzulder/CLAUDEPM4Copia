@@ -1,5 +1,5 @@
 import { fireEvent, render, screen } from '@testing-library/react';
-import { describe, expect, it, vi } from 'vitest';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
 import CorreccionErrorFuncional from './CorreccionErrorFuncional';
 
 // Smoke test de pantalla: depende de useTask Y useCollection (S2 delega en
@@ -23,8 +23,14 @@ const OBJ_TASK = {
   },
 };
 
+/** Fixture fresco por test, para pisar campos sin contaminar los siguientes. */
+const makeTask = (in_dicOverrides: Record<string, unknown> = {}) => ({
+  ...OBJ_TASK,
+  data: { ...OBJ_TASK.data, ...in_dicOverrides },
+});
+
 const OBJ_USE_TASK = {
-  task: OBJ_TASK,
+  task: makeTask(),
   loading: false,
   error: null,
   submitting: false,
@@ -38,6 +44,10 @@ const OBJ_USE_TASK = {
 };
 
 vi.mock('../../../../core/useTask', () => ({ useTask: () => OBJ_USE_TASK }));
+
+beforeEach(() => {
+  OBJ_USE_TASK.task = makeTask();
+});
 
 const CLL_VACIO: never[] = [];
 const OBJ_RAW_MAP_VACIO: Record<string, Record<string, unknown>> = {};
@@ -65,14 +75,55 @@ describe('CorreccionErrorFuncional (SCR-003)', () => {
     expect(screen.getByText('Sin intentos anteriores registrados')).toBeInTheDocument();
   });
 
-  it('"Escalar a Soporte Técnico" completa la tarea con esa acción, sin tocar el payload', () => {
+  it('"Escalar a Soporte Técnico" completa con esa acción y CONSERVA el payload como evidencia', () => {
+    // El nombre del test prometía "sin tocar el payload" pero solo se assertaba la acción.
+    // El fixture entra con un payload no vacío justamente para poder verificarlo: escalar
+    // NO debe vaciarlo (a diferencia de reenviar), porque queda como evidencia del rechazo.
+    OBJ_USE_TASK.task = makeTask({ qd_strPayloadSent: '{"canal_cod":"XX"}' });
     render(<CorreccionErrorFuncional />);
 
     fireEvent.click(screen.getByText('Escalar a Soporte Técnico'));
 
     expect(OBJ_USE_TASK.completeTask).toHaveBeenCalledWith(
-      expect.objectContaining({ qd_strAction: 'ESCALAR_SOPORTE' }),
+      expect.objectContaining({
+        qd_strAction: 'ESCALAR_SOPORTE',
+        qd_strPayloadSent: '{"canal_cod":"XX"}',
+      }),
     );
+  });
+
+  it('"Corregir y Reenviar" VACÍA qd_strPayloadSent (si no, se reenvía el payload viejo)', async () => {
+    // El fallo más caro de esta pantalla y el único que su código documenta explícitamente:
+    // opMomento2 reconstruye el body desde los campos corregidos, pero si qd_strPayloadSent
+    // llega con el valor viejo, el script ve diferencia y reenvía el VIEJO a SmartSupervision.
+    // Sin este test, borrar esa línea pasa en verde y el bug es silencioso.
+    OBJ_USE_TASK.task = makeTask({ qd_strPayloadSent: '{"canal_cod":"XX"}' });
+    render(<CorreccionErrorFuncional />);
+
+    fireEvent.click(screen.getByText(/Corregir y Reenviar/));
+
+    await vi.waitFor(() => {
+      expect(OBJ_USE_TASK.completeTask).toHaveBeenCalledWith(
+        expect.objectContaining({
+          qd_strAction: 'CORREGIR_REENVIAR',
+          qd_strPayloadSent: '',
+          qd_strPayloadAdjustNeeded: 'NO',
+        }),
+      );
+    });
+  });
+
+  it('reenviar sin cambios deja constancia explícita en qd_strFieldCorrection', () => {
+    // lstCambios() vacío ⇒ texto fijo, para que el resumen nunca viaje vacío al BPM.
+    render(<CorreccionErrorFuncional />);
+
+    fireEvent.click(screen.getByText(/Corregir y Reenviar/));
+
+    return vi.waitFor(() => {
+      expect(OBJ_USE_TASK.completeTask).toHaveBeenCalledWith(
+        expect.objectContaining({ qd_strFieldCorrection: 'Reenvío sin cambios en el payload' }),
+      );
+    });
   });
 
   it('"Ver Log Completo" abre el modal con el log técnico', () => {
