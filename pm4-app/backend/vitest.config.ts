@@ -8,5 +8,8 @@ export default defineConfig({
     // Misma zona fija que el frontend, por el mismo motivo: la expiración del token cifrado
     // se calcula con epoch (inmune a TZ), pero cualquier test de fecha futuro no lo sería.
     env: { TZ: 'America/Bogota' },
+    // Ver la nota extendida en frontend/vitest.config.ts: clearMocks limpia las llamadas
+    // pero conserva la implementación; mockReset la borraría y rompería los mocks de módulo.
+    clearMocks: true,
   },
 });

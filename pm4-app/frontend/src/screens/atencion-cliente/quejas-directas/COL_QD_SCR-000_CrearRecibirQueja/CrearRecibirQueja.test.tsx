@@ -69,6 +69,11 @@ vi.mock('../../../../core/useCollection', async (in_fnImportOriginal) => {
 beforeEach(() => {
   vi.clearAllMocks();
   OBJ_USE_TASK.task = makeTask();
+  // loading/error también se resetean acá: antes cada test que los pisaba los restauraba al
+  // final de su propio cuerpo, así que si una aserción fallaba en el medio el restore no
+  // corría y todo el resto del archivo renderizaba un loader o un banner de error.
+  OBJ_USE_TASK.loading = false;
+  OBJ_USE_TASK.error = null;
   // loadRecaptcha() resuelve de inmediato si grecaptcha.render ya existe — si no, espera el
   // script real de Google o expira a los 10s (ver RecaptchaModal.test.tsx).
   window.grecaptcha = { render: vi.fn(() => 1), reset: vi.fn() };
@@ -105,20 +110,30 @@ describe('CrearRecibirQueja (SCR-000)', () => {
     render(<CrearRecibirQueja />);
     await waitFor(() => expect(window.grecaptcha!.render).toHaveBeenCalledTimes(1));
 
+    // Se asserta la TRANSICIÓN, no el valor final: `?.disabled` queda en `undefined` cuando
+    // el botón está habilitado, así que `not.toBe(true)` por sí solo también lo cumpliría un
+    // botón inexistente. Verificar que ANTES era `true` y DESPUÉS ya no, prueba que el
+    // captcha efectivamente desbloqueó el envío.
+    const leerDisabled = () => (screen.getByText('Enviar PQR')
+      .closest('z-button') as unknown as { disabled?: boolean } | null)?.disabled;
+    expect(leerDisabled()).toBe(true);
+
     // Simulamos que Google resolvió el checkbox: toma el callback pasado a render().
     const objRenderArgs = (window.grecaptcha!.render as ReturnType<typeof vi.fn>).mock.calls[0][1];
     objRenderArgs.callback('token-de-prueba');
 
-    await waitFor(() => {
-      const objBtn = screen.getByText('Enviar PQR').closest('z-button');
-      expect((objBtn as unknown as { disabled?: boolean })?.disabled).not.toBe(true);
-    });
+    await waitFor(() => expect(leerDisabled()).not.toBe(true));
+  });
+
+  // Separado en dos tests: antes se hacían DOS render() en el mismo it() sin desmontar el
+  // primero, así que ambas instancias quedaban en document.body y el getByText buscaba
+  // entre las dos (pasaba solo porque el string era único de la segunda).
+  it('sin rol "Empleado Zurich" el campo Alianza está oculto (RUL-000-01)', () => {
+    render(<CrearRecibirQueja />);
+    expect(screen.queryByText('Alianza')).not.toBeInTheDocument();
   });
 
   it('rol "Empleado Zurich" (código 3) revela el campo Alianza (RUL-000-01)', () => {
-    render(<CrearRecibirQueja />);
-    expect(screen.queryByText('Alianza')).not.toBeInTheDocument();
-
     OBJ_USE_TASK.task = makeTask({ qd_strFilerRole: '3' });
     render(<CrearRecibirQueja />);
     expect(screen.getByText('Alianza')).toBeInTheDocument();
@@ -144,7 +159,6 @@ describe('CrearRecibirQueja (SCR-000)', () => {
 
     expect(screen.getByText('Radicación PQRs')).toBeInTheDocument();
     expect(container.querySelector('.screen-loading')).not.toBeNull();
-    OBJ_USE_TASK.loading = false;
   });
 
   it('el estado de error (useTask.error) muestra el mensaje sin lanzar', () => {
@@ -152,11 +166,20 @@ describe('CrearRecibirQueja (SCR-000)', () => {
     render(<CrearRecibirQueja />);
 
     expect(screen.getByText(/Error al cargar el formulario: Network Error/)).toBeInTheDocument();
-    OBJ_USE_TASK.error = null;
   });
 
-  it('"Limpiar queja" no lanza (reset del form + limpieza del registro de adjuntos)', () => {
+  it('"Limpiar queja" vacía los campos del formulario', () => {
+    // Antes este test solo verificaba que el click "no lanzara", lo que pasaba igual si
+    // limpiarFormulario() fuera un no-op. Ahora se asserta el efecto observable: un campo
+    // que venía precargado desde task.data queda vacío después del reset.
+    OBJ_USE_TASK.task = makeTask({ qd_strComplaintText: 'Texto que debe borrarse' });
     render(<CrearRecibirQueja />);
-    expect(() => fireEvent.click(screen.getByText('Limpiar queja'))).not.toThrow();
+
+    const objTextarea = document.querySelector('z-textarea#field-qd_strComplaintText');
+    expect((objTextarea as unknown as { model?: string })?.model).toBe('Texto que debe borrarse');
+
+    fireEvent.click(screen.getByText('Limpiar queja'));
+
+    expect((objTextarea as unknown as { model?: string })?.model).toBe('');
   });
 });

@@ -16,6 +16,16 @@ export default defineConfig({
     // UTC→local a propósito para mostrar; además no tiene DST, así que es determinista todo
     // el año. Verificado por el test de guardia en core/fechaHora.test.ts.
     env: { TZ: 'America/Bogota' },
+    // Limpia `mock.calls`/`mock.results` antes de cada test, para que un archivo sin
+    // `vi.clearAllMocks()` propio no arrastre llamadas de un test al siguiente (varios
+    // asertan sobre `completeTask.mock.calls`).
+    //
+    // ⚠️ `clearMocks`, NO `mockReset`/`resetMocks`: `clearMocks` conserva la
+    // IMPLEMENTACIÓN del mock, mientras que `mockReset` la borra. Varios tests declaran a
+    // nivel de módulo cosas como `completeTask: vi.fn(() => Promise.resolve({}))` porque la
+    // pantalla encadena `.catch()` sobre el resultado; con `mockReset` esa implementación
+    // desaparecería y esas pantallas explotarían con "cannot read .catch of undefined".
+    clearMocks: true,
     projects: [
       {
         extends: true,
