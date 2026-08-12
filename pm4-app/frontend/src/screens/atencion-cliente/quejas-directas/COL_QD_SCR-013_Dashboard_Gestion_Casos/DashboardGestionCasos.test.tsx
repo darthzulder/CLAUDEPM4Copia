@@ -23,7 +23,31 @@ vi.mock('../../../../core/useCollection', async (in_fnImportOriginal) => {
 });
 
 import { useCasosDashboard } from './useCasosDashboard';
+import type { CasoDashboard, EstadoCasoDashboard } from '../fields/types';
 const fnUseCasosDashboard = vi.mocked(useCasosDashboard);
+
+/** Lee los KPIs del DOM. `amount` es una PROPIEDAD del z-kpi-value, pero el encabezado NO:
+ *  se renderiza como <span slot="header"> dentro del elemento. */
+const leerKpis = (): Record<string, number | undefined> => Object.fromEntries(
+  [...document.querySelectorAll('z-kpi-value')].map((objKpi) => [
+    objKpi.querySelector('[slot="header"]')?.textContent,
+    (objKpi as unknown as { amount?: number }).amount,
+  ]),
+);
+
+const casoConEstado = (in_intId: number, in_strEstado: EstadoCasoDashboard): CasoDashboard => ({
+  id: in_intId,
+  numeroCaso: `C-${in_intId}`,
+  tipoSolicitud: '1',
+  fechaCreacion: '01/08/2026',
+  fechaVencimiento: '15/08/2026',
+  sla: '10',
+  diasRestantes: 3,
+  estado: in_strEstado,
+  areaResponsable: 'SIN',
+  responsable: 'Ana Pérez',
+  descripcion: 'Descripción',
+});
 
 describe('DashboardGestionCasos (SCR-013)', () => {
   it('mientras carga muestra el loader, sin KPIs ni tabla', () => {
@@ -39,11 +63,45 @@ describe('DashboardGestionCasos (SCR-013)', () => {
     render(<DashboardGestionCasos />);
 
     expect(screen.getByText('Gestión de Casos')).toBeInTheDocument();
-    // KPIs sobre SAMPLE_CASES: 2 Abierta, 2 Por Vencer, 2 Vencida, 1 Cerrada (1 Cancelada
-    // no cuenta en ningún KPI — ver calcularKpis()).
-    expect(screen.getByText('Casos abiertos')).toBeInTheDocument();
     expect(screen.getByText('Mostrando 1–8 de 8 casos')).toBeInTheDocument();
     expect(screen.getByText('001')).toBeInTheDocument();
+
+    // Los KPIs se asertan por VALOR, no por rótulo: antes se leía `getByText('Casos
+    // abiertos')`, que es el texto fijo del componente, así que calcularKpis() podía
+    // devolver todo en cero y el test pasaba igual.
+    // SAMPLE_CASES: 2 Abierta, 2 Por Vencer, 2 Vencida, 1 Cerrada — la 8ª es Cancelada y no
+    // suma en ningún KPI (ver calcularKpis(), cubierto en dashboardHelpers.test.ts).
+    expect(leerKpis()).toEqual({
+      'Casos abiertos': 2,
+      'Próximos a vencer': 2,
+      'Vencidos': 2,
+      'Cerrados': 1,
+    });
+  });
+
+  it('los KPIs cuentan cada estado por separado (conteos asimétricos)', () => {
+    // Con SAMPLE_CASES hay 2 Abierta y 2 Por Vencer, así que un swap entre esos dos filtros
+    // daría el mismo número y pasaría desapercibido. Con conteos distintos por estado, la
+    // pantalla sí delata que cada KPI lee el estado que le corresponde.
+    fnUseCasosDashboard.mockReturnValue({
+      casos: [
+        casoConEstado(1, 'Abierta'), casoConEstado(2, 'Abierta'), casoConEstado(3, 'Abierta'),
+        casoConEstado(4, 'Por Vencer'),
+        casoConEstado(5, 'Vencida'), casoConEstado(6, 'Vencida'),
+        casoConEstado(7, 'Cerrada'), casoConEstado(8, 'Cerrada'), casoConEstado(9, 'Cerrada'),
+        casoConEstado(10, 'Cancelada'), // no suma en ningún KPI
+      ],
+      loading: false,
+      error: null,
+    });
+    render(<DashboardGestionCasos />);
+
+    expect(leerKpis()).toEqual({
+      'Casos abiertos': 3,
+      'Próximos a vencer': 1,
+      'Vencidos': 2,
+      'Cerrados': 3,
+    });
   });
 
   it('con error de PM4 muestra el aviso pero sigue mostrando los datos de ejemplo', () => {
@@ -64,11 +122,23 @@ describe('DashboardGestionCasos (SCR-013)', () => {
     expect(screen.getByText(/Caso #001/)).toBeInTheDocument();
   });
 
-  it('con casos filtrados el botón "Descargar reporte" está habilitado', () => {
+  it('con casos para exportar, "Descargar reporte" no está bloqueado y la tabla no dice "Sin casos"', () => {
     fnUseCasosDashboard.mockReturnValue(OBJ_USE_CASOS_VACIO);
     render(<DashboardGestionCasos />);
 
+    // Se asserta el texto del contador además del botón: `disabled` queda en `undefined`
+    // cuando el valor es falso, así que por sí sola esa lectura no distingue "habilitado"
+    // de "el elemento no existe".
+    expect(screen.getByText('Mostrando 1–8 de 8 casos')).toBeInTheDocument();
+    expect(screen.queryByText('Sin casos')).not.toBeInTheDocument();
     const objBtn = screen.getByText('Descargar reporte').closest('z-button');
+    expect(objBtn).not.toBeNull();
     expect((objBtn as unknown as { disabled?: boolean })?.disabled).not.toBe(true);
   });
+
+  // NOTA: la rama contraria (`disabled={filtrados.length === 0}` ⇒ bloqueado + "Sin casos")
+  // NO se cubre acá a propósito. Solo se alcanza aplicando un filtro que no matchee, y eso
+  // exige escribir en un control del DS, que en jsdom no es interactuable (ver
+  // testing-conventions.md). La lógica subyacente sí está cubierta en dashboardHelpers.test.ts
+  // (`casosToCSV([])` y `calcularKpis([])`); lo único sin cubrir es el cableado del filtro.
 });
