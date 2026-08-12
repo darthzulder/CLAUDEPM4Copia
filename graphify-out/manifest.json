@@ -692,8 +692,12 @@
     "hash": "0bb60b8a0d4341d19329a9be5658ee70"
   },
   "G:\\DockerProys\\CLAUDEPM4Copia\\pm4-app\\scripts\\coverage-diff.mjs": {
-    "mtime": 1786548909.7793078,
-    "hash": "e4bd2c6bc2f3f60c32f3b354af65e174"
+    "mtime": 1786551778.9013984,
+    "hash": "b5665deace3ea21e51310d8f82dd0124"
+  },
+  "G:\\DockerProys\\CLAUDEPM4Copia\\pm4-app\\scripts\\integration-base.mjs": {
+    "mtime": 1786551718.2669156,
+    "hash": "207372a6d9deb78e0dc6e926eb265540"
   },
   "G:\\DockerProys\\CLAUDEPM4Copia\\pm4-app\\scripts\\pm4-registry-sync.mjs": {
     "mtime": 1786408867.8590732,
@@ -724,8 +728,8 @@
     "hash": "1bb59f000ba82e8bd1ff944873701589"
   },
   "G:\\DockerProys\\CLAUDEPM4Copia\\docs\\guides\\entorno-local-y-verificacion.md": {
-    "mtime": 1786548390.5153544,
-    "hash": "c2af2176a08108da26d6fcca1bffd85e"
+    "mtime": 1786551891.316427,
+    "hash": "0c1daab264c7dbc1bec9e8604d40b663"
   },
   "G:\\DockerProys\\CLAUDEPM4Copia\\docs\\guides\\GUIA_DOCUMENTACION_PANTALLAS.md": {
     "mtime": 1786409147.5851984,
@@ -748,8 +752,8 @@
     "hash": "f785e9ae1084d2bbf0dd993dbced50d8"
   },
   "G:\\DockerProys\\CLAUDEPM4Copia\\pm4-app\\CLAUDE.md": {
-    "mtime": 1786548434.3895326,
-    "hash": "f02b02c8fc633c4477e4cb6cca96746c"
+    "mtime": 1786551907.6323726,
+    "hash": "11034a8d35b53bb7e670171c2be06f00"
   },
   "G:\\DockerProys\\CLAUDEPM4Copia\\pm4-app\\render.yaml": {
     "mtime": 1783379764.062887,
