@@ -12,13 +12,18 @@
  * La creación va PRIMERO: sin queja radicada no tiene sentido subir anexos.
  *
  * -----------------------------------------------------------------------------
- * ACCESO A LA SFC CENTRALIZADO EN EL CORE (script 84)
+ * ACCESO A LA SFC CENTRALIZADO EN EL CORE
  * -----------------------------------------------------------------------------
  * M2 ya NO abre cURL contra la SFC ni hace login/firma local. La radicación de
  * la queja se delega al CORE con operacion="request" (login + firma + HTTP allá)
  * y los anexos con operacion="storage" (multipart allá). El token de login nunca
  * cruza el borde executeScript hacia M2. La config pública (urls, tipo_entidad…)
  * se pide con operacion="config".
+ *
+ * PORTABILIDAD: el CORE NO se referencia por su id numérico (cambia al migrar de
+ * instancia), sino por su UUID, que el export/import de paquetes de PM4
+ * preserva. El id real se resuelve en runtime (ver resolveScriptId() más abajo,
+ * idéntica a la del script 77 COL_QD_Check_SLA_Expire) y se cachea en proceso.
  *
  * Momento 2 puede traer hasta 5 anexos, en slots qd_strAttach01..05 (nombre)
  * + qd_strAttach01..05_id (ID de file en PM4). Cada slot presente se traduce
@@ -59,14 +64,65 @@
  * CREACION— qd_strPayloadSent (el body editable). En un fallo de anexo el error
  * reportado es el del PRIMER anexo que falló.
  *
- * Delega login, firma, HTTP y subida de anexos al script CORE (sfc_core.php) vía
- * executeScript. Toda la lógica del anexo (descarga del binario, multipart,
- * firma) vive en el CORE (operacion="storage") para no duplicarla entre M2/M3;
- * el binario nunca cruza el borde executeScript.
- * Ajusta $SFC_CORE_SCRIPT_ID con el ID real del CORE en PM4.
+ * Delega login, firma, HTTP y subida de anexos al script CORE vía executeScript.
+ * Toda la lógica del anexo (descarga del binario, multipart, firma) vive en el
+ * CORE (operacion="storage") para no duplicarla entre M2/M3; el binario nunca
+ * cruza el borde executeScript.
  */
 
-$SFC_CORE_SCRIPT_ID = 84; // TODO: reemplazar por el ID real del script CORE
+// UUID estable del script CORE (COL - QD - Core SFC) — no cambia entre instancias.
+const CORE_SCRIPT_UUID     = 'a2560610-9409-4931-bcc7-172aa91f56a9';
+// Título de respaldo por si el UUID no estuviera (p.ej. CORE recreado a mano).
+const CORE_SCRIPT_TITLE    = 'COL - QD - Core SFC';
+// Último recurso: id conocido en la instancia de referencia (PM4_BASE_URL actual).
+const CORE_SCRIPT_FALLBACK = 84;
+
+/**
+ * Resuelve el ID actual de un script por su UUID (estable entre instancias),
+ * con fallback al título. Cachea el resultado en proceso para no repetir la
+ * búsqueda si se invoca al mismo script varias veces en esta ejecución.
+ * Idéntica a resolveScriptId() del script 77 (COL_QD_Check_SLA_Expire).
+ */
+function resolveScriptId($api, $uuid, $title) {
+    static $cache = [];
+    $cacheKey = $uuid ?: $title;
+    if (isset($cache[$cacheKey])) {
+        return $cache[$cacheKey];
+    }
+
+    $scripts = $api->scripts();
+
+    // Acotamos la búsqueda por título (filtro liviano) y confirmamos por UUID.
+    // Si el título cambió tras migrar, caemos a un listado más amplio.
+    $tryLists = [];
+    $tryLists[] = $scripts->getScripts($title);   // filter = título
+    $tryLists[] = $scripts->getScripts($uuid);    // por si el filtro indexa uuid
+
+    foreach ($tryLists as $resp) {
+        $list = ($resp && method_exists($resp, 'getData')) ? $resp->getData() : [];
+        // 1º intento: match EXACTO por UUID (fuente de verdad).
+        foreach (($list ?: []) as $s) {
+            $sUuid = method_exists($s, 'getUuid') ? $s->getUuid() : ($s['uuid'] ?? null);
+            if ($uuid && $sUuid === $uuid) {
+                return $cache[$cacheKey] = (int)(method_exists($s, 'getId') ? $s->getId() : $s['id']);
+            }
+        }
+    }
+    // 2º intento (fallback): match exacto por título si el UUID no apareció.
+    $resp = $scripts->getScripts($title);
+    $list = ($resp && method_exists($resp, 'getData')) ? $resp->getData() : [];
+    foreach (($list ?: []) as $s) {
+        $sTitle = method_exists($s, 'getTitle') ? $s->getTitle() : ($s['title'] ?? null);
+        if ($sTitle === $title) {
+            return $cache[$cacheKey] = (int)(method_exists($s, 'getId') ? $s->getId() : $s['id']);
+        }
+    }
+
+    return null; // no se encontró
+}
+
+// Resolución dinámica del CORE: id numérico solo como último recurso.
+$SFC_CORE_SCRIPT_ID = resolveScriptId($api, CORE_SCRIPT_UUID, CORE_SCRIPT_TITLE) ?? CORE_SCRIPT_FALLBACK;
 
 // Bitácora de respuestas SFC acumulada de todas las llamadas al CORE en esta
 // ejecución (cada salida del CORE trae su _sfc_respons_logs; las vamos fusionando

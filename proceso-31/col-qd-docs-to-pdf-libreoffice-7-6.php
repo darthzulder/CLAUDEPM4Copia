@@ -16,14 +16,14 @@ class CustomTemplateProcessor extends TemplateProcessor
     public function __construct($documentTemplate)
     {
         parent::__construct($documentTemplate);
-        
+
         // Repair XML fragmentation in placeholders
         $this->tempDocumentMainPart = $this->repairMacros($this->tempDocumentMainPart);
-        
+
         foreach ($this->tempDocumentHeaders as $index => $content) {
             $this->tempDocumentHeaders[$index] = $this->repairMacros($content);
         }
-        
+
         foreach ($this->tempDocumentFooters as $index => $content) {
             $this->tempDocumentFooters[$index] = $this->repairMacros($content);
         }
@@ -108,7 +108,7 @@ class DocxSlipGenerator
                 $num = $index + 1;
                 $this->data['limite' . $num] = $alt['limite'] ?? '';
                 $this->data['primab' . $num] = $alt['prima_bruta'] ?? '';
-                
+
                 // Formatear el deducible de forma plana
                 $dedA = trim((string)($alt['deducible_a'] ?? ''));
                 $dedB = trim((string)($alt['deducible_b'] ?? ''));
@@ -182,11 +182,11 @@ class DocxSlipGenerator
                 $template->setValue($variable, $this->value($keyUpper));
             } elseif (array_key_exists($variable, $this->data)) {
                 $template->setValue($variable, $this->value($variable));
-            } 
+            }
             // 2. Intentar a través del mapa de alias (ej: {{NOMBREREPSOLICITANTE}} -> $data['nombre_representante'])
             elseif (array_key_exists($keyLower, $aliases) && array_key_exists($aliases[$keyLower], $this->data)) {
                 $template->setValue($variable, $this->value($aliases[$keyLower]));
-            } 
+            }
             else {
                 // Si la variable no está en el array de datos, la dejamos vacía para evitar que queden llaves rotas en el PDF.
                 $template->setValue($variable, '');
@@ -644,6 +644,60 @@ function uploadPdf(string $pdfPath, string $pdfFilename, string $requestId, stri
     return (int)($body['fileUploadId'] ?? 0);
 }
 
+// UUID estable de la colección "COL - QD - DocTemplates" (no cambia entre instancias).
+const DOCTEMPLATES_COLLECTION_UUID     = 'a2406cb8-b276-4267-be32-df872ab408e6';
+// Nombre de respaldo por si el UUID no apareciera (p.ej. colección recreada a mano).
+const DOCTEMPLATES_COLLECTION_NAME     = 'COL - QD - DocTemplates';
+// Último recurso: id conocido en la instancia de referencia (PM4_BASE_URL actual).
+const DOCTEMPLATES_COLLECTION_FALLBACK = 47;
+
+/**
+ * Resuelve el ID actual de una colección por su UUID (estable entre instancias),
+ * con fallback a su nombre y, si tampoco aparece, al id conocido de la instancia
+ * de referencia. Cachea el resultado en proceso. Mismo criterio que
+ * resolveScriptId() del script 77 (COL_QD_Check_SLA_Expire), adaptado a
+ * colecciones — este script ya habla con la API de PM4 vía Guzzle (no usa el SDK
+ * $api para esta parte), así que la resolución sigue el mismo canal.
+ */
+function resolveCollectionId(string $apiHost, string $apiToken, string $uuid, string $name, int $fallback): int
+{
+    static $cache = [];
+    $cacheKey = $uuid ?: $name;
+    if (isset($cache[$cacheKey])) {
+        return $cache[$cacheKey];
+    }
+
+    try {
+        $client = new GuzzleHttp\Client(['verify' => false]);
+        $res = $client->request('GET', $apiHost . '/collections', [
+            'headers' => [
+                'Authorization' => 'Bearer ' . $apiToken,
+                'Accept'        => 'application/json',
+            ],
+            'query' => ['filter' => $name, 'per_page' => 500],
+        ]);
+        $list = json_decode($res->getBody(), true)['data'] ?? [];
+
+        // 1º intento: match EXACTO por UUID (fuente de verdad).
+        foreach ($list as $c) {
+            if (($c['uuid'] ?? null) === $uuid) {
+                return $cache[$cacheKey] = (int)$c['id'];
+            }
+        }
+        // 2º intento (fallback): match exacto por nombre si el UUID no apareció.
+        foreach ($list as $c) {
+            if (($c['name'] ?? null) === $name) {
+                return $cache[$cacheKey] = (int)$c['id'];
+            }
+        }
+    } catch (\Exception $e) {
+        // sigue al fallback de abajo
+    }
+
+    error_log("[COL - QD - Docs to PDF] resolveCollectionId: no se resolvió '{$name}' (uuid={$uuid}) dinámicamente; usando fallback id={$fallback}.");
+    return $cache[$cacheKey] = $fallback;
+}
+
 try {
     // 1. Datos de conexión
     $processRequestId = (string)($data['_request']['id'] ?? '');
@@ -661,8 +715,16 @@ try {
     $apiHost  = getenv('API_HOST');
     $apiToken = getenv('API_TOKEN'); // Token dinámico inyectado por PM4 para la sesión del proceso
 
-    //  Definir el ID numérico de tu colección
-    $collectionId = 47; 
+    //  ID de la colección de plantillas — resuelto dinámicamente (ver PORTABILIDAD
+    //  arriba): no se referencia por su id numérico porque cambia al migrar de
+    //  instancia. El 47 solo queda como fallback dentro de resolveCollectionId().
+    $collectionId = resolveCollectionId(
+        $apiHost,
+        $apiToken,
+        DOCTEMPLATES_COLLECTION_UUID,
+        DOCTEMPLATES_COLLECTION_NAME,
+        DOCTEMPLATES_COLLECTION_FALLBACK
+    );
 
     //  Construir las cabeceras requeridas por la API REST de PM4
     $headers = [
@@ -686,10 +748,10 @@ try {
 
         // Extraer los datos si la colección no está vacía
         if (!empty($respuesta) && isset($respuesta['data']) && count($respuesta['data']) > 0) {
-            
+
             // Tomar la primera fila (configuración global)
-            $primerRegistro = $respuesta['data'][0]; 
-            
+            $primerRegistro = $respuesta['data'][0];
+
             // Extraer los inputs mapeados en el sub-nodo 'data'
             $campos = $primerRegistro['data'] ?? [];
 
@@ -704,7 +766,7 @@ try {
         ];
     }
     //----fin obetener variables
-    
+
     // 3. Construir el nombre del único archivo final requerido por PM4:
     //    {NOMBRES+APELLIDOS o RAZONSOCIAL}_{ID}_RESP_FINAL_SFC_{CASEID}
     //    Ejemplo: NELSONBRAVO_6139406_RESP_FINAL_SFC_001

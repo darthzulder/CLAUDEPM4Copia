@@ -14,7 +14,7 @@
  * fecha de vencimiento.
  *
  * -----------------------------------------------------------------------------
- * CONSUMO DE LA SFC — SIEMPRE VÍA CORE (script 84)
+ * CONSUMO DE LA SFC — SIEMPRE VÍA CORE
  * -----------------------------------------------------------------------------
  * Este script NO abre cURL contra la Superfinanciera. TODA llamada a la SFC
  * (incluido el PUT de prórroga) se delega al CORE con operacion="request", que
@@ -26,10 +26,15 @@
  * que NO toca la red: así el ÚNICO login de la prórroga es el que hace el propio
  * CORE al ejecutar el PUT (operacion="request").
  *
+ * PORTABILIDAD: el CORE NO se referencia por su id numérico (cambia al migrar de
+ * instancia), sino por su UUID, que el export/import de paquetes de PM4
+ * preserva. El id real se resuelve en runtime (ver resolveScriptId() más abajo,
+ * idéntica a la del script 77 COL_QD_Check_SLA_Expire) y se cachea en proceso.
+ *
  * -----------------------------------------------------------------------------
  * BITÁCORA ACUMULATIVA (_sfc_respons_logs) — EL CORE ES LA FUENTE ÚNICA
  * -----------------------------------------------------------------------------
- * El CORE (84) es acumulativo: precarga el _sfc_respons_logs que le llega en
+ * El CORE es acumulativo: precarga el _sfc_respons_logs que le llega en
  * $data y le AGREGA las respuestas de su propia ejecución. Para aprovecharlo sin
  * duplicar, este script REENVÍA su acumulador al CORE en cada llamada
  * (sfcCallScript) y, cuando el CORE responde, ADOPTA la bitácora devuelta tal
@@ -119,7 +124,61 @@
  *   qd_strAttemptNum      FLD-055  intento acumulado (previo + 1)
  */
 
-$SFC_CORE_SCRIPT_ID = 84; // ID del script CORE (COL - QD - Core SFC)
+// UUID estable del script CORE (COL - QD - Core SFC) — no cambia entre instancias.
+const CORE_SCRIPT_UUID     = 'a2560610-9409-4931-bcc7-172aa91f56a9';
+// Título de respaldo por si el UUID no estuviera (p.ej. CORE recreado a mano).
+const CORE_SCRIPT_TITLE    = 'COL - QD - Core SFC';
+// Último recurso: id conocido en la instancia de referencia (PM4_BASE_URL actual).
+const CORE_SCRIPT_FALLBACK = 84;
+
+/**
+ * Resuelve el ID actual de un script por su UUID (estable entre instancias),
+ * con fallback al título. Cachea el resultado en proceso para no repetir la
+ * búsqueda si se invoca al mismo script varias veces en esta ejecución.
+ * Idéntica a resolveScriptId() del script 77 (COL_QD_Check_SLA_Expire) — misma
+ * firma y misma estrategia, para que ambas convivan sin sorpresas si algún día
+ * se comparten en un include común.
+ */
+function resolveScriptId($api, $uuid, $title) {
+    static $cache = [];
+    $cacheKey = $uuid ?: $title;
+    if (isset($cache[$cacheKey])) {
+        return $cache[$cacheKey];
+    }
+
+    $scripts = $api->scripts();
+
+    // Acotamos la búsqueda por título (filtro liviano) y confirmamos por UUID.
+    // Si el título cambió tras migrar, caemos a un listado más amplio.
+    $tryLists = [];
+    $tryLists[] = $scripts->getScripts($title);   // filter = título
+    $tryLists[] = $scripts->getScripts($uuid);    // por si el filtro indexa uuid
+
+    foreach ($tryLists as $resp) {
+        $list = ($resp && method_exists($resp, 'getData')) ? $resp->getData() : [];
+        // 1º intento: match EXACTO por UUID (fuente de verdad).
+        foreach (($list ?: []) as $s) {
+            $sUuid = method_exists($s, 'getUuid') ? $s->getUuid() : ($s['uuid'] ?? null);
+            if ($uuid && $sUuid === $uuid) {
+                return $cache[$cacheKey] = (int)(method_exists($s, 'getId') ? $s->getId() : $s['id']);
+            }
+        }
+    }
+    // 2º intento (fallback): match exacto por título si el UUID no apareció.
+    $resp = $scripts->getScripts($title);
+    $list = ($resp && method_exists($resp, 'getData')) ? $resp->getData() : [];
+    foreach (($list ?: []) as $s) {
+        $sTitle = method_exists($s, 'getTitle') ? $s->getTitle() : ($s['title'] ?? null);
+        if ($sTitle === $title) {
+            return $cache[$cacheKey] = (int)(method_exists($s, 'getId') ? $s->getId() : $s['id']);
+        }
+    }
+
+    return null; // no se encontró
+}
+
+// Resolución dinámica del CORE: id numérico solo como último recurso.
+$SFC_CORE_SCRIPT_ID = resolveScriptId($api, CORE_SCRIPT_UUID, CORE_SCRIPT_TITLE) ?? CORE_SCRIPT_FALLBACK;
 
 // Máximo valor permitido para qd_strExtensionDays (12 prórrogas).
 const PRORROGA_MAX_EXTENSION_DAYS = 12;
@@ -140,7 +199,7 @@ function sfcCallScript(int $intScriptId, array $dicPayload)
 {
     global $api, $_sfc_respons_logs;
 
-    // Reenviamos la bitácora acumulada AL CORE: el 84 es acumulativo (precarga
+    // Reenviamos la bitácora acumulada AL CORE: es acumulativo (precarga
     // lo que recibe y le agrega lo nuevo), así que le pasamos lo que llevamos
     // para que la salida vuelva con previo + nuevo. NO la concatenamos de este
     // lado (eso duplicaría): al recibir, REEMPLAZAMOS el acumulador con lo que

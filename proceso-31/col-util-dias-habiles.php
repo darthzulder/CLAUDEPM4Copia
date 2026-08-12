@@ -4,8 +4,8 @@
 // =============================================================================
 //
 // Único lugar donde vive el cálculo de días hábiles: excluye fines de semana y
-// los feriados de la colección cat-feriados-colombia (id 48). No contiene reglas
-// de negocio de ningún proceso — cualquier script o pantalla puede invocarlo.
+// los feriados de la colección cat-feriados-colombia. No contiene reglas de
+// negocio de ningún proceso — cualquier script o pantalla puede invocarlo.
 //
 // ⚠️ HAY UN GEMELO EN EL FRONTEND: frontend/src/core/businessDays.ts replica esta
 // misma regla del lado del cliente. Son dos implementaciones de un mismo cálculo;
@@ -37,8 +37,79 @@
 //
 // Corre dentro del ejecutor PHP de PM4: $data lo inyecta el runtime, y HOST_URL /
 // API_TOKEN vienen de las variables de entorno de la instancia.
+//
+// PORTABILIDAD: la colección de feriados NO se referencia por su id numérico
+// (cambia al migrar de instancia), sino por su UUID nativo, que el export/import
+// de paquetes de PM4 preserva. El id real se resuelve en runtime contra
+// GET /collections y se cachea en proceso (mismo criterio que resolveScriptId()
+// del script 77 — acá es resolveCollectionId(), su equivalente para colecciones).
+// El id 48 solo queda como FALLBACK si la resolución dinámica no encuentra nada
+// (instancia sin red, colección renombrada Y con uuid distinto, etc.).
 
-const FERIADOS_COLLECTION_ID = 48;
+// UUID estable de la colección cat-feriados-colombia (no cambia entre instancias).
+const FERIADOS_COLLECTION_UUID     = 'a2421287-eefe-4ff6-88a8-7f7040a2d10e';
+// Nombre de respaldo por si el UUID no apareciera (p.ej. colección recreada a mano).
+const FERIADOS_COLLECTION_NAME     = 'cat-feriados-colombia';
+// Último recurso: id conocido en la instancia de referencia (PM4_BASE_URL actual).
+const FERIADOS_COLLECTION_FALLBACK = 48;
+
+/**
+ * Resuelve el ID actual de una colección por su UUID (estable entre instancias),
+ * con fallback a su nombre y, si tampoco aparece, al id conocido de la instancia
+ * de referencia. Cachea el resultado en proceso para no repetir la búsqueda si se
+ * invoca más de una vez en esta ejecución. Mismo criterio que resolveScriptId()
+ * del script COL_QD_Check_SLA_Expire (77), adaptado a colecciones: GET /collections
+ * no acepta uuid como filtro directo, así que se trae por nombre (filtro liviano)
+ * y se confirma por uuid antes de aceptar el match.
+ */
+function resolveCollectionId($baseUrl, $token, $uuid, $name, $fallback) {
+    static $cache = [];
+    $cacheKey = $uuid ?: $name;
+    if (isset($cache[$cacheKey])) {
+        return $cache[$cacheKey];
+    }
+
+    if ($baseUrl && $token) {
+        $url = rtrim($baseUrl, '/') . '/api/1.0/collections?per_page=500&filter=' . rawurlencode($name);
+        $ch = curl_init($url);
+        curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+        curl_setopt($ch, CURLOPT_TIMEOUT, 10);
+        curl_setopt($ch, CURLOPT_HTTPHEADER, [
+            'Authorization: Bearer ' . $token,
+            'Accept: application/json',
+        ]);
+        $response = curl_exec($ch);
+        $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+        $curlError = curl_error($ch);
+        curl_close($ch);
+
+        if (!$curlError && $httpCode === 200 && $response) {
+            $payload = json_decode($response, true);
+            $list = $payload['data'] ?? [];
+
+            // 1º intento: match EXACTO por UUID (fuente de verdad).
+            foreach ($list as $c) {
+                if ($uuid && ($c['uuid'] ?? null) === $uuid) {
+                    return $cache[$cacheKey] = (int)$c['id'];
+                }
+            }
+            // 2º intento (fallback): match exacto por nombre si el UUID no apareció
+            // (p.ej. el filtro de texto trajo resultados parciales/similares).
+            foreach ($list as $c) {
+                if (($c['name'] ?? null) === $name) {
+                    return $cache[$cacheKey] = (int)$c['id'];
+                }
+            }
+        }
+    }
+
+    // Último recurso: id conocido de la instancia de referencia. No se degrada a
+    // null porque sin esta colección el cálculo de días hábiles pierde TODOS los
+    // feriados (silenciosamente correcto solo en fines de semana), un costo mayor
+    // al de arriesgar un id potencialmente desactualizado.
+    error_log("[COL_UTIL_Dias_Habiles] resolveCollectionId: no se resolvió '{$name}' (uuid={$uuid}) dinámicamente; usando fallback id={$fallback}.");
+    return $cache[$cacheKey] = (int)$fallback;
+}
 
 /**
  * Feriados de Colombia como set de fechas 'Y-m-d' listas para consultar.
@@ -59,7 +130,15 @@ function fetchHolidaySet($baseUrl, $token) {
         return $holidaySet;
     }
 
-    $url = rtrim($baseUrl, '/') . '/api/1.0/collections/' . FERIADOS_COLLECTION_ID . '/records?per_page=500';
+    $collectionId = resolveCollectionId(
+        $baseUrl,
+        $token,
+        FERIADOS_COLLECTION_UUID,
+        FERIADOS_COLLECTION_NAME,
+        FERIADOS_COLLECTION_FALLBACK
+    );
+
+    $url = rtrim($baseUrl, '/') . '/api/1.0/collections/' . $collectionId . '/records?per_page=500';
 
     $ch = curl_init($url);
     curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
