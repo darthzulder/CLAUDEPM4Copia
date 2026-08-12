@@ -12,7 +12,7 @@
  *   momento1 -> GET  /api/queja/            · captura de quejas
  *   ack      -> POST /api/complaint/ack/    · {pqrs:[codigo]}  · (caso aparte)
  *
- * ACCESO A LA SFC CENTRALIZADO EN EL CORE (script 84): M1 ya NO hace login,
+ * ACCESO A LA SFC CENTRALIZADO EN EL CORE: M1 ya NO hace login,
  * firma ni cURL contra la SFC. Las dos llamadas a la SFC (GET /api/queja/ y
  * POST /api/complaint/ack/) van por el CORE con operacion="request" (login +
  * firma + HTTP allá); el token de login nunca cruza el borde executeScript.
@@ -21,12 +21,19 @@
  *
  * OJO: la creación de casos en PM4 (crearCasoPm4 / colecciones) es OTRA cosa —
  * usa el token de PM4 ($API_TOKEN) y su propio sfcHttp local, que se conserva.
- * Ajusta $SFC_CORE_SCRIPT_ID con el ID real del CORE en PM4.
+ *
+ * PORTABILIDAD: el CORE y las colecciones QD_COLL NO se referencian por su id
+ * numérico (cambia al migrar de instancia), sino por su UUID nativo. Los ids
+ * reales se resuelven en runtime — resolveScriptId() para el CORE (idéntica al
+ * script 77 COL_QD_Check_SLA_Expire) y resolveCollectionId() para las
+ * colecciones — y se cachean en proceso. Los ids numéricos que quedan en
+ * QD_COLL/CORE_SCRIPT_FALLBACK son solo el último recurso si la resolución
+ * dinámica no encuentra nada.
  *
  * -----------------------------------------------------------------------------
  * BITÁCORA ACUMULATIVA (_sfc_respons_logs) — EL CORE ES LA FUENTE ÚNICA
  * -----------------------------------------------------------------------------
- * El CORE (84) es acumulativo: precarga el _sfc_respons_logs que le llega en
+ * El CORE es acumulativo: precarga el _sfc_respons_logs que le llega en
  * $data y le AGREGA las respuestas de su propia ejecución. Para aprovecharlo sin
  * duplicar, M1 REENVÍA su acumulador al CORE en cada llamada (sfcCallScript) y,
  * cuando el CORE responde, ADOPTA la bitácora devuelta tal cual (previo + nuevo)
@@ -35,8 +42,58 @@
  * caso le pasa a M1 un _sfc_respons_logs previo, también se conserva y crece.
  */
 
-// ID del script CORE en PM4
-$SFC_CORE_SCRIPT_ID = 84; // TODO: reemplazar por el ID real del script CORE
+// UUID estable del script CORE (COL - QD - Core SFC) — no cambia entre instancias.
+const CORE_SCRIPT_UUID     = 'a2560610-9409-4931-bcc7-172aa91f56a9';
+// Título de respaldo por si el UUID no estuviera (p.ej. CORE recreado a mano).
+const CORE_SCRIPT_TITLE    = 'COL - QD - Core SFC';
+// Último recurso: id conocido en la instancia de referencia (PM4_BASE_URL actual).
+const CORE_SCRIPT_FALLBACK = 84;
+
+/**
+ * Resuelve el ID actual de un script por su UUID (estable entre instancias),
+ * con fallback al título. Cachea el resultado en proceso. Idéntica a
+ * resolveScriptId() del script 77 (COL_QD_Check_SLA_Expire).
+ */
+function resolveScriptId($api, $uuid, $title) {
+    static $cache = [];
+    $cacheKey = $uuid ?: $title;
+    if (isset($cache[$cacheKey])) {
+        return $cache[$cacheKey];
+    }
+
+    $scripts = $api->scripts();
+
+    // Acotamos la búsqueda por título (filtro liviano) y confirmamos por UUID.
+    // Si el título cambió tras migrar, caemos a un listado más amplio.
+    $tryLists = [];
+    $tryLists[] = $scripts->getScripts($title);   // filter = título
+    $tryLists[] = $scripts->getScripts($uuid);    // por si el filtro indexa uuid
+
+    foreach ($tryLists as $resp) {
+        $list = ($resp && method_exists($resp, 'getData')) ? $resp->getData() : [];
+        // 1º intento: match EXACTO por UUID (fuente de verdad).
+        foreach (($list ?: []) as $s) {
+            $sUuid = method_exists($s, 'getUuid') ? $s->getUuid() : ($s['uuid'] ?? null);
+            if ($uuid && $sUuid === $uuid) {
+                return $cache[$cacheKey] = (int)(method_exists($s, 'getId') ? $s->getId() : $s['id']);
+            }
+        }
+    }
+    // 2º intento (fallback): match exacto por título si el UUID no apareció.
+    $resp = $scripts->getScripts($title);
+    $list = ($resp && method_exists($resp, 'getData')) ? $resp->getData() : [];
+    foreach (($list ?: []) as $s) {
+        $sTitle = method_exists($s, 'getTitle') ? $s->getTitle() : ($s['title'] ?? null);
+        if ($sTitle === $title) {
+            return $cache[$cacheKey] = (int)(method_exists($s, 'getId') ? $s->getId() : $s['id']);
+        }
+    }
+
+    return null; // no se encontró
+}
+
+// Resolución dinámica del CORE: id numérico solo como último recurso.
+$SFC_CORE_SCRIPT_ID = resolveScriptId($api, CORE_SCRIPT_UUID, CORE_SCRIPT_TITLE) ?? CORE_SCRIPT_FALLBACK;
 
 // -----------------------------------------------------------------------------
 // Destino ProcessMaker 4 — la configuración vive en el CORE (sección 'pm4').
@@ -395,28 +452,38 @@ function sfcQuejaToPm4Payload(array $dicQueja): array
 //     en los globals por sfcAplicarConfigPm4() antes de la ingesta.
 // =============================================================================
 
-// Definición de cada colección QD: [id, valueField, labelField] (dotted-path sobre el
-// record PM4 {id, data:{...}}). Espejo de core/collections.ts (GLOBAL_COLLECTIONS).
+// Definición de cada colección QD: [uuid, name, fallbackId, valueField, labelField]
+// (dotted-path sobre el record PM4 {id, data:{...}}). Espejo de core/collections.ts
+// (GLOBAL_COLLECTIONS), adaptado a resolución dinámica: el id numérico NO se usa
+// directo (cambia al migrar de instancia) — se resuelve en runtime vía
+// resolveCollectionId() por uuid, con fallback a nombre y, en último caso, al id
+// conocido de la instancia de referencia.
 const QD_COLL = [
-    'idType'            => [11, 'data.codigo', 'data.descripcion'],
-    'personType'        => [12, 'data.codigo', 'data.descripcion'],
-    'countryCode'       => [13, 'data.codigo', 'data.descripcion'],
-    'department'        => [14, 'data.codigo_departamento', 'data.nombre_departamento'],
-    'sex'               => [23, 'data.codigo', 'data.descripcion'],
-    'lgbtiq'            => [41, 'data.codigo', 'data.descripcion'],
-    'specialCondition'  => [24, 'data.codigo', 'data.descripcion'],
-    'channel'           => [10, 'data.codigo', 'data.descripcion'],
-    'receptionInstance' => [19, 'data.codigo', 'data.descripcion'],
-    'requestType'       => [18, 'data.codigo', 'data.descripcion'],
-    'filerRole'         => [39, 'data.codigo_rol_radicador', 'data.nombre_rol_radicador'],
-    'sfcProduct'        => [16, 'data.codigo_producto_sfc', 'data.nombre_producto_sfc'],
-    'sfcReason'         => [17, 'data.codigo', 'data.descripcion'],
-    'admission'         => [21, 'data.codigo', 'data.descripcion'],
-    'controlEntity'     => [22, 'data.codigo', 'data.descripcion'],
-    'tutela'            => [30, 'data.codigo', 'data.descripcion'],
-    'expressComplaint'  => [32, 'data.codigo', 'data.descripcion'],
-    'matrixMotivos'     => [45, 'data.codigoMotivoSFC', 'data.motivoSFC'],
+    'idType'            => ['a21de141-8626-4bcb-8f5d-404726aa924d', 'cat-tipo-id', 11, 'data.codigo', 'data.descripcion'],
+    'personType'        => ['a21de14a-2850-47ae-9c62-2c24314d46a6', 'cat-tipo-persona', 12, 'data.codigo', 'data.descripcion'],
+    'countryCode'       => ['a21de14f-5b31-4d4c-846c-923c72707a34', 'cat-pais', 13, 'data.codigo', 'data.descripcion'],
+    'department'        => ['a21de15b-360c-452d-9e35-24abd8cdedb1', 'cat-dpto', 14, 'data.codigo_departamento', 'data.nombre_departamento'],
+    'sex'               => ['a21de1ee-f98e-4192-8065-2acec6ed93cc', 'cat-sexo', 23, 'data.codigo', 'data.descripcion'],
+    'lgbtiq'            => ['a21de372-8096-4dc1-abd7-e919ec79e00d', 'cat-lgbtiq', 41, 'data.codigo', 'data.descripcion'],
+    'specialCondition'  => ['a21de1f5-fb8c-44ed-a576-d9eac8a7be66', 'cat-cond-esp', 24, 'data.codigo', 'data.descripcion'],
+    'channel'           => ['a21de139-83bf-4c40-8cc3-eb2091c5b775', 'cat-canal', 10, 'data.codigo', 'data.descripcion'],
+    'receptionInstance' => ['a21de1bf-7c35-494c-a28b-b5aef1b6061a', 'cat-instancia', 19, 'data.codigo', 'data.descripcion'],
+    'requestType'       => ['a21de1ae-594f-4a15-896e-df64ec4f81a6', 'cat-tipo-sol', 18, 'data.codigo', 'data.descripcion'],
+    'filerRole'         => ['a21de29c-eb80-4c91-88b2-b2b676889809', 'cat-rol-radicador', 39, 'data.codigo_rol_radicador', 'data.nombre_rol_radicador'],
+    'sfcProduct'        => ['a21de19d-0acc-4229-a084-14956fb2f23e', 'cat-producto-sfc', 16, 'data.codigo_producto_sfc', 'data.nombre_producto_sfc'],
+    'sfcReason'         => ['a21de1a5-73ca-467b-9027-4ed1820133c0', 'cat-motivo-sfc', 17, 'data.codigo', 'data.descripcion'],
+    'admission'         => ['a21de1e1-f8fb-4edd-a4bf-6afc3136590a', 'cat-admision', 21, 'data.codigo', 'data.descripcion'],
+    'controlEntity'     => ['a21de1e8-d6e2-4686-a470-fafcc5aafbe9', 'cat-ente', 22, 'data.codigo', 'data.descripcion'],
+    'tutela'            => ['a21de23a-7553-4c6c-ac9e-39f7693521f8', 'cat-tutela', 30, 'data.codigo', 'data.descripcion'],
+    'expressComplaint'  => ['a21de253-e37d-464a-81d5-c82636674ef8', 'cat-expres', 32, 'data.codigo', 'data.descripcion'],
+    'matrixMotivos'     => ['a23663f3-e045-47ab-8859-30aca6876380', 'cat_matriz_motivos', 45, 'data.codigoMotivoSFC', 'data.motivoSFC'],
 ];
+
+// Colección de municipios (usada solo por descCity, filtrada por departamento vía PMQL):
+// NO está en QD_COLL porque su valueField/labelField dependen del PMQL, no del código plano.
+const MUNICIPIO_COLLECTION_UUID     = 'a21de17e-7c60-4d03-91e6-5af9b026de43';
+const MUNICIPIO_COLLECTION_NAME     = 'cat-mpio';
+const MUNICIPIO_COLLECTION_FALLBACK = 15;
 
 /** trim + lowercase para comparar columnas de la matriz (traen espacios sobrantes). */
 function sfcNorm($genVal): string
@@ -436,6 +503,50 @@ function resolvePath(array $dicRec, string $strPath): string
         }
     }
     return is_scalar($genAcc) ? (string) $genAcc : '';
+}
+
+/**
+ * Resuelve el ID actual de una colección por su UUID (estable entre instancias),
+ * con fallback a su nombre y, si tampoco aparece, al id conocido de la instancia
+ * de referencia. Cachea el resultado en proceso. Mismo criterio que
+ * resolveScriptId() del script 77 (COL_QD_Check_SLA_Expire), adaptado a
+ * colecciones — usa el mismo canal HTTP que pm4GetCollectionRecords() (curl +
+ * $PM4_BASE_URL/$API_TOKEN, ya poblados por sfcAplicarConfigPm4() antes de que
+ * se resuelva la primera colección).
+ */
+function resolveCollectionId(string $uuid, string $name, int $fallback): int
+{
+    global $PM4_BASE_URL, $PM4_API_BASE, $API_TOKEN;
+    static $cache = [];
+    $cacheKey = $uuid ?: $name;
+    if (isset($cache[$cacheKey])) {
+        return $cache[$cacheKey];
+    }
+
+    if ($API_TOKEN !== '' && $PM4_BASE_URL !== '') {
+        $strUrl = $PM4_BASE_URL . $PM4_API_BASE . '/collections?per_page=500&filter=' . rawurlencode($name);
+        $dicRes = sfcHttp('GET', $strUrl, ['Authorization: Bearer ' . $API_TOKEN, 'Accept: application/json']);
+        $lstColecciones = (is_array($dicRes['response']) && isset($dicRes['response']['data']) && is_array($dicRes['response']['data']))
+            ? $dicRes['response']['data']
+            : [];
+
+        // 1º intento: match EXACTO por UUID (fuente de verdad).
+        foreach ($lstColecciones as $dicColeccion) {
+            if (($dicColeccion['uuid'] ?? null) === $uuid) {
+                return $cache[$cacheKey] = (int) $dicColeccion['id'];
+            }
+        }
+        // 2º intento (fallback): match exacto por nombre si el UUID no apareció.
+        foreach ($lstColecciones as $dicColeccion) {
+            if (($dicColeccion['name'] ?? null) === $name) {
+                return $cache[$cacheKey] = (int) $dicColeccion['id'];
+            }
+        }
+    }
+
+    // Último recurso: id conocido de la instancia de referencia.
+    error_log("[COL - QD - Obtener Queja SFC - M1] resolveCollectionId: no se resolvió '{$name}' (uuid={$uuid}) dinámicamente; usando fallback id={$fallback}.");
+    return $cache[$cacheKey] = $fallback;
 }
 
 /** GET /collections/{id}/records?per_page=500[&pmql=...] → array de records ([] si falla). */
@@ -464,7 +575,11 @@ function catRecords(string $strName): array
         return $dicCache[$strName];
     }
     $dicDef = QD_COLL[$strName] ?? null;
-    $dicCache[$strName] = $dicDef ? pm4GetCollectionRecords($dicDef[0]) : [];
+    if (!$dicDef) {
+        return $dicCache[$strName] = [];
+    }
+    $intCollId = resolveCollectionId($dicDef[0], $dicDef[1], $dicDef[2]);
+    $dicCache[$strName] = pm4GetCollectionRecords($intCollId);
     return $dicCache[$strName];
 }
 
@@ -476,14 +591,14 @@ function descByCat(string $strName, string $strCode): string
         return '';
     }
     foreach (catRecords($strName) as $dicRec) {
-        if (resolvePath($dicRec, $dicDef[1]) === $strCode) {
-            return resolvePath($dicRec, $dicDef[2]);
+        if (resolvePath($dicRec, $dicDef[3]) === $strCode) {
+            return resolvePath($dicRec, $dicDef[4]);
         }
     }
     return '';
 }
 
-/** Municipio (colección 15) filtrado por departamento vía PMQL, cacheado por depto. */
+/** Municipio (colección cat-mpio) filtrado por departamento vía PMQL, cacheado por depto. */
 function descCity(string $strCityCode, string $strDeptCode): string
 {
     static $dicCache = [];
@@ -491,7 +606,8 @@ function descCity(string $strCityCode, string $strDeptCode): string
         return '';
     }
     if (!array_key_exists($strDeptCode, $dicCache)) {
-        $dicCache[$strDeptCode] = pm4GetCollectionRecords(15, 'data.codigo_departamento = "' . $strDeptCode . '"');
+        $intMunicipioId = resolveCollectionId(MUNICIPIO_COLLECTION_UUID, MUNICIPIO_COLLECTION_NAME, MUNICIPIO_COLLECTION_FALLBACK);
+        $dicCache[$strDeptCode] = pm4GetCollectionRecords($intMunicipioId, 'data.codigo_departamento = "' . $strDeptCode . '"');
     }
     foreach ($dicCache[$strDeptCode] as $dicRec) {
         if (resolvePath($dicRec, 'data.codigo_municipio') === $strCityCode) {
