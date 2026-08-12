@@ -80,6 +80,10 @@ venv.bak/
 .coverage
 htmlcov/
 
+# Cobertura de vitest (`npm run coverage`) — artefacto local/CI, se regenera siempre.
+# Las entradas de arriba (.coverage, htmlcov/) son de coverage.py, no cubren esto.
+coverage/
+
 # IDEs and Editors
 .vscode/
 .idea/
