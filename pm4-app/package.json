@@ -6,13 +6,16 @@
     "frontend"
   ],
   "scripts": {
-    "claude:mi-nuevo-hook": "command -v mi-herramienta-nueva >/dev/null 2>&1 || (echo '❌ Error: Falta instalar dependencias. Por favor ejecuta npm ci' && exit 1); mi-herramienta-nueva --args",
     "dev": "concurrently \"npm run dev --workspace=backend\" \"npm run dev --workspace=frontend\"",
     "prebuild": "node scripts/pm4-registry-sync.mjs --update --ci",
     "build": "npm run build --workspace=frontend && npm run build --workspace=backend",
-    "lint": "npm run lint --workspace=frontend",
+    "lint": "npm run lint --workspace=frontend && npm run lint --workspace=backend",
+    "typecheck": "npm run typecheck --workspace=backend",
     "test": "npm run test --workspace=frontend && npm run test --workspace=backend",
-    "verify": "npm run build --workspace=frontend && npm run build --workspace=backend && npm run lint && npm run test",
+    "verify": "node scripts/verify.mjs",
+    "verify:verbose": "node scripts/verify.mjs --verbose",
+    "coverage": "npm run coverage --workspace=frontend && npm run coverage --workspace=backend",
+    "coverage:diff": "node scripts/coverage-diff.mjs",
     "setup:hooks": "git config core.hooksPath .githooks",
     "start": "NODE_ENV=production node backend/dist/server.js"
   },
