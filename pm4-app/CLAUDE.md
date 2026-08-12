@@ -39,6 +39,84 @@ Aplican a **todo** cambio de código en este proyecto, no solo a pantallas nueva
    vía el registro. Ver [Registro de IDs PM4](#registro-de-ids-pm4-colecciones-scripts-procesos).
 7. **Comentarios técnicos profesionales en el código** — explican el porqué y el contrato,
    no repiten el nombre de la función. Ver [Comentarios y documentación técnica en el código](#comentarios-y-documentación-técnica-en-el-código).
+8. **Nunca commitear sin confirmación del usuario. Nunca pushear, salvo pedido explícito.**
+   Ver [Flujo de trabajo con Claude](#flujo-de-trabajo-con-claude).
+
+---
+
+## Flujo de trabajo con Claude
+
+El pedido típico es una línea —`"Crea la SCR-000 basada en su anexo: <ruta>"`— y detrás corre
+este guion. Sirve igual para una pantalla nueva, un fix o un refactor.
+
+### Los dos frenos, antes que nada
+
+- **Commit:** preparo todo (archivos, mensaje) y **pido confirmación**. Nunca commiteo por
+  iniciativa propia, ni siquiera cuando `verify` está verde y "obviamente corresponde".
+- **Push:** **no lo hago nunca**, salvo que el usuario lo pida con esas palabras. El push y el
+  PR son suyos. Si digo "listo", significa *commiteado en local*, no *subido*.
+
+Esto no es cortesía: un commit o un push son las dos acciones difíciles de revertir de todo el
+ciclo, y son las únicas donde el criterio del usuario no lo puede suplir la automatización.
+
+### Qué necesito en el pedido
+
+| Insumo | Por qué |
+|---|---|
+| El **anexo** (o el JSON exportado de PM4, o un screenshot) | Sin él invento campos, y eso es peor que no empezar |
+| Los **watchers**, si tiene | Qué campo dispara qué script |
+| La pantalla de referencia, si querés clonar una | Si no, elijo yo la más análoga y te lo digo |
+
+### Las 6 fases
+
+1. **Leer** — el insumo, más `../docs/guides/nomenclatura-variables.md`,
+   `outputs/zds-cheatsheet.md`, `outputs/shared-css-catalog.md` y
+   `../docs/guides/testing-conventions.md`. Si falta algo, **me detengo y pregunto**.
+2. **Rama** — `git switch -c feat/<slug>` desde `dev` actualizado (ver
+   [Modelo de ramas](#modelo-de-ramas-las-dos-de-larga-vida-son-entornos-desplegados)). Nunca
+   trabajo sobre `dev` ni `main`.
+3. **Construir** — `variables.ts` con las colecciones **por nombre** (`resolveCollectionId`,
+   jamás un id suelto) · campos `qd_*` con la nomenclatura · UI bajando la
+   [Jerarquía de decisión de UI](#jerarquía-de-decisión-de-ui-obligatorio) · registro en
+   `App.tsx` · `DOCUMENTACION_<slug>.md` con la trazabilidad FLD/RUL/MSG contra el insumo.
+4. **Testear — en el MISMO commit, no después.** Ver el detalle abajo.
+5. **Mutar** — rompo cada regla nueva a propósito, confirmo que el test se pone **rojo**, y
+   reverto. Si un test no se pone rojo al romper lo que dice cubrir, no sirve y hay que
+   rehacerlo.
+6. **Verificar y entregar** — `npm run verify` verde, `npm run coverage:diff` para ver qué quedó
+   sin ejercitar, y te reporto: qué construí, qué testeé, **qué mutaciones verifiqué** y qué
+   dejé afuera. Ahí pido la confirmación para commitear. El push y el PR contra `dev` son tuyos.
+
+### Qué significa "con sus tests" para una pantalla
+
+Tres cosas distintas, no un test genérico:
+
+- **Lógica pura** (`.test.ts`) — helpers y cálculos de `variables.ts` o `core/`.
+- **Pantalla** (`.test.tsx`) — que monte, **más un test por cada RUL del anexo**. Si el anexo
+  dice *"RUL-000-09: al cambiar Departamento se limpia Municipio"*, hay un test que falla si
+  alguien saca esa línea.
+- **Smoke de arranque** — registrar la pantalla en `App.tsx` **obliga** a sumar el slug a
+  `frontend/src/App.smoke.test.tsx`; si no, la guarda de inventario pone la suite en rojo
+  nombrando el slug faltante. Es el único de los tres que no depende de mi buena voluntad.
+
+Si el insumo pide una integración nueva, va como ruta en `backend/`, con la lógica no trivial
+extraída a `backend/src/lib/` y testeada ahí — nunca un `fetch` desde una pantalla.
+
+### Dónde freno a preguntar (y está bien que lo haga)
+
+- Un componente del DS que **no está documentado** en `outputs/` → pido la doc oficial antes de
+  inventar props.
+- Una colección/script que **no resuelve por nombre** en `pm4-registry.json`.
+- Una regla del insumo **ambigua** o que contradice una pantalla existente.
+
+### El límite honesto, y cómo controlarlo
+
+Los cuatro anillos atrapan **"rompiste algo"**, no **"no lo testeaste"**. Salvo la guarda del
+smoke, nada me obliga a escribir el test de una regla nueva. La palanca es una sola pregunta:
+
+> **"¿Qué mutaste para comprobar que los tests detectan la rotura?"**
+
+Si no puedo nombrar la línea que rompí y el test que se puso rojo, el test no vale.
 
 ---
 

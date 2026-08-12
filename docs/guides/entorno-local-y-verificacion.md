@@ -184,6 +184,10 @@ esperando un reporte que nunca llega.
 
 ## El flujo, de punta a punta
 
+> **Si el cambio lo hizo Claude:** llega hasta el commit y **pide confirmación** antes de
+> hacerlo; **no pushea nunca** salvo pedido explícito. El `git push`, el PR y el merge son del
+> usuario. Ver [`pm4-app/CLAUDE.md` → Flujo de trabajo con Claude](../../pm4-app/CLAUDE.md#flujo-de-trabajo-con-claude).
+
 ### Trabajo normal → `dev` (Render de desarrollo)
 
 ```bash
