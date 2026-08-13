@@ -24,7 +24,7 @@ on:
   # Las ramas de trabajo no van acá: se verifican vía `pull_request`, que además prueba el
   # resultado del merge. Cubrirlas con '**' duplicaría cada corrida sin agregar información.
   push:
-    branches: [main, dev]
+    branches: [main, develop]
   # Sin filtro de `branches` a propósito: dispara para PRs con cualquier base, así que cubre
   # igual los `feat/… → dev` del día a día y los `dev → main` de release.
   pull_request:

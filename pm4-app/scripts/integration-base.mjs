@@ -29,7 +29,7 @@
 import { spawnSync } from 'node:child_process';
 
 /** Ramas de larga vida: cada una es un entorno desplegado, ninguna se integra "hacia arriba". */
-export const STR_RAMA_DESARROLLO = 'dev';
+export const STR_RAMA_DESARROLLO = 'develop';
 export const STR_RAMA_PRODUCCION = 'main';
 
 /**
