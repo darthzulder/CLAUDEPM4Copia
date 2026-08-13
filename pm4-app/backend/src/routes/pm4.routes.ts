@@ -240,29 +240,4 @@ router.get('/requests/:request_id/files/:file_id/contents', (req, res) =>
   streamFile(`/requests/${req.params.request_id}/files/${req.params.file_id}/contents`, req, res)
 );
 
-// Cotizador Excel — proxy al micro-servicio Python separado
-router.post('/cotizador/calcular', async (req: Request, res: Response) => {
-  // Validamos que el micro-servicio este configurado
-  const strApiUrl = process.env.COTIZADOR_API_URL;
-  if (!strApiUrl) {
-    res.status(503).json({ message: 'COTIZADOR_API_URL no configurado' });
-    return;
-  }
-  console.log('[cotizador] Enviando a', strApiUrl);
-  try {
-    // Reenviamos el calculo al micro-servicio
-    const objResponse = await axios.post(`${strApiUrl}/calcular`, req.body, {
-      headers: { 'Content-Type': 'application/json' },
-      timeout: 30000,
-    });
-    res.json(objResponse.data);
-  } catch (excError) {
-    const excAxios = excError as AxiosError;
-    const intStatus = excAxios.response?.status ?? 500;
-    const strMsg    = (excAxios.response?.data as { error?: string })?.error ?? excAxios.message;
-    console.error('[cotizador] Error:', strMsg);
-    res.status(intStatus).json({ message: strMsg });
-  }
-});
-
 export default router;

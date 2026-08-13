@@ -17,17 +17,3 @@ services:
     environment:
       - NODE_ENV=development
       - PORT=3001
-    depends_on:
-      - cotizador-service
-
-  cotizador-service:
-    build:
-      context: ./pm4-app/cotizador-service
-      dockerfile: Dockerfile
-    container_name: cotizador-service-container
-    ports:
-      - "5001:5001"
-    volumes:
-      - ./pm4-app/cotizador-service:/app
-    environment:
-      - PORT=5001

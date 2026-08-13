@@ -62,7 +62,6 @@ const CLL_EXCLUIDOS = [
   /\/main\.tsx$/,
   /\/zds-setup\.ts$/,
   /\.types\.ts$/,
-  /\/screens\/FAST-FLOW\//,
   /\/backend\/src\/server\.ts$/,
 ];
 
@@ -230,7 +229,7 @@ for (const objFila of cllFilas) {
 if (cllFilas.length === 0) console.log('  (el diff no toca líneas ejecutables de TS/TSX)');
 
 if (cllOmitidos.length > 0) {
-  console.log(`\n  ${cllOmitidos.length} archivo(s) del diff sin cobertura que medir (tests, config, bootstrap, FAST-FLOW).`);
+  console.log(`\n  ${cllOmitidos.length} archivo(s) del diff sin cobertura que medir (tests, config, bootstrap).`);
 }
 
 // En CI se escribe además al job summary, que es donde se lee sin abrir los logs.
