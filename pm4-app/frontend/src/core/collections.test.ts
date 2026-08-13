@@ -12,7 +12,7 @@ const lstEntries = Object.entries(GLOBAL_COLLECTIONS);
 
 describe('GLOBAL_COLLECTIONS', () => {
   it('tiene entradas (el módulo no quedó vacío por un refactor)', () => {
-    expect(lstEntries.length).toBeGreaterThan(40);
+    expect(lstEntries.length).toBeGreaterThan(30);
   });
 
   it.each(lstEntries)('%s tiene un id numérico válido', (_strKey, in_objDef) => {
@@ -46,9 +46,10 @@ describe('GLOBAL_COLLECTIONS', () => {
 
   it('no aparecen NUEVAS colecciones compartiendo el mismo id de PM4', () => {
     // Compartir id no es fatal (dos vistas pueden usar el mismo catálogo), pero un duplicado
-    // nuevo casi siempre es un copy-paste o un id mal resuelto. Se fijan los grupos que hoy
-    // existen para que el test avise solo de los que aparezcan de aquí en adelante.
-    const setDuplicadosConocidos = new Set([5, 6, 14, 15, 25]);
+    // nuevo casi siempre es un copy-paste o un id mal resuelto. Hoy no hay ninguno conocido
+    // (los duplicados históricos eran todos de FAST-FLOW, ya eliminado); el set queda vacío
+    // para que el test avise de cualquiera que aparezca de aquí en adelante.
+    const setDuplicadosConocidos = new Set<number>([]);
     const dicPorId = new Map<number, string[]>();
     for (const [strKey, objDef] of lstEntries) {
       dicPorId.set(objDef.id, [...(dicPorId.get(objDef.id) ?? []), strKey]);

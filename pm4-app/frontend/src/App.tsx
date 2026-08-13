@@ -2,19 +2,7 @@ import { Component, lazy, Suspense, type ErrorInfo, type ReactNode } from 'react
 import { ZrLoader } from './components/fields/ZdsFields';
 
 // Cada pantalla se carga bajo demanda: el iframe solo renderiza una a la vez
-// (?screen=), así que no tiene sentido descargar las ~27 en un único bundle.
-const CotizadorFastFlow = lazy(() => import('./screens/FAST-FLOW/cotizador-fast-flow/CotizadorFastFlow'));
-const SolicitudCotizacionCuw = lazy(() => import('./screens/FAST-FLOW/solicitud-cotizacion-cuw/SolicitudCotizacionCuw'));
-const SolicitudFfFl = lazy(() => import('./screens/FAST-FLOW/ff-fl/SolicitudFfFl'));
-const CotizacionFfFl = lazy(() => import('./screens/FAST-FLOW/ff-fl/CotizacionFfFl'));
-const RespuestaCotizacion = lazy(() => import('./screens/FAST-FLOW/respuesta-cotizacion/RespuestaCotizacion'));
-const OpcionesCotizacion = lazy(() => import('./screens/FAST-FLOW/opciones-cotizacion/OpcionesCotizacion'));
-const VisualizarDocumentos = lazy(() => import('./screens/FAST-FLOW/nota-cobertura/VisualizarDocumentos'));
-const DocSARLAFT = lazy(() => import('./screens/FAST-FLOW/col-emision/DocSARLAFT'));
-const RevSARLAFT = lazy(() => import('./screens/FAST-FLOW/col-emision/RevSARLAFT'));
-const SolDocEmi = lazy(() => import('./screens/FAST-FLOW/col-emision/SolDocEmi'));
-const VerDocEmi = lazy(() => import('./screens/FAST-FLOW/col-emision/VerDocEmi'));
-const EstadoCorreo = lazy(() => import('./screens/FAST-FLOW/estado-correo/EstadoCorreo'));
+// (?screen=), así que no tiene sentido descargar las ~15 en un único bundle.
 const CrearRecibirQueja = lazy(() => import('./screens/atencion-cliente/quejas-directas/COL_QD_SCR-000_CrearRecibirQueja/CrearRecibirQueja'));
 const DsCatalog = lazy(() => import('./screens/ds-catalog/DsCatalog'));
 const RevisionErrorTecnicoApi = lazy(() => import('./screens/atencion-cliente/quejas-directas/COL_QD_SCR-004_Revision_Error_Tecnico_API/RevisionErrorTecnicoApi'));
@@ -52,18 +40,6 @@ class ErrorBoundary extends Component<{ children: ReactNode }, { error: Error | 
 // registrada y verifica que no revienta. La exportación es lo que le permite comparar su lista
 // contra esta y ponerse en rojo si se agrega una pantalla sin cubrirla; no es API para nadie más.
 export const SCREENS: Record<string, React.ComponentType> = {
-  'cotizador-fast-flow': CotizadorFastFlow,
-  'solicitud-cotizacion-cuw': SolicitudCotizacionCuw,
-  'ff-fl': SolicitudFfFl,
-  'ff-fl-cotizacion': CotizacionFfFl,
-  'respuesta-cotizacion': RespuestaCotizacion,
-  'opciones-cotizacion': OpcionesCotizacion,
-  'nota-cobertura': VisualizarDocumentos,
-  'doc-sarlaft': DocSARLAFT,
-  'rev-sarlaft': RevSARLAFT,
-  'sol-doc-emi': SolDocEmi,
-  'ver-doc-emi': VerDocEmi,
-  'estado-correo': EstadoCorreo,
   'COL_QD_SCR-000_CrearRecibirQueja': CrearRecibirQueja,
   'COL_QD_SCR-004_Revision_Error_Tecnico_API': RevisionErrorTecnicoApi,
   'COL_QD_SCR-003_Correccion_Error_Funcional': CorreccionErrorFuncional,
