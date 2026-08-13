@@ -66,6 +66,10 @@ const CLL_PASOS = [
   { nombre: 'build · backend',     cmd: 'npm run build --workspace=backend' },
   { nombre: 'test · frontend',     cmd: 'npm run test --workspace=frontend' },
   { nombre: 'test · backend',      cmd: 'npm run test --workspace=backend' },
+  // Los utilitarios de scripts/ no pertenecen a ningún workspace, así que necesitan su propio
+  // paso: agregarlos al script `test` del package.json no tendría efecto acá, porque esta lista
+  // no invoca `npm run test` sino cada workspace por separado.
+  { nombre: 'test · scripts',      cmd: 'npm run test:scripts' },
   {
     nombre: 'test · cotizador (pytest)',
     cmd: `${STR_PYTHON ?? 'python'} -m pytest -q`,
