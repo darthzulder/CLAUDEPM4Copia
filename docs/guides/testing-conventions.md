@@ -20,8 +20,7 @@ Vitest lo enruta automáticamente al project correcto por la extensión, no hace
 configurar nada por archivo.
 
 Comandos: `npm run verify` (el gate completo) · `npm run test --workspace=frontend`
-(Vitest, ambos projects) · `npm run test --workspace=backend` · `pytest -q` desde
-`cotizador-service/`.
+(Vitest, ambos projects) · `npm run test --workspace=backend`.
 
 ### Tres consecuencias de esa configuración que muerden
 
@@ -98,15 +97,13 @@ conversión ISO con un off-by-hours indescifrable.
 
 ## Qué necesita test — por capa
 
-### 1. Lógica pura (`core/*.ts`, helpers, `cotizador-service/app.py`) — OBLIGATORIO
+### 1. Lógica pura (`core/*.ts`, helpers) — OBLIGATORIO
 
 Toda función/hook nuevo o modificado que transforma datos, calcula algo, o tiene ramas de
-decisión (no solo pega a una API) necesita un test Vitest/pytest **colocado junto al
-archivo que testea**, mismo patrón que ya existe:
+decisión (no solo pega a una API) necesita un test Vitest **colocado junto al archivo que
+testea**, mismo patrón que ya existe:
 - `core/useCollection.test.ts` — código↔label de colecciones PM4.
-- `core/useCotizador.test.ts` — mapeo de resultado de cálculo a payload PM4.
 - `screens/.../respuestaFinalTemplate.test.ts` — reemplazo de placeholders en HTML.
-- `cotizador-service/tests/test_calc.py` — funciones `calc_*` contra `tables.json`.
 
 Cubrir: el caso feliz, al menos un caso límite (vacío/null/cero), y cualquier gotcha
 documentado en el comentario de la función (p. ej. un formato de fecha, un `null` que se
@@ -176,10 +173,10 @@ vi.mock('../../../../core/useCollection', async (in_fnImportOriginal) => {
 ```
 
 **2. La profundidad del path importa y falla en silencio.** Las 10 pantallas de Quejas
-Directas están 4 niveles bajo `src/` → **`'../../../../core/useTask'`**. Las de
-`screens/FAST-FLOW/<slug>/` están a 3 → `'../../../core/useTask'`. Un path que no resuelve
-**no lanza error**: `vi.mock` registra un mock que nadie importa, corre el hook real, y el
-test falla con un error de red confuso. Copiar el path del `import` real de la pantalla.
+Directas están 4 niveles bajo `src/` → **`'../../../../core/useTask'`**. Un path que no
+resuelve **no lanza error**: `vi.mock` registra un mock que nadie importa, corre el hook
+real, y el test falla con un error de red confuso. Copiar el path del `import` real de la
+pantalla.
 
 **3. Los valores de formulario NO se leen con `getByDisplayValue`.** Los controles del DS
 renderizan como custom elements **sin `<input>`/`<textarea>` nativo dentro** (0 elementos
@@ -228,8 +225,6 @@ docker exec pm4-app-container sh -c "cd /app && npm run build --workspace=fronte
 docker exec pm4-app-container sh -c "cd /app && npm run build --workspace=backend"
 docker exec pm4-app-container sh -c "cd /app && npm run lint --workspace=frontend"
 docker exec pm4-app-container sh -c "cd /app && npm run test --workspace=frontend"
-# si se tocó cotizador-service:
-docker exec cotizador-service-container sh -c "cd /app && pytest -q"
 ```
 
 No dar una tarea por terminada con build, lint o tests rotos — ni con un test viejo que dejó

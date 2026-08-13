@@ -1,7 +1,7 @@
 # Diagrama de integración — PM4 App
 
-Arquitectura actual (frontend + backend/proxy + microservicio de cotización + verificación
-reCAPTCHA + resolución de IDs por nombre). Fuente Mermaid renderizada a
+Arquitectura actual (frontend + backend/proxy + verificación reCAPTCHA + resolución de IDs
+por nombre). Fuente Mermaid renderizada a
 [`pm4_render_integration.svg`](pm4_render_integration.svg) con `@mermaid-js/mermaid-cli`.
 
 ```mermaid
@@ -28,7 +28,7 @@ flowchart TD
             APP["App.tsx
             router ?screen="]
             SCREEN["Pantalla React
-            (una de 26 registradas)"]
+            (una de 14 registradas)"]
             HOOKS["useTask · useCollection · useToken"]
             DOCS["Seccion Documentos
             file inputs"]
@@ -46,11 +46,6 @@ flowchart TD
             RECAPTCHA_VERIFY["POST /api/recaptcha/verify"]
         end
 
-    end
-
-    subgraph COTIZADOR["  cotizador-service — Flask (contenedor aparte)  "]
-        COT_CALC["POST /calcular
-        lookup en tables.json"]
     end
 
     subgraph GOOGLE["  Google — reCAPTCHA siteverify  "]
@@ -85,10 +80,6 @@ flowchart TD
     GOOGLE_API -->|"success: true/false"| RECAPTCHA_VERIFY
     RECAPTCHA_VERIFY -->|"verified: true/false"| RECAPTCHA
 
-    SCREEN    -->|"POST /api/cotizador/calcular"| PROXY
-    PROXY     -->|"reenvia payload"| COT_CALC
-    COT_CALC  -->|"primas · deducibles"| PROXY
-
     SCREEN    -->|"PUT /api/tasks/id
     status: COMPLETED
     data: frm_* + arrays + docs"| PROXY
@@ -100,6 +91,5 @@ flowchart TD
     style FRONTEND  fill:#1b4332,color:#fff,stroke:#52b788
     style BACKEND   fill:#1b4332,color:#fff,stroke:#52b788
     style BROWSER   fill:#374151,color:#fff,stroke:#9ca3af
-    style COTIZADOR fill:#4a3728,color:#fff,stroke:#d97706
     style GOOGLE    fill:#3a3a1b,color:#fff,stroke:#eab308
 ```

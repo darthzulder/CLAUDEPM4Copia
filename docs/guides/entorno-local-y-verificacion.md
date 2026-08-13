@@ -60,13 +60,11 @@ costo creciente:
 ```
 lint · frontend      lint · backend      typecheck · backend
 build · frontend     build · backend
-test · frontend      test · backend      test · cotizador (pytest)
+test · frontend      test · backend
 ```
 
-Esto no es cosmética. Antes cada anillo mantenía su propia lista y **ya habían divergido**: el
-hook corría los workspaces de Node pero no el `pytest` del cotizador, que sí corría CI. El
-resultado era el clásico "en mi máquina pasaba". Con un script compartido la divergencia es
-imposible por construcción.
+Esto no es cosmética. Antes cada anillo mantenía su propia lista y ya habían divergido entre
+sí. Con un script compartido la divergencia es imposible por construcción.
 
 ```bash
 cd pm4-app
@@ -74,11 +72,6 @@ npm run verify            # silencioso: solo imprime lo que falla
 npm run verify:verbose    # stream de cada paso (lo que usa CI)
 node scripts/verify.mjs --list   # qué pasos hay y cuáles se saltarían acá
 ```
-
-> **Si no tenés Python con `pytest`**, el paso del cotizador se **salta con aviso ruidoso** en
-> vez de bloquearte: en Windows es normal no tenerlo, y frenar cada commit del frontend por eso
-> sería absurdo. CI siempre lo corre, así que la cobertura no se pierde — se retrasa hasta el
-> PR. Para tenerlo en local: `pip install -r cotizador-service/requirements-dev.txt`.
 
 ## Setup de los hooks (una vez por clon)
 
@@ -320,12 +313,6 @@ Vía Docker:
 
 ```bash
 docker exec pm4-app-container sh -c "cd /app && npm run verify"
-```
-
-El paso de `pytest` va incluido; para correrlo solo:
-
-```bash
-docker exec cotizador-service-container sh -c "cd /app && pytest -q"
 ```
 
 > `verify` corre los builds **por workspace** a propósito. El script `build` de la raíz

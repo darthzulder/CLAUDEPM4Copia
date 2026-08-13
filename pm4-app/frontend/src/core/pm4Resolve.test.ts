@@ -2,7 +2,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import registry from '../config/pm4-registry.json';
 import { resolveCollectionId, resolveProcessEvent, resolveScriptId } from './pm4Resolve';
 
-// Estos tests cubren la rama de FALLBACK, que hoy está muerta en producción (los 52+3+1
+// Estos tests cubren la rama de FALLBACK, que hoy está muerta en producción (los 37+1+1
 // slugs del registro resuelven) pero se activa garantizado en la próxima migración de
 // instancia PM4 — justo cuando nadie la está mirando. No hace falta mockear el JSON: basta
 // pedir un slug que no existe.
@@ -21,9 +21,9 @@ afterEach(() => {
 
 describe('resolveCollectionId', () => {
   it('devuelve el id del registro cuando el slug existe', () => {
-    // 'intermediarios' es una entrada real; se lee del propio JSON para que el test no se
+    // 'requestType' es una entrada real; se lee del propio JSON para que el test no se
     // rompa cuando el id cambie de instancia (que es justamente lo normal).
-    expect(resolveCollectionId('intermediarios', 999)).toBe(registry.collections.intermediarios.id);
+    expect(resolveCollectionId('requestType', 999)).toBe(registry.collections.requestType.id);
     expect(objWarn).not.toHaveBeenCalled();
   });
 
@@ -36,8 +36,8 @@ describe('resolveCollectionId', () => {
 
 describe('resolveScriptId', () => {
   it('devuelve el id del registro cuando el slug existe', () => {
-    expect(resolveScriptId('consultarClienteTiaFastFlow', 999))
-      .toBe(registry.scripts.consultarClienteTiaFastFlow.id);
+    expect(resolveScriptId('similarCasesQuejas', 999))
+      .toBe(registry.scripts.similarCasesQuejas.id);
     expect(objWarn).not.toHaveBeenCalled();
   });
 

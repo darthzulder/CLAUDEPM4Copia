@@ -48,15 +48,13 @@ export default defineConfig({
       include: ['src/**/*.{ts,tsx}'],
       // Nada de esto es código de producto cuya cobertura signifique algo: los *.test.* son
       // el instrumento de medición, `main.tsx`/`zds-setup.ts` son bootstrap que solo corre en
-      // el navegador real, los `*.types.ts` no emiten runtime, y FAST-FLOW está marcado para
-      // reemplazo y fuera de alcance por decisión del proyecto.
+      // el navegador real, y los `*.types.ts` no emiten runtime.
       exclude: [
         'src/**/*.test.{ts,tsx}',
         'src/test-setup.ts',
         'src/main.tsx',
         'src/zds-setup.ts',
         'src/**/*.types.ts',
-        'src/screens/FAST-FLOW/**',
       ],
     },
     projects: [
