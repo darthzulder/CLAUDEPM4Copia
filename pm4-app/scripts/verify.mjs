@@ -21,6 +21,16 @@
  * Los builds se corren POR WORKSPACE a propósito, salteando el script `build` de la raíz:
  * ese dispara `prebuild` (pm4-registry-sync contra la instancia PM4 real), que haría una
  * llamada de red y podría reescribir pm4-registry.json en medio de un commit.
+ *
+ * Runner de los pasos de Node/npm (ver `detectarRunnerNode`): host si tiene la versión
+ * correcta, `pm4-app-container` si no. Se decide POR PASO, no una vez para todo el script, así
+ * que también beneficia un `npm run verify` corrido a mano, no solo el de los hooks. El host
+ * se prefiere sobre Docker cuando los dos están disponibles: `App.smoke.test.tsx` es
+ * intermitente dentro del contenedor bajo el pool de workers de Vitest compitiendo por I/O
+ * contra el bind mount de Windows, y 100% estable corriendo nativo (confirmado: 3/3 corridas
+ * en host, 478/478 tests, contra 1-4 fallos variables por corrida dentro de Docker). El
+ * contenedor sigue siendo un respaldo válido —trae garantizada la versión correcta de Node—
+ * nunca la primera opción.
  */
 
 import { spawnSync } from 'node:child_process';
@@ -29,6 +39,13 @@ import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 
 const STR_DIR_RAIZ = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
+
+// Igual que `Dockerfile` (`node:24-alpine`), `.github/workflows/ci.yml` (`actions/setup-node`)
+// y el runtime de Render — las cuatro superficies fijan el mismo major a propósito (ver el
+// comentario de Node 24 en ci.yml). Un host con un major distinto no es "probablemente
+// compatible": es el mismo tipo de drift que ya costó la migración de Node 20 a 24.
+const NUM_NODE_MAJOR_REQUERIDO = 24;
+const STR_CONTENEDOR = 'pm4-app-container';
 
 const blnVerbose = process.argv.includes('--verbose');
 const blnSoloListar = process.argv.includes('--list');
@@ -40,6 +57,12 @@ const blnSoloListar = process.argv.includes('--list');
  * cada commit del frontend por eso sería absurdo. Si no está, el paso se SALTA con aviso
  * ruidoso — CI siempre lo corre, así que la cobertura del cotizador nunca se pierde de
  * verdad, solo se retrasa hasta el PR.
+ *
+ * Sin fallback a Docker a propósito, a diferencia de `detectarRunnerNode`: el cotizador vive
+ * en su propio contenedor (`cotizador-service-container`, ver docker-compose.yml), que no es
+ * el mismo que corre Node, y sumarle esa segunda ruta de detección no está pedido por nada
+ * de lo que motivó este cambio (la flake era de Vitest/jsdom, no de pytest). Queda como
+ * mejora futura independiente si hace falta.
  */
 function detectarPython() {
   for (const strCmd of ['python', 'python3', 'py']) {
@@ -49,7 +72,31 @@ function detectarPython() {
   return null;
 }
 
+/**
+ * Dónde correr los pasos de Node/npm: host si tiene la versión correcta, `pm4-app-container`
+ * si no. Antes esta decisión la tomaba cada `.githooks/*` por su cuenta, y solo miraba si
+ * HABÍA un `npm` en el PATH — nunca si era la versión correcta, así que un host con Node 18/20
+ * pasaba el chequeo igual y corría todo ahí. Acá se valida la versión real.
+ */
+function detectarRunnerNode() {
+  const objVersion = spawnSync('node', ['--version'], { encoding: 'utf8' });
+  if (objVersion.status === 0) {
+    // parseInt corta en el primer '.', así que "24.19.0" → 24 sin partir el string a mano.
+    const numMajor = parseInt(objVersion.stdout.trim().replace(/^v/, ''), 10);
+    if (numMajor === NUM_NODE_MAJOR_REQUERIDO) return { modo: 'host', detalle: objVersion.stdout.trim() };
+  }
+
+  // Host ausente o con la versión equivocada: se prueba el contenedor, que SIEMPRE trae la
+  // correcta (Dockerfile fija `node:24-alpine`) — es un respaldo confiable, no una apuesta.
+  const objDocker = spawnSync('docker', ['ps', '--format', '{{.Names}}'], { encoding: 'utf8' });
+  const cllNombres = objDocker.status === 0 ? objDocker.stdout.split('\n').map((s) => s.trim()) : [];
+  if (cllNombres.includes(STR_CONTENEDOR)) return { modo: 'docker', detalle: STR_CONTENEDOR };
+
+  return { modo: null, detalle: null };
+}
+
 const STR_PYTHON = detectarPython();
+const OBJ_RUNNER_NODE = detectarRunnerNode();
 const STR_DIR_COTIZADOR = path.join(STR_DIR_RAIZ, 'cotizador-service');
 
 /**
@@ -74,6 +121,9 @@ const CLL_PASOS = [
     nombre: 'test · cotizador (pytest)',
     cmd: `${STR_PYTHON ?? 'python'} -m pytest -q`,
     cwd: STR_DIR_COTIZADOR,
+    // Nunca se delega a `pm4-app-container` (ver detectarRunnerNode): ese contenedor no trae
+    // Python, y el fallback de este paso es su propio criterio de host-only + skip, no Docker.
+    blnEsPython: true,
     // Se salta —con aviso— si no hay Python con pytest, o si el servicio no está en el árbol.
     saltarPorque: !existsSync(STR_DIR_COTIZADOR)
       ? 'no existe cotizador-service/ en este árbol'
@@ -83,6 +133,17 @@ const CLL_PASOS = [
   },
 ];
 
+// Sin runner Node válido (ni host con la versión correcta, ni el contenedor arriba), los
+// pasos de Node/npm se saltan con el mismo criterio que el de pytest sin intérprete: aviso
+// fuerte y seguir — CI, que sí tiene el runtime garantizado, es la red que no se puede saltar.
+if (OBJ_RUNNER_NODE.modo === null) {
+  for (const objPaso of CLL_PASOS) {
+    if (!objPaso.blnEsPython) {
+      objPaso.saltarPorque = `sin runner Node disponible: el host no tiene Node ${NUM_NODE_MAJOR_REQUERIDO} y '${STR_CONTENEDOR}' no está corriendo`;
+    }
+  }
+}
+
 if (blnSoloListar) {
   for (const objPaso of CLL_PASOS) {
     console.log(`${objPaso.saltarPorque ? '⏭ ' : '• '}${objPaso.nombre}${objPaso.saltarPorque ? `  (se salta: ${objPaso.saltarPorque})` : ''}`);
@@ -90,7 +151,12 @@ if (blnSoloListar) {
   process.exit(0);
 }
 
-console.log(`[verify] ${CLL_PASOS.length} pasos · node ${process.version}${STR_PYTHON ? ` · ${STR_PYTHON}` : ''}`);
+const strRunnerNode = OBJ_RUNNER_NODE.modo === 'host'
+  ? `host (${OBJ_RUNNER_NODE.detalle})`
+  : OBJ_RUNNER_NODE.modo === 'docker'
+    ? `docker (${OBJ_RUNNER_NODE.detalle})`
+    : 'SIN RUNNER — pasos Node saltados';
+console.log(`[verify] ${CLL_PASOS.length} pasos · node/npm: ${strRunnerNode}${STR_PYTHON ? ` · python: ${STR_PYTHON}` : ''}`);
 
 const cllSaltados = [];
 const intInicioTotal = Date.now();
@@ -105,15 +171,24 @@ for (const objPaso of CLL_PASOS) {
   const intInicio = Date.now();
   if (blnVerbose) console.log(`\n──────── ${objPaso.nombre} ────────`);
 
+  // Delegado a `pm4-app-container` cuando el host no tiene la versión correcta de Node (ver
+  // detectarRunnerNode) — el de pytest nunca se delega, tiene su propio criterio host-only.
+  // El `cd /app` es seguro sin importar `objPaso.cwd`: los pasos que se delegan son siempre
+  // los de Node/npm, y ninguno de ellos pisa el cwd por defecto (STR_DIR_RAIZ ≡ /app dentro
+  // del contenedor, por el bind mount de docker-compose.yml).
+  const strCmd = (!objPaso.blnEsPython && OBJ_RUNNER_NODE.modo === 'docker')
+    ? `docker exec ${STR_CONTENEDOR} sh -c "cd /app && ${objPaso.cmd}"`
+    : objPaso.cmd;
+
   // En modo silencioso se bufferea la salida y solo se imprime si el paso falla: en verde el
   // gate no tiene por qué escupir 200 líneas de build, y en rojo se ve todo lo necesario.
   // Comando como STRING con `shell: true`, no como (cmd, args[]): en Windows `npm` es un
   // `npm.cmd`, y desde la corrección de CVE-2024-27980 Node se niega a ejecutar `.cmd`/`.bat`
   // sin shell (falla con EINVAL). Pasar además un array de args con shell activo emite
   // DEP0190, porque los argumentos se concatenan sin escapar. La forma sancionada es un único
-  // string, y acá es segura porque todos los comandos son literales de este archivo: no hay
-  // ninguna entrada externa que interpolar.
-  const objRes = spawnSync(objPaso.cmd, {
+  // string, y acá es segura porque todos los comandos (incluido el `docker exec` que los
+  // envuelve) son literales de este archivo: no hay ninguna entrada externa que interpolar.
+  const objRes = spawnSync(strCmd, {
     cwd: objPaso.cwd ?? STR_DIR_RAIZ,
     stdio: blnVerbose ? 'inherit' : 'pipe',
     encoding: 'utf8',
