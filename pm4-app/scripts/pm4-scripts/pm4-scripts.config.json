@@ -1,0 +1,28 @@
+{
+  "_doc": "Qué procesos PM4 vigila la grabadora de historial. El alcance es POR PROCESO: los scripts de los demás proyectos de la instancia (FAST-FLOW, CUW, pruebas) se ignoran. Para vigilar un proceso nuevo, agregá una entrada acá y corré `npm run pm4:capture -- --all`.",
+  "_descubrimiento": "Los scripts de cada proceso se leen de su BPMN (y del de sus subprocesos, siguiendo los callActivity), así que agregar un scriptTask en PM4 no exige tocar este archivo. Solo hay que declarar en `scriptsExtra` los que NINGÚN BPMN referencia: los que un script invoca en runtime y los que dispara el frontend como watcher.",
+  "procesos": [
+    {
+      "id": 31,
+      "carpeta": "proceso-31",
+      "nombre": "COL - Gestion de Quejas Directas",
+      "scriptsExtra": [
+        {
+          "uuid": "a2560610-9409-4931-bcc7-172aa91f56a9",
+          "titulo": "COL - QD - Core SFC",
+          "motivo": "CORE: login, firma HMAC y HTTP contra la SFC. Lo invocan en runtime los scripts de M1/M2/M3 y prórroga (86/83/89/78); no lo referencia ningún BPMN."
+        },
+        {
+          "uuid": "a26a713d-ea78-48b3-b829-5ddce63cfbd2",
+          "titulo": "COL_UTIL_Dias_Habiles",
+          "motivo": "Utilidad de días hábiles. La invoca COL_QD_Check_SLA_Expire (77) resolviéndola por uuid en runtime."
+        },
+        {
+          "uuid": "a23434ce-0eea-405f-9df7-aa781df863dc",
+          "titulo": "COL_QD_Check_Similitud",
+          "motivo": "Watcher que dispara el frontend desde SCR-000 vía resolveScriptId('similarCasesQuejas'); no es una tarea del proceso."
+        }
+      ]
+    }
+  ]
+}

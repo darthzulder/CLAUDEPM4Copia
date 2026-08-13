@@ -15,7 +15,10 @@ export interface CollectionOption {
   label: string;
 }
 
-function resolvePath(in_dicObj: Record<string, unknown>, in_strPath: string): string {
+// Exportadas para poder testearlas: resolvePmql arma la consulta PMQL que se manda a PM4 y
+// resolvePath camina rutas con puntos sobre el record crudo. No son API para las pantallas —
+// se consumen solo desde useCollection, acá abajo.
+export function resolvePath(in_dicObj: Record<string, unknown>, in_strPath: string): string {
   // Recorremos el path separado por puntos para bajar por el objeto
   return String(
     in_strPath.split('.').reduce<unknown>((in_objAcc, in_strKey) => {
@@ -27,7 +30,7 @@ function resolvePath(in_dicObj: Record<string, unknown>, in_strPath: string): st
   );
 }
 
-function resolvePmql(in_strTemplate: string, in_dicValues: Record<string, unknown>): string {
+export function resolvePmql(in_strTemplate: string, in_dicValues: Record<string, unknown>): string {
   // Reemplazamos cada placeholder por el valor correspondiente del form
   return in_strTemplate.replace(/\{\{(\w+)\}\}/g, (_, in_strKey) => String(in_dicValues[in_strKey] ?? ''));
 }

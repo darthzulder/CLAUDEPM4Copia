@@ -1,0 +1,227 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<bpmn:definitions xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:bpmn="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI" xmlns:dc="http://www.omg.org/spec/DD/20100524/DC" xmlns:di="http://www.omg.org/spec/DD/20100524/DI" xmlns:pm="http://processmaker.com/BPMN/2.0/Schema.xsd" xmlns:tns="http://sourceforge.net/bpmn/definitions/_1530553328908" xmlns:xsd="http://www.w3.org/2001/XMLSchema" targetNamespace="http://bpmn.io/schema/bpmn" exporter="ProcessMaker Modeler" exporterVersion="1.0" xsi:schemaLocation="http://www.omg.org/spec/BPMN/20100524/MODEL http://bpmn.sourceforge.net/schemas/BPMN20.xsd">
+  <bpmn:process id="ProcessId" name="ProcessName" isExecutable="true">
+    <bpmn:laneSet id="node_2">
+      <bpmn:lane id="node_3" name="">
+        <bpmn:flowNodeRef>node_6</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>node_148</bpmn:flowNodeRef>
+      </bpmn:lane>
+      <bpmn:lane id="node_4" name="">
+        <bpmn:flowNodeRef>node_15</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>node_31</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>node_121</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>node_127</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>node_178</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>node_263</bpmn:flowNodeRef>
+      </bpmn:lane>
+      <bpmn:lane id="node_5" name="">
+        <bpmn:flowNodeRef>node_24</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>node_44</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>node_92</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>node_100</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>node_115</bpmn:flowNodeRef>
+      </bpmn:lane>
+    </bpmn:laneSet>
+    <bpmn:startEvent id="node_6" name="Queja validada — iniciar radicación" pm:allowInterstitial="true" pm:interstitialScreenRef="58" pm:config="{&#34;web_entry&#34;:null}">
+      <bpmn:outgoing>node_52</bpmn:outgoing>
+    </bpmn:startEvent>
+    <bpmn:exclusiveGateway id="node_15" name="">
+      <bpmn:incoming>node_72</bpmn:incoming>
+      <bpmn:incoming>node_191</bpmn:incoming>
+      <bpmn:incoming>node_331</bpmn:incoming>
+      <bpmn:outgoing>node_337</bpmn:outgoing>
+    </bpmn:exclusiveGateway>
+    <bpmn:exclusiveGateway id="node_24" name="¿SmartSupervision aceptó? (HTTP 201)">
+      <bpmn:incoming>node_91</bpmn:incoming>
+      <bpmn:outgoing>node_105</bpmn:outgoing>
+      <bpmn:outgoing>node_110</bpmn:outgoing>
+    </bpmn:exclusiveGateway>
+    <bpmn:scriptTask id="node_31" name="T01 Homologar catálogos internos con catálogos SFC" pm:scriptRef="">
+      <bpmn:incoming>node_52</bpmn:incoming>
+      <bpmn:outgoing>node_72</bpmn:outgoing>
+    </bpmn:scriptTask>
+    <bpmn:scriptTask id="node_44" name="T02 Enviar payload de creación a API (M1)/(M2)" pm:scriptRef="83">
+      <bpmn:incoming>node_337</bpmn:incoming>
+      <bpmn:outgoing>node_91</bpmn:outgoing>
+    </bpmn:scriptTask>
+    <bpmn:sequenceFlow id="node_52" name="" sourceRef="node_6" targetRef="node_31" />
+    <bpmn:sequenceFlow id="node_72" name="" sourceRef="node_31" targetRef="node_15" />
+    <bpmn:sequenceFlow id="node_91" name="" sourceRef="node_44" targetRef="node_24" />
+    <bpmn:scriptTask id="node_92" name="T04 Registrar error en log de trazabilidad" pm:scriptRef="">
+      <bpmn:incoming>node_105</bpmn:incoming>
+      <bpmn:outgoing>node_321</bpmn:outgoing>
+    </bpmn:scriptTask>
+    <bpmn:scriptTask id="node_100" name="T03 Registrar código radicado SFC" pm:scriptRef="">
+      <bpmn:incoming>node_110</bpmn:incoming>
+      <bpmn:outgoing>node_247</bpmn:outgoing>
+    </bpmn:scriptTask>
+    <bpmn:sequenceFlow id="node_105" name="No — HTTP 400" sourceRef="node_24" targetRef="node_92">
+      <bpmn:conditionExpression xsi:type="bpmn:tFormalExpression">qd_SSHTTPSP1 &#62; 300</bpmn:conditionExpression>
+    </bpmn:sequenceFlow>
+    <bpmn:endEvent id="node_115" name="Queja radicada exitosamente ante SmartSupervision" pm:elementDestination="{&#34;type&#34;:&#34;summaryScreen&#34;,&#34;value&#34;:null}">
+      <bpmn:incoming>node_247</bpmn:incoming>
+    </bpmn:endEvent>
+    <bpmn:exclusiveGateway id="node_121" name="Tipo de error">
+      <bpmn:outgoing>node_135</bpmn:outgoing>
+      <bpmn:outgoing>node_157</bpmn:outgoing>
+    </bpmn:exclusiveGateway>
+    <bpmn:task id="node_127" name="T06 Revisar y corregir error técnico API" pm:screenRef="167" pm:allowInterstitial="false" pm:assignment="user_group" pm:assignedUsers="" pm:assignedGroups="13" pm:config="{&#34;email_notifications&#34;:{&#34;notifications&#34;:[{&#34;sendAt&#34;:&#34;task-start&#34;,&#34;expression&#34;:&#34;&#34;,&#34;subject&#34;:&#34;RE: {{_user.firstname}} assigned you in \&#34;{{_task_name}}\&#34;&#34;,&#34;type&#34;:&#34;screen&#34;,&#34;textBody&#34;:&#34;&#34;,&#34;screenRef&#34;:2,&#34;usersAndGroupsOptionSelected&#34;:null,&#34;toRecipients&#34;:[{&#34;type&#34;:&#34;assignedUser&#34;,&#34;value&#34;:null}],&#34;ccRecipients&#34;:[],&#34;bccRecipients&#34;:[],&#34;i&#34;:22}]},&#34;web_entry&#34;:null}" pm:elementDestination="{&#34;type&#34;:&#34;taskSource&#34;,&#34;value&#34;:null}">
+      <bpmn:incoming>node_135</bpmn:incoming>
+      <bpmn:outgoing>node_190</bpmn:outgoing>
+    </bpmn:task>
+    <bpmn:sequenceFlow id="node_135" name="Error Tecnico" sourceRef="node_121" targetRef="node_127">
+      <bpmn:conditionExpression xsi:type="bpmn:tFormalExpression" />
+    </bpmn:sequenceFlow>
+    <bpmn:task id="node_148" name="T05 Corregir datos según error funcional" pm:screenRef="166" pm:allowInterstitial="false" pm:assignment="user_group" pm:assignedUsers="" pm:assignedGroups="13" pm:config="{&#34;email_notifications&#34;:{&#34;notifications&#34;:[{&#34;sendAt&#34;:&#34;task-start&#34;,&#34;expression&#34;:&#34;&#34;,&#34;subject&#34;:&#34;RE: {{_user.firstname}} assigned you in \&#34;{{_task_name}}\&#34;&#34;,&#34;type&#34;:&#34;screen&#34;,&#34;textBody&#34;:&#34;&#34;,&#34;screenRef&#34;:2,&#34;usersAndGroupsOptionSelected&#34;:null,&#34;toRecipients&#34;:[{&#34;type&#34;:&#34;assignedUser&#34;,&#34;value&#34;:null}],&#34;ccRecipients&#34;:[],&#34;bccRecipients&#34;:[],&#34;i&#34;:18}]},&#34;web_entry&#34;:null}" pm:elementDestination="{&#34;type&#34;:&#34;taskSource&#34;,&#34;value&#34;:null}">
+      <bpmn:incoming>node_157</bpmn:incoming>
+      <bpmn:outgoing>node_184</bpmn:outgoing>
+    </bpmn:task>
+    <bpmn:sequenceFlow id="node_157" name="Error funcional" sourceRef="node_121" targetRef="node_148">
+      <bpmn:conditionExpression xsi:type="bpmn:tFormalExpression" />
+    </bpmn:sequenceFlow>
+    <bpmn:exclusiveGateway id="node_178" name="">
+      <bpmn:incoming>node_184</bpmn:incoming>
+      <bpmn:incoming>node_190</bpmn:incoming>
+      <bpmn:outgoing>node_191</bpmn:outgoing>
+    </bpmn:exclusiveGateway>
+    <bpmn:sequenceFlow id="node_184" name="" sourceRef="node_148" targetRef="node_178" />
+    <bpmn:sequenceFlow id="node_190" name="" sourceRef="node_127" targetRef="node_178" />
+    <bpmn:sequenceFlow id="node_191" name="" sourceRef="node_178" targetRef="node_15">
+      <bpmn:conditionExpression xsi:type="bpmn:tFormalExpression" />
+    </bpmn:sequenceFlow>
+    <bpmn:sequenceFlow id="node_110" name="Sí — HTTP 201" sourceRef="node_24" targetRef="node_100">
+      <bpmn:conditionExpression xsi:type="bpmn:tFormalExpression">qd_SSHTTPSP1 &#62;= 200 &#38;&#38; qd_SSHTTPSP1 &#60; 300</bpmn:conditionExpression>
+    </bpmn:sequenceFlow>
+    <bpmn:sequenceFlow id="node_247" name="" sourceRef="node_100" targetRef="node_115" />
+    <bpmn:task id="node_263" name="T05 Corregir datos API" pm:screenRef="166" pm:allowInterstitial="false" pm:assignment="user_group" pm:assignedUsers="" pm:assignedGroups="13" pm:config="{&#34;email_notifications&#34;:{&#34;notifications&#34;:[{&#34;sendAt&#34;:&#34;task-start&#34;,&#34;expression&#34;:&#34;&#34;,&#34;subject&#34;:&#34;RE: \&#34;{{_user.firstname}}\&#34; assigned you in \&#34;{{_task_name}}\&#34;&#34;,&#34;type&#34;:&#34;screen&#34;,&#34;textBody&#34;:&#34;&#34;,&#34;screenRef&#34;:2,&#34;usersAndGroupsOptionSelected&#34;:null,&#34;toRecipients&#34;:[{&#34;type&#34;:&#34;assignedUser&#34;,&#34;value&#34;:null}],&#34;ccRecipients&#34;:[],&#34;bccRecipients&#34;:[],&#34;i&#34;:4}]},&#34;web_entry&#34;:null}" pm:elementDestination="{&#34;type&#34;:&#34;taskSource&#34;,&#34;value&#34;:null}">
+      <bpmn:incoming>node_321</bpmn:incoming>
+      <bpmn:outgoing>node_331</bpmn:outgoing>
+    </bpmn:task>
+    <bpmn:sequenceFlow id="node_321" name="" sourceRef="node_92" targetRef="node_263" />
+    <bpmn:sequenceFlow id="node_331" name="" sourceRef="node_263" targetRef="node_15" />
+    <bpmn:sequenceFlow id="node_337" sourceRef="node_15" targetRef="node_44">
+      <bpmn:conditionExpression xsi:type="bpmn:tFormalExpression"></bpmn:conditionExpression>
+    </bpmn:sequenceFlow>
+  </bpmn:process>
+  <bpmn:collaboration id="collaboration_0">
+    <bpmn:participant id="node_1" name="Pool" processRef="ProcessId" />
+  </bpmn:collaboration>
+  <bpmndi:BPMNDiagram id="BPMNDiagramId">
+    <bpmndi:BPMNPlane id="BPMNPlaneId" bpmnElement="collaboration_0">
+      <bpmndi:BPMNShape id="node_1_di" bpmnElement="node_1">
+        <dc:Bounds x="-109" y="-15" width="1199" height="705" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="node_3_di" bpmnElement="node_3">
+        <dc:Bounds x="-79" y="-15" width="1169" height="180" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="node_4_di" bpmnElement="node_4">
+        <dc:Bounds x="-79" y="165" width="1169" height="205" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="node_5_di" bpmnElement="node_5">
+        <dc:Bounds x="-79" y="370" width="1169" height="320" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="node_6_di" bpmnElement="node_6">
+        <dc:Bounds x="-1.4285714285714315" y="62.857142857142854" width="36" height="36" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="node_15_di" bpmnElement="node_15">
+        <dc:Bounds x="180" y="251.4285714285714" width="36" height="36" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="node_24_di" bpmnElement="node_24">
+        <dc:Bounds x="192.8571428571429" y="499.9999999999999" width="36" height="36" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="node_31_di" bpmnElement="node_31">
+        <dc:Bounds x="-40" y="230" width="116" height="76" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="node_44_di" bpmnElement="node_44">
+        <dc:Bounds x="-40" y="480" width="116" height="76" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge id="node_52_di" bpmnElement="node_52">
+        <di:waypoint x="16.57" y="80.86" />
+        <di:waypoint x="18" y="268" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="node_72_di" bpmnElement="node_72">
+        <di:waypoint x="18" y="268" />
+        <di:waypoint x="198" y="269.43" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="node_91_di" bpmnElement="node_91">
+        <di:waypoint x="18" y="518" />
+        <di:waypoint x="210.86" y="518" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNShape id="node_92_di" bpmnElement="node_92">
+        <dc:Bounds x="339.99999999999994" y="399.99999999999994" width="116" height="76" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="node_100_di" bpmnElement="node_100">
+        <dc:Bounds x="339.99999999999983" y="576.0000000000003" width="116" height="76" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge id="node_105_di" bpmnElement="node_105">
+        <di:waypoint x="210.86" y="518" />
+        <di:waypoint x="210.86" y="438" />
+        <di:waypoint x="398" y="438" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNShape id="node_115_di" bpmnElement="node_115">
+        <dc:Bounds x="579.0000000000002" y="587.1428571428573" width="36" height="36" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="node_121_di" bpmnElement="node_121">
+        <dc:Bounds x="510" y="185" width="36" height="36" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="node_127_di" bpmnElement="node_127">
+        <dc:Bounds x="665.7142857142856" y="277.14285714285717" width="116" height="76" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge id="node_135_di" bpmnElement="node_135">
+        <di:waypoint x="528" y="203" />
+        <di:waypoint x="528" y="280.14" />
+        <di:waypoint x="723.71" y="315.14" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNShape id="node_148_di" bpmnElement="node_148">
+        <dc:Bounds x="665.7142857142857" y="40.00000000000001" width="116" height="76" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge id="node_157_di" bpmnElement="node_157">
+        <di:waypoint x="528" y="203" />
+        <di:waypoint x="528" y="78" />
+        <di:waypoint x="665.71" y="78" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNShape id="node_178_di" bpmnElement="node_178">
+        <dc:Bounds x="890" y="170" width="36" height="36" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge id="node_184_di" bpmnElement="node_184">
+        <di:waypoint x="723.71" y="78" />
+        <di:waypoint x="908" y="188" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="node_190_di" bpmnElement="node_190">
+        <di:waypoint x="723.71" y="315.14" />
+        <di:waypoint x="908" y="188" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="node_191_di" bpmnElement="node_191">
+        <di:waypoint x="908" y="188" />
+        <di:waypoint x="990" y="188" />
+        <di:waypoint x="570" y="10" />
+        <di:waypoint x="198" y="269.43" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="node_110_di" bpmnElement="node_110">
+        <di:waypoint x="210.86" y="518" />
+        <di:waypoint x="210.86" y="614" />
+        <di:waypoint x="398" y="614" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="node_247_di" bpmnElement="node_247">
+        <di:waypoint x="398" y="614" />
+        <di:waypoint x="576" y="614.14" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNShape id="node_263_di" bpmnElement="node_263">
+        <dc:Bounds x="340" y="231" width="116" height="76" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge id="node_321_di" bpmnElement="node_321">
+        <di:waypoint x="398" y="438" />
+        <di:waypoint x="398" y="269" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="node_331_di" bpmnElement="node_331">
+        <di:waypoint x="398" y="269" />
+        <di:waypoint x="198" y="269.43" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="node_337_di" bpmnElement="node_337">
+        <di:waypoint x="198" y="269.43" />
+        <di:waypoint x="18" y="390" />
+        <di:waypoint x="18" y="518" />
+      </bpmndi:BPMNEdge>
+    </bpmndi:BPMNPlane>
+  </bpmndi:BPMNDiagram>
+</bpmn:definitions>

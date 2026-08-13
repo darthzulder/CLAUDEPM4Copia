@@ -1,0 +1,130 @@
+name: CI
+
+# ANILLO 4 — el único gate que no se puede saltar con `--no-verify`.
+#
+# Los anillos 2 (.githooks/pre-commit) y 3 (.githooks/pre-push) corren EXACTAMENTE lo mismo en
+# local (`npm run verify` → pm4-app/scripts/verify.mjs) como feedback rápido. La autoridad es
+# este workflow, por una razón que ningún hook local puede cubrir:
+#
+#   En eventos `pull_request`, GitHub hace checkout de la MERGE COMMIT (main + la rama, ya
+#   integradas) y corre la suite sobre eso. Un `git merge` local seguido de push a main nunca
+#   prueba esa combinación: probaste tu rama sola, antes de integrar. Los *semantic conflicts*
+#   —main renombra un campo `qd_*`, la rama agrega un uso del nombre viejo, ambos verdes por
+#   separado— solo aparecen acá.
+#
+# Para que esto sea un gate de verdad y no un reporte post-mortem, `main` tiene que estar
+# protegido: checks requeridos + "require branches to be up to date" + push directo prohibido.
+# Los pasos exactos están en docs/guides/entorno-local-y-verificacion.md.
+
+on:
+  # Solo las dos ramas de larga vida en `push`, porque las dos son entornos DESPLEGADOS:
+  # `dev` → Render de desarrollo, `main` → Render de producción. Un rojo ahí significa que un
+  # entorno quedó roto, así que la corrida post-merge es la señal que importa.
+  #
+  # Las ramas de trabajo no van acá: se verifican vía `pull_request`, que además prueba el
+  # resultado del merge. Cubrirlas con '**' duplicaría cada corrida sin agregar información.
+  push:
+    branches: [main, dev]
+  # Sin filtro de `branches` a propósito: dispara para PRs con cualquier base, así que cubre
+  # igual los `feat/… → dev` del día a día y los `dev → main` de release.
+  pull_request:
+
+# Si se pushea de nuevo a la misma rama, cancelar la corrida anterior en vez de acumular.
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  # NO ponerle `name:` a este job. Sin override, el check se llama `verify` (el id del job), y ese
+  # string es el que hay que escribir EXACTO en la protección de `main` como check requerido. Un
+  # nombre con acentos o paréntesis se matchea igual, pero se tipea mal con facilidad, y una
+  # protección que apunta a un check inexistente no bloquea nada: queda esperando para siempre.
+  # Nombre corto y ASCII a propósito.
+  verify:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      # Node 24 fijo, igual que pm4-app/Dockerfile (node:24-alpine) y que el runtime de
+      # Render. No usar 'lts/*' ni 'latest': un major distinto al del contenedor es
+      # exactamente el drift que este proyecto ya sufrió al migrar de Node 20 a 24.
+      - name: Setup Node 24
+        uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+          cache: 'npm'
+          cache-dependency-path: pm4-app/package-lock.json
+
+      # Python + pytest tienen que estar ANTES de `verify`: el script sondea el intérprete y,
+      # si no lo encuentra, salta el paso del cotizador con un aviso. En CI ese salto no es
+      # aceptable — acá es donde la verificación tiene que ser completa.
+      - name: Setup Python 3.13
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.13'
+
+      # `npm ci` resuelve @zurich/* desde los .tgz vendorizados y commiteados en
+      # frontend/vendor/, así que no depende del registro de ZDS (decomisionado en
+      # dic-2025) ni de credenciales.
+      - name: Install (Node)
+        working-directory: pm4-app
+        run: npm ci
+
+      - name: Install (Python)
+        working-directory: pm4-app/cotizador-service
+        run: pip install -r requirements-dev.txt
+
+      # Un solo paso a propósito. Antes este workflow enumeraba build/lint/test por su cuenta y
+      # ya había divergido del hook local (el hook no corría pytest), con el resultado clásico
+      # de "en mi máquina pasaba". Ahora los tres anillos ejecutan el mismo script.
+      - name: Verify
+        working-directory: pm4-app
+        run: npm run verify:verbose
+
+      # Salvaguarda de la corrección que saca los tests de dist/: el build del backend emite a
+      # dist/ y eso es lo que Render despliega. Si alguien vuelve a incluir los *.test.ts en
+      # tsconfig.json, acá se corta.
+      - name: Verificar que no se despliegan tests
+        working-directory: pm4-app
+        run: |
+          if find backend/dist -name '*.test.js' -print -quit | grep -q .; then
+            echo "::error::backend/dist contiene archivos de test — revisá el 'exclude' de backend/tsconfig.json"
+            find backend/dist -name '*.test.js'
+            exit 1
+          fi
+          echo "backend/dist limpio de tests."
+
+  coverage:
+    name: Cobertura del diff
+    runs-on: ubuntu-latest
+    # Solo en PRs: la pregunta que responde ("qué de MI cambio quedó sin ejercitar") necesita
+    # una base contra la que comparar. Es una SEÑAL, no un gate — no la pongas como check
+    # requerido: un umbral de cobertura obligatorio premia tests que ejecutan líneas sin
+    # asertar nada, que es justo el problema que este proyecto ya tuvo.
+    if: github.event_name == 'pull_request'
+
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          # El script necesita el historial para diffear contra la base del PR.
+          fetch-depth: 0
+
+      - name: Setup Node 24
+        uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+          cache: 'npm'
+          cache-dependency-path: pm4-app/package-lock.json
+
+      - name: Install
+        working-directory: pm4-app
+        run: npm ci
+
+      - name: Coverage
+        working-directory: pm4-app
+        run: npm run coverage
+
+      - name: Cobertura de las líneas del diff
+        working-directory: pm4-app
+        run: node scripts/coverage-diff.mjs --base "origin/${{ github.base_ref }}" --summary "$GITHUB_STEP_SUMMARY"

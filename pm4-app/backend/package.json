@@ -3,8 +3,14 @@
   "private": true,
   "scripts": {
     "dev": "tsx watch src/server.ts",
+    "prebuild": "node -e \"require('node:fs').rmSync('dist',{recursive:true,force:true})\"",
     "build": "tsc",
-    "start": "node dist/server.js"
+    "typecheck": "tsc -p tsconfig.check.json",
+    "lint": "eslint src",
+    "start": "node dist/server.js",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "coverage": "vitest run --coverage"
   },
   "dependencies": {
     "axios": "^1.18.1",
@@ -18,7 +24,11 @@
     "@types/express": "^5.0.6",
     "@types/multer": "^2.1.0",
     "@types/node": "^24.0.0",
+    "@typescript-eslint/parser": "^8.62.0",
+    "@vitest/coverage-v8": "^4.1.10",
+    "eslint": "^10.5.0",
     "tsx": "^4.22.4",
-    "typescript": "^5.9.3"
+    "typescript": "^5.9.3",
+    "vitest": "^4.1.10"
   }
 }

@@ -1,0 +1,198 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<bpmn:definitions xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:bpmn="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI" xmlns:dc="http://www.omg.org/spec/DD/20100524/DC" xmlns:di="http://www.omg.org/spec/DD/20100524/DI" xmlns:pm="http://processmaker.com/BPMN/2.0/Schema.xsd" xmlns:tns="http://sourceforge.net/bpmn/definitions/_1530553328908" xmlns:xsd="http://www.w3.org/2001/XMLSchema" targetNamespace="http://bpmn.io/schema/bpmn" exporter="ProcessMaker Modeler" exporterVersion="1.0" xsi:schemaLocation="http://www.omg.org/spec/BPMN/20100524/MODEL http://bpmn.sourceforge.net/schemas/BPMN20.xsd">
+  <bpmn:process id="ProcessId" name="ProcessName" isExecutable="true">
+    <bpmn:laneSet id="node_2">
+      <bpmn:lane id="node_3" name="         ">
+        <bpmn:flowNodeRef>node_165</bpmn:flowNodeRef>
+      </bpmn:lane>
+      <bpmn:lane id="node_4" name="Analista Técnico">
+        <bpmn:flowNodeRef>node_146</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>node_157</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>node_189</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>node_348</bpmn:flowNodeRef>
+      </bpmn:lane>
+      <bpmn:lane id="node_5" name="BPM / Sistema">
+        <bpmn:flowNodeRef>node_6</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>node_87</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>node_96</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>node_109</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>node_114</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>node_132</bpmn:flowNodeRef>
+      </bpmn:lane>
+    </bpmn:laneSet>
+    <bpmn:startEvent id="node_6" name="iniciar cierre" pm:allowInterstitial="true" pm:interstitialScreenRef="58" pm:config="{&#34;web_entry&#34;:null}">
+      <bpmn:outgoing>node_447</bpmn:outgoing>
+    </bpmn:startEvent>
+    <bpmn:scriptTask id="node_87" name="T05 Enviar payload de cierre a API (M3)" pm:scriptRef="89">
+      <bpmn:incoming>node_238</bpmn:incoming>
+      <bpmn:incoming>node_441</bpmn:incoming>
+      <bpmn:incoming>node_447</bpmn:incoming>
+      <bpmn:outgoing>node_260</bpmn:outgoing>
+    </bpmn:scriptTask>
+    <bpmn:exclusiveGateway id="node_96" name="¿SmartSupervision aceptó el cierre? (HTTP 200)">
+      <bpmn:incoming>node_260</bpmn:incoming>
+      <bpmn:outgoing>node_124</bpmn:outgoing>
+      <bpmn:outgoing>node_134</bpmn:outgoing>
+    </bpmn:exclusiveGateway>
+    <bpmn:scriptTask id="node_109" name="T06 Registrar confirmación cierre aceptado" pm:scriptRef="">
+      <bpmn:incoming>node_124</bpmn:incoming>
+      <bpmn:outgoing>node_467</bpmn:outgoing>
+    </bpmn:scriptTask>
+    <bpmn:endEvent id="node_114" name="End Event" pm:elementDestination="{&#34;type&#34;:&#34;summaryScreen&#34;,&#34;value&#34;:null}">
+      <bpmn:incoming>node_467</bpmn:incoming>
+    </bpmn:endEvent>
+    <bpmn:sequenceFlow id="node_124" name="Sí — HTTP 200" sourceRef="node_96" targetRef="node_109">
+      <bpmn:conditionExpression xsi:type="bpmn:tFormalExpression">qd_SSHTTPSP3 &#62;= 200 &#38;&#38; qd_SSHTTPSP3 &#60;300</bpmn:conditionExpression>
+    </bpmn:sequenceFlow>
+    <bpmn:scriptTask id="node_132" name="T07 Registrar rechazo en log" pm:scriptRef="">
+      <bpmn:incoming>node_134</bpmn:incoming>
+      <bpmn:outgoing>node_384</bpmn:outgoing>
+    </bpmn:scriptTask>
+    <bpmn:sequenceFlow id="node_134" name="No — HTTP 400" sourceRef="node_96" targetRef="node_132">
+      <bpmn:conditionExpression xsi:type="bpmn:tFormalExpression">qd_SSHTTPSP3 &#62;= 300</bpmn:conditionExpression>
+    </bpmn:sequenceFlow>
+    <bpmn:exclusiveGateway id="node_146" name="¿Tipo de error en cierre M3?">
+      <bpmn:outgoing>node_159</bpmn:outgoing>
+      <bpmn:outgoing>node_183</bpmn:outgoing>
+    </bpmn:exclusiveGateway>
+    <bpmn:task id="node_157" name="T09 Corregir error técnico de API en cierre" pm:screenRef="167" pm:allowInterstitial="false" pm:assignment="user_group" pm:assignedUsers="" pm:assignedGroups="13" pm:config="{&#34;email_notifications&#34;:{&#34;notifications&#34;:[{&#34;sendAt&#34;:&#34;task-start&#34;,&#34;expression&#34;:&#34;&#34;,&#34;subject&#34;:&#34;RE: {{_user.firstname}} assigned you in \&#34;{{_task_name}}\&#34;&#34;,&#34;type&#34;:&#34;screen&#34;,&#34;textBody&#34;:&#34;&#34;,&#34;screenRef&#34;:2,&#34;usersAndGroupsOptionSelected&#34;:null,&#34;toRecipients&#34;:[{&#34;type&#34;:&#34;assignedUser&#34;,&#34;value&#34;:null}],&#34;ccRecipients&#34;:[],&#34;bccRecipients&#34;:[],&#34;i&#34;:22}]},&#34;web_entry&#34;:null}" pm:elementDestination="{&#34;type&#34;:&#34;taskSource&#34;,&#34;value&#34;:null}">
+      <bpmn:incoming>node_159</bpmn:incoming>
+      <bpmn:outgoing>node_195</bpmn:outgoing>
+    </bpmn:task>
+    <bpmn:sequenceFlow id="node_159" name="Error técnico" sourceRef="node_146" targetRef="node_157">
+      <bpmn:conditionExpression xsi:type="bpmn:tFormalExpression" />
+    </bpmn:sequenceFlow>
+    <bpmn:task id="node_165" name="T08 Corregir error funcional de cierre" pm:screenRef="166" pm:allowInterstitial="false" pm:assignment="requester" pm:config="{&#34;email_notifications&#34;:{&#34;notifications&#34;:[{&#34;sendAt&#34;:&#34;task-start&#34;,&#34;expression&#34;:&#34;&#34;,&#34;subject&#34;:&#34;RE: {{_user.firstname}} assigned you in \&#34;{{_task_name}}\&#34;&#34;,&#34;type&#34;:&#34;screen&#34;,&#34;textBody&#34;:&#34;&#34;,&#34;screenRef&#34;:2,&#34;usersAndGroupsOptionSelected&#34;:null,&#34;toRecipients&#34;:[{&#34;type&#34;:&#34;assignedUser&#34;,&#34;value&#34;:null}],&#34;ccRecipients&#34;:[],&#34;bccRecipients&#34;:[],&#34;i&#34;:12}]},&#34;web_entry&#34;:null}" pm:elementDestination="{&#34;type&#34;:&#34;taskSource&#34;,&#34;value&#34;:null}">
+      <bpmn:incoming>node_183</bpmn:incoming>
+      <bpmn:outgoing>node_201</bpmn:outgoing>
+    </bpmn:task>
+    <bpmn:sequenceFlow id="node_183" name="Error funcional" sourceRef="node_146" targetRef="node_165">
+      <bpmn:conditionExpression xsi:type="bpmn:tFormalExpression" />
+    </bpmn:sequenceFlow>
+    <bpmn:exclusiveGateway id="node_189" name="Exclusive Gateway">
+      <bpmn:incoming>node_195</bpmn:incoming>
+      <bpmn:incoming>node_201</bpmn:incoming>
+      <bpmn:outgoing>node_238</bpmn:outgoing>
+    </bpmn:exclusiveGateway>
+    <bpmn:sequenceFlow id="node_195" name="" sourceRef="node_157" targetRef="node_189" />
+    <bpmn:sequenceFlow id="node_201" name="" sourceRef="node_165" targetRef="node_189" />
+    <bpmn:sequenceFlow id="node_238" name="" sourceRef="node_189" targetRef="node_87">
+      <bpmn:conditionExpression xsi:type="bpmn:tFormalExpression" />
+    </bpmn:sequenceFlow>
+    <bpmn:sequenceFlow id="node_260" name="" sourceRef="node_87" targetRef="node_96" />
+    <bpmn:task id="node_348" name="T08 Corregir error API" pm:screenRef="166" pm:allowInterstitial="false" pm:assignment="user_group" pm:assignedUsers="" pm:assignedGroups="13" pm:config="{&#34;email_notifications&#34;:{&#34;notifications&#34;:[{&#34;sendAt&#34;:&#34;task-start&#34;,&#34;expression&#34;:&#34;&#34;,&#34;subject&#34;:&#34;RE: \&#34;{{_user.firstname}}\&#34; assigned you in \&#34;{{_task_name}}\&#34;&#34;,&#34;type&#34;:&#34;screen&#34;,&#34;textBody&#34;:&#34;&#34;,&#34;screenRef&#34;:2,&#34;usersAndGroupsOptionSelected&#34;:null,&#34;toRecipients&#34;:[{&#34;type&#34;:&#34;assignedUser&#34;,&#34;value&#34;:null}],&#34;ccRecipients&#34;:[],&#34;bccRecipients&#34;:[],&#34;i&#34;:16}]},&#34;web_entry&#34;:null}" pm:elementDestination="{&#34;type&#34;:&#34;taskSource&#34;,&#34;value&#34;:null}">
+      <bpmn:incoming>node_384</bpmn:incoming>
+      <bpmn:outgoing>node_441</bpmn:outgoing>
+    </bpmn:task>
+    <bpmn:sequenceFlow id="node_384" name="" sourceRef="node_132" targetRef="node_348" />
+    <bpmn:sequenceFlow id="node_441" name="" sourceRef="node_348" targetRef="node_87" />
+    <bpmn:sequenceFlow id="node_447" name="" sourceRef="node_6" targetRef="node_87" />
+    <bpmn:sequenceFlow id="node_467" name="" sourceRef="node_109" targetRef="node_114" />
+  </bpmn:process>
+  <bpmn:collaboration id="collaboration_0">
+    <bpmn:participant id="node_1" name="SP3 — Cerrar Queja ante SmartSupervision (M3)" processRef="ProcessId" />
+  </bpmn:collaboration>
+  <bpmndi:BPMNDiagram id="BPMNDiagramId">
+    <bpmndi:BPMNPlane id="BPMNPlaneId" bpmnElement="collaboration_0">
+      <bpmndi:BPMNShape id="node_1_di" bpmnElement="node_1">
+        <dc:Bounds x="252" y="-22" width="1315" height="698" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="node_3_di" bpmnElement="node_3">
+        <dc:Bounds x="282" y="-22" width="1285" height="185" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="node_4_di" bpmnElement="node_4">
+        <dc:Bounds x="282" y="163" width="1285" height="205" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="node_5_di" bpmnElement="node_5">
+        <dc:Bounds x="282" y="368" width="1285" height="308" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="node_6_di" bpmnElement="node_6">
+        <dc:Bounds x="354.42857142857144" y="493.2857142857143" width="36" height="36" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="node_87_di" bpmnElement="node_87">
+        <dc:Bounds x="448.42857142857133" y="470.7142857142855" width="116" height="76" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="node_96_di" bpmnElement="node_96">
+        <dc:Bounds x="649.5714285714288" y="583.0000000000001" width="36" height="36" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="node_109_di" bpmnElement="node_109">
+        <dc:Bounds x="879.8571428571421" y="563.0000000000001" width="116" height="76" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="node_114_di" bpmnElement="node_114">
+        <dc:Bounds x="1257" y="582.0000000000001" width="36" height="36" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge id="node_124_di" bpmnElement="node_124">
+        <di:waypoint x="667.57" y="601" />
+        <di:waypoint x="937.86" y="601" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNShape id="node_132_di" bpmnElement="node_132">
+        <dc:Bounds x="856.7142857142861" y="391.57142857142856" width="116" height="76" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge id="node_134_di" bpmnElement="node_134">
+        <di:waypoint x="667.57" y="601" />
+        <di:waypoint x="667.57" y="430.14" />
+        <di:waypoint x="914.71" y="429.57" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNShape id="node_146_di" bpmnElement="node_146">
+        <dc:Bounds x="1015.5714285714282" y="212.99999999999991" width="36" height="36" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="node_157_di" bpmnElement="node_157">
+        <dc:Bounds x="1200.8095238095243" y="269.4761904761906" width="116" height="76" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge id="node_159_di" bpmnElement="node_159">
+        <di:waypoint x="1033.57" y="231" />
+        <di:waypoint x="1137" y="307.48" />
+        <di:waypoint x="1258.81" y="307.48" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNShape id="node_165_di" bpmnElement="node_165">
+        <dc:Bounds x="1195.3333333333335" y="51.33333333333333" width="116" height="76" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge id="node_183_di" bpmnElement="node_183">
+        <di:waypoint x="1033.57" y="231" />
+        <di:waypoint x="1033.57" y="89.33" />
+        <di:waypoint x="1253.33" y="89.33" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNShape id="node_189_di" bpmnElement="node_189">
+        <dc:Bounds x="1397" y="190" width="36" height="36" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge id="node_195_di" bpmnElement="node_195">
+        <di:waypoint x="1258.81" y="307.48" />
+        <di:waypoint x="1415" y="208" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="node_201_di" bpmnElement="node_201">
+        <di:waypoint x="1253.33" y="89.33" />
+        <di:waypoint x="1415" y="208" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="node_238_di" bpmnElement="node_238">
+        <di:waypoint x="1415" y="208" />
+        <di:waypoint x="1097" y="10" />
+        <di:waypoint x="506.43" y="508.71" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="node_260_di" bpmnElement="node_260">
+        <di:waypoint x="506.43" y="508.71" />
+        <di:waypoint x="506.43" y="601" />
+        <di:waypoint x="667.57" y="601" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNShape id="node_348_di" bpmnElement="node_348">
+        <dc:Bounds x="674" y="212.57142857142856" width="116" height="76" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge id="node_384_di" bpmnElement="node_384">
+        <di:waypoint x="914.71" y="429.57" />
+        <di:waypoint x="914.71" y="250.57" />
+        <di:waypoint x="732" y="250.57" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="node_441_di" bpmnElement="node_441">
+        <di:waypoint x="732" y="250.57" />
+        <di:waypoint x="506.43" y="508.71" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="node_447_di" bpmnElement="node_447">
+        <di:waypoint x="372.43" y="511.29" />
+        <di:waypoint x="506.43" y="508.71" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="node_467_di" bpmnElement="node_467">
+        <di:waypoint x="937.86" y="601" />
+        <di:waypoint x="1275" y="600" />
+      </bpmndi:BPMNEdge>
+    </bpmndi:BPMNPlane>
+  </bpmndi:BPMNDiagram>
+</bpmn:definitions>

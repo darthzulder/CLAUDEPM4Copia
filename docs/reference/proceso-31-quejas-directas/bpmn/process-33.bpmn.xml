@@ -1,0 +1,290 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<bpmn:definitions xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:bpmn="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI" xmlns:dc="http://www.omg.org/spec/DD/20100524/DC" xmlns:di="http://www.omg.org/spec/DD/20100524/DI" xmlns:pm="http://processmaker.com/BPMN/2.0/Schema.xsd" xmlns:tns="http://sourceforge.net/bpmn/definitions/_1530553328908" xmlns:xsd="http://www.w3.org/2001/XMLSchema" targetNamespace="http://bpmn.io/schema/bpmn" exporter="ProcessMaker Modeler" exporterVersion="1.0" xsi:schemaLocation="http://www.omg.org/spec/BPMN/20100524/MODEL http://bpmn.sourceforge.net/schemas/BPMN20.xsd">
+  <bpmn:process id="ProcessId" name="ProcessName" isExecutable="true">
+    <bpmn:laneSet id="node_2">
+      <bpmn:lane id="node_3" name="">
+        <bpmn:flowNodeRef>node_6</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>node_7</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>node_139</bpmn:flowNodeRef>
+      </bpmn:lane>
+      <bpmn:lane id="node_4" name="">
+        <bpmn:flowNodeRef>node_67</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>node_75</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>node_121</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>node_416</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>node_432</bpmn:flowNodeRef>
+      </bpmn:lane>
+      <bpmn:lane id="node_5" name="">
+        <bpmn:flowNodeRef>node_18</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>node_27</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>node_38</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>node_91</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>node_167</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>node_189</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>node_406</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>node_503</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>node_511</bpmn:flowNodeRef>
+      </bpmn:lane>
+    </bpmn:laneSet>
+    <bpmn:startEvent id="node_6" name="Start Event" pm:allowInterstitial="true" pm:interstitialScreenRef="58" pm:config="{&#34;web_entry&#34;:null}">
+      <bpmn:outgoing>node_39</bpmn:outgoing>
+    </bpmn:startEvent>
+    <bpmn:scriptTask id="node_7" name="T01 Recibir queja radicada y asignar responsable" pm:scriptRef="">
+      <bpmn:incoming>node_39</bpmn:incoming>
+      <bpmn:outgoing>node_352</bpmn:outgoing>
+    </bpmn:scriptTask>
+    <bpmn:task id="node_18" name="T02 Analizar queja y elaborar respuesta técnica" pm:screenRef="164" pm:allowInterstitial="false" pm:interstitialScreenRef="58" pm:assignment="process_variable" pm:assignedUsers="" pm:assignedGroups="qd_intResponsableGroupID" pm:assignmentLock="true" pm:config="{&#34;email_notifications&#34;:{&#34;notifications&#34;:[{&#34;sendAt&#34;:&#34;task-start&#34;,&#34;expression&#34;:&#34;&#34;,&#34;subject&#34;:&#34;RE: {{_user.firstname}} assigned you in \&#34;{{_task_name}}\&#34;&#34;,&#34;type&#34;:&#34;screen&#34;,&#34;textBody&#34;:&#34;&#34;,&#34;screenRef&#34;:2,&#34;usersAndGroupsOptionSelected&#34;:null,&#34;toRecipients&#34;:[{&#34;type&#34;:&#34;assignedUser&#34;,&#34;value&#34;:null}],&#34;ccRecipients&#34;:[],&#34;bccRecipients&#34;:[],&#34;i&#34;:49}]},&#34;web_entry&#34;:null}" pm:elementDestination="{&#34;type&#34;:&#34;taskList&#34;,&#34;value&#34;:&#34;/tasks&#34;}" pm:conditionalRedirect="{&#34;isEnabled&#34;:false,&#34;conditions&#34;:[{&#34;id&#34;:&#34;a07427bc-87e3-4dfa-bb70-d362e7d54a5c&#34;,&#34;condition&#34;:&#34;&#34;,&#34;taskDestination&#34;:null,&#34;customDashboard&#34;:null,&#34;externalUrl&#34;:null}]}">
+      <bpmn:incoming>node_352</bpmn:incoming>
+      <bpmn:incoming>node_407</bpmn:incoming>
+      <bpmn:incoming>node_510</bpmn:incoming>
+      <bpmn:outgoing>node_53</bpmn:outgoing>
+    </bpmn:task>
+    <bpmn:exclusiveGateway id="node_27" name="ayuda o prorroga?">
+      <bpmn:incoming>node_53</bpmn:incoming>
+      <bpmn:outgoing>node_61</bpmn:outgoing>
+      <bpmn:outgoing>node_415</bpmn:outgoing>
+      <bpmn:outgoing>node_506</bpmn:outgoing>
+    </bpmn:exclusiveGateway>
+    <bpmn:exclusiveGateway id="node_38" name="¿Requiere reasignación?">
+      <bpmn:incoming>node_61</bpmn:incoming>
+      <bpmn:outgoing>node_69</bpmn:outgoing>
+      <bpmn:outgoing>node_130</bpmn:outgoing>
+    </bpmn:exclusiveGateway>
+    <bpmn:sequenceFlow id="node_39" name="" sourceRef="node_6" targetRef="node_7" />
+    <bpmn:sequenceFlow id="node_53" name="" sourceRef="node_18" targetRef="node_27" />
+    <bpmn:sequenceFlow id="node_61" name="Enviar" sourceRef="node_27" targetRef="node_38">
+      <bpmn:conditionExpression xsi:type="bpmn:tFormalExpression">qd_strAction == "ENVIAR"</bpmn:conditionExpression>
+    </bpmn:sequenceFlow>
+    <bpmn:task id="node_67" name="T04 Revisar respuesta borrador (SAC)" pm:screenRef="169" pm:allowInterstitial="false" pm:assignment="user_group" pm:assignedUsers="" pm:assignedGroups="12" pm:config="{&#34;email_notifications&#34;:{&#34;notifications&#34;:[{&#34;sendAt&#34;:&#34;task-start&#34;,&#34;expression&#34;:&#34;&#34;,&#34;subject&#34;:&#34;RE: {{_user.firstname}} assigned you in \&#34;{{_task_name}}\&#34;&#34;,&#34;type&#34;:&#34;screen&#34;,&#34;textBody&#34;:&#34;&#34;,&#34;screenRef&#34;:2,&#34;usersAndGroupsOptionSelected&#34;:null,&#34;toRecipients&#34;:[{&#34;type&#34;:&#34;assignedUser&#34;,&#34;value&#34;:null}],&#34;ccRecipients&#34;:[],&#34;bccRecipients&#34;:[],&#34;i&#34;:29}]},&#34;web_entry&#34;:null}" pm:elementDestination="{&#34;type&#34;:&#34;taskSource&#34;,&#34;value&#34;:null}">
+      <bpmn:incoming>node_69</bpmn:incoming>
+      <bpmn:outgoing>node_108</bpmn:outgoing>
+    </bpmn:task>
+    <bpmn:sequenceFlow id="node_69" name="" sourceRef="node_38" targetRef="node_67">
+      <bpmn:conditionExpression xsi:type="bpmn:tFormalExpression">qd_strOmbudsmanEscalation == "SI" || qd_strCompensation == "SI" || qd_strReconsiderationSACEscalation == true</bpmn:conditionExpression>
+    </bpmn:sequenceFlow>
+    <bpmn:exclusiveGateway id="node_75" name="¿Respuesta aceptada por SAC?">
+      <bpmn:incoming>node_108</bpmn:incoming>
+      <bpmn:outgoing>node_110</bpmn:outgoing>
+      <bpmn:outgoing>node_122</bpmn:outgoing>
+    </bpmn:exclusiveGateway>
+    <bpmn:task id="node_91" name="T05 Ajustar respuesta según observaciones SAC" pm:screenRef="164" pm:allowInterstitial="false" pm:assignment="process_variable" pm:assignedUsers="" pm:assignedGroups="qd_intResponsableGroupID" pm:assignmentLock="true" pm:config="{&#34;email_notifications&#34;:{&#34;notifications&#34;:[{&#34;sendAt&#34;:&#34;task-start&#34;,&#34;expression&#34;:&#34;&#34;,&#34;subject&#34;:&#34;RE: {{_user.firstname}} assigned you in \&#34;{{_task_name}}\&#34;&#34;,&#34;type&#34;:&#34;screen&#34;,&#34;textBody&#34;:&#34;&#34;,&#34;screenRef&#34;:2,&#34;usersAndGroupsOptionSelected&#34;:null,&#34;toRecipients&#34;:[{&#34;type&#34;:&#34;assignedUser&#34;,&#34;value&#34;:null}],&#34;ccRecipients&#34;:[],&#34;bccRecipients&#34;:[],&#34;i&#34;:11}]},&#34;web_entry&#34;:null}" pm:elementDestination="{&#34;type&#34;:&#34;taskSource&#34;,&#34;value&#34;:null}">
+      <bpmn:incoming>node_110</bpmn:incoming>
+      <bpmn:outgoing>node_128</bpmn:outgoing>
+    </bpmn:task>
+    <bpmn:sequenceFlow id="node_108" name="" sourceRef="node_67" targetRef="node_75" />
+    <bpmn:sequenceFlow id="node_110" name="No" sourceRef="node_75" targetRef="node_91">
+      <bpmn:conditionExpression xsi:type="bpmn:tFormalExpression">qd_blnSACApproved == false</bpmn:conditionExpression>
+    </bpmn:sequenceFlow>
+    <bpmn:exclusiveGateway id="node_121" name="">
+      <bpmn:incoming>node_122</bpmn:incoming>
+      <bpmn:incoming>node_128</bpmn:incoming>
+      <bpmn:incoming>node_130</bpmn:incoming>
+      <bpmn:outgoing>node_158</bpmn:outgoing>
+    </bpmn:exclusiveGateway>
+    <bpmn:sequenceFlow id="node_122" name="Si" sourceRef="node_75" targetRef="node_121">
+      <bpmn:conditionExpression xsi:type="bpmn:tFormalExpression">qd_blnSACApproved == true</bpmn:conditionExpression>
+    </bpmn:sequenceFlow>
+    <bpmn:sequenceFlow id="node_128" name="" sourceRef="node_91" targetRef="node_121" />
+    <bpmn:sequenceFlow id="node_130" name="" sourceRef="node_38" targetRef="node_121">
+      <bpmn:conditionExpression xsi:type="bpmn:tFormalExpression">qd_strOmbudsmanEscalation == "NO" &#38;&#38; qd_strCompensation == "NO" &#38;&#38; qd_strReconsiderationSACEscalation == false</bpmn:conditionExpression>
+    </bpmn:sequenceFlow>
+    <bpmn:scriptTask id="node_139" name="T06 Generar PDF de respuesta final" pm:scriptRef="80">
+      <bpmn:incoming>node_158</bpmn:incoming>
+      <bpmn:outgoing>node_182</bpmn:outgoing>
+    </bpmn:scriptTask>
+    <bpmn:sequenceFlow id="node_158" name="" sourceRef="node_121" targetRef="node_139">
+      <bpmn:conditionExpression xsi:type="bpmn:tFormalExpression" />
+    </bpmn:sequenceFlow>
+    <bpmn:task id="node_167" name="T07 Diligenciar formulario Superintendencia" pm:screenRef="170" pm:allowInterstitial="false" pm:assignment="user_group" pm:assignedUsers="" pm:assignedGroups="12" pm:config="{&#34;email_notifications&#34;:{&#34;notifications&#34;:[{&#34;sendAt&#34;:&#34;task-start&#34;,&#34;expression&#34;:&#34;&#34;,&#34;subject&#34;:&#34;RE: {{_user.firstname}} assigned you in \&#34;{{_task_name}}\&#34;&#34;,&#34;type&#34;:&#34;screen&#34;,&#34;textBody&#34;:&#34;&#34;,&#34;screenRef&#34;:2,&#34;usersAndGroupsOptionSelected&#34;:null,&#34;toRecipients&#34;:[{&#34;type&#34;:&#34;assignedUser&#34;,&#34;value&#34;:null}],&#34;ccRecipients&#34;:[],&#34;bccRecipients&#34;:[],&#34;i&#34;:14}]},&#34;web_entry&#34;:null}" pm:elementDestination="{&#34;type&#34;:&#34;taskSource&#34;,&#34;value&#34;:null}">
+      <bpmn:incoming>node_182</bpmn:incoming>
+      <bpmn:outgoing>node_523</bpmn:outgoing>
+    </bpmn:task>
+    <bpmn:sequenceFlow id="node_182" name="" sourceRef="node_139" targetRef="node_167" />
+    <bpmn:endEvent id="node_189" name="End Event" pm:elementDestination="{&#34;type&#34;:&#34;summaryScreen&#34;,&#34;value&#34;:null}">
+      <bpmn:incoming>node_528</bpmn:incoming>
+    </bpmn:endEvent>
+    <bpmn:sequenceFlow id="node_352" name="" sourceRef="node_7" targetRef="node_18" />
+    <bpmn:parallelGateway id="node_406" name="" gatewayDirection="Diverging">
+      <bpmn:incoming>node_415</bpmn:incoming>
+      <bpmn:outgoing>node_407</bpmn:outgoing>
+      <bpmn:outgoing>node_428</bpmn:outgoing>
+    </bpmn:parallelGateway>
+    <bpmn:sequenceFlow id="node_407" name="" sourceRef="node_406" targetRef="node_18" />
+    <bpmn:sequenceFlow id="node_415" name="ayuda" sourceRef="node_27" targetRef="node_406">
+      <bpmn:conditionExpression xsi:type="bpmn:tFormalExpression">qd_strAction == "AYUDA"</bpmn:conditionExpression>
+    </bpmn:sequenceFlow>
+    <bpmn:callActivity id="node_416" name="T05.2 Llenar datos de ayuda" calledElement="ProcessId-77" pm:config="{&#34;calledElement&#34;:&#34;ProcessId-77&#34;,&#34;processId&#34;:77,&#34;startEvent&#34;:&#34;node_1&#34;,&#34;name&#34;:&#34;COL - QD - Subproceso ayuda&#34;}">
+      <bpmn:incoming>node_428</bpmn:incoming>
+      <bpmn:outgoing>node_436</bpmn:outgoing>
+    </bpmn:callActivity>
+    <bpmn:sequenceFlow id="node_428" name="" sourceRef="node_406" targetRef="node_416" />
+    <bpmn:endEvent id="node_432" name="End Event" pm:elementDestination="{&#34;type&#34;:&#34;summaryScreen&#34;,&#34;value&#34;:null}">
+      <bpmn:incoming>node_436</bpmn:incoming>
+    </bpmn:endEvent>
+    <bpmn:sequenceFlow id="node_436" name="" sourceRef="node_416" targetRef="node_432" />
+    <bpmn:callActivity id="node_503" name="SP04 Gestionar Prorroga" calledElement="ProcessId-35" pm:config="{&#34;calledElement&#34;:&#34;ProcessId-35&#34;,&#34;processId&#34;:35,&#34;startEvent&#34;:&#34;node_6&#34;,&#34;name&#34;:&#34;COL - QD - SubProceso - SP4 Gestionar Prórroga Regulatoria&#34;}">
+      <bpmn:incoming>node_506</bpmn:incoming>
+      <bpmn:outgoing>node_510</bpmn:outgoing>
+    </bpmn:callActivity>
+    <bpmn:sequenceFlow id="node_506" name="Prorroga" sourceRef="node_27" targetRef="node_503">
+      <bpmn:conditionExpression xsi:type="bpmn:tFormalExpression">qd_strAction == "SOLICITAR_PRORROGA"</bpmn:conditionExpression>
+    </bpmn:sequenceFlow>
+    <bpmn:sequenceFlow id="node_510" name="" sourceRef="node_503" targetRef="node_18" />
+    <bpmn:task id="node_511" name="Form Task" pm:allowInterstitial="false" pm:assignment="requester" pm:config="{&#34;email_notifications&#34;:{&#34;notifications&#34;:[{&#34;sendAt&#34;:&#34;task-start&#34;,&#34;expression&#34;:&#34;&#34;,&#34;subject&#34;:&#34;RE: {{_user.firstname}} assigned you in \&#34;{{_task_name}}\&#34;&#34;,&#34;type&#34;:&#34;screen&#34;,&#34;textBody&#34;:&#34;&#34;,&#34;screenRef&#34;:2,&#34;usersAndGroupsOptionSelected&#34;:null,&#34;toRecipients&#34;:[{&#34;type&#34;:&#34;assignedUser&#34;,&#34;value&#34;:null}],&#34;ccRecipients&#34;:[],&#34;bccRecipients&#34;:[],&#34;i&#34;:6}]},&#34;web_entry&#34;:null}" pm:elementDestination="{&#34;type&#34;:&#34;taskSource&#34;,&#34;value&#34;:null}">
+      <bpmn:incoming>node_523</bpmn:incoming>
+      <bpmn:outgoing>node_528</bpmn:outgoing>
+    </bpmn:task>
+    <bpmn:sequenceFlow id="node_523" name="" sourceRef="node_167" targetRef="node_511" />
+    <bpmn:sequenceFlow id="node_528" name="" sourceRef="node_511" targetRef="node_189" />
+  </bpmn:process>
+  <bpmn:collaboration id="collaboration_0">
+    <bpmn:participant id="node_1" name="Pool" processRef="ProcessId" />
+  </bpmn:collaboration>
+  <bpmndi:BPMNDiagram id="BPMNDiagramId">
+    <bpmndi:BPMNPlane id="BPMNPlaneId" bpmnElement="collaboration_0">
+      <bpmndi:BPMNShape id="node_1_di" bpmnElement="node_1">
+        <dc:Bounds x="-40" y="28" width="1460" height="790" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="node_3_di" bpmnElement="node_3">
+        <dc:Bounds x="-10" y="28" width="1430" height="212" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="node_4_di" bpmnElement="node_4">
+        <dc:Bounds x="-10" y="240" width="1430" height="180" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="node_5_di" bpmnElement="node_5">
+        <dc:Bounds x="-10" y="420" width="1430" height="398" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="node_6_di" bpmnElement="node_6">
+        <dc:Bounds x="40" y="118.57142857142856" width="36" height="36" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="node_7_di" bpmnElement="node_7">
+        <dc:Bounds x="137.85714285714286" y="98.57142857142857" width="116" height="76" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="node_18_di" bpmnElement="node_18">
+        <dc:Bounds x="137.85714285714286" y="517.1428571428571" width="116" height="76" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="node_27_di" bpmnElement="node_27">
+        <dc:Bounds x="352.5" y="537.1428571428571" width="36" height="36" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="node_38_di" bpmnElement="node_38">
+        <dc:Bounds x="549.9999999999998" y="537.1428571428571" width="36" height="36" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge id="node_39_di" bpmnElement="node_39">
+        <di:waypoint x="58" y="136.57" />
+        <di:waypoint x="195.86" y="136.57" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="node_53_di" bpmnElement="node_53">
+        <di:waypoint x="195.86" y="555.14" />
+        <di:waypoint x="370.5" y="555.14" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="node_61_di" bpmnElement="node_61">
+        <di:waypoint x="370.5" y="555.14" />
+        <di:waypoint x="568" y="555.14" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNShape id="node_67_di" bpmnElement="node_67">
+        <dc:Bounds x="509.9999999999997" y="275.42857142857133" width="116" height="76" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge id="node_69_di" bpmnElement="node_69">
+        <di:waypoint x="568" y="555.14" />
+        <di:waypoint x="568" y="313.43" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNShape id="node_75_di" bpmnElement="node_75">
+        <dc:Bounds x="725.714285714286" y="295.42857142857133" width="36" height="36" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="node_91_di" bpmnElement="node_91">
+        <dc:Bounds x="685.7142857142859" y="435.71428571428567" width="116" height="76" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge id="node_108_di" bpmnElement="node_108">
+        <di:waypoint x="568" y="313.43" />
+        <di:waypoint x="743.71" y="313.43" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="node_110_di" bpmnElement="node_110">
+        <di:waypoint x="743.71" y="313.43" />
+        <di:waypoint x="743.71" y="473.71" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNShape id="node_121_di" bpmnElement="node_121">
+        <dc:Bounds x="895" y="295.42857142857133" width="36" height="36" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge id="node_122_di" bpmnElement="node_122">
+        <di:waypoint x="743.71" y="313.43" />
+        <di:waypoint x="913" y="313.43" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="node_128_di" bpmnElement="node_128">
+        <di:waypoint x="743.71" y="473.71" />
+        <di:waypoint x="913" y="313.43" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="node_130_di" bpmnElement="node_130">
+        <di:waypoint x="568" y="555.14" />
+        <di:waypoint x="913" y="313.43" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNShape id="node_139_di" bpmnElement="node_139">
+        <dc:Bounds x="855" y="90" width="116" height="76" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge id="node_158_di" bpmnElement="node_158">
+        <di:waypoint x="913" y="313.43" />
+        <di:waypoint x="913" y="128" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNShape id="node_167_di" bpmnElement="node_167">
+        <dc:Bounds x="1041.4285714285722" y="470.0000000000001" width="116" height="76" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge id="node_182_di" bpmnElement="node_182">
+        <di:waypoint x="913" y="128" />
+        <di:waypoint x="1099.43" y="508" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNShape id="node_189_di" bpmnElement="node_189">
+        <dc:Bounds x="1364.285714285714" y="490.0000000000001" width="36" height="36" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge id="node_352_di" bpmnElement="node_352">
+        <di:waypoint x="195.86" y="136.57" />
+        <di:waypoint x="195.86" y="555.14" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNShape id="node_406_di" bpmnElement="node_406">
+        <dc:Bounds x="352.5" y="447.5" width="36" height="36" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge id="node_407_di" bpmnElement="node_407">
+        <di:waypoint x="370.5" y="465.5" />
+        <di:waypoint x="195.86" y="555.14" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="node_415_di" bpmnElement="node_415">
+        <di:waypoint x="370.5" y="555.14" />
+        <di:waypoint x="370.5" y="465.5" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNShape id="node_416_di" bpmnElement="node_416">
+        <dc:Bounds x="312.5" y="303.75" width="116" height="76" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge id="node_428_di" bpmnElement="node_428">
+        <di:waypoint x="370.5" y="465.5" />
+        <di:waypoint x="370.5" y="341.75" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNShape id="node_432_di" bpmnElement="node_432">
+        <dc:Bounds x="232.50000000000006" y="323.33333333333337" width="36" height="36" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge id="node_436_di" bpmnElement="node_436">
+        <di:waypoint x="370.5" y="341.75" />
+        <di:waypoint x="250.5" y="341.33" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNShape id="node_503_di" bpmnElement="node_503">
+        <dc:Bounds x="311.5" y="709.6666666666667" width="116" height="76" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge id="node_506_di" bpmnElement="node_506">
+        <di:waypoint x="370.5" y="555.14" />
+        <di:waypoint x="369.5" y="747.67" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="node_510_di" bpmnElement="node_510">
+        <di:waypoint x="369.5" y="747.67" />
+        <di:waypoint x="195.86" y="555.14" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNShape id="node_511_di" bpmnElement="node_511">
+        <dc:Bounds x="1207" y="468" width="116" height="76" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge id="node_523_di" bpmnElement="node_523">
+        <di:waypoint x="1099.43" y="508" />
+        <di:waypoint x="1265" y="506" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="node_528_di" bpmnElement="node_528">
+        <di:waypoint x="1265" y="506" />
+        <di:waypoint x="1382.29" y="508" />
+      </bpmndi:BPMNEdge>
+    </bpmndi:BPMNPlane>
+  </bpmndi:BPMNDiagram>
+</bpmn:definitions>

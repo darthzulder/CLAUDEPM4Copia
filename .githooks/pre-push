@@ -1,0 +1,111 @@
+#!/bin/sh
+#
+# ANILLO 3 de verificación — "no rompí el proyecto".
+#
+# Es la última puerta antes de que el código salga de la máquina. Hace dos cosas que el
+# `pre-commit` (anillo 2) no puede hacer:
+#
+#   1. Verifica lo que REALMENTE se va a pushear, no lo que había en el índice de un commit
+#      suelto. Un `git commit --no-verify` (el escape documentado para trabajo en progreso)
+#      se salta el anillo 2; acá se lo alcanza igual.
+#   2. Avisa si la rama quedó detrás de su rama BASE de integración (`dev` para las ramas de
+#      trabajo, `main` para dev/release/hotfix — ver pm4-app/scripts/integration-base.mjs). Un
+#      commit puede estar perfectamente verde contra la foto de la base que tenías al empezar y
+#      romperse al integrarse: la base renombró un campo `qd_*`, tu rama agregó un uso del
+#      nombre viejo, ambos verdes por separado. Eso es un *semantic conflict* y no lo detecta
+#      ninguna suite corrida sobre una sola de las dos ramas.
+#
+# La base se CALCULA, no está cableada. Cuando estaba fija en `main`, este chequeo era un falso
+# verde: como `dev` contiene todo `main`, cualquier rama salida de `dev` cumplía "contiene main"
+# por construcción y el hook felicitaba sin haber mirado nada, mientras la pregunta real —¿estoy
+# atrás de `dev`?— quedaba sin responder.
+#
+# El aviso de (2) NO bloquea a propósito: obligar a traer la base en cada push volvería
+# insoportable trabajar en una rama larga. Quien bloquea de verdad es el anillo 4 (branch
+# protection en GitHub, con "require branches to be up to date before merging"), donde el
+# chequeo importa porque ahí sí estás por integrar. Ver docs/guides/entorno-local-y-verificacion.md.
+#
+# Para saltarlo: git push --no-verify   (queda el anillo 4, que no se puede saltar)
+
+set -e
+
+STR_RAIZ="$(git rev-parse --show-toplevel)"
+STR_GIT_DIR="$(git rev-parse --git-dir)"
+STR_RAMA="$(git symbolic-ref --short HEAD 2>/dev/null || echo '(detached)')"
+
+# ── ¿Hay algo que pushear? ────────────────────────────────────────────────────────────────
+# git alimenta por stdin una línea por ref: <local ref> <local sha> <remote ref> <remote sha>.
+# En un push que SOLO borra ramas remotas, el sha local viene todo en ceros y no hay nada que
+# verificar. El patrón `*[!0]*` es "contiene algún carácter distinto de 0", así que funciona
+# igual con sha1 (40) que con sha256 (64).
+blnHayCommits=0
+while read -r _strLocalRef strLocalSha _strRemoteRef _strRemoteSha; do
+  case "$strLocalSha" in
+    *[!0]*) blnHayCommits=1 ;;
+  esac
+done
+
+if [ "$blnHayCommits" -eq 0 ]; then
+  echo "[pre-push] Solo borrado de refs remotas — nada que verificar."
+  exit 0
+fi
+
+# ── (2) ¿La rama contiene a su base de integración? ───────────────────────────────────────
+# La base la resuelve scripts/integration-base.mjs (única fuente de verdad de la regla, también
+# usada por coverage-diff.mjs). Sale vacía cuando la rama no se integra en ninguna —`main`, que es
+# la punta del flujo— y en ese caso no hay nada que chequear.
+#
+# Si no hay node, se salta el chequeo en vez de adivinar una base: un aviso con la rama equivocada
+# es peor que no avisar. La verificación de (1) sigue corriendo igual (vía contenedor si hace falta).
+STR_BASE=""
+if command -v node >/dev/null 2>&1; then
+  STR_BASE="$(node "$STR_RAIZ/pm4-app/scripts/integration-base.mjs" "$STR_RAMA" 2>/dev/null || true)"
+else
+  echo "[pre-push] ⚠️  Sin node en el host: no se puede determinar la rama base, se salta ese chequeo."
+fi
+
+if [ -n "$STR_BASE" ]; then
+  # El fetch puede fallar por estar sin red o sin credenciales; en ese caso se avisa y se sigue.
+  # Este chequeo es informativo, así que nunca debe ser el motivo de que no puedas pushear.
+  if git fetch --quiet origin "$STR_BASE" 2>/dev/null; then
+    if git rev-parse --verify --quiet "origin/$STR_BASE" >/dev/null 2>&1; then
+      if git merge-base --is-ancestor "origin/$STR_BASE" HEAD 2>/dev/null; then
+        echo "[pre-push] ✅ La rama contiene origin/$STR_BASE: lo que verificás es el resultado integrado."
+      else
+        INT_DETRAS="$(git rev-list --count "HEAD..origin/$STR_BASE" 2>/dev/null || echo '?')"
+        echo "[pre-push] ⚠️  La rama está $INT_DETRAS commit(s) DETRÁS de origin/$STR_BASE."
+        echo "[pre-push] ⚠️  El verde de abajo prueba tu rama aislada, NO el resultado del merge."
+        echo "[pre-push] ⚠️  Antes de mergear: git merge origin/$STR_BASE  (y volver a verificar)."
+      fi
+    fi
+  else
+    echo "[pre-push] ⚠️  No se pudo hacer fetch de origin/$STR_BASE (sin red o sin credenciales):"
+    echo "[pre-push] ⚠️  no se puede saber si la rama está al día."
+  fi
+fi
+
+# ── (1) Verificación ──────────────────────────────────────────────────────────────────────
+# Si el anillo 2 ya verificó EXACTAMENTE este contenido, no se repiten los ~30s. La marca
+# guarda el hash del árbol verificado, y solo se escribe cuando el working tree estaba limpio
+# respecto del índice (si no, lo verificado y lo commiteado no serían lo mismo y la marca
+# mentiría). Mismo árbol ⇒ mismo resultado, así que saltarlo es seguro, no un atajo.
+STR_MARCA="$STR_GIT_DIR/pm4-verified-tree"
+STR_ARBOL_HEAD="$(git rev-parse 'HEAD^{tree}')"
+
+if [ -f "$STR_MARCA" ] && [ "$(cat "$STR_MARCA" 2>/dev/null)" = "$STR_ARBOL_HEAD" ] && git diff --quiet && git diff --cached --quiet; then
+  echo "[pre-push] ✅ Este árbol ($(echo "$STR_ARBOL_HEAD" | cut -c1-8)) ya lo verificó el pre-commit — no se repite."
+  exit 0
+fi
+
+echo "[pre-push] Verificando (anillo 3/4)…"
+
+if command -v npm >/dev/null 2>&1; then
+  cd "$STR_RAIZ/pm4-app"
+  npm run verify
+elif command -v docker >/dev/null 2>&1 && docker ps --format '{{.Names}}' 2>/dev/null | grep -qx "pm4-app-container"; then
+  docker exec pm4-app-container sh -c "cd /app && npm run verify"
+else
+  echo "[pre-push] ⚠️  No hay forma de verificar en local (ni npm ni el contenedor)."
+  echo "[pre-push] ⚠️  Se permite el push; CI (anillo 4) sí corre el gate."
+  exit 0
+fi

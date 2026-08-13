@@ -56,11 +56,15 @@ dist/
 downloads/
 eggs/
 .eggs/
-lib/
-lib64/
-parts/
+# Anclados a la raíz a propósito: sin la barra inicial, `lib/`, `var/` y `parts/` son
+# patrones GLOBALES que se tragan cualquier carpeta con ese nombre en cualquier nivel —
+# p. ej. el código fuente de backend/src/lib/. Son output de setuptools en la raíz; los
+# `lib/` de un virtualenv ya quedan cubiertos por venv/ .venv/ env/ ENV/.
+/lib/
+/lib64/
+/parts/
 sdist/
-var/
+/var/
 wheels/
 share/python-wheels/
 *.egg-info/
@@ -76,6 +80,10 @@ venv.bak/
 .coverage
 htmlcov/
 
+# Cobertura de vitest (`npm run coverage`) — artefacto local/CI, se regenera siempre.
+# Las entradas de arriba (.coverage, htmlcov/) son de coverage.py, no cubren esto.
+coverage/
+
 # IDEs and Editors
 .vscode/
 .idea/
@@ -90,3 +98,9 @@ htmlcov/
 .DS_Store
 Thumbs.db
 desktop.ini
+
+# Espejo local de los scripts PM4 — generado por scripts/pm4-scripts en cada captura.
+# El respaldo versionado es la rama `pm4-scripts-historial`; esto es solo la copia navegable.
+# La barra inicial ancla el patrón a la raíz: sin ella también ignoraría el código de la
+# herramienta, que vive en pm4-app/scripts/pm4-scripts/.
+/pm4-scripts/

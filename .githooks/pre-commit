@@ -1,0 +1,56 @@
+#!/bin/sh
+#
+# ANILLO 2 de verificación — "no rompí lo que toqué".
+#
+# Corre `npm run verify` (= scripts/verify.mjs, la ÚNICA definición de verde del proyecto:
+# lint front+back, typecheck, builds, tests front+back y pytest del cotizador). Los otros dos
+# anillos son `.githooks/pre-push` (anillo 3) y GitHub Actions (anillo 4, el autoritativo).
+#
+# Los tres invocan el MISMO script a propósito: antes cada uno mantenía su propia lista de
+# pasos y ya habían divergido —este hook no corría pytest, CI sí— con el resultado clásico de
+# "en mi máquina pasaba".
+#
+# Versionado en .githooks/ y activado con `npm run setup:hooks` desde pm4-app/
+# (= `git config core.hooksPath .githooks`). No usa husky: no hace falta una dependencia.
+#
+# Runner: npm del host si existe; si no, el contenedor. Si no hay ninguno, avisa y NO
+# bloquea — el gate autoritativo es GitHub Actions, que no se puede saltar. Este hook es
+# feedback rápido, no la última línea de defensa.
+#
+# Para saltarlo en un commit de trabajo en progreso: git commit --no-verify
+# (el anillo 3 lo vuelve a verificar antes de que el código salga de la máquina).
+
+set -e
+
+STR_CONTAINER="pm4-app-container"
+
+echo "[pre-commit] Verificando (anillo 2/4)…"
+
+if command -v npm >/dev/null 2>&1; then
+  # Ruta nativa (requiere Node 24 en el host, igual que el contenedor y Render).
+  echo "[pre-commit] runner: npm del host ($(node -v 2>/dev/null || echo 'node ?'))"
+  cd "$(git rev-parse --show-toplevel)/pm4-app"
+  npm run verify
+
+elif command -v docker >/dev/null 2>&1 && docker ps --format '{{.Names}}' 2>/dev/null | grep -qx "$STR_CONTAINER"; then
+  # Respaldo: sin npm en el host, usamos el contenedor si está arriba.
+  echo "[pre-commit] runner: docker exec $STR_CONTAINER"
+  docker exec "$STR_CONTAINER" sh -c "cd /app && npm run verify"
+
+else
+  echo "[pre-commit] ⚠️  No hay forma de verificar: ni npm en el host ni el contenedor '$STR_CONTAINER' arriba."
+  echo "[pre-commit] ⚠️  Se permite el commit, pero el pre-push y CI sí van a correr el gate."
+  echo "[pre-commit] ⚠️  Para verificar en local: instalar Node 24 (nvm install 24) o levantar el contenedor."
+  exit 0
+fi
+
+# Marca para el anillo 3: deja constancia de QUÉ árbol quedó verificado, para que el pre-push
+# no repita los mismos ~30s sobre contenido idéntico.
+#
+# Solo se escribe si no hay cambios sin stagear (`git diff --quiet`): `npm run verify` lee el
+# working tree, no el índice, así que con cambios a medio stagear lo verificado y lo
+# commiteado serían cosas distintas y la marca mentiría. El `if` es además lo que evita que
+# `set -e` aborte el commit cuando `git diff` sale con 1 por haber diferencias.
+if git diff --quiet; then
+  git write-tree > "$(git rev-parse --absolute-git-dir)/pm4-verified-tree"
+fi

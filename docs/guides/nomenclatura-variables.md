@@ -65,9 +65,13 @@ campo (`fields.ts` documenta cada nombre con `// FLD-xxx · antes qd_nombreViejo
 El estándar original define un prefijo `dat` para `DateTime`. **En este proyecto no se
 usa**: PM4 transporta las fechas de proceso como texto en formato `DD/MM/YYYY`
 (`qd_strFilingDate`, `qd_strClosureDate`, `qd_strDraftDate`, …), no como tipo `Date` nativo.
-Usar siempre `str` para campos de fecha que vienen de PM4, y `parsePm4Date()` para leerlos
-como `Date` en el cliente — `new Date(stringDDMMYYYY)` los interpreta como `MM/DD/YYYY` y
-produce fechas incorrectas.
+Usar siempre `str` para campos de fecha que vienen de PM4, y `parsePm4Date()` (vive en
+[`core/businessDays.ts`](../../pm4-app/frontend/src/core/businessDays.ts), es la única
+definición del repo) para leerlos como `Date` en el cliente — `new Date(stringDDMMYYYY)` los
+interpreta como `MM/DD/YYYY` y produce fechas corridas un mes entero. Ojo con el fallback: un
+string que **no** matchee `DD/MM/YYYY` (p. ej. un ISO) lo parsea `new Date()` en silencio, y
+en UTC-5 eso puede devolver el día anterior. Comportamiento fijado en
+`core/businessDays.test.ts`.
 
 ## Convención compañera `_desc` — código + descripción
 

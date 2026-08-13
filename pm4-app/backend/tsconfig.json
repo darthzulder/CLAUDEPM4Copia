@@ -8,8 +8,22 @@
     "strict": true,
     "esModuleInterop": true,
     "skipLibCheck": true,
-    "resolveJsonModule": true
+    "resolveJsonModule": true,
+    // Paridad con el frontend: el backend no tenía ninguno de estos, así que una variable o
+    // un parámetro muertos pasaban sin que nada avisara (los params intencionalmente sin uso
+    // ya van con prefijo `_`, que TypeScript acepta).
+    "noUnusedLocals": true,
+    "noUnusedParameters": true,
+    "noFallthroughCasesInSwitch": true
   },
   "include": ["src/**/*"],
-  "exclude": ["node_modules", "dist"]
+  // Los tests se EXCLUYEN del build a propósito: este tsconfig emite a `dist/`, que es el
+  // artefacto que Render despliega. Antes incluía `src/**/*` sin excluir nada, así que
+  // `dist/lib/` terminaba conteniendo recaptcha.test.js, tasks.test.js y token.test.js — código
+  // de test en producción, con sus fixtures y sus llaves de prueba.
+  //
+  // Excluirlos acá NO los deja sin chequeo de tipos: para eso está `tsconfig.check.json`,
+  // que los incluye con `noEmit` y es lo que corre el paso `typecheck · backend` de
+  // scripts/verify.mjs.
+  "exclude": ["node_modules", "dist", "src/**/*.test.ts"]
 }
