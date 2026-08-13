@@ -79,6 +79,7 @@ const CLL_SLUGS = [
   'COL_QD_SCR-011_Revision_Error_Tecnico_Prorroga',
   'COL_QD_SCR-012_Revision_Error_Funcional_Prorroga',
   'COL_QD_SCR-013_Dashboard_Gestion_Casos',
+  'COL_OS_SCR-003_Bandeja_Gestion_Linea2',
   'ds-catalog',
   'smartsupervision-api-docs',
 ];

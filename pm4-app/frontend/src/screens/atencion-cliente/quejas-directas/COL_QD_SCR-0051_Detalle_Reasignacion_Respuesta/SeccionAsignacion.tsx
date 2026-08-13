@@ -6,15 +6,13 @@ import {
   ZrButton, ZrAlert, ZrTable, ZdsStatusBadge,
 } from '../../../../components/fields/ZdsFields';
 import { useCollection, useSyncDesc } from '../../../../core/useCollection';
+import { fetchGroupUsers } from '../../../../core/pm4Groups';
 import pm4 from '../../../../api/pm4Client';
 import { QD, QD_COLLECTIONS, OPTIONS_SI_NO, SCR0051_MAX_AYUDANTES as MAX_AYUDANTES } from '../fields/fields';
 import type { DetalleReasignacionRespuestaFormData } from '../fields/fields';
 import type { AsignacionHistorial } from '../fields/types';
 
 // ── Helpers de la matriz cat_matriz_motivos (id 45) ──────────────────────────
-// Los datos vienen "sucios" (espacios sobrantes), por eso normalizamos antes de comparar.
-const normalizar = (in_gen: unknown) => String(in_gen ?? '').trim().toLowerCase();
-
 // Lee una columna del registro crudo de la matriz (los campos viven bajo `data`).
 function leerColumna(in_objRow: Record<string, unknown>, in_strCol: string): string {
   const dicData = (in_objRow.data ?? in_objRow) as Record<string, unknown>;
@@ -33,32 +31,9 @@ function opcionesUnicas(in_cll: { value: string; label: string }[]): { value: st
   return cllOut;
 }
 
-// Resuelve los usuarios reales de un grupo PM4 por nombre (GET /groups?filter= +
-// GET /groups/{id}/users). Compartido por "Área a reasignar" (S5) y "Área destino"
-// (S6, solicitud de ayuda) — ambas apuntan a grupos PM4 (rolResponsable de la matriz).
-async function fetchGroupUsers(in_strGroupName: string): Promise<{ value: string; label: string; id: string }[]> {
-  const objGroupsResp = await pm4.get('/groups', { params: { filter: in_strGroupName, per_page: 100 } });
-  const lstGroups: { id: string; name?: string }[] = objGroupsResp.data?.data ?? [];
-  const objGroup = lstGroups.find((objG) => normalizar(objG.name) === normalizar(in_strGroupName)) ?? lstGroups[0];
-  if (!objGroup) return [];
-
-  const objUsersResp = await pm4.get(`/groups/${objGroup.id}/users`, { params: { per_page: 100 } });
-  // OJO: pese a que el OpenAPI de este endpoint documenta la respuesta como `users` puros,
-  // PM4 en la práctica devuelve registros con forma de GroupMember (pivote): `id` es el id
-  // de LA FILA del pivote group_members, no el id real del usuario — ese viaja en
-  // `member_id` (ver schemas groupMembers/getGroupMembersById en docs (4).json). Se prioriza
-  // member_id y se cae a id solo si member_id no viene (por si alguna instancia sí devuelve
-  // el user plano).
-  const lstUsers: { id: number | string; member_id?: number | string; username: string; firstname?: string; lastname?: string }[]
-    = objUsersResp.data?.data ?? [];
-  return lstUsers
-    .map((objUser) => ({
-      value: objUser.username,
-      label: `${objUser.firstname ?? ''} ${objUser.lastname ?? ''}`.trim() || objUser.username,
-      id: String(objUser.member_id ?? objUser.id),
-    }))
-    .filter((objOpt) => !!objOpt.value);
-}
+// "Área a reasignar" (S5) y "Área destino" (S6, solicitud de ayuda) apuntan a grupos
+// PM4 (rolResponsable de la matriz) y resuelven sus usuarios con `fetchGroupUsers`
+// (core/pm4Groups.ts), compartido con SCR-003 de Otras Solicitudes.
 
 interface Props {
   form: UseFormReturn<DetalleReasignacionRespuestaFormData>;

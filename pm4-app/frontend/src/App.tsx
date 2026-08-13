@@ -26,6 +26,7 @@ const FormularioSuperintendencia = lazy(() => import('./screens/atencion-cliente
 const RevisionErrorTecnicoProrroga = lazy(() => import('./screens/atencion-cliente/quejas-directas/COL_QD_SCR-011_Revision_Error_Tecnico_Prorroga/RevisionErrorTecnicoProrroga'));
 const ErrorFuncionalProrroga = lazy(() => import('./screens/atencion-cliente/quejas-directas/COL_QD_SCR-012_Revision_Error_Funcional_Prorroga/ErrorFuncionalProrroga'));
 const DashboardGestionCasos = lazy(() => import('./screens/atencion-cliente/quejas-directas/COL_QD_SCR-013_Dashboard_Gestion_Casos/DashboardGestionCasos'));
+const GestionLinea2 = lazy(() => import('./screens/atencion-cliente/otras-solicitudes/COL_OS_SCR-003_Bandeja_Gestion_Linea2/GestionLinea2'));
 const SmartsupervisionApiDocs = lazy(() => import('./screens/smartsupervision-api-docs/SmartsupervisionApiDocs'));
 
 class ErrorBoundary extends Component<{ children: ReactNode }, { error: Error | null }> {
@@ -76,6 +77,7 @@ export const SCREENS: Record<string, React.ComponentType> = {
   'COL_QD_SCR-011_Revision_Error_Tecnico_Prorroga': RevisionErrorTecnicoProrroga,
   'COL_QD_SCR-012_Revision_Error_Funcional_Prorroga': ErrorFuncionalProrroga,
   'COL_QD_SCR-013_Dashboard_Gestion_Casos': DashboardGestionCasos,
+  'COL_OS_SCR-003_Bandeja_Gestion_Linea2': GestionLinea2,
   'ds-catalog': DsCatalog,
   'smartsupervision-api-docs': SmartsupervisionApiDocs,
 };
