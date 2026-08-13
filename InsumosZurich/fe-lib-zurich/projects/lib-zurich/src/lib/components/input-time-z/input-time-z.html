@@ -1,0 +1,16 @@
+<za-time-input
+  #timeInput
+  name="{{name}}"
+  [config]="typeInput"
+  label="{{label}}"
+  help-text="{{helpText}}"
+  locale="es"
+  model="00:05"
+  [required]="required"
+  [invalid]="valid"
+  [disabled]="disabled"
+  [(ngModel)]="model"
+  (ngModelChange)="modelChange.emit(model)"
+  [readonly]="readonly"
+  [range]="range"
+/>

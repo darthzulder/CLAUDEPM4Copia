@@ -1,0 +1,10 @@
+Get this package with the Azure DevOps Extension for Azure CLI
+This is for Zurich Design System (ZDS)
+Connect to Feed
+then
+az artifacts universal download \
+--organization "https://dev.azure.com/ZurichInsurance-CO/" \
+--feed "Librerias-estandar" \
+--name "lib-angular" \
+--version "1.0.0" \
+--path .

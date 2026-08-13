@@ -21,6 +21,14 @@ graphify-out/cache/
 # (ver nota en CLAUDE.md sobre cache_root al correr extract() en subcarpetas).
 **/*/graphify-out/
 
+# Salida generada del scanner de SonarQube
+.scannerwork/
+**/.scannerwork/
+
+# Credenciales del feed de Azure Artifacts (contienen :_password= en base64)
+.npmrc
+**/.npmrc
+
 # Scratch/debug — nunca deben versionarse (histórico: contuvieron token/URL de PM4)
 pm4-app/_t.txt
 pm4-app/_b.txt

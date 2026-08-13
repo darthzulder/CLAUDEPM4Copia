@@ -1,0 +1,25 @@
+@if (this.img != '') {
+<div class="grid">
+  <div class="col-12">
+    <za-avatar
+      [config]="this.config"
+      [content]="this.content"
+      [image-src]="this.img"
+      [name]="this.name"
+      [status]="this.status"
+    ></za-avatar>
+  </div>
+</div>
+} @else {
+<div class="grid">
+  <div class="col-12">
+    <za-avatar
+      [config]="this.config"
+      [content]="this.content"
+      [initials]="this.initials"
+      [name]="this.name"
+      [status]="this.status"
+    ></za-avatar>
+  </div>
+</div>
+}

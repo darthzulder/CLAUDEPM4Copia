@@ -1,0 +1,21 @@
+<za-date-input
+  #dateInput
+  [config]="lineType"
+  label="{{label}}"
+  [input-type]="
+    inputType == 'date'?
+    'date': inputType == 'month'?
+    'month': inputType == 'datetime-local'?
+    'datetime-local': inputType == 'week'?
+    'week': 'date'"
+  [max]="max"
+  [min]="min"
+  [required]="required"
+  [readonly]="readonly"
+  [invalid]="valid"
+  [(ngModel)]="model"
+  (ngModelChange)="modelChange.emit(model)"
+  [custom-ui]="false"
+  [today-nav]="true"
+  name="{{name}}"
+/>

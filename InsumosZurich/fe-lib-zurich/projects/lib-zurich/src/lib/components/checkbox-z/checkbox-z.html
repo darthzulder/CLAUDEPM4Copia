@@ -1,0 +1,10 @@
+<za-checkbox
+  id="{{name}}"
+  name="{{name}}"
+  label="{{label}}"
+  [help-text]="helpText"
+  [(ngModel)]="model"
+  (ngModelChange)="modelChange.emit(model)"
+  [required]="required"
+  (change)="eventChange.emit($event)"
+/>

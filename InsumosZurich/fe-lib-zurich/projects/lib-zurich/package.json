@@ -1,0 +1,18 @@
+{
+  "name": "@zurich-col/lib-zurich",
+  "version": "2.6.14",
+  "peerDependencies": {
+    "@angular/common": "^21.2.13",
+    "@angular/core": "^21.2.13",
+    "@angular/forms": "^21.2.13",
+    "@zurich/angular-components": ">=0.8.2",
+    "@zurich/web-components": ">=0.8.2",
+    "@zurich/dev-utils": ">=0.8.2",
+    "primeflex": "^4.0.0",
+    "karma-sonarqube-unit-reporter": "^0.0.23"
+  },
+  "dependencies": {
+    "tslib": "^2.3.0"
+  },
+  "sideEffects": false
+}

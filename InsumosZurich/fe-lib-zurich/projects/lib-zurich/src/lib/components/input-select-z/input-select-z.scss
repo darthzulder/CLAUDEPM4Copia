@@ -1,0 +1,11 @@
+.select-wrapper {
+    position: relative;
+    padding-bottom: 70px; // Ajusta según el alto real del select
+}
+
+.select-absolute {
+    position: absolute;
+    width: 100%;
+    left: 0;
+    top: 0; // Opcional: asegura que el select esté pegado arriba
+}

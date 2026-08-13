@@ -1,0 +1,9 @@
+<za-stage [custom-str]="customStr" [header]="header" [image-src]="imageSrc">
+  @if (contentTpl) {
+  <ng-container
+    *ngTemplateOutlet="contentTpl; context: contentContext"
+  ></ng-container>
+  } @else {
+  <ng-content></ng-content>
+  }
+</za-stage>

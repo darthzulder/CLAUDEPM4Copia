@@ -1,0 +1,2016 @@
+<lib-navigation-z [routes]="routes" [social]="socialLinks"></lib-navigation-z>
+
+<lib-stage-z
+  header="Zurich Design Colombia"
+  image-src="https://zds.zurich.com/0.7.0/sample.webp"
+  custom-str="bg: #2167ae; color: white; bg--mobile: #04093C; color--mobile: #1BE59E;"
+>
+</lib-stage-z>
+
+<div class="grid">
+  <div class="col">
+    <lib-card-z [showFooter]="false">
+      <ng-template libZTemplate id="header">
+        <strong>Prueba Tabla</strong>
+      </ng-template>
+      <ng-template libZTemplate id="content">
+        <lib-table-z
+          [tableCheck]="true"
+          typeStyle="odd"
+          [showGenericStart]="false"
+          genericStartName="Prueba "
+          [showGenericEnd]="true"
+          generciEndName="Prueba2"
+          [pages]="2"
+          (eventChangePages)="pageChange($event)"
+          (selectedItemsList)="pruebaSelectedTable($event)"
+          [hideHeader]="false"
+          [headers]="[
+            {
+              title: 'Group',
+              key: 'groupLabel',
+              id: false,
+              showGroupLabel: true,
+              groupLabel: true,
+              rowspan: 2,
+              pipe: 'strong'
+            },
+            {
+              title: 'titulo1',
+              key: 'head1',
+              id: true,
+              pipe: 'uppercase'
+            },
+            {
+              title: 'titulo2',
+              key: 'head2'
+            },
+            {
+              title: 'titulo2',
+              key: 'head3'
+            }
+            ,
+            {
+              title: 'titulo3',
+              key: 'head4'
+            },
+            {
+              title: 'titulo5',
+              key: 'head5',
+              isTag: true,
+
+            },
+            {
+              title: 'titulo6',
+              key: 'head6'
+            },
+            {
+              title: 'titulo7',
+              key: 'sub',
+              isSubGroup: true,
+              subGroupIndice: 0,
+              subGroupkey: 'item'
+            },
+          ]"
+          [data]="this.data"
+        >
+          <ng-template libZTemplate id="start">
+            <p>Pruba 1</p>
+          </ng-template>
+          <ng-template libZTemplate id="end" let-value="value">
+            <lib-button-z
+              type="primary:xs"
+              label="Prueba"
+              icon="edit:line"
+              [iconRight]="false"
+              [disabled]="false"
+              (eventClick)="getSelected(value)"
+            ></lib-button-z>
+          </ng-template>
+        </lib-table-z>
+      </ng-template>
+    </lib-card-z>
+  </div>
+</div>
+
+<!-- div alertas -->
+<div class="zurich-docs-grid" id="alert">
+  <div class="zurich-docs-col">
+    <h2 class="zurich-docs-title">Alertas</h2>
+    <div class="zurich-docs-card">
+      <div class="zurich-docs-variants">
+        <lib-button-z
+          type="primary"
+          label="Alert Info"
+          icon="info:line"
+          [iconRight]="false"
+          [disabled]="false"
+          (eventClick)="mostrarAlertaInfo()"
+        ></lib-button-z>
+        <lib-button-z
+          type="primary"
+          label="Alert Positive"
+          icon="check:line"
+          [iconRight]="false"
+          [disabled]="false"
+          (eventClick)="mostrarAlertaPositive()"
+        ></lib-button-z>
+        <lib-button-z
+          type="primary"
+          label="Alert Alert"
+          [iconRight]="false"
+          [disabled]="false"
+          (eventClick)="mostrarAlertaAlert()"
+        ></lib-button-z>
+        <lib-button-z
+          type="primary"
+          label="Alert Negative"
+          icon="close:line"
+          [iconRight]="false"
+          [disabled]="false"
+          (eventClick)="mostrarAlertaNegative()"
+        ></lib-button-z>
+      </div>
+
+      <hr class="zurich-docs-divider" />
+
+      <div class="zurich-docs-code-area">
+        <div class="zurich-docs-code-label">HTML Example</div>
+        <pre class="zurich-docs-pre">
+          &lt;lib-button-z type="primary" label="Alert Info" icon="info:line" [iconRight]="false" [disabled]="false" (eventClick)="mostrarAlertaInfo()"&gt;&lt;/lib-button-z&gt;
+          &lt;lib-button-z type="primary" label="Alert Positive" icon="check:line" [iconRight]="false" [disabled]="false" (eventClick)="mostrarAlertaPositive()"&gt;&lt;/lib-button-z&gt;
+          &lt;lib-button-z type="primary" label="Alert Alert" [iconRight]="false" [disabled]="false" (eventClick)="mostrarAlertaAlert()"&gt;&lt;/lib-button-z&gt;
+          &lt;lib-button-z type="primary" label="Alert Negative" icon="close:line" [iconRight]="false" [disabled]="false" (eventClick)="mostrarAlertaNegative()"&gt;&lt;/lib-button-z&gt;
+        </pre>
+        <button
+          class="zurich-docs-copy-btn"
+          onclick="
+            navigator.clipboard
+              .writeText(`<lib-button-z type=&quot;primary&quot; label=&quot;Alert Info&quot; icon=&quot;info:line&quot; [iconRight]=&quot;false&quot; [disabled]=&quot;false&quot; (eventClick)=&quot;mostrarAlertaInfo()&quot;></lib-button-z>
+          <lib-button-z type=&quot;primary&quot; label=&quot;Alert Positive&quot; icon=&quot;check:line&quot; [iconRight]=&quot;false&quot; [disabled]=&quot;false&quot; (eventClick)=&quot;mostrarAlertaPositive()&quot;></lib-button-z>
+          <lib-button-z type=&quot;primary&quot; label=&quot;Alert Alert&quot; [iconRight]=&quot;false&quot; [disabled]=&quot;false&quot; (eventClick)=&quot;mostrarAlertaAlert()&quot;></lib-button-z>
+          <lib-button-z type=&quot;primary&quot; label=&quot;Alert Negative&quot; icon=&quot;close:line&quot; [iconRight]=&quot;false&quot; [disabled]=&quot;false&quot; (eventClick)=&quot;mostrarAlertaNegative()&quot;></lib-button-z>
+          `)
+          "
+        >
+          Copy
+        </button>
+      </div>
+
+      <div class="zurich-docs-params-card">
+        <div class="zurich-docs-params-title">
+          Parámetros / Configuraciones de AlertZService
+        </div>
+        <table class="zurich-docs-params-table">
+          <thead>
+            <tr>
+              <th class="zurich-docs-params-th">Propiedad</th>
+              <th class="zurich-docs-params-th">Tipo</th>
+              <th class="zurich-docs-params-th">Descripción</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td class="zurich-docs-params-td">
+                <span class="zurich-docs-params-tag">tipo</span>
+              </td>
+              <td class="zurich-docs-params-td">
+                <span class="zurich-docs-params-tag">Método</span>
+              </td>
+              <td class="zurich-docs-params-td">
+                Determina el tipo y color de la alerta.<br />
+                Usar uno de los siguientes métodos:<br />
+                <span class="zurich-docs-params-tag">alerts.info</span>
+                (informativa)<br />
+                <span class="zurich-docs-params-tag">alerts.positive</span>
+                (éxito)<br />
+                <span class="zurich-docs-params-tag">alerts.alert</span>
+                (advertencia)<br />
+                <span class="zurich-docs-params-tag">alerts.negative</span>
+                (error)
+              </td>
+            </tr>
+            <tr>
+              <td class="zurich-docs-params-td">
+                <span class="zurich-docs-params-tag">message</span>
+              </td>
+              <td class="zurich-docs-params-td">
+                <span class="zurich-docs-params-tag">string</span>
+              </td>
+              <td class="zurich-docs-params-td">
+                Mensaje principal que se mostrará en la alerta.
+              </td>
+            </tr>
+            <tr>
+              <td class="zurich-docs-params-td">
+                <span class="zurich-docs-params-tag">title</span>
+              </td>
+              <td class="zurich-docs-params-td">
+                <span class="zurich-docs-params-tag">string</span>
+              </td>
+              <td class="zurich-docs-params-td">
+                Título opcional que aparece en la parte superior de la alerta.
+              </td>
+            </tr>
+            <tr>
+              <td class="zurich-docs-params-td">
+                <span class="zurich-docs-params-tag">widthPercent</span>
+              </td>
+              <td class="zurich-docs-params-td">
+                <span class="zurich-docs-params-tag">number</span>
+              </td>
+              <td class="zurich-docs-params-td">
+                Define el ancho de la alerta como porcentaje de la pantalla.
+                Ejemplo: <span class="zurich-docs-params-tag">100</span> para
+                100%.
+              </td>
+            </tr>
+            <tr>
+              <td class="zurich-docs-params-td">
+                <span class="zurich-docs-params-tag">autoCloseAfter</span>
+              </td>
+              <td class="zurich-docs-params-td">
+                <span class="zurich-docs-params-tag">number</span>
+              </td>
+              <td class="zurich-docs-params-td">
+                Tiempo en milisegundos antes de que la alerta se cierre
+                automáticamente. Ejemplo:
+                <span class="zurich-docs-params-tag">5000</span> (5 segundos).
+              </td>
+            </tr>
+            <tr>
+              <td class="zurich-docs-params-td">
+                <span class="zurich-docs-params-tag">onShowAnimation</span>
+              </td>
+              <td class="zurich-docs-params-td">
+                <span class="zurich-docs-params-tag">string</span>
+              </td>
+              <td class="zurich-docs-params-td">
+                Animación al mostrar la alerta. Ejemplos:
+                <span class="zurich-docs-params-tag">zoom-in</span>,
+                <span class="zurich-docs-params-tag">fade-in</span>.
+              </td>
+            </tr>
+            <tr>
+              <td class="zurich-docs-params-td">
+                <span class="zurich-docs-params-tag">onCloseAnimation</span>
+              </td>
+              <td class="zurich-docs-params-td">
+                <span class="zurich-docs-params-tag">string</span>
+              </td>
+              <td class="zurich-docs-params-td">
+                Animación al cerrar la alerta. Ejemplos:
+                <span class="zurich-docs-params-tag">slide-out</span>,
+                <span class="zurich-docs-params-tag">fade-out</span>,
+                <span class="zurich-docs-params-tag">shrink-out</span>.
+              </td>
+            </tr>
+            <tr>
+              <td class="zurich-docs-params-td">
+                <span class="zurich-docs-params-tag">dismissible</span>
+              </td>
+              <td class="zurich-docs-params-td">
+                <span class="zurich-docs-params-tag">boolean</span>
+              </td>
+              <td class="zurich-docs-params-td">
+                Permite al usuario cerrar la alerta manualmente si es
+                <span class="zurich-docs-params-tag">true</span>.
+              </td>
+            </tr>
+          </tbody>
+        </table>
+
+        <!-- Ejemplo de implementación -->
+        <div class="zurich-docs-code-label" style="margin-top: 2rem">
+          Ejemplo de implementación
+        </div>
+
+        <div class="zurich-docs-code-area" style="margin-bottom: 1rem">
+          <div class="zurich-docs-code-label" style="font-weight: 500">
+            1. Importa el componente en tu HTML
+          </div>
+          <pre class="zurich-docs-pre">
+&lt;lib-alert-z&gt;&lt;/lib-alert-z&gt;
+    </pre
+          >
+        </div>
+
+        <div class="zurich-docs-code-area" style="margin-bottom: 1rem">
+          <div class="zurich-docs-code-label" style="font-weight: 500">
+            2. Inyecta el servicio en el constructor
+          </div>
+          <pre class="zurich-docs-pre">
+constructor(private alerts: AlertZService) &#123; &#125;
+    </pre
+          >
+        </div>
+
+        <div class="zurich-docs-code-area">
+          <div class="zurich-docs-code-label" style="font-weight: 500">
+            3. Llama la alerta desde tu componente
+          </div>
+          <pre class="zurich-docs-pre">
+// Ejemplo de alerta informativa
+mostrarAlertaInfo() &#123;
+  this.alerts.info('&#161;Bienvenido a la app Zurich!', &#123;
+    title: 'Informaci&#243;n',
+    widthPercent: 100,
+    autoCloseAfter: 5000,
+    onShowAnimation: 'zoom-in',
+    onCloseAnimation: 'slide-out',
+    dismissible: true,
+  &#125;);
+&#125;
+    </pre
+          >
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- div botones -->
+<div class="zurich-docs-grid" id="boton">
+  <div class="zurich-docs-col">
+    <h2 class="zurich-docs-title">Botones</h2>
+    <div class="zurich-docs-card">
+      <div class="zurich-docs-variants">
+        <lib-button-z
+          type="primary"
+          size="xs"
+          label="Primary"
+          [disabled]="false"
+        ></lib-button-z>
+        <lib-button-z
+          type="secondary"
+          label="Secondary"
+          [disabled]="false"
+        ></lib-button-z>
+        <lib-button-z
+          type="positive"
+          label="Positive"
+          [disabled]="false"
+        ></lib-button-z>
+        <lib-button-z
+          type="negative"
+          label="Negative"
+          [disabled]="false"
+        ></lib-button-z>
+        <lib-button-z
+          type="link"
+          label="Link"
+          [disabled]="false"
+          custom_str="color:red"
+        ></lib-button-z>
+      </div>
+
+      <hr class="zurich-docs-divider" />
+
+      <div class="zurich-docs-code-area">
+        <div class="zurich-docs-code-label">HTML Example</div>
+        <pre class="zurich-docs-pre">
+            &lt;lib-button-z type="primary" [disabled]="false" label="Primary"&gt;&lt;/lib-button-z&gt;
+            &lt;lib-button-z type="secondary" [disabled]="false" label="Secondary"&gt;&lt;/lib-button-z&gt;
+            &lt;lib-button-z type="positive" [disabled]="false" label="Positive"&gt;&lt;/lib-button-z&gt;
+            &lt;lib-button-z type="negative" [disabled]="false" label="Negative"&gt;&lt;/lib-button-z&gt;
+            &lt;lib-button-z type="link" [disabled]="false" label="Link"&gt;&lt;/lib-button-z&gt;
+        </pre>
+        <button
+          class="zurich-docs-copy-btn"
+          onclick="
+            navigator.clipboard
+              .writeText(`<lib-button-z type=&quot;primary&quot; [disabled]=&quot;false&quot; label=&quot;Primary&quot;></lib-button-z>
+          <lib-button-z type=&quot;secondary&quot; [disabled]=&quot;false&quot; label=&quot;Secondary&quot;></lib-button-z>
+          <lib-button-z type=&quot;positive&quot; [disabled]=&quot;false&quot; label=&quot;Positive&quot;></lib-button-z>
+          <lib-button-z type=&quot;negative&quot; [disabled]=&quot;false&quot; label=&quot;Negative&quot;></lib-button-z>
+          <lib-button-z type=&quot;link&quot; [disabled]=&quot;false&quot; label=&quot;Link&quot;></lib-button-z>
+          `)
+          "
+        >
+          Copy
+        </button>
+      </div>
+
+      <div class="zurich-docs-params-card">
+        <div class="zurich-docs-params-title">Parámetros / Configuraciones</div>
+        <table class="zurich-docs-params-table">
+          <thead>
+            <tr>
+              <th class="zurich-docs-params-th">Propiedad</th>
+              <th class="zurich-docs-params-th">Tipo</th>
+              <th class="zurich-docs-params-th">Descripción</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td class="zurich-docs-params-td">
+                <span class="zurich-docs-params-tag">label</span>
+              </td>
+              <td class="zurich-docs-params-td">
+                <span class="zurich-docs-params-tag">string</span>
+              </td>
+              <td class="zurich-docs-params-td">Texto del botón.</td>
+            </tr>
+            <tr>
+              <td class="zurich-docs-params-td">
+                <span class="zurich-docs-params-tag">type</span>
+              </td>
+              <td class="zurich-docs-params-td">
+                <span class="zurich-docs-params-tag">string</span>
+              </td>
+              <td class="zurich-docs-params-td">
+                Establece el estilo y tamaño del botón.<br />
+                Formato:
+                <span class="zurich-docs-params-tag">estilo:tamaño</span><br />
+                Ejemplos:
+                <span class="zurich-docs-params-tag">primary:xs</span>,
+                <span class="zurich-docs-params-tag">secondary:s</span>,
+                <span class="zurich-docs-params-tag">positive:l</span>.<br />
+                <strong>Estilos:</strong>
+                <span class="zurich-docs-params-tag">primary</span>,
+                <span class="zurich-docs-params-tag">secondary</span>,
+                <span class="zurich-docs-params-tag">positive</span>,
+                <span class="zurich-docs-params-tag">negative</span>,
+                <span class="zurich-docs-params-tag">link</span>.<br />
+                <strong>Tamaños:</strong>
+                <span class="zurich-docs-params-tag">xs</span>,
+                <span class="zurich-docs-params-tag">s</span>,
+                <span class="zurich-docs-params-tag">m</span>,
+                <span class="zurich-docs-params-tag">l</span>.
+              </td>
+            </tr>
+
+            <tr>
+              <td class="zurich-docs-params-td">
+                <span class="zurich-docs-params-tag">[iconRight]</span>
+              </td>
+              <td class="zurich-docs-params-td">
+                <span class="zurich-docs-params-tag">boolean</span>
+              </td>
+              <td class="zurich-docs-params-td">
+                Si <span class="zurich-docs-params-tag">true</span>, muestra el
+                icono a la derecha.
+              </td>
+            </tr>
+            <tr>
+              <td class="zurich-docs-params-td">
+                <span class="zurich-docs-params-tag">[icon]</span>
+              </td>
+              <td class="zurich-docs-params-td">
+                <span class="zurich-docs-params-tag">string</span>
+              </td>
+              <td class="zurich-docs-params-td">
+                Nombre del icono para añadirlo al botón.
+              </td>
+            </tr>
+            <tr>
+              <td class="zurich-docs-params-td">
+                <span class="zurich-docs-params-tag">[disabled]</span>
+              </td>
+              <td class="zurich-docs-params-td">
+                <span class="zurich-docs-params-tag">boolean</span>
+              </td>
+              <td class="zurich-docs-params-td">
+                Desactiva el botón si
+                <span class="zurich-docs-params-tag">true</span>.
+              </td>
+            </tr>
+            <tr>
+              <td class="zurich-docs-params-td">
+                <span class="zurich-docs-params-tag">theme</span>
+              </td>
+              <td class="zurich-docs-params-td">
+                <span class="zurich-docs-params-tag">string</span>
+              </td>
+              <td class="zurich-docs-params-td">
+                Permite seleccionar el tema (<span
+                  class="zurich-docs-params-tag"
+                  >light</span
+                >, <span class="zurich-docs-params-tag">dark</span>).
+              </td>
+            </tr>
+
+            <tr>
+              <td class="zurich-docs-params-td">
+                <span class="zurich-docs-params-tag">label</span>
+              </td>
+              <td class="zurich-docs-params-td">
+                <span class="zurich-docs-params-tag">string</span>
+              </td>
+              <td class="zurich-docs-params-td">Texto del botón.</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- cards component-->
+<div class="zurich-docs-grid" id="card">
+  <div class="zurich-docs-col">
+    <h2 class="zurich-docs-title">Cards</h2>
+
+    <div class="zurich-docs-card">
+      <!-- Demo visual -->
+      <div class="zurich-docs-variants" style="justify-content: center">
+        <lib-card-z bgColor="#2167ae" colorTxt="#FFFFFF">
+          <ng-template libZTemplate id="header"> Hola mundo </ng-template>
+        </lib-card-z>
+
+        <lib-card-z>
+          <ng-template libZTemplate id="header">
+            <strong>Prueba Header</strong>
+          </ng-template>
+          <ng-template libZTemplate id="content">
+            <strong>Prueba content</strong>
+          </ng-template>
+          <ng-template libZTemplate id="footer">
+            <strong>Prueba footer</strong>
+          </ng-template>
+        </lib-card-z>
+      </div>
+
+      <hr class="zurich-docs-divider" />
+
+      <!-- Código copiable -->
+      <div class="zurich-docs-code-area">
+        <div class="zurich-docs-code-label">HTML Example</div>
+        <pre class="zurich-docs-pre">
+                  &lt;lib-card-z bgColor=&quot;#2167ae&quot; colorTxt=&quot;#FFFFFF&quot;&gt;
+                &lt;ng-template libZTemplate id=&quot;header&quot;&gt; Hola mundo &lt;/ng-template&gt;
+              &lt;/lib-card-z&gt;
+
+              &lt;lib-card-z&gt;
+                &lt;ng-template libZTemplate id=&quot;header&quot;&gt;
+                  &lt;strong&gt;Prueba Header&lt;/strong&gt;
+                &lt;/ng-template&gt;
+                &lt;ng-template libZTemplate id=&quot;content&quot;&gt;
+                  &lt;strong&gt;Prueba content&lt;/strong&gt;
+                &lt;/ng-template&gt;
+                &lt;ng-template libZTemplate id=&quot;footer&quot;&gt;
+                  &lt;strong&gt;Prueba footer&lt;/strong&gt;
+                &lt;/ng-template&gt;
+              &lt;/lib-card-z&gt;
+        </pre>
+        <button
+          class="zurich-docs-copy-btn"
+          onclick="
+            navigator.clipboard
+              .writeText(`<lib-card-z bgColor=&quot;#2167ae&quot; colorTxt=&quot;#FFFFFF&quot;>
+  <ng-template libZTemplate id=&quot;header&quot;> Hola mundo </ng-template>
+</lib-card-z>
+
+<lib-card-z>
+  <ng-template libZTemplate id=&quot;header&quot;>
+    <strong>Prueba Header</strong>
+  </ng-template>
+  <ng-template libZTemplate id=&quot;content&quot;>
+    <strong>Prueba content</strong>
+  </ng-template>
+  <ng-template libZTemplate id=&quot;footer&quot;>
+    <strong>Prueba footer</strong>
+  </ng-template>
+</lib-card-z>`)
+          "
+        >
+          Copy
+        </button>
+      </div>
+
+      <!-- Parámetros -->
+      <div class="zurich-docs-params-card">
+        <div class="zurich-docs-params-title">
+          Parámetros / Configuraciones de <code>lib-card-z</code>
+        </div>
+        <table class="zurich-docs-params-table">
+          <thead>
+            <tr>
+              <th class="zurich-docs-params-th">Propiedad</th>
+              <th class="zurich-docs-params-th">Tipo</th>
+              <th class="zurich-docs-params-th">Descripción</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td class="zurich-docs-params-td">
+                <span class="zurich-docs-params-tag">bgColor</span>
+              </td>
+              <td class="zurich-docs-params-td">
+                <span class="zurich-docs-params-tag">string</span>
+              </td>
+              <td class="zurich-docs-params-td">
+                Color de fondo personalizado del card (hex, rgb, etc).
+              </td>
+            </tr>
+            <tr>
+              <td class="zurich-docs-params-td">
+                <span class="zurich-docs-params-tag">colorTxt</span>
+              </td>
+              <td class="zurich-docs-params-td">
+                <span class="zurich-docs-params-tag">string</span>
+              </td>
+              <td class="zurich-docs-params-td">Color del texto del card.</td>
+            </tr>
+            <tr>
+              <td class="zurich-docs-params-td">
+                <span class="zurich-docs-params-tag"
+                  >&lt;ng-template libZTemplate id="header"&gt;</span
+                >
+              </td>
+              <td class="zurich-docs-params-td">
+                <span class="zurich-docs-params-tag">TemplateRef</span>
+              </td>
+              <td class="zurich-docs-params-td">
+                Contenido para el encabezado del card.
+              </td>
+            </tr>
+            <tr>
+              <td class="zurich-docs-params-td">
+                <span class="zurich-docs-params-tag"
+                  >&lt;ng-template libZTemplate id="content"&gt;</span
+                >
+              </td>
+              <td class="zurich-docs-params-td">
+                <span class="zurich-docs-params-tag">TemplateRef</span>
+              </td>
+              <td class="zurich-docs-params-td">Contenido central del card.</td>
+            </tr>
+            <tr>
+              <td class="zurich-docs-params-td">
+                <span class="zurich-docs-params-tag"
+                  >&lt;ng-template libZTemplate id="footer"&gt;</span
+                >
+              </td>
+              <td class="zurich-docs-params-td">
+                <span class="zurich-docs-params-tag">TemplateRef</span>
+              </td>
+              <td class="zurich-docs-params-td">
+                Contenido para el pie del card.
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- inputs component-->
+<div class="zurich-docs-grid" id="inputs">
+  <div class="zurich-docs-col">
+    <h2 class="zurich-docs-title">Inputs</h2>
+
+    <div class="zurich-docs-card">
+      <!-- Demo visual -->
+      <div
+        class="zurich-docs-variants"
+        style="flex-wrap: wrap; justify-content: center; gap: 2rem"
+      >
+        <!-- Input de texto -->
+        <lib-input-text-z
+          name="prueba"
+          label="Prueba componente"
+          [lineType]="false"
+          icon="game"
+          [valid]="this.fg.prueba.get('prueba').status == 'INVALID'"
+          helpText="Por favor ingrese un valor"
+          [(model)]="pruebaI"
+          [group]="fg.prueba"
+          [required]="true"
+          (modelChange)="modeloCambia()"
+        >
+        </lib-input-text-z>
+
+        <!-- Input de fecha y hora -->
+        <lib-input-date-z
+          label="Pruebas"
+          lineType="line"
+          [readonly]="true"
+          inputType="date"
+          [(model)]="datePrueba"
+          [disabled]="true"
+          [valid]="this.fg.inputDate.get('inputDate')?.invalid"
+          [required]="true"
+          name="inputDate"
+          [group]="fg.inputDate"
+        >
+        </lib-input-date-z>
+
+        <!-- {{datePrueba -> `${this.fg.inputDate.get('inputDate')?.invalid}`}} -->
+
+        <!-- Input de password -->
+        <lib-input-password-z
+          label="Password"
+          [lineType]="false"
+          [disabled]="false"
+          [invalid]="this.fg.inputPass.get('inputPass').status == 'INVALID'"
+          [required]="true"
+          name="inputPass"
+          [group]="fg.inputPass"
+          [(model)]="pruebaPass"
+        >
+        </lib-input-password-z>
+
+        <lib-input-time-z
+          typeInput="line"
+          [readonly]="true"
+          label="Prueba"
+        ></lib-input-time-z>
+      </div>
+
+      <hr class="zurich-docs-divider" />
+
+      <!-- Selects -->
+      <div
+        class="zurich-docs-variants"
+        style="flex-wrap: wrap; justify-content: center; gap: 2rem"
+      >
+        <lib-input-select-z
+          label="prueba"
+          [(model)]="pruebaSelectM"
+          (modelChange)="prubaMultiSelect($event)"
+          helpText="Este campo es requerido"
+          [multiSelect]="true"
+          [group]="fg.inputSelectM"
+          [invalid]="this.fg.inputSelectM.get('inputSelectM').status == 'INVALID'"
+          name="inputSelectM"
+          [required]="true"
+          [options]="[
+            { value: 1, description: 'Prueba 1' },
+            { value: 2, description: 'Prueba 2' },
+            { value: 3, description: 'Prueba 3' }
+          ]"
+        >
+        </lib-input-select-z>
+        <lib-input-select-z
+          name="inputSelect"
+          label="prueba"
+          [(model)]="pruebaSelect"
+          (modelChange)="prubaMultiSelect($event)"
+          helpText="Este campo es requerido"
+          [multiSelect]="false"
+          [group]="fg.inputSelect"
+          [invalid]="this.fg.inputSelect.get('inputSelect').status == 'INVALID'"
+          [required]="true"
+          [typeLine]="false"
+          [options]="[
+            { value: 1, description: 'Prueba 1' },
+            { value: 2, description: 'Prueba 2' },
+            { value: 3, description: 'Prueba 3' }
+          ]"
+        >
+        </lib-input-select-z>
+      </div>
+
+      <hr class="zurich-docs-divider" />
+
+      <!-- Checkbox -->
+      <div
+        class="zurich-docs-variants"
+        style="flex-wrap: wrap; justify-content: center; gap: 2rem"
+      >
+        <lib-checkbox-z
+          name="checkPrueba"
+          label="Prueba Check"
+          [(model)]="mCheck"
+          helpText="Este item es requerido"
+          [group]="fg.check"
+          [required]="true"
+          [valid]="false"
+        >
+        </lib-checkbox-z>
+      </div>
+
+      <hr class="zurich-docs-divider" />
+
+      <div class="zurich-docs-code-area">
+        <div class="zurich-docs-code-label">HTML Example</div>
+        <pre class="zurich-docs-pre">
+          &lt;lib-input-text-z
+            name=&quot;prueba&quot;
+            label=&quot;Prueba componente&quot;
+            [lineType]=&quot;false&quot;
+            [valid]=&quot;this.fg.prueba.get('prueba').status == 'INVALID'&quot;
+            helpText=&quot;Por favor ingrese un valor&quot;
+            [(model)]=&quot;pruebaI&quot;
+            [group]=&quot;fg.prueba&quot;
+            [required]=&quot;true&quot;
+            (modelChange)=&quot;modeloCambia()&quot;&gt;
+          &lt;/lib-input-text-z&gt;
+            </pre
+        >
+        <button
+          class="zurich-docs-copy-btn"
+          onclick="
+            navigator.clipboard.writeText(`<lib-input-text-z
+            name=&quot;prueba&quot;
+            label=&quot;Prueba componente&quot;
+            [lineType]=&quot;false&quot;
+            [valid]=&quot;this.fg.prueba.get('prueba').status == 'INVALID'&quot;
+            helpText=&quot;Por favor ingrese un valor&quot;
+            [(model)]=&quot;pruebaI&quot;
+            [group]=&quot;fg.prueba&quot;
+            [required]=&quot;true&quot;
+            (modelChange)=&quot;modeloCambia()&quot;>
+          </lib-input-text-z>`)
+          "
+        >
+          Copy
+        </button>
+      </div>
+      <!-- Parámetros de los componentes de input -->
+      <div class="zurich-docs-params-card">
+        <div class="zurich-docs-params-title">
+          Parámetros / Configuraciones de Inputs Zurich
+        </div>
+        <table class="zurich-docs-params-table">
+          <thead>
+            <tr>
+              <th class="zurich-docs-params-th">Propiedad</th>
+              <th class="zurich-docs-params-th">Tipo</th>
+              <th class="zurich-docs-params-th">Descripción</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td class="zurich-docs-params-td">
+                <span class="zurich-docs-params-tag">name</span>
+              </td>
+              <td class="zurich-docs-params-td">
+                <span class="zurich-docs-params-tag">string</span>
+              </td>
+              <td class="zurich-docs-params-td">
+                Nombre interno del input (usado en formularios).
+              </td>
+            </tr>
+            <tr>
+              <td class="zurich-docs-params-td">
+                <span class="zurich-docs-params-tag">label</span>
+              </td>
+              <td class="zurich-docs-params-td">
+                <span class="zurich-docs-params-tag">string</span>
+              </td>
+              <td class="zurich-docs-params-td">Etiqueta visible del input.</td>
+            </tr>
+            <tr>
+              <td class="zurich-docs-params-td">
+                <span class="zurich-docs-params-tag">[(model)]</span>
+              </td>
+              <td class="zurich-docs-params-td">
+                <span class="zurich-docs-params-tag">any</span>
+              </td>
+              <td class="zurich-docs-params-td">
+                Binding bidireccional para el valor del input.
+              </td>
+            </tr>
+            <tr>
+              <td class="zurich-docs-params-td">
+                <span class="zurich-docs-params-tag">(modelChange)</span>
+              </td>
+              <td class="zurich-docs-params-td">
+                <span class="zurich-docs-params-tag">EventEmitter</span>
+              </td>
+              <td class="zurich-docs-params-td">
+                Evento emitido al cambiar el valor.
+              </td>
+            </tr>
+            <tr>
+              <td class="zurich-docs-params-td">
+                <span class="zurich-docs-params-tag">[group]</span>
+              </td>
+              <td class="zurich-docs-params-td">
+                <span class="zurich-docs-params-tag">FormGroup</span>
+              </td>
+              <td class="zurich-docs-params-td">
+                Grupo de formularios para integración con Reactive Forms de
+                Angular.
+              </td>
+            </tr>
+            <tr>
+              <td class="zurich-docs-params-td">
+                <span class="zurich-docs-params-tag">helpText</span>
+              </td>
+              <td class="zurich-docs-params-td">
+                <span class="zurich-docs-params-tag">string</span>
+              </td>
+              <td class="zurich-docs-params-td">
+                Texto de ayuda mostrado bajo el input.
+              </td>
+            </tr>
+            <tr>
+              <td class="zurich-docs-params-td">
+                <span class="zurich-docs-params-tag">[required]</span>
+              </td>
+              <td class="zurich-docs-params-td">
+                <span class="zurich-docs-params-tag">boolean</span>
+              </td>
+              <td class="zurich-docs-params-td">
+                Indica si el campo es obligatorio.
+              </td>
+            </tr>
+            <tr>
+              <td class="zurich-docs-params-td">
+                <span class="zurich-docs-params-tag">[invalid]</span>
+              </td>
+              <td class="zurich-docs-params-td">
+                <span class="zurich-docs-params-tag">boolean</span>
+              </td>
+              <td class="zurich-docs-params-td">
+                Marca el campo como inválido para mostrar errores.
+              </td>
+            </tr>
+            <tr>
+              <td class="zurich-docs-params-td">
+                <span class="zurich-docs-params-tag">[options]</span>
+              </td>
+              <td class="zurich-docs-params-td">
+                <span class="zurich-docs-params-tag">Array&lt;Object&gt;</span>
+              </td>
+              <td class="zurich-docs-params-td">
+                Opciones disponibles para selects y combos.
+              </td>
+            </tr>
+            <tr>
+              <td class="zurich-docs-params-td">
+                <span class="zurich-docs-params-tag">[multiSelect]</span>
+              </td>
+              <td class="zurich-docs-params-td">
+                <span class="zurich-docs-params-tag">boolean</span>
+              </td>
+              <td class="zurich-docs-params-td">
+                Permite seleccionar múltiples opciones en selects.
+              </td>
+            </tr>
+            <tr>
+              <td class="zurich-docs-params-td">
+                <span class="zurich-docs-params-tag">[disabled]</span>
+              </td>
+              <td class="zurich-docs-params-td">
+                <span class="zurich-docs-params-tag">boolean</span>
+              </td>
+              <td class="zurich-docs-params-td">Desactiva el input.</td>
+            </tr>
+            <tr>
+              <td class="zurich-docs-params-td">
+                <span class="zurich-docs-params-tag">inputType</span>
+              </td>
+              <td class="zurich-docs-params-td">
+                <span class="zurich-docs-params-tag">string</span>
+              </td>
+              <td class="zurich-docs-params-td">
+                Tipo de input para fechas y horas (<span
+                  class="zurich-docs-params-tag"
+                  >date</span
+                >, <span class="zurich-docs-params-tag">datetime-local</span>,
+                etc).
+              </td>
+            </tr>
+          </tbody>
+        </table>
+        <div style="margin-top: 1.2em; font-size: 0.98em">
+          <strong>Tip:</strong> Todos los inputs pueden integrarse con Reactive
+          Forms y binding bidireccional
+          <span class="zurich-docs-params-tag">[(model)]</span> para mayor
+          flexibilidad y validación.
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- div Loader-->
+<div class="zurich-docs-grid" id="loader">
+  <div class="zurich-docs-col">
+    <h2 class="zurich-docs-title">Loader</h2>
+
+    <div class="zurich-docs-card">
+      <!-- Demo visual -->
+      <div class="zurich-docs-variants" style="justify-content: center">
+        <lib-loader-z
+          customStr="size: 40px; stroke: 7px;"
+          label="Cargando..."
+        ></lib-loader-z>
+      </div>
+
+      <hr class="zurich-docs-divider" />
+
+      <!-- Código copiable -->
+      <div class="zurich-docs-code-area">
+        <div class="zurich-docs-code-label">HTML Example</div>
+        <pre class="zurich-docs-pre">
+            &lt;lib-loader-z customStr=&quot;size: 40px; stroke: 7px;&quot; label=&quot;Cargando...&quot;&gt;&lt;/lib-loader-z&gt;
+        </pre>
+        <button
+          class="zurich-docs-copy-btn"
+          onclick="
+            navigator.clipboard.writeText(
+              `<lib-loader-z customStr=&quot;size: 40px; stroke: 7px;&quot; label=&quot;Cargando...&quot;></lib-loader-z>`,
+            )
+          "
+        >
+          Copy
+        </button>
+      </div>
+
+      <!-- Tabla de parámetros/configuraciones -->
+      <div class="zurich-docs-params-card">
+        <div class="zurich-docs-params-title">
+          Parámetros / Configuraciones de <code>lib-loader-z</code>
+        </div>
+        <table class="zurich-docs-params-table">
+          <thead>
+            <tr>
+              <th class="zurich-docs-params-th">Propiedad</th>
+              <th class="zurich-docs-params-th">Tipo</th>
+              <th class="zurich-docs-params-th">Descripción</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td class="zurich-docs-params-td">
+                <span class="zurich-docs-params-tag">label</span>
+              </td>
+              <td class="zurich-docs-params-td">
+                <span class="zurich-docs-params-tag">string</span>
+              </td>
+              <td class="zurich-docs-params-td">
+                Texto que se muestra debajo o al lado del loader. Ejemplo:
+                <span class="zurich-docs-params-tag">Cargando...</span>
+              </td>
+            </tr>
+            <tr>
+              <td class="zurich-docs-params-td">
+                <span class="zurich-docs-params-tag">customStr</span>
+              </td>
+              <td class="zurich-docs-params-td">
+                <span class="zurich-docs-params-tag">string</span>
+              </td>
+              <td class="zurich-docs-params-td">
+                Estilos personalizados para el loader.<br />
+                Puedes definir, por ejemplo:
+                <span class="zurich-docs-params-tag">size</span> (tamaño),
+                <span class="zurich-docs-params-tag">stroke</span> (grosor),
+                <span class="zurich-docs-params-tag">color</span>, etc.<br />
+                Ejemplo:
+                <span class="zurich-docs-params-tag"
+                  >size: 40px; stroke: 7px;</span
+                >
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Stage banner component-->
+<div class="zurich-docs-grid" id="stageBanner">
+  <div class="zurich-docs-col">
+    <h2 class="zurich-docs-title">Stage Banner</h2>
+
+    <div class="zurich-docs-card">
+      <!-- Demo visual -->
+      <div class="" style="justify-content: center">
+        <lib-stage-banner-z
+          [roundedBanner]="true"
+          customStr="bg:#2167ae; color:#FFFFFF;"
+          shape="5"
+        ></lib-stage-banner-z>
+      </div>
+
+      <hr class="zurich-docs-divider" />
+
+      <!-- Código copiable -->
+      <div class="zurich-docs-code-area">
+        <div class="zurich-docs-code-label">HTML Example</div>
+        <pre class="zurich-docs-pre">
+            &lt;lib-stage-banner-z
+              [roundedBanner]=&quot;true&quot;
+              customStr=&quot;bg:#2167ae; color:#FFFFFF;&quot;
+              shape=&quot;5&quot;
+            &gt;&lt;/lib-stage-banner-z&gt;
+                    </pre
+        >
+        <button
+          class="zurich-docs-copy-btn"
+          onclick="
+            navigator.clipboard.writeText(`<lib-stage-banner-z
+              [roundedBanner]=&quot;true&quot;
+              customStr=&quot;bg:#2167ae; color:#FFFFFF;&quot;
+              shape=&quot;5&quot;
+            ></lib-stage-banner-z>`)
+          "
+        >
+          Copy
+        </button>
+      </div>
+
+      <!-- Parámetros -->
+      <div class="zurich-docs-params-card">
+        <div class="zurich-docs-params-title">
+          Parámetros / Configuraciones de <code>lib-stage-banner-z</code>
+        </div>
+        <table class="zurich-docs-params-table">
+          <thead>
+            <tr>
+              <th class="zurich-docs-params-th">Propiedad</th>
+              <th class="zurich-docs-params-th">Tipo</th>
+              <th class="zurich-docs-params-th">Descripción</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td class="zurich-docs-params-td">
+                <span class="zurich-docs-params-tag">[roundedBanner]</span>
+              </td>
+              <td class="zurich-docs-params-td">
+                <span class="zurich-docs-params-tag">boolean</span>
+              </td>
+              <td class="zurich-docs-params-td">
+                Indica si el banner debe tener esquinas redondeadas (<span
+                  class="zurich-docs-params-tag"
+                  >true</span
+                >) o no.
+              </td>
+            </tr>
+            <tr>
+              <td class="zurich-docs-params-td">
+                <span class="zurich-docs-params-tag">customStr</span>
+              </td>
+              <td class="zurich-docs-params-td">
+                <span class="zurich-docs-params-tag">string</span>
+              </td>
+              <td class="zurich-docs-params-td">
+                Estilos personalizados en línea para el banner (color de fondo,
+                texto, etc).
+              </td>
+            </tr>
+            <tr>
+              <td class="zurich-docs-params-td">
+                <span class="zurich-docs-params-tag">shape</span>
+              </td>
+              <td class="zurich-docs-params-td">
+                <span class="zurich-docs-params-tag">number</span>
+              </td>
+              <td class="zurich-docs-params-td">
+                Define la variante o forma del banner (ej:
+                <span class="zurich-docs-params-tag">5</span>). Consulta la
+                documentación para las opciones disponibles.
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- div tabs -->
+<div class="zurich-docs-grid" id="tabs">
+  <div class="zurich-docs-col">
+    <h2 class="zurich-docs-title">Tabs</h2>
+
+    <div class="zurich-docs-card">
+      <!-- Demo visual -->
+      <div
+        class="zurich-docs-variants"
+        style="justify-content: center; display: block"
+      >
+        <lib-tabs-z
+          [headers]="[
+          { title: 'Pestaña 1', key: 'con1', icon: 'home:line' },
+          { title: 'Pestaña 2', key: 'con2', icon: 'info:line' },
+          { title: 'Pestaña 3', key: 'con3', icon: 'edit:line' },
+          { title: 'Pestaña 4', key: 'pestania4', icon: 'edit:line' }
+        ]"
+          [data]="{
+          con1: 'Contenido 1 prueba',
+          con2: 'Contenido 2 HTML',
+          con3: 'Contenido 3'
+        }"
+        >
+          <ng-template #con1>
+            <strong>Template personalizado para la pestaña 1</strong>
+          </ng-template>
+
+          <ng-template #con2>
+            <div style="color: green">
+              Este es otro template con <i>estilos</i>
+            </div>
+          </ng-template>
+
+          <ng-template #pestania4>
+            <lib-stage-z
+              header="Arquetipo Angular"
+              image-src="https://zds.zurich.com/0.7.0/sample.webp"
+              custom-str="bg: #2167ae; color: white; bg--mobile: #04093C; color--mobile: #1BE59E;"
+            >
+              <lib-card-z>
+                <ng-template libZTemplate id="header">
+                  <strong>Hello World :D</strong>
+                </ng-template>
+              </lib-card-z>
+            </lib-stage-z>
+          </ng-template>
+        </lib-tabs-z>
+      </div>
+
+      <hr class="zurich-docs-divider" />
+
+      <!-- Código copiable -->
+      <div class="zurich-docs-code-area">
+        <div class="zurich-docs-code-label">HTML Example</div>
+        <pre class="zurich-docs-pre">
+            &lt;lib-tabs-z [headers]=&quot;[
+              &#123; title: 'Pesta&#241;a 1', key: 'con1', icon: 'home:line' &#125;,
+              &#123; title: 'Pesta&#241;a 2', key: 'con2', icon: 'info:line' &#125;,
+              &#123; title: 'Pesta&#241;a 3', key: 'con3', icon: 'edit:line' &#125;,
+              &#123; title: 'Pesta&#241;a 4', key: 'pestania4', icon: 'edit:line' &#125;
+            &#93;&quot; [data]=&quot;&#123;
+              con1: 'Contenido 1 prueba',
+              con2: 'Contenido 2 HTML',
+              con3: 'Contenido 3'
+            &#125;&quot;&gt;
+              &lt;ng-template #con1&gt;
+                &lt;strong&gt;Template personalizado para la pesta&#241;a 1&lt;/strong&gt;
+              &lt;/ng-template&gt;
+
+              &lt;ng-template #con2&gt;
+                &lt;div style=&quot;color: green&quot;&gt;
+                  Este es otro template con &lt;i&gt;estilos&lt;/i&gt;
+                &lt;/div&gt;
+              &lt;/ng-template&gt;
+
+              &lt;ng-template #pestania4&gt;
+                &lt;lib-stage-z header=&quot;Arquetipo Angular&quot; image-src=&quot;https://zds.zurich.com/0.7.0/sample.webp&quot;
+                  custom-str=&quot;bg: #2167ae; color: white; bg--mobile: #04093C; color--mobile: #1BE59E;&quot;&gt;
+                  &lt;lib-card-z&gt;
+                    &lt;ng-template libZTemplate id=&quot;header&quot;&gt;
+                      &lt;strong&gt;Hello World :D&lt;/strong&gt;
+                    &lt;/ng-template&gt;
+                  &lt;/lib-card-z&gt;
+                &lt;/lib-stage-z&gt;
+              &lt;/ng-template&gt;
+            &lt;/lib-tabs-z&gt;
+        </pre>
+        <button
+          class="zurich-docs-copy-btn"
+          onclick="
+            navigator.clipboard.writeText(`<lib-tabs-z [headers]=&quot;[
+              { title: 'Pestaña 1', key: 'con1', icon: 'home:line' },
+              { title: 'Pestaña 2', key: 'con2', icon: 'info:line' },
+              { title: 'Pestaña 3', key: 'con3', icon: 'edit:line' },
+              { title: 'Pestaña 4', key: 'pestania4', icon: 'edit:line' }
+            ]&quot; [data]=&quot;{
+              con1: 'Contenido 1 prueba',
+              con2: 'Contenido 2 HTML',
+              con3: 'Contenido 3'
+            }&quot;>
+              <ng-template #con1>
+                <strong>Template personalizado para la pestaña 1</strong>
+              </ng-template>
+
+              <ng-template #con2>
+                <div style=&quot;color: green&quot;>
+                  Este es otro template con <i>estilos</i>
+                </div>
+              </ng-template>
+
+              <ng-template #pestania4>
+                <lib-stage-z header=&quot;Arquetipo Angular&quot; image-src=&quot;https://zds.zurich.com/0.7.0/sample.webp&quot;
+                  custom-str=&quot;bg: #2167ae; color: white; bg--mobile: #04093C; color--mobile: #1BE59E;&quot;>
+                  <lib-card-z>
+                    <ng-template libZTemplate id=&quot;header&quot;>
+                      <strong>Hello World :D</strong>
+                    </ng-template>
+                  </lib-card-z>
+                </lib-stage-z>
+              </ng-template>
+            </lib-tabs-z>
+            `)
+          "
+        >
+          Copy
+        </button>
+      </div>
+
+      <!-- Tabla de parámetros/configuraciones -->
+      <div class="zurich-docs-params-card">
+        <div class="zurich-docs-params-title">
+          Parámetros / Configuraciones de <code>lib-tabs-z</code>
+        </div>
+        <table class="zurich-docs-params-table">
+          <thead>
+            <tr>
+              <th class="zurich-docs-params-th">Propiedad</th>
+              <th class="zurich-docs-params-th">Tipo</th>
+              <th class="zurich-docs-params-th">Descripción</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td class="zurich-docs-params-td">
+                <span class="zurich-docs-params-tag">headers</span>
+              </td>
+              <td class="zurich-docs-params-td">
+                <span class="zurich-docs-params-tag">Array&lt;Object&gt;</span>
+              </td>
+              <td class="zurich-docs-params-td">
+                Define las pestañas que se mostrarán.<br />
+                Cada objeto debe tener:
+                <ul style="margin: 0; padding-left: 1.2em">
+                  <li>
+                    <span class="zurich-docs-params-tag">title</span>: Título
+                    visible
+                  </li>
+                  <li>
+                    <span class="zurich-docs-params-tag">key</span>: Referencia
+                    única para la pestaña (debe coincidir con el template o el
+                    key de <span class="zurich-docs-params-tag">data</span>)
+                  </li>
+                  <li>
+                    <span class="zurich-docs-params-tag">icon</span>: (opcional)
+                    Icono a mostrar
+                  </li>
+                </ul>
+                <strong>Ejemplo:</strong>
+                <pre
+                  class="zurich-docs-pre"
+                  style="
+                    background: #222;
+                    color: #fff;
+                    padding: 0.4em 0.8em;
+                    font-size: 0.98em;
+                  "
+                >
+[&#123; title: 'Pesta&#241;a 1', key: 'con1', icon: 'home:line' &#125;]
+              </pre
+                >
+              </td>
+            </tr>
+            <tr>
+              <td class="zurich-docs-params-td">
+                <span class="zurich-docs-params-tag">data</span>
+              </td>
+              <td class="zurich-docs-params-td">
+                <span class="zurich-docs-params-tag">Object</span>
+              </td>
+              <td class="zurich-docs-params-td">
+                Permite definir el contenido por key desde TypeScript.<br />
+                <strong>Ejemplo TS:</strong>
+                <pre
+                  class="zurich-docs-pre"
+                  style="
+                    background: #222;
+                    color: #fff;
+                    padding: 0.4em 0.8em;
+                    font-size: 0.98em;
+                  "
+                >
+tabData = &#123;
+  con1: 'Contenido para la pestaña 1',
+  con2: 'Contenido HTML para la pestaña 2',
+  con3: 'Contenido para la pestaña 3',
+&#125;;
+              </pre
+                >
+                Si existe un <code>&lt;ng-template #key&gt;</code>, tiene
+                prioridad sobre
+                <span class="zurich-docs-params-tag">data</span>.
+              </td>
+            </tr>
+            <tr>
+              <td class="zurich-docs-params-td">
+                <span class="zurich-docs-params-tag"
+                  >&lt;ng-template #key&gt;</span
+                >
+              </td>
+              <td class="zurich-docs-params-td">
+                <span class="zurich-docs-params-tag">TemplateRef</span>
+              </td>
+              <td class="zurich-docs-params-td">
+                Permite definir un template HTML/Angular para el contenido de la
+                pestaña.<br />
+                El nombre del template (<span class="zurich-docs-params-tag"
+                  >#key</span
+                >) debe coincidir con el
+                <span class="zurich-docs-params-tag">key</span> en
+                <span class="zurich-docs-params-tag">headers</span>.
+              </td>
+            </tr>
+          </tbody>
+        </table>
+        <div style="margin-top: 1.2em; font-size: 0.98em">
+          <strong>Tips:</strong> Puedes mezclar
+          <span class="zurich-docs-params-tag">data</span> y
+          <span class="zurich-docs-params-tag">&lt;ng-template #key&gt;</span>
+          en un mismo componente. Si ambos existen para la misma pestaña, el
+          template tiene prioridad.
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- div Tooltips -->
+<div class="zurich-docs-grid" id="tooltip">
+  <div class="zurich-docs-col">
+    <h2 class="zurich-docs-title">Tooltips</h2>
+
+    <div class="zurich-docs-card">
+      <!-- Variantes visuales -->
+      <div class="zurich-docs-variants">
+        <lib-tooltip-z
+          text="Tooltip Bottom"
+          config="bottom:s"
+          customStr="bg: black; color: white;"
+        >
+          <lib-button-z
+            type="primary:xs"
+            label="Bottom"
+            [iconRight]="false"
+            [disabled]="false"
+          ></lib-button-z>
+        </lib-tooltip-z>
+        <lib-tooltip-z
+          text="Tooltip Bottom Left"
+          config="bottom-left:s"
+          customStr="bg: black; color: white;"
+        >
+          <lib-button-z
+            type="primary:xs"
+            label="Bottom Left"
+            [iconRight]="false"
+            [disabled]="false"
+          ></lib-button-z>
+        </lib-tooltip-z>
+        <lib-tooltip-z
+          text="Tooltip Bottom Right"
+          config="bottom-right:s"
+          customStr="bg: black; color: white;"
+        >
+          <lib-button-z
+            type="primary:xs"
+            label="Bottom Right"
+            [iconRight]="false"
+            [disabled]="false"
+          ></lib-button-z>
+        </lib-tooltip-z>
+        <lib-tooltip-z
+          text="Tooltip Top"
+          config="top:s"
+          customStr="bg: black; color: white;"
+        >
+          <lib-button-z
+            type="primary:xs"
+            label="Top"
+            [iconRight]="false"
+            [disabled]="false"
+          ></lib-button-z>
+        </lib-tooltip-z>
+        <lib-tooltip-z
+          text="Tooltip Top Left"
+          config="top-left:s"
+          customStr="bg: black; color: white;"
+        >
+          <lib-button-z
+            type="primary:xs"
+            label="Top Left"
+            [iconRight]="false"
+            [disabled]="false"
+          ></lib-button-z>
+        </lib-tooltip-z>
+        <lib-tooltip-z
+          text="Tooltip Top Right"
+          config="top-right:s"
+          customStr="bg: black; color: white;"
+        >
+          <lib-button-z
+            type="primary:xs"
+            label="Top Right"
+            [iconRight]="false"
+            [disabled]="false"
+          ></lib-button-z>
+        </lib-tooltip-z>
+      </div>
+
+      <hr class="zurich-docs-divider" />
+
+      <!-- Código copiable -->
+      <div class="zurich-docs-code-area">
+        <div class="zurich-docs-code-label">HTML Example</div>
+        <pre class="zurich-docs-pre">
+&lt;lib-tooltip-z text=&quot;Tooltip Bottom&quot; config=&quot;bottom:s&quot; customStr=&quot;bg: black; color: white;&quot;&gt;
+  &lt;lib-button-z type=&quot;primary:xs&quot; label=&quot;Bottom&quot; [iconRight]=&quot;false&quot; [disabled]=&quot;false&quot;&gt;&lt;/lib-button-z&gt;
+&lt;/lib-tooltip-z&gt;
+
+
+        </pre>
+        <button
+          class="zurich-docs-copy-btn"
+          onclick="
+            navigator.clipboard
+              .writeText(`<lib-tooltip-z text=&quot;Tooltip Bottom&quot; config=&quot;bottom:s&quot; customStr=&quot;bg: black; color: white;&quot;>
+  <lib-button-z type=&quot;primary:xs&quot; label=&quot;Bottom&quot; [iconRight]=&quot;false&quot; [disabled]=&quot;false&quot;></lib-button-z>
+</lib-tooltip-z>
+
+`)
+          "
+        >
+          Copy
+        </button>
+      </div>
+
+      <!-- Tabla de parámetros/configuraciones -->
+      <div class="zurich-docs-params-card">
+        <div class="zurich-docs-params-title">
+          Parámetros / Configuraciones de <code>lib-tooltip-z</code>
+        </div>
+        <table class="zurich-docs-params-table">
+          <thead>
+            <tr>
+              <th class="zurich-docs-params-th">Propiedad</th>
+              <th class="zurich-docs-params-th">Tipo</th>
+              <th class="zurich-docs-params-th">Descripción</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td class="zurich-docs-params-td">
+                <span class="zurich-docs-params-tag">text</span>
+              </td>
+              <td class="zurich-docs-params-td">
+                <span class="zurich-docs-params-tag">string</span>
+              </td>
+              <td class="zurich-docs-params-td">
+                Texto que se mostrará dentro del tooltip.
+              </td>
+            </tr>
+            <tr>
+              <td class="zurich-docs-params-td">
+                <span class="zurich-docs-params-tag">config</span>
+              </td>
+              <td class="zurich-docs-params-td">
+                <span class="zurich-docs-params-tag">string</span>
+              </td>
+              <td class="zurich-docs-params-td">
+                Posición y tamaño del tooltip.<br />
+                Formato:
+                <span class="zurich-docs-params-tag">posición:tamaño</span
+                ><br />
+                Ejemplos: <span class="zurich-docs-params-tag">bottom:s</span>,
+                <span class="zurich-docs-params-tag">top-left:m</span>,
+                <span class="zurich-docs-params-tag">top-right:l</span>.<br />
+                <strong>Posiciones:</strong>
+                <span class="zurich-docs-params-tag">top</span>,
+                <span class="zurich-docs-params-tag">top-left</span>,
+                <span class="zurich-docs-params-tag">top-right</span>,
+                <span class="zurich-docs-params-tag">bottom</span>,
+                <span class="zurich-docs-params-tag">bottom-left</span>,
+                <span class="zurich-docs-params-tag">bottom-right</span>.<br />
+                <strong>Tamaños:</strong>
+                <span class="zurich-docs-params-tag">s</span>,
+                <span class="zurich-docs-params-tag">m</span>,
+                <span class="zurich-docs-params-tag">l</span>.
+              </td>
+            </tr>
+            <tr>
+              <td class="zurich-docs-params-td">
+                <span class="zurich-docs-params-tag">customStr</span>
+              </td>
+              <td class="zurich-docs-params-td">
+                <span class="zurich-docs-params-tag">string</span>
+              </td>
+              <td class="zurich-docs-params-td">
+                Estilos CSS personalizados para el tooltip (por ejemplo, color
+                de fondo y de texto).
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="grid p-3" id="tile">
+  <div class="col-12">
+    <h2 class="zurich-docs-title">Tile Component</h2>
+    <div class="grid">
+      <div class="col-6">
+        <lib-tile-z
+          [imgLeft]="true"
+          nameButton="prueba"
+          [customButtons]="false"
+          img="assets/img/tendencias-futuro-tecnologia-2024.jpg"
+        >
+          <ng-template libZTemplate id="title"> Hola mundo </ng-template>
+          <ng-template libZTemplate id="content">
+            <div class="grid">
+              <div class="col-12">Prueba contenido</div>
+            </div>
+          </ng-template>
+        </lib-tile-z>
+      </div>
+      <div class="col-6">
+        <lib-tile-z></lib-tile-z>
+      </div>
+
+      <hr class="zurich-docs-divider" />
+
+      <div class="zurich-docs-code-area">
+        <div class="zurich-docs-code-label">HTML Example</div>
+        <pre class="zurich-docs-pre">
+&lt;lib-tile-z nameButton=&quot;prueba&quot; [customButtons]=&quot;false&quot; img=&quot;assets/img/tendencias-futuro-tecnologia-2024.jpg&quot;&gt;
+  &lt;ng-template libZTemplate id=&quot;title&quot;&gt; Hola mundo &lt;/ng-template&gt;
+  &lt;ng-template libZTemplate id=&quot;content&quot;&gt;
+    &lt;div class=&quot;grid&quot;&gt;
+      &lt;div class=&quot;col-12&quot;&gt;Prueba contenido&lt;/div&gt;
+    &lt;/div&gt;
+  &lt;/ng-template&gt;
+&lt;/lib-tile-z&gt;
+
+&lt;lib-tile-z&gt;&lt;/lib-tile-z&gt;
+        </pre>
+        <button
+          class="zurich-docs-copy-btn"
+          onclick="
+            navigator.clipboard
+              .writeText(`<lib-tile-z nameButton=&quot;prueba&quot; [customButtons]=&quot;false&quot; img=&quot;assets/img/tendencias-futuro-tecnologia-2024.jpg&quot;>
+  <ng-template libZTemplate id=&quot;title&quot;> Hola mundo </ng-template>
+  <ng-template libZTemplate id=&quot;content&quot;>
+    <div class=&quot;grid&quot;>
+      <div class=&quot;col-12&quot;>Prueba contenido</div>
+    </div>
+  </ng-template>
+</lib-tile-z>
+
+<lib-tile-z></lib-tile-z>`)
+          "
+        >
+          Copy
+        </button>
+      </div>
+
+      <div class="zurich-docs-params-card">
+        <div class="zurich-docs-params-title">
+          Parámetros / Configuraciones de <code>lib-tile-z</code>
+        </div>
+        <table class="zurich-docs-params-table">
+          <thead>
+            <tr>
+              <th class="zurich-docs-params-th">Propiedad</th>
+              <th class="zurich-docs-params-th">Tipo</th>
+              <th class="zurich-docs-params-th">Descripción</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td class="zurich-docs-params-td">
+                <span class="zurich-docs-params-tag">nameButton</span>
+              </td>
+              <td class="zurich-docs-params-td">
+                <span class="zurich-docs-params-tag">string</span>
+              </td>
+              <td class="zurich-docs-params-td">
+                Texto del botón principal del tile.
+              </td>
+            </tr>
+            <tr>
+              <td class="zurich-docs-params-td">
+                <span class="zurich-docs-params-tag">customButtons</span>
+              </td>
+              <td class="zurich-docs-params-td">
+                <span class="zurich-docs-params-tag">boolean</span>
+              </td>
+              <td class="zurich-docs-params-td">
+                Permite definir botones personalizados para el tile.
+              </td>
+            </tr>
+            <tr>
+              <td class="zurich-docs-params-td">
+                <span class="zurich-docs-params-tag">img</span>
+              </td>
+              <td class="zurich-docs-params-td">
+                <span class="zurich-docs-params-tag">string</span>
+              </td>
+              <td class="zurich-docs-params-td">
+                Ruta de la imagen que se muestra en el tile.
+              </td>
+            </tr>
+            <tr>
+              <td class="zurich-docs-params-td">
+                <span class="zurich-docs-params-tag"
+                  >&lt;ng-template libZTemplate id="title"&gt;</span
+                >
+              </td>
+              <td class="zurich-docs-params-td">
+                <span class="zurich-docs-params-tag">TemplateRef</span>
+              </td>
+              <td class="zurich-docs-params-td">
+                Contenido para el título del tile.
+              </td>
+            </tr>
+            <tr>
+              <td class="zurich-docs-params-td">
+                <span class="zurich-docs-params-tag"
+                  >&lt;ng-template libZTemplate id="content"&gt;</span
+                >
+              </td>
+              <td class="zurich-docs-params-td">
+                <span class="zurich-docs-params-tag">TemplateRef</span>
+              </td>
+              <td class="zurich-docs-params-td">
+                Contenido central/personalizado del tile.
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="zurich-docs-grid">
+  <div class="zurich-docs-col">
+    <h2 class="zurich-docs-title">Avatar</h2>
+    <div class="zurich-docs-card">
+      <lib-avatar-z
+        [config]="'horizontal'"
+        content="Profesiona IT"
+        name="Jeferson Piñeros"
+        [status]="'online'"
+      ></lib-avatar-z>
+    </div>
+  </div>
+</div>
+
+<div class="zurich-docs-grid">
+  <div class="zurich-docs-col">
+    <h2 class="zurich-docs-title">Accordion</h2>
+    <div class="zurich-docs-card">
+      <div class="grid">
+        <div class="col-6">
+          <lib-accordion-z [titleInput]="true" summaryMargin="0.5">
+            <ng-template libZTemplate id="content">
+              <div class="grid">
+                <div class="col-12">Prueba contenido</div>
+              </div>
+            </ng-template>
+          </lib-accordion-z>
+          <lib-accordion-z [titleInput]="true" summaryMargin="0.5">
+            <ng-template libZTemplate id="content">
+              <div class="grid">
+                <div class="col-12">Prueba contenido</div>
+              </div>
+            </ng-template>
+          </lib-accordion-z>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="zurich-docs-grid">
+  <div class="zurich-docs-col">
+    <h2 class="zurich-docs-title">Pictograms</h2>
+    <div class="zurich-docs-card">
+      <div class="grid">
+        <div class="col-6">
+          <lib-pictogram-z
+            customStr="size:20rem"
+            typePictogram="growth-mindset"
+          ></lib-pictogram-z>
+          <lib-pictogram-z
+            customStr="size:20rem"
+            typePictogram="4-very-good:dark"
+          ></lib-pictogram-z>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- modal component-->
+<div class="zurich-docs-grid" id="modal">
+  <div class="zurich-docs-col">
+    <h2 class="zurich-docs-title">Modal</h2>
+
+    <div class="zurich-docs-card">
+      <!-- Demo visual -->
+      <div class="zurich-docs-variants" style="justify-content: center">
+        <lib-button-z
+          type="primary:xs"
+          label="Open Modal"
+          icon="edit:line"
+          [iconRight]="false"
+          [disabled]="false"
+          (eventClick)="openModal()"
+        ></lib-button-z>
+      </div>
+
+      <hr class="zurich-docs-divider" />
+
+      <!-- Código copiable -->
+      <div class="zurich-docs-code-area">
+        <div class="zurich-docs-code-label">HTML Example</div>
+        <pre class="zurich-docs-pre">
+&lt;lib-button-z
+  type=&quot;primary:xs&quot;
+  label=&quot;Open Modal&quot;
+  icon=&quot;edit:line&quot;
+  [iconRight]=&quot;false&quot;
+  [disabled]=&quot;false&quot;
+  (eventClick)=&quot;openModal()&quot;&gt;
+&lt;/lib-button-z&gt;
+
+&lt;lib-modal-z
+  [open]=&quot;statusModal&quot;
+  (close)=&quot;statusModal = $event&quot;
+  tamanio=&quot;xs&quot;&gt;
+  &lt;ng-template libZTemplate id=&quot;title&quot;&gt;
+    &lt;strong&gt;Prueba Titulo&lt;/strong&gt;
+  &lt;/ng-template&gt;
+  &lt;ng-template libZTemplate id=&quot;content&quot;&gt;
+    &lt;strong&gt;Prueba Contenido&lt;/strong&gt;
+  &lt;/ng-template&gt;
+  &lt;ng-template libZTemplate id=&quot;buttons&quot;&gt;
+    &lt;strong&gt;Prueba actions&lt;/strong&gt;
+  &lt;/ng-template&gt;
+&lt;/lib-modal-z&gt;
+        </pre>
+        <button
+          class="zurich-docs-copy-btn"
+          onclick="
+            navigator.clipboard.writeText(`<lib-button-z
+  type=&quot;primary:xs&quot;
+  label=&quot;Open Modal&quot;
+  icon=&quot;edit:line&quot;
+  [iconRight]=&quot;false&quot;
+  [disabled]=&quot;false&quot;
+  (eventClick)=&quot;openModal()&quot;>
+</lib-button-z>
+
+<lib-modal-z
+  [open]=&quot;statusModal&quot;
+  (close)=&quot;statusModal = $event&quot;
+  tamanio=&quot;xs&quot;>
+  <ng-template libZTemplate id=&quot;title&quot;>
+    <strong>Prueba Titulo</strong>
+  </ng-template>
+  <ng-template libZTemplate id=&quot;content&quot;>
+    <strong>Prueba Contenido</strong>
+  </ng-template>
+  <ng-template libZTemplate id=&quot;buttons&quot;>
+    <strong>Prueba actions</strong>
+  </ng-template>
+</lib-modal-z>`)
+          "
+        >
+          Copy
+        </button>
+      </div>
+
+      <!-- Parámetros -->
+      <div class="zurich-docs-params-card">
+        <div class="zurich-docs-params-title">
+          Parámetros / Configuraciones de <code>lib-modal-z</code>
+        </div>
+        <table class="zurich-docs-params-table">
+          <thead>
+            <tr>
+              <th class="zurich-docs-params-th">Propiedad</th>
+              <th class="zurich-docs-params-th">Tipo</th>
+              <th class="zurich-docs-params-th">Descripción</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td class="zurich-docs-params-td">
+                <span class="zurich-docs-params-tag">[open]</span>
+              </td>
+              <td class="zurich-docs-params-td">
+                <span class="zurich-docs-params-tag">boolean</span>
+              </td>
+              <td class="zurich-docs-params-td">
+                Controla si el modal está abierto (<span
+                  class="zurich-docs-params-tag"
+                  >true</span
+                >) o cerrado.
+              </td>
+            </tr>
+            <tr>
+              <td class="zurich-docs-params-td">
+                <span class="zurich-docs-params-tag">(close)</span>
+              </td>
+              <td class="zurich-docs-params-td">
+                <span class="zurich-docs-params-tag">EventEmitter</span>
+              </td>
+              <td class="zurich-docs-params-td">
+                Evento que se dispara al cerrar el modal.
+              </td>
+            </tr>
+            <tr>
+              <td class="zurich-docs-params-td">
+                <span class="zurich-docs-params-tag">tamanio</span>
+              </td>
+              <td class="zurich-docs-params-td">
+                <span class="zurich-docs-params-tag">string</span>
+              </td>
+              <td class="zurich-docs-params-td">
+                Tamaño del modal. Valores:
+                <span class="zurich-docs-params-tag">xs</span>,
+                <span class="zurich-docs-params-tag">sm</span>,
+                <span class="zurich-docs-params-tag">md</span>,
+                <span class="zurich-docs-params-tag">lg</span>,
+                <span class="zurich-docs-params-tag">xl</span>.
+              </td>
+            </tr>
+            <tr>
+              <td class="zurich-docs-params-td">
+                <span class="zurich-docs-params-tag"
+                  >&lt;ng-template libZTemplate id="title"&gt;</span
+                >
+              </td>
+              <td class="zurich-docs-params-td">
+                <span class="zurich-docs-params-tag">TemplateRef</span>
+              </td>
+              <td class="zurich-docs-params-td">
+                Contenido para el título del modal.
+              </td>
+            </tr>
+            <tr>
+              <td class="zurich-docs-params-td">
+                <span class="zurich-docs-params-tag"
+                  >&lt;ng-template libZTemplate id="content"&gt;</span
+                >
+              </td>
+              <td class="zurich-docs-params-td">
+                <span class="zurich-docs-params-tag">TemplateRef</span>
+              </td>
+              <td class="zurich-docs-params-td">
+                Contenido principal del modal.
+              </td>
+            </tr>
+            <tr>
+              <td class="zurich-docs-params-td">
+                <span class="zurich-docs-params-tag"
+                  >&lt;ng-template libZTemplate id="buttons"&gt;</span
+                >
+              </td>
+              <td class="zurich-docs-params-td">
+                <span class="zurich-docs-params-tag">TemplateRef</span>
+              </td>
+              <td class="zurich-docs-params-td">
+                Zona de botones y acciones del modal.
+              </td>
+            </tr>
+          </tbody>
+        </table>
+        <div style="margin-top: 1.2em; font-size: 0.98em">
+          <strong>Tip:</strong> Puedes controlar el estado de apertura/cierre
+          del modal usando una variable booleana y el evento
+          <span class="zurich-docs-params-tag">(close)</span>.
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<button class="zurich-fab-scroll-top" (click)="scrollToTop()" title="Ir arriba">
+  ↑
+</button>
+
+<div class="grid">
+  <div class="col-12">
+    <lib-shape-z size="100" shape="1"></lib-shape-z>
+
+    <div class="zurich-docs-params-card">
+      <div class="zurich-docs-params-title">
+        Parámetros / Configuraciones de <code>lib-shape-z</code>
+      </div>
+      <div class="zurich-docs-params-td">
+        <span class="zurich-docs-params-tag">
+          &lt;lib-shape-z size="100" shape="1"&gt;
+        </span>
+      </div>
+    </div>
+  </div>
+</div>
+
+<lib-footer-z></lib-footer-z>
+<lib-alert-z></lib-alert-z>
+
+<lib-modal-z [open]="statusModal" (close)="statusModal = $event" tamanio="xs">
+  <ng-template libZTemplate id="title">
+    <strong>Prueba Titulo</strong>
+  </ng-template>
+  <ng-template libZTemplate id="content">
+    <strong>Prueba Contenido</strong>
+  </ng-template>
+  <ng-template libZTemplate id="buttons">
+    <strong>Prueba actions</strong>
+  </ng-template>
+</lib-modal-z>
