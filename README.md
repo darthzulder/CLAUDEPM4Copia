@@ -5,11 +5,11 @@
 The motivation is that PM4's native screen builder does not offer the flexibility needed for these forms (complex validations, watchers, file uploads, dynamic collections, PDF generation, etc.), so screens are developed here as standalone React apps and embedded back into PM4 process tasks via `task_id`/`token` query parameters.
 
 Key pieces of the repository:
-- **`pm4-app/`** — the application itself (frontend, backend/proxy, and a Python cotizador microservice). See [pm4-app/CLAUDE.md](pm4-app/CLAUDE.md) for the full architecture/convention reference.
+- **`pm4-app/`** — the application itself (frontend and backend/proxy). See [pm4-app/CLAUDE.md](pm4-app/CLAUDE.md) for the full architecture/convention reference.
 - **`PM4 Backup/`** — exported JSON packages of the original PM4 screens/forms used as reference when building or migrating a screen.
 - **`docs (4).json`** — the OpenAPI reference for the PM4 instance's REST API.
 - **`graphify-out/`** — an auto-generated knowledge graph of the codebase ([GRAPH_REPORT.md](graphify-out/GRAPH_REPORT.md)) used for navigation and impact analysis.
-- **`docker-compose.yml`** — local orchestration for the app plus its Python calculation service.
+- **`docker-compose.yml`** — local orchestration for the app.
 
 # Getting Started
 
@@ -21,9 +21,7 @@ This project runs **inside Docker** — Node/npm are not expected to be availabl
 docker compose up --build
 ```
 
-This builds and starts two containers:
-- `pm4-app-container` — Express backend (proxy to PM4) + Vite/React frontend, using `pm4-app/Dockerfile`
-- `cotizador-service-container` — Python calculation microservice used by the quoting screens
+This builds and starts `pm4-app-container` — Express backend (proxy to PM4) + Vite/React frontend, using `pm4-app/Dockerfile`.
 
 Once running, exec into the app container to run npm scripts (there is no host-level `npm`):
 
@@ -39,7 +37,6 @@ docker exec pm4-app-container sh -c "cd /app && npm run build --workspace=fronte
 - **Express 5.2** (backend/proxy)
 - **react-hook-form 7.80**
 - `@zurich/web-components` / `@zurich/css-components` **0.8.1** — vendored as `.tgz` under `pm4-app/frontend/vendor/` (the ZDS DevKit registry was decommissioned; see `pm4-app/frontend/vendor/README.md` and the `[[project-zds-decommission]]` note before touching these)
-- **Python** (cotizador microservice under `pm4-app/cotizador-service/`)
 
 ## 3. Configuration
 
@@ -111,9 +108,6 @@ themselves, which is still done inside the PM4 iframe (or directly at
 ```bash
 # Frontend — Vitest, lógica pura de core/*.ts y utilidades de pantalla
 docker exec pm4-app-container sh -c "cd /app && npm run test --workspace=frontend"
-
-# Cotizador — pytest, funciones calc_dyo/cc/pdysi/pi de cotizador-service/app.py
-docker exec cotizador-service-container sh -c "cd /app && pip install -r requirements-dev.txt && pytest -q"
 ```
 
 # Contribute
