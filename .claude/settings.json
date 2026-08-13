@@ -12,6 +12,32 @@
           }
         ]
       }
+    ],
+    "PreToolUse": [
+      {
+        "matcher": "mcp__pm4-scripts__pm4_(update|run)_script",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node \"${CLAUDE_PROJECT_DIR}/.claude/hooks/pm4-capture.mjs\"",
+            "timeout": 60,
+            "statusMessage": "Guardando el estado previo del script..."
+          }
+        ]
+      }
+    ],
+    "PostToolUse": [
+      {
+        "matcher": "mcp__pm4-scripts__pm4_(update|run)_script",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node \"${CLAUDE_PROJECT_DIR}/.claude/hooks/pm4-capture.mjs\"",
+            "timeout": 60,
+            "statusMessage": "Registrando el script en el historial..."
+          }
+        ]
+      }
     ]
   }
 }
