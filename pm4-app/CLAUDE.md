@@ -41,6 +41,17 @@ Aplican a **todo** cambio de código en este proyecto, no solo a pantallas nueva
    no repiten el nombre de la función. Ver [Comentarios y documentación técnica en el código](#comentarios-y-documentación-técnica-en-el-código).
 8. **Nunca commitear sin confirmación del usuario. Nunca pushear, salvo pedido explícito.**
    Ver [Flujo de trabajo con Claude](#flujo-de-trabajo-con-claude).
+   *Excepción única:* los commits de captura en la rama `pm4-scripts-historial` son automáticos.
+   No son trabajo tuyo ni una decisión de diseño: son el registro de un estado que **ya existe en
+   PM4**, escritos con plumbing sobre una rama huérfana que nunca se mergea, sin tocar el working
+   tree, el índice ni la rama activa. Pedir confirmación destruiría lo que los hace útiles: que
+   capturar sea imposible de olvidar.
+9. **Nunca sobrescribir un script PM4 sin capturar antes y después.** Toda escritura
+   —`pm4_update_script`, `pm4_run_script` con `code_adhoc` (que también escribe), o
+   `PUT /scripts/{id}`— queda registrada por los hooks `PreToolUse`/`PostToolUse`, que guardan el
+   estado anterior y el nuevo. **Si escribís por API cruda (`curl`, Bash) los hooks no disparan:**
+   ahí corré `npm run pm4:capture -- --id <id>` vos mismo, antes y después. Ver
+   [`../docs/guides/historial-scripts-pm4.md`](../docs/guides/historial-scripts-pm4.md).
 
 ---
 
@@ -401,6 +412,30 @@ hardcodeado suelto en `collections.ts`/`variables.ts`/`fields.ts` (ni en un `WAT
 `resolveScriptId`/`resolveProcessEvent`, con el ID que tendrías puesto de todos modos como
 `fallback`. Un ID suelto que hoy "funciona" porque coincide con la instancia activa es
 exactamente el tipo de deuda que rompe en la próxima migración sin avisar.
+
+### Historial de los scripts PHP (rama `pm4-scripts-historial`)
+
+Hermano de esta sección: ambas tratan de cómo se referencia y se mantiene lo que vive en PM4.
+
+- Los scripts PM4 se editan en la UI o por API; **git no los gobierna, los registra**. La API de PM4
+  no tiene historial de versiones, así que cada escritura pisa la anterior sin dejar rastro.
+- **Escrituras por el MCP:** los hooks `PreToolUse`/`PostToolUse` capturan solos el estado anterior
+  y el nuevo, en el momento. No hace falta ningún paso final: si la sesión se corta, lo ya subido
+  ya está registrado.
+- **Trabajo en la UI de PM4:** `npm run pm4:capture -- --all`. Es el único paso manual — la UI no
+  pasa por ninguna herramienta que un hook pueda interceptar.
+- **Alcance por proceso, no toda la instancia:** solo se vigilan los procesos declarados en
+  `scripts/pm4-scripts/pm4-scripts.config.json` (hoy el 31 → 13 scripts de los 62 de la instancia).
+  Los scripts de cada proceso se descubren de su BPMN; en `scriptsExtra` se declaran solo los que
+  ningún BPMN referencia (los que otro script invoca en runtime, y los watchers del frontend).
+- Los `.php` capturados viven en la rama huérfana `pm4-scripts-historial`, nunca en `dev`. Son
+  registro, no fuente: editarlos no cambia nada en PM4. La rama no se mergea ni se borra.
+  La copia navegable de `/pm4-scripts/` (raíz del repo) se **genera** en cada captura y está
+  ignorada en git.
+- Coherente con la regla de IDs de arriba: el índice se indexa por `uuid` y el id numérico es solo
+  caché que se re-resuelve en cada corrida.
+- Flujo completo, comandos de consulta y vuelta atrás:
+  [`../docs/guides/historial-scripts-pm4.md`](../docs/guides/historial-scripts-pm4.md).
 
 ⚠️ Varias colecciones de FAST-FLOW (`naic`, `correosIntermediari`/`correosIntermediario`,
 `comerciales`, `suscriptores`, `actividadNaic`) y el script `consultarClienteTiaCuw` (id 50)

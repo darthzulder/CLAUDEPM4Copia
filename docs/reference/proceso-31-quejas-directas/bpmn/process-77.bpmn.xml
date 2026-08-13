@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<bpmn:definitions xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:bpmn="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI" xmlns:dc="http://www.omg.org/spec/DD/20100524/DC" xmlns:di="http://www.omg.org/spec/DD/20100524/DI" xmlns:pm="http://processmaker.com/BPMN/2.0/Schema.xsd" xmlns:tns="http://sourceforge.net/bpmn/definitions/_1530553328908" xmlns:xsd="http://www.w3.org/2001/XMLSchema" targetNamespace="http://bpmn.io/schema/bpmn" exporter="ProcessMaker Modeler" exporterVersion="1.0" xsi:schemaLocation="http://www.omg.org/spec/BPMN/20100524/MODEL http://bpmn.sourceforge.net/schemas/BPMN20.xsd">
+  <bpmn:process id="ProcessId" name="ProcessName" isExecutable="true">
+    <bpmn:startEvent id="node_1" name="Start Event" pm:allowInterstitial="true" pm:interstitialScreenRef="58" pm:config="{&#34;web_entry&#34;:null}">
+      <bpmn:outgoing>node_98</bpmn:outgoing>
+    </bpmn:startEvent>
+    <bpmn:task id="node_2" name="0052 Responder ayuda" pm:screenRef="168" pm:allowInterstitial="false" pm:assignment="process_variable" pm:assignedUsers="qd_strNewAssignee" pm:assignedGroups="" pm:config="{&#34;email_notifications&#34;:{&#34;notifications&#34;:[{&#34;sendAt&#34;:&#34;task-start&#34;,&#34;expression&#34;:&#34;&#34;,&#34;subject&#34;:&#34;RE: {{_user.firstname}} assigned you in \&#34;{{_task_name}}\&#34;&#34;,&#34;type&#34;:&#34;screen&#34;,&#34;textBody&#34;:&#34;&#34;,&#34;screenRef&#34;:2,&#34;usersAndGroupsOptionSelected&#34;:null,&#34;toRecipients&#34;:[{&#34;type&#34;:&#34;assignedUser&#34;,&#34;value&#34;:null}],&#34;ccRecipients&#34;:[],&#34;bccRecipients&#34;:[],&#34;i&#34;:12}]},&#34;web_entry&#34;:null,&#34;selfService&#34;:false}" pm:elementDestination="{&#34;type&#34;:&#34;homepageDashboard&#34;,&#34;value&#34;:&#34;/process-browser&#34;}">
+      <bpmn:incoming>node_98</bpmn:incoming>
+      <bpmn:outgoing>node_54</bpmn:outgoing>
+    </bpmn:task>
+    <bpmn:endEvent id="node_10" name="End Event" pm:elementDestination="{&#34;type&#34;:&#34;summaryScreen&#34;,&#34;value&#34;:null}">
+      <bpmn:incoming>node_54</bpmn:incoming>
+    </bpmn:endEvent>
+    <bpmn:sequenceFlow id="node_54" name="" sourceRef="node_2" targetRef="node_10" />
+    <bpmn:sequenceFlow id="node_98" sourceRef="node_1" targetRef="node_2" />
+  </bpmn:process>
+  <bpmndi:BPMNDiagram id="BPMNDiagramId">
+    <bpmndi:BPMNPlane id="BPMNPlaneId" bpmnElement="ProcessId">
+      <bpmndi:BPMNShape id="node_1_di" bpmnElement="node_1">
+        <dc:Bounds x="286" y="246" width="36" height="36" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="node_2_di" bpmnElement="node_2">
+        <dc:Bounds x="450" y="230" width="116" height="76" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="node_10_di" bpmnElement="node_10">
+        <dc:Bounds x="660" y="251" width="36" height="36" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge id="node_54_di" bpmnElement="node_54">
+        <di:waypoint x="508" y="268" />
+        <di:waypoint x="678" y="269" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="node_98_di" bpmnElement="node_98">
+        <di:waypoint x="304" y="264" />
+        <di:waypoint x="508" y="268" />
+      </bpmndi:BPMNEdge>
+    </bpmndi:BPMNPlane>
+  </bpmndi:BPMNDiagram>
+</bpmn:definitions>
