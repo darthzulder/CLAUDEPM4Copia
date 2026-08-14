@@ -21,20 +21,14 @@
 | SEC-039 | SCR-006 | S7 Selección de Plantilla | Sección de formulario | 7 | 2 | Sí | Siempre |
 | SEC-040 | SCR-006 | S8 Redacción de Respuesta Final | Sección de formulario | 8 | 2 | Sí | Siempre |
 | SEC-041 | SCR-006 | S9 Adjuntos de Soporte para el Cliente | Sección de formulario | 9 | 2 | Sí | Siempre |
-| SEC-022 | SCR-007 | S1 Datos del DP (solo lectura) | Sección de formulario | 1 | 2 | Sí | Siempre |
-| SEC-023 | SCR-007 | S2 Análisis del Derecho de Petición | Sección de formulario | 2 | 2 | Sí | Siempre |
-| SEC-024 | SCR-007 | S3 Respuesta al Peticionario | Sección de formulario | 3 | 2 | Sí | Siempre |
-| SEC-025 | SCR-007 | S4 Documentos Soporte | Sección de formulario | 4 | 2 | Sí | Siempre |
-| SEC-026 | SCR-008 | S1 Datos del Caso (solo lectura) | Sección de formulario | 1 | 2 | Sí | Siempre |
-| SEC-042 | SCR-008 | S2 Solicitar Información Adicional | Sección de formulario | 2 | 2 | Sí | Siempre |
-| SEC-043 | SCR-008 | S3 Historial de Solicitudes | Sección de formulario | 3 | 2 | Sí | Siempre |
-| SEC-027 | SCR-008 | S4 Información Consultada | Sección de formulario | 4 | 2 | Sí | Siempre |
-| SEC-028 | SCR-008 | S5 Respuesta y Evidencia | Sección de formulario | 5 | 2 | Sí | Siempre |
-| SEC-029 | SCR-009 | S1 Datos del Caso (solo lectura) | Sección de formulario | 1 | 2 | Sí | Siempre |
-| SEC-030 | SCR-009 | S2 Verificación de Viabilidad | Sección de formulario | 2 | 2 | Sí | Siempre |
-| SEC-044 | SCR-009 | S3 Solicitar Información Adicional | Sección de formulario | 3 | 2 | Sí | Siempre |
-| SEC-045 | SCR-009 | S4 Historial de Solicitudes | Sección de formulario | 4 | 2 | Sí | Siempre |
-| SEC-031 | SCR-009 | S5 Ejecución y Evidencia de Modificación | Sección de formulario | 5 | 2 | Sí | Siempre |
+| SEC-055 | SCR-081 | S1 Datos del Caso (solo lectura) | Sección de formulario | 1 | 2 | Sí | Siempre |
+| SEC-056 | SCR-081 | S2 Solicitar Información Adicional | Sección de formulario | 2 | 2 | Sí | Siempre |
+| SEC-057 | SCR-081 | S3 Historial de Solicitudes | Sección de formulario | 3 | 2 | Sí | Siempre |
+| SEC-058 | SCR-081 | S4 Información Consultada, Respuesta y Evidencia | Sección de formulario | 4 | 2 | Sí | Solo si tipoRequerimiento = Solicitud de Información, Cancelación u Otro |
+| SEC-059 | SCR-081 | S5 Verificación de Viabilidad, Ejecución y Evidencia | Sección de formulario | 5 | 2 | No | Solo si tipoRequerimiento = Modificación |
+| SEC-060 | SCR-081 | S6 Selección de Plantilla | Sección de formulario | 6 | 2 | Sí | Siempre |
+| SEC-061 | SCR-081 | S7 Redacción de Respuesta Final | Sección de formulario | 7 | 2 | Sí | Siempre |
+| SEC-062 | SCR-081 | S8 Adjuntos de Soporte para el Cliente | Sección de formulario | 8 | 2 | Sí | Siempre |
 | SEC-032 | SCR-010 | S1 Datos del Caso (solo lectura) | Sección de formulario | 1 | 2 | Sí | Siempre |
 | SEC-033 | SCR-010 | S2 Tipo de Manifestación y Análisis | Sección de formulario | 2 | 2 | Sí | Siempre |
 | SEC-034 | SCR-010 | S3 Decisión de Comunicación al Cliente | Sección de formulario | 3 | 2 | Sí | Siempre |
