@@ -25,12 +25,19 @@
  * Runner de los pasos de Node/npm (ver `detectarRunnerNode`): host si tiene la versión
  * correcta, `pm4-app-container` si no. Se decide POR PASO, no una vez para todo el script, así
  * que también beneficia un `npm run verify` corrido a mano, no solo el de los hooks. El host
- * se prefiere sobre Docker cuando los dos están disponibles: `App.smoke.test.tsx` es
- * intermitente dentro del contenedor bajo el pool de workers de Vitest compitiendo por I/O
- * contra el bind mount de Windows, y 100% estable corriendo nativo (confirmado: 3/3 corridas
- * en host, 478/478 tests, contra 1-4 fallos variables por corrida dentro de Docker). El
- * contenedor sigue siendo un respaldo válido —trae garantizada la versión correcta de Node—
- * nunca la primera opción.
+ * se prefiere sobre Docker cuando los dos están disponibles: trae la misma versión de Node sin
+ * el costo de I/O del bind mount de Windows. El contenedor sigue siendo un respaldo válido
+ * —también garantiza el major correcto— nunca la primera opción.
+ *
+ * CORREGIDO (ago-2026): este encabezado atribuía la intermitencia de `App.smoke.test.tsx` al
+ * contenedor, y por lo tanto la preferencia por el host se leía como su mitigación. Era un
+ * diagnóstico equivocado. La causa real vivía en el propio test: sus `waitFor` usaban el
+ * default de 1000 ms de RTL mientras el `testTimeout` de vitest.config.ts es 15_000, así que
+ * bajo contención del pool de workers abandonaban la espera con 14 s de presupuesto sin usar.
+ * Reprodujo también en host al sumar los pasos de `frontend-ng` (más carga en la misma
+ * máquina), lo que descartó a Docker como factor. Arreglado alineando los dos timeouts, con la
+ * mutación que lo confirma documentada en el comentario de ese `waitFor`. Si vuelve a aparecer
+ * intermitencia ahí, el sospechoso ya no es el contenedor.
  */
 
 import { spawnSync } from 'node:child_process';
@@ -105,13 +112,21 @@ const STR_DIR_COTIZADOR = path.join(STR_DIR_RAIZ, 'cotizador-service');
  * `lint` y `typecheck` tardan segundos y atrapan la mayoría de los errores de tipeo, así que
  * van antes de los builds y de los ~13s de la suite de jsdom.
  */
+// Durante la migración a Angular (ver docs/archive/ cuando cierre) hay DOS frontends vivos:
+// `frontend` (React, desplegado) y `frontend-ng` (Angular, en construcción). Los pasos de
+// `frontend-ng` se SUMAN, no reemplazan: hasta la Fase 7 el gate cubre los tres workspaces, así
+// que una rotura en el que todavía sirve al negocio no puede pasar inadvertida. El `lint` de
+// `frontend-ng` incluye su propio `tsc --noEmit`, así que no necesita paso de typecheck aparte.
 const CLL_PASOS = [
   { nombre: 'lint · frontend',     cmd: 'npm run lint --workspace=frontend' },
+  { nombre: 'lint · frontend-ng',  cmd: 'npm run lint --workspace=frontend-ng' },
   { nombre: 'lint · backend',      cmd: 'npm run lint --workspace=backend' },
   { nombre: 'typecheck · backend', cmd: 'npm run typecheck --workspace=backend' },
   { nombre: 'build · frontend',    cmd: 'npm run build --workspace=frontend' },
+  { nombre: 'build · frontend-ng', cmd: 'npm run build --workspace=frontend-ng' },
   { nombre: 'build · backend',     cmd: 'npm run build --workspace=backend' },
   { nombre: 'test · frontend',     cmd: 'npm run test --workspace=frontend' },
+  { nombre: 'test · frontend-ng',  cmd: 'npm run test --workspace=frontend-ng' },
   { nombre: 'test · backend',      cmd: 'npm run test --workspace=backend' },
   // Los utilitarios de scripts/ no pertenecen a ningún workspace, así que necesitan su propio
   // paso: agregarlos al script `test` del package.json no tendría efecto acá, porque esta lista

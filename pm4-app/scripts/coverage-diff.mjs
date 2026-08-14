@@ -42,6 +42,15 @@ const STR_DIR_REPO = path.resolve(STR_DIR_RAIZ, '..');
  */
 const CLL_LCOV = [
   { base: path.join(STR_DIR_RAIZ, 'frontend'), lcov: path.join(STR_DIR_RAIZ, 'frontend', 'coverage', 'lcov.info') },
+  // `frontend-ng` anida un nivel más: `@angular/build:unit-test` escribe en
+  // `coverage/<nombre-del-proyecto>/`, no en `coverage/` como hace Vitest invocado a mano. Apuntar
+  // a `coverage/lcov.info` acá no falla con error — el `existsSync` de abajo lo saltea en silencio
+  // y el workspace queda invisible en el informe, que es justo el modo de falla que este script
+  // existe para evitar.
+  {
+    base: path.join(STR_DIR_RAIZ, 'frontend-ng'),
+    lcov: path.join(STR_DIR_RAIZ, 'frontend-ng', 'coverage', 'frontend-ng', 'lcov.info'),
+  },
   { base: path.join(STR_DIR_RAIZ, 'backend'), lcov: path.join(STR_DIR_RAIZ, 'backend', 'coverage', 'lcov.info') },
 ];
 
@@ -53,20 +62,27 @@ const CLL_LCOV = [
  * filtro, el informe marcaba como "sin tests" a los propios `*.test.ts` — que son el instrumento
  * de medición, no el sujeto.
  *
- * Debe mantenerse alineado con los `coverage.exclude` de frontend/vitest.config.ts y
- * backend/vitest.config.ts, donde está el porqué de cada uno.
+ * Debe mantenerse alineado con los `coverage.exclude` de frontend/vitest.config.ts,
+ * backend/vitest.config.ts y el `coverageExclude` del target `test` de frontend-ng/angular.json,
+ * donde está el porqué de cada uno.
  */
 const CLL_EXCLUIDOS = [
   /\.test\.tsx?$/,
+  // Angular usa `*.spec.ts` (default del CLI) donde React usa `*.test.tsx`. Sin esta línea, los
+  // specs nuevos se reportarían a sí mismos como "ningún test carga este archivo".
+  /\.spec\.ts$/,
   /\/test-setup\.ts$/,
   /\/main\.tsx$/,
+  /\/main\.ts$/,
   /\/zds-setup\.ts$/,
+  /\/app\.config\.ts$/,
+  /\/variables\.ts$/,
   /\.types\.ts$/,
   /\/backend\/src\/server\.ts$/,
 ];
 
 /** Solo el código fuente de los workspaces: configs, scripts y docs no tienen cobertura que medir. */
-const RGX_FUENTE = /^pm4-app\/(frontend|backend)\/src\//;
+const RGX_FUENTE = /^pm4-app\/(frontend|frontend-ng|backend)\/src\//;
 
 function estaExcluido(in_strRuta) {
   return CLL_EXCLUIDOS.some((in_rgx) => in_rgx.test(in_strRuta));

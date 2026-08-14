@@ -1,0 +1,13 @@
+/* Vacío a propósito, y conviene saber por qué antes de agregarle algo.
+ *
+ * `shared.css` es la ÚNICA hoja de estilos global permitida del proyecto (regla vigente en
+ * pm4-app/CLAUDE.md), y se importa desde `main.ts` junto con `zds-setup` para que la cascada
+ * quede en el orden correcto: tokens del DS primero, alias semánticos del proyecto después.
+ * Entrar por el array `styles` de angular.json —que es lo que este archivo alimenta— lo
+ * cargaría vía el `<link>` del index.html, ANTES del `main.js`, y por lo tanto antes de los
+ * tokens del DS: los alias `--z-*` de shared.css quedarían apuntando a variables inexistentes.
+ *
+ * Corolario verificado en el gate 0: el `styles-*.css` emitido por el build queda en 0 bytes
+ * y el CSS del DS aparece como lazy chunk (~494 kB) cargado desde `main.js`. Es lo esperado,
+ * NO un fallo — ver el hallazgo 4 del gate 0 en el plan de migración.
+ */

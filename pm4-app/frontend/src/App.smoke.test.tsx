@@ -143,9 +143,20 @@ describe('Arranque de la app (smoke)', () => {
       // Las pantallas son `lazy()`, así que primero aparece el fallback de Suspense. Esperar a
       // que el `.loading-overlay` desaparezca es la señal de que el chunk resolvió y el árbol
       // real se montó — sin esto el test asertaría sobre el spinner y pasaría siempre.
+      //
+      // El `timeout` explícito NO es cosmético: el default de RTL es 1000 ms, mientras que el
+      // `testTimeout` de vitest.config.ts es 15_000. Esa asimetría era la causa real de la
+      // intermitencia que el encabezado de scripts/verify.mjs atribuía a Docker: con los 34
+      // archivos de la suite compitiendo por el pool de workers, resolver el chunk de una
+      // pantalla cargada de componentes del DS pasa del segundo, y `waitFor` abandonaba cuando
+      // al test le quedaban 14 s de presupuesto sin usar. Aislado (`vitest run
+      // src/App.smoke.test.tsx`) pasaba 17/17 siempre; en la suite completa fallaban 1-2
+      // pantallas distintas por corrida, y con `--maxWorkers=1` volvían a pasar 413/413. Alinear
+      // los dos números elimina la carrera sin ocultar una rotura real: si una pantalla explota
+      // de verdad, el ErrorBoundary la pinta y la aserción de abajo falla igual, sin esperar.
       await waitFor(() => {
         expect(container.querySelector('.loading-overlay')).toBeNull();
-      });
+      }, { timeout: 15_000 });
 
       // El ErrorBoundary de App atrapa cualquier throw del árbol y lo pinta como "Error de
       // Render" junto al stack, así que el mensaje de fallo ya trae el diagnóstico.

@@ -3,21 +3,23 @@
   "private": true,
   "workspaces": [
     "backend",
-    "frontend"
+    "frontend",
+    "frontend-ng"
   ],
   "scripts": {
     "dev": "concurrently \"npm run dev --workspace=backend\" \"npm run dev --workspace=frontend\"",
+    "dev:ng": "concurrently \"npm run dev --workspace=backend\" \"npm run dev --workspace=frontend-ng\"",
     "prebuild": "node scripts/pm4-registry-sync.mjs --update --ci",
-    "build": "npm run build --workspace=frontend && npm run build --workspace=backend",
-    "lint": "npm run lint --workspace=frontend && npm run lint --workspace=backend",
+    "build": "npm run build --workspace=frontend && npm run build --workspace=frontend-ng && npm run build --workspace=backend",
+    "lint": "npm run lint --workspace=frontend && npm run lint --workspace=frontend-ng && npm run lint --workspace=backend",
     "typecheck": "npm run typecheck --workspace=backend",
-    "test": "npm run test --workspace=frontend && npm run test --workspace=backend",
+    "test": "npm run test --workspace=frontend && npm run test --workspace=frontend-ng && npm run test --workspace=backend",
     "test:scripts": "vitest run --config vitest.scripts.config.ts",
     "pm4:capture": "node scripts/pm4-scripts/pm4-scripts.mjs capture",
     "pm4:status": "node scripts/pm4-scripts/pm4-scripts.mjs status",
     "verify": "node scripts/verify.mjs",
     "verify:verbose": "node scripts/verify.mjs --verbose",
-    "coverage": "npm run coverage --workspace=frontend && npm run coverage --workspace=backend",
+    "coverage": "npm run coverage --workspace=frontend && npm run coverage --workspace=frontend-ng && npm run coverage --workspace=backend",
     "coverage:diff": "node scripts/coverage-diff.mjs",
     "setup:hooks": "git config core.hooksPath .githooks",
     "start": "NODE_ENV=production node backend/dist/server.js"
