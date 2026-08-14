@@ -134,8 +134,8 @@ button{border:0;border-radius:6px;padding:9px 18px;cursor:pointer;font-size:13px
     <div class="nav-group"><span class="nav-group-label">Índice</span><a href="#" onclick="showScreen('index')">📋 Todas</a></div>
     <div class="nav-group"><span class="nav-group-label">P02</span><a href="#" onclick="showScreen('scr003')">PAN-03 Línea 2</a></div>
     <div class="nav-group"><span class="nav-group-label">SP01 VD</span><a href="#" onclick="showScreen('scr004')">PAN-04 Reporte SIC</a><a href="#" onclick="showScreen('scr005')">PAN-05 Análisis</a></div>
-    <div class="nav-group"><span class="nav-group-label">SP02 DP</span><a href="#" onclick="showScreen('scr006')">PAN-06 Asignación</a><a href="#" onclick="showScreen('scr007')">PAN-07 Gestión DP</a></div>
-    <div class="nav-group"><span class="nav-group-label">SP03 REQ</span><a href="#" onclick="showScreen('scr008')">PAN-08 Información</a><a href="#" onclick="showScreen('scr009')">PAN-09 Modificación</a></div>
+    <div class="nav-group"><span class="nav-group-label">SP02 DP</span><a href="#" onclick="showScreen('scr006')">PAN-06 Asignación</a></div>
+    <div class="nav-group"><span class="nav-group-label">SP03 REQ</span><a href="#" onclick="showScreen('scr081')">PAN-08.1 Requerimientos</a></div>
     <div class="nav-group"><span class="nav-group-label">SP04 SUG/FEL</span><a href="#" onclick="showScreen('scr010')">PAN-10 Sug/Fel</a></div>
     <div class="nav-group"><span class="nav-group-label">SP05 RESP</span><a href="#" onclick="showScreen('scr012')">PAN-12 Aprobación</a></div>
   </div>
@@ -148,10 +148,11 @@ button{border:0;border-radius:6px;padding:9px 18px;cursor:pointer;font-size:13px
   <div class="form-body">
     <div class="idx-hero">
       <h1>📋 Mockups TO-BE v3.1 — Gestión de Otras Solicitudes</h1>
-      <p>Zurich Seguros Colombia · ProcessMaker 4 BPMS · 9 pantallas · 7 procesos/subprocesos · BeePM — Beesmartec · Mayo 2026 · rev. Ago 2026 · ACZ-OS-001</p>
+      <p>Zurich Seguros Colombia · ProcessMaker 4 BPMS · 7 pantallas · 7 procesos/subprocesos · BeePM — Beesmartec · Mayo 2026 · rev. Ago 2026 · ACZ-OS-001</p>
     </div>
     <div class="alert alert-crit"><span class="alert-icon">⚠</span><div><strong>NOTAS REGULATORIAS CRÍTICAS:</strong> SP01 VD: Reporte a SIC pendiente validación legal (Ley 1581/2012). SP02 DP: Plazos legales (15/10/30 días hábiles) pendientes de confirmar con equipo legal de Zurich. SP05: Toda respuesta debe usar plantilla corporativa — no se permite texto libre (RUL-010-01). SLA por tipología pendiente de parametrización antes del go-live.</div></div>
-    <div class="alert alert-info"><span class="alert-icon">🔄</span><div><strong>Revisión v3.1 (ago-2026) — consistencia, sin cambios funcionales:</strong> maquetas realineadas contra <em>03_Campos</em>; IDs duplicados renumerados (FLD-158 y SEC-039/040/041 de SCR-012 → FLD-193 y SEC-052/053/054); alta de CAT-TIPO-DATOS, CAT-CANAL-SIC y CAT-USUARIOS-ROLE con valores <em>dummy</em> pendientes de validación; 12 reglas de <em>05_Reglas</em> que faltaban en las maquetas ya sincronizadas; SP06 documentado como subproceso sin pantalla. En estos mockups: se corrigieron dos referencias a reglas inexistentes (RUL-011-01, RUL-020), se alinearon las opciones de los catálogos nuevos y se agregó el botón Cancelar de SCR-003. A la inversa, los botones <em>Guardar Borrador</em> de SCR-003 y SCR-009 que este prototipo ya ofrecía se dieron de alta en el anexo como ACT-003-04 y ACT-009-06.</div></div>
+    <div class="alert alert-info"><span class="alert-icon">🔄</span><div><strong>Revisión v3.1 (ago-2026) — consistencia, sin cambios funcionales:</strong> maquetas realineadas contra <em>03_Campos</em>; IDs duplicados renumerados (FLD-158 y SEC-039/040/041 de SCR-012 → FLD-193 y SEC-052/053/054); alta de CAT-TIPO-DATOS, CAT-CANAL-SIC y CAT-USUARIOS-ROLE con valores <em>dummy</em> pendientes de validación; 12 reglas de <em>05_Reglas</em> que faltaban en las maquetas ya sincronizadas; SP06 documentado como subproceso sin pantalla. En estos mockups: se corrigieron dos referencias a reglas inexistentes (RUL-011-01, RUL-020), se alinearon las opciones de los catálogos nuevos y se agregó el botón Cancelar de SCR-003. A la inversa, los botones <em>Guardar Borrador</em> de SCR-003 y de la antigua pantalla de Modificación que este prototipo ya ofrecía se dieron de alta en el anexo como ACT-003-04 y como la acción equivalente de esa pantalla (hoy ACT-081-02).</div></div>
+    <div class="alert alert-info"><span class="alert-icon">🆕</span><div><strong>Refinamiento ago-2026 — unificación del SP03:</strong> los cuatro subtipos de requerimiento (Solicitud de Información, Modificación, Cancelación y Otros Requerimientos) se gestionan ahora en una sola pantalla, <strong>SCR-081 · PAN-08.1</strong>, cuyas secciones condicionales se adaptan al <em>Tipo de Requerimiento</em>. Las pantallas <strong>SCR-008 · PAN-08</strong> y <strong>SCR-009 · PAN-09</strong> fueron eliminadas y sus IDs quedan retirados (no se reutilizan). Total: 8 → 7 pantallas.</div></div>
     <div class="idx-section">
       <h2><span class="tag tag-p02">P02</span> Proceso Principal — Gestión de Otras Solicitudes</h2>
       <div class="alert alert-info"><span class="alert-icon">ℹ</span><div>La <strong>radicación</strong> y la <strong>clasificación/tipificación</strong> inicial se realizan ahora en la pantalla externa <strong>PAN-000 · Radicación PQRS</strong> (fuera del alcance de este documento). Las antiguas <strong>PAN-01</strong> (Formulario de Radicación) y <strong>PAN-02</strong> (Clasificación y Tipificación) fueron eliminadas de estos mockups.</div></div>
@@ -170,14 +171,12 @@ button{border:0;border-radius:6px;padding:9px 18px;cursor:pointer;font-size:13px
       <h2><span class="tag tag-sp02">SP02</span> Gestión Derecho de Petición · <span style="font-weight:400;font-size:11px">Ley 1755/2015</span></h2>
       <div class="idx-grid">
         <a class="idx-card" onclick="showScreen('scr006')"><div class="idx-card-id">SCR-006 · PAN-06 · SP02-T03</div><div class="idx-card-name">Asignación Responsable DP</div><div class="idx-card-desc">Identificación área competente y asignación dentro del plazo legal</div><div class="idx-card-role">👤 Gestor de Experiencia</div></a>
-        <a class="idx-card" onclick="showScreen('scr007')"><div class="idx-card-id">SCR-007 · PAN-07 · SP02-T04</div><div class="idx-card-name">Gestión y Respuesta al DP</div><div class="idx-card-desc">Análisis de fondo y respuesta que aborde todos los puntos del peticionario</div><div class="idx-card-role">👤 Gestor / Línea 2</div></a>
       </div>
     </div>
     <div class="idx-section">
       <h2><span class="tag tag-sp03">SP03</span> Gestión Requerimiento de Información</h2>
       <div class="idx-grid">
-        <a class="idx-card" onclick="showScreen('scr008')"><div class="idx-card-id">SCR-008 · PAN-08 · SP03-SP02</div><div class="idx-card-name">Gestión Solicitud de Información</div><div class="idx-card-desc">Consulta de sistemas, documentación de respuesta y evidencia</div><div class="idx-card-role">👤 Gestor de Experiencia</div></a>
-        <a class="idx-card" onclick="showScreen('scr009')"><div class="idx-card-id">SCR-009 · PAN-09 · SP03-SP03</div><div class="idx-card-name">Gestión Solicitud de Modificación</div><div class="idx-card-desc">Verificación de viabilidad, ejecución y evidencia del cambio</div><div class="idx-card-role">🏢 Usuario Zurich Responsable</div></a>
+        <a class="idx-card" onclick="showScreen('scr081')"><div class="idx-card-id">SCR-081 · PAN-08.1 · SP03-SP01 a SP03-SP04</div><div class="idx-card-name">Gestión Unificada de Requerimientos</div><div class="idx-card-desc">Una pantalla para los 4 subtipos: Información, Modificación, Cancelación y Otros. Reemplaza SCR-008 y SCR-009</div><div class="idx-card-role">👤 Gestor de Experiencia / 🏢 Usuario Zurich Responsable</div></a>
       </div>
     </div>
     <div class="idx-section">
@@ -572,96 +571,26 @@ button{border:0;border-radius:6px;padding:9px 18px;cursor:pointer;font-size:13px
   </div>
 </div>
 
-<!-- ═══ SCR-007 — GESTIÓN RESPUESTA DP ═══════════════════════════════════════ -->
-<div class="screen" id="screen-scr007">
+<!-- ═══ SCR-081 — GESTIÓN UNIFICADA DE REQUERIMIENTOS (SP03) ══════════════════ -->
+<div class="screen" id="screen-scr081">
   <div class="screen-header">
     <div class="screen-header-top">
-      <div class="scr-badge">SCR-007 · PAN-07</div>
+      <div class="scr-badge">SCR-081 · PAN-08.1</div>
       <div>
-        <div class="scr-title">Formulario de Gestión y Respuesta al DP</div>
-        <div class="scr-sub">Análisis de fondo y respuesta que aborde todos los puntos del peticionario · Ley 1755/2015</div>
-        <div class="scr-tags"><span class="tag tag-sp02">SP02</span><span class="tag tag-role">👤 Gestor / Línea 2</span><span class="tag" style="background:#dcfce7;color:#166534">SP02-T04</span></div>
-      </div>
-    </div>
-  </div>
-  <div class="ctx-bar">
-    <div class="ctx-item">Caso <strong>#DP-2026-0087</strong></div>
-    <div class="ctx-item">SLA: <span class="sla-crit">⬤ 2 días hábiles — CRÍTICO</span></div>
-    <div class="ctx-item">Estado: <span class="status-badge sb-active"><span class="sb-dot"></span>En gestión</span></div>
-  </div>
-  <div class="form-body">
-    <div class="alert alert-err"><span class="alert-icon">🔴</span><div><strong>RUL-007-01 — RESTRICCIÓN CRÍTICA:</strong> La respuesta al Derecho de Petición <strong>debe abordar de fondo cada uno de los puntos planteados por el peticionario</strong>. No se permite una respuesta genérica. Mínimo 100 caracteres.</div></div>
-
-    <div class="fpanel">
-      <div class="fpanel-head" onclick="togglePanel(this)">📋 S1 — Datos del DP (solo lectura)</div>
-      <div class="fpanel-body">
-        <div class="g3">
-          <div class="field"><label class="fl">ID Caso / Radicado</label><input class="ro" readonly value="DP-2026-0087"></div>
-          <div class="field"><label class="fl">SLA Restante</label><div style="padding:8px 0"><span class="sla-crit">⬤ 2 días hábiles — CRÍTICO</span></div></div>
-          <div class="field"><label class="fl">Peticionario</label><input class="ro" readonly value="Ricardo Solano Montoya"></div>
-          <div class="field span3"><label class="fl">Contenido del Derecho de Petición</label><textarea class="ro" readonly rows="3">Solicita información detallada sobre las coberturas vigentes de su póliza de vida grupo No. VG-2023-04421, específicamente sobre: (1) exclusiones aplicables por condición preexistente, (2) cobertura por invalidez parcial, (3) condiciones de renovación para el próximo período.</textarea></div>
-        </div>
-      </div>
-    </div>
-
-    <div class="fpanel">
-      <div class="fpanel-head" onclick="togglePanel(this)">🔍 S2 — Análisis del Derecho de Petición</div>
-      <div class="fpanel-body">
-        <div class="g2">
-          <div class="field span2"><label class="fl">Análisis del Fondo de la Solicitud <span class="req">*</span></label><textarea rows="3" placeholder="Describir el análisis de cada punto planteado en el DP. Mínimo 100 caracteres. Debe abordar TODOS los puntos del peticionario..."></textarea><span class="fhelp">Mínimo 100 caracteres. Debe abordar todos los puntos.</span></div>
-          <div class="field span2"><label class="fl">Posición de Zurich <span class="req">*</span></label><textarea rows="3" placeholder="Posición corporativa de Zurich frente a la solicitud del peticionario..."></textarea></div>
-        </div>
-      </div>
-    </div>
-
-    <div class="fpanel">
-      <div class="fpanel-head" onclick="togglePanel(this)">✍️ S3 — Respuesta al Peticionario</div>
-      <div class="fpanel-body">
-        <div class="g2">
-          <div class="field span2"><label class="fl">Respuesta de Fondo (borrador) <span class="req">*</span></label><textarea rows="5" placeholder="Redacte la respuesta que aborda de fondo TODOS los puntos del peticionario. Mínimo 100 caracteres...&#10;&#10;(1) Exclusiones por condición preexistente:&#10;(2) Cobertura por invalidez parcial:&#10;(3) Condiciones de renovación:"></textarea><span class="fhelp">Mínimo 100 caracteres. Debe responder cada punto enumerado en el DP.</span></div>
-          <div class="field"><label class="fl">¿Reconocimiento o Compensación? <span class="req">*</span></label>
-            <div class="radio-group">
-              <label><input type="radio" name="recon_dp" value="si"> Sí</label>
-              <label><input type="radio" name="recon_dp" value="no" checked> No</label>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-
-    <div class="fpanel">
-      <div class="fpanel-head" onclick="togglePanel(this)">📎 S4 — Documentos Soporte</div>
-      <div class="fpanel-body">
-        <div class="file-zone">📎 Adjunte documentos soporte de la respuesta<br><span style="font-size:11px">No van directamente al cliente. Máx 10 archivos.</span></div>
-      </div>
-    </div>
-
-    <div class="actions">
-      <button class="btn-secondary" type="button">💾 Guardar Borrador</button>
-      <button class="btn-secondary" type="button">✕ Cancelar</button>
-      <button class="btn-primary" type="button">✔ Registrar y Avanzar a SP05 →</button>
-    </div>
-  </div>
-</div>
-
-<!-- ═══ SCR-008 — GESTIÓN INFORMACIÓN ════════════════════════════════════════ -->
-<div class="screen" id="screen-scr008">
-  <div class="screen-header">
-    <div class="screen-header-top">
-      <div class="scr-badge">SCR-008 · PAN-08</div>
-      <div>
-        <div class="scr-title">Formulario de Gestión de Requerimiento de Información</div>
-        <div class="scr-sub">Consulta de sistemas de pólizas, documentación de respuesta y registro de evidencia</div>
-        <div class="scr-tags"><span class="tag tag-sp03">SP03</span><span class="tag tag-role">👤 Gestor de Experiencia</span><span class="tag" style="background:#dcfce7;color:#166534">SP03-SP02</span></div>
+        <div class="scr-title">Formulario Único de Gestión de Requerimientos</div>
+        <div class="scr-sub">Una sola pantalla para los 4 subtipos del SP03: Solicitud de Información, Modificación, Cancelación y Otros Requerimientos</div>
+        <div class="scr-tags"><span class="tag tag-sp03">SP03</span><span class="tag tag-role">👤 Gestor de Experiencia / 🏢 Usuario Zurich Responsable</span><span class="tag" style="background:#dcfce7;color:#166534">SP03-SP01 a SP03-SP04</span></div>
       </div>
     </div>
   </div>
   <div class="ctx-bar">
     <div class="ctx-item">Caso <strong>#REQ-2026-0234</strong></div>
-    <div class="ctx-item">Subtipo: <span class="chip chip-req">Solicitud de Información</span></div>
+    <div class="ctx-item">Subtipo: <span class="chip chip-req" id="chip-subtipo-081">Solicitud de Información</span></div>
     <div class="ctx-item">SLA: <span class="sla-ok">⬤ 9 días hábiles</span></div>
   </div>
   <div class="form-body">
+    <div class="alert alert-info"><span class="alert-icon">ℹ</span><div><strong>RUL-081-02 — REGLA DE NEGOCIO:</strong> el campo <em>Tipo de Requerimiento</em> determina las secciones visibles. Con <em>Modificación</em> se muestra <strong>S5 — Verificación de Viabilidad, Ejecución y Evidencia</strong>; con <em>Solicitud de Información</em>, <em>Cancelación</em> u <em>Otro</em> se muestra <strong>S4 — Información Consultada, Respuesta y Evidencia</strong>. Provisionalmente es seleccionable por el usuario; en producción el BPM lo propaga desde la subtipificación del caso (CAT-SUBTIPO).</div></div>
+
     <div class="fpanel">
       <div class="fpanel-head" onclick="togglePanel(this)">📂 S1 — Datos del Caso (solo lectura)</div>
       <div class="fpanel-body">
@@ -670,7 +599,15 @@ button{border:0;border-radius:6px;padding:9px 18px;cursor:pointer;font-size:13px
           <div class="field"><label class="fl">SLA Restante</label><div style="padding:8px 0"><span class="sla-ok">⬤ 9 días hábiles</span></div></div>
           <div class="field"><label class="fl">Cliente</label><input class="ro" readonly value="Sandra Milena Torres Ríos"></div>
           <div class="field"><label class="fl">Producto / Ramo</label><input class="ro" readonly value="Vida / Seguro de Vida Individual"></div>
-          <div class="field"><label class="fl">Número de Póliza</label><input class="ro" readonly value="VI-2021-078234"></div>
+          <div class="field span2"><label class="fl">Tipo de Requerimiento <span class="req">*</span></label>
+            <select id="tipo-req-081" onchange="updateTipoReq081(this)">
+              <option value="informacion" selected>Solicitud de Información</option>
+              <option value="modificacion">Modificación</option>
+              <option value="cancelacion">Cancelación</option>
+              <option value="otro">Otro Requerimiento</option>
+            </select>
+            <span class="fhelp">Catálogo CAT-SUBTIPO. Determina qué secciones se muestran (S4 o S5).</span>
+          </div>
           <div class="field span3"><label class="fl">Solicitud del Cliente</label><textarea class="ro" readonly rows="2">La cliente solicita información sobre el estado de pago de su prima mensual, el valor asegurado vigente y el listado de beneficiarios registrados en su póliza de vida individual.</textarea></div>
         </div>
       </div>
@@ -681,17 +618,17 @@ button{border:0;border-radius:6px;padding:9px 18px;cursor:pointer;font-size:13px
       <div class="fpanel-body">
         <div class="g2">
           <div class="field"><label class="fl">Área Competente <span class="req">*</span></label>
-            <select id="area-08"><option>Seleccione...</option><option selected>SAC — Servicio al Cliente</option><option>Siniestros</option><option>Pagos</option><option>Producto</option><option>Jurídica</option></select>
+            <select id="area-081"><option>Seleccione...</option><option selected>SAC — Servicio al Cliente</option><option>Suscripción</option><option>Siniestros</option><option>Pagos</option><option>Producto</option><option>Jurídica</option></select>
             <span class="fhelp">Áreas habilitadas para atender la solicitud.</span>
           </div>
           <div class="field"><label class="fl">Usuario Responsable <span class="req">*</span></label>
-            <select id="usuario-08"><option>Seleccione...</option><option selected>Ana Lucía Gómez — Analista SAC Senior</option><option>Jorge Hernández — Analista SAC</option><option>Laura Pinilla — Analista SAC</option></select>
+            <select id="usuario-081"><option>Seleccione...</option><option selected>Ana Lucía Gómez — Analista SAC Senior</option><option>Jorge Hernández — Analista SAC</option><option>Carlos Mario Ruiz — Analista de Suscripción</option><option>Diana Marcela Ortiz — Analista Senior</option></select>
             <span class="fhelp">Solo usuarios autorizados para atender la solicitud.</span>
           </div>
-          <div class="field span2"><label class="fl">Detalles de la Solicitud</label><textarea id="detalle-sol-08" rows="2" placeholder="Describa la información adicional requerida al responsable..."></textarea></div>
+          <div class="field span2"><label class="fl">Detalles de la Solicitud</label><textarea id="detalle-sol-081" rows="2" placeholder="Describa la información adicional requerida al responsable..."></textarea></div>
         </div>
         <div style="display:flex;justify-content:flex-end;margin-top:12px">
-          <button class="btn-primary" type="button" onclick="agregarSolicitud08()">📨 Enviar Solicitud</button>
+          <button class="btn-primary" type="button" onclick="agregarSolicitud081()">📨 Enviar Solicitud</button>
         </div>
         <span class="fhelp">Al enviar, la solicitud se agrega al Historial de Solicitudes (S3).</span>
       </div>
@@ -702,13 +639,13 @@ button{border:0;border-radius:6px;padding:9px 18px;cursor:pointer;font-size:13px
       <div class="fpanel-body">
         <table class="data-table">
           <thead><tr><th>Persona Asignada</th><th>Fecha de Asignación</th><th>Detalles de la Solicitud</th><th>¿Respondida?</th><th>Acción</th></tr></thead>
-          <tbody id="historial-sol-08-body">
+          <tbody id="historial-sol-081-body">
             <tr data-respondida="si" data-persona="Ana Lucía Gómez — Analista SAC Senior">
               <td>Ana Lucía Gómez — Analista SAC Senior</td>
               <td>2026-06-02 14:20</td>
               <td>Solicitud de validación del histórico de pagos y del valor asegurado vigente</td>
               <td><span class="chip chip-ok">Sí</span></td>
-              <td><button class="btn-link" type="button" onclick="verRespuestaSol08(this)">Ver respuesta</button></td>
+              <td><button class="btn-link" type="button" onclick="verRespuestaSol081(this)">Ver respuesta</button></td>
             </tr>
           </tbody>
         </table>
@@ -716,145 +653,107 @@ button{border:0;border-radius:6px;padding:9px 18px;cursor:pointer;font-size:13px
       </div>
     </div>
 
-    <div class="fpanel">
-      <div class="fpanel-head" onclick="togglePanel(this)">🔍 S4 — Información Consultada</div>
-      <div class="fpanel-body">
-        <div class="g2">
-          <div class="field span2"><label class="fl">Sistemas Consultados <span class="req">*</span></label><textarea rows="2" placeholder="Registrar qué sistemas fueron consultados: sistema de pólizas, historial de pagos, coberturas, siniestros..."></textarea></div>
-          <div class="field span2"><label class="fl">Información Encontrada <span class="req">*</span></label><textarea rows="3" placeholder="Describir la información obtenida de los sistemas consultados..."></textarea></div>
-        </div>
-      </div>
-    </div>
-
-    <div class="fpanel">
-      <div class="fpanel-head" onclick="togglePanel(this)">✍️ S5 — Respuesta y Evidencia</div>
-      <div class="fpanel-body">
-        <div class="g2">
-          <div class="field span2"><label class="fl">Respuesta a la Solicitud de Información <span class="req">*</span></label><textarea rows="4" placeholder="Respuesta completa y detallada a la solicitud del cliente. Mínimo 100 caracteres..."></textarea><span class="fhelp">Mínimo 100 caracteres.</span></div>
-          <div class="field span2"><label class="fl">Adjuntos de Evidencia</label>
-            <div class="file-zone">📎 Adjunte pantallazos, reportes o confirmaciones como evidencia<br><span style="font-size:11px">PDF, JPG, PNG</span></div>
-          </div>
-        </div>
-      </div>
-    </div>
-
-    <div class="actions">
-      <button class="btn-secondary" type="button">💾 Guardar Borrador</button>
-      <button class="btn-secondary" type="button">✕ Cancelar</button>
-      <button class="btn-primary" type="button">✔ Registrar y Avanzar a SP05 →</button>
-    </div>
-  </div>
-</div>
-
-<!-- ═══ SCR-009 — GESTIÓN MODIFICACIÓN ═══════════════════════════════════════ -->
-<div class="screen" id="screen-scr009">
-  <div class="screen-header">
-    <div class="screen-header-top">
-      <div class="scr-badge">SCR-009 · PAN-09</div>
-      <div>
-        <div class="scr-title">Formulario de Gestión de Solicitud de Modificación</div>
-        <div class="scr-sub">Verificación de viabilidad contractual, ejecución y documentación de la modificación</div>
-        <div class="scr-tags"><span class="tag tag-sp03">SP03</span><span class="tag tag-role">🏢 Usuario Zurich Responsable</span><span class="tag" style="background:#dcfce7;color:#166534">SP03-SP03</span></div>
-      </div>
-    </div>
-  </div>
-  <div class="ctx-bar">
-    <div class="ctx-item">Caso <strong>#REQ-2026-0198</strong></div>
-    <div class="ctx-item">Subtipo: <span class="chip chip-req">Modificación</span></div>
-    <div class="ctx-item">SLA: <span class="sla-warn">⬤ 4 días hábiles</span></div>
-  </div>
-  <div class="form-body">
-    <div class="fpanel">
-      <div class="fpanel-head" onclick="togglePanel(this)">📂 S1 — Datos del Caso (solo lectura)</div>
-      <div class="fpanel-body">
-        <div class="g4">
-          <div class="field"><label class="fl">ID Caso</label><input class="ro" readonly value="REQ-2026-0198"></div>
-          <div class="field"><label class="fl">SLA Restante</label><div style="padding:8px 0"><span class="sla-warn">⬤ 4 días hábiles</span></div></div>
-          <div class="field"><label class="fl">Cliente</label><input class="ro" readonly value="Jorge Luis Castaño Mesa"></div>
-          <div class="field"><label class="fl">Tipo de Modificación</label><input class="ro" readonly value="Cambio de beneficiario"></div>
-        </div>
-      </div>
-    </div>
-
-    <div class="fpanel">
-      <div class="fpanel-head" onclick="togglePanel(this)">⚖️ S2 — Verificación de Viabilidad</div>
-      <div class="fpanel-body">
-        <div class="g2">
-          <div class="field span2"><label class="fl">Condiciones Contractuales Verificadas <span class="req">*</span></label><textarea rows="3" placeholder="Verificar las condiciones del contrato que aplican a la modificación solicitada. Confirmar si es viable..."></textarea></div>
-          <div class="field"><label class="fl">¿Modificación Viable? <span class="req">*</span></label>
-            <div class="radio-group">
-              <label><input type="radio" name="viable" value="si" checked onchange="document.getElementById('sec-mod').classList.add('visible');document.getElementById('sec-noviable').classList.remove('visible')"> Sí — Proceder con la modificación</label>
-              <label><input type="radio" name="viable" value="no" onchange="document.getElementById('sec-noviable').classList.add('visible');document.getElementById('sec-mod').classList.remove('visible')"> No — Documentar motivo</label>
+    <div class="cond-section visible" id="sec-081-info">
+      <div class="fpanel">
+        <div class="fpanel-head" onclick="togglePanel(this)">🔍 S4 — Información Consultada, Respuesta y Evidencia</div>
+        <div class="fpanel-body">
+          <span class="fhelp" style="display:block;margin-bottom:10px">◆ Visible si Tipo de Requerimiento = Solicitud de Información, Cancelación u Otro.</span>
+          <div class="g2">
+            <div class="field span2"><label class="fl">Sistemas Consultados <span class="req">*</span></label><textarea rows="2" placeholder="Registrar qué sistemas fueron consultados: sistema de pólizas, historial de pagos, coberturas, siniestros..."></textarea></div>
+            <div class="field span2"><label class="fl">Información Encontrada <span class="req">*</span></label><textarea rows="3" placeholder="Describir la información obtenida de los sistemas consultados..."></textarea></div>
+            <div class="field span2"><label class="fl">Respuesta a la Solicitud <span class="req">*</span></label><textarea rows="4" placeholder="Respuesta completa y detallada a la solicitud del cliente. Mínimo 100 caracteres..."></textarea><span class="fhelp">Mínimo 100 caracteres.</span></div>
+            <div class="field span2"><label class="fl">Adjuntos de Evidencia</label>
+              <div class="file-zone">📎 Adjunte pantallazos, reportes o confirmaciones como evidencia<br><span style="font-size:11px">PDF, JPG, PNG</span></div>
             </div>
           </div>
-          <div class="cond-section" id="sec-noviable" style="grid-column:span 2">
-            <div class="field"><label class="fl">Motivo de No Viabilidad <span class="req cond">◆ Requerido si No viable</span></label><textarea rows="2" placeholder="Documentar el motivo contractual o normativo por el que no es viable la modificación..."></textarea></div>
-          </div>
         </div>
       </div>
     </div>
 
-    <div class="fpanel">
-      <div class="fpanel-head" onclick="togglePanel(this)">📨 S3 — Solicitar Información Adicional</div>
-      <div class="fpanel-body">
-        <div class="g2">
-          <div class="field"><label class="fl">Área Competente <span class="req">*</span></label>
-            <select id="area-09"><option>Seleccione...</option><option selected>Suscripción</option><option>Siniestros</option><option>Jurídica</option><option>Producto</option><option>SAC — Servicio al Cliente</option></select>
-            <span class="fhelp">Áreas habilitadas para atender la solicitud.</span>
-          </div>
-          <div class="field"><label class="fl">Usuario Responsable <span class="req">*</span></label>
-            <select id="usuario-09"><option>Seleccione...</option><option selected>Carlos Mario Ruiz — Analista de Suscripción</option><option>Diana Marcela Ortiz — Analista Senior</option><option>Felipe Torres — Analista de Producto</option></select>
-            <span class="fhelp">Solo usuarios autorizados para atender la solicitud.</span>
-          </div>
-          <div class="field span2"><label class="fl">Detalles de la Solicitud</label><textarea id="detalle-sol-09" rows="2" placeholder="Describa la información adicional requerida al responsable para verificar la viabilidad o ejecutar la modificación..."></textarea></div>
-        </div>
-        <div style="display:flex;justify-content:flex-end;margin-top:12px">
-          <button class="btn-primary" type="button" onclick="agregarSolicitud09()">📨 Enviar Solicitud</button>
-        </div>
-        <span class="fhelp">Al enviar, la solicitud se agrega al Historial de Solicitudes (S4).</span>
-      </div>
-    </div>
-
-    <div class="fpanel">
-      <div class="fpanel-head" onclick="togglePanel(this)">📜 S4 — Historial de Solicitudes</div>
-      <div class="fpanel-body">
-        <table class="data-table">
-          <thead><tr><th>Persona Asignada</th><th>Fecha de Asignación</th><th>Detalles de la Solicitud</th><th>¿Respondida?</th><th>Acción</th></tr></thead>
-          <tbody id="historial-sol-09-body">
-            <tr data-respondida="si" data-persona="Carlos Mario Ruiz — Analista de Suscripción">
-              <td>Carlos Mario Ruiz — Analista de Suscripción</td>
-              <td>2026-06-03 09:45</td>
-              <td>Validar si el cambio de beneficiario requiere reevaluación de las condiciones de la póliza</td>
-              <td><span class="chip chip-ok">Sí</span></td>
-              <td><button class="btn-link" type="button" onclick="verRespuestaSol09(this)">Ver respuesta</button></td>
-            </tr>
-          </tbody>
-        </table>
-        <span class="fhelp">Cada fila corresponde a una solicitud de información enviada. "Ver respuesta" muestra el análisis técnico, las acciones ejecutadas y los soportes internos.</span>
-      </div>
-    </div>
-
-    <div class="cond-section visible" id="sec-mod">
+    <div class="cond-section" id="sec-081-mod">
       <div class="fpanel">
-        <div class="fpanel-head" onclick="togglePanel(this)">⚙️ S5 — Ejecución y Evidencia de Modificación</div>
+        <div class="fpanel-head" onclick="togglePanel(this)">⚖️ S5 — Verificación de Viabilidad, Ejecución y Evidencia</div>
         <div class="fpanel-body">
+          <span class="fhelp" style="display:block;margin-bottom:10px">◆ Visible si Tipo de Requerimiento = Modificación.</span>
           <div class="alert alert-info"><span class="alert-icon">ℹ</span><div><strong>Criterio de expediente:</strong> Toda modificación ejecutada en sistemas operacionales debe quedar documentada en el expediente con: tipo de modificación, sistema afectado, usuario que ejecutó el cambio y fecha/hora.</div></div>
           <div class="g2">
-            <div class="field"><label class="fl">Sistema donde se Ejecutó <span class="req cond">◆ Requerido si Sí</span></label><input type="text" placeholder="Nombre del sistema operacional afectado"></div>
-            <div class="field span2"><label class="fl">Descripción del Cambio Ejecutado <span class="req cond">◆ Requerido si Sí</span></label><textarea rows="3" placeholder="Describir en detalle el cambio ejecutado en el sistema..."></textarea></div>
-            <div class="field span2"><label class="fl">Adjunto de Evidencia <span class="req cond">◆ Requerido si Sí</span></label>
-              <div class="file-zone">📎 Adjunte pantallazos o confirmaciones del cambio ejecutado<br><span style="font-size:11px">Evidencia obligatoria de la modificación</span></div>
+            <div class="field span2"><label class="fl">Condiciones Contractuales Verificadas <span class="req">*</span></label><textarea rows="3" placeholder="Verificar las condiciones del contrato que aplican a la modificación solicitada. Confirmar si es viable..."></textarea></div>
+            <div class="field"><label class="fl">¿Modificación Viable? <span class="req">*</span></label>
+              <div class="radio-group">
+                <label><input type="radio" name="viable081" value="si" checked onchange="updateViable081('si')"> Sí — Proceder con la modificación</label>
+                <label><input type="radio" name="viable081" value="no" onchange="updateViable081('no')"> No — Documentar motivo</label>
+              </div>
+            </div>
+            <div class="cond-section" id="sec-081-noviable" style="grid-column:span 2">
+              <div class="field"><label class="fl">Motivo de No Viabilidad <span class="req cond">◆ Requerido si No viable</span></label><textarea rows="2" placeholder="Documentar el motivo contractual o normativo por el que no es viable la modificación..."></textarea></div>
+            </div>
+            <div class="cond-section visible" id="sec-081-ejecucion" style="grid-column:span 2">
+              <div class="g2">
+                <div class="field span2"><label class="fl">Sistema donde se Ejecutó la Modificación <span class="req cond">◆ Requerido si Sí</span></label><input type="text" placeholder="Nombre del sistema operacional afectado"></div>
+                <div class="field span2"><label class="fl">Descripción del Cambio Ejecutado <span class="req cond">◆ Requerido si Sí</span></label><textarea rows="3" placeholder="Describir en detalle el cambio ejecutado en el sistema..."></textarea></div>
+                <div class="field span2"><label class="fl">Adjunto de Evidencia <span class="req cond">◆ Requerido si Sí</span></label>
+                  <div class="file-zone">📎 Adjunte pantallazos o confirmaciones del cambio ejecutado<br><span style="font-size:11px">Evidencia obligatoria de la modificación</span></div>
+                </div>
+              </div>
             </div>
           </div>
         </div>
       </div>
     </div>
 
+    <div class="alert alert-err"><span class="alert-icon">🔴</span><div><strong>RUL-081-05 — RESTRICCIÓN:</strong> La respuesta final debe partir de una plantilla corporativa aprobada del catálogo del BPM. No se permite texto libre. El botón <em>Enviar a Aprobación</em> permanecerá deshabilitado hasta seleccionar plantilla.</div></div>
+
+    <div class="fpanel">
+      <div class="fpanel-head" onclick="togglePanel(this)">📋 S6 — Selección de Plantilla</div>
+      <div class="fpanel-body">
+        <div class="g2">
+          <div class="field"><label class="fl">Plantilla Corporativa <span class="req">*</span></label>
+            <select onchange="updatePlantilla081(this)">
+              <option value="">Seleccione plantilla obligatoria...</option>
+              <option value="req">TPL-REQ — Plantilla Requerimiento</option>
+              <option value="dp">TPL-DP — Plantilla Derecho de Petición</option>
+              <option value="vd">TPL-VD — Plantilla Vulneración de Datos</option>
+              <option value="sug">TPL-SUG — Plantilla Sugerencia</option>
+              <option value="fel">TPL-FEL — Plantilla Felicitación</option>
+            </select>
+            <span class="fhelp">⚠️ Pendiente parametrización de plantillas por equipo de Comunicaciones/SAC.</span>
+          </div>
+          <div class="field"><label class="fl">Vista Previa de la Plantilla</label>
+            <div id="vista-plantilla-081" style="padding:10px;background:#f8fafc;border:1px solid var(--border);border-radius:6px;font-size:12px;color:var(--muted);min-height:60px">Seleccione una plantilla para ver su contenido base...</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="fpanel">
+      <div class="fpanel-head" onclick="togglePanel(this)">✍️ S7 — Redacción de Respuesta Final</div>
+      <div class="fpanel-body">
+        <div class="g2">
+          <div class="field span2">
+            <label class="fl">Respuesta Final Personalizada <span class="req">*</span></label>
+            <textarea id="respuesta-final-081" rows="8" placeholder="[Seleccione una plantilla primero para cargar el contenido base]&#10;&#10;Los campos variables se autocompletan con los datos del caso: {{nombreCliente}}, {{numeroCaso}}, {{fechaLimite}}, etc."></textarea>
+            <div style="display:flex;justify-content:space-between;margin-top:4px">
+              <span class="fhelp" id="chars-counter-081">Mínimo 100 caracteres</span>
+              <span class="fhelp" id="chars-count-081">0 caracteres</span>
+            </div>
+          </div>
+          <div class="field span2"><label class="fl">Comentario Adicional (solo uso interno)</label><textarea rows="2" placeholder="Notas internas — no van al cliente ni a la aprobación formal..."></textarea></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="fpanel">
+      <div class="fpanel-head" onclick="togglePanel(this)">📎 S8 — Adjuntos de Soporte para el Cliente</div>
+      <div class="fpanel-body">
+        <div class="file-zone">📎 Adjunte documentos que se enviarán al cliente junto con la respuesta<br><span style="font-size:11px">PDF, JPG, PNG · Máx 5 archivos, 5 MB c/u</span></div>
+      </div>
+    </div>
+
     <div class="actions">
+      <button class="btn-danger" type="button">✕ Cancelar</button>
       <button class="btn-secondary" type="button">💾 Guardar Borrador</button>
-      <button class="btn-secondary" type="button">✕ Cancelar</button>
-      <button class="btn-warn" type="button" id="btn-no-viable" style="display:none">✗ Registrar No Viabilidad →</button>
-      <button class="btn-primary" type="button">✔ Confirmar Modificación →</button>
+      <button class="btn-warn" type="button" id="btn-no-viable-081" style="display:none">✗ Registrar No Viabilidad →</button>
+      <button class="btn-primary" id="btn-enviar-aprobacion-081" type="button" disabled title="Seleccione plantilla y complete respuesta (mín 100 car.)">✔ Enviar a Aprobación →</button>
     </div>
   </div>
 </div>
@@ -1091,7 +990,7 @@ Fundamento: Ley 1755/2015 (Derecho de Petición) y condiciones particulares de l
   </div>
 </div>
 
-<!-- Modal · Ver respuesta (SCR-008 · Historial de Solicitudes) -->
+<!-- Modal · Ver respuesta (SCR-081 · Historial de Solicitudes) -->
 <div class="modal-overlay" id="modal-sol-overlay">
   <div class="modal-box">
     <div class="modal-head">
@@ -1122,36 +1021,6 @@ Fundamento: Ley 1755/2015 (Derecho de Petición) y condiciones particulares de l
   </div>
 </div>
 
-<!-- Modal · Ver respuesta (SCR-009 · Historial de Solicitudes) -->
-<div class="modal-overlay" id="modal-sol-overlay-09">
-  <div class="modal-box">
-    <div class="modal-head">
-      <h3>📄 Respuesta del responsable — <span id="modal-sol-persona-09">Responsable</span></h3>
-      <button class="modal-close" type="button" onclick="cerrarModalSol09()" title="Cerrar">✕</button>
-    </div>
-    <div class="modal-body">
-      <div class="field">
-        <label class="fl">Análisis Técnico</label>
-        <div style="padding:10px;background:#f8fafc;border:1px solid var(--border);border-radius:6px;font-size:12px;color:#374151;white-space:pre-wrap">Se revisaron las condiciones contractuales de la póliza y la normativa aplicable al cambio de beneficiario. Se confirmó que la modificación es viable y no altera el valor asegurado ni la prima vigente. Se validó la identidad del nuevo beneficiario y la documentación de respaldo aportada por el cliente.</div>
-      </div>
-      <div class="field" style="margin-top:12px">
-        <label class="fl">Acciones Ejecutadas</label>
-        <div style="padding:10px;background:#f8fafc;border:1px solid var(--border);border-radius:6px;font-size:12px;color:#374151;white-space:pre-wrap">1. Revisión de las cláusulas contractuales aplicables al cambio de beneficiario.
-2. Verificación normativa y de requisitos documentales.
-3. Validación de la identidad y documentación del nuevo beneficiario.
-4. Confirmación de viabilidad y consolidación del soporte técnico.</div>
-      </div>
-      <div class="field" style="margin-top:12px">
-        <label class="fl">Soportes Internos</label>
-        <div class="alert alert-info" style="margin-top:6px"><span class="alert-icon">📎</span><div><a class="btn-link" href="#" onclick="return false">⬇ Descargar Analisis_Tecnico_Soportes_Internos.pdf</a></div></div>
-        <span class="fhelp">Documentación interna de respaldo. No se envía al cliente.</span>
-      </div>
-    </div>
-    <div class="actions" style="padding:12px 18px">
-      <button class="btn-secondary" type="button" onclick="cerrarModalSol09()">Cerrar</button>
-    </div>
-  </div>
-</div>
 
 </main>
 
@@ -1197,6 +1066,7 @@ function applyPlantilla(sel,suffix){
 }
 
 function updatePlantilla06(sel){ applyPlantilla(sel,'-06'); }
+function updatePlantilla081(sel){ applyPlantilla(sel,'-081'); }
 function updatePlantilla10(sel){ applyPlantilla(sel,'-10'); }
 
 // Contador de caracteres reutilizable
@@ -1249,17 +1119,17 @@ function cerrarModalRespuesta(){
   document.getElementById('modal-resp-overlay').classList.remove('open');
 }
 
-// SCR-008 · Envía una solicitud de información adicional y la agrega al Historial de Solicitudes (S4).
-function agregarSolicitud08(){
-  var usuario=document.getElementById('usuario-08');
-  var det=document.getElementById('detalle-sol-08');
+// SCR-081 · Envía una solicitud de información adicional y la agrega al Historial de Solicitudes (S3).
+function agregarSolicitud081(){
+  var usuario=document.getElementById('usuario-081');
+  var det=document.getElementById('detalle-sol-081');
   if(!usuario || usuario.selectedIndex===0){
     alert('Seleccione un Usuario Responsable antes de enviar la solicitud.');
     return;
   }
   var persona=usuario.value;
   var detalles=(det && det.value.trim())?det.value.trim():'Sin detalles';
-  var tbody=document.getElementById('historial-sol-08-body');
+  var tbody=document.getElementById('historial-sol-081-body');
   var tr=document.createElement('tr');
   tr.setAttribute('data-respondida','no');
   tr.setAttribute('data-persona',persona);
@@ -1273,8 +1143,8 @@ function agregarSolicitud08(){
   alert('✓ Solicitud enviada y agregada al Historial de Solicitudes.\n\nResponsable: '+persona);
 }
 
-// SCR-008 · Abre el popup con análisis técnico, acciones ejecutadas y link de descarga de soportes internos.
-function verRespuestaSol08(btn){
+// SCR-081 · Abre el popup con análisis técnico, acciones ejecutadas y link de descarga de soportes internos.
+function verRespuestaSol081(btn){
   var tr=btn.closest('tr');
   var persona=tr?tr.getAttribute('data-persona'):'Responsable';
   document.getElementById('modal-sol-persona').textContent=persona;
@@ -1284,43 +1154,41 @@ function cerrarModalSol(){
   document.getElementById('modal-sol-overlay').classList.remove('open');
 }
 
-// SCR-009 · Envía una solicitud de información adicional y la agrega al Historial de Solicitudes (S4).
-function agregarSolicitud09(){
-  var usuario=document.getElementById('usuario-09');
-  var det=document.getElementById('detalle-sol-09');
-  if(!usuario || usuario.selectedIndex===0){
-    alert('Seleccione un Usuario Responsable antes de enviar la solicitud.');
-    return;
+// SCR-081 · RUL-081-02: el Tipo de Requerimiento decide qué sección se muestra (S4 o S5).
+var SUBTIPOS_081={
+  'informacion':'Solicitud de Información',
+  'modificacion':'Modificación',
+  'cancelacion':'Cancelación',
+  'otro':'Otro Requerimiento'
+};
+function updateTipoReq081(sel){
+  var esMod=sel.value==='modificacion';
+  document.getElementById('sec-081-info').classList.toggle('visible',!esMod);
+  document.getElementById('sec-081-mod').classList.toggle('visible',esMod);
+  var chip=document.getElementById('chip-subtipo-081');
+  if(chip) chip.textContent=SUBTIPOS_081[sel.value]||'—';
+  // El botón de no viabilidad solo tiene sentido en el subtipo Modificación.
+  if(!esMod){
+    var btn=document.getElementById('btn-no-viable-081');
+    if(btn) btn.style.display='none';
+  } else {
+    var r=document.querySelector('input[name="viable081"]:checked');
+    updateViable081(r?r.value:'si');
   }
-  var persona=usuario.value;
-  var detalles=(det && det.value.trim())?det.value.trim():'Sin detalles';
-  var tbody=document.getElementById('historial-sol-09-body');
-  var tr=document.createElement('tr');
-  tr.setAttribute('data-respondida','no');
-  tr.setAttribute('data-persona',persona);
-  tr.innerHTML='<td>'+persona+'</td>'+
-    '<td>(pendiente registro del sistema)</td>'+
-    '<td>'+detalles+'</td>'+
-    '<td><span class="chip chip-pend">Pendiente</span></td>'+
-    '<td><span class="fhelp">Sin respuesta aún</span></td>';
-  tbody.appendChild(tr);
-  if(det) det.value='';
-  alert('✓ Solicitud enviada y agregada al Historial de Solicitudes.\n\nResponsable: '+persona);
 }
 
-// SCR-009 · Abre el popup con análisis técnico, acciones ejecutadas y link de descarga de soportes internos.
-function verRespuestaSol09(btn){
-  var tr=btn.closest('tr');
-  var persona=tr?tr.getAttribute('data-persona'):'Responsable';
-  document.getElementById('modal-sol-persona-09').textContent=persona;
-  document.getElementById('modal-sol-overlay-09').classList.add('open');
-}
-function cerrarModalSol09(){
-  document.getElementById('modal-sol-overlay-09').classList.remove('open');
+// SCR-081 · RUL-081-03 / RUL-081-04: alterna motivo de no viabilidad vs. ejecución y evidencia.
+function updateViable081(v){
+  var viable=v==='si';
+  document.getElementById('sec-081-noviable').classList.toggle('visible',!viable);
+  document.getElementById('sec-081-ejecucion').classList.toggle('visible',viable);
+  var btn=document.getElementById('btn-no-viable-081');
+  if(btn) btn.style.display=viable?'none':'inline-flex';
 }
 
 document.addEventListener('DOMContentLoaded',function(){
   attachCharCounter('-06');
+  attachCharCounter('-081');
   attachCharCounter('-10');
   // Resaltar en el menú superior la pantalla activa al cargar (índice por defecto).
   var act=document.querySelector('.screen.active');
