@@ -1,5 +1,8 @@
 import { describe, it, expect } from 'vitest';
-import { extraerScriptRefs, extraerSubprocesos, descubrirArbol, resolverUuidsVigilados } from './descubrir.mjs';
+import {
+  extraerScriptRefs, extraerSubprocesos, descubrirArbol, resolverUuidsVigilados,
+  extraerDependenciasDeCodigo, extraerSlugsInvocadosPorFrontend, uuidsDesdeRegistro, cerrarDependencias,
+} from './descubrir.mjs';
 
 /** Fragmento de BPMN con la forma real que devuelve PM4. */
 const STR_BPMN_31 = `<?xml version="1.0"?>
@@ -118,5 +121,129 @@ describe('resolverUuidsVigilados', () => {
 
   it('tolera scriptsExtra ausente', () => {
     expect(resolverUuidsVigilados([69], undefined, LST_REMOTOS).uuids.size).toBe(1);
+  });
+});
+
+describe('extraerDependenciasDeCodigo', () => {
+  const dicPorUuid = new Map([
+    ['a26a713d-ea78-48b3-b829-5ddce63cfbd2', { id: 95, uuid: 'a26a713d-ea78-48b3-b829-5ddce63cfbd2', title: 'Dias habiles' }],
+  ]);
+  const dicPorId = new Map([[84, { id: 84, uuid: 'u-core', title: 'CORE SFC' }]]);
+  const dicIndices = { dicPorUuid, dicPorId };
+
+  it('detecta un uuid literal que corresponde a un script', () => {
+    const strCodigo = "const UTIL_UUID = 'a26a713d-ea78-48b3-b829-5ddce63cfbd2';";
+    expect([...extraerDependenciasDeCodigo(strCodigo, dicIndices)]).toEqual(['a26a713d-ea78-48b3-b829-5ddce63cfbd2']);
+  });
+
+  it('detecta una constante *SCRIPT_ID* y la traduce a uuid', () => {
+    expect([...extraerDependenciasDeCodigo('$SFC_CORE_SCRIPT_ID = 84;', dicIndices)]).toEqual(['u-core']);
+  });
+
+  it('IGNORA un uuid que no es de un script — asi se descartan los de coleccion', () => {
+    // FERIADOS_COLLECTION_UUID es un caso real: apunta a una coleccion, no a un script.
+    const strCodigo = "const FERIADOS_COLLECTION_UUID = 'a2421287-eefe-4ff6-88a8-7f7040a2d10e';";
+    expect([...extraerDependenciasDeCodigo(strCodigo, dicIndices)]).toEqual([]);
+  });
+
+  it('ignora una constante SCRIPT_ID que apunta a un id inexistente', () => {
+    expect([...extraerDependenciasDeCodigo('$OTRO_SCRIPT_ID = 9999;', dicIndices)]).toEqual([]);
+  });
+
+  it('tolera codigo vacio o nulo', () => {
+    expect([...extraerDependenciasDeCodigo('', dicIndices)]).toEqual([]);
+    expect([...extraerDependenciasDeCodigo(null, dicIndices)]).toEqual([]);
+  });
+});
+
+describe('extraerSlugsInvocadosPorFrontend', () => {
+  it('saca el slug de resolveScriptId', () => {
+    const strFuente = "export const X = resolveScriptId('similarCasesQuejas', 70);";
+    expect([...extraerSlugsInvocadosPorFrontend(strFuente)]).toEqual(['similarCasesQuejas']);
+  });
+
+  it('acepta comillas dobles y espacios', () => {
+    expect([...extraerSlugsInvocadosPorFrontend('resolveScriptId(  "otroSlug" , 1)')]).toEqual(['otroSlug']);
+  });
+
+  it('deduplica y saca varios de un mismo archivo', () => {
+    const strFuente = "resolveScriptId('a',1); resolveScriptId('b',2); resolveScriptId('a',1);";
+    expect([...extraerSlugsInvocadosPorFrontend(strFuente)].sort()).toEqual(['a', 'b']);
+  });
+
+  it('no confunde resolveCollectionId con resolveScriptId', () => {
+    expect([...extraerSlugsInvocadosPorFrontend("resolveCollectionId('depto', 14)")]).toEqual([]);
+  });
+});
+
+describe('uuidsDesdeRegistro', () => {
+  const objRegistro = { scripts: { similarCasesQuejas: { id: 70, uuid: 'u-70' } } };
+
+  it('traduce el slug a uuid', () => {
+    const objRes = uuidsDesdeRegistro(['similarCasesQuejas'], objRegistro);
+    expect([...objRes.uuids]).toEqual(['u-70']);
+    expect(objRes.sinRegistrar).toEqual([]);
+  });
+
+  it('reporta el slug que el frontend usa pero el registro no tiene', () => {
+    const objRes = uuidsDesdeRegistro(['noExiste'], objRegistro);
+    expect(objRes.uuids.size).toBe(0);
+    expect(objRes.sinRegistrar).toEqual(['noExiste']);
+  });
+
+  it('tolera un registro vacio', () => {
+    expect(uuidsDesdeRegistro(['x'], {}).sinRegistrar).toEqual(['x']);
+  });
+});
+
+describe('cerrarDependencias', () => {
+  // Los uuid tienen que ser uuid DE VERDAD: el detector busca el formato completo, asi que un
+  // identificador de fantasia tipo 'u-b' no se reconoce (y este test fallaria por el motivo
+  // equivocado, escondiendo si el cierre transitivo funciona o no).
+  const UUID_A = 'aaaaaaaa-1111-2222-3333-444444444444';
+  const UUID_B = 'bbbbbbbb-1111-2222-3333-444444444444';
+  const UUID_C = 'cccccccc-1111-2222-3333-444444444444';
+
+  /** A -> B -> C, para probar que el cierre es transitivo y no de un solo nivel. */
+  const dicPorUuid = new Map([
+    [UUID_A, { uuid: UUID_A, title: 'A', codigo: `const X = '${UUID_B}';` }],
+    [UUID_B, { uuid: UUID_B, title: 'B', codigo: `const Y = '${UUID_C}';` }],
+    [UUID_C, { uuid: UUID_C, title: 'C', codigo: 'sin dependencias' }],
+  ]);
+  const dicPorId = new Map();
+
+  it('sigue la cadena completa, no solo el primer nivel', () => {
+    const objRes = cerrarDependencias(new Set([UUID_A]), dicPorUuid, dicPorId);
+    expect([...objRes.uuids].sort()).toEqual([UUID_A, UUID_B, UUID_C]);
+  });
+
+  it('reporta quien invoca a cada agregado', () => {
+    const objRes = cerrarDependencias(new Set([UUID_A]), dicPorUuid, dicPorId);
+    expect(objRes.agregados).toEqual([
+      { uuid: UUID_B, desde: 'A' },
+      { uuid: UUID_C, desde: 'B' },
+    ]);
+  });
+
+  it('lee `code` ademas de `codigo` — la forma cruda de la API', () => {
+    // Este test existe por un bug real: la CLI normaliza a `codigo` y el descubrimiento leia
+    // `code`, asi que no detectaba NINGUNA dependencia y no daba error.
+    const dicCrudo = new Map([
+      [UUID_A, { uuid: UUID_A, title: 'X', code: `const D = '${UUID_B}';` }],
+      [UUID_B, { uuid: UUID_B, title: 'Y', code: '' }],
+    ]);
+    expect([...cerrarDependencias(new Set([UUID_A]), dicCrudo, dicPorId).uuids].sort()).toEqual([UUID_A, UUID_B]);
+  });
+
+  it('no cuelga ante una dependencia circular', () => {
+    const dicCiclo = new Map([
+      [UUID_A, { uuid: UUID_A, title: '1', codigo: `'${UUID_B}'` }],
+      [UUID_B, { uuid: UUID_B, title: '2', codigo: `'${UUID_A}'` }],
+    ]);
+    expect([...cerrarDependencias(new Set([UUID_A]), dicCiclo, dicPorId).uuids].sort()).toEqual([UUID_A, UUID_B]);
+  });
+
+  it('ignora un uuid del que no tenemos el script', () => {
+    expect([...cerrarDependencias(new Set(['u-fantasma']), dicPorUuid, dicPorId).uuids]).toEqual(['u-fantasma']);
   });
 });

@@ -123,24 +123,49 @@ En la instancia conviven varios proyectos (FAST-FLOW, CUW, pruebas). Solo se vig
 declarados en **`pm4-app/scripts/pm4-scripts/pm4-scripts.config.json`** — hoy el 31, que son 13
 scripts de los 62 de la instancia.
 
-**Los scripts de cada proceso se descubren de su BPMN**, siguiendo también los `callActivity` hacia
-sus subprocesos. Así, agregar un `scriptTask` en PM4 no obliga a tocar configuración: la próxima
-captura lo incluye solo.
+Un script puede pertenecer a un proceso por **tres vías distintas**, y las tres se resuelven solas:
 
-Lo único que hay que declarar a mano es lo que **ningún BPMN referencia**, en `scriptsExtra`:
+| Vía | Cómo se descubre | Ejemplo en el proceso 31 |
+|---|---|---|
+| **BPMN** | Los `scriptTask` del proceso y de sus subprocesos, siguiendo los `callActivity` | los 10 del diagrama |
+| **Frontend** | Las pantallas declaradas en `pantallas` se escanean buscando `resolveScriptId('slug')`, y el slug se traduce a uuid con `pm4-registry.json` | `COL_QD_Check_Similitud`, que invoca SCR-000 |
+| **Código** | Lo que un script vigilado invoca en runtime: un uuid literal o una constante `*SCRIPT_ID*`. Se cierra **transitivamente** (si A llama a B y B a C, entra C) | el CORE SFC y la utilidad de días hábiles |
 
-| Caso | Ejemplo en el proceso 31 |
-|---|---|
-| Un script que otro invoca en runtime | el CORE SFC (84) y la utilidad de días hábiles (95) |
-| Un script que dispara el frontend como watcher | `COL_QD_Check_Similitud` (70), desde SCR-000 |
+Por eso `scriptsExtra` está **vacío** en el proceso 31: las tres relaciones se infieren. Queda como
+escape solo para lo que no se puede deducir — un id armado en runtime o que venga de una variable
+de entorno.
 
-Detectarlos automáticamente exigiría analizar el PHP y el TSX — frágil, y con falsos negativos
-justo en los scripts más críticos. Por eso se declaran, cada uno con su motivo.
+La inferencia es **conservadora**: un identificador solo cuenta si resuelve a un script que existe
+en la instancia. Eso descarta los falsos positivos sin adivinar — un `FERIADOS_COLLECTION_UUID`
+apunta a una colección, no resuelve a script, y se ignora solo.
+
+Y cada captura dice de dónde salió cada uno:
+
+```
+[ALCANCE] proceso-31 — proceso 31 + 5 subproceso(s): 13 script(s) vigilado(s).
+  ↳ [DEPENDENCIA] COL_UTIL_Dias_Habiles — lo invoca "COL_QD_Check_SLA_Expire".
+  ↳ [DEPENDENCIA] COL - QD - Core SFC — lo invoca "COL_QD_SS_Sla_Prolongation".
+  ↳ [FRONTEND] 1 script(s) invocado(s) desde las pantallas del proceso.
+```
 
 ### Vigilar un proceso nuevo
 
-Agregá una entrada a `procesos` en el config y corré `npm run pm4:capture -- --all`. Sus scripts
-salen del BPMN; solo hace falta declarar los `scriptsExtra` si los tiene.
+Agregá una entrada a `procesos` en el config, con la carpeta de sus pantallas si las tiene:
+
+```json
+{
+  "id": 36,
+  "carpeta": "proceso-36",
+  "nombre": "COL - Otras Solicitudes",
+  "pantallas": ["frontend/src/screens/atencion-cliente/otras-solicitudes"],
+  "scriptsExtra": []
+}
+```
+
+Y `npm run pm4:capture -- --all`. El resto se descubre.
+
+El campo `pantallas` es lo que atribuye cada watcher a **su** proceso: sin él, las llamadas del
+frontend de FAST-FLOW y las de Quejas Directas se mezclarían.
 
 Si el hook dispara sobre un script **fuera de alcance**, no bloquea: avisa que se sobrescribe sin
 registrar historial y sigue.
@@ -165,6 +190,12 @@ poder abrirlos y grepearlos como archivos normales. Esa carpeta:
 
 El respaldo real y versionado sigue siendo la rama `pm4-scripts-historial` — conviene pushearla al
 remoto como cualquier otra.
+
+> ⚠️ **Nunca hagas `git checkout pm4-scripts-historial`.** Es una rama huérfana: su árbol contiene
+> solo los `.php`, así que git **vacía el working tree** de todo el resto del proyecto. No se pierde
+> nada commiteado —se vuelve con `git switch <tu-rama>`— pero ver el repo vacío asusta, y lo que
+> tuvieras sin commitear sí se pierde. Para leer los scripts está el espejo `/pm4-scripts/`; para
+> ver el historial, `git log` y `git show`, que no requieren checkout.
 
 ## Detalles que importan
 

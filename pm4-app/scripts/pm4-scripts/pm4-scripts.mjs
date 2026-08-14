@@ -20,13 +20,19 @@
 //
 // Exit codes: 0 OK · 2 uso inválido · 4 red/auth PM4 · 5 error de git.
 
-import { readFileSync } from 'node:fs';
+import { readFileSync, readdirSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
 import { dirname, join } from 'node:path';
 import { normalizar } from './core/canonicalizar.mjs';
 import { compararInstancia, detectarCambiosDeId, slugDesdeTitulo } from './core/estado.mjs';
 import { commitearCaptura, leerIndice, validarIdentidadGit } from './core/historial.mjs';
-import { descubrirArbol, resolverUuidsVigilados } from './core/descubrir.mjs';
+import {
+  descubrirArbol,
+  resolverUuidsVigilados,
+  extraerSlugsInvocadosPorFrontend,
+  uuidsDesdeRegistro,
+  cerrarDependencias,
+} from './core/descubrir.mjs';
 import { escribirEspejo } from './core/espejo.mjs';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
@@ -148,6 +154,49 @@ function leerConfig() {
   }
 }
 
+/** pm4-registry.json, que traduce el slug de negocio que usa el frontend a uuid. */
+function leerRegistro() {
+  try {
+    return JSON.parse(readFileSync(join(__dirname, '..', '..', 'frontend', 'src', 'config', 'pm4-registry.json'), 'utf8'));
+  } catch {
+    return { scripts: {} };
+  }
+}
+
+/**
+ * Slugs que invocan las pantallas declaradas para un proceso.
+ *
+ * Recorre las carpetas de `pantallas` buscando `resolveScriptId('slug', …)`. El filtro por carpeta
+ * es lo que permite atribuir cada llamada a SU proceso: las pantallas de Quejas Directas invocan
+ * `similarCasesQuejas`, y las de FAST-FLOW invocan las suyas, sin mezclarse.
+ */
+function slugsDePantallas(lstDirsRelativos) {
+  const setSlugs = new Set();
+
+  for (const strDirRel of lstDirsRelativos ?? []) {
+    const strDir = join(__dirname, '..', '..', strDirRel);
+    let lstEntradas;
+    try {
+      lstEntradas = readdirSync(strDir, { recursive: true, withFileTypes: true });
+    } catch {
+      // Una carpeta mal declarada no debe tumbar la captura; se avisa aparte.
+      continue;
+    }
+    for (const objEntrada of lstEntradas) {
+      if (!objEntrada.isFile() || !/\.tsx?$/.test(objEntrada.name)) continue;
+      if (objEntrada.name.includes('.test.')) continue;
+      const strRuta = join(objEntrada.parentPath ?? objEntrada.path ?? strDir, objEntrada.name);
+      try {
+        for (const strSlug of extraerSlugsInvocadosPorFrontend(readFileSync(strRuta, 'utf8'))) {
+          setSlugs.add(strSlug);
+        }
+      } catch { /* archivo ilegible: se omite */ }
+    }
+  }
+
+  return setSlugs;
+}
+
 /**
  * Resuelve qué scripts se vigilan y en qué carpeta va cada uno.
  *
@@ -160,16 +209,43 @@ async function resolverAlcance(lstRemotos) {
   const dicCarpetaPorUuid = new Map();
   const lstAvisos = [];
 
+  const dicPorUuid = new Map(lstRemotos.map((objScript) => [objScript.uuid, objScript]));
+  const dicPorId = new Map(lstRemotos.map((objScript) => [objScript.id, objScript]));
+  const objRegistro = leerRegistro();
+
   for (const objProceso of leerConfig()) {
+    // Fuente 1 — el BPMN del proceso y sus subprocesos.
     const objArbol = await descubrirArbol(objProceso.id, pm4GetBpmn);
     const objRes = resolverUuidsVigilados(objArbol.scriptIds, objProceso.scriptsExtra, lstRemotos);
+    const setUuids = new Set(objRes.uuids);
 
-    for (const strUuid of objRes.uuids) dicCarpetaPorUuid.set(strUuid, objProceso.carpeta);
+    // Fuente 2 — lo que invocan las pantallas de este repo, traducido con pm4-registry.json.
+    const setSlugs = slugsDePantallas(objProceso.pantallas);
+    const objFront = uuidsDesdeRegistro(setSlugs, objRegistro);
+    for (const strUuid of objFront.uuids) setUuids.add(strUuid);
+
+    // Fuente 3 — dependencias dentro del código, cerradas transitivamente.
+    const objCierre = cerrarDependencias(setUuids, dicPorUuid, dicPorId);
+
+    for (const strUuid of objCierre.uuids) dicCarpetaPorUuid.set(strUuid, objProceso.carpeta);
 
     lstAvisos.push(
       `[ALCANCE] ${objProceso.carpeta} — proceso ${objProceso.id} + ${objArbol.procesos.length - 1} subproceso(s): ` +
-      `${objRes.uuids.size} script(s) vigilado(s).`,
+      `${objCierre.uuids.size} script(s) vigilado(s).`,
     );
+    for (const objAgregado of objCierre.agregados) {
+      const objScript = dicPorUuid.get(objAgregado.uuid);
+      lstAvisos.push(`  ↳ [DEPENDENCIA] ${objScript?.title ?? objAgregado.uuid} — lo invoca "${objAgregado.desde}".`);
+    }
+    if (objFront.uuids.size > 0) {
+      lstAvisos.push(`  ↳ [FRONTEND] ${objFront.uuids.size} script(s) invocado(s) desde las pantallas del proceso.`);
+    }
+    if (objFront.sinRegistrar.length > 0) {
+      lstAvisos.push(
+        `  ↳ [SIN REGISTRAR] las pantallas invocan slugs que no están en pm4-registry.json: ` +
+        `${objFront.sinRegistrar.join(', ')}.`,
+      );
+    }
     if (objRes.noResueltos.length > 0) {
       lstAvisos.push(
         `[SIN RESOLVER] el BPMN de ${objProceso.carpeta} referencia ids que ya no existen en la ` +

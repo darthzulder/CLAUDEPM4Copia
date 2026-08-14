@@ -425,9 +425,13 @@ Hermano de esta sección: ambas tratan de cómo se referencia y se mantiene lo q
 - **Trabajo en la UI de PM4:** `npm run pm4:capture -- --all`. Es el único paso manual — la UI no
   pasa por ninguna herramienta que un hook pueda interceptar.
 - **Alcance por proceso, no toda la instancia:** solo se vigilan los procesos declarados en
-  `scripts/pm4-scripts/pm4-scripts.config.json` (hoy el 31 → 13 scripts de los 62 de la instancia).
-  Los scripts de cada proceso se descubren de su BPMN; en `scriptsExtra` se declaran solo los que
-  ningún BPMN referencia (los que otro script invoca en runtime, y los watchers del frontend).
+  `scripts/pm4-scripts/pm4-scripts.config.json` (hoy el 31 → 13 scripts). Los scripts de cada
+  proceso se descubren por tres vías, todas automáticas: su **BPMN** (y el de sus subprocesos), las
+  **pantallas** declaradas del frontend (`resolveScriptId` → `pm4-registry.json`), y las
+  **dependencias en el código** de los scripts vigilados, cerradas transitivamente. `scriptsExtra`
+  quedó como escape para lo que no se puede inferir, y hoy está vacío.
+- **Nunca hacer checkout de `pm4-scripts-historial`**: es huérfana y vacía el working tree. Se
+  consulta con `git log`/`git show`, o leyendo el espejo `/pm4-scripts/`.
 - Los `.php` capturados viven en la rama huérfana `pm4-scripts-historial`, nunca en `dev`. Son
   registro, no fuente: editarlos no cambia nada en PM4. La rama no se mergea ni se borra.
   La copia navegable de `/pm4-scripts/` (raíz del repo) se **genera** en cada captura y está
