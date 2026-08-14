@@ -13,6 +13,8 @@
  * `interceptorPm4Token`, registrado una vez en `app.config.ts`.
  */
 import { HttpInterceptorFn } from '@angular/common/http';
+import { inject } from '@angular/core';
+import { Pm4ContextService } from '../core/pm4-context.service';
 
 /** Prefijo del proxy del BFF. Toda URL de PM4 se arma con `urlApi()`, nunca a mano. */
 export const STR_BASE_API = '/api';
@@ -38,10 +40,21 @@ export function urlApi(in_strRuta: string): string {
  *
  * Devuelve `''` (no `null`) cuando no hay ninguno, para que el interceptor pueda decidir con
  * un simple truthy check y no inyectar un header vacío.
+ *
+ * **Delega en `Pm4ContextService`, no reimplementa la resolución.** Cuando este archivo se
+ * escribió (Fase 1) el servicio no existía todavía y la función leía **solo** la query string,
+ * así que el fallback de entorno que este mismo comentario describía no ocurría: el docstring
+ * documentaba un contrato que el código no cumplía.
+ *
+ * El servicio entra **por parámetro**, no con un `new` interno ni con `inject()` acá: un
+ * `HttpInterceptorFn` corre en contexto de inyección, así que el interceptor lo obtiene con
+ * `inject()` y lo pasa. Con un `new`, el servicio no resolvería su token `PM4_ENV_FALLBACKS` (usaría
+ * el `factory` que lee el archivo generado) y un spec no tendría forma de sustituir el entorno sin
+ * manosear el prototipo — el builder de Angular 21 prohíbe `vi.mock` sobre imports relativos, así que
+ * esa era la única alternativa. Recibirlo por parámetro deja la función testeable sin trucos.
  */
-export function resolverToken(): string {
-  const objParams = new URLSearchParams(window.location.search);
-  return objParams.get('token') ?? '';
+export function resolverToken(in_objCtx: Pm4ContextService): string {
+  return in_objCtx.token();
 }
 
 /**
@@ -56,7 +69,10 @@ export function resolverToken(): string {
 export const interceptorPm4Token: HttpInterceptorFn = (in_objReq, in_fnNext) => {
   if (!in_objReq.url.startsWith(`${STR_BASE_API}/`)) return in_fnNext(in_objReq);
 
-  const strToken = resolverToken();
+  // El `inject()` va DESPUÉS del filtro por prefijo a propósito: un interceptor corre en contexto de
+  // inyección, así que esto es válido, pero pedir el servicio solo cuando la petición es del BFF
+  // evita trabajo en las que no lo son.
+  const strToken = resolverToken(inject(Pm4ContextService));
   if (!strToken) return in_fnNext(in_objReq);
 
   return in_fnNext(

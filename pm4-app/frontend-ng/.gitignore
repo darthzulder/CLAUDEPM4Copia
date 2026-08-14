@@ -8,3 +8,7 @@
 # Salida de tsc --noEmit / los proyectos de tsconfig
 /out-tsc
 /tmp
+
+# Fallbacks de entorno generados desde `pm4-app/.env` por scripts/gen-env-define.mjs.
+# Se regenera en cada build/dev/test y PUEDE CONTENER UN TOKEN PM4 de desarrollo — no commitear.
+/src/env.generated.ts

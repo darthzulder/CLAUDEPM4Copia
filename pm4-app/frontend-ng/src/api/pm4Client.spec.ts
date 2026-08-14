@@ -16,8 +16,25 @@ import {
   HttpTestingController,
   provideHttpClientTesting,
 } from '@angular/common/http/testing';
-
+import { PM4_ENV_FALLBACKS, Pm4ContextService } from '../core/pm4-context.service';
 import { interceptorPm4Token, resolverToken, urlApi, STR_BASE_API } from './pm4Client';
+
+/**
+ * El entorno se fija vacío por DI, y **no** es redundante con que hoy salga vacío igual.
+ *
+ * `resolverToken()` delega en `Pm4ContextService`, que cae a los fallbacks de `PM4_ENV_FALLBACKS` —
+ * cuyo default lee `src/env.generated.ts`, un archivo generado desde `pm4-app/.env`. En este árbol
+ * sale vacío (no hay `.env`, está gitignoreado), así que los casos de "no hay token" pasarían solos;
+ * **en la máquina de un dev con `VITE_PM4_TOKEN` cargado se pondrían rojos**, por estado local ajeno
+ * al código. Proveerlo vacío hace que estos tests dependan solo de la query string, que es lo que
+ * dicen probar.
+ *
+ * (`vi.mock('../env.generated')` sería la vía obvia y el builder de Angular 21 la **prohíbe** para
+ * imports relativos: obliga a `TestBed`, que es justamente lo que se usa acá. El fallback de entorno
+ * en sí se cubre en `core/pm4-context.service.spec.ts`, que es su dueño.)
+ */
+const OBJ_ENV_VACIO = { token: '', taskId: '', caseId: '' } as const;
+const LST_PROVIDERS_ENV = [{ provide: PM4_ENV_FALLBACKS, useValue: OBJ_ENV_VACIO }];
 
 /**
  * Reemplaza el query string del `window.location` de jsdom.
@@ -45,18 +62,44 @@ describe('urlApi', () => {
 });
 
 describe('resolverToken', () => {
+  let objCtx: Pm4ContextService;
+
+  beforeEach(() => {
+    TestBed.configureTestingModule({ providers: LST_PROVIDERS_ENV });
+    objCtx = TestBed.inject(Pm4ContextService);
+  });
+
   afterEach(() => fijarQueryString(''));
 
   it('devuelve el token del query string del iframe', () => {
     fijarQueryString('?token=eyJabc&task_id=123');
-    expect(resolverToken()).toBe('eyJabc');
+    expect(resolverToken(objCtx)).toBe('eyJabc');
   });
 
-  it('devuelve cadena vacía —no null— cuando no hay token en la URL', () => {
+  it('devuelve cadena vacía —no null— cuando no hay token en la URL ni en el entorno', () => {
     // El interceptor decide con un truthy check; un `null` acá lo obligaría a un chequeo
     // distinto y un `undefined` terminaría como header literal "undefined".
     fijarQueryString('?task_id=123');
-    expect(resolverToken()).toBe('');
+    expect(resolverToken(objCtx)).toBe('');
+  });
+
+  it('delega en Pm4ContextService: hereda su fallback de entorno', () => {
+    // Cuando este archivo se escribió (Fase 1) `resolverToken()` leía SOLO la query string, aunque su
+    // comentario ya prometía el fallback de entorno — un contrato documentado que el código no
+    // cumplía. Ahora delega de verdad, y esto lo asevera: sin token en la URL, sale el del entorno
+    // que provee el TestBed. Es el único caso del archivo que necesita un entorno NO vacío, así que
+    // arma su propio contexto en vez de usar el de arriba.
+    fijarQueryString('');
+    TestBed.resetTestingModule();
+    TestBed.configureTestingModule({
+      providers: [
+        {
+          provide: PM4_ENV_FALLBACKS,
+          useValue: { token: 'token-de-entorno', taskId: '', caseId: '' },
+        },
+      ],
+    });
+    expect(resolverToken(TestBed.inject(Pm4ContextService))).toBe('token-de-entorno');
   });
 });
 
@@ -69,6 +112,7 @@ describe('interceptorPm4Token', () => {
       providers: [
         provideHttpClient(withInterceptors([interceptorPm4Token])),
         provideHttpClientTesting(),
+        ...LST_PROVIDERS_ENV,
       ],
     });
     objHttp = TestBed.inject(HttpClient);

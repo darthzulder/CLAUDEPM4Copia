@@ -4,14 +4,15 @@
   "private": true,
   "scripts": {
     "ng": "ng",
-    "dev": "ng serve",
-    "start": "ng serve",
-    "build": "ng build",
-    "watch": "ng build --watch --configuration development",
-    "lint": "eslint src --max-warnings=0 && tsc -p tsconfig.app.json --noEmit",
-    "test": "cross-env TZ=America/Bogota ng test",
-    "test:watch": "cross-env TZ=America/Bogota ng test --watch",
-    "coverage": "cross-env TZ=America/Bogota ng test --coverage"
+    "dev": "node scripts/gen-env-define.mjs && ng serve",
+    "start": "node scripts/gen-env-define.mjs && ng serve",
+    "build": "node scripts/gen-env-define.mjs && ng build",
+    "watch": "node scripts/gen-env-define.mjs && ng build --watch --configuration development",
+    "lint": "node scripts/gen-env-define.mjs && eslint src --max-warnings=0 && tsc -p tsconfig.app.json --noEmit",
+    "test": "node scripts/gen-env-define.mjs && cross-env TZ=America/Bogota ng test",
+    "test:watch": "node scripts/gen-env-define.mjs && cross-env TZ=America/Bogota ng test --watch",
+    "coverage": "node scripts/gen-env-define.mjs && cross-env TZ=America/Bogota ng test --coverage",
+    "env:gen": "node scripts/gen-env-define.mjs"
   },
   "dependencies": {
     "@angular/common": "21.2.20",
