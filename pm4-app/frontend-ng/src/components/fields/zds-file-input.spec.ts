@@ -51,7 +51,9 @@ import { ZdsFileInput } from './zds-file-input';
 /** Doble del `<z-file-input>` real: solo lo que el wrapper le toca. */
 interface ElementoFalso extends Partial<HTMLElement> {
   _fileName: string | null;
-  reset: () => void;
+  // Tipado como el spy que realmente es (y no como `() => void`), para que un `drenarAsincronia` pueda
+  // esperar por `reset.mock.calls.length` en vez de por un número fijo de vueltas.
+  reset: ReturnType<typeof vi.fn>;
 }
 
 function elementoFalso(in_strNombre: string | null): ElementoFalso {
@@ -89,13 +91,45 @@ function blob(in_strContenido: string, in_strTipo = 'application/pdf'): Blob {
  * de que el fixture se destruyó. Los de **rechazo** pasaban igual, porque cortan con `return` antes
  * del primer `await`: pasaban por el motivo equivocado.
  *
- * Dos macrotasks: uno para el `FileReader` del archivo entrante y otro para el de cada archivo ya
- * registrado que el bucle de duplicados hashea.
+ * ── Por qué espera por CONDICIÓN y no un número fijo de vueltas ───────────────────────────────
+ * Esta función drenaba 4 vueltas fijas, contadas como "un macrotask para el hash del archivo
+ * entrante y otro para el de cada archivo ya registrado". Esa cuenta vale para un registro con UN
+ * archivo, y es un **presupuesto**, no una condición: si el handler necesita una vuelta más, el test
+ * asevera sobre un estado que todavía no llegó.
+ *
+ * Y falla de la peor manera posible — **de forma intermitente**. El caso del duplicado es el que más
+ * ticks necesita (`arrayBuffer()` + `crypto.subtle.digest()` por CADA archivo comparado, en cadena),
+ * así que es el primero en quedarse corto cuando el pool de workers de Vitest está bajo contención.
+ * Se lo vio caer una vez en la suite completa (`expected '' to contain 'ya fue adjuntado'`: el
+ * mensaje no había llegado) y pasar aislado y en las 4 corridas completas siguientes.
+ *
+ * Verificado bajando el tope a 1 vuelta: caen 6 de los 15 tests, entre ellos el del duplicado. O sea
+ * que media suite dependía de que el presupuesto alcanzara, no de que el trabajo hubiera terminado.
+ *
+ * Así que ahora espera a que el handler **haya producido un efecto observable**, con el tope solo como
+ * red de seguridad. Cada llamador pasa la condición que el propio test asevera después; los que
+ * aseveran una AUSENCIA no pasan ninguna (ver el comentario en ese caso).
+ *
+ * **El margen, medido y no estimado:** barriendo el tope, el peor caso pasa con **3** vueltas (con 2
+ * fallan 2 tests, con 3 pasan los 15). El tope quedó en **40**, o sea 13× el trabajo real. Antes eran
+ * 4 vueltas para un trabajo de 3: margen de 1.33×, y de ahí la intermitencia. Con el trabajo ya hecho
+ * la función vuelve en la primera vuelta, así que el tope alto no encarece nada.
+ *
+ * Ojo con un detalle que costó un falso rojo: `objAceptado` del host arranca en **`null`**, no en
+ * `undefined`. Una condición `!== undefined` es verdadera desde la vuelta cero, sale sin esperar nada
+ * y el test falla comparando contra el `Blob` sin reconstruir. La condición correcta es `!== null`.
  */
-async function drenarAsincronia(in_objFixture: ComponentFixture<unknown>): Promise<void> {
-  for (let intVuelta = 0; intVuelta < 4; intVuelta += 1) {
+async function drenarAsincronia(
+  in_objFixture: ComponentFixture<unknown>,
+  in_fnListo?: () => boolean,
+): Promise<void> {
+  // El tope existe para que un handler que nunca resuelve falle por la aserción del test (con su
+  // mensaje) en vez de colgar la suite hasta el `testTimeout`.
+  const INT_TOPE_VUELTAS = 40;
+  for (let intVuelta = 0; intVuelta < INT_TOPE_VUELTAS; intVuelta += 1) {
     await new Promise((in_fnResolver) => setTimeout(in_fnResolver, 0));
     await in_objFixture.whenStable();
+    if (in_fnListo?.()) return;
   }
 }
 
@@ -174,7 +208,7 @@ describe('ZdsFileInput', () => {
       // archivo; si no se reconstruye, `FormData` lo sube como "blob" y PM4 no puede resolver la
       // extensión. Este test se pone rojo si alguien saca el `new File([...], strNombre, ...)`.
       hijo(objFixture)._onChange(eventoCambio(blob('CONTENIDO-PDF'), elementoFalso('cedula.pdf')));
-      await drenarAsincronia(objFixture);
+      await drenarAsincronia(objFixture, () => objRegistro.obtener('qd_strSoporte') !== undefined);
 
       const objArchivo = objRegistro.obtener('qd_strSoporte');
       expect(objArchivo).toBeInstanceOf(File);
@@ -186,7 +220,7 @@ describe('ZdsFileInput', () => {
 
     it('escribe el NOMBRE en el control (no el binario) y avisa por aceptado', async () => {
       hijo(objFixture)._onChange(eventoCambio(blob('X'), elementoFalso('anexo.pdf')));
-      await drenarAsincronia(objFixture);
+      await drenarAsincronia(objFixture, () => objHost.objAceptado !== null);
 
       expect(objControl.value).toBe('anexo.pdf');
       expect(objHost.objAceptado?.name).toBe('anexo.pdf');
@@ -196,7 +230,7 @@ describe('ZdsFileInput', () => {
   describe('rechazos', () => {
     it('rechaza una extensión no permitida y NO la registra', async () => {
       hijo(objFixture)._onChange(eventoCambio(blob('X'), elementoFalso('virus.exe')));
-      await drenarAsincronia(objFixture);
+      await drenarAsincronia(objFixture, () => objHost.strRechazo !== '');
 
       expect(objRegistro.obtener('qd_strSoporte')).toBeUndefined();
       expect(objControl.value).toBe('');
@@ -213,7 +247,7 @@ describe('ZdsFileInput', () => {
       // se equivoca en el factor 1024.
       const objGrande = new Blob(['a'.repeat(1024 * 1024 + 1)], { type: 'application/pdf' });
       hijo(objFixture)._onChange(eventoCambio(objGrande, elementoFalso('grande.pdf')));
-      await drenarAsincronia(objFixture);
+      await drenarAsincronia(objFixture, () => objHost.strRechazo !== '');
 
       expect(objRegistro.obtener('qd_strSoporte')).toBeUndefined();
       expect(objHost.strRechazo).toContain('1 MB');
@@ -225,7 +259,7 @@ describe('ZdsFileInput', () => {
 
       const objJusto = new Blob(['a'.repeat(1024 * 1024)], { type: 'application/pdf' });
       hijo(objFixture)._onChange(eventoCambio(objJusto, elementoFalso('justo.pdf')));
-      await drenarAsincronia(objFixture);
+      await drenarAsincronia(objFixture, () => objRegistro.obtener('qd_strSoporte') !== undefined);
 
       expect(objRegistro.obtener('qd_strSoporte')).toBeDefined();
     });
@@ -235,8 +269,10 @@ describe('ZdsFileInput', () => {
       // dejaría pasar este caso y el error saldría recién en PM4.
       objRegistro.registrar('qd_strOtroDoc', new File(['MISMO-BINARIO'], 'original.pdf'));
 
+      // Es el caso que más ticks necesita de todo el archivo: hashea el entrante Y el ya registrado,
+      // en cadena. Por eso fue el primero en caerse cuando el drenaje era de 4 vueltas fijas.
       hijo(objFixture)._onChange(eventoCambio(blob('MISMO-BINARIO'), elementoFalso('copia.pdf')));
-      await drenarAsincronia(objFixture);
+      await drenarAsincronia(objFixture, () => objHost.strRechazo !== '');
 
       expect(objRegistro.obtener('qd_strSoporte')).toBeUndefined();
       expect(objHost.strRechazo).toContain('ya fue adjuntado');
@@ -245,8 +281,10 @@ describe('ZdsFileInput', () => {
     it('reemplazar el archivo del propio campo NO se reporta como duplicado', async () => {
       objRegistro.registrar('qd_strSoporte', new File(['MISMO-BINARIO'], 'cedula.pdf'));
 
+      // Acá se espera que el archivo del propio slot quede REEMPLAZADO por el entrante. Es el mismo
+      // trabajo de hash que el caso anterior (dos hashes), pero termina en aceptación, no en rechazo.
       hijo(objFixture)._onChange(eventoCambio(blob('MISMO-BINARIO'), elementoFalso('cedula.pdf')));
-      await drenarAsincronia(objFixture);
+      await drenarAsincronia(objFixture, () => objHost.objAceptado !== null);
 
       expect(objRegistro.obtener('qd_strSoporte')?.name).toBe('cedula.pdf');
       expect(objHost.strRechazo).toBe('');
@@ -257,7 +295,7 @@ describe('ZdsFileInput', () => {
       // `reset()` público, que hace lo mismo desde adentro y deja que Lit re-renderice.
       const objElemento = elementoFalso('virus.exe');
       hijo(objFixture)._onChange(eventoCambio(blob('X'), objElemento));
-      await drenarAsincronia(objFixture);
+      await drenarAsincronia(objFixture, () => objElemento.reset.mock.calls.length > 0);
 
       expect(objElemento.reset).toHaveBeenCalledOnce();
     });
@@ -266,7 +304,7 @@ describe('ZdsFileInput', () => {
       // `setErrors` reemplaza en vez de componer, así que si el wrapper lo usara borraría el
       // `required` que declaró la pantalla. El aviso sale por `output` justamente por esto.
       hijo(objFixture)._onChange(eventoCambio(blob('X'), elementoFalso('virus.exe')));
-      await drenarAsincronia(objFixture);
+      await drenarAsincronia(objFixture, () => objHost.strRechazo !== '');
 
       expect(objControl.errors).toEqual({ required: true });
       expect(objHost.strRechazo).not.toBe('');
@@ -276,13 +314,13 @@ describe('ZdsFileInput', () => {
   describe('limpieza', () => {
     it('un change con detail null saca el archivo del registro y vacía el control', async () => {
       hijo(objFixture)._onChange(eventoCambio(blob('X'), elementoFalso('anexo.pdf')));
-      await drenarAsincronia(objFixture);
+      await drenarAsincronia(objFixture, () => objRegistro.obtener('qd_strSoporte') !== undefined);
       expect(objRegistro.obtener('qd_strSoporte')).toBeDefined();
 
       // Es lo que llega cuando el usuario borra el archivo, y también lo que re-entra acá cuando el
       // propio `reset()` del elemento emite `change` con `detail: null`.
       hijo(objFixture)._onChange(eventoCambio(null, elementoFalso(null)));
-      await drenarAsincronia(objFixture);
+      await drenarAsincronia(objFixture, () => objRegistro.obtener('qd_strSoporte') === undefined);
 
       expect(objRegistro.obtener('qd_strSoporte')).toBeUndefined();
       expect(objControl.value).toBe('');
@@ -290,6 +328,9 @@ describe('ZdsFileInput', () => {
 
     it('la limpieza NO emite rechazado (borrar un archivo no es un error)', async () => {
       hijo(objFixture)._onChange(eventoCambio(null, elementoFalso(null)));
+      // Sin condición a propósito: este test asevera una AUSENCIA, así que hay que drenar el tope
+      // completo. Cortar antes por una condición positiva sería trampa — daría verde justamente
+      // cuando el mensaje no llegó todavía, que es el fallo que debería detectar.
       await drenarAsincronia(objFixture);
 
       expect(objHost.strRechazo).toBe('');
@@ -298,7 +339,7 @@ describe('ZdsFileInput', () => {
 
   it('un archivo sin extensión se rechaza en vez de registrarse con extensión vacía', async () => {
     hijo(objFixture)._onChange(eventoCambio(blob('X'), elementoFalso('sinextension')));
-    await drenarAsincronia(objFixture);
+    await drenarAsincronia(objFixture, () => objHost.strRechazo !== '');
 
     expect(objRegistro.obtener('qd_strSoporte')).toBeUndefined();
     // Sin esta aserción el test pasaría igual con el handler muerto: `obtener` devuelve `undefined`
@@ -309,7 +350,7 @@ describe('ZdsFileInput', () => {
   it('la extensión se compara sin distinguir mayúsculas', async () => {
     // El diálogo nativo devuelve el nombre tal como está en disco, así que `.PDF` es habitual.
     hijo(objFixture)._onChange(eventoCambio(blob('X'), elementoFalso('CEDULA.PDF')));
-    await drenarAsincronia(objFixture);
+    await drenarAsincronia(objFixture, () => objRegistro.obtener('qd_strSoporte') !== undefined);
 
     expect(objRegistro.obtener('qd_strSoporte')?.name).toBe('CEDULA.PDF');
   });
