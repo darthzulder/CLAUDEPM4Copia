@@ -65,6 +65,21 @@ export default tseslint.config(
       // nomenclatura gana: es contrato con PM4 para los `qd_*` y convención documentada en
       // docs/guides/nomenclatura-variables.md para el resto.
       '@typescript-eslint/naming-convention': 'off',
+      // El prefijo `_` marca "descartado a propósito". Hace falta por el idiom de omitir una clave
+      // destructurando (`const { screen: _x, ...resto } = params` en `app.routes.ts`), donde la
+      // variable **no se usa por definición**: usarla sería el bug. Sin esto la única salida sería
+      // un `delete` sobre una copia, que es más código para el mismo efecto y menos claro.
+      // `caughtErrors: 'none'` acompaña al `catch {}` de `writeValue`, que ignora el error a
+      // propósito y explica por qué en su comentario.
+      '@typescript-eslint/no-unused-vars': [
+        'error',
+        {
+          argsIgnorePattern: '^_',
+          varsIgnorePattern: '^_',
+          destructuredArrayIgnorePattern: '^_',
+          caughtErrors: 'none',
+        },
+      ],
     },
   },
   {

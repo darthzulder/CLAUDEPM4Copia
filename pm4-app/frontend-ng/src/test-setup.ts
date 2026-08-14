@@ -32,3 +32,41 @@ if (!window.matchMedia) {
     }),
   });
 }
+
+/**
+ * Shim de `Blob.prototype.arrayBuffer` / `.text()`.
+ *
+ * **jsdom implementa `Blob` y `File` pero no sus métodos de lectura asíncrona** — el `Blob` de jsdom
+ * quedó en la especificación anterior, donde el contenido solo se leía con `FileReader`. Es una
+ * ausencia silenciosa: `new File([...])` funciona perfecto y falla recién al leerlo, con
+ * `TypeError: in_objFile.arrayBuffer is not a function`.
+ *
+ * Hace falta para `core/file-hash.ts`, que hashea el contenido del adjunto con
+ * `file.arrayBuffer()` → `crypto.subtle.digest`. Sin el shim, la detección de duplicados por
+ * contenido —la razón de existir de ese módulo— no se puede testear en absoluto.
+ *
+ * Se implementa sobre `FileReader`, que jsdom **sí** trae, así que se lee el mismo contenido real que
+ * en el navegador: el shim no simula bytes, los extrae. Por eso los hashes que salen en los tests son
+ * los verdaderos y un test de "mismo contenido → mismo hash" prueba lo que dice probar.
+ */
+if (!Blob.prototype.arrayBuffer) {
+  Blob.prototype.arrayBuffer = function leerComoArrayBuffer(this: Blob): Promise<ArrayBuffer> {
+    return new Promise((in_fnResolver, in_fnRechazar) => {
+      const objLector = new FileReader();
+      objLector.onload = () => in_fnResolver(objLector.result as ArrayBuffer);
+      objLector.onerror = () => in_fnRechazar(objLector.error);
+      objLector.readAsArrayBuffer(this);
+    });
+  };
+}
+
+if (!Blob.prototype.text) {
+  Blob.prototype.text = function leerComoTexto(this: Blob): Promise<string> {
+    return new Promise((in_fnResolver, in_fnRechazar) => {
+      const objLector = new FileReader();
+      objLector.onload = () => in_fnResolver(objLector.result as string);
+      objLector.onerror = () => in_fnRechazar(objLector.error);
+      objLector.readAsText(this);
+    });
+  };
+}
