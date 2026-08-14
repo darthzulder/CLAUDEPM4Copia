@@ -1,7 +1,7 @@
 /**
- * Genera `src/env.generated.ts` a partir del `.env` de `pm4-app/`, para que los tres fallbacks de
- * entorno que hoy usa React (`VITE_PM4_TOKEN`, `VITE_TASK_ID`, `VITE_CASE_ID`) existan también en
- * Angular sin que la app tenga que leer `process.env` en el navegador.
+ * Genera `src/env.generated.ts` a partir del `.env` de `pm4-app/`, para que los fallbacks de entorno
+ * que hoy usa React (`VITE_PM4_TOKEN`, `VITE_TASK_ID`, `VITE_CASE_ID` y la site key de reCAPTCHA)
+ * existan también en Angular sin que la app tenga que leer `process.env` en el navegador.
  *
  * ── Por qué un archivo generado y no `define` de `angular.json` a secas ──────────────────────────
  * Se intentó primero con `define`, que es el equivalente directo del `define` de Vite. **No sirve
@@ -26,11 +26,18 @@
  *   de string, sin ninguna referencia a `process`.
  * - Una variable ausente sale como `''`, no como `undefined`: replica el `?? ''` de `useToken.ts` y
  *   evita que el tipo del servicio tenga que ser `string | undefined`.
- * - Se generan **solo estas tres**. `VITE_PROCESS_ID`/`VITE_EVENT_ID` los lee `useToken.ts` en React
+ * - `VITE_RECAPTCHA_SITE_KEY` se suma en la Fase 4, con `RecaptchaModal`. En React no pasa por este
+ *   camino sino por el `define` de `vite.config.ts` (`__RECAPTCHA_SITE_KEY__`), que ahí **sí** puede
+ *   computar `JSON.stringify(...)` porque es un `.ts`; `angular.json` no. O sea que no es un cambio de
+ *   diseño: es el mismo mecanismo de Vite escrito donde Angular lo admite.
+ * - Se generan **solo estas cuatro**. `VITE_PROCESS_ID`/`VITE_EVENT_ID` los lee `useToken.ts` en React
  *   pero **no están declarados en `.env.example`**, cuyas líneas 15-19 dicen explícitamente que los
  *   IDs de proceso/colección/script ya no se configuran por variable de entorno — viven en
  *   `pm4-registry.json` (regla 6). Portarlos sería recrear deuda que el proyecto ya sacó.
  * - El archivo generado está gitignoreado y **puede contener un token de dev**: nunca commitearlo.
+ * - `STR_COMMIT_HASH` es la excepción a todo lo anterior: **no sale del `.env`**, se computa acá
+ *   (ver `resolverCommitHash`). Va en este archivo igual porque el destino es el mismo —un literal
+ *   en el bundle— y tener dos mecanismos para inyectar constantes de build sería peor.
  *
  * ── Por qué este script está enganchado también a `lint` ─────────────────────────────────────────
  * Porque el archivo está gitignoreado, en una clonada limpia **no existe**, y `lint` no es solo
@@ -46,6 +53,7 @@
  * Es idempotente y cuesta milisegundos, así que repetirlo es más barato que razonar sobre cuándo hace
  * falta.
  */
+import { execSync } from 'node:child_process';
 import { existsSync, readFileSync, writeFileSync } from 'node:fs';
 import { dirname, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -54,8 +62,18 @@ const STR_DIR = dirname(fileURLToPath(import.meta.url));
 const STR_ENV = resolve(STR_DIR, '../../.env');
 const STR_SALIDA = resolve(STR_DIR, '../src/env.generated.ts');
 
-// Las únicas tres con fallback por entorno (ver el bloque de contrato arriba).
-const LST_CLAVES = ['VITE_PM4_TOKEN', 'VITE_TASK_ID', 'VITE_CASE_ID'];
+// Las cuatro con fallback por entorno (ver el bloque de contrato arriba).
+const LST_CLAVES = [
+  'VITE_PM4_TOKEN',
+  'VITE_TASK_ID',
+  'VITE_CASE_ID',
+  // La site key de reCAPTCHA v2. Va acá y no en un `define` por el mismo motivo que las otras tres,
+  // y ojo con la diferencia de naturaleza: esta clave es **pública** (viaja en el HTML de cualquier
+  // sitio que use el widget), a diferencia del token PM4. El secreto es `RECAPTCHA_SECRET_KEY`, que
+  // vive **solo** en el backend (regla 3) y NO se genera acá — si algún día aparece en esta lista,
+  // es un incidente, no una mejora.
+  'VITE_RECAPTCHA_SITE_KEY',
+];
 
 /**
  * Parser mínimo de `.env`. No se usa `dotenv` a propósito: es dependencia de `backend/`, no de este
@@ -86,6 +104,37 @@ function parsearEnv(in_strContenido) {
   return dicSalida;
 }
 
+/**
+ * Hash corto del commit del build, para saber qué versión corre dentro del iframe (donde no hay
+ * barra de direcciones ni forma de mirar el deploy).
+ *
+ * Port literal de la cadena de `frontend/vite.config.ts:20-28`, en este orden y por estos motivos:
+ * 1. **`RENDER_GIT_COMMIT`** — la variable que Render inyecta en su build. Va primero porque en el
+ *    contenedor de deploy el `.git` puede no estar, y cuando está, el commit del entorno es el que
+ *    de verdad se desplegó.
+ * 2. **`git rev-parse --short HEAD`** — el caso de desarrollo local.
+ * 3. **`'unknown'`** — y el `catch` es **silencioso a propósito**: dentro de un Docker sin git
+ *    instalado esto falla siempre, y no tener el hash no es un problema del build. Un `console.warn`
+ *    acá sería ruido en cada `npm run build` de cualquiera que use el contenedor.
+ *
+ * El `stdio: ['ignore', 'pipe', 'ignore']` silencia el stderr de git: sin eso, un directorio que no
+ * es repo escupe "fatal: not a git repository" en la salida del build aunque el catch lo maneje.
+ */
+function resolverCommitHash() {
+  const strDeRender = process.env.RENDER_GIT_COMMIT;
+  if (strDeRender) return strDeRender;
+
+  try {
+    return execSync('git rev-parse --short HEAD', {
+      stdio: ['ignore', 'pipe', 'ignore'],
+    })
+      .toString()
+      .trim();
+  } catch {
+    return 'unknown';
+  }
+}
+
 const dicEnv = existsSync(STR_ENV) ? parsearEnv(readFileSync(STR_ENV, 'utf8')) : {};
 
 // `process.env` gana sobre el `.env`: es lo que permite `VITE_TASK_ID=123 npm run build` en CI y en
@@ -95,12 +144,17 @@ for (const strClave of LST_CLAVES) {
   dicValores[strClave] = process.env[strClave] ?? dicEnv[strClave] ?? '';
 }
 
+const strCommitHash = resolverCommitHash();
+
 const strContenido = `// ARCHIVO GENERADO por scripts/gen-env-define.mjs — NO EDITAR NI COMMITEAR.
 // Se regenera en cada build/dev/test desde \`pm4-app/.env\` (o desde process.env, que gana).
 // El porqué de que esto sea un archivo generado y no un \`define\` de angular.json está en el
 // encabezado del generador: \`define\` sustituye TEXTO, no evalúa, así que dejar
 // \`process.env.VITE_TASK_ID\` ahí inyecta esa expresión cruda en el bundle del navegador.
 ${LST_CLAVES.map((in_strClave) => `export const ${in_strClave} = ${JSON.stringify(dicValores[in_strClave])};`).join('\n')}
+
+// Este NO sale del .env: se computa en cada corrida del generador (RENDER_GIT_COMMIT → git → 'unknown').
+export const STR_COMMIT_HASH = ${JSON.stringify(strCommitHash)};
 `;
 
 writeFileSync(STR_SALIDA, strContenido, 'utf8');
@@ -110,4 +164,4 @@ const strResumen = LST_CLAVES.map(
   (in_strClave) => `${in_strClave}=${dicValores[in_strClave] ? '<presente>' : '<vacío>'}`,
 ).join(' · ');
 // eslint-disable-next-line no-console
-console.log(`env.generated.ts → ${strResumen}`);
+console.log(`env.generated.ts → ${strResumen} · commit=${strCommitHash}`);

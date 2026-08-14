@@ -1447,3 +1447,130 @@ z-table :is(th, td)[config*="right"] {
   color: var(--z-text);
   text-align: right;
 }
+
+/* ─────────────────────────────────────────────────────────────────────────────
+   Índice de pantallas y páginas de diagnóstico (Fase 4)
+
+   Son las tres vistas que NO son pantallas de negocio: el índice que se ve sin
+   `?screen=`, el "pantalla no encontrada" y el error de render. En React vivían
+   como objetos de estilo en línea dentro de `App.tsx` (`DEBUG_BANNER_STYLE` y
+   los `style={{...}}` del `ScreenIndex`), lo que acá no es una opción: la
+   jerarquía de UI de CLAUDE.md prohíbe estilos ad-hoc y manda todo CSS nuevo al
+   final de esta hoja, tokenizado. Por eso el port las convierte en clases.
+
+   Nombradas por componente (`pm4-indice-*`, `pm4-diag-*`), nunca por pantalla.
+   ───────────────────────────────────────────────────────────────────────────── */
+
+.pm4-indice {
+  min-height: 100vh;
+  background: var(--zg-white-zurich);
+  padding: var(--zs-300) var(--zs-200);
+  position: relative;
+}
+
+/* El hash del commit, arriba a la derecha: sirve para saber qué build está
+   corriendo dentro del iframe, donde no hay barra de direcciones útil. */
+.pm4-indice-commit {
+  position: absolute;
+  top: var(--zs-100);
+  right: var(--zs-150);
+  font: var(--zf-body-12);
+  color: var(--zg-7);
+}
+
+.pm4-indice-cuerpo {
+  max-width: 800px;
+  margin: 0 auto;
+}
+
+.pm4-indice-titulo {
+  margin: 0;
+  font: var(--zf-h-24);
+  color: var(--z-blue-dark);
+}
+
+/* La barrita azul vertical al lado del título. Es decorativa: va con
+   `aria-hidden` en el template. */
+.pm4-indice-marca {
+  width: 6px;
+  height: 32px;
+  background: var(--z-blue);
+  border-radius: 3px;
+}
+
+.pm4-indice-conteo {
+  margin: 0 0 0 18px;
+  color: var(--zg-5);
+  font: var(--zf-body-14);
+}
+
+.pm4-indice-grilla {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+  gap: var(--zs-100);
+}
+
+/* Cada tarjeta es un `<a href="?screen=...">`: navegación real, no un handler
+   de click, así que funciona con el teclado y con "abrir en pestaña nueva". */
+.pm4-indice-item {
+  display: block;
+  padding: var(--zs-100) var(--zs-150);
+  background: var(--zg-white);
+  border: 1.5px solid var(--zg-9);
+  border-radius: 8px;
+  text-decoration: none;
+  color: var(--z-blue-dark);
+  font: var(--zf-body-14);
+  transition: border-color .15s, color .15s, box-shadow .15s;
+  box-shadow: 0 1px 3px color-mix(in srgb, var(--zg-black) 6%, transparent);
+}
+
+/* El hover se hace con CSS y no con `onMouseEnter`/`onMouseLeave` como en
+   React: ahí eran tres asignaciones a `style` por evento, acá es una regla. De
+   paso cubre `:focus-visible`, que la versión de React no cubría. */
+.pm4-indice-item:hover,
+.pm4-indice-item:focus-visible {
+  border-color: var(--z-blue);
+  color: var(--z-blue);
+  box-shadow: 0 4px 12px color-mix(in srgb, var(--z-blue) 15%, transparent);
+}
+
+.pm4-indice-item-prefijo {
+  display: block;
+  color: var(--zg-7);
+  font: var(--zf-body-12);
+  margin-bottom: var(--zs-50);
+}
+
+/* Aviso de que el token salió del `.env` y no del `?token=` de PM4. Fijo arriba
+   y sin capturar el mouse, para que no tape ni bloquee nada del formulario. */
+.pm4-banner-debug {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 99999;
+  background: var(--zc-peach-aa);
+  color: var(--zg-white);
+  text-align: center;
+  padding: var(--zs-75) var(--zs-150);
+  font: var(--zf-body-12);
+  font-weight: 700;
+  letter-spacing: .4px;
+  pointer-events: none;
+}
+
+.pm4-diag {
+  padding: var(--zs-200);
+}
+
+.pm4-diag-error {
+  color: var(--zc-peach-aa);
+}
+
+/* El stack completo, sin recortar: es el equivalente del `<pre>` del
+   ErrorBoundary de React y el único lugar donde se puede leer y copiar. */
+.pm4-diag-stack {
+  white-space: pre-wrap;
+  font: var(--zf-body-14);
+}

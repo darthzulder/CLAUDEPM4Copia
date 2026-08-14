@@ -1,1 +1,16 @@
-<router-outlet />
+@if (objError(); as objErr) {
+  <!-- Port del fallback del ErrorBoundary de React. El stack va completo y sin recortar: dentro de
+       un iframe es el único lugar donde se puede leer y copiar. -->
+  <div class="pm4-diag">
+    <h2 class="pm4-diag-error">Error de Render</h2>
+    <pre class="pm4-diag-stack">{{ objErr.message }}
+
+{{ objErr.stack }}</pre>
+  </div>
+} @else {
+  <router-outlet />
+}
+
+@if (blnTokenDeDebug) {
+  <div class="pm4-banner-debug">⚠ Usando token de debug — no usar en producción</div>
+}

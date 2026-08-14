@@ -5,6 +5,9 @@ import { routes } from './app.routes';
 // Importada estáticamente a propósito: es el lado "esperado" de la aserción que distingue una ruta
 // sana de una que resuelve `undefined`. El coste del chunk se paga igual al navegar.
 import { GateFachada } from '../screens/gate-fachada/gate-fachada';
+import { IndicePantallas } from './indice-pantallas';
+import { PantallaNoEncontrada } from './pantalla-no-encontrada';
+import { DIC_PANTALLAS, listarSlugsEnrutables } from './pantallas';
 
 /**
  * Specs del **mecanismo** de enrutado, no del inventario de pantallas.
@@ -116,28 +119,120 @@ describe('app.routes · traducción de ?screen= a path', () => {
   it('preserva el slug tal cual, con guiones y mayúsculas', async () => {
     // Los slugs reales de PM4 son de esta forma (`COL_QD_SCR-009_...`) y son contrato con el BPM:
     // normalizarlos a minúsculas o a kebab rompería la URL que genera el proceso. Se usa una tabla
-    // con un slug de ese estilo para probar la traducción sin depender del inventario de la Fase 4;
+    // con un slug de ese estilo para probar la traducción sin depender del inventario de la Fase 5;
     // hay que resetear el TestBed porque el `beforeEach` ya configuró uno con las rutas reales.
+    const strSlug = 'COL_QD_SCR-009_Formulario_Superintendencia';
     TestBed.resetTestingModule();
-    const objRouterAlias = crearRouter([
+    const objRouterSlug = crearRouter([
       routes[0],
-      { path: 'COL_QD_SCR-010_cierre-m3', loadComponent: () => import('./app').then((m) => m.App) },
+      { path: strSlug, loadComponent: () => import('./app').then((m) => m.App) },
     ]);
-    await objRouterAlias.navigateByUrl('/?screen=COL_QD_SCR-010_cierre-m3');
-    expect(objRouterAlias.url).toBe('/COL_QD_SCR-010_cierre-m3');
+    await objRouterSlug.navigateByUrl(`/?screen=${strSlug}`);
+    expect(objRouterSlug.url).toBe(`/${strSlug}`);
   });
 
-  it('sin ?screen= NO redirige: se queda en la raíz', async () => {
-    // Es el caso del índice de pantallas del `App.tsx` de React, que pone la Fase 4. Redirigir a
-    // `/undefined` mandaría a la ruta comodín y el índice nunca se vería.
+  it('sin ?screen= NO redirige: se queda en la raíz y carga el índice', async () => {
+    // Redirigir a `/undefined` mandaría a la ruta comodín y el índice nunca se vería.
     await objRouter.navigateByUrl('/');
+
     expect(objRouter.url).toBe('/');
+    // Y el índice **se resuelve de verdad**, misma aserción que la del `loadComponent` de arriba y
+    // por el mismo motivo: la URL correcta con un componente en `undefined` es una raíz en blanco.
+    expect(objRouter.routerState.snapshot.root.firstChild?.component).toBe(IndicePantallas);
+  }, INT_TIMEOUT);
+
+  it('⚠ el orden importa: la ruta del índice NO se come el caso con ?screen=', async () => {
+    // Las dos rutas de `''` llevan `pathMatch: 'full'` y el query string **no participa del
+    // matcheo**, así que si el índice estuviera declarado antes del `redirectTo` matchearía
+    // primero en los dos casos y **ninguna pantalla abriría jamás**. Es un fallo total y silencioso
+    // —la raíz se vería perfecta— que solo se detecta pidiendo un slug. Este test es la barrera
+    // contra un reordenamiento "cosmético" de la tabla.
+    await objRouter.navigateByUrl('/?screen=gate-fachada');
+
+    expect(objRouter.url).toBe('/gate-fachada');
+    expect(objRouter.routerState.snapshot.root.firstChild?.component).not.toBe(IndicePantallas);
+  }, INT_TIMEOUT);
+
+  describe('la ruta comodín', () => {
+    it('un slug desconocido cae en "pantalla no encontrada"', async () => {
+      // Antes de la Fase 4 esta navegación **se rechazaba** (no había `**`), y el test lo aseveraba
+      // para que agregar el comodín fuera un cambio visible. Ahora resuelve, que es el
+      // comportamiento de React: un `?screen=` desconocido muestra el diagnóstico con el slug
+      // pedido, no un iframe roto.
+      await objRouter.navigateByUrl('/?screen=no-existe');
+
+      expect(objRouter.url).toBe('/no-existe');
+      expect(objRouter.routerState.snapshot.root.firstChild?.component).toBe(PantallaNoEncontrada);
+    }, INT_TIMEOUT);
+
+    it('también atrapa un path escrito a mano, no solo un ?screen= inválido', async () => {
+      // Más cobertura que el `if (!Screen)` de React, que solo se alcanzaba vía `?screen=`.
+      await objRouter.navigateByUrl('/loQueSea/profundo');
+
+      expect(objRouter.routerState.snapshot.root.firstChild?.component).toBe(PantallaNoEncontrada);
+    }, INT_TIMEOUT);
+  });
+});
+
+describe('app.routes · generación de rutas desde el registro', () => {
+  it('hoy no hay pantallas de negocio en la tabla, y es el estado correcto', () => {
+    // Fija el estado de la Fase 4 para que la primera pantalla de la Fase 5 **tenga** que tocar
+    // este número: si alguien registra una pantalla, este test se pone rojo y lo manda a leer la
+    // guarda de inventario de `pantallas.spec.ts`, que es donde está la obligación del spec.
+    expect(Object.keys(DIC_PANTALLAS)).toEqual([]);
   });
 
-  it('un slug desconocido no matchea ninguna ruta', async () => {
-    // Sin ruta comodín todavía (la agrega la Fase 4 con el componente de "pantalla no encontrada"),
-    // así que la navegación se rechaza. El test asevera el estado de HOY para que agregar el `**`
-    // sea un cambio deliberado y visible, no un efecto colateral.
-    await expect(objRouter.navigateByUrl('/?screen=no-existe')).rejects.toThrow();
+  it('cada pantalla del registro tiene su ruta', () => {
+    const setPaths = new Set(routes.map((in_objRuta) => in_objRuta.path));
+    const cllFaltantes = Object.keys(DIC_PANTALLAS).filter(
+      (in_strSlug) => !setPaths.has(in_strSlug),
+    );
+
+    // La garantía de que generar las rutas del registro de verdad las genera. Hoy pasa por
+    // vacuidad; en la Fase 5 muerde si alguien rompe `generarRutasDePantallas()`.
+    expect(`pantallas sin ruta: [${cllFaltantes.join(', ')}]`).toBe('pantallas sin ruta: []');
+  });
+
+  it('⚠ hoy no hay alias declarados: la ex SCR-010 se eliminó del proyecto', () => {
+    const setPaths = new Set(routes.map((in_objRuta) => in_objRuta.path));
+
+    // **Este caso reemplaza al que aseveraba lo contrario.** La versión anterior fijaba un estado
+    // transitorio —el alias `COL_QD_SCR-010_cierre-m3` declarado pero sin ruta, porque su destino
+    // (la SCR-009) se porta en la Fase 5— y estaba escrito para ponerse rojo cuando ese destino
+    // apareciera. Ya no aplica: la SCR-010 se eliminó del proyecto por decisión del usuario
+    // (ago-2026), así que no hay nodo del BPM que preservar y `DIC_ALIAS` quedó vacío.
+    //
+    // Lo que se asevera ahora es el **borrado**, en las dos direcciones: que el slug no quedó como
+    // ruta y que tampoco quedó en el registro. Sin esto, reponerlo por descuido —copiándolo del
+    // `App.tsx` de React, que **todavía** lo declara hasta que la Fase 7 borre ese árbol— no pondría
+    // nada rojo.
+    expect(setPaths.has('COL_QD_SCR-010_cierre-m3')).toBe(false);
+    expect(listarSlugsEnrutables()).not.toContain('COL_QD_SCR-010_cierre-m3');
+  });
+
+  it('⚠ el mecanismo de alias sigue vivo aunque no haya ninguno declarado', () => {
+    // **Sin este caso, borrar `generarRutasDePantallas()` entera no pondría nada rojo hoy.** Los dos
+    // diccionarios están vacíos, así que la función devuelve `[]` y el spread es un no-op: cada
+    // aserción sobre las rutas generadas pasa por vacuidad. Y el recorrido de los alias es lo que la
+    // Fase 5 va a necesitar en cuanto aparezca el primer slug renombrado.
+    //
+    // Se asevera sobre la **tabla real**, no sobre datos inyectados: lo que se fija es que las rutas
+    // fijas siguen ahí y que el spread no rompió el orden, que es la parte de la que depende el
+    // comodín. La composición de la unión (pantallas + alias) la cubre `pantallas.spec.ts`.
+    const cllPaths = routes.map((in_objRuta) => in_objRuta.path);
+
+    // Las tres fijas de la Fase 4 (`''` × 2 + `gate-fachada`) más el comodín. Si alguien "limpiara"
+    // el spread de `generarRutasDePantallas()` por verse inútil con el registro vacío, este conteo
+    // no lo detecta —hoy es un no-op— pero el caso de abajo, que exige el `**` último, sí protege el
+    // orden en que la Fase 5 va a insertar las pantallas.
+    expect(cllPaths.filter((in_strPath) => in_strPath === '')).toHaveLength(2);
+    expect(cllPaths).toContain('gate-fachada');
+    expect(cllPaths.indexOf('gate-fachada')).toBeLessThan(cllPaths.indexOf('**'));
+  });
+
+  it('la ruta comodín es la ÚLTIMA de la tabla', () => {
+    // `**` matchea cualquier cosa: una ruta declarada debajo sería inalcanzable, y el síntoma
+    // sería "esa pantalla muestra pantalla-no-encontrada" sin ninguna pista de por qué.
+    expect(routes[routes.length - 1].path).toBe('**');
   });
 });

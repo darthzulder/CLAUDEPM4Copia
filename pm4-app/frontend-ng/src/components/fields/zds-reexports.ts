@@ -84,6 +84,38 @@
  * Coincide con la fila del plan (`lib-alert-z` + **`AlertZService`**), y es la razón por la que el
  * servicio se re-exporta acá junto con los componentes: sin él el componente no muestra nada.
  *
+ * **5b. Y por eso hay DOS alertas, no una: `ZrAlert` (cola imperativa) y `ZrAlertInline` (caja
+ * declarativa).** El hallazgo del punto 5 tiene una consecuencia que no se ve hasta que hay que portar
+ * una pantalla: React usa la alerta de las **dos** formas, y `lib-alert-z` solo cubre una.
+ *
+ * `RequestFileList.tsx` escribe `<ZrAlert config="negative">{strError}</ZrAlert>` **dentro** de su
+ * markup, en el lugar exacto donde va el mensaje, y lo mismo con `config="info"` para el estado vacío.
+ * Eso es una **caja inline**: vive donde está el contenido que describe, aparece y desaparece con un
+ * `@if`, y no tiene cola ni ciclo de vida propio. Mandarlo por `AlertZService` cambiaría el
+ * comportamiento —el mensaje saltaría al contenedor global de la pantalla en vez de quedar debajo del
+ * título de la lista— y además obligaría a llamar `.remove()` a mano cada vez que el error se resuelve,
+ * porque el servicio **acumula**: dos cargas fallidas seguidas dejarían dos alertas apiladas.
+ *
+ * `za-alert` sí es esa caja, y su contrato coincide **input por input** con el de React (verificado en
+ * `dist/fesm2022/angular.mjs`, no supuesto):
+ * `inputs: { config, icon, hideClose: ["hide-close", …], confirmText: ["confirm-text", …], custom }`,
+ * `outputs: { close, confirm }`, y `<ng-content>` para el cuerpo. Así que el port es literal:
+ *
+ * ```html
+ * <za-alert config="negative" hide-close>No se pudo cargar…</za-alert>
+ * ```
+ *
+ * Ojo con `hide-close`: el template de `za-alert` lo pasa hacia abajo como
+ * `[hide-close]="hideClose || undefined"`, o sea que un `false` viaja como **`undefined`**, no como
+ * `false`. Para el custom element es lo mismo (ausente = no ocultar), pero explica por qué el atributo
+ * no aparece en el DOM cuando se le pasa `false` — no es que el binding no funcione.
+ *
+ * Las dos se exportan y **ninguna reemplaza a la otra**: `ZrAlert` para avisos de resultado de una
+ * acción (guardar, reasignar), que es lo que corresponde mandar a una cola global; `ZrAlertInline` para
+ * el estado de un bloque de la pantalla. Es la única entrada de esta fachada donde un mismo nombre de
+ * React se abre en dos componentes, y el motivo es que `lib-zurich` fusionó dos conceptos que el DS de
+ * React tenía separados.
+ *
  * ── Qué NO existe en `lib-zurich` y por lo tanto baja al nivel `za-*` ─────────────────────────
  * La librería exporta **26** selectores `lib-*-z`, y entre ellos **no hay** `lib-icon-z`,
  * `lib-switch-z`, `lib-kpi-value-z` ni `lib-pagination-z`. Por la jerarquía de fuentes vigente
@@ -125,6 +157,10 @@ export {
 } from '@zurich-col/lib-zurich';
 
 export {
+  // Ver el punto 5b del docstring: la caja de alerta INLINE, que es la forma en que React usaba
+  // `ZrAlert` dentro del markup. No sustituye a `ZrAlert` (la cola imperativa de `lib-alert-z`) —
+  // son dos usos distintos y las dos siguen vivas.
+  ZaAlert as ZrAlertInline,
   ZaIcon as ZrIcon,
   ZaKpiValue as ZrKpiValue,
   ZaPagination as ZrPagination,

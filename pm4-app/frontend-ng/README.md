@@ -53,6 +53,45 @@ Y dos que se descubrieron al instalar y correr esto de verdad (Fase 1):
 | **La cobertura sale en `coverage/frontend-ng/`**, no en `coverage/` | `@angular/build:unit-test` anida un nivel por nombre de proyecto, a diferencia de Vitest invocado a mano. `scripts/coverage-diff.mjs` apunta ahí explícitamente; si se apuntara a `coverage/lcov.info` **no fallaría con error** — el `existsSync` lo saltea en silencio y el workspace quedaría invisible en el informe del PR. |
 | **`coverageThresholds`, no `thresholds`** | El nombre de la opción en el builder de Angular difiere del de la config nativa de Vitest, y `angular.json` **ignora** en silencio una clave que no esté en el schema. Verificado que los cuatro umbrales fallan de verdad (con un archivo sin specs a propósito): salen los 4 `ERROR:` y el exit code es 1. Lo mismo con **`coverageInclude`**: no existe `coverageAll`, y sin el include los archivos que ningún spec carga no aparecen en el lcov — que para Sonar se lee como "cubierto", no como "sin tests". |
 
+### ⚠ Un backtick dentro de un `template:` inline: el error apunta SIEMPRE al lugar equivocado
+
+Costó **cuatro** ciclos de diagnóstico en la Fase 4, y el patrón que lo dispara es inocente: un
+comentario HTML dentro del template que nombra un símbolo entre comillas invertidas.
+
+```ts
+@Component({
+  template: `
+    <!-- la condición es "abierto Y hay cuerpo", igual que el `isOpen && children` de React -->
+    …                                            ^^^^^^^^^^^^^^^^^^^^^ acá termina el string
+  `,
+  imports: [ZrIcon],
+})
+```
+
+Ese backtick **cierra el template literal**, así que el resto del archivo se parsea como código. El
+compilador entonces reporta una cascada que **nunca menciona la línea del backtick**:
+
+```
+TS1005: ';' expected
+TS2304: Cannot find name 'children'   ← palabras del comentario, leídas como identificadores
+TS2304: Cannot find name 'imports'    ← apunta al decorador, no al template
+TS1135: Argument expression expected
+```
+
+**La firma para reconocerlo en un segundo:** `Cannot find name 'imports'` (o `'label'`, `'title'`,
+`'config'`) señalando el `@Component({`, el `imports:` o el `})` de cierre. Ninguno de esos tres
+lugares es el defecto; buscá comillas invertidas en el template. Los docstrings **arriba** del
+decorador sí las admiten — viven fuera del literal.
+
+> **No hay regla de ESLint que lo atrape, y está medido.** Se escribió un `no-restricted-syntax` con
+> el selector `Property[key.name="template"] > TemplateLiteral > TemplateElement[value.raw=/…/]` y se
+> probó contra un archivo roto a propósito: ESLint devolvió `Parsing error: ';' expected` y exit 1
+> **desde el parser**, sin llegar a evaluar ninguna regla. Una regla que opera sobre el AST no puede
+> detectar un defecto cuya naturaleza es *impedir que exista un AST*. La regla se quitó en vez de
+> dejar un guardrail que no dispara: un guardrail que no funciona es peor que ninguno, porque se
+> confía en él. Si algún día se quiere mecanizar, tiene que ser un chequeo de **texto crudo** anterior
+> al parser (un paso de `pre-commit` o un script), no un plugin de lint.
+
 Dos cosas que parecen fallos y no lo son, verificadas en el gate 0:
 
 - **El `styles-*.css` emitido queda en 0 bytes** y el CSS del DS aparece como *lazy chunk* de

@@ -90,6 +90,39 @@ export class Pm4ContextService {
     return this.leerParam('token') ?? this.objEnv.token;
   }
 
+  /**
+   * `true` cuando el token en uso salió del `.env` y no de la URL — o sea, el token de desarrollo.
+   *
+   * Es lo que dispara el banner de advertencia de la raíz, portado de
+   * `frontend/src/App.tsx:126`:
+   *
+   *     const blnUsingDebugToken = !objParams.get('token') && !!import.meta.env.VITE_PM4_TOKEN;
+   *
+   * ── Por qué vive acá y no en el componente raíz ─────────────────────────────────────────────
+   * Porque es la **única** pregunta que necesita ver los dos lados por separado, y `token()` ya los
+   * colapsó en un string: desde afuera no hay forma de saber si un token no vacío vino del query
+   * param o del entorno. Ponerlo en el componente obligaría a leer `window.location.search` ahí y a
+   * importar `env.generated` fuera de este servicio, que es justo el acoplamiento que el token de DI
+   * existe para evitar.
+   *
+   * ⚠ **Es `!` y no `?? ''`, a diferencia de `token()` — y ahí hay un defecto preexistente que se
+   * porta a propósito.** Con un `?token=` presente pero vacío los dos métodos divergen:
+   *
+   * - `token()` usa `??`, así que el `''` se conserva y el entorno **no** se consulta: no hay token.
+   * - este método usa `!`, y `!''` es `true`, así que **sí** reporta token de debug.
+   *
+   * O sea que con `?token=` el banner dice "estás usando el token de debug" cuando en realidad no se
+   * está usando **ninguno**, y todas las llamadas a PM4 van a fallar por falta de credencial. El
+   * banner manda a mirar el `.env` cuando el problema está en la URL que emitió PM4.
+   *
+   * Es exactamente lo que hace React hoy (`!objParams.get('token')` con `''` da `true`), y se porta
+   * igual porque esto es una migración de framework: arreglarlo acá sería un cambio funcional de
+   * contrabando. Queda fijado por spec para que el arreglo, cuando se decida, sea explícito.
+   */
+  public usandoTokenDeDebug(): boolean {
+    return !this.leerParam('token') && !!this.objEnv.token;
+  }
+
   /** Id de la tarea a cargar. `?task_id=` → `VITE_TASK_ID` → `''`. */
   public taskId(): string {
     return this.leerParam('task_id') ?? this.objEnv.taskId;

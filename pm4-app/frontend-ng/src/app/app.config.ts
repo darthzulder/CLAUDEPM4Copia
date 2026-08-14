@@ -1,5 +1,6 @@
 import {
   ApplicationConfig,
+  ErrorHandler,
   provideBrowserGlobalErrorListeners,
   provideZonelessChangeDetection,
 } from '@angular/core';
@@ -8,6 +9,7 @@ import { provideHttpClient, withInterceptors } from '@angular/common/http';
 
 import { routes } from './app.routes';
 import { interceptorPm4Token } from '../api/pm4Client';
+import { ManejadorDeErrores } from './error-render.service';
 
 export const appConfig: ApplicationConfig = {
   providers: [
@@ -21,5 +23,21 @@ export const appConfig: ApplicationConfig = {
     provideZonelessChangeDetection(),
     provideRouter(routes),
     provideHttpClient(withInterceptors([interceptorPm4Token])),
+
+    /**
+     * El reemplazo del `ErrorBoundary` de React. Son **dos** providers para la **misma**
+     * instancia, y esa es la parte que importa:
+     *
+     * - `ManejadorDeErrores` es lo que inyecta el componente raíz para leer la señal del error.
+     * - `ErrorHandler` es lo que usa Angular internamente para reportar excepciones no atrapadas.
+     *
+     * ⚠ **Tiene que ser `useExisting`, no `useClass`.** Con `useClass` Angular crearía una
+     * instancia **distinta** para cada token: reportaría los errores en una y el componente raíz
+     * leería la señal de la otra, que nunca se llena. El resultado sería una app que loguea
+     * `[ErrorBoundary]` en consola y **no pinta nada** — un fallo silencioso, porque el log da la
+     * impresión de que el mecanismo funciona. El spec lo asevera por identidad de instancia.
+     */
+    ManejadorDeErrores,
+    { provide: ErrorHandler, useExisting: ManejadorDeErrores },
   ],
 };

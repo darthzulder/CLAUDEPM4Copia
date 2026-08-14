@@ -1,6 +1,6 @@
-import { Routes } from '@angular/router';
 import { inject } from '@angular/core';
-import { Router } from '@angular/router';
+import { Route, Router, Routes } from '@angular/router';
+import { DIC_ALIAS, DIC_PANTALLAS } from './pantallas';
 
 /**
  * Rutas de la app. Las **pantallas de negocio** se pueblan en la **Fase 4**; hoy la tabla
@@ -15,9 +15,9 @@ import { Router } from '@angular/router';
  * - **Una ruta por slug con `loadComponent`**, que es el equivalente del `React.lazy` +
  *   `Suspense` de `App.tsx`: el iframe renderiza una sola pantalla a la vez, así que
  *   descargar las ~15 en un bundle único no tiene sentido.
- * - **El alias `COL_QD_SCR-010_cierre-m3` → `FormularioSuperintendencia`** hay que
- *   preservarlo: la ex SCR-010 se fusionó en la SCR-009 y hay nodos del BPM que todavía
- *   apuntan al slug viejo.
+ * - **Los alias de slugs viejos se generan igual que las pantallas** (ver `DIC_ALIAS`). Hoy no
+ *   hay ninguno vigente —la ex SCR-010 se eliminó del proyecto— pero el mecanismo queda, porque
+ *   el próximo slug renombrado lo va a necesitar y es una entrada en un objeto, no código nuevo.
  * - **La guarda de inventario** (un spec que compara las rutas declaradas contra la lista de
  *   pantallas con spec) es parte del gate de la Fase 4 y es el único mecanismo del proyecto
  *   que no depende de la buena voluntad de quien programa. Ver el `SCREENS` exportado en
@@ -49,6 +49,58 @@ import { Router } from '@angular/router';
  * ("no hay task") a tres capas de distancia de la causa (una redirección del router). Por eso
  * se construye un `UrlTree` con `queryParams` explícitos.
  */
+/**
+ * Convierte el registro de pantallas en entradas de ruta, una por slug.
+ *
+ * Es el único lugar donde `DIC_PANTALLAS` se recorre para producir `Routes`, y por eso la ruta y el
+ * inventario **no pueden desincronizarse**: registrar la pantalla ya la enruta. En React esto era
+ * manual —una entrada en `SCREENS` y el `lazy()` arriba— y era el punto exacto donde un olvido daba
+ * un iframe en blanco sin ningún test rojo.
+ *
+ * Los alias apuntan al **mismo** cargador que su destino en vez de hacer `redirectTo`. Es a
+ * propósito: un `redirectTo` cambiaría la URL visible del iframe, y el slug de la URL es lo que se
+ * mira para saber qué nodo del BPM abrió la tarea. Con el cargador compartido, la ex SCR-010 sigue
+ * mostrándose como SCR-010 y renderiza el formulario unificado.
+ */
+function generarRutasDePantallas(): Route[] {
+  const cllRutas: Route[] = Object.entries(DIC_PANTALLAS).map(([in_strSlug, in_fnCargar]) => ({
+    path: in_strSlug,
+    loadComponent: in_fnCargar,
+  }));
+
+  for (const [strAlias, strDestino] of Object.entries(DIC_ALIAS)) {
+    const fnCargar = DIC_PANTALLAS[strDestino];
+
+    if (!fnCargar) {
+      /**
+       * ⚠ **Un alias sin destino se SALTEA, y esto es distinto de tolerar un error de registro.**
+       *
+       * La primera versión de esta rama lanzaba, con el argumento de que un `loadComponent` en
+       * `undefined` es el defecto #3 del gate 2 (suite verde, iframe en blanco). El razonamiento
+       * era bueno y la conclusión estaba mal: **hoy la app no arrancaría**. El alias de la ex
+       * SCR-010 tiene que estar declarado desde ya —es contrato con nodos del BPM que ya existen—
+       * pero su destino, la SCR-009, se porta en la Fase 5. Lanzar hacía que `app.routes.ts`
+       * reventara al importarse, y con él la suite entera (medido: `app.routes.spec.ts`, 0 tests
+       * ejecutados).
+       *
+       * La garantía se conserva sin bloquear la Fase 4: se saltea, así que **no se crea la ruta**
+       * —que es lo importante: una ruta con `loadComponent: undefined` es el modo de falla
+       * silencioso, y no crearla manda el slug al comodín, que dice qué pasa—, y `pantallas.spec.ts`
+       * asevera que ningún alias quede huérfano en cuanto haya pantallas registradas.
+       *
+       * Sin `console.warn` a propósito: hoy este camino se recorre **siempre**, así que avisar
+       * sería ruido garantizado en cada arranque y en cada spec, y un aviso que suena siempre deja
+       * de leerse justo cuando empieza a significar algo.
+       */
+      continue;
+    }
+
+    cllRutas.push({ path: strAlias, loadComponent: fnCargar });
+  }
+
+  return cllRutas;
+}
+
 export const routes: Routes = [
   {
     // El borde: `/?screen=<slug>` → `/<slug>`, **preservando el resto del query string**.
@@ -69,6 +121,19 @@ export const routes: Routes = [
   },
   {
     /**
+     * El índice, para la raíz **sin** `?screen=`.
+     *
+     * Va después del `redirectTo` de `''` y **también** con `pathMatch: 'full'`. El orden importa:
+     * el router toma la primera ruta que matchea, así que si esta estuviera primero se comería el
+     * caso con `?screen=` (el query string no participa del matcheo) y ninguna pantalla abriría
+     * jamás. El `redirectTo` de arriba devuelve `''` cuando no hay slug, y ese `''` cae acá.
+     */
+    path: '',
+    pathMatch: 'full',
+    loadComponent: () => import('./indice-pantallas').then((m) => m.IndicePantallas),
+  },
+  {
+    /**
      * Pantalla de verificación del **gate 2**, no una pantalla de negocio.
      *
      * Está acá y no en la Fase 4 porque el gate 2 exige verificación manual en un navegador
@@ -79,5 +144,22 @@ export const routes: Routes = [
      */
     path: 'gate-fachada',
     loadComponent: () => import('../screens/gate-fachada/gate-fachada').then((m) => m.GateFachada),
+  },
+
+  // Las pantallas de negocio, generadas del registro. Hoy son cero (la Fase 5 las porta de a una)
+  // y el spread de un array vacío es un no-op, así que la tabla es válida igual.
+  ...generarRutasDePantallas(),
+
+  {
+    /**
+     * El comodín, **último a propósito**: `**` matchea cualquier cosa, así que cualquier ruta
+     * escrita debajo sería inalcanzable.
+     *
+     * Reemplaza el `if (!Screen)` de React. Nótese que atrapa más que ese `if`: en React solo se
+     * llegaba ahí con un `?screen=` desconocido, porque no había otros paths; acá también cubre un
+     * `/loQueSea` escrito a mano. Es más cobertura, no menos, y el mensaje sirve para los dos.
+     */
+    path: '**',
+    loadComponent: () => import('./pantalla-no-encontrada').then((m) => m.PantallaNoEncontrada),
   },
 ];

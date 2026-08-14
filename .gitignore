@@ -107,6 +107,12 @@ coverage/
 Thumbs.db
 desktop.ini
 
+# Artefactos del MCP de Playwright — snapshots, logs de consola y screenshots que el
+# servidor escribe en el cwd al navegar. Son de una sesión concreta y pesados (los logs
+# de consola llegan a varios MB).
+.playwright-mcp/
+**/.playwright-mcp/
+
 # Espejo local de los scripts PM4 — generado por scripts/pm4-scripts en cada captura.
 # El respaldo versionado es la rama `pm4-scripts-historial`; esto es solo la copia navegable.
 # La barra inicial ancla el patrón a la raíz: sin ella también ignoraría el código de la

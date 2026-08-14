@@ -116,6 +116,67 @@ describe('Pm4ContextService · el matiz del ?? (presente pero vacío)', () => {
   });
 });
 
+describe('Pm4ContextService · usandoTokenDeDebug (el banner de la raíz)', () => {
+  /**
+   * Port de `frontend/src/App.tsx:126`:
+   *
+   *     const blnUsingDebugToken = !objParams.get('token') && !!import.meta.env.VITE_PM4_TOKEN;
+   *
+   * Es la única pregunta del servicio que necesita ver los dos lados **sin colapsar**: `token()` ya
+   * los fusionó en un string, así que desde afuera no hay forma de distinguir un token que vino de la
+   * URL de uno que vino del `.env`. De ahí que viva acá y no en el componente raíz.
+   *
+   * Los cuatro casos son las cuatro combinaciones de (token en URL) × (token en entorno), y el que
+   * importa de verdad es el tercero.
+   */
+  it('sin token en la URL y con token en el entorno: SÍ es token de debug', () => {
+    fijarQueryString('');
+    expect(objCtx.usandoTokenDeDebug()).toBe(true);
+  });
+
+  it('con token en la URL: NO es token de debug, aunque el entorno también tenga uno', () => {
+    // El caso de producción: PM4 mandó el token en el iframe. Que el `.env` de la máquina tenga uno
+    // es irrelevante — `token()` ni lo mira — y pintar el banner acá sería una advertencia falsa.
+    fijarQueryString('?token=token-real-de-pm4');
+    expect(objCtx.usandoTokenDeDebug()).toBe(false);
+  });
+
+  it('⚠ `?token=` presente pero VACÍO: SÍ pinta el banner, y el banner MIENTE', () => {
+    // **El caso donde este método y `token()` divergen, y hay que tenerlo claro para no "arreglarlo".**
+    //
+    // `token()` usa `??`, así que un `?token=` presente-pero-vacío resuelve a `''` y **no** consulta
+    // el entorno: la app se queda sin token. Pero este método usa `!`, y `!''` es `true`, así que
+    // reporta que se está usando el token de debug — cuando en realidad no se está usando **ninguno**.
+    //
+    // Es un **defecto preexistente de la app React**, portado a propósito sin arreglar
+    // (`frontend/src/App.tsx:126` hace exactamente `!objParams.get('token') && !!VITE_PM4_TOKEN`).
+    // Consecuencia real: con un `?token=` vacío el iframe muestra "usando token de debug" mientras
+    // todas las llamadas a PM4 fallan por falta de credencial — el banner manda a mirar el `.env`
+    // cuando el problema está en la URL que emitió PM4.
+    //
+    // Se fija tal cual porque esto es una migración de framework: arreglarlo acá sería un cambio
+    // funcional de contrabando (el plan lo prohíbe explícitamente). Este test es lo que hace que el
+    // arreglo, cuando se decida, sea una decisión explícita y no un cambio silencioso — igual que el
+    // de `urlBandejaTareas()` más abajo.
+    fijarQueryString('?token=');
+    expect(objCtx.usandoTokenDeDebug()).toBe(true);
+  });
+
+  it('sin token en ningún lado: NO es token de debug', () => {
+    // Se re-provee el entorno vacío para este caso puntual: el `OBJ_ENV_FALSO` del `beforeEach` trae
+    // token, y sin sustituirlo esta rama del `&&` no se ejercitaría nunca.
+    TestBed.resetTestingModule();
+    TestBed.configureTestingModule({
+      providers: [{ provide: PM4_ENV_FALLBACKS, useValue: { token: '', taskId: '', caseId: '' } }],
+    });
+    fijarQueryString('');
+
+    // No hay token de debug porque no hay token: el banner advierte de estar usando el de desarrollo,
+    // no de la ausencia de credenciales (que se manifiesta sola, como un 401 de PM4).
+    expect(TestBed.inject(Pm4ContextService).usandoTokenDeDebug()).toBe(false);
+  });
+});
+
 describe('Pm4ContextService · process_id y event_id son solo query string', () => {
   it('los lee de la URL cuando están', () => {
     fijarQueryString('?process_id=31&event_id=node_12');
