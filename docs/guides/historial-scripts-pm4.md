@@ -188,8 +188,42 @@ poder abrirlos y grepearlos como archivos normales. Esa carpeta:
 - **Se regenera sola:** si la borrás o clonás el repo de cero, `npm run pm4:capture -- --all` la
   reconstruye.
 
-El respaldo real y versionado sigue siendo la rama `pm4-scripts-historial` — conviene pushearla al
-remoto como cualquier otra.
+El respaldo real y versionado sigue siendo la rama `pm4-scripts-historial`.
+
+## Trabajo en equipo
+
+La rama de historial es un **canal compartido**: todos capturan, todos leen, y no hay PR ni merge de
+por medio. Cada captura hace tres cosas sin que nadie las pida:
+
+1. **`fetch`** de la rama antes de comparar, para no volver a registrar lo que otro ya subió.
+2. **commit** de lo que cambió.
+3. **`push`** a `origin`.
+
+Y si la rama existe en el remoto pero no en tu máquina —el caso de un clone nuevo— **se adopta la
+del remoto**. Sin ese paso se crearía una rama huérfana paralela, sin ancestro común: dos
+historiales que ya no se pueden juntar. Es el fallo más silencioso del modo compartido.
+
+### Qué pasa si dos capturan a la vez
+
+Se resuelve solo. El contenido de esta rama no es una opinión que haya que fusionar: es *el estado
+de PM4*, que es objetivo. Cuando el push sale rechazado porque el remoto avanzó, la herramienta trae
+el remoto y rehace el commit con **dos padres** —el tuyo y el del compañero— usando el árbol del
+remoto como base. Resultado: lo que el otro capturó sobrevive, lo tuyo también, y ambas historias
+quedan en el grafo. No hay conflicto de texto que resolver a mano, ni siquiera en el índice JSON,
+que se regenera entero.
+
+### Sobre el push automático
+
+Es la única excepción a la regla de "no pushear sin pedirlo", y está acotada por código: la función
+de push **lanza** si se la invoca con cualquier rama que no sea la de historial, y usa un refspec
+explícito para que la configuración de `push.default` de tu máquina no pueda subir la rama activa
+por accidente.
+
+Si no querés publicar en una corrida puntual: `npm run pm4:capture -- --all --no-push`. El commit
+local queda igual, así que el registro no se pierde — solo se pospone, y la próxima captura lo sube.
+
+Un fallo de red tampoco es grave: el commit ya está en local y se publica en la siguiente captura.
+Perder el push es recuperable; perder el registro, no.
 
 > ⚠️ **Nunca hagas `git checkout pm4-scripts-historial`.** Es una rama huérfana: su árbol contiene
 > solo los `.php`, así que git **vacía el working tree** de todo el resto del proyecto. No se pierde

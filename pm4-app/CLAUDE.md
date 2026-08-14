@@ -41,11 +41,15 @@ Aplican a **todo** cambio de código en este proyecto, no solo a pantallas nueva
    no repiten el nombre de la función. Ver [Comentarios y documentación técnica en el código](#comentarios-y-documentación-técnica-en-el-código).
 8. **Nunca commitear sin confirmación del usuario. Nunca pushear, salvo pedido explícito.**
    Ver [Flujo de trabajo con Claude](#flujo-de-trabajo-con-claude).
-   *Excepción única:* los commits de captura en la rama `pm4-scripts-historial` son automáticos.
-   No son trabajo tuyo ni una decisión de diseño: son el registro de un estado que **ya existe en
-   PM4**, escritos con plumbing sobre una rama huérfana que nunca se mergea, sin tocar el working
-   tree, el índice ni la rama activa. Pedir confirmación destruiría lo que los hace útiles: que
-   capturar sea imposible de olvidar.
+   *Excepción única —commit **y push**— sobre la rama `pm4-scripts-historial`:* las capturas se
+   commitean y se publican solas. No son trabajo tuyo ni una decisión de diseño: son el registro de
+   un estado que **ya existe en PM4**, escrito con plumbing sobre una rama huérfana que nunca se
+   mergea, sin tocar el working tree, el índice ni la rama activa. El push es parte del mecanismo,
+   no un extra: el historial es un canal compartido por el equipo, y sin publicar cada uno
+   acumularía el suyo en local. La restricción es estructural, no una convención —
+   `pushearHistorial` (en `core/historial.mjs`) **lanza** si se lo invoca con cualquier otra rama, y
+   usa refspec explícito para que `push.default` no pueda subir la rama activa por accidente.
+   **Sobre cualquier otra rama el push sigue prohibido sin pedido explícito.**
 9. **Nunca sobrescribir un script PM4 sin capturar antes y después.** Toda escritura
    —`pm4_update_script`, `pm4_run_script` con `code_adhoc` (que también escribe), o
    `PUT /scripts/{id}`— queda registrada por los hooks `PreToolUse`/`PostToolUse`, que guardan el
@@ -432,6 +436,10 @@ Hermano de esta sección: ambas tratan de cómo se referencia y se mantiene lo q
   quedó como escape para lo que no se puede inferir, y hoy está vacío.
 - **Nunca hacer checkout de `pm4-scripts-historial`**: es huérfana y vacía el working tree. Se
   consulta con `git log`/`git show`, o leyendo el espejo `/pm4-scripts/`.
+- **Es un canal compartido del equipo:** cada captura hace `fetch` → commit → `push`. Un clone nuevo
+  adopta la rama del remoto en vez de crear una paralela, y si dos personas capturan a la vez la
+  divergencia se reconcilia sola con un commit de dos padres (el estado de PM4 es objetivo, así que
+  no hay nada que fusionar a mano). `--no-push` pospone la publicación sin perder el registro.
 - Los `.php` capturados viven en la rama huérfana `pm4-scripts-historial`, nunca en `dev`. Son
   registro, no fuente: editarlos no cambia nada en PM4. La rama no se mergea ni se borra.
   La copia navegable de `/pm4-scripts/` (raíz del repo) se **genera** en cada captura y está

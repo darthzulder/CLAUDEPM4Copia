@@ -25,7 +25,18 @@ import { fileURLToPath } from 'node:url';
 import { dirname, join } from 'node:path';
 import { normalizar } from './core/canonicalizar.mjs';
 import { compararInstancia, detectarCambiosDeId, slugDesdeTitulo } from './core/estado.mjs';
-import { commitearCaptura, leerIndice, validarIdentidadGit } from './core/historial.mjs';
+import {
+  commitearCaptura,
+  leerIndice,
+  validarIdentidadGit,
+  traerRemoto,
+  estadoSincronizacion,
+  puntaLocal,
+  puntaRemota,
+  moverRamaA,
+  pushearHistorial,
+  hayRemoto,
+} from './core/historial.mjs';
 import {
   descubrirArbol,
   resolverUuidsVigilados,
@@ -76,6 +87,9 @@ const PM4_TOKEN = process.env.PM4_TOKEN ?? dicEnv.PM4_TOKEN ?? '';
 const STR_COMANDO = process.argv[2] ?? '';
 const BLN_ALL = process.argv.includes('--all');
 const BLN_JSON = process.argv.includes('--json');
+// Escape para capturar sin publicar (sin red, o si no querés compartir todavía). El commit local
+// queda igual, así que el registro no se pierde: solo se pospone.
+const BLN_NO_PUSH = process.argv.includes('--no-push');
 
 /** Valor de un flag `--x valor`, o null si no está. */
 function flag(strNombre) {
@@ -288,6 +302,102 @@ function cuerpoCommit(lstCapturados, strMotivo) {
   return lstLineas.join('\n');
 }
 
+/**
+ * Pone la rama local al día con el remoto antes de capturar.
+ *
+ * Cuatro situaciones, y solo dos requieren acción:
+ *   · la rama existe en el remoto y no en local (clone nuevo) → se crea local desde el remoto. Sin
+ *     esto la herramienta la vería como inexistente y crearía una rama huérfana PARALELA, sin
+ *     ancestro común: dos historiales que ya no se pueden juntar.
+ *   · local detrás → fast-forward.
+ *   · local adelante o divergido → no se toca acá; lo resuelve el commit (que puede llevar dos
+ *     padres) y el push posterior.
+ *
+ * @returns {{avisos: string[], estado: string}}
+ */
+function sincronizarAntesDeCapturar() {
+  const lstAvisos = [];
+  if (!hayRemoto(STR_REPO)) return { avisos: [], estado: 'sin-remoto' };
+
+  traerRemoto(STR_REPO, STR_RAMA);
+
+  const strLocal = puntaLocal(STR_REPO, STR_RAMA);
+  const strRemoto = puntaRemota(STR_REPO, STR_RAMA);
+
+  if (!strLocal && strRemoto) {
+    moverRamaA(STR_REPO, STR_RAMA, strRemoto);
+    lstAvisos.push(`[SYNC] rama ${STR_RAMA} creada desde el remoto (${strRemoto.slice(0, 7)}).`);
+    return { avisos: lstAvisos, estado: 'al-dia' };
+  }
+
+  const strEstado = estadoSincronizacion(STR_REPO, STR_RAMA);
+  if (strEstado === 'detras') {
+    moverRamaA(STR_REPO, STR_RAMA, strRemoto);
+    lstAvisos.push(`[SYNC] rama local adelantada al remoto (${strRemoto.slice(0, 7)}).`);
+  } else if (strEstado === 'divergido') {
+    lstAvisos.push('[SYNC] local y remoto divergieron: la captura los reconcilia en un commit con ambas historias.');
+  }
+
+  return { avisos: lstAvisos, estado: strEstado };
+}
+
+/**
+ * Sube la rama de historial, reconciliando si el remoto avanzó mientras tanto.
+ *
+ * El rechazo por non-fast-forward no es un error a reportar: es la carrera esperable cuando dos
+ * personas capturan a la vez. Se resuelve sola porque el contenido no es opinión sino el estado de
+ * PM4 — se trae el remoto y se rehace el commit con ambos padres y el árbol del remoto como base.
+ *
+ * Un fallo de red o de permisos NO es fatal: el commit ya está en local y se subirá en la próxima
+ * captura. Perder el push es recuperable; perder el registro, no.
+ */
+function publicarHistorial(dicArchivos, strMensaje) {
+  const objPush = pushearHistorial(STR_REPO, STR_RAMA);
+  if (objPush.ok) return { ok: true, aviso: `[PUSH] ${STR_RAMA} publicada en origin.` };
+
+  if (!objPush.rechazado) {
+    return { ok: false, aviso: `[PUSH] no se pudo publicar (${objPush.mensaje}). El commit está en local; se subirá en la próxima captura.` };
+  }
+
+  // Carrera: alguien pusheó entre nuestro fetch y nuestro push.
+  traerRemoto(STR_REPO, STR_RAMA);
+  const strRemoto = puntaRemota(STR_REPO, STR_RAMA);
+  const strLocal = puntaLocal(STR_REPO, STR_RAMA);
+  if (!strRemoto || !strLocal) {
+    return { ok: false, aviso: '[PUSH] rechazado y no se pudo leer el remoto; el commit queda en local.' };
+  }
+
+  const objMerge = commitearCaptura({
+    strRepo: STR_REPO,
+    strRama: STR_RAMA,
+    dicArchivos,
+    strMensaje: `${strMensaje}\n\nReconciliado con el remoto: se registran ambas historias.`,
+    lstPadres: [strLocal, strRemoto],
+    strTreeBase: strRemoto,
+  });
+
+  const objReintento = pushearHistorial(STR_REPO, STR_RAMA);
+  return objReintento.ok
+    ? { ok: true, aviso: `[PUSH] reconciliado con el remoto y publicado (${objMerge.sha.slice(0, 7)}).` }
+    : { ok: false, aviso: `[PUSH] sigue rechazado tras reconciliar (${objReintento.mensaje}). El commit está en local.` };
+}
+
+/**
+ * Publica si la rama local tiene commits que el remoto no tiene, aunque esta corrida no haya
+ * capturado nada. Cubre el historial que quedó sin subir por falta de red o de un push anterior.
+ */
+function publicarSiHayPendiente() {
+  if (BLN_NO_PUSH || !hayRemoto(STR_REPO)) return { ok: false, aviso: '' };
+
+  const strEstado = estadoSincronizacion(STR_REPO, STR_RAMA);
+  if (strEstado !== 'adelante' && strEstado !== 'sin-remoto') return { ok: false, aviso: '' };
+
+  const objPush = pushearHistorial(STR_REPO, STR_RAMA);
+  return objPush.ok
+    ? { ok: true, aviso: `[PUSH] historial local pendiente publicado en origin.` }
+    : { ok: false, aviso: `[PUSH] quedan commits sin publicar (${objPush.mensaje}).` };
+}
+
 // ── capture ─────────────────────────────────────────────────────────────────────────────────
 async function cmdCapture() {
   if (!BLN_ALL && INT_ID === null) {
@@ -300,6 +410,12 @@ async function cmdCapture() {
     log(`[pm4-scripts] ${strProblemaGit}`);
     return salir(5, { ok: false, error: strProblemaGit });
   }
+
+  // ── Sincronización previa ────────────────────────────────────────────────────────────────
+  // Sin esto, dos personas capturando en paralelo se pisan: cada una parte de su punta local y
+  // vuelve a registrar lo que la otra ya había subido.
+  const objSync = sincronizarAntesDeCapturar();
+  for (const strAviso of objSync.avisos) log(strAviso);
 
   const objIndice = leerIndice(STR_REPO, STR_RAMA, STR_RUTA_INDICE);
   const dicIndice = objIndice.scripts;
@@ -361,7 +477,12 @@ async function cmdCapture() {
 
   if (!objComp.hayCambios) {
     log(`[pm4-scripts] sin cambios — ${objComp.sinCambios.length} script(s) ya estaban capturados.`);
-    return salir(0, { ok: true, capturados: 0, commit: null });
+    // Aunque no haya nada nuevo que registrar, puede haber commits locales sin publicar: capturas
+    // hechas sin red, o antes de que existiera el push automático. Si no se intenta acá, ese
+    // historial se queda en una sola máquina justamente cuando ya no hay nada que lo dispare.
+    const objPendiente = publicarSiHayPendiente();
+    if (objPendiente.aviso) log(objPendiente.aviso);
+    return salir(0, { ok: true, capturados: 0, commit: null, publicado: objPendiente.ok });
   }
 
   // Archivos del commit: los .php que cambiaron, más el índice actualizado.
@@ -415,11 +536,20 @@ async function cmdCapture() {
   log(`\n✓ ${lstCapturados.length} script(s) capturado(s) en ${STR_RAMA}@${objCommit.sha.slice(0, 7)}`);
   if (objCommit.esPrimerCommit) log(`  (rama ${STR_RAMA} creada)`);
 
+  // Publicar es parte de capturar: el historial es un canal compartido, y sin push cada uno
+  // acumularía el suyo en local. El push está autorizado SOLO para esta rama (ver
+  // STR_RAMA_HISTORIAL en core/historial.mjs, que lo hace imposible sobre cualquier otra).
+  const objPub = BLN_NO_PUSH
+    ? { ok: false, aviso: '[PUSH] omitido por --no-push; el commit queda solo en local.' }
+    : publicarHistorial(dicArchivos, strMensaje);
+  log(objPub.aviso);
+
   return salir(0, {
     ok: true,
     capturados: lstCapturados.length,
     commit: objCommit.sha,
     rama: STR_RAMA,
+    publicado: objPub.ok,
     scripts: lstCapturados.map((o) => o.slug),
   });
 }

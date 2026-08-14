@@ -26,6 +26,19 @@ import { join } from 'node:path';
 const STR_MODO_BLOB = '100644';
 
 /**
+ * ÚNICA rama que este módulo puede pushear.
+ *
+ * El push automático está autorizado exclusivamente para la rama de historial: es un canal de
+ * registro compartido, no trabajo de nadie, y nunca se mergea. Sobre cualquier otra rama el push
+ * sigue siendo decisión del usuario (regla #8 de CLAUDE.md).
+ *
+ * La restricción es estructural, no una convención: `pushearHistorial` compara contra esta
+ * constante y lanza si no coincide, y usa un refspec explícito para que la configuración de
+ * `push.default` de cada máquina no pueda hacer que se suba la rama activa por accidente.
+ */
+export const STR_RAMA_HISTORIAL = 'pm4-scripts-historial';
+
+/**
  * Corre git y devuelve stdout como string.
  *
  * `stdio` se declara explícitamente porque el default de execFileSync **reenvía stderr al proceso
@@ -100,6 +113,125 @@ export function leerIndice(strRepo, strRama, strRutaIndice) {
   }
 }
 
+/** ¿Hay un remoto `origin` configurado? Sin él, todo el modo compartido se omite en silencio. */
+export function hayRemoto(strRepo) {
+  try {
+    return git(['remote', 'get-url', 'origin'], { strRepo }).trim() !== '';
+  } catch {
+    return false;
+  }
+}
+
+/**
+ * Trae la rama de historial del remoto. No toca la rama local: solo actualiza
+ * `refs/remotes/origin/<rama>` para poder comparar.
+ *
+ * @returns {boolean} true si el fetch se hizo; false si no hay remoto o falló (sin red, por ej.)
+ */
+export function traerRemoto(strRepo, strRama) {
+  if (!hayRemoto(strRepo)) return false;
+  try {
+    git(['fetch', 'origin', `${strRama}:refs/remotes/origin/${strRama}`], { strRepo });
+    return true;
+  } catch {
+    // La rama puede no existir aún en el remoto (primera vez), o no haber red. Ninguno es fatal:
+    // se captura igual en local y el push posterior creará la rama si corresponde.
+    return false;
+  }
+}
+
+/** Punta de la rama en el remoto ya fetcheado, o null si no existe. */
+export function puntaRemota(strRepo, strRama) {
+  try {
+    return git(['rev-parse', '--verify', '--quiet', `refs/remotes/origin/${strRama}`], { strRepo }).trim() || null;
+  } catch {
+    return null;
+  }
+}
+
+/** Punta de la rama local, o null. */
+export function puntaLocal(strRepo, strRama) {
+  try {
+    return git(['rev-parse', '--verify', '--quiet', `refs/heads/${strRama}`], { strRepo }).trim() || null;
+  } catch {
+    return null;
+  }
+}
+
+/**
+ * Relación entre la rama local y la del remoto.
+ *
+ * Distinguir `detras` de `divergido` es lo que decide la estrategia de la captura: en el primer
+ * caso alcanza con adelantar la local (fast-forward); en el segundo hay que registrar ambas
+ * historias en el commit nuevo para no perder lo que el compañero ya había capturado.
+ *
+ * @returns {'sin-local'|'sin-remoto'|'al-dia'|'detras'|'adelante'|'divergido'}
+ */
+export function estadoSincronizacion(strRepo, strRama) {
+  const strLocal = puntaLocal(strRepo, strRama);
+  const strRemoto = puntaRemota(strRepo, strRama);
+
+  if (!strLocal && !strRemoto) return 'sin-local';
+  if (!strLocal) return 'sin-local';
+  if (!strRemoto) return 'sin-remoto';
+  if (strLocal === strRemoto) return 'al-dia';
+
+  const blnRemotoEsAncestro = esAncestro(strRepo, strRemoto, strLocal);
+  const blnLocalEsAncestro = esAncestro(strRepo, strLocal, strRemoto);
+
+  if (blnLocalEsAncestro) return 'detras';
+  if (blnRemotoEsAncestro) return 'adelante';
+  return 'divergido';
+}
+
+function esAncestro(strRepo, strPosibleAncestro, strDescendiente) {
+  try {
+    git(['merge-base', '--is-ancestor', strPosibleAncestro, strDescendiente], { strRepo });
+    return true;
+  } catch {
+    return false;
+  }
+}
+
+/** Mueve la rama local a un commit dado. Se usa para adelantarla al remoto (fast-forward). */
+export function moverRamaA(strRepo, strRama, strSha) {
+  git(['update-ref', `refs/heads/${strRama}`, strSha], { strRepo });
+}
+
+/**
+ * Sube la rama de historial al remoto.
+ *
+ * Dos guardas deliberadas:
+ *   · solo acepta STR_RAMA_HISTORIAL — sobre cualquier otra rama lanza, así que este módulo no
+ *     puede publicar trabajo de nadie aunque se lo invoque mal;
+ *   · refspec explícito `<rama>:<rama>` en vez de `git push` a secas, para que la configuración
+ *     de `push.default` de la máquina no pueda subir la rama activa por accidente.
+ *
+ * @returns {{ok: boolean, rechazado: boolean, mensaje: string}} `rechazado` indica que el remoto
+ *   avanzó y hay que reconciliar; cualquier otro fallo (sin red, sin permisos) viene con ok=false
+ *   y rechazado=false, y NO es fatal: el commit ya está en local y se subirá en la próxima captura.
+ */
+export function pushearHistorial(strRepo, strRama) {
+  if (strRama !== STR_RAMA_HISTORIAL) {
+    throw new Error(
+      `pushearHistorial solo puede pushear '${STR_RAMA_HISTORIAL}'; se pidió '${strRama}'. ` +
+      'El push automático está autorizado únicamente para la rama de historial.',
+    );
+  }
+  if (!hayRemoto(strRepo)) {
+    return { ok: false, rechazado: false, mensaje: 'no hay remoto origin configurado' };
+  }
+
+  try {
+    git(['push', 'origin', `refs/heads/${strRama}:refs/heads/${strRama}`], { strRepo });
+    return { ok: true, rechazado: false, mensaje: '' };
+  } catch (excError) {
+    const strMensaje = String(excError.message ?? '');
+    const blnRechazado = /non-fast-forward|rejected|fetch first|behind/i.test(strMensaje);
+    return { ok: false, rechazado: blnRechazado, mensaje: strMensaje.slice(0, 300) };
+  }
+}
+
 /**
  * Crea un commit en `strRama` con los archivos dados, sin tocar el working tree ni el índice real.
  *
@@ -112,9 +244,14 @@ export function leerIndice(strRepo, strRama, strRutaIndice) {
  * @param {string} objArgs.strRama rama destino (se crea huérfana si no existe)
  * @param {Record<string, string>} objArgs.dicArchivos ruta en la rama (con `/`) → contenido
  * @param {string} objArgs.strMensaje mensaje completo del commit (título + cuerpo)
+ * @param {string[]} [objArgs.lstPadres] padres explícitos. Con dos, el commit es un merge: se usa
+ *   al reconciliar una divergencia, para que la historia del compañero quede en el grafo en vez de
+ *   descartarse. Si se omite, el padre es la punta actual de la rama.
+ * @param {string} [objArgs.strTreeBase] árbol de partida. Al reconciliar se pasa el del REMOTO, no
+ *   el de la rama local: así los archivos que el compañero capturó y nosotros no tocamos sobreviven.
  * @returns {{sha: string, esPrimerCommit: boolean}}
  */
-export function commitearCaptura({ strRepo, strRama, dicArchivos, strMensaje }) {
+export function commitearCaptura({ strRepo, strRama, dicArchivos, strMensaje, lstPadres, strTreeBase }) {
   const lstRutas = Object.keys(dicArchivos);
   if (lstRutas.length === 0) {
     throw new Error('commitearCaptura: no se recibió ningún archivo que commitear.');
@@ -128,8 +265,11 @@ export function commitearCaptura({ strRepo, strRama, dicArchivos, strMensaje }) 
   try {
     const blnExiste = ramaExiste(strRepo, strRama);
 
-    // Punto de partida del árbol: lo que la rama ya tenía, o vacío si es la primera captura.
-    if (blnExiste) {
+    // Punto de partida del árbol: el que se indique (reconciliación), lo que la rama ya tenía, o
+    // vacío si es la primera captura.
+    if (strTreeBase) {
+      git(['read-tree', strTreeBase], { strRepo, dicEnv });
+    } else if (blnExiste) {
       git(['read-tree', strRama], { strRepo, dicEnv });
     } else {
       git(['read-tree', '--empty'], { strRepo, dicEnv });
@@ -153,7 +293,13 @@ export function commitearCaptura({ strRepo, strRama, dicArchivos, strMensaje }) 
     // El mensaje va por stdin y no por -m: evita todo el problema de escapado de comillas y saltos
     // de línea al pasar un mensaje multilínea por la línea de comandos en Windows.
     const lstArgsCommit = ['commit-tree', strTreeSha];
-    if (blnExiste) {
+    if (lstPadres?.length) {
+      // Dos padres = commit de merge. Es la forma de reconciliar una divergencia sin perder nada:
+      // el árbol lo generamos nosotros desde PM4 (que es la verdad), y ambas historias quedan
+      // alcanzables en el grafo. No hay conflicto de texto que resolver porque no fusionamos
+      // contenido: lo reemplazamos por el estado real.
+      for (const strPadre of lstPadres) lstArgsCommit.push('-p', strPadre);
+    } else if (blnExiste) {
       const strPadre = git(['rev-parse', strRama], { strRepo }).trim();
       lstArgsCommit.push('-p', strPadre);
     }
