@@ -132,15 +132,32 @@ describe('PantallaNoEncontrada', () => {
     }
   });
 
-  it('hoy el registro real está vacío, así que la lista sale sin ningún slug', async () => {
-    // El puente con la realidad, hermano del que quedó en `indice-pantallas.spec.ts`: fija que el
-    // registro vacío no es una hipótesis del test sino **lo que se ve al pedir un slug inexistente
-    // hoy**. Se pone rojo en la Fase 5 con la primera pantalla portada, que es cuando conviene volver
-    // a leer este archivo — el caso de arriba, en cambio, seguirá valiendo sin cambios.
-    expect(listarSlugsEnrutables()).toEqual([]);
+  /**
+   * ⚠ **Reemplaza al caso que aseveraba el registro vacío**, hermano del de `indice-pantallas.spec.ts`
+   * y por el mismo motivo. La versión de la Fase 4 fijaba `toEqual([])` y anunciaba que se pondría
+   * rojo "en la Fase 5 con la primera pantalla portada"; la SCR-008 lo hizo
+   * (`expected [ Array(1) ] to deeply equal []`).
+   *
+   * Se sustituye en vez de borrarse porque es el único caso del archivo que **no** inyecta
+   * `SLUGS_DISPONIBLES`: los demás pasan su propia lista por el token, así que si el factory real del
+   * token dejara de leer `listarSlugsEnrutables()` —o volviera a devolver `[]`— seguirían todos
+   * verdes. Este es el que ata el template al registro de verdad.
+   */
+  it('⚠ el registro real YA NO está vacío y la lista enumera slugs de verdad', async () => {
+    const cllReales = listarSlugsEnrutables();
 
+    // `length > 0` y no un conteo exacto: cada pantalla nueva de la Fase 5 haría rojo un número fijo
+    // sin que nada esté mal. El inventario exacto lo vigila `pantallas.spec.ts`.
+    expect(cllReales.length).toBeGreaterThan(0);
+
+    // Sin `montarEn` con el token inyectado, o sea con el factory real: es lo que ejercita la cadena
+    // `DIC_PANTALLAS` → `listarSlugsEnrutables()` → token → template de punta a punta.
     const objRaiz = await montarEn('/no-existe');
     expect(objRaiz.textContent).toContain('Pantallas disponibles');
+
+    // El slug sale del registro, no escrito acá: si el template enumerara una lista paralela (o el
+    // token cayera a `[]`), el rótulo seguiría estando y solo esta línea lo notaría.
+    expect(objRaiz.textContent).toContain(cllReales[0]);
   });
 
   it('ofrece la vuelta al índice con un href, no con routerLink', async () => {

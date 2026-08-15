@@ -15,12 +15,23 @@
  * `app.routes.spec.ts`— y la guarda pasaría de instantánea a la parte más lenta de la suite.
  * Acá el slug es un string y el componente una función no invocada.
  *
- * ── ⚠ Está VACÍO a propósito, y eso es el estado correcto hoy ───────────────────────────────
- * Las 12 pantallas de negocio se portan en la **Fase 5**, una por una. Este archivo se escribe
- * en la Fase 4 —antes de que exista la primera— justamente para que la guarda exista **antes**
- * que las pantallas que tiene que vigilar: una guarda escrita después se escribe, sin querer,
- * a la medida de lo que ya se construyó. Escrita antes, cada pantalla portada se encuentra un
- * requisito que ya estaba puesto.
+ * ── Se escribió VACÍO en la Fase 4, y eso fue deliberado ────────────────────────────────────
+ * Las 12 pantallas de negocio se portan en la **Fase 5**, una por una. Este archivo se escribió
+ * en la Fase 4 —antes de que existiera la primera— justamente para que la guarda existiera
+ * **antes** que las pantallas que tiene que vigilar: una guarda escrita después se escribe, sin
+ * querer, a la medida de lo que ya se construyó. Escrita antes, cada pantalla portada se
+ * encuentra un requisito que ya estaba puesto.
+ *
+ * **Ya no está vacío:** la primera pantalla portada fue `COL_QD_SCR-008_Revision_Respuesta_SAC`
+ * (Fase 5, pantalla 1 de 12). Con eso se activaron por sí solos los casos que la Fase 4 dejó
+ * *armados* y pasando por vacuidad —los de `indice-pantallas.spec.ts` y
+ * `pantalla-no-encontrada.spec.ts`, que iteraban un registro vacío—, que era exactamente el
+ * momento previsto para volver a leerlos.
+ *
+ * La segunda es `COL_QD_SCR-004_Revision_Error_Tecnico_API`, y con **dos** entradas empieza a
+ * valer algo que con una sola no se podía distinguir: los casos que recorren el registro real
+ * (el puente de `indice-pantallas.spec.ts`, el `strDisponibles` de `pantalla-no-encontrada`)
+ * ahora se pondrían rojos ante un recorte que devolviera *una* pantalla, no solo ante `[]`.
  *
  * Agregar una pantalla en la Fase 5 son dos líneas, en dos archivos, y las dos son obligatorias:
  * 1. una entrada acá, con su slug real de PM4 y su `loadComponent`;
@@ -54,6 +65,14 @@ export type CargadorDePantalla = NonNullable<Route['loadComponent']>;
  */
 export const DIC_PANTALLAS: Record<string, CargadorDePantalla> = {
   // Fase 5 — se pueblan de a una, en el orden del plan de migración.
+  'COL_QD_SCR-008_Revision_Respuesta_SAC': () =>
+    import(
+      '../screens/atencion-cliente/quejas-directas/COL_QD_SCR-008_Revision_Respuesta_SAC/revision-respuesta-sac'
+    ).then((in_objModulo) => in_objModulo.RevisionRespuestaSac),
+  'COL_QD_SCR-004_Revision_Error_Tecnico_API': () =>
+    import(
+      '../screens/atencion-cliente/quejas-directas/COL_QD_SCR-004_Revision_Error_Tecnico_API/revision-error-tecnico-api'
+    ).then((in_objModulo) => in_objModulo.RevisionErrorTecnicoApi),
 };
 
 /**

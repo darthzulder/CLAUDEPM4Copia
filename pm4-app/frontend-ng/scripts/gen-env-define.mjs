@@ -26,11 +26,29 @@
  *   de string, sin ninguna referencia a `process`.
  * - Una variable ausente sale como `''`, no como `undefined`: replica el `?? ''` de `useToken.ts` y
  *   evita que el tipo del servicio tenga que ser `string | undefined`.
+ * - ⚠ **Cada constante se emite con anotación `: string` explícita, y eso NO es decorativo.** Un
+ *   `export const X = "true"` sin anotar tiene el tipo **literal** `"true"`, no `string`, así que
+ *   `tsc` rechaza `X !== 'false'` con `TS2367: los tipos '"true"' y '"false"' no tienen overlap` —
+ *   una comparación que el compilador considera decidible porque cree conocer el valor. Pero el valor
+ *   **no** es un hecho de compilación: sale del `.env` de la máquina que buildea y cambia sin que el
+ *   código cambie. Bajo Vite el mismo código compilaba porque `import.meta.env.X` es
+ *   `string | undefined`, o sea ya ancho. La anotación repone ese ancho.
+ *
+ *   Lo encontró el port de `screens/.../fields/fields.ts` (Fase 5), cuyo `LOCK_COUNTRY` es un feature
+ *   flag *opt-out* (`VITE_LOCK_COUNTRY !== 'false'`) y no compilaba. El arreglo va acá y no allá a
+ *   propósito: castear en el consumidor dejaría la trampa armada para el siguiente —`VITE_TASK_ID`
+ *   comparado contra `''` es el caso más probable— y además el `TS2367` es **por valor**, así que
+ *   aparece o no según lo que tenga el `.env` de cada uno. Anotando en el generador, el tipo del
+ *   archivo no depende del entorno que lo generó.
  * - `VITE_RECAPTCHA_SITE_KEY` se suma en la Fase 4, con `RecaptchaModal`. En React no pasa por este
  *   camino sino por el `define` de `vite.config.ts` (`__RECAPTCHA_SITE_KEY__`), que ahí **sí** puede
  *   computar `JSON.stringify(...)` porque es un `.ts`; `angular.json` no. O sea que no es un cambio de
  *   diseño: es el mismo mecanismo de Vite escrito donde Angular lo admite.
- * - Se generan **solo estas cuatro**. `VITE_PROCESS_ID`/`VITE_EVENT_ID` los lee `useToken.ts` en React
+ * - La lista de claves es **cerrada y explícita** (ver `LST_CLAVES`): se declara la que se necesita,
+ *   no se vuelca el `.env` entero. Es lo que impide que un secreto del backend —`PM4_TOKEN`,
+ *   `RECAPTCHA_SECRET_KEY`, `IFRAME_ENCRYPTION_KEY`— llegue al bundle del navegador por el solo hecho
+ *   de estar en el mismo archivo. Sumar una clave acá es una decisión, no un efecto colateral.
+ * - `VITE_PROCESS_ID`/`VITE_EVENT_ID` los lee `useToken.ts` en React
  *   pero **no están declarados en `.env.example`**, cuyas líneas 15-19 dicen explícitamente que los
  *   IDs de proceso/colección/script ya no se configuran por variable de entorno — viven en
  *   `pm4-registry.json` (regla 6). Portarlos sería recrear deuda que el proyecto ya sacó.
@@ -62,7 +80,7 @@ const STR_DIR = dirname(fileURLToPath(import.meta.url));
 const STR_ENV = resolve(STR_DIR, '../../.env');
 const STR_SALIDA = resolve(STR_DIR, '../src/env.generated.ts');
 
-// Las cuatro con fallback por entorno (ver el bloque de contrato arriba).
+// Las que tienen fallback por entorno (ver el bloque de contrato arriba).
 const LST_CLAVES = [
   'VITE_PM4_TOKEN',
   'VITE_TASK_ID',
@@ -73,6 +91,19 @@ const LST_CLAVES = [
   // vive **solo** en el backend (regla 3) y NO se genera acá — si algún día aparece en esta lista,
   // es un incidente, no una mejora.
   'VITE_RECAPTCHA_SITE_KEY',
+  // ── Configuración de país, sumadas en la Fase 5 con el port de `fields/fields.ts` ─────────────
+  // En React son los dos únicos `import.meta.env` de ese archivo
+  // (`frontend/src/screens/.../fields/fields.ts:427-428`), y de ahí salen `DEFAULT_COUNTRY_CODE` y
+  // `LOCK_COUNTRY`, que consumen SCR-000 y SCR-009.
+  //
+  // ⚠ El "ausente sale como `''`" del contrato **no es indiferente acá, y hay que leerlo con
+  // cuidado**: `LOCK_COUNTRY` se deriva con `!== 'false'`, o sea que el `''` de una variable
+  // ausente da `true` — que es exactamente lo que hace Vite hoy con `undefined !== 'false'`. Si en
+  // cambio saliera `undefined`, seguiría dando `true` igual; pero si alguien "mejorara" el default a
+  // `'false'`, el país quedaría desbloqueado en cualquier entorno que no declare la variable, que es
+  // un cambio funcional silencioso. El default correcto es el string vacío, y por eso queda escrito.
+  'VITE_DEFAULT_COUNTRY_CODE',
+  'VITE_LOCK_COUNTRY',
 ];
 
 /**
@@ -151,10 +182,14 @@ const strContenido = `// ARCHIVO GENERADO por scripts/gen-env-define.mjs — NO 
 // El porqué de que esto sea un archivo generado y no un \`define\` de angular.json está en el
 // encabezado del generador: \`define\` sustituye TEXTO, no evalúa, así que dejar
 // \`process.env.VITE_TASK_ID\` ahí inyecta esa expresión cruda en el bundle del navegador.
-${LST_CLAVES.map((in_strClave) => `export const ${in_strClave} = ${JSON.stringify(dicValores[in_strClave])};`).join('\n')}
+//
+// El \`: string\` de cada constante es obligatorio, no estilo: sin él el tipo es el **literal** del
+// valor ("true", ""), y \`tsc\` rechaza cualquier comparación contra otro literal con TS2367 aunque el
+// valor venga del .env y no sea un hecho de compilación. Ver el bloque de contrato del generador.
+${LST_CLAVES.map((in_strClave) => `export const ${in_strClave}: string = ${JSON.stringify(dicValores[in_strClave])};`).join('\n')}
 
 // Este NO sale del .env: se computa en cada corrida del generador (RENDER_GIT_COMMIT → git → 'unknown').
-export const STR_COMMIT_HASH = ${JSON.stringify(strCommitHash)};
+export const STR_COMMIT_HASH: string = ${JSON.stringify(strCommitHash)};
 `;
 
 writeFileSync(STR_SALIDA, strContenido, 'utf8');

@@ -95,14 +95,6 @@ describe('IndicePantallas', () => {
       expect(objRaiz.querySelector('.pm4-indice-grilla')).toBeNull();
     });
 
-    it('hoy el registro real ESTÁ vacío, así que la app arranca en ese estado', async () => {
-      // El puente entre los casos inyectados y la realidad: fija que el estado vacío no es una
-      // hipótesis de test sino **lo que se ve al abrir la raíz hoy**. Es lo que un revisor del gate 4
-      // necesita saber antes de reportar el índice como roto, y se pone rojo en la Fase 5 con la
-      // primera pantalla registrada — que es cuando conviene volver a leer este archivo.
-      expect(listarSlugsEnrutables()).toEqual([]);
-      expect((await montar()).querySelector('.pm4-indice-grilla')).toBeNull();
-    });
   });
 
   describe('con slugs en el registro', () => {
@@ -146,6 +138,44 @@ describe('IndicePantallas', () => {
       for (const strSlug of CLL_SLUGS_DE_PRUEBA) {
         expect(strTexto).toContain(strSlug);
       }
+    });
+  });
+
+  describe('el puente con el registro real', () => {
+    /**
+     * ⚠ **Este caso REEMPLAZA al que aseveraba que el registro estaba vacío, y el reemplazo es el
+     * punto.** La versión de la Fase 4 fijaba `listarSlugsEnrutables()).toEqual([])` y dejaba escrito
+     * que se pondría rojo "en la Fase 5 con la primera pantalla registrada — que es cuando conviene
+     * volver a leer este archivo". Pasó exactamente eso: la SCR-008 entró a `DIC_PANTALLAS` y el caso
+     * se puso rojo con `expected [ Array(1) ] to deeply equal []`.
+     *
+     * Un caso que asevera lo **contrario** del nuevo estado del mundo no se borra: se sustituye. Si se
+     * borrara sin más, el puente entre los casos inyectados y la realidad desaparecería, y volver a
+     * vaciar el registro por descuido —o que `listarSlugsEnrutables()` se degradara— no pondría nada
+     * rojo acá; los otros cuatro casos inyectan sus propios slugs justamente para no depender del
+     * inventario, así que ninguno lo notaría. Es el mismo criterio de "guarda de borrado" que la Fase 4
+     * aplicó al alias de la ex SCR-010 en `app.routes.spec.ts`.
+     */
+    it('⚠ el registro real YA NO está vacío y la grilla real se pinta', async () => {
+      const cllReales = listarSlugsEnrutables();
+
+      // La mitad que el caso viejo cubría al revés: que el estado del índice sea un hecho verificado y
+      // no una hipótesis del test. Se asevera `length > 0` y no un número exacto a propósito — con un
+      // número, cada pantalla de la Fase 5 pondría este archivo rojo sin que nada esté mal, y el
+      // inventario exacto ya lo vigila `pantallas.spec.ts`, que es su lugar.
+      expect(cllReales.length).toBeGreaterThan(0);
+
+      // Y la mitad que ningún caso inyectado puede cubrir: que con el registro **real** —no el pisado—
+      // el `@else` se tome y la grilla exista. Sin esto, `cllSlugs` podría dejar de leer del registro
+      // (quedar en `[]` fijo, por ejemplo) y los cuatro casos de arriba seguirían verdes porque los
+      // cuatro pisan el campo antes de pintar.
+      const objRaiz = await montar();
+      expect(objRaiz.querySelector('.pm4-indice-grilla')).not.toBeNull();
+      expect(objRaiz.textContent).not.toContain('Todavía no hay pantallas de negocio portadas');
+
+      // El primer slug real, nombrado desde el registro y no escrito acá: cierra el lazo de que lo que
+      // se pinta viene de `DIC_PANTALLAS` y no de una lista paralela.
+      expect(objRaiz.textContent).toContain(cllReales[0]);
     });
   });
 });

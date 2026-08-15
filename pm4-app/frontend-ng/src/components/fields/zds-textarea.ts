@@ -1,4 +1,12 @@
-import { Component, forwardRef, input, viewChild } from '@angular/core';
+import {
+  afterRenderEffect,
+  Component,
+  ElementRef,
+  forwardRef,
+  inject,
+  input,
+  viewChild,
+} from '@angular/core';
 import { NG_VALUE_ACCESSOR } from '@angular/forms';
 import { TextareaZ } from '@zurich-col/lib-zurich';
 import { CampoBase } from './campo-base';
@@ -60,13 +68,26 @@ import { CampoBase } from './campo-base';
  *    por `if (this.group.get(this.name))` — o sea que escribe el control **solo** porque el wrapper
  *    lo pre-creó. La `CampoBase` sigue siendo lo que hace que esto funcione.
  *
- * ── `maxLength` acá SÍ sirve, al revés que en `lib-input-text-z` ────────────────────────────
- * En el input de texto `maxLength`/`maxNumber` son inputs muertos. Acá **no**: el template hace
- * `[attr.max-length]="maxLength ? maxNumber : ''"`. O sea que `maxLength` es el **interruptor
- * booleano** y `maxNumber` el **número**, y hacen falta los dos. El wrapper esconde ese par detrás
- * de un único `maxLength: number` —que es el nombre y el tipo que usan las pantallas React— y
- * deriva el booleano. Igual que en el input de texto, el límite **efectivo** se declara como
- * `Validators.maxLength(n)` en el control; esto es el contador visual del DS.
+ * ── `maxLength`: el par bool+num de la lib, y el contador que NO llega solo ──────────────────
+ * En el input de texto `maxLength`/`maxNumber` son inputs muertos. Acá **casi** sirven: el template
+ * de `lib-textarea-z` hace `[attr.max-length]="maxLength ? maxNumber : ''"`, así que `maxLength` es
+ * el **interruptor booleano** y `maxNumber` el **número**, y hacen falta los dos. El wrapper esconde
+ * ese par detrás de un único `maxLength: number` —el nombre y el tipo que usan las pantallas React—
+ * y deriva el booleano. El límite **efectivo** se declara como `Validators.maxLength(n)` en el
+ * control; esto es solo el contador visual del DS (`15/2000`).
+ *
+ * **Pero el par no alcanza, y el contador no se pinta.** El `[attr.max-length]` de la lib es un
+ * binding de **atributo**, y `za-textarea` declara ese input como **propiedad**
+ * (`inputs: { maxLength: ["max-length", "maxLength"] }`). En Angular un `[attr.x]` escribe el
+ * atributo del DOM y **no** ejecuta el setter del input del hijo, así que `ZaTextarea.maxLength`
+ * queda `undefined` y el `[max-length]="maxLength"` que ese template reenvía al `z-textarea` —el
+ * elemento de Lit que de verdad pinta el contador— empuja `undefined`. El atributo queda visible en
+ * el `za-textarea` (parece cableado) pero muere ahí: es un bug de `lib-zurich`, no de la fachada.
+ *
+ * Medido en el navegador contra React lado a lado: React pone `max-length="2000"` **en el
+ * `z-textarea`** y su shadow root pinta `0/2000`; Angular lo tenía en el `za-textarea` y no pintaba
+ * nada. Poniendo el atributo a mano en el `z-textarea` de Angular el contador apareció al instante
+ * (`15/2000` con 15 caracteres tipeados). De ahí el parche de abajo.
  */
 @Component({
   selector: 'zds-textarea',
@@ -119,6 +140,38 @@ export class ZdsTextarea extends CampoBase<string> {
   }
 
   private readonly objHijo = viewChild.required<TextareaZ>('objHijo');
+
+  private readonly objAnfitrion = inject(ElementRef<HTMLElement>);
+
+  constructor() {
+    super();
+
+    // Repone el `max-length` sobre el `z-textarea`, que es el único lugar donde el DS lo lee para
+    // pintar el contador. Ver el bloque de la cabecera: el `[attr.max-length]` de `lib-textarea-z`
+    // escribe el atributo del `za-textarea` sin ejecutar su setter, así que el valor nunca baja al
+    // elemento de Lit y el contador no aparece.
+    //
+    // Va en `afterRenderEffect` y no en `ngAfterViewInit` por dos motivos: el `z-textarea` lo pinta
+    // el template de `za-textarea`, o sea dos niveles abajo y no necesariamente presente en el
+    // primer pasaje; y `maxLength()` es un signal input que puede cambiar, así que el efecto se
+    // re-ejecuta solo. Es DOM directo por la misma razón que `alCambiarValid()` escribe la propiedad
+    // del hijo: la lib no ofrece la palanca y bindear no gana.
+    afterRenderEffect(() => {
+      const numLimite = this.maxLength();
+
+      const objTextarea = (this.objAnfitrion.nativeElement as HTMLElement).querySelector(
+        'za-textarea z-textarea',
+      );
+      if (!objTextarea) return;
+
+      if (numLimite === undefined) {
+        objTextarea.removeAttribute('max-length');
+        return;
+      }
+
+      objTextarea.setAttribute('max-length', String(numLimite));
+    });
+  }
 
   /**
    * Corrige el `valid` que la lib se auto-asignó mirando el group entero.

@@ -1,0 +1,217 @@
+@if (blnCargando()) {
+  <div class="screen-wrapper">
+    <div class="screen-loading"><lib-loader-z /></div>
+  </div>
+} @else if (strError()) {
+  <div class="screen-wrapper">
+    <!-- Alerta INLINE (`za-alert`), no la cola imperativa de `lib-alert-z`: en React esto es un
+         `<ZrAlert>` dentro del markup, o sea una caja que vive donde está el contenido que describe.
+         `[hide-close]="true"` y no el atributo pelado: el input está tipado `boolean` y un atributo
+         sin valor vale `''`, que Angular 21 rechaza (`TS2322`). Ver el punto 5b de zds-reexports.ts. -->
+    <za-alert config="negative" [hide-close]="true"
+      >Error al cargar el formulario: {{ strError() }}</za-alert
+    >
+  </div>
+} @else {
+  <div class="screen-wrapper">
+    <app-screen-header title="Revisión Error Técnico API" />
+
+    <div class="screen-content">
+      <!-- `(ngSubmit)` va a `autorizar()`: es la única acción de cierre de la pantalla, así que el
+           submit nativo del form (Enter en un campo) coincide con el botón principal. A diferencia de
+           SCR-008 acá no hay ambigüedad — ACT-004-02 se retiró (§10.10 del DOCUMENTACION). -->
+      <form [formGroup]="form" (ngSubmit)="autorizar()" novalidate>
+        <!-- ── S1 · Detalle del Error Técnico (SEC-011, todo de solo lectura) ──
+             Cabecera en rojo porque la sección describe una falla, no un dato de trámite: es el mismo
+             `color="var(--z-red)"` del original. Token del DS, nunca un hex (regla 3 de CLAUDE.md). -->
+        <app-form-section title="Detalle del Error Técnico" color="var(--z-red)">
+          <!-- ACT-004-03 · el botón va en el slot `[action]`, que `FormSectionComponent` pinta a la
+               derecha del encabezado. El `[disabled]="false"` explícito es obligatorio: el default de
+               `lib-button-z` es `disabled = true` y omitirlo deja el botón muerto. -->
+          <lib-button-z
+            action
+            label="Ver Log Completo"
+            [type]="'link'"
+            icon="file-text:line"
+            [disabled]="false"
+            (eventClick)="abrirLog()"
+          />
+
+          <!-- MSG del intento acumulado: el sufijo solo aparece si el script de M3 escribió
+               `qd_strAttemptNum`, igual que el `&&` de React — sin dato no se inventa un "#". -->
+          <za-alert config="negative" [hide-close]="true">
+            La integración con SmartSupervision <strong>falló por un error técnico</strong> tras
+            varios intentos. Revise el detalle, registre la corrección y autorice el reenvío.
+            @if (strIntento()) {
+              <span> — Intento acumulado <strong>#{{ strIntento() }}</strong>.</span>
+            }
+          </za-alert>
+
+          <!-- ⚠ `formControlName` **y** `name`, los dos, en todo campo de la fachada. No es
+               redundancia: `formControlName` es lo que ata el control al `FormGroup` (el wrapper es
+               el `NG_VALUE_ACCESSOR` de ese `NgControl`), y `name` es lo que la fachada usa para el
+               `id="field-<name>"` que necesita `scrollToFirstError` y para pre-crear el control que
+               el `lib-*-z` adopta. Con solo `name` el campo pinta y **nunca llega al form**. -->
+          <div class="form-row cols-3">
+            <zds-input
+              formControlName="qd_strHttpCode"
+              name="qd_strHttpCode"
+              label="Código HTTP"
+              [readOnly]="true"
+            />
+            <zds-input
+              formControlName="qd_strErrorType"
+              name="qd_strErrorType"
+              label="Tipo de Error"
+              [readOnly]="true"
+            />
+            <zds-input
+              formControlName="qd_strAttemptNum"
+              name="qd_strAttemptNum"
+              label="Número de Intento Acumulado"
+              [readOnly]="true"
+            />
+          </div>
+          <div class="form-row cols-1">
+            <zds-input
+              formControlName="qd_strEndpointCalled"
+              name="qd_strEndpointCalled"
+              label="Endpoint Invocado"
+              [readOnly]="true"
+            />
+          </div>
+          <div class="form-row cols-1">
+            <zds-textarea
+              formControlName="qd_strApiTechMessage"
+              name="qd_strApiTechMessage"
+              label="Mensaje Técnico de la API"
+              [readOnly]="true"
+              helpText='Mensaje devuelto por la API — solo lectura. El log técnico completo está en "Ver Log Completo".'
+            />
+          </div>
+          <div class="form-row cols-1">
+            <!-- ⚠ NO lleva `[readOnly]`: el bloqueo vive en el CONTROL (`enable()`/`disable()` según
+                 FLD-058), no en la vista — ver `sincronizarEdicionPayload()` en el .ts. Un `readonly`
+                 del `za-textarea` no se refleja bajo jsdom y el spec no podría aseverarlo. -->
+            <zds-textarea
+              formControlName="qd_strPayloadSent"
+              name="qd_strPayloadSent"
+              label="Payload Enviado (JSON)"
+              [helpText]="strAyudaPayload()"
+            />
+          </div>
+        </app-form-section>
+
+        <!-- ── S2 · Registro de Corrección Técnica (SEC-012) ── -->
+        <app-form-section title="Registro de Corrección Técnica">
+          <div class="form-row cols-1">
+            <zds-textarea
+              formControlName="qd_strRootCause"
+              name="qd_strRootCause"
+              label="Causa Raíz Identificada"
+              [required]="true"
+              [maxLength]="2000"
+              [error]="strErrorCausaRaiz()"
+            />
+          </div>
+          <div class="form-row cols-1">
+            <zds-textarea
+              formControlName="qd_strCorrectionApplied"
+              name="qd_strCorrectionApplied"
+              label="Corrección Aplicada"
+              [required]="true"
+              [maxLength]="2000"
+              [error]="strErrorCorreccion()"
+            />
+          </div>
+          <div class="form-row cols-1">
+            <!-- FLD-058 · abrir/cerrar la edición del payload de S1 NO se cablea acá: los wrappers de
+                 la fachada no exponen ningún `@Output` (su único canal es el CVA), así que la reacción
+                 vive en la suscripción a `form.valueChanges` del .ts. -->
+            <zds-radio
+              formControlName="qd_strPayloadAdjustNeeded"
+              name="qd_strPayloadAdjustNeeded"
+              label="¿Requiere ajuste en payload?"
+              [options]="cllOpcionesSiNo"
+              [inline]="true"
+              [required]="true"
+            />
+          </div>
+
+          @if (blnAjustaPayload()) {
+            <za-alert config="alert" [hide-close]="true">
+              Edite el <strong>Payload Enviado (JSON)</strong> en la sección superior antes de
+              autorizar el reenvío.
+            </za-alert>
+          }
+
+          <!-- El bloqueo por JSON inválido: sin esta alerta el analista vería el botón deshabilitado
+               sin saber por qué, porque la causa está en un campo de OTRA sección. -->
+          @if (blnAjustaPayload() && !blnPayloadJsonOk()) {
+            <za-alert config="negative" [hide-close]="true">
+              El <strong>Payload Enviado</strong> no es un objeto JSON válido. Corríjalo para poder
+              autorizar el reenvío — de lo contrario la edición se descartaría y se reenviaría el body
+              reconstruido por el BPM.
+            </za-alert>
+          }
+
+          <!-- MSG-004-01 · RUL-004-01. Alerta permanente mientras la regla no se cumple, que es el
+               par del `[disabled]` del botón: la afordancia dice "no podés", el mensaje dice "por qué". -->
+          @if (!blnPuedeAutorizar()) {
+            <za-alert config="info" [hide-close]="true">
+              Debe registrar la <strong>causa raíz</strong> y la <strong>corrección aplicada</strong>
+              antes de autorizar el reenvío.
+            </za-alert>
+          }
+        </app-form-section>
+
+        <!-- ── Acciones (ACT-004-01) ──
+             Una sola: ACT-004-02 ("Escalar a Proveedor") se retiró por decisión del negocio.
+             El `[disabled]` es afordancia, NO la guarda: un botón deshabilitado del DS igual dispara
+             su handler bajo jsdom (trampa 1 de testing-conventions.md), así que el corte real vive en
+             `autorizar()`. Las dos cosas son necesarias. -->
+        <app-action-bar>
+          <lib-button-z
+            label="Autorizar Reenvío ▶"
+            [type]="'positive'"
+            [disabled]="!blnPuedeAutorizar() || blnEnviando()"
+            [loading]="blnEnviando()"
+            (eventClick)="autorizar()"
+          />
+        </app-action-bar>
+      </form>
+    </div>
+
+    <!-- ── ACT-004-03 · Modal del log completo ──
+         ⚠ Tres reglas duras del contrato de slots de `ModalZ`, las tres con fallas silenciosas:
+         1. El contenido va en `<ng-template libZTemplate id="content">`, no como hijo directo.
+         2. El `id` es un atributo ESTÁTICO: `ModalZ` lo lee con `@Attribute('id')`, que resuelve una
+            sola vez — un `[id]="expr"` llega `null` y el slot queda sin asignar, sin error.
+         3. El `ng-template` NO puede estar dentro de un `@if`: `ngAfterContentInit` corre UNA vez y si
+            el template no está en ese momento, `ModalZ` guarda `undefined` y no vuelve a mirar. Como
+            la pantalla monta con el modal CERRADO, esa es justamente la condición inicial real. El
+            `@if` va ADENTRO del slot.
+         Ver `preview-modal.ts`, que es el ejemplo funcionando, y el punto 3 de zds-reexports.ts. -->
+    <lib-modal-z [open]="blnVerLog()" tamanio="l" (close)="cerrarLog()">
+      <ng-template libZTemplate id="content">
+        @if (blnVerLog()) {
+          <h3 class="modal-titulo">Log completo del error técnico</h3>
+          <div class="modal-scroll-body">
+            <!-- `qd_strCompleteLogAPI` es un campo AGREGADO sin FLD en el anexo: lo emite el script de
+                 Momento 3 (§10.5 del DOCUMENTACION). Fuera del `[formGroup]` del form principal, así
+                 que necesita su propio contexto — de ahí el `[formGroup]` local. -->
+            <div [formGroup]="form">
+              <zds-textarea
+                formControlName="qd_strCompleteLogAPI"
+                name="qd_strCompleteLogAPI"
+                label="Log Completo"
+                [readOnly]="true"
+                [elastic]="true"
+              />
+            </div>
+          </div>
+        }
+      </ng-template>
+    </lib-modal-z>
+  </div>
+}

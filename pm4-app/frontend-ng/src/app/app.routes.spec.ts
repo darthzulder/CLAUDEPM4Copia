@@ -175,12 +175,51 @@ describe('app.routes · traducción de ?screen= a path', () => {
 });
 
 describe('app.routes · generación de rutas desde el registro', () => {
-  it('hoy no hay pantallas de negocio en la tabla, y es el estado correcto', () => {
-    // Fija el estado de la Fase 4 para que la primera pantalla de la Fase 5 **tenga** que tocar
-    // este número: si alguien registra una pantalla, este test se pone rojo y lo manda a leer la
-    // guarda de inventario de `pantallas.spec.ts`, que es donde está la obligación del spec.
-    expect(Object.keys(DIC_PANTALLAS)).toEqual([]);
-  });
+  /**
+   * ⚠ **Reemplaza al caso que aseveraba que la tabla no tenía pantallas de negocio**, y es el tercer
+   * puente del mismo tipo (los otros dos: `indice-pantallas.spec.ts`, `pantalla-no-encontrada.spec.ts`).
+   * La versión de la Fase 4 fijaba `toEqual([])` y decía textualmente que *"si alguien registra una
+   * pantalla, este test se pone rojo y lo manda a leer la guarda de inventario de `pantallas.spec.ts`"*.
+   * Hizo exactamente eso al entrar la SCR-008 (`expected [ Array(1) ] to deeply equal []`), y esa
+   * guarda ya la tiene declarada en `CLL_SLUGS_CON_SPEC`. Cumplido el mandado, el caso se sustituye
+   * por su contrario en vez de borrarse: si `DIC_PANTALLAS` volviera a vaciarse por un merge mal
+   * resuelto, los otros dos casos de este `describe` seguirían **verdes por vacuidad** (`[].filter`
+   * es `[]`, y el conteo de rutas fijas no mira las generadas).
+   *
+   * Y asevera algo que ningún otro puente puede: que la pantalla registrada **tiene ruta con
+   * componente resuelto**. Los puentes de índice y de comodín solo miran la lista de slugs; que un
+   * slug esté en el registro y que su `loadComponent` cargue una clase son dos cosas distintas —es el
+   * mismo agujero que la mutación del timeout destapó arriba, ahora sobre una pantalla de negocio.
+   */
+  it('⚠ el registro YA tiene pantallas de negocio y la primera enruta de verdad', async () => {
+    const cllSlugs = Object.keys(DIC_PANTALLAS);
+
+    // `length > 0` y no un conteo exacto: cada pantalla nueva de la Fase 5 haría rojo un número fijo
+    // sin que nada esté mal. El inventario exacto lo vigila `pantallas.spec.ts`, que es su lugar.
+    expect(cllSlugs.length).toBeGreaterThan(0);
+
+    // La ruta se navega de verdad, con el `?screen=` que manda PM4 — no se inspecciona la tabla. Es lo
+    // que ejercita la cadena completa `DIC_PANTALLAS` → `generarRutasDePantallas()` → `redirectTo` →
+    // `loadComponent`, que es la que el iframe recorre.
+    // ⚠ El router se crea **acá dentro**, no se reusa el del `describe` de arriba: son bloques
+    // hermanos, así que su `beforeEach` no corre para este caso y `objRouter` sería `undefined`.
+    // El `resetTestingModule()` es necesario porque otros casos de este archivo ya configuraron un
+    // TestBed y `configureTestingModule` sobre uno ya inicializado lanza.
+    TestBed.resetTestingModule();
+    TestBed.configureTestingModule({ providers: [provideRouter(routes)] });
+    const objRouterReal = TestBed.inject(Router);
+
+    const strSlug = cllSlugs[0];
+    await objRouterReal.navigateByUrl(`/?screen=${strSlug}`);
+
+    expect(objRouterReal.url).toBe(`/${strSlug}`);
+
+    // La aserción que distingue "enrutó" de "cargó": con un `loadComponent` que resuelve a `undefined`
+    // la URL queda igual de correcta y el iframe muestra una pantalla en blanco.
+    const objComponente = objRouterReal.routerState.snapshot.root.firstChild?.component;
+    expect(objComponente).toBeDefined();
+    expect(objComponente).not.toBe(PantallaNoEncontrada);
+  }, INT_TIMEOUT);
 
   it('cada pantalla del registro tiene su ruta', () => {
     const setPaths = new Set(routes.map((in_objRuta) => in_objRuta.path));

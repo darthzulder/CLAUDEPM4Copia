@@ -1574,3 +1574,15 @@ z-table :is(th, td)[config*="right"] {
   white-space: pre-wrap;
   font: var(--zf-body-14);
 }
+
+/* Separación del valor respecto de su etiqueta en un bloque de solo lectura
+   (`.zds-field-wrap` > `.info-bar-label` + `.info-bar-value`).
+
+   Existe porque en React esto era un `style={{ marginTop: 'var(--zs-50)' }}` repetido
+   ~10 veces en el JSX de SCR-008. El token es el mismo, así que el render no cambia;
+   lo que cambia es que deja de ser estilo en línea por pantalla, que la regla 3 de
+   pm4-app/CLAUDE.md no permite. Sirve para cualquier pantalla con bloques de contexto
+   de solo lectura — SCR-0051 y SCR-0052 tienen los mismos. */
+.valor-solo-lectura {
+  margin-top: var(--zs-50);
+}

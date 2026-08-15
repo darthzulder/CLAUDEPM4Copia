@@ -131,6 +131,22 @@
  * 'icon' must be specified`). Es el hallazgo 2 del gate 0 y vale como recordatorio general: los
  * inputs de `za-*` se verifican contra `dist/fesm2022/angular.mjs` antes de escribirlos, nunca se
  * asumen por el nombre que tendrían en otra librería.
+ *
+ * ── Y ojo con CÓMO los `lib-*-z` reenvían a los `za-*`: `[attr.x]` no cablea un input ─────────
+ * Un input de `lib-*-z` puede existir, tipar bien, aceptar el valor **y no llegar a destino**. El caso
+ * medido: `TextareaZ` reenvía el límite del contador con `[attr.max-length]="maxLength ? maxNumber : ''"`
+ * —un binding de **atributo**— mientras `ZaTextarea` declara ese input como **propiedad**
+ * (`inputs: { maxLength: ["max-length", "maxLength"] }`). En Angular un `[attr.x]` escribe el atributo
+ * del DOM y **no** ejecuta el setter del input del hijo, así que la propiedad queda `undefined` y lo
+ * que el `za-*` reenvía hacia abajo (al `z-*` de Lit, que es el que pinta) es `undefined`.
+ *
+ * Lo insidioso es el síntoma: el atributo **sí** queda visible en el `za-*` al inspeccionar el DOM, así
+ * que la cadena parece cableada. Solo se ve que está roto comparando el render con React, que escribe
+ * el atributo directo sobre el `z-*`. Y ningún spec que asevere el input del `lib-*-z` lo detecta —
+ * hay que aseverar el atributo **sobre el `z-*`**, que es el final real de la cadena (y que bajo jsdom
+ * existe en el DOM, porque lo pinta el template de un componente de Angular; lo que no ocurre ahí es
+ * el upgrade de Lit, o sea que el contador en el shadow root no es aseverable, pero el atributo sí).
+ * Ver `zds-textarea.ts`, que repone el atributo con un `afterRenderEffect`.
  */
 
 /**

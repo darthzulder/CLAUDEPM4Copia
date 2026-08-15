@@ -34,8 +34,10 @@ import { DIC_ALIAS, DIC_PANTALLAS, listarSlugsEnrutables } from './pantallas';
 /**
  * Los slugs que **tienen** su propio spec de pantalla.
  *
- * Vacío hoy porque `DIC_PANTALLAS` está vacío: las 12 pantallas de negocio se portan en la Fase 5.
- * Las dos listas crecen juntas, de a una por pantalla.
+ * Las dos listas crecen juntas, de a una por pantalla: las 12 pantallas de negocio se portan en la
+ * Fase 5. La primera fue la SCR-008 y la segunda la SCR-004; cada spec vive en la carpeta de su
+ * pantalla (`revision-respuesta-sac.spec.ts`, `revision-error-tecnico-api.spec.ts`) y cubre un caso
+ * por RUL/ACT, no un smoke.
  *
  * ⚠ **Los alias NO van acá.** Un alias no es una pantalla nueva (ver `DIC_ALIAS`): no hay nada
  * propio que cubrir, y exigirle un spec forzaría un archivo duplicado del de su destino. Lo que sí
@@ -45,6 +47,8 @@ import { DIC_ALIAS, DIC_PANTALLAS, listarSlugsEnrutables } from './pantallas';
  */
 const CLL_SLUGS_CON_SPEC: string[] = [
   // Fase 5 — un slug por pantalla portada, en el mismo commit que su spec.
+  'COL_QD_SCR-008_Revision_Respuesta_SAC',
+  'COL_QD_SCR-004_Revision_Error_Tecnico_API',
 ];
 
 describe('guarda de inventario de pantallas', () => {

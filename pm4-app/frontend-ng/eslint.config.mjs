@@ -26,6 +26,23 @@ import angular from 'angular-eslint';
 
 export default tseslint.config(
   {
+    // ⚠ `src/env.generated.ts` NO se lintea, y el motivo es que la regla y el archivo se
+    // contradicen por diseño. Lo emite `scripts/gen-env-define.mjs` con una anotación
+    // `: string` **explícita en cada constante**, que `no-inferrable-types` marca como
+    // redundante — y no lo es: sin ella el tipo es el **literal** del valor (`"true"`, `""`),
+    // y `tsc` rechaza cualquier comparación contra otro literal con `TS2367` aunque el valor
+    // salga del `.env` de la máquina que buildea y no sea un hecho de compilación (es el
+    // `LOCK_COUNTRY` de `fields/fields.ts`, `VITE_LOCK_COUNTRY !== 'false'`). O sea que
+    // obedecer a ESLint acá rompería el typecheck del mismo `npm run lint`.
+    //
+    // Se ignora en vez de meter un `eslint-disable` en la plantilla del generador porque el
+    // archivo es **generado y gitignoreado**: lintear su salida no protege nada (nadie lo
+    // edita a mano) y el `--max-warnings=0` del script lo convertía en un rojo de `verify`
+    // que depende de qué claves tenga el `.env` de cada uno. `tsc` sí lo sigue chequeando,
+    // que es donde el archivo importa.
+    ignores: ['src/env.generated.ts'],
+  },
+  {
     files: ['src/**/*.ts'],
     extends: [
       ...tseslint.configs.recommended,

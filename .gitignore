@@ -118,3 +118,15 @@ desktop.ini
 # La barra inicial ancla el patrón a la raíz: sin ella también ignoraría el código de la
 # herramienta, que vive en pm4-app/scripts/pm4-scripts/.
 /pm4-scripts/
+
+# CA del proxy TLS corporativo (`CN=ssldecrypt.latam.zurich.com`), que el backend necesita
+# para que Node confíe en la cadena que la red inyecta al hablar con PM4.
+#
+# No se versiona, y el motivo NO es que sea secreta —es una CA pública que la política
+# corporativa instala en el almacén de cada máquina Zurich—: es que es **un artefacto del
+# entorno de red**, no del proyecto. Commitearla implicaría que el repo declara en qué red se
+# compila, y dejaría un certificado congelado que caduca (jun-2031) o rota sin que nada avise;
+# peor, alguien fuera de la red corporativa lo cargaría sin necesitarlo. Cada dev exporta el
+# suyo del almacén de Windows con el procedimiento de `certs/README.md`, que además verifica
+# la huella contra la que presenta la conexión — cosa que un archivo commiteado no puede hacer.
+pm4-app/certs/*.pem

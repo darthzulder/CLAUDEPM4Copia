@@ -160,6 +160,35 @@ describe('ZdsTextarea', () => {
     expect(hijo(objFixture).maxNumber).toBe(500);
   });
 
+  // ⚠ El caso de arriba se quedó **verde** todo el tiempo que el contador estuvo roto en el
+  // navegador, y por eso este existe. Aseverar el par bool+num sobre la instancia de `TextareaZ`
+  // prueba que el traductor del wrapper está bien, pero no que el valor **llegue** al elemento que
+  // lo usa: el `[attr.max-length]` de la lib escribe el atributo del `za-textarea` sin ejecutar su
+  // setter, así que moría ahí (ver la cabecera del wrapper). El `z-textarea` es el elemento de Lit
+  // que pinta el contador y es el final real de la cadena, así que es donde hay que aseverar.
+  //
+  // Bajo jsdom el `z-textarea` **sí** existe en el DOM: lo pinta el template de `za-textarea`, que es
+  // un componente de Angular, no un custom element. Lo que no ocurre es el upgrade de Lit — o sea que
+  // el contador en sí (`15/2000`, que vive en el shadow root) no es aseverable acá, pero el atributo
+  // del que depende sí. Esa es la línea exacta que jsdom permite cruzar.
+  it('el `max-length` llega hasta el `z-textarea`, no se queda en el `za-textarea`', async () => {
+    objFixture.componentInstance.maxLength = 500;
+    objFixture.componentRef.changeDetectorRef.markForCheck();
+    await objFixture.whenStable();
+
+    const objTextarea = objFixture.nativeElement.querySelector('za-textarea z-textarea');
+    expect(objTextarea, 'no se encontró el z-textarea que pinta el contador').not.toBeNull();
+    expect(objTextarea.getAttribute('max-length')).toBe('500');
+
+    // Y se va cuando el límite se va: si quedara pegado, un campo sin `maxLength` mostraría un
+    // contador viejo. Es la mitad del efecto que un `setAttribute` suelto no cubriría.
+    objFixture.componentInstance.maxLength = undefined;
+    objFixture.componentRef.changeDetectorRef.markForCheck();
+    await objFixture.whenStable();
+
+    expect(objTextarea.hasAttribute('max-length')).toBe(false);
+  });
+
   it('los validadores del padre sobreviven al montaje', () => {
     const objControl = objFixture.componentInstance.form.controls.qd_strDescription;
 
