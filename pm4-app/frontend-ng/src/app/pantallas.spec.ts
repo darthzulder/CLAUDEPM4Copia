@@ -49,6 +49,7 @@ const CLL_SLUGS_CON_SPEC: string[] = [
   // Fase 5 — un slug por pantalla portada, en el mismo commit que su spec.
   'COL_QD_SCR-008_Revision_Respuesta_SAC',
   'COL_QD_SCR-004_Revision_Error_Tecnico_API',
+  'COL_QD_SCR-011_Revision_Error_Tecnico_Prorroga',
 ];
 
 describe('guarda de inventario de pantallas', () => {

@@ -1,0 +1,742 @@
+{
+  "_comentario": "Contrato de campos que declaraba la app React, congelado como dato de migración. Generado una sola vez por scripts/extraer-paridad-react.mjs; frontend/ desaparece en la Fase 7. props.maxLength es el contador visual del DS; validadores.maxLength es el que invalida — son dos contratos distintos y hacen falta los dos.",
+  "_generadoPor": "scripts/extraer-paridad-react.mjs",
+  "pantallas": {
+    "COL_OS_SCR-003_Bandeja_Gestion_Linea2": {
+      "os_strBpmCaseId": {
+        "wrapper": "ZdsInput"
+      },
+      "os_strDueDate": {
+        "wrapper": "ZdsInput"
+      },
+      "os_strConsumerName": {
+        "wrapper": "ZdsInput"
+      },
+      "os_strIdentification": {
+        "wrapper": "ZdsInput"
+      },
+      "os_strProductLine": {
+        "wrapper": "ZdsInput"
+      },
+      "os_strCaseDescription": {
+        "wrapper": "ZdsTextarea"
+      },
+      "os_strTechAnalysis": {
+        "wrapper": "ZdsTextarea",
+        "validadores": {
+          "required": {
+            "mensaje": "Debe documentar el análisis o resolución antes de confirmar la atención."
+          }
+        }
+      },
+      "os_strSystemActions": {
+        "wrapper": "ZdsTextarea"
+      },
+      "os_strAssigneeArea": {
+        "wrapper": "ZdsSelect"
+      },
+      "os_strAssigneeUser": {
+        "wrapper": "ZdsSelect"
+      }
+    },
+    "COL_QD_SCR-000_CrearRecibirQueja": {
+      "qd_strRequestType": {
+        "wrapper": "ZdsSelect",
+        "validadores": {
+          "required": {
+            "mensaje": "Campo requerido"
+          }
+        }
+      },
+      "qd_strReceptionPoint": {
+        "wrapper": "ZdsSelect",
+        "validadores": {
+          "required": {
+            "mensaje": "Campo requerido"
+          }
+        }
+      },
+      "qd_strReceptionInstance": {
+        "wrapper": "ZdsSelect"
+      },
+      "qd_strFilerRole": {
+        "wrapper": "ZdsSelect",
+        "validadores": {
+          "required": {
+            "mensaje": "Campo requerido"
+          }
+        }
+      },
+      "qd_strAlliance": {
+        "wrapper": "ZdsSelect"
+      },
+      "qd_blnDataAuth": {
+        "wrapper": "ZdsCheckboxField"
+      },
+      "qd_strCcEmail": {
+        "wrapper": "ZdsInput",
+        "props": {
+          "inputType": "email"
+        },
+        "validadores": {
+          "pattern": {
+            "mensaje": "Formato esperado: usuario@dominio.com"
+          }
+        }
+      },
+      "qd_strAssigneeRole": {
+        "wrapper": "ZdsInput"
+      },
+      "qd_strAssignee": {
+        "wrapper": "ZdsInput"
+      },
+      "qd_strIdType": {
+        "wrapper": "ZdsSelect",
+        "validadores": {
+          "required": {
+            "mensaje": "Campo requerido"
+          }
+        }
+      },
+      "qd_strIdNumber": {
+        "wrapper": "ZdsInput",
+        "validadores": {
+          "required": {
+            "mensaje": "Campo requerido"
+          },
+          "pattern": {
+            "mensaje": "Verifica el formato según el tipo de documento"
+          }
+        }
+      },
+      "qd_strFirstName": {
+        "wrapper": "ZdsInput",
+        "validadores": {
+          "required": {
+            "mensaje": "Campo requerido"
+          },
+          "pattern": {
+            "mensaje": "Solo letras"
+          }
+        }
+      },
+      "qd_strLastName": {
+        "wrapper": "ZdsInput",
+        "validadores": {
+          "required": {
+            "mensaje": "Campo requerido"
+          },
+          "pattern": {
+            "mensaje": "Solo letras"
+          }
+        }
+      },
+      "qd_strCompanyName": {
+        "wrapper": "ZdsInput",
+        "validadores": {
+          "required": {
+            "mensaje": "Campo requerido"
+          }
+        }
+      },
+      "qd_strContactFirstName": {
+        "wrapper": "ZdsInput",
+        "validadores": {
+          "required": {
+            "mensaje": "Campo requerido"
+          },
+          "pattern": {
+            "mensaje": "Solo letras"
+          }
+        }
+      },
+      "qd_strContactLastName": {
+        "wrapper": "ZdsInput",
+        "validadores": {
+          "required": {
+            "mensaje": "Campo requerido"
+          },
+          "pattern": {
+            "mensaje": "Solo letras"
+          }
+        }
+      },
+      "qd_strEmail": {
+        "wrapper": "ZdsInput",
+        "props": {
+          "inputType": "email"
+        },
+        "validadores": {
+          "required": {
+            "mensaje": "Campo requerido"
+          },
+          "pattern": {
+            "mensaje": "Formato esperado: usuario@dominio.com"
+          }
+        }
+      },
+      "qd_strPhone": {
+        "wrapper": "ZdsInput",
+        "props": {
+          "inputType": "tel"
+        },
+        "validadores": {
+          "required": {
+            "mensaje": "Campo requerido"
+          },
+          "pattern": {
+            "mensaje": "Debe contener exactamente 10 dígitos"
+          }
+        }
+      },
+      "qd_strDepartment": {
+        "wrapper": "ZdsSelect",
+        "validadores": {
+          "required": {
+            "mensaje": "Campo requerido"
+          }
+        }
+      },
+      "qd_strCity": {
+        "wrapper": "ZdsSelect",
+        "validadores": {
+          "required": {
+            "mensaje": "Campo requerido"
+          }
+        }
+      },
+      "qd_strSfcProduct": {
+        "wrapper": "ZdsSelect",
+        "validadores": {
+          "required": {
+            "mensaje": "Campo requerido"
+          }
+        }
+      },
+      "qd_strPlate": {
+        "wrapper": "ZdsInput",
+        "validadores": {
+          "required": {
+            "mensaje": "Campo requerido"
+          },
+          "pattern": {
+            "mensaje": "Formato esperado: 3 letras y 3 números, p.ej. ABC 123"
+          }
+        }
+      },
+      "qd_strReply": {
+        "wrapper": "ZdsCheckboxField"
+      },
+      "qd_strReplyArgument": {
+        "wrapper": "ZdsTextarea",
+        "props": {
+          "maxLength": 2000
+        }
+      },
+      "qd_strInteraction": {
+        "wrapper": "ZdsSelect",
+        "validadores": {
+          "required": {
+            "mensaje": "Campo requerido"
+          }
+        }
+      },
+      "qd_strServiceProvided": {
+        "wrapper": "ZdsSelect",
+        "validadores": {
+          "required": {
+            "mensaje": "Campo requerido"
+          }
+        }
+      },
+      "qd_strSfcReason": {
+        "wrapper": "ZdsSelect",
+        "validadores": {
+          "required": {
+            "mensaje": "Campo requerido"
+          }
+        }
+      },
+      "qd_strComplaintText": {
+        "wrapper": "ZdsTextarea",
+        "props": {
+          "maxLength": 2000
+        },
+        "validadores": {
+          "required": {
+            "mensaje": "Campo requerido"
+          },
+          "minLength": {
+            "valor": 50,
+            "mensaje": "Mínimo 50 caracteres"
+          },
+          "maxLength": {
+            "valor": 2000,
+            "mensaje": "Máximo 2000 caracteres"
+          }
+        }
+      },
+      "qd_strAdmission": {
+        "wrapper": "ZdsSelect",
+        "validadores": {
+          "required": {
+            "mensaje": "Campo requerido"
+          }
+        }
+      }
+    },
+    "COL_QD_SCR-003_Correccion_Error_Funcional": {
+      "qd_strErrorType": {
+        "wrapper": "ZdsInput"
+      },
+      "qd_strEndpointCalled": {
+        "wrapper": "ZdsInput"
+      },
+      "qd_strPayloadSent": {
+        "wrapper": "ZdsTextarea"
+      },
+      "qd_strCorrectionJustif": {
+        "wrapper": "ZdsTextarea",
+        "props": {
+          "maxLength": 2000
+        }
+      },
+      "qd_strCompleteLogAPI": {
+        "wrapper": "ZdsTextarea"
+      }
+    },
+    "COL_QD_SCR-004_Revision_Error_Tecnico_API": {
+      "qd_strHttpCode": {
+        "wrapper": "ZdsInput"
+      },
+      "qd_strErrorType": {
+        "wrapper": "ZdsInput"
+      },
+      "qd_strAttemptNum": {
+        "wrapper": "ZdsInput"
+      },
+      "qd_strEndpointCalled": {
+        "wrapper": "ZdsInput"
+      },
+      "qd_strApiTechMessage": {
+        "wrapper": "ZdsTextarea"
+      },
+      "qd_strPayloadSent": {
+        "wrapper": "ZdsTextarea"
+      },
+      "qd_strRootCause": {
+        "wrapper": "ZdsTextarea",
+        "props": {
+          "maxLength": 2000
+        },
+        "validadores": {
+          "required": {
+            "mensaje": "Campo requerido"
+          },
+          "maxLength": {
+            "valor": 2000,
+            "mensaje": "Máximo 2000 caracteres"
+          }
+        }
+      },
+      "qd_strCorrectionApplied": {
+        "wrapper": "ZdsTextarea",
+        "props": {
+          "maxLength": 2000
+        },
+        "validadores": {
+          "required": {
+            "mensaje": "Campo requerido"
+          },
+          "maxLength": {
+            "valor": 2000,
+            "mensaje": "Máximo 2000 caracteres"
+          }
+        }
+      },
+      "qd_strPayloadAdjustNeeded": {
+        "wrapper": "ZdsRadio",
+        "validadores": {
+          "required": {
+            "mensaje": "Campo requerido"
+          }
+        }
+      },
+      "qd_strCompleteLogAPI": {
+        "wrapper": "ZdsTextarea"
+      }
+    },
+    "COL_QD_SCR-0051_Detalle_Reasignacion_Respuesta": {
+      "qd_strAssigneeArea": {
+        "wrapper": "ZdsSelect"
+      },
+      "qd_strAssigneeUser": {
+        "wrapper": "ZdsSelect"
+      },
+      "qd_strAssignmentRemarks": {
+        "wrapper": "ZdsTextarea",
+        "props": {
+          "maxLength": 2000
+        }
+      },
+      "qd_strNeedsOtherAreas": {
+        "wrapper": "ZdsRadio"
+      },
+      "qd_strTargetArea": {
+        "wrapper": "ZdsSelect"
+      },
+      "qd_strNewAssignee": {
+        "wrapper": "ZdsSelect"
+      },
+      "qd_strReassignRemarks": {
+        "wrapper": "ZdsTextarea",
+        "props": {
+          "maxLength": 2000
+        }
+      },
+      "qd_strEmail": {
+        "wrapper": "ZdsInput"
+      },
+      "qd_strPersonType_desc": {
+        "wrapper": "ZdsInput"
+      },
+      "qd_strSfcProduct": {
+        "wrapper": "ZdsSelect",
+        "validadores": {
+          "required": {
+            "mensaje": "Campo requerido"
+          }
+        }
+      },
+      "qd_strInteraction": {
+        "wrapper": "ZdsSelect",
+        "validadores": {
+          "required": {
+            "mensaje": "Campo requerido"
+          }
+        }
+      },
+      "qd_strServiceProvided": {
+        "wrapper": "ZdsSelect",
+        "validadores": {
+          "required": {
+            "mensaje": "Campo requerido"
+          }
+        }
+      },
+      "qd_strPlate": {
+        "wrapper": "ZdsInput",
+        "validadores": {
+          "required": {
+            "mensaje": "Campo requerido"
+          }
+        }
+      },
+      "qd_strSfcReason": {
+        "wrapper": "ZdsSelect",
+        "validadores": {
+          "required": {
+            "mensaje": "Campo requerido"
+          }
+        }
+      },
+      "qd_strReceptionInstance_desc": {
+        "wrapper": "ZdsInput"
+      },
+      "qd_strControlEntity_desc": {
+        "wrapper": "ZdsInput"
+      },
+      "qd_strComplaintText": {
+        "wrapper": "ZdsTextarea"
+      },
+      "qd_strFavorability": {
+        "wrapper": "ZdsSelect",
+        "validadores": {
+          "required": {
+            "mensaje": "Campo requerido"
+          }
+        }
+      },
+      "qd_strSacRemarks": {
+        "wrapper": "ZdsTextarea"
+      },
+      "qd_strClientResponse": {
+        "wrapper": "ZdsTextarea",
+        "props": {
+          "maxLength": 5000
+        },
+        "validadores": {
+          "required": {
+            "mensaje": "Campo requerido"
+          }
+        }
+      },
+      "qd_strActionsTaken": {
+        "wrapper": "ZdsTextarea",
+        "props": {
+          "maxLength": 2000
+        }
+      },
+      "qd_strExtensionReason": {
+        "wrapper": "ZdsSelect"
+      }
+    },
+    "COL_QD_SCR-0052_Respuesta_Area_Responsable": {
+      "qd_strEmail": {
+        "wrapper": "ZdsInput"
+      },
+      "qd_strPersonType_desc": {
+        "wrapper": "ZdsInput"
+      },
+      "qd_strReceptionInstance_desc": {
+        "wrapper": "ZdsInput"
+      },
+      "qd_strControlEntity_desc": {
+        "wrapper": "ZdsInput"
+      },
+      "qd_strComplaintText": {
+        "wrapper": "ZdsTextarea"
+      },
+      "qd_strAreaComment": {
+        "wrapper": "ZdsTextarea",
+        "props": {
+          "maxLength": 2000
+        },
+        "validadores": {
+          "required": {
+            "mensaje": "Campo requerido"
+          }
+        }
+      },
+      "qd_strAreaAttach": {
+        "wrapper": "ZdsFileInput"
+      }
+    },
+    "COL_QD_SCR-008_Revision_Respuesta_SAC": {
+      "qd_strSfcCode": {
+        "wrapper": "ZdsInput"
+      },
+      "qd_strSlaAssigned": {
+        "wrapper": "ZdsInput"
+      },
+      "qd_strResponsableRole": {
+        "wrapper": "ZdsInput"
+      },
+      "qd_strDraftDate": {
+        "wrapper": "ZdsInput"
+      },
+      "qd_strComplaintText": {
+        "wrapper": "ZdsTextarea"
+      },
+      "qd_strClientResponse": {
+        "wrapper": "ZdsTextarea",
+        "props": {
+          "maxLength": 5000
+        }
+      },
+      "qd_strActionsTaken": {
+        "wrapper": "ZdsTextarea",
+        "props": {
+          "maxLength": 5000
+        }
+      },
+      "qd_strCompensation": {
+        "wrapper": "ZdsInput"
+      },
+      "qd_strSacRemarks": {
+        "wrapper": "ZdsTextarea",
+        "props": {
+          "maxLength": 2000
+        }
+      }
+    },
+    "COL_QD_SCR-009_Formulario_Superintendencia": {
+      "qd_strSex": {
+        "wrapper": "ZdsSelect"
+      },
+      "qd_strLgbtiq": {
+        "wrapper": "ZdsSelect"
+      },
+      "qd_strDigitalProduct": {
+        "wrapper": "ZdsSelect"
+      },
+      "qd_strSpecialCondition": {
+        "wrapper": "ZdsSelect"
+      },
+      "qd_strMarking": {
+        "wrapper": "ZdsSelect"
+      },
+      "qd_strUpdateDate": {
+        "wrapper": "ZdsInput"
+      },
+      "qd_strClosureDate": {
+        "wrapper": "ZdsInput"
+      },
+      "qd_strSfcCode": {
+        "wrapper": "ZdsInput"
+      },
+      "qd_strFraudType": {
+        "wrapper": "ZdsSelect"
+      },
+      "qd_strFraudModality": {
+        "wrapper": "ZdsSelect"
+      },
+      "qd_strClaimedAmount": {
+        "wrapper": "ZdsInput"
+      },
+      "qd_strAcknowledgedAmount": {
+        "wrapper": "ZdsInput"
+      },
+      "qd_strIncludesComplaintAnnex": {
+        "wrapper": "ZdsRadio",
+        "validadores": {
+          "required": {
+            "mensaje": "Campo requerido"
+          }
+        }
+      },
+      "qd_strIncludesReplyAttach": {
+        "wrapper": "ZdsRadio",
+        "validadores": {
+          "required": {
+            "mensaje": "Campo requerido"
+          }
+        }
+      }
+    },
+    "COL_QD_SCR-011_Revision_Error_Tecnico_Prorroga": {
+      "qd_strHttpCode": {
+        "wrapper": "ZdsInput"
+      },
+      "qd_strErrorType": {
+        "wrapper": "ZdsInput"
+      },
+      "qd_strAttemptNum": {
+        "wrapper": "ZdsInput"
+      },
+      "qd_strEndpointCalled": {
+        "wrapper": "ZdsInput"
+      },
+      "qd_strApiTechMessage": {
+        "wrapper": "ZdsTextarea"
+      },
+      "qd_strPayloadSent": {
+        "wrapper": "ZdsTextarea"
+      },
+      "qd_strRootCause": {
+        "wrapper": "ZdsTextarea",
+        "props": {
+          "maxLength": 2000
+        },
+        "validadores": {
+          "required": {
+            "mensaje": "Campo requerido"
+          },
+          "maxLength": {
+            "valor": 2000,
+            "mensaje": "Máximo 2000 caracteres"
+          }
+        }
+      },
+      "qd_strCorrectionApplied": {
+        "wrapper": "ZdsTextarea",
+        "props": {
+          "maxLength": 2000
+        },
+        "validadores": {
+          "required": {
+            "mensaje": "Campo requerido"
+          },
+          "maxLength": {
+            "valor": 2000,
+            "mensaje": "Máximo 2000 caracteres"
+          }
+        }
+      },
+      "qd_strPayloadAdjustNeeded": {
+        "wrapper": "ZdsRadio",
+        "validadores": {
+          "required": {
+            "mensaje": "Campo requerido"
+          }
+        }
+      },
+      "qd_strCompleteLogAPI": {
+        "wrapper": "ZdsTextarea"
+      }
+    },
+    "COL_QD_SCR-012_Revision_Error_Funcional_Prorroga": {
+      "qd_strExtErrorCode": {
+        "wrapper": "ZdsInput"
+      },
+      "qd_strExtAffectedField": {
+        "wrapper": "ZdsInput"
+      },
+      "qd_strExtCurrentAttempt": {
+        "wrapper": "ZdsInput"
+      },
+      "qd_strExtErrorMessage": {
+        "wrapper": "ZdsTextarea"
+      },
+      "qd_strExtensionReason": {
+        "wrapper": "ZdsSelect",
+        "validadores": {
+          "required": {
+            "mensaje": "Campo requerido"
+          }
+        }
+      },
+      "qd_strNewDeadline": {
+        "wrapper": "ZdsDate",
+        "validadores": {
+          "required": {
+            "mensaje": "Campo requerido"
+          },
+          "validate": {
+            "esFuncion": true
+          }
+        }
+      },
+      "qd_strExtensionCounter": {
+        "wrapper": "ZdsInput",
+        "validadores": {
+          "required": {
+            "mensaje": "Campo requerido"
+          },
+          "pattern": {
+            "mensaje": "Solo dígitos"
+          }
+        }
+      },
+      "qd_strExtensionJustif": {
+        "wrapper": "ZdsTextarea",
+        "props": {
+          "maxLength": 2000
+        },
+        "validadores": {
+          "required": {
+            "mensaje": "Campo requerido"
+          },
+          "maxLength": {
+            "valor": 2000,
+            "mensaje": "Máximo 2000 caracteres"
+          }
+        }
+      }
+    },
+    "COL_QD_SCR-013_Dashboard_Gestion_Casos": {
+      "filtroTipo": {
+        "wrapper": "ZdsSelect"
+      },
+      "filtroEstado": {
+        "wrapper": "ZdsSelect"
+      },
+      "filtroArea": {
+        "wrapper": "ZdsSelect"
+      },
+      "filtroBuscar": {
+        "wrapper": "ZdsInput"
+      }
+    }
+  }
+}

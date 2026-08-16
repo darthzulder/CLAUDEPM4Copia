@@ -1,0 +1,255 @@
+@if (blnCargando()) {
+  <div class="screen-wrapper">
+    <div class="screen-loading"><lib-loader-z /></div>
+  </div>
+} @else if (strError()) {
+  <div class="screen-wrapper">
+    <!-- Alerta INLINE (`za-alert`), no la cola imperativa de `lib-alert-z`: en React esto es un
+         `<ZrAlert>` dentro del markup, o sea una caja que vive donde está el contenido que describe.
+         `[hide-close]="true"` y no el atributo pelado: el input está tipado `boolean` y un atributo
+         sin valor vale `''`, que Angular 21 rechaza (`TS2322`). Ver el punto 5b de zds-reexports.ts. -->
+    <za-alert config="negative" [hide-close]="true"
+      >Error al cargar el formulario: {{ strError() }}</za-alert
+    >
+  </div>
+} @else {
+  <div class="screen-wrapper">
+    <!-- ⚠ Los rótulos de esta pantalla dicen "Prórroga" y NO son copia de SCR-004: son los del
+         Anexo02 para SCR-011, y el spec los asevera textualmente. La pantalla gemela revisa el error
+         de la respuesta al ciudadano; esta revisa el de la **solicitud de prórroga**, que es otro
+         momento del proceso. Un rótulo copiado de allá le diría al analista que está viendo el error
+         equivocado. -->
+    <app-screen-header title="Revisión Error Técnico Prórroga" />
+
+    <div class="screen-content">
+      <!-- `(ngSubmit)` va a `autorizar()` y NO a `escalar()`: el submit nativo del form (Enter en un
+           campo) tiene que coincidir con la acción principal. Escalar es la salida de excepción y solo
+           se alcanza por su botón — que un Enter derivara el caso al proveedor sería un accidente
+           irreversible desde el lado de PM4. -->
+      <form [formGroup]="form" (ngSubmit)="autorizar()" novalidate>
+        <!-- ── S1 · Detalle del Error Técnico — Prórroga (SEC-037, todo de solo lectura) ──
+             Cabecera en rojo porque la sección describe una falla, no un dato de trámite: es el mismo
+             `color="var(--z-red)"` del original. Token del DS, nunca un hex (regla 3 de CLAUDE.md). -->
+        <app-form-section title="Detalle del Error Técnico — Prórroga" color="var(--z-red)">
+          <!-- El botón va en el slot `[action]`, que `FormSectionComponent` pinta a la derecha del
+               encabezado. El `[disabled]="false"` explícito es obligatorio: el default de
+               `lib-button-z` es `disabled = true` y omitirlo deja el botón muerto. -->
+          <lib-button-z
+            action
+            label="Ver Log Completo"
+            [type]="'link'"
+            icon="file-text:line"
+            [disabled]="false"
+            (eventClick)="abrirLog()"
+          />
+
+          <!-- MSG del intento acumulado: el sufijo solo aparece si el script de M3 escribió
+               `qd_strAttemptNum`, igual que el `&&` de React — sin dato no se inventa un "#". -->
+          <za-alert config="negative" [hide-close]="true">
+            El envío de la <strong>solicitud de prórroga</strong> a SmartSupervision
+            <strong>falló por un error técnico</strong> tras varios intentos. Revise el detalle,
+            registre la corrección y autorice el reenvío.
+            @if (strIntento()) {
+              <span> — Intento acumulado <strong>#{{ strIntento() }}</strong>.</span>
+            }
+          </za-alert>
+
+          <!-- ⚠ `formControlName` **y** `name`, los dos, en todo campo de la fachada. No es
+               redundancia: `formControlName` es lo que ata el control al `FormGroup` (el wrapper es
+               el `NG_VALUE_ACCESSOR` de ese `NgControl`), y `name` es lo que la fachada usa para el
+               `id="field-<name>"` que necesita `scrollToFirstError` y para pre-crear el control que
+               el `lib-*-z` adopta. Con solo `name` el campo pinta y **nunca llega al form**. -->
+          <div class="form-row cols-3">
+            <zds-input
+              formControlName="qd_strHttpCode"
+              name="qd_strHttpCode"
+              label="Código HTTP prórroga"
+              [readOnly]="true"
+            />
+            <zds-input
+              formControlName="qd_strErrorType"
+              name="qd_strErrorType"
+              label="Tipo de Error"
+              [readOnly]="true"
+            />
+            <zds-input
+              formControlName="qd_strAttemptNum"
+              name="qd_strAttemptNum"
+              label="Número de intento prórroga"
+              [readOnly]="true"
+            />
+          </div>
+          <div class="form-row cols-1">
+            <zds-input
+              formControlName="qd_strEndpointCalled"
+              name="qd_strEndpointCalled"
+              label="Endpoint Invocado"
+              [readOnly]="true"
+            />
+          </div>
+          <div class="form-row cols-1">
+            <zds-textarea
+              formControlName="qd_strApiTechMessage"
+              name="qd_strApiTechMessage"
+              label="Mensaje Técnico de la API"
+              [readOnly]="true"
+              helpText='Mensaje devuelto por la API — solo lectura. El log técnico completo está en "Ver Log Completo".'
+            />
+          </div>
+          <div class="form-row cols-1">
+            <!-- ⚠ NO lleva `[readOnly]`: el bloqueo vive en el CONTROL (`enable()`/`disable()` según
+                 FLD-058), no en la vista — ver `sincronizarEdicionPayload()` en el .ts. React sí usaba
+                 un `readOnly={!blnAdjustPayload}` acá, y esa es una de las cuatro divergencias
+                 deliberadas del port: un `readonly` del `za-textarea` no se refleja bajo jsdom y el
+                 spec no podría aseverar el bloqueo de ninguna forma honesta. -->
+            <zds-textarea
+              formControlName="qd_strPayloadSent"
+              name="qd_strPayloadSent"
+              label="Payload de prórroga enviado (JSON)"
+              [helpText]="strAyudaPayload()"
+            />
+          </div>
+        </app-form-section>
+
+        <!-- ── S2 · Registro de Corrección — Prórroga (SEC-038) ── -->
+        <app-form-section title="Registro de Corrección — Prórroga">
+          <div class="form-row cols-1">
+            <!-- El `[obligatorio]="true"` es del **wrapper** (el asterisco del rótulo), no del control:
+                 ver el punto 3 del docstring del .ts — la obligatoriedad es de ACT-011-01, no de la
+                 pantalla, así que vive en `blnPuedeAutorizar()` y no en un `Validators.required` que
+                 dejaría el form inválido al escalar con los campos vacíos.
+
+                 ⚠ Y el input se llama `obligatorio`, no `required`, **por esta pantalla**. Escribir
+                 `[required]` acá matchearía el selector del `RequiredValidator` de Angular
+                 (`[required][formControlName]`) y le pegaría un `{required: true}` al control que la
+                 pantalla nunca declaró — con lo que escalar con los campos vacíos dejaría de ser
+                 alcanzable. El motivo completo está en el docstring de `CampoBase.obligatorio`. -->
+            <zds-textarea
+              formControlName="qd_strRootCause"
+              name="qd_strRootCause"
+              label="Causa Raíz"
+              [obligatorio]="true"
+              [maxLength]="2000"
+              [error]="strErrorCausaRaiz()"
+            />
+          </div>
+          <div class="form-row cols-1">
+            <zds-textarea
+              formControlName="qd_strCorrectionApplied"
+              name="qd_strCorrectionApplied"
+              label="Corrección Aplicada"
+              [obligatorio]="true"
+              [maxLength]="2000"
+              [error]="strErrorCorreccion()"
+            />
+          </div>
+          <div class="form-row cols-1">
+            <!-- FLD-058 · abrir/cerrar la edición del payload de S1 NO se cablea acá: los wrappers de
+                 la fachada no exponen ningún `@Output` (su único canal es el CVA), así que la reacción
+                 vive en la suscripción a `form.valueChanges` del .ts. -->
+            <zds-radio
+              formControlName="qd_strPayloadAdjustNeeded"
+              name="qd_strPayloadAdjustNeeded"
+              label="¿Requiere ajuste en payload?"
+              [options]="cllOpcionesSiNo"
+              [inline]="true"
+              [obligatorio]="true"
+            />
+          </div>
+
+          @if (blnAjustaPayload()) {
+            <za-alert config="alert" [hide-close]="true">
+              Edite el <strong>Payload de prórroga enviado (JSON)</strong> en la sección superior
+              antes de autorizar el reenvío.
+            </za-alert>
+          }
+
+          <!-- El bloqueo por JSON inválido: sin esta alerta el analista vería el botón deshabilitado
+               sin saber por qué, porque la causa está en un campo de OTRA sección. -->
+          @if (blnAjustaPayload() && !blnPayloadJsonOk()) {
+            <za-alert config="negative" [hide-close]="true">
+              El <strong>Payload de prórroga enviado</strong> no es un objeto JSON válido. Corríjalo
+              para poder autorizar el reenvío — de lo contrario la edición se descartaría y se
+              reenviaría el body reconstruido por el BPM.
+            </za-alert>
+          }
+
+          <!-- MSG-011-01 · RUL-011-01. Alerta permanente mientras la regla no se cumple, que es el par
+               del `[disabled]` del botón de autorizar: la afordancia dice "no podés", el mensaje dice
+               "por qué". No aplica al botón de escalar, que sigue disponible.
+               (MSG-011-02 no vive en la UI: lo emite el BPM después del `completeTask`.) -->
+          @if (!blnPuedeAutorizar()) {
+            <za-alert config="info" [hide-close]="true">
+              Debe registrar la <strong>causa raíz</strong> y la <strong>corrección aplicada</strong>
+              antes de autorizar el reenvío de la prórroga.
+            </za-alert>
+          }
+        </app-form-section>
+
+        <!-- ── Acciones (ACT-011-01 y ACT-011-02) ──
+             ⚠ SON DOS, y es la diferencia principal con SCR-004, donde ACT-004-02 se retiró. El botón
+             de escalar está **siempre disponible** (solo lo apaga el envío en curso): es la salida que
+             el analista usa cuando NO puede diagnosticar la falla, así que condicionarlo a RUL-011-01
+             la volvería inalcanzable justo en su escenario. Ver `escalar()` en el .ts.
+
+             El `[disabled]` de autorizar es afordancia, NO la guarda: un botón deshabilitado del DS
+             igual dispara su handler bajo jsdom (trampa 1 de testing-conventions.md), así que el corte
+             real vive en `autorizar()`. Las dos cosas son necesarias.
+
+             Ojo con el reflejo de poner `type="button"` en escalar para que no dispare el `(ngSubmit)`:
+             acá no hace falta y además no existe. `ButtonZ` no es un `<button>` nativo — su plantilla
+             es un `<za-button>` (un custom element de Lit), así que no participa del submit implícito
+             del `<form>` y no hay handler que suprimir. Y su input `type` es la **variante del DS**
+             (`primary`/`secondary`/`positive`/`link`, que viaja al `[config]` del `za-button`), no el
+             `type` del HTML: escribir `type="button"` pintaría el botón con una variante inexistente. -->
+        <app-action-bar>
+          <lib-button-z
+            label="Escalar a Proveedor"
+            [type]="'secondary'"
+            [disabled]="blnEnviando()"
+            (eventClick)="escalar()"
+          />
+          <lib-button-z
+            label="Autorizar Reenvío Prórroga ▶"
+            [type]="'positive'"
+            [disabled]="!blnPuedeAutorizar() || blnEnviando()"
+            [loading]="blnEnviando()"
+            (eventClick)="autorizar()"
+          />
+        </app-action-bar>
+      </form>
+    </div>
+
+    <!-- ── Modal del log completo ──
+         ⚠ Tres reglas duras del contrato de slots de `ModalZ`, las tres con fallas silenciosas:
+         1. El contenido va en `<ng-template libZTemplate id="content">`, no como hijo directo.
+         2. El `id` es un atributo ESTÁTICO: `ModalZ` lo lee con `@Attribute('id')`, que resuelve una
+            sola vez — un `[id]="expr"` llega `null` y el slot queda sin asignar, sin error.
+         3. El `ng-template` NO puede estar dentro de un `@if`: `ngAfterContentInit` corre UNA vez y si
+            el template no está en ese momento, `ModalZ` guarda `undefined` y no vuelve a mirar. Como
+            la pantalla monta con el modal CERRADO, esa es justamente la condición inicial real. El
+            `@if` va ADENTRO del slot.
+         Ver `preview-modal.ts`, que es el ejemplo funcionando, y el punto 3 de zds-reexports.ts. -->
+    <lib-modal-z [open]="blnVerLog()" tamanio="l" (close)="cerrarLog()">
+      <ng-template libZTemplate id="content">
+        @if (blnVerLog()) {
+          <h3 class="modal-titulo">Log completo del error técnico de prórroga</h3>
+          <div class="modal-scroll-body">
+            <!-- `qd_strCompleteLogAPI` es un campo AGREGADO sin FLD en el anexo: lo emite el script de
+                 Momento 3. Fuera del `[formGroup]` del form principal, así que necesita su propio
+                 contexto — de ahí el `[formGroup]` local. -->
+            <div [formGroup]="form">
+              <zds-textarea
+                formControlName="qd_strCompleteLogAPI"
+                name="qd_strCompleteLogAPI"
+                label="Log Completo"
+                [readOnly]="true"
+                [elastic]="true"
+              />
+            </div>
+          </div>
+        }
+      </ng-template>
+    </lib-modal-z>
+  </div>
+}

@@ -73,6 +73,10 @@ export const DIC_PANTALLAS: Record<string, CargadorDePantalla> = {
     import(
       '../screens/atencion-cliente/quejas-directas/COL_QD_SCR-004_Revision_Error_Tecnico_API/revision-error-tecnico-api'
     ).then((in_objModulo) => in_objModulo.RevisionErrorTecnicoApi),
+  'COL_QD_SCR-011_Revision_Error_Tecnico_Prorroga': () =>
+    import(
+      '../screens/atencion-cliente/quejas-directas/COL_QD_SCR-011_Revision_Error_Tecnico_Prorroga/revision-error-tecnico-prorroga'
+    ).then((in_objModulo) => in_objModulo.RevisionErrorTecnicoProrroga),
 };
 
 /**
