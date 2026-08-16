@@ -81,7 +81,37 @@ export abstract class CampoBase<T> implements ControlValueAccessor, OnInit {
   readonly name = input.required<string>();
 
   readonly label = input<string>('');
-  readonly required = input(false);
+
+  /**
+   * Marca visual de obligatoriedad: el **asterisco del rótulo**, nada más. La obligatoriedad que
+   * *invalida* se declara donde siempre — `Validators.required` en el `FormControl` de la pantalla.
+   *
+   * ── ⚠ Por qué NO se llama `required`, y no es cosmético ──────────────────────────────────────
+   * Porque `RequiredValidator`, el directivo **estándar de Angular**, tiene selector
+   * `:not([type=checkbox])[required][formControlName]` (más las variantes `[formControl]`/`[ngModel]`).
+   * Un input llamado `required` obliga a la pantalla a escribir
+   *
+   *     <zds-textarea formControlName="qd_strRootCause" [required]="true" />
+   *
+   * y eso es **exactamente** el selector: Angular engancha su `RequiredValidator` en el elemento de
+   * la pantalla y le suma `{required: true}` al control — un validador que la pantalla nunca declaró.
+   * El asterisco y la validación quedan pegados sin que nadie lo haya pedido.
+   *
+   * Nótese dónde vive el defecto: **en la plantilla de la pantalla**, no en la lib ni en el `[group]`.
+   * Cambiar el nombre del input lo cierra **por estructura** — sin el atributo literal `required` el
+   * selector no puede matchear— en vez de por disciplina de quien escribe la pantalla. Es la única de
+   * las opciones consideradas que no depende de que nadie se olvide: neutralizar el validador después
+   * de montado sería pelear contra un directivo que sigue enganchado, y derivar el asterisco de
+   * `hasValidator(Validators.required)` le quitaría el asterisco a los campos que lo necesitan **sin**
+   * validador (SCR-011 escala con los campos vacíos a propósito).
+   *
+   * `zds-required.spec.ts` es la guarda: se pone roja si un wrapper vuelve a aceptar `required`.
+   *
+   * ⚠ El `[required]` que los wrappers ponen **adentro**, sobre el `lib-*-z`/`za-*`, sí va y es
+   * correcto: es el input del DS que pinta el asterisco, y ahí no hay `formControlName` en el mismo
+   * elemento, así que el selector de Angular no matchea.
+   */
+  readonly obligatorio = input(false);
   readonly readOnly = input(false);
   readonly helpText = input<string>('');
   readonly placeholder = input<string>('');
@@ -329,7 +359,7 @@ export abstract class CampoBase<T> implements ControlValueAccessor, OnInit {
    */
   protected grupoPropio(): FormGroup<Record<string, FormControl>> {
     this.objGrupoPropio ??= new FormGroup<Record<string, FormControl>>({
-      [this.name()]: new FormControl(this.model(), this.required() ? [Validators.required] : []),
+      [this.name()]: new FormControl(this.model(), this.obligatorio() ? [Validators.required] : []),
     });
     return this.objGrupoPropio;
   }

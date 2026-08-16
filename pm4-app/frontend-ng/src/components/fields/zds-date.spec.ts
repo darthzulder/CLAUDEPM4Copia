@@ -24,7 +24,7 @@ import { ZdsDate } from './zds-date';
         formControlName="qd_strFechaProrroga"
         name="qd_strFechaProrroga"
         label="Fecha de prórroga"
-        [required]="true"
+        [obligatorio]="true"
         [min]="min"
         [error]="error"
       />

@@ -82,7 +82,7 @@ import { CampoBase } from './campo-base';
         [label]="label()"
         [model]="blnTildado"
         (modelChange)="alCambiarTildado($event)"
-        [required]="required()"
+        [required]="obligatorio()"
         [helpText]="strTextoAyuda"
       />
     </div>

@@ -1,4 +1,4 @@
-import { Component, computed, inject, input, output } from '@angular/core';
+import { Component, computed, effect, inject, input, output, viewChild } from '@angular/core';
 import { ReactiveFormsModule } from '@angular/forms';
 import { ZaFileInput } from '@zurich/angular-components';
 import { findDuplicateAttachment } from '../../core/file-hash';
@@ -120,13 +120,13 @@ interface ElementoFileInput extends HTMLElement {
   template: `
     <div class="zds-field-wrap" [id]="strId" tabindex="-1">
       <za-file-input
+        #objHijo
         (change)="alCambiarArchivo($event)"
         [formControl]="control"
         [name]="name()"
         [label]="label()"
         [accept]="cllAccept()"
         [droppable]="droppable()"
-        [required]="required()"
         [invalid]="blnEnError"
         [help-text]="strTextoAyuda"
       />
@@ -134,6 +134,24 @@ interface ElementoFileInput extends HTMLElement {
   `,
 })
 export class ZdsFileInput extends CampoZaBase {
+  /**
+   * El asterisco se escribe por código y no con `[required]` en la plantilla, por el mismo motivo
+   * estructural que en [`ZdsRadio`](./zds-radio.ts) —cuyo docstring tiene el detalle— y que aplica a
+   * los dos wrappers de esta base: el selector del `RequiredValidator` de Angular incluye
+   * `[required][formControl]`, y el `[formControl]="control"` de acá es el control **de la pantalla**.
+   * Un `[required]` en este elemento le filtraría `{required: true}` aunque el input público ya se
+   * llame `obligatorio`. Ni `[attr.required]` (es un input, el binding de atributo no corre el setter)
+   * ni un control clonado (el CVA nativo tiene que escribir el objeto real) sirven de salida.
+   */
+  private readonly objHijo = viewChild.required<ZaFileInput>('objHijo');
+
+  constructor() {
+    super();
+    effect(() => {
+      this.objHijo().required = this.obligatorio();
+    });
+  }
+
   /**
    * Extensiones aceptadas, sin punto. El `za-file-input` las pasa a `[accept]` del elemento de Lit,
    * que las convierte a `.pdf,.doc,...` para el `<input type=file>` — o sea que el filtro del

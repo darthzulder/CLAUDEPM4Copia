@@ -60,7 +60,7 @@ import { CampoBase } from './campo-base';
         (modelChange)="alCambiarModelo($event)"
         [inputType]="inputType()"
         [icon]="strIconoEfectivo()"
-        [required]="required()"
+        [required]="obligatorio()"
         [readonly]="readOnly()"
         [helpText]="strTextoAyuda"
         [valid]="blnEnError"

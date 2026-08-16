@@ -37,7 +37,7 @@ import { ZdsRadio } from './zds-radio';
         name="qd_strTipo"
         label="Tipo de solicitud"
         [options]="cllOpciones()"
-        [required]="true"
+        [obligatorio]="true"
         [inline]="blnInline()"
         [error]="strError()"
         helpText="Elegí una opción"

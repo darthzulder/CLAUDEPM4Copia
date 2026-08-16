@@ -61,20 +61,20 @@ import { ZdsTextarea } from './zds-textarea';
         formControlName="qd_strNombre"
         name="qd_strNombre"
         label="Nombre"
-        [required]="true"
+        [obligatorio]="true"
       />
       <zds-select
         formControlName="qd_strCanal"
         name="qd_strCanal"
         label="Canal"
         [options]="[{ value: '13', text: 'Internet' }]"
-        [required]="true"
+        [obligatorio]="true"
       />
       <zds-textarea
         formControlName="qd_strDetalle"
         name="qd_strDetalle"
         label="Detalle"
-        [required]="true"
+        [obligatorio]="true"
       />
     </form>
   `,

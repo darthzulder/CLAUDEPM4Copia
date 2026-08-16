@@ -73,7 +73,7 @@ interface OpcionLib {
         (modelChange)="alCambiarModelo($event)"
         [options]="cllOpcionesLib()"
         [multiSelect]="multiSelect()"
-        [required]="required()"
+        [required]="obligatorio()"
         [helpText]="strTextoAyudaSelect"
         [invalid]="blnEnError"
         [manualValidation]="true"

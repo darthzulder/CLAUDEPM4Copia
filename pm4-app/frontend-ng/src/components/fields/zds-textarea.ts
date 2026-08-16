@@ -17,7 +17,7 @@ import { CampoBase } from './campo-base';
  *
  * ```html
  * <zds-textarea formControlName="qd_strDescription" name="qd_strDescription"
- *               label="Descripción del caso" [required]="true" />
+ *               label="Descripción del caso" [obligatorio]="true" />
  * ```
  *
  * ── El gotcha grave de `lib-textarea-z`: NO tiene `manualValidation` ────────────────────────
@@ -62,8 +62,19 @@ import { CampoBase } from './campo-base';
  * Su `ngOnInit` llama **solo** a `generateGroup()`; **nunca** a `generateControl()` (a diferencia de
  * `InputTextZ`/`InputSelectZ`/`InputDateZ`/`CheckboxZ`, que sí). Consecuencias:
  *  - No inventa ningún `name-<ts>-<n>`: no hay nada que adoptar y el group queda intacto.
- *  - **No compone validadores propios**, así que `required` acá es puramente visual (el asterisco
- *    del label). La validación efectiva vive donde ya vivía: `Validators.required` en el control.
+ *  - **No compone validadores propios.** Su `generateControl()` existe pero es código muerto: nadie
+ *    lo llama. Así que el `[required]` que este wrapper le pasa adentro es puramente visual — el
+ *    asterisco del rótulo—, y la validación efectiva vive donde ya vivía: en el `FormControl`.
+ *
+ *    ⚠ **De acá se sacó una conclusión falsa y costó un diagnóstico entero, así que queda escrito.**
+ *    Se leyó como "entonces marcar el campo no puede agregar validadores", y una pantalla apareció
+ *    con `{required: true}` en un control sin un solo validador declarado. La fuga no venía de la lib
+ *    ni del `[group]`: venía de la **plantilla de la pantalla**, que escribía
+ *    `<zds-textarea formControlName="…" [required]="true" />` — exactamente el selector del
+ *    `RequiredValidator` de Angular. Se probó con un A/B de dos hosts idénticos salvo ese atributo
+ *    (`CON errors={"required":true}` · `SIN errors=null`), y antes se descartó a este wrapper
+ *    clavándole `[required]="false"` adentro sin que la fuga cesara. Por eso el input público se
+ *    llama **`obligatorio`**: ver el docstring de `CampoBase.obligatorio`.
  *  - `updateControl()` existe y sí corre por el `setTimeout` de `changes.model`, pero está guardado
  *    por `if (this.group.get(this.name))` — o sea que escribe el control **solo** porque el wrapper
  *    lo pre-creó. La `CampoBase` sigue siendo lo que hace que esto funcione.
@@ -110,7 +121,7 @@ import { CampoBase } from './campo-base';
         [model]="model() ?? ''"
         (modelChange)="alCambiarModelo($event)"
         (validChange)="alCambiarValid($event)"
-        [required]="required()"
+        [required]="obligatorio()"
         [readonly]="readOnly()"
         [disabled]="deshabilitado()"
         [helpText]="strTextoAyuda"

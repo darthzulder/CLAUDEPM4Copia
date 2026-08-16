@@ -28,7 +28,7 @@ import { ZdsCheckboxField } from './zds-checkbox-field';
         formControlName="qd_blnAcepta"
         name="qd_blnAcepta"
         label="Acepto los términos"
-        [required]="true"
+        [obligatorio]="true"
         helpText="Obligatorio para continuar"
       />
     </form>

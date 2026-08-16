@@ -52,7 +52,7 @@
         label="Nombre completo"
         placeholder="Escriba y borre para ver el required"
         helpText="Máx 40 caracteres (Validators.maxLength en el control)"
-        [required]="true"
+        [obligatorio]="true"
       />
 
       <!-- inputType="email" trae el ícono `mail-closed:line` por default, igual que en React. -->
@@ -62,7 +62,7 @@
         label="Correo electrónico"
         inputType="email"
         placeholder="nombre@zurich.com"
-        [required]="true"
+        [obligatorio]="true"
         [error]="strErrorServidor()"
       />
     </div>
@@ -77,7 +77,7 @@
         placeholder="Seleccione un canal..."
         [options]="cllCanales"
         [loading]="blnCargando()"
-        [required]="true"
+        [obligatorio]="true"
       />
 
       <zds-select
@@ -97,7 +97,7 @@
       placeholder="Mínimo 10 caracteres"
       helpText="El contador de largo sale del par maxLength(bool) + maxNumber(num) de la lib"
       [maxLength]="500"
-      [required]="true"
+      [obligatorio]="true"
     />
 
     <div class="form-row cols-2">
@@ -126,10 +126,10 @@
       formControlName="qd_strAutoriza"
       name="qd_strAutoriza"
       label="Autorizo el tratamiento de mis datos personales"
-      helpText="La obligatoriedad la declara requerirTildado('SI') en el control, no el [required]"
+      helpText="La obligatoriedad la declara requerirTildado('SI') en el control, no el [obligatorio]"
       checkedValue="SI"
       uncheckedValue="NO"
-      [required]="true"
+      [obligatorio]="true"
     />
 
     <zds-file-input

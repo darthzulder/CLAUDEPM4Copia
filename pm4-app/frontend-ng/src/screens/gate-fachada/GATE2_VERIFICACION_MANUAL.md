@@ -39,7 +39,7 @@ Los specs cubren el contrato del CVA y el estado del `FormControl`. Estos pasos 
       persona (radios), autorización (checkbox), soporte (adjunto).
 - [ ] Tienen **estilos del DS**, no texto pelado: tipografía Zurich, bordes, espaciado. Si se ven como
       HTML sin estilo, el problema es `zds-setup.ts` / el chunk de CSS, no los wrappers.
-- [ ] El **asterisco de obligatorio** aparece en los 5 campos con `[required]="true"`.
+- [ ] El **asterisco de obligatorio** aparece en los 5 campos con `[obligatorio]="true"`.
 - [ ] El `helpText` se ve **debajo** del campo en los que lo declaran.
 - [ ] La **fecha no** muestra help-text (su input no existe en la lib — es lo esperado, no un bug).
 - [ ] Los radios salen **en línea** (`[inline]="true"`).

@@ -26,7 +26,7 @@ El choke point sigue siendo uno.
 
 ```html
 <form [formGroup]="form">
-  <zds-input formControlName="qd_strChannel" name="qd_strChannel" label="Canal" [required]="true" />
+  <zds-input formControlName="qd_strChannel" name="qd_strChannel" label="Canal" [obligatorio]="true" />
   <zds-select formControlName="qd_strDepartment" name="qd_strDepartment" label="Departamento"
               [options]="cllDepartamentos()" [loading]="blnCargando()" />
   <zds-file-input formControlName="qd_strSoporte" name="qd_strSoporte" label="Soporte"
@@ -184,8 +184,17 @@ deja limpio cuando está vacío — al revés de lo que un obligatorio significa
 tiene `manualValidation`, así que **no hay input que apague la composición**.
 
 **Regla para las pantallas, no sugerencia:** la obligatoriedad de un checkbox se declara **solo** con
-`Validators.requiredTrue` en el `FormControl`. El `required` del wrapper se usa **únicamente por su
-efecto visual** (el asterisco del label).
+`Validators.requiredTrue` en el `FormControl`. El `obligatorio` del wrapper se usa **únicamente por
+su efecto visual** (el asterisco del label).
+
+> **Y se llama `obligatorio`, no `required`, por una razón estructural** — no es preferencia de
+> nomenclatura. `RequiredValidator`, el directivo estándar de Angular, tiene selector
+> `:not([type=checkbox])[required][formControlName]`, así que un input público llamado `required`
+> obligaría a las pantallas a escribir el atributo que **matchea ese selector** y Angular les
+> engancharía un `{required: true}` al control sin que nadie lo declare. Con el nombre cambiado la
+> colisión es imposible. El detalle completo, con las dos pruebas de runtime, está en el docstring de
+> [`CampoBase.obligatorio`](./campo-base.ts) y la guarda está en
+> [`zds-required.spec.ts`](./zds-required.spec.ts).
 
 No se intercepta el validador a propósito: hacerlo significaría pisar el `setValidators` que la lib
 compone, y eso rompería la adopción de validadores del padre — la pieza sobre la que se apoya toda la
@@ -393,8 +402,12 @@ Fases 2, 5 y 6 — no un extra opcional. Ver
 
 ## Contrato de la fachada React que se preserva
 
-`id="field-<name>"`, `label`, `required`, `readOnly`, `helpText`, `error`, `placeholder`, `icon` (con
-el default `mail-closed:line` para `inputType="email"`), `maxLength`, `min`, `elastic`.
+`id="field-<name>"`, `label`, `readOnly`, `helpText`, `error`, `placeholder`, `icon` (con el default
+`mail-closed:line` para `inputType="email"`), `maxLength`, `min`, `elastic`.
+
+**Una sola divergencia deliberada de nombre: el `required` de React acá es `obligatorio`.** En React
+no había colisión posible porque no existe un directivo que matchee por atributo; en Angular sí, y el
+nombre viejo la garantizaba. Ver la nota del checkbox más arriba.
 
 Dos límites heredados, anotados donde alguien los va a buscar:
 

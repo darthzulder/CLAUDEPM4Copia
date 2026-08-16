@@ -107,7 +107,7 @@ export class GateFachada {
    * 2. **La obligatoriedad no puede delegarse al DS.** El `validRequired()` de `lib-checkbox-z` está
    *    **invertido** (`return this.required && this.model`, sin negación), así que marcaría
    *    `errorRequired` justo cuando el checkbox **sí** está tildado. La regla de la fachada es que la
-   *    obligatoriedad del checkbox vive solo en el control, y el `[required]` del wrapper se pasa
+   *    obligatoriedad del checkbox vive solo en el control, y el `[obligatorio]` del wrapper se pasa
    *    únicamente por el asterisco del label. Ver la cabecera de `zds-checkbox-field.ts`.
    */
   readonly form = new FormGroup({

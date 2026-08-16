@@ -56,7 +56,7 @@ import { ZdsInput } from './zds-input';
         formControlName="qd_strChannel"
         name="qd_strChannel"
         label="Canal"
-        [required]="true"
+        [obligatorio]="true"
         [error]="error"
       />
     </form>

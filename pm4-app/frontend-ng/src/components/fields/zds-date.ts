@@ -56,7 +56,7 @@ import { CampoBase } from './campo-base';
         [inputType]="inputType()"
         [min]="min()"
         [max]="max()"
-        [required]="required()"
+        [required]="obligatorio()"
         [readonly]="readOnly()"
         [disabled]="deshabilitado()"
         [valid]="blnEnError"

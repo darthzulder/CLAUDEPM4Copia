@@ -109,7 +109,7 @@
               formControlName="qd_strRootCause"
               name="qd_strRootCause"
               label="Causa Raíz Identificada"
-              [required]="true"
+              [obligatorio]="true"
               [maxLength]="2000"
               [error]="strErrorCausaRaiz()"
             />
@@ -119,7 +119,7 @@
               formControlName="qd_strCorrectionApplied"
               name="qd_strCorrectionApplied"
               label="Corrección Aplicada"
-              [required]="true"
+              [obligatorio]="true"
               [maxLength]="2000"
               [error]="strErrorCorreccion()"
             />
@@ -134,7 +134,7 @@
               label="¿Requiere ajuste en payload?"
               [options]="cllOpcionesSiNo"
               [inline]="true"
-              [required]="true"
+              [obligatorio]="true"
             />
           </div>
 

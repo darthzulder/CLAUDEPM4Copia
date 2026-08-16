@@ -72,7 +72,31 @@ export abstract class CampoZaBase implements ControlValueAccessor, OnInit {
   readonly name = input.required<string>();
 
   readonly label = input<string>('');
-  readonly required = input(false);
+
+  /**
+   * Marca visual de obligatoriedad — el **asterisco del rótulo**, nada más. Se llama `obligatorio` y
+   * no `required` por el mismo motivo estructural que en [`CampoBase`](./campo-base.ts), cuyo
+   * docstring tiene el detalle completo: el atributo literal `required` junto a `formControlName`
+   * matchea el selector del `RequiredValidator` de Angular y le pega un `{required: true}` al control
+   * que la pantalla nunca declaró.
+   *
+   * ⚠ **Y acá la exposición es mayor, no menor — y no fue teórica.** En `CampoBase` el control que
+   * Angular contaminaría es el de la pantalla porque el wrapper lo localiza; en esta base el
+   * `[formControl]` del template le entrega al `za-*` **el mismo objeto** `FormControl`. Como el
+   * selector del `RequiredValidator` cubre **`[required][formControl]`** además de la variante con
+   * `formControlName`, un `[required]` en el elemento **interno** —el `za-*`, no el host— alcanza para
+   * filtrar el validador, que en `CampoBase` era imposible. `zds-required.spec.ts` lo encontró en los
+   * dos wrappers de esta base.
+   *
+   * Por eso, en las subclases de acá, `obligatorio` **no se bindea en la plantilla**: se escribe sobre
+   * la instancia del hijo con `viewChild` + `effect`. El detalle de por qué `[attr.required]` y clonar
+   * el control no eran salidas está en el docstring de `ZdsRadio.objHijo`. La obligatoriedad que
+   * *invalida* se declara donde siempre: en el `FormControl` de la pantalla.
+   *
+   * La guarda es [`zds-required.spec.ts`](./zds-required.spec.ts), que cubre los 7 wrappers de las
+   * dos bases con un control pelado.
+   */
+  readonly obligatorio = input(false);
   readonly helpText = input<string>('');
 
   /**

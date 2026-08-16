@@ -1,4 +1,4 @@
-import { Component, computed, input } from '@angular/core';
+import { Component, computed, effect, input, viewChild } from '@angular/core';
 import { ReactiveFormsModule } from '@angular/forms';
 import { ZaRadioSelect } from '@zurich/angular-components';
 import { CampoZaBase, proveerAccessorDePaso } from './campo-za-base';
@@ -72,11 +72,11 @@ interface OpcionZa {
   template: `
     <div class="zds-field-wrap" [id]="strId" tabindex="-1">
       <za-radio-select
+        #objHijo
         [formControl]="control"
         [name]="name()"
         [label]="label()"
         [options]="cllOpcionesZa()"
-        [required]="required()"
         [invalid]="blnEnError"
         [help-text]="strTextoAyuda"
         [config]="strConfig()"
@@ -85,6 +85,33 @@ interface OpcionZa {
   `,
 })
 export class ZdsRadio extends CampoZaBase {
+  /**
+   * El asterisco se escribe por código, no con `[required]` en la plantilla, y **el renombre del
+   * input público no alcanzaba para esto**. Es la segunda mitad del mismo defecto: el selector del
+   * `RequiredValidator` de Angular es `[required][formControlName]` **y también**
+   * `[required][formControl]`, y acá `[formControl]="control"` es el control **de la pantalla** (esta
+   * base lo presta, no lo copia — ver la cabecera de `CampoZaBase`). O sea que un `[required]` sobre
+   * este mismo elemento matchea igual y le filtra `{required: true}` al control, aunque el input de
+   * la fachada ya se llame `obligatorio`.
+   *
+   * No sirve `[attr.required]`: `required` es un **input** de `ZaBaseInput` (verificado en
+   * `dist/fesm2022/angular.mjs`), y un binding de atributo no ejecuta el setter — el mismo pozo que
+   * ya está documentado para `max-length` en `zds-textarea.ts`. Y tampoco sirve clonar el control:
+   * el CVA nativo del `za-*` tiene que escribir sobre el objeto real de la pantalla.
+   *
+   * Queda entonces escribir la propiedad del hijo, que es el mismo canal que usa el DS y la misma
+   * técnica que `alCambiarValid()` en `zds-textarea.ts`. Sin el atributo literal en la plantilla el
+   * directivo no puede matchear. La guarda es `zds-required.spec.ts`, que es quien encontró esto.
+   */
+  private readonly objHijo = viewChild.required<ZaRadioSelect>('objHijo');
+
+  constructor() {
+    super();
+    effect(() => {
+      this.objHijo().required = this.obligatorio();
+    });
+  }
+
   readonly options = input<readonly OpcionZds[]>([]);
 
   /** Radios en una fila en vez de apilados. En React era `config: 'inline'`. */

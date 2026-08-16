@@ -22,7 +22,7 @@ import { ZdsTextarea } from './zds-textarea';
         formControlName="qd_strDescription"
         name="qd_strDescription"
         label="Descripción"
-        [required]="true"
+        [obligatorio]="true"
         [error]="error"
         [maxLength]="maxLength"
       />
@@ -37,6 +37,36 @@ class HostDeFormulario {
 
   error = '';
   maxLength: number | undefined = undefined;
+}
+
+/**
+ * Host del caso de la fuga de validador, y **la diferencia con `HostDeFormulario` es todo el punto**:
+ * acá el control se declara **sin ningún validador**, pero el wrapper igual lleva
+ * `[obligatorio]="true"`.
+ *
+ * En el host de arriba los dos coinciden (`Validators.required` en el control **y** la marca visual
+ * en el wrapper), así que un `required` de más es indistinguible del propio y la fuga queda invisible
+ * — que es exactamente por qué no se detectó al escribir la fachada. Con el control pelado, cualquier
+ * `{required: true}` que aparezca en `errors` sólo puede venir de la plantilla.
+ */
+@Component({
+  standalone: true,
+  imports: [ReactiveFormsModule, ZdsTextarea],
+  template: `
+    <form [formGroup]="form">
+      <zds-textarea
+        formControlName="qd_strRootCause"
+        name="qd_strRootCause"
+        label="Causa Raíz"
+        [obligatorio]="true"
+      />
+    </form>
+  `,
+})
+class HostSinValidadores {
+  readonly form = new FormGroup({
+    qd_strRootCause: new FormControl(''),
+  });
 }
 
 async function drenarTimeouts() {
@@ -145,7 +175,7 @@ describe('ZdsTextarea', () => {
     expect(hijo(objFixture).maxLength).toBe(false);
 
     objFixture.componentInstance.maxLength = 500;
-    // `detectChanges()` acá tiraba NG0100 sobre el `[required]="true"` del host. No es un bug del
+    // `detectChanges()` acá tiraba NG0100 sobre el `[obligatorio]="true"` del host. No es un bug del
     // wrapper: en un fixture **zoneless** el `detectChanges()` corre su pasada de verificación
     // (check-no-changes) sobre un host al que se le acaba de escribir un campo desde afuera, sin que
     // Angular sepa que quedó sucio. `markForCheck()` + `whenStable()` es la forma correcta de
@@ -196,6 +226,46 @@ describe('ZdsTextarea', () => {
 
     objControl.setValue('x'.repeat(501));
     expect(objControl.errors?.['maxlength']).toBeTruthy();
+  });
+
+  it('⚠ `[obligatorio]` es VISUAL: no le agrega ningún validador al control del padre', async () => {
+    // **Este caso nació rojo y por eso existe.** Y la explicación que se le escribió encima primero
+    // era **falsa**, así que queda anotada como tal: culpaba a la plantilla interna de
+    // `lib-textarea-z` (`<za-textarea [required]="required" [(ngModel)]="model">`) de matchear el
+    // selector del `RequiredValidator` de Angular sobre el `NgModel` del hijo, que a través del
+    // `[group]` llegaría al control de la pantalla. **Es estructuralmente imposible:** `NgModel`
+    // inyecta `ControlContainer` con `host: true` (verificado en `forms.mjs`), así que no puede
+    // alcanzar el `formGroup` de la pantalla — su control queda standalone. Lo que sí es cierto de la
+    // lib es que `TextareaZ.ngOnInit` llama sólo a `generateGroup()` y **nunca** a `generateControl()`,
+    // o sea que no compone ningún validador propio; era la **conclusión** la que estaba mal, no el dato.
+    //
+    // La causa real vivía un nivel más arriba, en la **plantilla de la pantalla**:
+    // `<zds-textarea formControlName="…" [required]="true" />` **es** el selector
+    // `:not([type=checkbox])[required][formControlName]`, así que Angular enganchaba su
+    // `RequiredValidator` en el elemento del host y le sumaba `{required: true}` al control.
+    //
+    // Se probó con un A/B de dos hosts idénticos salvo ese atributo (`CON errors={"required":true}` ·
+    // `SIN errors=null`), y se descartó a la lib clavándole `[required]="false"` adentro del wrapper
+    // sin que la fuga cesara. El cierre fue renombrar el input público a `obligatorio`: sin el atributo
+    // literal `required` el selector no puede matchear. Ver el docstring de `CampoBase.obligatorio`.
+    //
+    // Nadie lo vio antes porque en `HostDeFormulario` —y en SCR-004, y en `gate-fachada`— el control
+    // declara `Validators.required` **además** de marcar el wrapper, así que el validador filtrado era
+    // redundante y no cambiaba nada observable. La primera pantalla que dependió de que la marca fuera
+    // de verdad sólo visual (SCR-011, que necesita escalar con los campos vacíos) se encontró el form
+    // inválido sin tener un solo validador declarado.
+    //
+    // Por eso la aserción es sobre `errors` y no sobre `valid`: nombra la clave que se filtra, así que
+    // si mañana vuelve a filtrarse el mensaje dice cuál es en vez de "expected false to be true".
+    const objHost = TestBed.createComponent(HostSinValidadores);
+    objHost.detectChanges();
+    await objHost.whenStable();
+
+    const objControl = objHost.componentInstance.form.controls.qd_strRootCause;
+
+    expect(objControl.value).toBe('');
+    expect(objControl.errors).toBeNull();
+    expect(objControl.valid).toBe(true);
   });
 
   it('setDisabledState propaga control.disable() al wrapper', async () => {
