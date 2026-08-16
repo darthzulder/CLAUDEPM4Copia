@@ -1,6 +1,32 @@
 /* ==========================================================================
    SHARED — ESTILOS COMUNES DE LAS PANTALLAS DE PM4
-   Importado una sola vez en main.tsx.
+   Importado una sola vez desde el array `styles` de angular.json.
+   ==========================================================================
+
+   ⚠ ESTA HOJA **NO** ES UNA COPIA DE LA DE REACT, Y NO DEBE CONVERGER A ELLA.
+
+   Se copió tal cual en la Fase 1 de la migración para no bloquear el porte, pero la política
+   acordada (2026-08-16) es la inversa: **minimizar este archivo priorizando componentes ZDS de
+   Colombia (`lib-*-z`) como base.** El motivo es histórico — cuando se escribió el `shared.css` de
+   React no se conocía el inventario completo del DS, así que hay bloques que reimplementan a mano
+   cosas que el DS ya da hechas.
+
+   El criterio, en dos preguntas:
+     1. ¿Esto es un **elemento visual** (card, tag, acordeón, badge, loader)? → buscar el `lib-*-z`
+        que lo cubra y usarlo. Primero `@zurich-col/lib-zurich`, después `za-*`, y solo si ninguno
+        alcanza, CSS acá.
+     2. ¿Esto es **layout o estructura** (grillas, posicionamiento, overlays, breakpoints)? → CSS
+        propio acá. El DS no cubre layout de pantalla y forzarlo empeora las cosas.
+
+   Sobre el resultado visual: **no hace falta que sea idéntico a React**, pero sí lo más parecido
+   posible. Si un componente del DS se ve algo distinto del CSS a mano, gana el componente del DS.
+
+   **Cuándo se migra cada bloque: al portar la pantalla que lo usa, no antes.** Hoy buena parte de
+   esta hoja es CSS anticipado —sus pantallas todavía no se portaron (vamos 3 de 12)—, y reescribir
+   un bloque sin una pantalla que lo consuma deja el cambio sin forma de verificarse contra el React
+   de referencia. Los bloques ya investigados llevan una nota `⏳ CANDIDATO ZDS PENDIENTE` con el
+   componente, sus inputs verificados y qué reemplaza; los descartados llevan el motivo, para que no
+   se vuelva a investigar lo mismo.
    ========================================================================== */
 
 /* ── 1. TOKENS & ALIASES ZURICH ────────────────────────────────────────── */
@@ -15,8 +41,17 @@
   --z-border: var(--zg-9);
   --z-text: var(--zc-blue-dark);
   --z-muted: var(--zg-5);
-  /* Sombra de elevación: ZDS 0.8.1 no expone tokens de elevación; el color se
-     deriva del token negro del DS vía color-mix (resultado idéntico al rgba). */
+  /* Sombra de elevación. El color se deriva del token negro del DS vía color-mix (resultado
+     idéntico al rgba).
+
+     ⚠ Corrige lo que decía antes: **el DS sí expone tokens de elevación** — `--zd-1`..`--zd-8`
+     existen en `@zurich/css-components/dist/base.css` (verificado 2026-08-16). Lo que no hay es
+     uno equivalente a esta sombra:
+         --zd-1:          0 1px 5px 0 rgba(0,0,0,.07), 0 2px 2px 0 …, 0 3px 1px -2px …
+         --z-card-shadow: 0 1px 3px …7%, 0 6px 18px …6%
+     `--zd-1` son 3 capas pegadas al borde (realce tipo material); esta son 2 capas difusas y
+     amplias. Sustituir **cambia el aspecto**, y la paridad visual con React —que usa esta— es el
+     requisito. Se mantiene a propósito, no por ausencia de token. */
   --z-card-shadow:
     0 1px 3px color-mix(in srgb, var(--zg-black) 7%, transparent),
     0 6px 18px color-mix(in srgb, var(--zg-black) 6%, transparent);
@@ -25,6 +60,48 @@
   --z-card-border: #DDE3EC;    /* borde azul-grisáceo de cards (sin token DS) */
   --z-warning-deep: #B8860B;   /* ámbar legible p/ícono warning sobre lemon */
   --z-modal-backdrop: #0B1B3C; /* navy del scrim de modales (sin token DS) */
+
+  /* ⚠ `--z-sf-base` y `--z-ct-primary` NO son sustitutos de `--zg-white` / `--z-text`.
+     Son tokens **de tema**: el DS los redefine invertidos según el ancestro (verificado
+     2026-08-16 en `@zurich/css-components/dist/base.css`).
+
+         :root, *[z-theme=light]  →  --z-sf-base: var(--zg-white)      --z-ct-primary: var(--zc-blue-dark)
+         *[z-theme=dark]          →  --z-sf-base: var(--zc-blue-dark)  --z-ct-primary: var(--zg-white)
+
+     Usarlos donde hoy hay un color fijo no es tokenizar: es **adoptar theming**, y un
+     `z-theme="dark"` en cualquier ancestro daría vuelta el fondo de las cards. Eso es un cambio
+     funcional, fuera del alcance de la migración (que es paridad con React, no rediseño). Si algún
+     día se quiere modo oscuro, se decide aparte y se revisa toda esta hoja de una vez —no de a un
+     token por pantalla, que dejaría la mitad clara y la mitad oscura. */
+
+  /* ── RADIOS: por qué van con `--zs-*` y no con `--z-rd-*` ───────────────────────────────
+     Inventariado 2026-08-16 sobre el CSS compilado de los tres paquetes. El DS **no** usa sus
+     propios tokens de radio: tiene tres (`--z-rd-s`=16px, `--z-rd-m`=24px, `--z-rd-l`=40px) y
+     `--z-rd-s` aparece **una sola vez** en toda la librería (`kpi-value`). Lo que usa en todos
+     los demás componentes son los tokens de **espaciado**:
+
+         var(--zs-25)   color-input, progress-bar
+         var(--zs-50)   selectable-cards, share-bar, vertical-stepper
+         var(--zs-75)   alert, chip, file-input
+         var(--zs-100)  action-card, alert, article-card
+         var(--zs-150)  modal, rating, selection-tag, tag
+         var(--zs-12)   progress-tracker
+
+     Y deja crudos los que la escala no cubre: `5px` (checkbox), `16px` (tooltip), `28px`
+     (button), `100px` (badge), `1000px` (skeleton), `50%` (23 veces).
+
+     Por eso acá los radios que coinciden exacto con la escala van tokenizados
+     (2px→`--zs-12`, 4px→`--zs-25`, 8px→`--zs-50`, 12px→`--zs-75`): es el patrón del DS, no una
+     licencia. Los `@zurich-col/lib-*-z` de Colombia, por su parte, usan `4px`/`6px`/`12px`/
+     `1.5rem`/`50%` **todos crudos** — pero eso vive en su shadow DOM y no condiciona nada de acá:
+     esta hoja estila contenedores propios, nunca componentes del DS.
+
+     Los 8 radios que quedan crudos, y el motivo de cada uno (para que no se lean como descuido):
+       · `50%` ×3  — forma geométrica (círculo), no un punto de la escala. El DS hace lo mismo.
+       · `999px` ×1 — pill. El DS usa `100px`/`1000px` crudos para el mismo efecto.
+       · `10px` ×3 — **sin token**: cae entre `--zs-50` (8px) y `--zs-75` (12px). Tokenizarlo
+                     cambiaría el aspecto, y el requisito es acercarse a React, no redondear.
+       · `3px` ×1  — ídem, entre `--zs-12` (2px) y `--zs-25` (4px). */
 }
 
 @font-face {
@@ -183,6 +260,12 @@ z-table th,
 }
 
 /* ── 3. ESTADOS DE CARGA Y ERROR globales ────────────────────────────── */
+
+/* Ninguno de estos dos es candidato a `lib-loader-z`, aunque el nombre lo sugiera (revisado
+   2026-08-16). `LoaderZ` expone solo `customStr` + `label`: **es el spinner**, y ya se usa dentro
+   de estos contenedores. Lo que hacen estas dos clases es **posicionarlo** — centrado en 60vh y
+   overlay fijo con scrim —, y eso no lo cubre ningún input del componente. Es layout de pantalla,
+   se queda como CSS propio. */
 .screen-loading {
   display: flex;
   flex-direction: column;
@@ -205,6 +288,23 @@ z-table th,
 
 /* ── 4. LAYOUT DE FORMULARIOS Y GRID ───────────────────────────────────── */
 
+/* Grilla de campos. Investigado 2026-08-16 al portar: `za-fieldset` / `z-fieldset` NO la reemplaza,
+   aunque a primera vista parezca el candidato (su `:host` y su `fieldset>div` son `display: grid`).
+
+   - Su input `config` **no es de layout**: el `render()` solo lo propaga como atributo a los inputs
+     hijos (`z-text-input`, `z-select`, …), o sea que gobierna la apariencia de los controles. No
+     existe un `config="row"` que arme columnas — era una suposición del plan de migración que el
+     código del componente no respalda.
+   - Las columnas irían por `--z-fieldset--template`, una custom property, no por atributo. Eso
+     obligaría a un `style="--z-fieldset--template: 1fr 1fr 1fr"` inline por fila y por pantalla
+     (estilo ad-hoc, contra la regla 3), y los tres breakpoints de abajo no se pueden expresar en un
+     inline: habría que escribir CSS igual, pero repartido entre una custom property y media queries
+     sobre un custom element.
+   - Su `gap` está fijo en `var(--zs-100)` (16px) sin token de override; acá son 24px (`--zs-150`).
+     Migrar cambiaría el espaciado de todas las filas, y el requisito es paridad con React.
+
+   Aparte, envuelve el contenido en `<fieldset>` + `<legend>`: una `form-row` no es una agrupación
+   lógica de campos (eso es `FormSection`), así que la semántica tampoco corresponde. */
 .form-row {
   display: grid;
   gap: var(--zs-150);
@@ -315,9 +415,28 @@ z-table th,
    1.75rem, fondo --z-bg-light-base, estado readonly nativo via color/borde). */
 
 /* Sub-secciones básicas */
+
+/* ⏳ CANDIDATO ZDS PENDIENTE → `lib-card-z` **sí** reemplaza este bloque (y `.products-card`).
+   Verificado 2026-08-16 leyendo el CSS compilado de `z-card` (`web-components/dist/card.js`),
+   que es lo que `lib-card-z` envuelve. Su `:host>div` es configurable entero por tokens:
+
+       --z-card--radius   (def. --zs-150)   --z-card--bg       (def. --z-sf-base)
+       --z-card--padding  (def. --zs-150)   --z-card--gap      (def. --zs-100)
+       --z-card--border                     --z-card--shadow   (def. --zd-1)
+
+   y ya es `display: grid` con `gap`, o sea lo mismo que el `flex-direction: column` + `gap` de
+   acá. Con `--z-card--border` / `--radius` / `--gap` / `--padding` se llega al mismo aspecto.
+
+   ⚠ Matiz importante, porque contradice a medias la nota de `.form-section-card`: el
+   `background ... !important` de `z-card` **no** descarta el componente en general — solo impide
+   un fondo **distinto por slot**, que es lo que `FormSection` necesita (franja de color sólido
+   separada del cuerpo blanco) y esta subsección **no**. Acá el fondo es uno solo.
+
+   No se migra todavía: la pantalla que usa esta clase no está portada. Se migra al portar la
+   pantalla, comparando contra React — política de reducción de esta hoja. */
 .form-subsection {
   border: 1px solid var(--z-border);
-  border-radius: 8px;
+  border-radius: var(--zs-50);
   padding: var(--zs-100) var(--zs-150) var(--zs-75);
   background: var(--zg-white);
   display: flex;
@@ -349,7 +468,7 @@ z-table th,
   display: inline-block;
   width: 3px;
   height: 14px;
-  border-radius: 2px;
+  border-radius: var(--zs-12);
   flex-shrink: 0;
 }
 
@@ -464,16 +583,38 @@ z-table :is(th, td)[config*="right"] {
   flex-shrink: 0;
 }
 
-/* Component: FormSection — investigado 2026-08-06: ni ZrCard (un solo slot
-   `content`, sin slot de header) ni ZrTile (header como texto plano dentro
-   de `main`, mismo fondo que el resto de la tile) permiten una franja de
-   color sólido full-width separada del cuerpo — CSS de dominio confirmado,
-   FormSection.tsx se mantiene igual. */
+/* Component: FormSection — CSS de dominio, confirmado dos veces contra el DS.
+
+   Lo que hace falta es una franja de color sólido full-width **separada** del cuerpo blanco.
+   Ninguna card del DS puede darla, y el motivo NO es el mismo en React que en Angular:
+
+   - React (investigado 2026-08-06): `ZrCard` expone un solo slot `content`, sin slot de header;
+     `ZrTile` rinde el header como texto plano dentro de `main`, con el mismo fondo que el resto.
+   - Angular (verificado 2026-08-16, al portar): `lib-card-z` **sí tiene** slot de header
+     (`showHeader` + `<ng-template libZTemplate id="header">`), así que el argumento de React no
+     aplica acá y hay que mirar otra cosa. Lo que bloquea es el CSS de `z-card`, que pone el fondo
+     sobre el **único `<div>` envolvente** y con `!important`:
+         :host > div { background: var(--z-card--bg, var(--z-sf-base)) !important; }
+     El `bg:` que `CardZ.buildCustomStr()` arma desde su input `bgColor` termina en ese
+     `--z-card--bg`, o sea que pinta la **card entera** — header y cuerpo comparten superficie.
+     Un `bg` por slot no existe.
+
+     ⚠ Alcance de ese `!important`, para no sobre-leerlo: descarta `lib-card-z` **solo** cuando se
+     necesitan dos superficies distintas en la misma card, que es este caso. Para una caja de fondo
+     único `lib-card-z` sirve perfectamente y es configurable por tokens (`--z-card--radius`,
+     `--padding`, `--gap`, `--border`, `--shadow`) — ver la nota de `.form-subsection`.
+
+   El matiz importa para no re-investigar: "no tiene slot de header" era el motivo en React y **ya
+   no es cierto** en Angular. Si mañana aparece una card del DS con slot de header, eso por sí solo
+   no habilita nada — lo que hay que revisar es si el fondo es por slot o por wrapper.
+
+   Gotcha de `lib-card-z` si algún día se lo usa para otra cosa: `buildCustomStr()` corre **solo**
+   en `ngAfterContentInit`, así que cambiar `bgColor` después del primer render no propaga nada. */
 .form-section-card {
   margin-bottom: var(--zs-250);
   background: var(--zg-white);
   border: 1px solid var(--z-card-border);
-  border-radius: 12px;
+  border-radius: var(--zs-75);
   box-shadow: var(--z-card-shadow);
 }
 
@@ -482,7 +623,7 @@ z-table :is(th, td)[config*="right"] {
   display: flex;
   align-items: center;
   gap: var(--zs-50);
-  border-radius: 12px 12px 0 0;
+  border-radius: var(--zs-75) var(--zs-75) 0 0;
 }
 
 .form-section-header span {
@@ -597,6 +738,14 @@ z-table :is(th, td)[config*="right"] {
   box-shadow: 0 2px 8px color-mix(in srgb, var(--zc-moss-aa) 7%, transparent);
 }
 
+/* Círculo numerado de paso. Buscado componente ZDS 2026-08-16, no hay — y los dos candidatos
+   que parecen serlo, no lo son:
+     · `lib-tag-z` (`TagZ`): etiqueta con padding horizontal y texto por el input `label`.
+       No es un círculo y no admite contenido por slot.
+     · `lib-shape-z` (`ShapeZ`): `shape: '1'..'7'` + `size`, pero es **decorativo** —
+       `zShapeSlots: never[]` en `@zurich/dev-utils/dist/code/Shape.props.d.ts`, o sea que
+       no tiene dónde poner el número. Los '1'..'7' son formas, no dígitos.
+   Queda como CSS de dominio. El `50%` es forma geométrica, no escala (ver nota de radios en :root). */
 .doc-num-badge {
   width: 32px;
   height: 32px;
@@ -662,7 +811,7 @@ z-table :is(th, td)[config*="right"] {
   text-overflow: ellipsis;
   white-space: nowrap;
   background: var(--zg-9);
-  border-radius: 4px;
+  border-radius: var(--zs-25);
   padding: 2px 7px;
 }
 
@@ -744,7 +893,7 @@ z-table :is(th, td)[config*="right"] {
   padding: var(--zs-150);
   background: var(--zg-white-zurich);
   border: 1px solid var(--z-border);
-  border-radius: 8px;
+  border-radius: var(--zs-50);
   color: var(--z-muted);
 }
 
@@ -817,7 +966,7 @@ z-table :is(th, td)[config*="right"] {
 .billing-block {
   background: var(--zg-white-zurich);
   border: 1px solid var(--z-border);
-  border-radius: 8px;
+  border-radius: var(--zs-50);
   padding: var(--zs-75) var(--zs-100);
 }
 
@@ -837,12 +986,16 @@ z-table :is(th, td)[config*="right"] {
 /* Colapsable de tomador */
 .policyholder-create-body {
   border: 1.5px solid var(--zc-lemon-aa);
-  border-radius: 8px;
+  border-radius: var(--zs-50);
   padding: var(--zs-150) var(--zs-150) var(--zs-75);
   margin-bottom: var(--zs-25);
 }
 
 /* Products card */
+/* ⏳ CANDIDATO ZDS PENDIENTE → `lib-card-z`, mismo caso que `.form-subsection` (fondo único,
+   configurable por `--z-card--radius` / `--shadow` / `--border`). Ver esa nota para el detalle.
+   El `10px` de acá no tiene token (cae entre `--zs-50` y `--zs-75`), así que migrar a `lib-card-z`
+   además resuelve el radio: pasaría a ser el del DS en vez de un valor crudo intermedio. */
 .products-card {
   background: var(--zg-white);
   border-radius: 10px;
@@ -885,7 +1038,7 @@ z-table :is(th, td)[config*="right"] {
   gap: var(--zs-75);
   padding: var(--zs-50) var(--zs-75);
   border: 1px solid var(--z-border);
-  border-radius: 8px;
+  border-radius: var(--zs-50);
   background: var(--zg-white);
 }
 
@@ -963,7 +1116,7 @@ z-table :is(th, td)[config*="right"] {
 
 .quote-summary-product {
   border: 1px solid var(--zg-9);
-  border-radius: 8px;
+  border-radius: var(--zs-50);
   overflow: hidden;
 }
 
@@ -1028,9 +1181,25 @@ z-table :is(th, td)[config*="right"] {
 }
 
 /* Nota Cobertura screen */
+
+/* ⏳ CANDIDATO ZDS PENDIENTE → `lib-accordion-z` reemplaza este bloque y los 5 de abajo
+   (`.doc-card-header`, `:hover`, `.is-open`, `.doc-info`, `.doc-actions`, `.doc-viewer`).
+   Verificado 2026-08-16 en `types/zurich-col-lib-zurich.d.ts`, clase `AccordionZ`:
+
+       titleLabel: string        ← el texto del header (hoy `.doc-card-header` + `.doc-info`)
+       label: string
+       readonlyInput: boolean
+       template: QueryList<ZTemplate>   ← cuerpo por `<ng-template libZTemplate id="...">`
+       changeRead(): void        ← el abrir/cerrar que hoy es la clase `.is-open` a mano
+
+   O sea que el estado de apertura, el header clickeable y el cuerpo colapsable ya los da el
+   componente; acá se están reimplementando a mano. **No se migra todavía a propósito:** las
+   pantallas que usan estas clases (VisualizarDocumentos, RequestFileList) no están portadas aún,
+   y sin la pantalla al lado del React no hay con qué comparar visualmente. Se migra al portar la
+   pantalla — política de reducción de esta hoja, ver el encabezado del archivo. */
 .doc-card {
   border: 1px solid var(--z-border);
-  border-radius: 8px;
+  border-radius: var(--zs-50);
   overflow: hidden;
   background: var(--zg-white-zurich);
 }
@@ -1105,7 +1274,15 @@ z-table :is(th, td)[config*="right"] {
 /* Investigado 2026-08-06: ZrTag (radius --zs-150=24px, sin word-break) y
    ZrChip (siempre interactivo, con botón de cierre integrado) no calzan con
    un correo electrónico completo de solo lectura que necesita quebrarse —
-   CSS de dominio confirmado, sin componente ZDS equivalente. */
+   CSS de dominio confirmado, sin componente ZDS equivalente.
+
+   Re-verificado 2026-08-16 contra la lib de Colombia, que es la base ahora: `lib-tag-z`
+   (clase `TagZ`) expone **solo** `label` / `colorTag` / `icon` / `iconRight` / `fill`
+   (10 paletas: moss, azure, teal, lilac, candy, peach, mint, lime, lemon, powder-pink).
+   Sin salida para `word-break`, y el texto va por el input `label` (string), no por slot —
+   así que no hay dónde meter un quiebre. El motivo de 2026-08-06 sigue vigente con la lib
+   nueva, por una razón distinta a la de React: no es el radio, es que el contenido es un
+   input de texto plano y no un slot. Se mantiene como CSS de dominio. */
 .email-status-badge {
   display: inline-block;
   margin: var(--zs-75) 0;
@@ -1306,6 +1483,13 @@ z-table :is(th, td)[config*="right"] {
    problemas?"); migrar rompería esa interacción. La alternativa (`footer`,
    fila plana) tampoco sirve: solo admite un listado y ya está reservada
    para la fila de legales. CSS de dominio confirmado, se mantiene. */
+/* `lib-footer-z` NO reemplaza este bloque ni los `.pqr-footer-*` de abajo. Verificado
+   2026-08-16 en `types/zurich-col-lib-zurich.d.ts`: la clase `FooterZ` está **vacía** —
+   `declare class FooterZ { }`, cero inputs. Su contenido (links y redes) es hardcodeado de la
+   lib, no configurable, y acá se necesitan los links legales específicos de esta pantalla PQR.
+   (Un grep sobre el `.mjs` minificado devuelve `routes`/`social` para este selector, pero son
+   inputs del componente **vecino** en el bundle: los `.mjs` van en una línea, así que la
+   proximidad textual no respeta límites de componente. El `.d.ts` es la fuente confiable.) */
 .pqr-footer {
   display: flex;
   align-items: center;
@@ -1517,7 +1701,7 @@ z-table :is(th, td)[config*="right"] {
   padding: var(--zs-100) var(--zs-150);
   background: var(--zg-white);
   border: 1.5px solid var(--zg-9);
-  border-radius: 8px;
+  border-radius: var(--zs-50);
   text-decoration: none;
   color: var(--z-blue-dark);
   font: var(--zf-body-14);

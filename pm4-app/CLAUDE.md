@@ -555,9 +555,20 @@ Al construir UI hay **dos ejes** con escaleras distintas. Recorre cada una **de 
 4. **Último recurso** → CSS custom tokenizado.
 
 ### Regla transversal (SIEMPRE, sin importar el escalón)
-- **Solo tokens:** `--zs-*` (espaciado), `--zf-*` (tipografía), `--z-*`/`--zc-*`/`--zg-*` (color). **Nunca** px/hex crudos (excepto `1px` de borde, radios, `line-height`, anchos puntuales).
+- **Solo tokens:** `--zs-*` (espaciado), `--zf-*` (tipografía), `--z-*`/`--zc-*`/`--zg-*` (color). **Nunca** px/hex crudos (excepto `1px` de borde, `line-height` y anchos puntuales).
+- **Radios: tokenizados cuando coinciden con la escala `--zs-*`.** Ya no son excepción libre. El DS **no** usa sus propios tokens de radio (`--z-rd-s/m/l` aparecen **una vez** en toda la librería, en `kpi-value`): usa los de **espaciado** como radios en 20+ componentes (`--zs-25` color-input, `--zs-50` selectable-cards, `--zs-75` alert/chip, `--zs-100` action-card, `--zs-150` modal/tag). Así que el patrón correcto es 2px→`--zs-12`, 4px→`--zs-25`, 8px→`--zs-50`, 12px→`--zs-75`, 16px→`--zs-100`, 24px→`--zs-150`. Queda crudo solo lo que la escala no cubre — `50%` y pills (el DS también los deja crudos), y valores intermedios como `10px`/`3px`, **siempre con comentario del motivo**. (Verificado 2026-08-16 sobre el CSS compilado de los tres paquetes. Los `lib-*-z` de Colombia usan radios crudos en su shadow DOM, pero eso no condiciona nuestras hojas.)
 - **Nombra clases por componente/primitivo, nunca por pantalla.**
 - **CSS nuevo va al final de `shared.css`, DRY.**
+
+### `shared.css` de Angular: minimizar, no replicar el de React (política 2026-08-16)
+
+`frontend-ng/src/shared.css` se copió tal cual del React en la Fase 1 para no bloquear el porte, pero **no debe converger a él**. Cuando se escribió el original no se conocía el inventario completo del DS, así que hay bloques que reimplementan a mano cosas que el DS ya da hechas. El objetivo en Angular es **reducir esa hoja priorizando `lib-*-z` de Colombia como base**.
+
+- **Elemento visual** (card, tag, acordeón, badge, loader, tabla) → componente del DS. Orden: `@zurich-col/lib-zurich` → `za-*` → CSS propio.
+- **Layout o estructura** (grillas, posicionamiento, overlays, breakpoints, scrims) → CSS propio. El DS no cubre layout de pantalla; forzarlo empeora el resultado (ver el caso `za-fieldset` vs `.form-row`, documentado en la hoja).
+- **Paridad visual:** no hace falta ser idéntico a React, pero sí lo más parecido posible. Si el componente del DS se ve algo distinto del CSS a mano, **gana el componente del DS**.
+- **Momento de migrar cada bloque: al portar la pantalla que lo usa, no antes.** Buena parte de la hoja es CSS anticipado (sus pantallas no están portadas), y reescribir un bloque sin pantalla que lo consuma deja el cambio sin forma de verificarse contra el React de referencia.
+- Los bloques ya investigados llevan nota en la hoja: `⏳ CANDIDATO ZDS PENDIENTE` con el componente y sus inputs verificados, o el motivo del descarte. **Leer esas notas antes de re-investigar.** Verificar los inputs contra `InsumosZurich/lib-zurich-2.6.16/package/types/zurich-col-lib-zurich.d.ts` — **no** por grep sobre el `.mjs`, que va en una sola línea y devuelve inputs del componente vecino (así se le atribuyó a `lib-footer-z` un `routes`/`social` que no tiene: `FooterZ` está vacía).
 
 ### ¿Clase o componente nuevo? *(bifurcación del escalón "crear")*
 - Concepto de UI reutilizable **con markup/comportamiento** → **componente** semántico (`ActionBar`, `FormRow`).
@@ -566,7 +577,8 @@ Al construir UI hay **dos ejes** con escaleras distintas. Recorre cada una **de 
 - **NO** envolver lo que ya es componente. Umbral de reúso **≥3** (o que encapsule comportamiento real).
 
 ### Hechos de `z-flex`/`z-align` (verificados contra el CSS compilado)
-- Gaps válidos: `50 / 75 / 100 / 150 / 200 / 300` (= `--zs-*`). **No existe gap `25`** (4px) → ese caso queda como clase CSS.
+- Gaps válidos: `50 / 75 / 100 / 150 / 200 / 300 / 400 / 600` (= `--zs-*`). **No existe gap `25`** (4px) → ese caso queda como clase CSS. (Re-verificado 2026-08-16 enumerando los selectores `[z-flex…]` de `base.css`: **`400` y `600` sí existen** y esta lista los omitía.)
+- Modificadores de wrap: `:wrap` y `:wrap-rev` son válidos como sufijo (`[z-flex*=":wrap"]`), además de las formas `wrap`/`wrap-rev` al principio del valor. También existen `rev`, `row-rev`, `col`/`column-rev` como prefijo.
 - `z-flex` por defecto es `align-items: stretch` (la doc local dice "center" y es **falso**).
 - **No** pongas `z-flex` sobre `ZrCard`/`ZrForm`/`ZrModal` (tienen su propio layout interno).
 - Sintaxis: `z-flex="col:150"` = columna gap 150; fila centrada a la derecha = `z-flex="75" z-align="right:center"`.
