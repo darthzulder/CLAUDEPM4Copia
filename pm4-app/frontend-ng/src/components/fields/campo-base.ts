@@ -1,14 +1,17 @@
 import {
+  afterNextRender,
   ApplicationRef,
   Directive,
   inject,
   Injector,
   input,
+  isDevMode,
   signal,
   type OnInit,
   type WritableSignal,
 } from '@angular/core';
 import {
+  ControlContainer,
   FormControl,
   FormGroup,
   NgControl,
@@ -84,13 +87,25 @@ export abstract class CampoBase<T> implements ControlValueAccessor, OnInit {
   readonly placeholder = input<string>('');
 
   /**
-   * NO hay input `maxLength` acá a propósito, aunque la fachada React lo tenga.
+   * NO hay input `maxLength` acá a propósito — pero el motivo es **más angosto** de lo que este
+   * comentario decía antes, y la diferencia costó los tres contadores de la SCR-008.
    *
-   * En `lib-input-text-z` el input homónimo está tipado **`boolean`** (el largo iría en `maxNumber`)
-   * y ninguno de los dos llega al `za-text-input`: su template no los pasa y la única referencia en
-   * la clase está comentada. Exponerlo acá daría un prop que se acepta, no falla y no limita nada.
-   * El límite se declara como `Validators.maxLength(n)` en el control, que es efectivo y además es
-   * donde el proyecto ya lo tiene.
+   * Lo que sigue siendo cierto es sobre **`lib-input-text-z`**: su input homónimo está tipado
+   * `boolean` (el largo iría en `maxNumber`) y ninguno de los dos llega al `za-text-input` — su
+   * template no los pasa y la única referencia en la clase está comentada. Ahí sí es un prop muerto.
+   *
+   * ⚠ **Lo que era falso: la generalización a todos los campos.** Este comentario afirmaba que
+   * exponer `maxLength` "no limita nada", sin acotarlo al input de texto, y de ahí se leyó que en
+   * cualquier wrapper sería un falso verde. En `lib-textarea-z` **no** es así: su template hace
+   * `[attr.max-length]="maxLength ? maxNumber : ''"`, y aunque ese binding de atributo muere antes
+   * del `z-textarea` (bug de la lib), [`zds-textarea`](./zds-textarea.ts) lo **neutraliza** reponiendo
+   * el atributo con un `afterRenderEffect`. Así que ese wrapper sí expone `maxLength`, y funciona: el
+   * DS pinta el contador (`9/5000`).
+   *
+   * Por eso el input vive en `ZdsTextarea` y no acá: es un contrato de **un** wrapper, no de la base.
+   * Y sigue habiendo dos contratos distintos, que no se sustituyen — el límite **efectivo** es
+   * `Validators.maxLength(n)` en el control (lo único que invalida), y el **contador visual** es el
+   * `[maxLength]` del template. Aseverar uno no detecta la falta del otro.
    */
 
   /**
@@ -150,8 +165,106 @@ export abstract class CampoBase<T> implements ControlValueAccessor, OnInit {
   // eslint-disable-next-line @typescript-eslint/no-empty-function -- idem
   private fnAlTocar: () => void = () => {};
 
+  /**
+   * Solo para la guarda de dev: el `ControlContainer` del ancestro, que es lo que provee
+   * `[formGroup]`/`[formGroupName]`/`ngForm`. `{ optional: true }` porque el uso suelto —sin ningún
+   * form alrededor— es legítimo y ahí no hay nada que inyectar.
+   *
+   * ⚠ Se pregunta por **DI y no por el DOM**, y la diferencia es la que hizo que la primera versión
+   * de esta guarda fuera inútil. Ver el bloque de `guardarFormControlNameEnDev()`.
+   */
+  private readonly objContenedorAncestro = inject(ControlContainer, { optional: true });
+
+  constructor() {
+    this.guardarFormControlNameEnDev();
+  }
+
   ngOnInit(): void {
     this.ngControl = this.objInjector.get(NgControl, null, { optional: true, self: true });
+  }
+
+  /**
+   * ⚠ **La red que atrapa el `formControlName` olvidado — en dev, en el navegador y en cualquier spec
+   * que monte la pantalla.** Es la guarda cross-pantalla de la que nace todo este bloque.
+   *
+   * ── Por qué existe: tres defectos del mismo tipo, ninguno visto por el spec de su pantalla ──────
+   * La SCR-008 nació con `[formGroup]` y `name="qd_*"` en sus 9 `zds-*` y **sin `formControlName` en
+   * ninguno**. Los 9 campos quedaron muertos —React pintaba 8 de 9 con datos reales, Angular los 9
+   * vacíos— y los 10 casos de su spec estaban **verdes**, porque todos empujaban el `FormGroup` a mano
+   * y ninguno preguntaba si el valor llegaba al componente.
+   *
+   * La lección que obligó a subir la guarda acá: **un spec por pantalla asevera lo que la pantalla
+   * declara; no puede aseverar lo que la pantalla olvidó declarar.** Sumar un caso más por pantalla no
+   * cierra eso — lo escribe la misma persona que acaba de olvidar el binding, en el mismo momento.
+   * Vive en la fachada porque acá la condición es **universal**: todo `zds-*` dentro de un form
+   * necesita `formControlName`, sin excepción, así que se puede decidir sin saber nada de la pantalla.
+   *
+   * ── Por qué `throw` y no `console.error` ───────────────────────────────────────────────────────
+   * Un `console.error` no pone rojo ningún spec, y entonces no sirve para este propósito: el defecto
+   * volvería a viajar con la suite en verde, que es exactamente lo que pasó. El `throw` cambia un
+   * campo **silenciosamente muerto** por un fallo ruidoso y nombrado — la operación correcta, porque
+   * de los dos el silencioso es el que llega al navegador de un usuario.
+   *
+   * Va detrás de `isDevMode()`: en producción no rompe una pantalla por un binding faltante (el
+   * `ng build` de prod lo elimina del bundle). O sea que la guarda es un detector de errores de
+   * autor, no una validación de runtime.
+   *
+   * ── Por qué `afterNextRender` y no `ngOnInit` ──────────────────────────────────────────────────
+   * `formControlName` engancha el control en el `ngOnChanges` de **su** directiva, que corre después
+   * del `ngOnInit` de este componente — es el mismo desfase que ya documenta el getter `grupo`, y por
+   * el que ahí la resolución es perezosa. Preguntar en `ngOnInit` daría un falso positivo en **todos**
+   * los campos, incluidos los correctos. `afterNextRender` corre una sola vez, después del primer
+   * render, cuando el `NgControl` ya está resuelto y el DOM ya existe para poder buscar el form.
+   *
+   * ── Por qué la condición incluye "hay un form ancestro" ────────────────────────────────────────
+   * Porque el uso **suelto** es legítimo y está aseverado: sin `NgControl` el wrapper cae a
+   * `grupoPropio()`, que es lo que usan los usos de solo lectura y varios specs de la fachada. Un
+   * `zds-*` sin `formControlName` **fuera** de un form no es un defecto; adentro, sí. Esa condición
+   * es lo que distingue los dos casos, y sin ella esta guarda rompería media suite de la fachada.
+   *
+   * ── ⚠ Por qué se pregunta por DI y NO por el DOM (la primera versión de esta guarda no servía) ──
+   * El primer intento preguntaba
+   * `objAnfitrion.closest('[formGroup],[formGroupName],form[ngForm]')`, y **falló abierto**: la
+   * mutación de la SCR-008 —quitarle el `formControlName` a `qd_strClientResponse`— no la puso roja.
+   * Medido con una sonda antes de creerle a la lectura: el callback **sí** corría (18 veces, una por
+   * `CampoBase` montado), el `ngControl` del campo mutado **sí** era `null`… y el `closest()`
+   * devolvía `false`.
+   *
+   * El motivo: **`[formGroup]="form"` es un binding de propiedad, así que Angular no lo deja en el
+   * DOM.** El `<form>` renderizado tiene exactamente `["novalidate","class"]` como atributos — el
+   * `formGroup` no está ahí en runtime, aunque se lea en el template. La guarda estaba aseverando un
+   * atributo que no existe, y por eso perdonaba justo el defecto para el que se escribió.
+   *
+   * Eso es peor que no tener guarda: 13 pantallas cubiertas por algo que nunca se pone rojo. Y es el
+   * mismo error que el defecto 3 de la SCR-004 —aseverar el eslabón que *parece* el contrato en vez
+   * del que existe—, cometido en el código escrito para no volver a cometerlo.
+   *
+   * La versión correcta pregunta por el **`ControlContainer` ancestro**, que es lo que
+   * `[formGroup]`/`[formGroupName]`/`ngForm` proveen por DI, y es el mismo canal por el que
+   * `formControlName` encuentra su group. No depende de que nada quede escrito en el DOM.
+   */
+  private guardarFormControlNameEnDev(): void {
+    if (!isDevMode()) return;
+
+    afterNextRender(() => {
+      // El `NgControl` ya está resuelto acá: `ngOnInit` corrió y `formControlName` enganchó su
+      // control. Si existe, el campo está bien cableado y no hay nada que decir.
+      if (this.ngControl) return;
+
+      // Uso suelto legítimo (solo lectura, specs de la fachada): sin form ancestro no hay contrato
+      // que incumplir. Ver el bloque de arriba.
+      if (!this.objContenedorAncestro) return;
+
+      throw new Error(
+        `[fachada ZDS] ${this.constructor.name}(name="${this.name()}") está dentro de un form ` +
+          `reactivo pero no tiene [formControlName]. Sin él no hay NgControl: el wrapper cae a su ` +
+          `group de respaldo, writeValue() nunca corre (la precarga escribe controles que nadie ` +
+          `escucha) y el (modelChange) de vuelta muere en un no-op. O sea: el campo queda MUERTO en ` +
+          `las dos direcciones, sin ningún síntoma en consola. Agregá ` +
+          `formControlName="${this.name()}". Precedente: la SCR-008 se portó así con sus 9 campos y ` +
+          `su spec quedó verde — ver el bloque de esta guarda en campo-base.ts.`,
+      );
+    });
   }
 
   /**

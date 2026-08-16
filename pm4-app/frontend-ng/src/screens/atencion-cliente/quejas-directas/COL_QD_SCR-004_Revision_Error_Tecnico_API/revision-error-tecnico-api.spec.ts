@@ -3,6 +3,7 @@ import { HttpTestingController, provideHttpClientTesting } from '@angular/common
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { By } from '@angular/platform-browser';
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
+import { aseverarContratoDeCampos } from '../../../../components/fields/contrato-pantalla';
 import { PM4_ENV_FALLBACKS } from '../../../../core/pm4-context.service';
 import { QD } from '../fields/fields';
 import { RevisionErrorTecnicoApi } from './revision-error-tecnico-api';
@@ -205,6 +206,22 @@ afterEach(() => {
 });
 
 describe('SCR-004 · Revisión Error Técnico API', () => {
+  /**
+   * El contrato **estructural** de la fachada, en una línea. La lógica vive en
+   * [contrato-pantalla.ts](../../../../components/fields/contrato-pantalla.ts), así que cada defecto
+   * nuevo que se descubra cubre esta pantalla sin tocar este archivo.
+   *
+   * Complementa —no reemplaza— al caso de los rótulos y al del contador de 2000: ésos aseveran datos
+   * **de esta pantalla** (qué dice cada `label`, qué `maxLength` pide el anexo); éste asevera lo que
+   * vale para cualquiera (que ningún campo dentro del form se haya quedado sin `formControlName`, que
+   * el `name` y la clave del control coincidan, que los `id="field-*"` no se repitan).
+   */
+  it('cumple el contrato estructural de campos de la fachada', async () => {
+    await montar();
+
+    aseverarContratoDeCampos(objFixture);
+  });
+
   it('monta y precarga el detalle del error desde task.data', async () => {
     await montar();
 

@@ -3,6 +3,11 @@ import { HttpTestingController, provideHttpClientTesting } from '@angular/common
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 import { CampoBase } from '../../../../components/fields/campo-base';
+import {
+  aseverarContratoDeCampos,
+  cllCamposDeLaFachada,
+  objHijoDelDs,
+} from '../../../../components/fields/contrato-pantalla';
 import { PM4_ENV_FALLBACKS } from '../../../../core/pm4-context.service';
 import { QD } from '../fields/fields';
 import { RevisionRespuestaSac } from './revision-respuesta-sac';
@@ -248,65 +253,25 @@ function dicPayloadEnviado(): Record<string, unknown> | null {
 }
 
 /**
- * Los campos `zds-*` del template, en el orden en que aparecen y **sin repetidos**.
+ * Los campos `zds-*` del template, sin repetidos.
  *
- * ⚠ El `Set` no es defensivo, es necesario, y esto se midió: `queryAll` devuelve **18 nodos para 9
- * campos**. `DebugElement.componentInstance` no es "el componente que este nodo ES", es "el componente
- * **dueño** de este nodo", así que el `<div class="zds-field-wrap">` de adentro de cada wrapper también
- * reporta el wrapper. Sin deduplicar, cada campo aparece dos veces (`ZDS-INPUT` + `DIV`) y la aserción
- * de conteo de abajo falla por una causa del test.
+ * ⚠ **Las dos funciones de acá vivían escritas en este archivo y se mudaron a la fachada**
+ * ([contrato-pantalla.ts](../../../../components/fields/contrato-pantalla.ts)) cuando se vio que las 13
+ * pantallas iban a necesitarlas iguales. Lo que queda son dos alias de una línea, y quedan a propósito:
+ * los ~6 llamados de abajo siguen leyéndose igual, y el `objFixture` (que es de este archivo) no hay que
+ * pasarlo en cada uno.
+ *
+ * El detalle que motivó mudarlas está documentado allá, con la medición: el `Set` **no** es defensivo
+ * —`queryAll` da 18 nodos para 9 campos— y el descubrimiento del hijo del DS va por el árbol de
+ * `DebugElement` porque importar la clase del DS desde un spec de pantalla es un error de lint.
  */
 function cllCamposDs(): CampoBase<string>[] {
-  const cllInstancias = objFixture.debugElement
-    .queryAll((in_objNodo) => in_objNodo.componentInstance instanceof CampoBase)
-    .map((in_objNodo) => in_objNodo.componentInstance as CampoBase<string>);
-
-  return [...new Set(cllInstancias)];
+  return cllCamposDeLaFachada<string>(objFixture);
 }
 
-/**
- * El componente del DS que el wrapper de la fachada renderiza adentro (`lib-input-text-z` o
- * `lib-textarea-z`), tipado como `any` a propósito.
- *
- * ⚠ **No se importa la clase del DS, y eso no es comodidad: sería un error de lint.** El
- * `no-restricted-imports` de `eslint.config.mjs` prohíbe `@zurich-col/lib-zurich` en todo el
- * workspace salvo `src/components/fields/**` y `src/zds-setup.ts` —la regla 2 de CLAUDE.md hecha
- * ejecutable—, y un spec de pantalla no está en esa lista. Por eso `zds-textarea.spec.ts` **sí** puede
- * buscar su hijo con `instanceof TextareaZ` (vive en la fachada) y acá hay que hacerlo por posición.
- * Ensanchar la excepción para que un test importe cómodo sería cambiar el guardrail por el test.
- *
- * El descubrimiento va por el **árbol de `DebugElement`**, no por `viewChild` ni por tag: el hijo es el
- * primer nodo debajo del wrapper cuyo `componentInstance` **no es** el wrapper. Con eso alcanza porque
- * la plantilla de los dos wrappers es un `<div class="zds-field-wrap">` con **un solo** componente
- * adentro (ver `zds-input.ts` / `zds-textarea.ts`).
- *
- * ⚠ El `!== in_objCampo` es lo que hace el trabajo, y no es una guarda trivial:
- * `DebugElement.componentInstance` devuelve el componente **dueño** del nodo, no el que el nodo es, así
- * que el `<div class="zds-field-wrap">` del propio wrapper también responde con el wrapper. Medido: un
- * `queryAll` de `instanceof CampoBase` sobre esta pantalla da **18 nodos para 9 campos** por ese motivo.
- *
- * El `any` está sancionado para specs y **no lleva `eslint-disable`**: el bloque
- * `files: ['src/**\/*.spec.ts']` de la config ya apaga `no-explicit-any` para todo este archivo, así
- * que un directivo acá sale como `Unused eslint-disable directive` y con `--max-warnings=0` **rompe el
- * lint**. Y no se pierde nada tipándolo así — lo único que se lee es `model` (la propiedad que el
- * wrapper le escribe por `[model]`) y `modelChange` (el `EventEmitter` de vuelta), que son contrato
- * del DS, no de la fachada.
- */
+/** El componente del DS que el wrapper renderiza adentro. Ver el bloque de arriba. */
 function objHijoDs(in_objCampo: CampoBase<string>): any {
-  const objWrapper = objFixture.debugElement.query(
-    (in_objNodo) => in_objNodo.componentInstance === in_objCampo,
-  );
-
-  const objHijo = objWrapper
-    .queryAll((in_objNodo) => !!in_objNodo.componentInstance)
-    .find((in_objNodo) => in_objNodo.componentInstance !== in_objCampo);
-
-  // Sin esto un cambio de plantilla que sacara el `lib-*-z` haría que las aserciones de abajo
-  // fallaran con `Cannot read properties of undefined`, que se lee como error del test y no como el
-  // defecto que es.
-  expect(objHijo, `el wrapper de ${in_objCampo.name()} no renderizó ningún componente del DS`).toBeDefined();
-
-  return objHijo!.componentInstance;
+  return objHijoDelDs(objFixture, in_objCampo);
 }
 
 beforeEach(() => {
@@ -461,6 +426,25 @@ describe('RevisionRespuestaSac (SCR-008)', () => {
       [QD.strAction]: 'DEVOLVER',
       [QD.blnSacApproved]: false,
     });
+  });
+
+  /**
+   * El contrato **estructural** de la fachada, en una línea.
+   *
+   * No reemplaza a los dos casos de abajo: éste asevera lo decidible **sin saber nada de esta
+   * pantalla** (que todo campo dentro del form tenga su `NgControl`, que el `name` coincida con la
+   * clave del control, que los `id="field-*"` no se repitan), y los de abajo aseveran que los
+   * **valores** de esta pantalla en particular hagan el viaje completo.
+   *
+   * Lo valioso es que la lógica vive en
+   * [contrato-pantalla.ts](../../../../components/fields/contrato-pantalla.ts): cada defecto nuevo que
+   * se descubra se agrega **una vez** allá y queda cubriendo las 13 pantallas, incluidas las que
+   * todavía no se portaron. Es lo contrario de sumar un caso más al spec de la que acaba de fallar.
+   */
+  it('cumple el contrato estructural de campos de la fachada', async () => {
+    await montar(datosTarea());
+
+    aseverarContratoDeCampos(objFixture);
   });
 
   /**
