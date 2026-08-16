@@ -135,6 +135,7 @@ interface ElementoFileInput extends HTMLElement {
         [droppable]="droppable()"
         [invalid]="blnEnError"
         [help-text]="strTextoAyuda"
+        [locale]="strLocale"
       />
     </div>
   `,

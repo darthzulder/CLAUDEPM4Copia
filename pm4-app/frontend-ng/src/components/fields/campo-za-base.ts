@@ -105,6 +105,41 @@ export abstract class CampoZaBase implements ControlValueAccessor, OnInit {
    */
   readonly error = input<string>('');
 
+  /**
+   * Idioma que se le pasa al `za-*` de adentro. Fijo en `'es'`, y **no** es redundante con el
+   * `ZDS_LOCALES` global que pone [`zds-setup.ts`](../../zds-setup.ts): los dos hacen falta porque
+   * atacan dos mecanismos distintos del DS, y uno de ellos es un **defecto de la librería**.
+   *
+   * ── El global cubre los textos; esto cubre lo que el global no alcanza ────────────────────────
+   * `localized.js` resuelve los textos con `computedLocale`, que cae al `<html lang="es">` cuando la
+   * propiedad `locale` está vacía — así que para los strings el global basta y esto no cambia nada.
+   *
+   * Pero `file-input.js` formatea la lista de extensiones con
+   * `new Intl.ListFormat(this.locale, { type: "disjunction" })`: usa **la propiedad cruda, nunca
+   * `computedLocale`** (verificado: 3 ocurrencias de `this.locale`, 0 de `computedLocale` en ese
+   * archivo). Con `locale` sin setear, `Intl` recibe `undefined`, cae al idioma del navegador y el
+   * conector sale en inglés **aunque el resto de la frase esté traducida**:
+   *
+   * ```
+   * sin esto:  "Sólo se permiten archivos PDF, JPG, or PNG"   ← el "or" delata el bug
+   * con esto:  "Sólo se permiten archivos PDF, JPG o PNG"
+   * ```
+   *
+   * Medido en el navegador sobre la pantalla del gate, no inferido de la lectura.
+   *
+   * ── Por qué constante y no `input()` ─────────────────────────────────────────────────────────
+   * La app corre en una sola instancia de PM4 Colombia; un campo en otro idioma que el resto de la
+   * pantalla sería un defecto, no una opción. Se declara acá —una vez, en la base— en lugar de
+   * repetir `locale="es"` en cada plantilla, que es exactamente el tipo de dato que se copia mal.
+   * Si algún día hiciera falta multiidioma, esto pasa a `input()` con `'es'` de default y ninguna
+   * plantilla cambia.
+   *
+   * Los `lib-*-z` de Colombia **no tienen** este input (0 ocurrencias de `locale` en su `.d.ts`), así
+   * que esta mitad de la fachada es la única que puede aprovecharlo. Para la otra mitad manda el
+   * global.
+   */
+  protected readonly strLocale = 'es';
+
   private readonly objInjector = inject(Injector);
 
   protected ngControl: NgControl | null = null;

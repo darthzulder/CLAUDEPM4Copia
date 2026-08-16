@@ -85,6 +85,7 @@ interface OpcionZa {
         [invalid]="blnEnError"
         [help-text]="strTextoAyuda"
         [config]="strConfig()"
+        [locale]="strLocale"
       />
     </div>
   `,
