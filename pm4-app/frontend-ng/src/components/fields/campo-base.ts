@@ -457,7 +457,7 @@ export abstract class CampoBase<T> implements ControlValueAccessor, OnInit {
    * `id` del campo. Contrato con `scrollToFirstError`, que hace
    * `document.getElementById('field-<path>')` → `scrollIntoView` → `focus?.()`.
    *
-   * ── Por qué va en el `<div class="zds-field-wrap">` y no en el `lib-*-z` ────────────────────
+   * ── Por qué va en el `<div>` envolvente y no en el `lib-*-z` ────────────────────────────────
    * La fachada React lo pone directo sobre el componente del DS (`<ZrTextInput id="field-...">`).
    * Acá no se puede: `lib-input-text-z` cablea `[id]="name"` sobre su `za-text-input` interno y no
    * expone input para sobrescribirlo, así que poner `[id]` en el `<lib-input-text-z>` dejaría DOS
@@ -466,6 +466,14 @@ export abstract class CampoBase<T> implements ControlValueAccessor, OnInit {
    *
    * El wrap además scrollea mejor: `block:'center'` centra el campo completo (label + control +
    * help-text), no el input pelado.
+   *
+   * **La clase de ese div no es la misma en todos los wrappers, y no es cosmético.**
+   * `.zds-field-wrap` impone `min-height: 68px` (pill de 48 + línea de helpText) y es lo que alinea
+   * los pills de una `form-row` exista o no el helpText — corresponde donde React también envuelve:
+   * input, textarea, date y select. Los que React rinde **pelados** (checkbox de esta base; radio y
+   * file-input de `CampoZaBase`) usan `.zds-field-bare`, sin piso, porque el piso les agregaba aire
+   * que React no tiene. El `id` va igual en los dos casos: lo que cambia es el alto. Ver el bloque
+   * de `.zds-field-bare` al final de `shared.css` para la tabla medida.
    *
    * ── Lo que el `focus?.()` NO hace, ni acá ni en React (límite preexistente) ─────────────────
    * `scrollToFirstError` intenta enfocar el elemento después de scrollear. Eso **no enfoca el input

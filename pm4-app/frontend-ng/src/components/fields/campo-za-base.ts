@@ -153,8 +153,15 @@ export abstract class CampoZaBase implements ControlValueAccessor, OnInit {
 
   /**
    * Contrato con `scrollToFirstError`: `document.getElementById('field-<name>')` → `scrollIntoView`.
-   * Va en el `<div class="zds-field-wrap">` por la misma razón que en `CampoBase`: los `za-*`
-   * cablean su propio `id`/`name` sobre el web component de adentro.
+   * Va en el `<div>` envolvente por la misma razón que en `CampoBase`: los `za-*` cablean su propio
+   * `id`/`name` sobre el web component de adentro, así que ponerlo en el componente del DS sería
+   * pisado.
+   *
+   * **La clase de ese div no es la misma en los siete wrappers**, y la diferencia es de paridad
+   * visual, no de estilo: `.zds-field-wrap` impone `min-height: 68px` (la caja pill+helpText que
+   * alinea los inputs de una `form-row`) y solo corresponde donde React también envuelve —input,
+   * textarea, date y select. Los tres que React rinde **pelados** (radio, checkbox, file-input) usan
+   * `.zds-field-bare`, que no tiene piso. El `id` va igual en los dos casos: lo que cambia es el alto.
    */
   protected get strId(): string {
     return `field-${this.name()}`;

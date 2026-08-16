@@ -204,12 +204,21 @@ describe('ZdsCheckboxField booleano', () => {
     expect(hijo(objFixture).helpText).toBe('Obligatorio para continuar');
   });
 
-  it('emite id="field-<name>" en el wrap', () => {
+  it('emite id="field-<name>" en el wrap, y el wrap NO lleva el piso de 68px', () => {
     const objWrap: HTMLElement | null = objFixture.nativeElement.querySelector('#field-qd_blnAcepta');
 
     expect(objWrap).not.toBeNull();
-    expect(objWrap!.classList.contains('zds-field-wrap')).toBe(true);
     expect(objWrap!.getAttribute('tabindex')).toBe('-1');
+
+    // La clase es `zds-field-bare`, no `zds-field-wrap`, y la diferencia es visible: `.zds-field-wrap`
+    // impone `min-height: 68px` (la caja pill+helpText que alinea los inputs de una fila) y el contenido
+    // real de este wrap mide 44px, así que esa clase le agregaba 24px de aire que React no tiene —
+    // React renderiza el checkbox sin div envolvente. Medido en el navegador, 68 → 44; los 44 no son el
+    // `za-checkbox` solo (17px) sino el checkbox más el label y el helpText, que `lib-checkbox-z` rinde
+    // como HERMANOS suyos dentro de este mismo wrap. Se asevera acá y no en un spec de layout porque
+    // jsdom no calcula alto: lo único observable es qué clase se emitió, y es lo que decide el alto real.
+    expect(objWrap!.classList.contains('zds-field-bare')).toBe(true);
+    expect(objWrap!.classList.contains('zds-field-wrap')).toBe(false);
   });
 
   it('setDisabledState registra el estado aunque `disabled` sea un input muerto en la lib', async () => {

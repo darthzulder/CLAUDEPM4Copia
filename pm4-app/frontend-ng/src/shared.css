@@ -1586,3 +1586,42 @@ z-table :is(th, td)[config*="right"] {
 .valor-solo-lectura {
   margin-top: var(--zs-50);
 }
+
+/* Caja de campo SIN el piso de 68px — para los wrappers que React renderiza pelados.
+
+   `.zds-field-wrap` reserva 68px a propósito (pill de 48 + línea de helpText), y eso es lo que
+   alinea los pills de una `form-row` exista o no el helpText. Pero React solo envuelve en esa
+   clase a `ZdsInput`, `ZdsTextarea` y `ZdsDate`: el radio, el checkbox y el file-input van
+   **sin div**, así que su alto es el del control y nada más.
+
+   Acá los 7 wrappers necesitan el div igual, porque es donde vive el `id="field-<name>"` que
+   `scrollToFirstError` busca (los `za-*`/`lib-*-z` cablean su propio `id` sobre el custom element
+   de adentro, así que ponerlo en el componente del DS no sirve — ver `campo-za-base.ts`). O sea
+   que el div se queda y lo que sobra es el piso.
+
+   Medido con Playwright contra React, mismo `task_id`, wrapper por wrapper (alto de la caja vs
+   alto real del control):
+
+     zds-input        48 → 68  (+20)  ← a propósito, React hace lo mismo
+     zds-date         48 → 68  (+20)  ← ídem
+     zds-textarea    166 → 166 ( +0)  ← más alto que el piso, inerte
+     zds-radio        52 → 68  (+16)  ← divergencia: React no lo envuelve
+     zds-checkbox     44 → 68  (+24)  ← la peor, y la que no se había visto
+     zds-file-input  236 → 236 ( +0)  ← piso inerte, pero la clase igual corresponde
+
+   Un matiz de esa tabla que cuesta caro leer mal: los 44px del checkbox son el alto del
+   **contenido del wrap**, no el del `za-checkbox`, que mide 17. La diferencia es que
+   `lib-checkbox-z` rinde el label y el helpText como HERMANOS del checkbox dentro del mismo
+   wrap, así que medir solo el `firstElementChild` da 17 y sobreestima el aire en 27px.
+
+   El +16 del radio es lo que hacía que la SCR-011 midiera 1815px de alto contra los 1799px de
+   React: el delta nacía en la tercera `form-row` de la segunda tarjeta y subía intacto hasta el
+   `body`. El +24 del checkbox no se había visto porque ninguna de las pantallas portadas hasta
+   ahora tiene uno; estaba esperando a la primera que lo tuviera.
+
+   Verificado en el navegador después del arreglo: la SCR-011 pasó a medir 1799/1707/1619 en
+   `body`/`.screen-content`/`form` — idéntica a React en los tres niveles— y el wrap del radio
+   computa `min-height: 0px` y rinde 52px. */
+.zds-field-bare {
+  width: 100%;
+}

@@ -42,7 +42,7 @@ Cada una responde a un hallazgo concreto del gate 0 de la migración, no a prefe
 | **Angular fijado en `21.2.20` exacto**, no `^21.2.0` | `@zurich-col/lib-zurich@2.6.16` pide el peer `^21.2.13`, que **no acepta Angular 22**. `21.2.20` es la más alta de la línea 21.2 para el framework (`21.2.21` es del `@angular/cli`, que versiona aparte). Un caret dejaría que un `npm update` trajera 22.x y rompiera el peer. |
 | **Budgets de bundle en 1.5 MB / 2.5 MB**, no los 500 kB/1 MB del `ng new` | El bundle mínimo con el DS de Zurich pesa **6.16 MB raw / 768 kB transferido** con *dos* campos en pantalla. Con el default, `ng build --configuration production` falla por presupuesto con la compilación perfecta. |
 | **`@zurich/css-components` declarado explícitamente** en `package.json` | Es de **primer nivel**: dependencia de nadie. Ningún `npm install` lo arrastraría solo, y su ausencia no rompe la instalación — se manifiesta como estilos base faltantes en runtime. Lo importa [`src/zds-setup.ts`](src/zds-setup.ts). |
-| **`shared.css` se importa desde `main.ts`**, no desde el array `styles` de `angular.json` | Preserva la cascada: tokens del DS primero, alias `--z-*` del proyecto después. Ver el comentario en [`src/styles.css`](src/styles.css). |
+| **`base.css` y `shared.css` van en el array `styles` de `angular.json`, en ese orden** — no importados desde un `.ts` | `@angular/build:application` **no enlaza un `.css` importado desde un `.ts`**: lo emite como sidecar del entrypoint y lo deja **huérfano**, con el build en verde. El array `styles` es la única vía soportada, y **su orden ES la cascada** (los entries se concatenan en un solo bundle en orden de array): tokens del DS primero, alias `--z-*` del proyecto después. Reordenarlo rompe los colores. El porqué medido está en el comentario de [`src/zds-setup.ts`](src/zds-setup.ts), y la guarda que se pone roja si alguien lo deshace es [`src/core/css-global.spec.ts`](src/core/css-global.spec.ts) — hace falta un spec sobre la config porque el defecto **no** pone el build rojo. |
 | **`TZ=America/Bogota` vía `cross-env` en el script `test`** | `@angular/build:unit-test` no expone un `env` propio como opción del builder, así que no se puede fijar en `angular.json` como sí hace `frontend/vitest.config.ts`. La guarda está en [`src/core/zona-horaria.spec.ts`](src/core/zona-horaria.spec.ts): si alguien saca la variable del script, ese spec falla primero y con mensaje claro. |
 | **`provideZonelessChangeDetection()`** | Es lo que usa el harness de desarrollo de Zurich (`InsumosZurich/fe-lib-zurich`). Los componentes del DS son bindings sobre custom elements de Lit: emiten eventos nativos y no dependen de que zone.js parchee nada. |
 
@@ -92,22 +92,31 @@ decorador sí las admiten — viven fuera del literal.
 > confía en él. Si algún día se quiere mecanizar, tiene que ser un chequeo de **texto crudo** anterior
 > al parser (un paso de `pre-commit` o un script), no un plugin de lint.
 
-Dos cosas que parecen fallos y no lo son, verificadas en el gate 0:
+Una cosa que parece un fallo y no lo es, verificada en el gate 0:
 
-- **El `styles-*.css` emitido queda en 0 bytes** y el CSS del DS aparece como *lazy chunk* de
-  ~494 kB cargado desde `main.js`. Es la consecuencia de importarlo como módulo ES (que es lo que
-  replica el contrato de `zds-setup.ts` de React). Los tokens llegan igual.
 - **`npm ls` muestra `karma-sonarqube-unit-reporter`.** Es una fuga de las `peerDependencies` de
   `lib-zurich@2.6.16` — un paquete de Karma en un proyecto que usa Vitest. No rompe nada.
+
+Y una que **sí lo era**, aunque el gate 0 la anotó como esperada (corregido ago-2026):
+
+- **El `styles-*.css` en 0 bytes con el CSS del DS como *lazy chunk*.** El gate 0 lo registró como
+  la consecuencia normal de importar el CSS como módulo ES y cerró con "los tokens llegan igual".
+  El lazy chunk era real; el sheet vacío **era el defecto**. El CSS se compilaba correcto y quedaba
+  **huérfano**: ningún `<link>` en el `index.html` y ninguna referencia desde un `.js`, con el build
+  en verde. En el navegador `shared.css` daba **0 reglas** y `--z-blue` resolvía a vacío. La causa y
+  el arreglo están en el comentario de [`src/zds-setup.ts`](src/zds-setup.ts).
+
+  **La lección, que es la del gate 2 otra vez:** el gate 0 midió que los tokens estaban *en el
+  bundle emitido*, no que llegaran *al navegador*. Un aserto sobre el artefacto no es un aserto
+  sobre el runtime, y la diferencia se ve exactamente cuando falta el `<link>` que los une.
 
 ## Estructura
 
 ```
 src/
-├── main.ts                 ← bootstrap; importa zds-setup ANTES de shared.css
-├── zds-setup.ts            ← punto único de assets globales del DS  ⚠ autorizado a importar @zurich/*
-├── shared.css              ← copia verbatim de frontend/src/shared.css (1449 líneas)
-├── styles.css              ← vacío a propósito (ver comentario adentro)
+├── main.ts                 ← bootstrap; importa zds-setup (solo código, no CSS)
+├── zds-setup.ts            ← registro de custom elements del DS  ⚠ autorizado a importar @zurich/*
+├── shared.css              ← copia verbatim de frontend/src/shared.css; entra por `styles` de angular.json
 ├── api/pm4Client.ts        ← urlApi() + interceptor x-pm4-token sobre /api/* (regla BFF)
 ├── core/                   ← servicios (ex-hooks) + lógica pura       · Fase 3
 ├── components/fields/      ← la fachada: wrappers CVA                 · Fase 2  ⚠ autorizado

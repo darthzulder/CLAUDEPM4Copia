@@ -202,6 +202,25 @@ describe('ZdsFileInput', () => {
     expect(objFixture.nativeElement.querySelector('#field-qd_strSoporte')).not.toBeNull();
   });
 
+  /**
+   * `zds-field-bare`, no `zds-field-wrap`: React no envuelve el file-input en ningún div, así que no le
+   * corresponde el `min-height: 68px` de la caja pill+helpText.
+   *
+   * **Acá el piso hoy es inerte** —el `za-file-input` mide 236px, muy por encima de 68— así que este
+   * caso no guarda una diferencia visible actual, a diferencia del radio (+16px) y del checkbox
+   * (+24px), los dos medidos en el navegador. Guarda la coherencia de la regla: los tres wrappers que
+   * React renderiza pelados usan la clase sin piso, y si una variante futura del componente rindiera
+   * más bajo que 68px el aire aparecería sin que nada se pusiera rojo.
+   */
+  it('el wrap NO lleva el piso de 68px de `.zds-field-wrap` (React no envuelve el file-input)', () => {
+    const objWrap: HTMLElement | null =
+      objFixture.nativeElement.querySelector('#field-qd_strSoporte');
+
+    expect(objWrap).not.toBeNull();
+    expect(objWrap!.classList.contains('zds-field-bare')).toBe(true);
+    expect(objWrap!.classList.contains('zds-field-wrap')).toBe(false);
+  });
+
   describe('reconstrucción del File a partir del Blob sin nombre', () => {
     it('registra un File con el nombre real, tomado de _fileName del elemento', async () => {
       // **El test central de este wrapper.** El DS emite un `Blob` que perdió la identidad del

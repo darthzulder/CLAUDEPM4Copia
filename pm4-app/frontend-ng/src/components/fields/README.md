@@ -411,10 +411,22 @@ nombre viejo la garantizaba. Ver la nota del checkbox más arriba.
 
 Dos límites heredados, anotados donde alguien los va a buscar:
 
-- **`id` va en el `<div class="zds-field-wrap">`, no en el `lib-*-z`.** La fachada React lo pone
+- **`id` va en el `<div>` envolvente, no en el `lib-*-z`.** La fachada React lo pone
   directo sobre el componente del DS; acá no se puede, porque `lib-input-text-z` cablea `[id]="name"`
   sobre su `za-text-input` interno y no expone input para sobrescribirlo — habría **dos** elementos
   con id distinto para el mismo campo.
+
+  **La clase de ese div no es la misma en los siete wrappers, y la diferencia es de paridad visual.**
+  `.zds-field-wrap` impone `min-height: 68px` (pill de 48 + línea de helpText), que es lo que alinea
+  los pills de una `form-row` exista o no el helpText. Corresponde donde React también envuelve —
+  `zds-input`, `zds-textarea`, `zds-date` y `zds-select` (este último en `.zds-select-wrap`). Los tres
+  que React rinde **pelados** —`zds-radio`, `zds-checkbox-field`, `zds-file-input`— usan
+  `.zds-field-bare`, sin piso. Medido con Playwright contra React: el piso le agregaba +16px al radio
+  y +24px al checkbox, y en el file-input hoy es inerte (el control mide 236px). El +16 del radio era
+  **todo** el delta de alto de la SCR-011 (1815px contra 1799px de React), porque nacía en una
+  `form-row` y subía intacto hasta el `body`. La tabla completa está en el bloque de
+  `.zds-field-bare`, al final de `shared.css`; las guardas son los tres casos "el wrap NO lleva el
+  piso de 68px" en los specs de esos wrappers, que aseveran la **clase** porque jsdom no hace layout.
 - **El `focus?.()` de `scrollToFirstError` no enfoca el input de verdad**, ni acá ni en React: los
   custom elements del DS no declaran `delegatesFocus` (0 ocurrencias, medido en los dos paquetes), así
   que el foco queda en el host y no baja al `<input>` del shadow root. **No se arregla en esta

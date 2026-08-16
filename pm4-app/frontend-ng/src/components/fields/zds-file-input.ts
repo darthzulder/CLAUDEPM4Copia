@@ -118,7 +118,13 @@ interface ElementoFileInput extends HTMLElement {
   // `useExisting` apunta a esta clase concreta, no a `CampoZaBase` — ver `proveerAccessorDePaso`.
   providers: [proveerAccessorDePaso(() => ZdsFileInput)],
   template: `
-    <div class="zds-field-wrap" [id]="strId" tabindex="-1">
+    <!-- zds-field-bare, no zds-field-wrap: React renderiza el file-input SIN div envolvente. Hoy el
+         piso de 68px era inerte acá (el control mide 236px), pero la clase igual corresponde: si una
+         variante futura del za-file-input rindiera más bajo que 68px, el aire aparecería sin que nada
+         se pusiera rojo. El div se queda porque es donde vive el id.
+
+         (Sin comillas invertidas a propósito: una backtick acá cierra el template literal.) -->
+    <div class="zds-field-bare" [id]="strId" tabindex="-1">
       <za-file-input
         #objHijo
         (change)="alCambiarArchivo($event)"

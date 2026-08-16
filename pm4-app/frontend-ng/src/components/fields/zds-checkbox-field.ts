@@ -75,7 +75,17 @@ import { CampoBase } from './campo-base';
     },
   ],
   template: `
-    <div class="zds-field-wrap" [id]="strId" tabindex="-1">
+    <!-- zds-field-bare, no zds-field-wrap: React renderiza el checkbox SIN div envolvente, así que no
+         le corresponde el piso de 68px de la caja pill+helpText. Medido en el navegador: el wrap
+         pasó de 68px a 44px, o sea que el piso le agregaba 24px de aire. Los 44px son el alto real
+         del contenido: el za-checkbox mide 17px y el label y el helpText que lib-checkbox-z rinde
+         como HERMANOS suyos —no adentro— aportan el resto. El div se queda porque es donde vive el
+         id que busca scrollToFirstError.
+
+         (Sin comillas invertidas a propósito: esto vive dentro de un template literal, así que una
+         backtick acá cierra la cadena y el resto del archivo se parsea como TypeScript — NG1002 +
+         una cascada de errores de sintaxis que no nombran el comentario.) -->
+    <div class="zds-field-bare" [id]="strId" tabindex="-1">
       <lib-checkbox-z
         [group]="grupo"
         [name]="name()"

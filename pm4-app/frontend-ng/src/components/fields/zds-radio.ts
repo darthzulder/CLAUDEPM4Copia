@@ -70,7 +70,12 @@ interface OpcionZa {
   // `useExisting` apunta a esta clase concreta, no a `CampoZaBase` — ver `proveerAccessorDePaso`.
   providers: [proveerAccessorDePaso(() => ZdsRadio)],
   template: `
-    <div class="zds-field-wrap" [id]="strId" tabindex="-1">
+    <!-- zds-field-bare, no zds-field-wrap: React renderiza el radio SIN div envolvente, así que no le
+         corresponde el piso de 68px de la caja pill+helpText (medido: 52px reales → 68px, y ese +16
+         era todo el delta de alto de la SCR-011). El div se queda porque es donde vive el id.
+
+         (Sin comillas invertidas a propósito: una backtick acá cierra el template literal.) -->
+    <div class="zds-field-bare" [id]="strId" tabindex="-1">
       <za-radio-select
         #objHijo
         [formControl]="control"

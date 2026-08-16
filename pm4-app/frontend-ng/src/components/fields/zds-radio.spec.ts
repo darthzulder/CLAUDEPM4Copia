@@ -159,6 +159,32 @@ describe('ZdsRadio', () => {
     expect(objFixture.nativeElement.querySelector('#field-qd_strTipo')).not.toBeNull();
   });
 
+  /**
+   * El wrap del radio lleva `zds-field-bare`, NO `zds-field-wrap`, y esta es la guarda del defecto de
+   * paridad que se midió con Playwright contra React: `.zds-field-wrap` impone `min-height: 68px` —la
+   * caja pill+helpText que alinea los inputs de una `form-row`— y el `za-radio-select` mide 52px, así
+   * que esa clase le sumaba 16px de aire. React no envuelve el radio en ningún div, o sea que el piso
+   * no le corresponde.
+   *
+   * Ese +16 no era cosmético en abstracto: era **todo** el delta de alto de la SCR-011 (Angular 1815px
+   * contra 1799px de React). Nacía en la tercera `form-row` de la segunda tarjeta y subía intacto por
+   * el `form`, la `.screen-content` y el `body`, así que la única forma de encontrarlo fue medir la
+   * cadena de ancestros en las dos apps y comparar nivel por nivel.
+   *
+   * Se asevera la clase y no el alto porque **jsdom no hace layout**: `getBoundingClientRect()` da 0
+   * en todo. La clase es lo único observable en el runner, y es exactamente lo que decide el alto en
+   * el navegador. El div sí se queda: es donde vive el `id` que busca `scrollToFirstError` (los `za-*`
+   * cablean su propio `id` sobre el custom element de adentro — ver `campo-za-base.ts`).
+   */
+  it('el wrap NO lleva el piso de 68px de `.zds-field-wrap` (React no envuelve el radio)', () => {
+    const objWrap: HTMLElement | null =
+      objFixture.nativeElement.querySelector('#field-qd_strTipo');
+
+    expect(objWrap).not.toBeNull();
+    expect(objWrap!.classList.contains('zds-field-bare')).toBe(true);
+    expect(objWrap!.classList.contains('zds-field-wrap')).toBe(false);
+  });
+
   it('inline se traduce a config="inline"; sin inline no manda config', async () => {
     // `undefined`, no `''`: el tipo del DS es `'inline' | undefined` y `''` no es un valor válido.
     expect(hijo(objFixture).config).toBeUndefined();
