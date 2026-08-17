@@ -127,16 +127,30 @@ type EstadoRecaptcha = 'cargando' | 'listo' | 'error';
   styles: `
     /* Los tres bloques que React tenía inline. Solo tokens, sin px ni hex crudos. El min-height
        reserva el alto del checkbox de Google (78px es su tamaño fijo) para que el modal no salte
-       cuando el loader se reemplaza por el widget. */
+       cuando el loader se reemplaza por el widget.
+
+       ⚠ Los dos tokens de font estaban INVENTADOS y no resolvían a nada (una declaración font con
+       una var() indefinida se invalida ENTERA, así que ambos textos venían con los estilos por
+       defecto del navegador). Verificado contra @zurich/css-components/dist/base.css:
+       - la escala de headings NO lleva sufijo de peso (--zf-h-20--700 no existe; los --700 solo
+         existen en las familias body-* y capt-*) → va --zf-body-20--700;
+       - el peso base tampoco lleva sufijo (--zf-body-16--400 no existe) → va --zf-body-16.
+       Los sufijos válidos hay que verificarlos en base.css, no deducirlos del patrón.
+
+       (Sin comillas invertidas acá: este comentario vive DENTRO del template literal de styles, así
+       que una comilla invertida cierra la cadena. El error que sale no menciona el comentario: habla
+       de un "var ;" inexistente 70 líneas más arriba y de un NG8110 en cada input/output/viewChild
+       de la clase, porque lo que en realidad falló al parsear es el decorador entero. Misma trampa
+       que el comentario del template, y el NG8110 es ruido derivado, no la causa.) */
     .recaptcha-modal-title {
       margin: 0 0 var(--zs-75);
-      font: var(--zf-h-20--700);
+      font: var(--zf-body-20--700);
       color: var(--z-text);
     }
 
     .recaptcha-modal-text {
       margin: 0 0 var(--zs-150);
-      font: var(--zf-body-16--400);
+      font: var(--zf-body-16);
       color: var(--z-text);
     }
 
