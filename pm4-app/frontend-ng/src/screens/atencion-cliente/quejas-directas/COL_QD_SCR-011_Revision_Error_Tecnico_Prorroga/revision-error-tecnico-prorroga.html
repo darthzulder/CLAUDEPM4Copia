@@ -44,11 +44,18 @@
           />
 
           <!-- MSG del intento acumulado: el sufijo solo aparece si el script de M3 escribió
-               `qd_strAttemptNum`, igual que el `&&` de React — sin dato no se inventa un "#". -->
+               `qd_strAttemptNum`, igual que el `&&` de React — sin dato no se inventa un "#".
+
+               ⚠ El texto base es el de React palabra por palabra, y eso hay que cuidarlo: el porte
+               había agregado "tras varios intentos", que no está ni en React ni en el anexo
+               (`insumos/Quejas directas/Anexo02_Index/screens/SCR-011.md`). No es un detalle de
+               redacción — el conteo de intentos lo trae `qd_strAttemptNum` y puede valer 1, así que
+               la frase afirmaba algo que el caso a veces contradice. Corregido en la revisión visual
+               del 2026-08-17. -->
           <za-alert config="negative" [hide-close]="true">
             El envío de la <strong>solicitud de prórroga</strong> a SmartSupervision
-            <strong>falló por un error técnico</strong> tras varios intentos. Revise el detalle,
-            registre la corrección y autorice el reenvío.
+            <strong>falló por un error técnico</strong>. Revise el detalle, registre la corrección y
+            autorice el reenvío.
             @if (strIntento()) {
               <span> — Intento acumulado <strong>#{{ strIntento() }}</strong>.</span>
             }
@@ -91,7 +98,7 @@
             <zds-textarea
               formControlName="qd_strApiTechMessage"
               name="qd_strApiTechMessage"
-              label="Mensaje Técnico de la API"
+              label="Mensaje técnico de la API"
               [readOnly]="true"
               helpText='Mensaje devuelto por la API — solo lectura. El log técnico completo está en "Ver Log Completo".'
             />

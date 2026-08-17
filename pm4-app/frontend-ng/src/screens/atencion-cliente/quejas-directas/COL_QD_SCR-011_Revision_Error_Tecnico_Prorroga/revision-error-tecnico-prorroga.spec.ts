@@ -265,7 +265,12 @@ describe('SCR-011 · Revisión Error Técnico Prórroga', () => {
     const dicEsperado: Record<string, string> = {
       [QD.strHttpCode]: 'Código HTTP prórroga', // FLD-190 — NO "Código HTTP" (ese es SCR-004)
       [QD.strErrorType]: 'Tipo de Error', // FLD-191
-      [QD.strApiTechMessage]: 'Mensaje Técnico de la API', // FLD-192
+      // FLD-192 — minúscula, como el anexo y como el React de ESTA pantalla. La T mayúscula viene de
+      // SCR-004, que es la fuente del copy-paste y la escribe así en su propio React; el anexo usa
+      // minúscula en las cuatro filas donde aparece el rótulo (FLD-052 y FLD-192, en `screens/` y en
+      // `masters/03_Campos.md`). Encontrado en la revisión visual del 2026-08-17: el caso aseveraba la
+      // mayúscula, o sea que este mismo test congelaba la divergencia que decía vigilar.
+      [QD.strApiTechMessage]: 'Mensaje técnico de la API',
       [QD.strEndpointCalled]: 'Endpoint Invocado', // FLD-193
       [QD.strPayloadSent]: 'Payload de prórroga enviado (JSON)', // FLD-193 — NO "Payload Enviado (JSON)"
       [QD.strAttemptNum]: 'Número de intento prórroga', // FLD-194
@@ -293,7 +298,17 @@ describe('SCR-011 · Revisión Error Técnico Prórroga', () => {
     const strTexto = objFixture.nativeElement.textContent as string;
     expect(strTexto).toContain('Detalle del Error Técnico — Prórroga');
     expect(strTexto).toContain('Registro de Corrección — Prórroga');
-    expect(strTexto).toContain('solicitud de prórroga');
+
+    // ⚠ La ORACIÓN COMPLETA, no el fragmento `'solicitud de prórroga'` que este caso aseveraba antes.
+    // Con el fragmento, el porte pudo agregarle "tras varios intentos" al medio y el caso siguió verde
+    // (encontrado en la revisión visual del 2026-08-17, con las 909 en verde). El cuerpo de la alerta es
+    // copy del React y una frase de más afirma algo que el caso a veces contradice — el conteo de
+    // `qd_strAttemptNum` puede valer 1. Se normalizan los espacios porque el template corta líneas.
+    const strAlerta = strTexto.replace(/\s+/g, ' ');
+    expect(strAlerta).toContain(
+      'El envío de la solicitud de prórroga a SmartSupervision falló por un error técnico. ' +
+        'Revise el detalle, registre la corrección y autorice el reenvío.',
+    );
 
     // Y NO los de la gemela: es la mitad que distingue "el texto correcto está" de "además quedó el
     // de SCR-004 pegado al lado", que es exactamente lo que produce un copy-paste a medio corregir.

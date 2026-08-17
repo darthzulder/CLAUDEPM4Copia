@@ -259,6 +259,36 @@ olvido.** Está anotado en el código porque la simetría con `autorizar()` invi
 La mutación 4 es exactamente esa: ponerle la guarda de autorizar a `escalar()` pone **3 casos** en
 rojo con el mensaje `¿le pusieron la guarda de autorizar?`.
 
+### 12.5 La revisión visual (2026-08-17) — dos textos que la suite verde no veía
+
+La mitad manual del gate de Fase 5. Las 909 estaban en verde y los dos defectos eran de **texto**, así
+que ningún test los podía traer: los dos casos que decían cubrir ese texto lo cubrían de más arriba.
+
+| # | Qué estaba mal | Por qué el spec no lo vio | Mutación |
+|---|---|---|---|
+| 1 | La alerta de S1 decía `falló por un error técnico` **tras varios intentos**, frase que no está ni en el React de esta pantalla (`RevisionErrorTecnicoProrroga.tsx:102`) ni en el anexo (`screens/SCR-011.md`) | El caso *los títulos de sección y la alerta de S1…* aseveraba el **fragmento** `'solicitud de prórroga'` — pasa igual con cualquier frase intercalada. Ahora asevera la **oración completa** con los espacios normalizados | M4 → 1 rojo |
+| 2 | El rótulo de FLD-192 decía `Mensaje **T**écnico de la API` | El caso *los rótulos… son textualmente los del Anexo02* **aseveraba la mayúscula**: el mismo test que existe para vigilar los rótulos congelaba la divergencia | M3 → 1 rojo, con el campo en el mensaje |
+
+Sobre el 1: no es corrección de estilo. El conteo lo trae `qd_strAttemptNum` y **puede valer 1**, así
+que la frase afirmaba algo que el caso a veces contradice — mientras el sufijo `— Intento acumulado #N`
+dice el número real justo al lado.
+
+Sobre el 2: la T mayúscula viene de **SCR-004**, que es la fuente del copy-paste y la escribe así en su
+propio React (`RevisionErrorTecnicoApi.tsx:118`). O sea que la base de React es inconsistente entre las
+dos pantallas del mismo campo (FLD-192 ≡ FLD-052) y el porte unificó eligiendo la forma que el anexo
+**no** usa: `masters/03_Campos.md` y los dos `screens/` escriben `técnico` en minúscula en las cuatro
+filas. Se corrigió SCR-011 (la pantalla bajo revisión) y **SCR-004 quedó con la mayúscula** — su React
+ya decía así, y alinearla es una decisión de alcance que no corresponde a este gate. Queda como
+divergencia conocida entre las dos pantallas hermanas.
+
+**Lo que sí se investigó y NO era un defecto:** el `qd_strPayloadSent` se ve atenuado cuando FLD-058
+está en "No", y React no atenúa ninguno de sus dos textarea de solo lectura. No se tocó, porque las
+tres cosas se verificaron en el navegador: (i) acá el bloqueo es `control.disable()` deliberado y no un
+`readonly` de vista (§12.3), (ii) React usa `readonly` en los dos y por eso no atenúa, y (iii) el
+atenuado **lo pone el propio DS** — `z-textarea[disabled]` computa `opacity: 0.5` en el host, el mismo
+mecanismo que el `z-select` de React. O sea que la señal visual es correcta y consistente con el DS;
+lo que divergía era el mecanismo, que ya estaba documentado con su motivo.
+
 Contratos adicionales del port, todos con falla silenciosa, documentados en el `.html`: los dos
 atributos (`formControlName` **y** `name`) en cada campo; los slots de `lib-modal-z` con `id`
 estático y el `@if` **dentro** del slot, nunca envolviéndolo; `[hide-close]="true"` como binding.
