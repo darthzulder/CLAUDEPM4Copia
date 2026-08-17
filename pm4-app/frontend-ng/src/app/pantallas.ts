@@ -77,6 +77,14 @@ export const DIC_PANTALLAS: Record<string, CargadorDePantalla> = {
     import(
       '../screens/atencion-cliente/quejas-directas/COL_QD_SCR-011_Revision_Error_Tecnico_Prorroga/revision-error-tecnico-prorroga'
     ).then((in_objModulo) => in_objModulo.RevisionErrorTecnicoProrroga),
+  'COL_QD_SCR-012_Revision_Error_Funcional_Prorroga': () =>
+    import(
+      '../screens/atencion-cliente/quejas-directas/COL_QD_SCR-012_Revision_Error_Funcional_Prorroga/error-funcional-prorroga'
+    ).then((in_objModulo) => in_objModulo.ErrorFuncionalProrroga),
+  'COL_QD_SCR-003_Correccion_Error_Funcional': () =>
+    import(
+      '../screens/atencion-cliente/quejas-directas/COL_QD_SCR-003_Correccion_Error_Funcional/correccion-error-funcional'
+    ).then((in_objModulo) => in_objModulo.CorreccionErrorFuncional),
 };
 
 /**

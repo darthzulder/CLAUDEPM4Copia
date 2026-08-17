@@ -1383,6 +1383,32 @@ z-table :is(th, td)[config*="right"] {
   overflow-y: auto;
 }
 
+/* Título del modal ancho. Reemplaza el `style={{...}}` en línea que usan las pantallas React
+   equivalentes (SCR-004/SCR-011/SCR-003, las tres con los mismos tres valores): la regla 3
+   prohíbe estilos ad-hoc, y tres copias del mismo objeto ya eran la definición de no-DRY.
+
+   No va por `lib-modal-z` con el slot `title`: ese slot pinta el encabezado del modal CON su
+   botón de cierre al lado, y acá el título va DENTRO del cuerpo desplazable, arriba del textarea.
+   Son dos posiciones distintas del layout, no dos estilos del mismo elemento.
+
+   ⚠ Existía como clase referenciada y NO definida en `revision-error-tecnico-api.html:198` y
+   `revision-error-tecnico-prorroga.html:236` desde que se portaron: un `class=` que no matchea
+   ninguna regla no da error en ningún gate —ni lint, ni build, ni spec— así que los dos h3
+   venían pintando con los estilos por defecto del navegador. Es el modo de falla del CSS: la
+   ausencia se ve como "un poco distinto", no como roto.
+
+   ⚠ `--zf-body-20--700` y NO `--zf-h-20--700`, que es lo que dicen los `style` en línea de las
+   6 pantallas React: la escala de headings **no lleva sufijo de peso** (`--zf-h-20` es
+   `300 1.25rem/1.875rem`, light), así que `--zf-h-20--700` no resuelve a nada e invalida el
+   shorthand `font` COMPLETO — los h3 de React tampoco están pintando con ese estilo. Los
+   sufijos `--700` existen solo en las familias `body-*` y `capt-*`. Mismo criterio que
+   `.pqr-modal-title`, donde el proyecto ya lo había medido. */
+.modal-titulo {
+  margin: 0 0 var(--zs-75);
+  font: var(--zf-body-20--700);
+  color: var(--z-text);
+}
+
 /* ── PÁGINA PÚBLICA DE RADICACIÓN (maquetado web Zurich) ───────────────────
    Chrome de página pública: barra de navegación, banner, hoja de secciones y
    footer corporativo. Es el maquetado del sitio Zurich (no el chrome de una

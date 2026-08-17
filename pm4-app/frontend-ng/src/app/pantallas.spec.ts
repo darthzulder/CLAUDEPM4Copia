@@ -50,6 +50,8 @@ const CLL_SLUGS_CON_SPEC: string[] = [
   'COL_QD_SCR-008_Revision_Respuesta_SAC',
   'COL_QD_SCR-004_Revision_Error_Tecnico_API',
   'COL_QD_SCR-011_Revision_Error_Tecnico_Prorroga',
+  'COL_QD_SCR-012_Revision_Error_Funcional_Prorroga',
+  'COL_QD_SCR-003_Correccion_Error_Funcional',
 ];
 
 describe('guarda de inventario de pantallas', () => {

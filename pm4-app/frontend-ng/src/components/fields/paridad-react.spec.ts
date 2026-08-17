@@ -10,6 +10,8 @@ import { PM4_ENV_FALLBACKS } from '../../core/pm4-context.service';
 import { RevisionRespuestaSac } from '../../screens/atencion-cliente/quejas-directas/COL_QD_SCR-008_Revision_Respuesta_SAC/revision-respuesta-sac';
 import { RevisionErrorTecnicoApi } from '../../screens/atencion-cliente/quejas-directas/COL_QD_SCR-004_Revision_Error_Tecnico_API/revision-error-tecnico-api';
 import { RevisionErrorTecnicoProrroga } from '../../screens/atencion-cliente/quejas-directas/COL_QD_SCR-011_Revision_Error_Tecnico_Prorroga/revision-error-tecnico-prorroga';
+import { ErrorFuncionalProrroga } from '../../screens/atencion-cliente/quejas-directas/COL_QD_SCR-012_Revision_Error_Funcional_Prorroga/error-funcional-prorroga';
+import { CorreccionErrorFuncional } from '../../screens/atencion-cliente/quejas-directas/COL_QD_SCR-003_Correccion_Error_Funcional/correccion-error-funcional';
 
 /**
  * ⚠ **Paridad contra el contrato de campos que declaraba React, congelado como dato de migración.**
@@ -87,7 +89,92 @@ const CLL_PORTADAS: readonly { readonly strSlug: string; readonly objTipo: Type<
   { strSlug: 'COL_QD_SCR-008_Revision_Respuesta_SAC', objTipo: RevisionRespuestaSac },
   { strSlug: 'COL_QD_SCR-004_Revision_Error_Tecnico_API', objTipo: RevisionErrorTecnicoApi },
   { strSlug: 'COL_QD_SCR-011_Revision_Error_Tecnico_Prorroga', objTipo: RevisionErrorTecnicoProrroga },
+  { strSlug: 'COL_QD_SCR-012_Revision_Error_Funcional_Prorroga', objTipo: ErrorFuncionalProrroga },
+  { strSlug: 'COL_QD_SCR-003_Correccion_Error_Funcional', objTipo: CorreccionErrorFuncional },
 ];
+
+/**
+ * Los campos que React declaraba con un **nombre dinámico**, y que por eso NO están en el dataset.
+ *
+ * ── Por qué existe esta exención, y por qué no es un agujero ──────────────────────────────────
+ * El extractor resuelve el `name` de cada campo por análisis estático del `.tsx`. Cuando el nombre es
+ * una expresión que no se puede evaluar sin correr el código —`name={`edit-${strVar}`}` dentro de un
+ * `.map()`, o `name={nmErrorCode}` calculado desde `task.data`— **no lo puede saber**, así que descarta
+ * el campo y lo reporta como `dinamico:<expr>` / `template-dinamico`. Esos campos existían en React,
+ * pero el dataset no los nombra. Verificado con `node scripts/extraer-paridad-react.mjs --check`, que
+ * los lista uno por uno y cierra con `✓ el dataset congelado coincide con el .tsx de React`: son un
+ * límite del análisis estático, no un dataset desactualizado.
+ *
+ * Sin la exención, la SCR-003 —la primera pantalla portada con campos de nombre dinámico— pone rojo el
+ * caso de inventario con **44 huérfanos** que en realidad están bien portados.
+ *
+ * ── Por qué es por pantalla y por prefijo, y no una lista global de nombres ────────────────────
+ * Porque la exención tiene que ser **más angosta que el defecto que el caso persigue**. El caso existe
+ * para atrapar un campo *renombrado al portar* (`qd_strSacRemark` sin la `s`), y eso sigue vivo: un
+ * campo de nombre **estático** en React que se porte mal cae fuera de toda exención y pone rojo igual.
+ * Lo que se exime es solo el juego de nombres que el extractor declaró que no pudo ver, en la pantalla
+ * donde los declaró. Una pantalla sin entrada acá no exime nada.
+ *
+ * ⚠ Agregar un prefijo acá **no** es una forma legítima de silenciar un huérfano. Antes de sumar uno,
+ * correr el `--check` del extractor y confirmar que ese campo aparece en su lista de "sin resolver".
+ * Si no aparece, el nombre era estático y el huérfano es un defecto del port de verdad.
+ */
+const DIC_NOMBRES_DINAMICOS: Readonly<Record<string, readonly string[]>> = {
+  // Los 3 de S1 (`dinamico:nmErrorCode` / `nmAttempt` / `nmErrorMessage`) se atan al nombre que el caso
+  // REALMENTE trae, con fallback al del anexo: FLD-040..045 están declarados pero ningún script los
+  // escribe hoy. Los del editor de payload (`dinamico:strName`) salen de un `@for` sobre las 20 claves.
+  'COL_QD_SCR-003_Correccion_Error_Funcional': [
+    // S1 · los tres campos de nombre resuelto en runtime. Solo van los del juego que este fixture monta
+    // de verdad: con `data: {}` el fallback elige el juego que consume la SCR-004
+    // (`sfcCamposErrorTecnico()`). Los del anexo (`qd_strErrorCodeSFC`, `qd_intAttemptNumber`,
+    // `qd_strErrorMessageSFC`) **no se listan** aunque la pantalla los sepa montar: la guarda de abajo
+    // los rechaza por no estar montados, y con razón — una exención que este fixture no ejercita es una
+    // exención que nadie verifica. Si algún día el fixture trae esas claves, se suman acá.
+    'qd_strHttpCode',
+    'qd_strAttemptNum',
+    'qd_strApiTechMessage',
+    // S2 · el editor de payload. Cada una de las 20 claves monta hasta tres controles con el nombre
+    // armado en el `@for`: el valor (`<clave>`), el checkbox de habilitación (`edit-<clave>`) y, solo
+    // para el producto, el select traducido (`ui-<clave>`). Los prefijos van por `startsWith`; los
+    // nombres pelados se enumeran **uno por uno** a propósito: exentar `qd_*` entero desactivaría el
+    // caso para toda la pantalla, y lo que se quiere es exentar estas 19 claves y nada más.
+    'edit-',
+    'ui-',
+    'qd_strCountryCode',
+    'qd_strDepartment',
+    'qd_strCity',
+    'qd_strChannel',
+    'qd_strInteraction',
+    'qd_strServiceProvided',
+    'qd_strSfcReason',
+    'qd_strFilingDate',
+    'qd_strCompanyName',
+    'qd_strFirstName',
+    'qd_strLastName',
+    'qd_strIdType',
+    'qd_strIdNumber',
+    'qd_strPersonType',
+    'qd_strReceptionInstance',
+    'qd_strReceptionPoint',
+    'qd_strAdmission',
+    'qd_strComplaintText',
+    'qd_strControlEntity',
+  ],
+};
+
+/**
+ * Predicado de exención para una pantalla: `true` si el nombre montado es uno de los que React
+ * declaraba dinámicamente. Se compara por **prefijo** para los juegos generados en bucle (`edit-<var>`,
+ * `ui-<var>`) y por igualdad exacta para los nombres sueltos.
+ */
+function fnExencionDeNombreDinamico(in_strSlug: string): (in_strNombre: string) => boolean {
+  const cllExentos = DIC_NOMBRES_DINAMICOS[in_strSlug] ?? [];
+
+  return (in_strNombre) =>
+    cllExentos.some((in_strExento) =>
+      in_strExento.endsWith('-') ? in_strNombre.startsWith(in_strExento) : in_strNombre === in_strExento,
+    );
+}
 
 const INT_TASK_ID = 7;
 
@@ -240,12 +327,34 @@ describe('paridad con el contrato de campos de React (dataset congelado)', () =>
         // de abajo en `[]` y el caso pasaría sin comparar un solo campo.
         expect(cllMontados.length, 'la pantalla no montó ningún campo').toBeGreaterThan(0);
 
-        const cllHuerfanos = cllMontados.filter((in_strNombre) => !dicReact[in_strNombre]);
+        const fnEsDinamico = fnExencionDeNombreDinamico(strSlug);
+        const cllHuerfanos = cllMontados.filter(
+          (in_strNombre) => !dicReact[in_strNombre] && !fnEsDinamico(in_strNombre),
+        );
 
         expect(
           cllHuerfanos,
           `estos campos no existen en el contrato de React: ¿se renombraron al portar? ` +
             `Los qd_* son contrato con PM4 (regla 1) y renombrar rompe el proceso.`,
+        ).toEqual([]);
+
+        // ── Guarda de la exención misma ──
+        // Una entrada de `DIC_NOMBRES_DINAMICOS` que ya no corresponde a ningún campo montado es peor
+        // que ruido: si mañana ese nombre reaparece por un port mal hecho, la exención lo tapa. Así que
+        // cada nombre exento tiene que estar **efectivamente montado** por la pantalla. Es la misma
+        // lógica de las dos direcciones de la guarda de inventario de `pantallas.spec.ts`.
+        const cllExentosDeclarados = DIC_NOMBRES_DINAMICOS[strSlug] ?? [];
+        const cllExentosSinUsar = cllExentosDeclarados.filter((in_strExento) =>
+          in_strExento.endsWith('-')
+            ? !cllMontados.some((in_strNombre) => in_strNombre.startsWith(in_strExento))
+            : !cllMontados.includes(in_strExento),
+        );
+
+        expect(
+          cllExentosSinUsar,
+          `estos nombres están exentos en DIC_NOMBRES_DINAMICOS pero la pantalla no los monta: ` +
+            `una exención que no corresponde a ningún campo taparía un rename de verdad el día que ` +
+            `ese nombre reaparezca. Sacalos de la lista.`,
         ).toEqual([]);
       });
 
