@@ -113,13 +113,17 @@ Todas heredadas, todas vinculantes. Verbatim donde importa.
 
 ### Pendientes de fondo (no urgentes)
 
-- **Servidores levantados** que hay que bajar cuando termine la revisión: `btyyusmet` (backend),
-  `b2hwhyy5z` (React :5173), `bt4e8434o` (Angular :4200). De a uno.
+- **Servidores:** ninguno levantado. Los de la revisión visual y los de §6-quater se bajaron por PID
+  específico (`netstat -ano | grep LISTENING` filtrando `:3001`/`:4200`/`:5173` → `taskkill //PID`).
+  **Nunca en masa:** un `taskkill //IM node.exe` ya fue denegado por el usuario.
 - **Segundo hallazgo visual, es de DATOS no de CSS:** Angular muestra `—` en "Clasificación
   Regulatoria" donde React muestra Autos/Asistencias/Internet/Entidad vigilada; las fechas de
   borrador también difieren. Sin investigar.
-- **Mitad manual del gate de Fase 5 para SCR-011 y SCR-012:** la paridad visual ya está hecha
-  (§6-ter); queda la **verificación manual en Docker de los dos submits**.
+- ~~**Mitad manual del gate de Fase 5 para SCR-011 y SCR-012**~~ — **hecha** (§6-quater): paridad
+  visual en §6-ter, y los submits de SCR-003 y SCR-012 verificados en el navegador con el PUT real
+  capturado y **bloqueado**. Queda pendiente lo que este entorno no puede dar: probar contra un caso
+  **parado en el nodo de estas pantallas**. El caso 32219 tiene una sola tarea activa y es
+  `"Calcular validez de la oferta"`, de otro proceso.
 - **Chequeo de mixed content:** la instancia PM4 de dev es HTTPS; un iframe HTTPS embebiendo
   `http://localhost:4200` puede quedar bloqueado.
 - **Alcance de `gen-env-define.mjs`:** hoy hornea `VITE_CASE_ID`/`VITE_TASK_ID`/`VITE_PM4_TOKEN` en el
@@ -475,6 +479,70 @@ particular.
 
 ---
 
+## 6-quater. La verificación manual de los submits (2026-08-17)
+
+La otra mitad del gate de Fase 5. Cuatro ramas verificadas en el navegador contra el backend real,
+con el PUT capturado y **bloqueado** antes de salir: `REENVIAR` y `CANCELAR` de SCR-012,
+`CORREGIR_REENVIAR` y `ESCALAR_SOPORTE` de SCR-003.
+
+### ⚠ El método, y la trampa que casi lo arruina
+
+**`provideHttpClient()` de esta app NO lleva `withFetch()`** (`app/app.config.ts:25`), así que
+`HttpClient` usa **`XMLHttpRequest`**. El primer interceptor que escribí parcheaba `window.fetch`:
+reportó "instalado" y no capturaba nada. Un click en Reenviar con ese parche puesto habría hecho un
+PUT real y **completado una tarea de PM4**, que es irreversible desde acá.
+
+Lo que funciona es parchear `XMLHttpRequest.prototype.open`/`send`, guardar el body de todo
+`PUT`/`POST` y simular un 200 (`readyState`/`status`/`responseText` por `defineProperty` + disparar
+`load`/`loadend`), para que la pantalla siga su camino de éxito sin que nada salga.
+
+**Y hay que probar el bloqueo antes de confiar en él, en las dos direcciones:** un
+`PUT /api/__prueba_del_bloqueo__` tiene que (a) aparecer en la lista de capturados y (b) **no**
+aparecer en el log del backend. Al final, `grep` de escrituras hacia PM4 en el log: **0**.
+
+Ojo: **navegar entre pantallas reinstala el JS y se pierde el parche.** Hay que reinstalarlo después
+de cada `navigate`, antes de tocar cualquier botón.
+
+### Lo que los mocks no podían demostrar
+
+- **SCR-003 · el riesgo de `value` vs `getRawValue()`, medido:** 51 controles, **21 deshabilitados**,
+  y `value` omitiría **exactamente esas 21 claves**. Con `value`, cada reenvío habría borrado 21
+  campos del caso en PM4. Con `getRawValue()` viajan las 52 con su valor.
+- **SCR-003 · ninguna fuga de UI:** cero claves `edit-*`/`ui-*` en el PUT. Viven en el `FormGroup`
+  satélite `objGrupoEdicion` del hijo (22 controles: 21 checkboxes + `ui-qd_strSfcProduct`), **fuera**
+  del form del padre, así que no pueden llegar a PM4 por construcción.
+- **SCR-003 · las dos ramas hacen lo opuesto con la evidencia, y las dos bien:**
+  `CORREGIR_REENVIAR` vacía `qd_strPayloadSent` y resetea `qd_strPayloadAdjustNeeded='NO'` (para que
+  el script regenere el body); `ESCALAR_SOPORTE` lo **preserva** intacto (es lo que el analista
+  necesita leer).
+- **SCR-003 · la cascada del checkbox anda:** tildar `edit-qd_strSfcReason` habilitó la fila del
+  padre, y `lstCambios()` rotuló el cambio por su **key de payload** (`macro_motivo_cod: (vacío) →
+  …`), no por el nombre de la variable.
+- **SCR-012 · la convención `_desc` contra el catálogo real:** elegir `FALTA_DOCUMENTACION` llenó
+  `qd_strExtensionReason_desc = 'Falta documentación del cliente'`. Las 3 opciones del catálogo
+  llegaron a la pantalla **y** al `lib-input-select-z`.
+- **SCR-012 · `CANCELAR` sale con el form inválido y S2 vacío** — la salida de excepción es
+  alcanzable en su propio escenario, que es el contrato.
+- **El filtro de `precargar()` por claves declaradas, comprobado:** `task.data` del caso trae **71**
+  claves de otros procesos y **ninguna** se colcó al form de 9 de SCR-012.
+
+### Lo que este entorno no puede dar
+
+Un caso **parado en el nodo de estas pantallas**. El 32219 tiene una sola tarea activa y es
+`"Calcular validez de la oferta"` (id 169767), de otro proceso, así que todos los `qd_strExt*` de
+SCR-012 y el `qd_strPayloadSent` de SCR-003 llegan **vacíos** y hubo que sembrarlos a mano. Falta
+probar la precarga con datos que el BPM haya escrito de verdad en Momento 3 — para eso hace falta
+correr el proceso desde SCR-000 y forzar el rechazo de SmartSupervision.
+
+### Interacción con el DS bajo automatización
+
+El combobox de `lib-input-select-z` es un `<input type="checkbox" role="combobox">` en shadow DOM: el
+click de Playwright **se cuelga** (timeout de 5 s, "performing click action" sin volver). Se verifica
+que las opciones llegaron (al componente y al `lib-*`) y se elige por el control. Es la misma familia
+de trampas que el §5.3.
+
+---
+
 ## 7. Para documentar en `docs/guides/testing-conventions.md`
 
 Todo el §5 de este archivo es candidato. Lo más valioso, en orden:
@@ -494,7 +562,13 @@ Todo el §5 de este archivo es candidato. Lo más valioso, en orden:
    al medio. Para copy que viene de React o del anexo, aseverar la **oración completa** con los
    espacios normalizados. Y el caso de rótulos de SCR-011 muestra el peor modo: el test escrito
    *específicamente* para vigilar los rótulos era el que congelaba la divergencia.
-7. Todas las trampas del §5.1 y §5.3.
+7. **La lección del §6-quater, la más peligrosa de todas porque el interceptor MIENTE:** para probar
+   un submit sin completar la tarea real, el parche va sobre **`XMLHttpRequest`**, no sobre `fetch` —
+   `provideHttpClient()` sin `withFetch()` usa XHR. Un parche de `fetch` reporta "instalado", no
+   captura nada, y el siguiente click hace el PUT de verdad. **Regla: probar el bloqueo con un PUT de
+   prueba y verificar las dos direcciones** (aparece en los capturados **y** no aparece en el log del
+   backend) antes de tocar un botón de submit.
+8. Todas las trampas del §5.1 y §5.3.
 
 ---
 
