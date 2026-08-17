@@ -195,11 +195,19 @@ describe('ZdsSelect', () => {
     expect(objFixture.componentInstance.form.controls.qd_strChannel.errors?.['required']).toBe(true);
   });
 
-  it('setDisabledState registra el estado aunque la lib no pueda deshabilitar el select', async () => {
+  it('deshabilitar el control registra el estado y atenúa el envoltorio', async () => {
     // El límite documentado: `disable` es un input muerto en `lib-input-select-z` (declarado, nunca
-    // leído), así que **no hay forma** de deshabilitar visualmente este campo. Lo que sí se puede
-    // aseverar —y es lo que importa para el CVA— es que el wrapper recibió el estado; si mañana la
-    // lib cablea ese input, el bindeo se agrega en un solo lugar y este test ya lo respalda.
+    // leído), así que el estado no puede viajar al `za-select`. Angular igual bloquea el campo de
+    // verdad; lo que se perdía era la SEÑAL VISUAL que el `z-select` de React da desde el propio DS
+    // (`opacity: .5` en el host con `disabled`). Se replica marcando el envoltorio, así que el caso
+    // cubre las dos mitades: el CVA recibió el estado, y la clase que lo pinta quedó puesta.
+    const fnEnvoltorio = () =>
+      objFixture.nativeElement.querySelector('.zds-select-wrap') as HTMLElement;
+
+    // El conteo va antes: sin envoltorio, los dos `contains` de abajo son tautologías.
+    expect(fnEnvoltorio()).not.toBeNull();
+    expect(fnEnvoltorio().classList.contains('zds-select-wrap--deshabilitado')).toBe(false);
+
     objFixture.componentInstance.form.controls.qd_strChannel.disable();
     objFixture.detectChanges();
     await objFixture.whenStable();
@@ -209,5 +217,6 @@ describe('ZdsSelect', () => {
     ).componentInstance as ZdsSelect;
 
     expect(objWrapper.deshabilitado()).toBe(true);
+    expect(fnEnvoltorio().classList.contains('zds-select-wrap--deshabilitado')).toBe(true);
   });
 });

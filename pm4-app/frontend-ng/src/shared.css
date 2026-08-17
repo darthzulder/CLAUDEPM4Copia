@@ -411,6 +411,16 @@ z-table th,
   top: 0;
 }
 
+/* `lib-input-select-z` no tiene input de deshabilitado que funcione (`disable`/`disabled` son
+   muertos — ver el bloque de gotchas de `zds-select.ts`), así que `control.disable()` bloquea el
+   campo pero lo deja viéndose habilitado. El `z-select` de React lo resuelve dentro del propio DS
+   computando `opacity: .5` en el host cuando lleva `disabled`; se replica ese mismo valor acá.
+   `pointer-events` NO se toca: el bloqueo real ya lo hace Angular (el listado no abre y el valor no
+   se propaga), y apagarlos además mataría el tooltip/foco del campo. */
+.zds-select-wrap--deshabilitado {
+  opacity: .5;
+}
+
 /* Campos de entrada: se usan los DEFAULTS del DS sin overrides (radio pill
    1.75rem, fondo --z-bg-light-base, estado readonly nativo via color/borde). */
 

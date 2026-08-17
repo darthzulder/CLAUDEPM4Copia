@@ -42,6 +42,14 @@ interface OpcionLib {
  *    declaración). O sea que ni `disable` ni `disabled` deshabilitan este select. Se documenta y
  *    **no se bindea**, para no ofrecer un prop que no hace nada. El plan decía "usa `disable`, no
  *    `disabled`" — es cierto en cuanto al nombre, pero incompleto: ninguno de los dos funciona.
+ *    **Consecuencia visual, encontrada comparando contra React:** `control.disable()` sí bloquea el
+ *    campo de verdad (Angular no propaga el valor y el listado no abre — verificado en el navegador
+ *    sobre los 21 controles bloqueados de SCR-003), pero el widget **se sigue viendo habilitado**,
+ *    porque nada llega al `za-select`. El `z-select` de React resuelve esto en el propio DS:
+ *    con el atributo `disabled` puesto, el host computa `opacity: .5`. Se replica con
+ *    `.zds-select-wrap--deshabilitado` sobre el envoltorio que ya existía, alimentada por la señal
+ *    `deshabilitado` que el CVA llena en `setDisabledState`. Es CSS propio como último recurso
+ *    legítimo: no hay input del DS que lo haga, y el valor no se inventa — es el del DS de React.
  *  - **`manualValidation` SÍ existe acá** (a diferencia de textarea/checkbox), y hace falta por el
  *    mismo motivo que en el input de texto: sin él, `ngOnChanges` hace
  *    `if (!manualValidation && group.status == 'INVALID') this.invalid = true`, marcando en error un
@@ -64,7 +72,12 @@ interface OpcionLib {
     },
   ],
   template: `
-    <div class="zds-select-wrap" [id]="strId" tabindex="-1">
+    <div
+      class="zds-select-wrap"
+      [class.zds-select-wrap--deshabilitado]="deshabilitado()"
+      [id]="strId"
+      tabindex="-1"
+    >
       <lib-input-select-z
         [group]="grupo"
         [name]="name()"
