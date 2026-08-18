@@ -259,10 +259,25 @@ afterEach(() => {
 describe('SCR-003 · Corrección Error Funcional M1/M2', () => {
   // ── Estructura y montaje ────────────────────────────────────────────────────────────────────────
 
-  it('cumple el contrato estructural de campos de la fachada', async () => {
-    await montar();
-    aseverarContratoDeCampos(objFixture);
-  });
+  /**
+   * ⚠ **Timeout explícito de 15s, y no es un test lento que haya que arreglar: es el más caro del
+   * repo por una razón estructural.** Es el primer `it()` del archivo, así que paga el primer montaje
+   * del módulo —la subida de los custom elements del DS— para las **22** `formControlName` de esta
+   * pantalla (SCR-0052 tiene 9, SCR-012 tiene 11), y `aseverarContratoDeCampos()` recorre todos.
+   *
+   * Aislado corre en ~1s y en grupos chicos también; con los **70** archivos de la suite completa
+   * compitiendo por los workers cruza el default de 5000ms (medido: 5137ms y 5359ms en dos corridas
+   * seguidas, o sea reproducible y no un flake). Subir el tope global castigaría a los otros 998
+   * casos escondiendo cuelgues reales, así que el tope va acá, en el único caso que lo necesita.
+   */
+  it(
+    'cumple el contrato estructural de campos de la fachada',
+    async () => {
+      await montar();
+      aseverarContratoDeCampos(objFixture);
+    },
+    15_000,
+  );
 
   it('precarga el diagnóstico y el payload rechazado desde task.data', async () => {
     await montar();
