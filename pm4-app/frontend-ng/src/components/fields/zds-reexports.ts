@@ -181,4 +181,12 @@ export {
   ZaKpiValue as ZrKpiValue,
   ZaPagination as ZrPagination,
   ZaSwitch as ZrSwitch,
+  // ⚠ **No se consume en ninguna plantilla: existe para que los SPECS puedan tiparlo.** La píldora
+  // de estado se usa siempre por `zds-status-badge`, que es quien envuelve `za-tag` y decide el
+  // `fill`. Pero aseverar que ese `fill` llegó de verdad exige la INSTANCIA del componente del DS
+  // —`fill` es un `input()`, no un atributo reflejado, así que `getAttribute()` devuelve `null`— y
+  // para buscarla por tipo (`instanceof`) hace falta la clase. Sin esta línea el spec importaría
+  // `@zurich/angular-components` directo, que es exactamente lo que la fachada existe para evitar:
+  // la exención de `no-restricted-imports` es de `components/fields/**`, no de los specs de pantalla.
+  ZaTag as ZrTag,
 } from '@zurich/angular-components';

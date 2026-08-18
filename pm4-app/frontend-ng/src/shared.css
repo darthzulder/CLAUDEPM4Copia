@@ -1845,3 +1845,61 @@ z-table :is(th, td)[config*="right"] {
 .zds-field-bare {
   width: 100%;
 }
+
+/* Valor de solo lectura que conserva sus saltos de línea.
+
+   Es el `style={{ whiteSpace: 'pre-wrap' }}` que React pone en línea sobre el `.info-bar-value`
+   de las observaciones de SCR-0052 (`RespuestaAreaResponsable.tsx:278`). Se saca a clase por la
+   regla 3 de pm4-app/CLAUDE.md —nada de estilo en línea *ad-hoc* por pantalla— y se nombra por
+   el patrón, no por la pantalla: cualquier texto libre que un usuario escribió en un textarea y
+   que otra pantalla muestra en modo consulta necesita exactamente esto. Sin la regla, los saltos
+   de línea que el Analista SAC puso en sus observaciones se leen como un párrafo corrido.
+
+   Va sobre el `.info-bar-value`, no sobre el `.valor-solo-lectura`: el margen y el quiebre de
+   línea son cosas distintas y se combinan (`<span class="info-bar-value texto-multilinea">`). */
+.texto-multilinea {
+  white-space: pre-wrap;
+}
+
+/* Semáforo de los KPI de SLA de SCR-013 (Próximos a vencer / Vencidos / Cerrados).
+
+   `za-kpi-value` colorea su número con la custom property `--z-kpi-value--color`, y React la setea
+   con un `style` en línea por cada tarjeta (`DashboardGestionCasos.tsx:126-128`). Acá va como clase
+   por la regla 3 de pm4-app/CLAUDE.md: nada de estilo en línea *ad-hoc*.
+
+   Se nombran por el ESTADO que comunican y no por la pantalla ni por el KPI, porque el semáforo
+   verde/naranja/rojo es el mismo lenguaje que ya usan `zds-status-badge` y las alertas — la próxima
+   pantalla con un contador de SLA reusa estas tres y no agrega otras.
+
+   ⚠ El `config` del componente NO sirve para esto: sus dos variantes (`positive`/`negative`) tiñen el
+   `difference` (la flechita de variación), no el valor, y esta pantalla no pasa `difference`. Por eso
+   la custom property es el único camino, y no un atajo. */
+.kpi-warn {
+  --z-kpi-value--color: var(--z-orange);
+}
+
+.kpi-danger {
+  --z-kpi-value--color: var(--z-red);
+}
+
+.kpi-ok {
+  --z-kpi-value--color: var(--z-green);
+}
+
+/* Barra de encabezado de una sección con acción a la derecha (título + botón).
+
+   Es el `style={{ margin: 'var(--zs-100) 0' }}` que React pone en línea sobre el
+   `z-flex="100" z-align="between:center"` de SCR-013 (`DashboardGestionCasos.tsx:108`) — el layout
+   ya lo hacen los primitivos del DS, así que esta clase aporta **solo** el margen vertical, que es
+   lo que no tiene primitivo.
+
+   El `.section-title` que va adentro trae su propio `margin-bottom`, que acá sobra porque el
+   `z-flex` ya centra verticalmente: se anula para que el título no quede desplazado hacia arriba
+   respecto del botón. React lo resuelve con otro `style` en línea (`margin: 0`). */
+.section-bar {
+  margin: var(--zs-100) 0;
+}
+
+.section-bar .section-title {
+  margin-bottom: 0;
+}

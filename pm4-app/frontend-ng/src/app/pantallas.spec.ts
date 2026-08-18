@@ -52,6 +52,23 @@ const CLL_SLUGS_CON_SPEC: string[] = [
   'COL_QD_SCR-011_Revision_Error_Tecnico_Prorroga',
   'COL_QD_SCR-012_Revision_Error_Funcional_Prorroga',
   'COL_QD_SCR-003_Correccion_Error_Funcional',
+  // La única de Otras Solicitudes hasta ahora, y la única con DOS specs: la pantalla
+  // (`gestion-linea2.spec.ts`) y su modal de reasignación (`reasignar-caso-modal.spec.ts`).
+  'COL_OS_SCR-003_Bandeja_Gestion_Linea2',
+  'COL_QD_SCR-0052_Respuesta_Area_Responsable',
+  'COL_QD_SCR-009_Formulario_Superintendencia',
+  // La segunda con DOS specs: la pantalla (`detalle-reasignacion-respuesta.spec.ts`) y su modal de
+  // expediente (`expediente-completo-modal.spec.ts`), que tiene su propia regla aseverable —el
+  // bloque sin campos con dato desaparece completo, título incluido— y no depende del form.
+  'COL_QD_SCR-0051_Detalle_Reasignacion_Respuesta',
+  // La primera con **cinco** archivos de test: la pantalla (`dashboard-gestion-casos.spec.ts`), su
+  // modal (`detalle-caso-modal.spec.ts`), su tabla (`tabla-casos.spec.ts`), sus helpers puros
+  // (`dashboard-helpers.spec.ts`) y su servicio de carga (`casos-dashboard.service.spec.ts`). Es la
+  // única pantalla sin `task_id`, así que su carga paginada es lógica propia y se cubre aparte; y la
+  // tabla tiene spec propio porque las reglas de los dos huecos de `TableZ` —los `id` literales
+  // `start`/`end`, el typo `generciEndName` y el empty state como hermano— se degradan **sin** poner
+  // rojo nada de la pantalla.
+  'COL_QD_SCR-013_Dashboard_Gestion_Casos',
 ];
 
 describe('guarda de inventario de pantallas', () => {

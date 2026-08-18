@@ -1,0 +1,198 @@
+<!-- ── S5 · Reasignación de Responsable (SEC-051) ────────────────────────────────────────────────
+     Se oculta cuando el caso volvió del Analista SAC: ahí el área solo ajusta la respuesta, no
+     reasigna. Ver `blnDevueltoPorSac` en el componente. -->
+@if (!blnDevueltoPorSac()) {
+  <app-form-section title="Reasignación de Responsable">
+    <div class="form-row cols-2" [formGroup]="form()">
+      <!-- Sin `[disabled]`: `zds-select` no expone ese input (ni él ni `CampoBase`). El bloqueo fuera
+           del modo reasignación es el estado del control, que `sincronizarBloqueo()` gobierna. -->
+      <zds-select
+        [formControlName]="QD.strAssigneeArea"
+        [name]="QD.strAssigneeArea"
+        label="Área Responsable"
+        [options]="cllGruposReasignacion()"
+        placeholder="Seleccione el área..."
+      />
+      <zds-select
+        [formControlName]="QD.strAssigneeUser"
+        [name]="QD.strAssigneeUser"
+        label="Responsable Asignado"
+        [options]="cllUsuarios()"
+        placeholder="Seleccione el responsable..."
+        [loading]="blnCargandoUsuarios()"
+      />
+    </div>
+
+    <!-- El comentario de la reasignación solo aparece en modo edición: fuera de él no hay nada que
+         justificar, y dejarlo montado en solo lectura sumaría una caja vacía a la vista normal. -->
+    @if (blnModoReasignacion()) {
+      <div class="form-row cols-1" [formGroup]="form()">
+        <zds-textarea
+          [formControlName]="QD.strAssignmentRemarks"
+          [name]="QD.strAssignmentRemarks"
+          label="Comentario de la reasignación"
+          [maxLength]="2000"
+          helpText="Motivo del cambio de responsable. Queda en el caso."
+        />
+      </div>
+
+      <!-- RUL-0051-01-bis · sin un usuario resuelto no hay `user_id` para el PUT, así que se avisa en
+           vez de dejar el botón muerto sin explicación. `hide-close`: es un estado, no un aviso que
+           el gestor pueda descartar. -->
+      @if (blnGrupoSinUsuarios()) {
+        <za-alert config="alert" [hide-close]="true">
+          El grupo «{{ strAreaSeleccionada() }}» no tiene usuarios disponibles en ProcessMaker, o el
+          responsable actual no pertenece a ese grupo. Elija otra área para poder reasignar.
+        </za-alert>
+      }
+    }
+
+    <div z-flex="75" z-align="right:center">
+      @if (blnModoReasignacion()) {
+        <lib-button-z
+          label="Cancelar"
+          type="secondary"
+          [disabled]="enviando()"
+          (eventClick)="cancelarReasignacion()"
+        />
+        <!-- `[disabled]` explícito y obligatorio: el default de `lib-button-z` es `true`. -->
+        <lib-button-z
+          label="Confirmar Reasignación"
+          type="positive"
+          [disabled]="!blnPuedeConfirmarReasignacion()"
+          (eventClick)="emitirConfirmarReasignacion()"
+        />
+      } @else {
+        <lib-button-z
+          label="Reasignar Queja"
+          type="secondary"
+          [disabled]="enviando()"
+          (eventClick)="iniciarReasignacion()"
+        />
+      }
+    </div>
+  </app-form-section>
+
+  <!-- ── S6 · Solicitud de ayuda a otras áreas (SEC-052) ───────────────────────────────────────── -->
+  <app-form-section title="">
+    <div class="form-row cols-1" [formGroup]="form()">
+      <zds-radio
+        [formControlName]="QD.strNeedsOtherAreas"
+        [name]="QD.strNeedsOtherAreas"
+        label="¿Necesita apoyo de otras áreas para responder?"
+        [options]="CLL_SI_NO"
+        [inline]="true"
+      />
+    </div>
+
+    <!-- RUL-0051-07 · el bloque completo depende del radio de arriba. -->
+    @if (blnMostrarAyuda()) {
+      <!-- RUL-0051-08 / MSG-0051-06 · con el tope alcanzado se reemplaza el formulario por el aviso,
+           no se deshabilita: dejar los campos visibles pero muertos invita a llenarlos. -->
+      @if (blnTopeAyudantes()) {
+        <za-alert config="alert" [hide-close]="true">
+          Ya se solicitó ayuda a {{ INT_MAX_AYUDANTES }} áreas, que es el máximo permitido para un
+          caso. No es posible registrar más solicitudes.
+        </za-alert>
+      } @else {
+        <p class="subsection-note">
+          Solicitudes registradas: {{ cllHistorial().length }}/{{ INT_MAX_AYUDANTES }}
+        </p>
+
+        <div class="form-row cols-2" [formGroup]="form()">
+          <zds-select
+            [formControlName]="QD.strTargetArea"
+            [name]="QD.strTargetArea"
+            label="Área Destino"
+            [options]="cllGruposReasignacion()"
+            placeholder="Seleccione el área..."
+            [obligatorio]="true"
+          />
+          <!-- ⚠ Este select guarda el **id numérico** de PM4, no el username — a diferencia del de
+               S5. Ver la cabecera del componente: es contrato con el subproceso de ayuda. -->
+          <zds-select
+            [formControlName]="QD.strNewAssignee"
+            [name]="QD.strNewAssignee"
+            label="Responsable Destino"
+            [options]="cllUsuariosDestino()"
+            placeholder="Seleccione el responsable..."
+          />
+        </div>
+
+        <div class="form-row cols-1" [formGroup]="form()">
+          <zds-textarea
+            [formControlName]="QD.strReassignRemarks"
+            [name]="QD.strReassignRemarks"
+            label="¿Qué necesita del área?"
+            [maxLength]="2000"
+            [obligatorio]="true"
+            helpText="Descríbalo con el detalle suficiente para que el área pueda responder sin volver a preguntar."
+          />
+        </div>
+
+        <!-- MSG-0051-03 · el aviso de incompleto va como caja inline (no por `AlertZService`): vive
+             junto al formulario que describe y desaparece solo al completarse. `config="info"` porque
+             es una guía, no un error de validación. -->
+        @if (!blnAyudaCompleta()) {
+          <za-alert config="info" [hide-close]="true">
+            Indique el área destino y qué necesita de ella para poder registrar la solicitud.
+          </za-alert>
+        }
+
+        <div z-flex="75" z-align="right:center">
+          <lib-button-z
+            label="Confirmar Solicitud de Ayuda"
+            type="primary"
+            [disabled]="enviando() || !blnAyudaCompleta()"
+            (eventClick)="registrarAyuda()"
+          />
+        </div>
+      }
+    }
+  </app-form-section>
+}
+
+<!-- ── S7 · Historial de Asignaciones (SEC-053) ──────────────────────────────────────────────────
+     Se conserva incluso con el caso devuelto por el SAC: es auditoría, no una acción. -->
+@if (blnMostrarAyuda() || cllHistorial().length) {
+  <app-form-section title="Historial de Asignaciones">
+    <!-- ⚠ Siete columnas por `[headers]` + la octava ("Adjunto") por `showGenericEnd`, porque necesita
+         un botón y `TableZ` solo pinta texto en una columna normal. El `id="end"` es literal: el
+         `ngAfterContentInit` del componente hace `switch (item.id)` y solo reconoce `'start'` y
+         `'end'` (cualquier otro id cae en `columnTemplates`, que **nunca se lee**). El contexto que
+         inyecta es `{value: row}`, de ahí el `let-objFila="value"`.
+
+         ⚠ Ojo con el nombre del rótulo: `generciEndName`, con el typo de la librería. Su hermano
+         `genericStartName` sí está bien escrito, lo que lo hace fácil de errar.
+
+         ⚠ La tabla queda montada siempre y el empty state va **afuera**, como bloque hermano: el
+         `<tbody>` de `TableZ` es un `@for` pelado sin rama de lista vacía, así que con `data: []`
+         pinta el encabezado y nada más — que es la paridad con React. Envolverla en un `@if` se
+         comería los rótulos de columna. Mismo motivo que en SCR-003. -->
+    <lib-table-z
+      [headers]="cllColumnasHistorial"
+      [data]="cllFilasHistorial()"
+      [showGenericEnd]="true"
+      generciEndName="Adjunto"
+      typeStyle="zebra"
+    >
+      <ng-template libZTemplate id="end" let-objFila="value">
+        @if (objFila.adjuntoFileId) {
+          <lib-button-z
+            type="link"
+            [label]="objFila.adjunto"
+            icon="download:line"
+            [disabled]="false"
+            (eventClick)="descargarAdjunto(objFila)"
+          />
+        } @else {
+          <span>—</span>
+        }
+      </ng-template>
+    </lib-table-z>
+
+    @if (!cllHistorial().length) {
+      <div class="record-empty">Sin reasignaciones ni solicitudes de ayuda registradas</div>
+    }
+  </app-form-section>
+}

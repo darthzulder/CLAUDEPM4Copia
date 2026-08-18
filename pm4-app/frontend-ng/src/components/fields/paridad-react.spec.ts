@@ -12,6 +12,11 @@ import { RevisionErrorTecnicoApi } from '../../screens/atencion-cliente/quejas-d
 import { RevisionErrorTecnicoProrroga } from '../../screens/atencion-cliente/quejas-directas/COL_QD_SCR-011_Revision_Error_Tecnico_Prorroga/revision-error-tecnico-prorroga';
 import { ErrorFuncionalProrroga } from '../../screens/atencion-cliente/quejas-directas/COL_QD_SCR-012_Revision_Error_Funcional_Prorroga/error-funcional-prorroga';
 import { CorreccionErrorFuncional } from '../../screens/atencion-cliente/quejas-directas/COL_QD_SCR-003_Correccion_Error_Funcional/correccion-error-funcional';
+import { GestionLinea2 } from '../../screens/atencion-cliente/otras-solicitudes/COL_OS_SCR-003_Bandeja_Gestion_Linea2/gestion-linea2';
+import { RespuestaAreaResponsable } from '../../screens/atencion-cliente/quejas-directas/COL_QD_SCR-0052_Respuesta_Area_Responsable/respuesta-area-responsable';
+import { FormularioSuperintendencia } from '../../screens/atencion-cliente/quejas-directas/COL_QD_SCR-009_Formulario_Superintendencia/formulario-superintendencia';
+import { DetalleReasignacionRespuesta } from '../../screens/atencion-cliente/quejas-directas/COL_QD_SCR-0051_Detalle_Reasignacion_Respuesta/detalle-reasignacion-respuesta';
+import { DashboardGestionCasos } from '../../screens/atencion-cliente/quejas-directas/COL_QD_SCR-013_Dashboard_Gestion_Casos/dashboard-gestion-casos';
 
 /**
  * ⚠ **Paridad contra el contrato de campos que declaraba React, congelado como dato de migración.**
@@ -51,9 +56,9 @@ import { CorreccionErrorFuncional } from '../../screens/atencion-cliente/quejas-
  * **No** asevera rótulos, `helpText` ni `placeholder`: ya los cubren los specs de paridad de cada
  * pantalla, con el texto del Anexo02 al lado del FLD, que es más útil que un diff contra React.
  *
- * ── Alcance: 3 de 11 pantallas, y eso es correcto hoy ─────────────────────────────────────────
- * El dataset congela **11 pantallas / 128 campos**, pero acá se comparan las **portadas hasta hoy**
- * (SCR-008, SCR-004 y SCR-011). Las otras no se pueden montar todavía. **Ese es el valor del
+ * ── Alcance: las portadas hasta hoy, no las 11 del dataset ────────────────────────────────────
+ * El dataset congela **11 pantallas / 128 campos**, pero acá se comparan las que ya se pueden montar
+ * (ver `CLL_PORTADAS`, que es la lista viva). Las otras no se pueden montar todavía. **Ese es el valor del
  * dataset**: el `.tsx` se borra en la Fase 7 y los datos de las que faltan sobreviven; cada pantalla
  * nueva de la Fase 5 se suma a `CLL_PORTADAS` en una línea y hereda la comparación. El caso de
  * inventario de abajo se pone rojo si alguien porta una pantalla y se olvida de sumarla.
@@ -91,7 +96,61 @@ const CLL_PORTADAS: readonly { readonly strSlug: string; readonly objTipo: Type<
   { strSlug: 'COL_QD_SCR-011_Revision_Error_Tecnico_Prorroga', objTipo: RevisionErrorTecnicoProrroga },
   { strSlug: 'COL_QD_SCR-012_Revision_Error_Funcional_Prorroga', objTipo: ErrorFuncionalProrroga },
   { strSlug: 'COL_QD_SCR-003_Correccion_Error_Funcional', objTipo: CorreccionErrorFuncional },
+  { strSlug: 'COL_OS_SCR-003_Bandeja_Gestion_Linea2', objTipo: GestionLinea2 },
+  { strSlug: 'COL_QD_SCR-0052_Respuesta_Area_Responsable', objTipo: RespuestaAreaResponsable },
+  { strSlug: 'COL_QD_SCR-009_Formulario_Superintendencia', objTipo: FormularioSuperintendencia },
+  { strSlug: 'COL_QD_SCR-0051_Detalle_Reasignacion_Respuesta', objTipo: DetalleReasignacionRespuesta },
+  { strSlug: 'COL_QD_SCR-013_Dashboard_Gestion_Casos', objTipo: DashboardGestionCasos },
 ];
+
+/**
+ * Cuántos campos con `maxLength` declaraba React en cada pantalla portada.
+ *
+ * Es la guarda de anti-vacuidad del caso de los contadores, y está por pantalla —en vez de un
+ * `toBeGreaterThan(0)` global— porque **cero es un valor legítimo**: la OS_SCR-003 no declaraba ningún
+ * `maxLength` en su `.tsx`. Con el tope global, esa pantalla ponía el caso en rojo por estar bien
+ * portada, y la única salida habría sido sacarla de `CLL_PORTADAS` — o sea, dejar de comparar sus
+ * campos justo para no ver un cero.
+ *
+ * ⚠ El número se lee del **dataset**, no del template de Angular: es el contrato congelado de React, y
+ * por eso solo se actualiza cuando cambia `paridad-react.json` (o sea, cuando el extractor vuelve a
+ * correr contra el `.tsx`). Bajar un número acá para "que pase" es tapar exactamente el defecto que el
+ * caso persigue: un contador que se apagó al portar.
+ */
+const DIC_MAXLENGTH_ESPERADOS: Readonly<Record<string, number>> = {
+  'COL_QD_SCR-008_Revision_Respuesta_SAC': 3,
+  'COL_QD_SCR-004_Revision_Error_Tecnico_API': 2,
+  'COL_QD_SCR-011_Revision_Error_Tecnico_Prorroga': 2,
+  'COL_QD_SCR-012_Revision_Error_Funcional_Prorroga': 1,
+  'COL_QD_SCR-003_Correccion_Error_Funcional': 1,
+  // ⚠ Cero DECLARADO, verificado por grep sobre `GestionLinea2.tsx`/`ReasignarCasoModal.tsx` de React:
+  // ningún campo llevaba `maxLength`. La pantalla igual hereda el caso de huérfanos de arriba, que es
+  // el que atrapa un rename — que es el defecto grave, no el contador.
+  'COL_OS_SCR-003_Bandeja_Gestion_Linea2': 0,
+  // Uno solo: el `qd_strAreaComment` (2000). Los otros 6 campos de la pantalla son de solo lectura, y
+  // un campo `readOnly` no lleva contador porque no se tipea en él.
+  'COL_QD_SCR-0052_Respuesta_Area_Responsable': 1,
+  // ⚠ Cero DECLARADO, leído del dataset: los 14 campos de la SCR-009 son 7 selects, 5 inputs y 2
+  // radios, y **ninguno** trae `props.maxLength` ni `validadores.maxLength`. Es el mismo caso legítimo
+  // que la OS_SCR-003 — los 5 inputs son los tres `readOnly` del cierre (fechas y código SFC) más los
+  // dos montos de fraude, y React no le puso tope a ninguno.
+  'COL_QD_SCR-009_Formulario_Superintendencia': 0,
+  // Cuatro, leídos del dataset: los dos comentarios de S5 (2000 cada uno), la respuesta al cliente
+  // (5000) y las acciones tomadas (2000, en S8).
+  //
+  // ⚠ **Dos de los cuatro viven detrás de un `@if`** y no se montan con el fixture pelado, así que esta
+  // pantalla es la primera que necesita una entrada en `DIC_APERTURA_DE_RAMAS`. El número se mantiene en
+  // 4 —el del dataset— y lo que se ajusta es el fixture; bajarlo a 2 dejaría los dos condicionales sin
+  // vigilar para siempre, que es exactamente lo que el párrafo de arriba prohíbe.
+  'COL_QD_SCR-0051_Detalle_Reasignacion_Respuesta': 4,
+  // ⚠ Cero DECLARADO, leído del dataset: los 4 campos de la SCR-013 son los tres selects de filtro y el
+  // input de búsqueda, y React no le puso `maxLength` a ninguno. Tercer cero legítimo, después de la
+  // OS_SCR-003 y la SCR-009, y por un motivo distinto a los dos: acá **no hay ningún campo de captura**
+  // —es un tablero de solo lectura y sus cuatro controles son filtros—, así que un tope de longitud no
+  // tendría a qué aplicarse. La pantalla igual hereda el caso de huérfanos, que es el que atrapa un
+  // rename de filtro al portar.
+  'COL_QD_SCR-013_Dashboard_Gestion_Casos': 0,
+};
 
 /**
  * Los campos que React declaraba con un **nombre dinámico**, y que por eso NO están en el dataset.
@@ -118,6 +177,23 @@ const CLL_PORTADAS: readonly { readonly strSlug: string; readonly objTipo: Type<
  * ⚠ Agregar un prefijo acá **no** es una forma legítima de silenciar un huérfano. Antes de sumar uno,
  * correr el `--check` del extractor y confirmar que ese campo aparece en su lista de "sin resolver".
  * Si no aparece, el nombre era estático y el huérfano es un defecto del port de verdad.
+ *
+ * ── La SEGUNDA causa legítima: un control SATÉLITE que el port tuvo que inventar ────────────────
+ * Descubierta al portar la SCR-0051, y anotada acá porque el párrafo de arriba, solo, la habría
+ * rechazado. Hay nombres montados que React **nunca** declaró y que igual son correctos: los controles
+ * de andamiaje que el port necesita porque la fachada de Angular no tiene el equivalente de una prop de
+ * React. El caso vivo es `ui-qd_strSfcProduct`: React resolvía los códigos duplicados de la colección 16
+ * con el triplete `toPickerValue`/`fromPickerValue`/`onPickerChange` de `ZdsSelect`, y `zds-select` es un
+ * CVA puro cuyo único canal es el `FormControl` — así que el port ata el picker a un control satélite y
+ * traduce al control real en su `valueChanges`.
+ *
+ * **Estos NO aparecen en el `--check` del extractor** (verificado: sus 8 "sin resolver" son todos de la
+ * SCR-003), porque el nombre no es que React no lo pudiera resolver: es que en React no existía.
+ *
+ * Lo que hace que la exención siga siendo angosta —y no una puerta para tapar un rename— es que el
+ * satélite **no viaja a PM4**: vive en un `FormGroup` propio de la sección, fuera del form de la
+ * pantalla, así que no puede entrar en el payload. Ese es el criterio para sumar un nombre por esta vía,
+ * y hay que comprobarlo leyendo dónde se declara el control, no asumirlo por el prefijo `ui-`.
  */
 const DIC_NOMBRES_DINAMICOS: Readonly<Record<string, readonly string[]>> = {
   // Los 3 de S1 (`dinamico:nmErrorCode` / `nmAttempt` / `nmErrorMessage`) se atan al nombre que el caso
@@ -160,6 +236,18 @@ const DIC_NOMBRES_DINAMICOS: Readonly<Record<string, readonly string[]>> = {
     'qd_strComplaintText',
     'qd_strControlEntity',
   ],
+
+  // Exención por la SEGUNDA causa (control satélite del port), no por nombre dinámico de React: ver el
+  // último bloque del docstring. Es **un solo prefijo** y a propósito — la pantalla monta ~22 campos y
+  // todos los demás son nombres estáticos que React sí declaraba, así que un rename en cualquiera de
+  // ellos sigue poniendo el caso rojo.
+  //
+  // El `ui-` no vale para exentar lo que quiera empezar con eso: el único control satélite de la pantalla
+  // es `ui-qd_strSfcProduct`, declarado en el `objGrupoUi` de `seccion-detalle-caso.ts` —un `FormGroup`
+  // aparte del de la pantalla— así que no puede colarse en el payload de PM4. Si aparece un segundo
+  // `ui-*` que sí viva en el form del caso, esta exención lo taparía: por eso el criterio se verifica en
+  // el archivo de la sección, no acá.
+  'COL_QD_SCR-0051_Detalle_Reasignacion_Respuesta': ['ui-'],
 };
 
 /**
@@ -175,6 +263,55 @@ function fnExencionDeNombreDinamico(in_strSlug: string): (in_strNombre: string) 
       in_strExento.endsWith('-') ? in_strNombre.startsWith(in_strExento) : in_strNombre === in_strExento,
     );
 }
+
+/**
+ * Cómo abrir las ramas condicionales que esconden un campo con `maxLength`.
+ *
+ * ── Por qué hace falta, y por qué es lo honesto ────────────────────────────────────────────────
+ * El caso de los contadores compara el dataset contra el DOM, y un campo detrás de un `@if` no está en
+ * el DOM salvo que su rama esté abierta. Con el fixture pelado (`data: {}`) el caso fallaría nombrando
+ * un contador apagado — un falso positivo, porque el campo está bien portado y simplemente no se montó.
+ *
+ * La alternativa era declarar en `DIC_MAXLENGTH_ESPERADOS` solo los campos visibles, y es justo lo que
+ * el comentario de esa constante prohíbe: el número se lee del dataset, no de lo que este fixture logra
+ * mostrar. Bajarlo dejaría a los condicionales **sin vigilar para siempre** — que es el defecto que el
+ * caso persigue, con otro disfraz. Así que se abre la rama.
+ *
+ * `datos` siembra `task.data` (para las ramas que dependen de un valor del caso) y `fnAbrir` corre
+ * después del montaje (para las que dependen de estado local, alcanzable solo por interacción). Cada
+ * entrada acopla este archivo a un template concreto, así que se agrega **solo** cuando un `maxLength`
+ * del dataset vive detrás de un `@if`; una pantalla sin campos condicionales no va acá.
+ */
+const DIC_APERTURA_DE_RAMAS: Readonly<
+  Record<string, { readonly datos?: Record<string, unknown>; readonly fnAbrir?: (in_objRaiz: HTMLElement) => void }>
+> = {
+  // TRES de los cuatro `maxLength` de la SCR-0051 son condicionales, y por dos vías distintas:
+  //  · `qd_strReassignRemarks` vive en el bloque de ayuda a otras áreas (RUL-0051-07), que depende del
+  //    radio `qd_strNeedsOtherAreas` — o sea, de un dato del caso. Se siembra.
+  //  · `qd_strActionsTaken` vive en "Acciones Tomadas" (RUL-0051-09), que solo se muestra cuando la
+  //    respuesta sale a favor del **Cliente**: `blnMostrarAcciones()` compara `qd_strFavorability === '1'`,
+  //    y el `'1'` es el value de la opción "Cliente" en `SCR0051_OPTIONS_FAVOR` (el otro es `'3'`,
+  //    Compañía — no son 1/2). También es un dato del caso, así que también se siembra.
+  //  · `qd_strAssignmentRemarks` vive en el modo reasignación, que es una señal local que arranca en
+  //    `false` y solo abre el botón "Reasignar Queja". Se hace clic.
+  //
+  // El clic va por el `<za-button>` interno y no por el host `lib-button-z`: el handler está enganchado
+  // ahí dentro (`(click)` sobre el `za-button` del template de `ButtonZ`), así que un `click()` sobre el
+  // host no dispara nada. El `label` es el ancla porque `lib-button-z` no expone `id`.
+  'COL_QD_SCR-0051_Detalle_Reasignacion_Respuesta': {
+    datos: { qd_strNeedsOtherAreas: 'SI', qd_strFavorability: '1' },
+    fnAbrir: (in_objRaiz) => {
+      const cllBotones = Array.from(in_objRaiz.querySelectorAll('lib-button-z'));
+      const objHost = cllBotones.find(
+        (in_objBoton) => in_objBoton.getAttribute('label') === 'Reasignar Queja',
+      );
+
+      // Sin `expect` acá a propósito: este helper no es el caso. Si el botón no aparece, el que falla es
+      // el caso de los contadores, nombrando el campo que no encontró — que es el mensaje útil.
+      objHost?.querySelector('za-button')?.dispatchEvent(new Event('click', { bubbles: true }));
+    },
+  },
+};
 
 const INT_TASK_ID = 7;
 
@@ -217,11 +354,19 @@ describe('paridad con el contrato de campos de React (dataset congelado)', () =>
    *  4. `whenStable()` → `detectChanges()` en ese orden: `whenStable()` por sí solo **no repinta** en
    *     zoneless, y sin el segundo repintado el template se queda en la rama `@if (blnCargando())`.
    *
-   * Los campos se dejan **vacíos** a propósito (`data: {}`): este spec asevera límites de longitud, y un
+   * Los campos se dejan **vacíos** por default (`data: {}`): este spec asevera límites de longitud, y un
    * valor precargado tendría que restaurarse con exactitud tras cada `setValue` de prueba. Con vacío, la
    * restauración es trivial y no hay dato de la pantalla del que este archivo dependa.
+   *
+   * ── Las dos excepciones, y por qué son datos de la pantalla y no del helper ────────────────────
+   * `DIC_APERTURA_DE_RAMAS` permite sembrar `task.data` y disparar una acción después del montaje. Existe
+   * porque un campo con `maxLength` puede vivir **detrás de un `@if`**, y entonces el caso de los
+   * contadores busca su `max-length` en un DOM donde el campo no está: falla nombrando un contador
+   * apagado que en realidad nunca se montó. La SCR-0051 fue la primera con ese caso (dos de sus cuatro
+   * textarea son condicionales) y la salida tentadora era bajar su número en `DIC_MAXLENGTH_ESPERADOS`
+   * a los que sí se ven — o sea, exactamente lo que el comentario de esa constante prohíbe.
    */
-  async function montar<T>(in_objTipo: Type<T>): Promise<ComponentFixture<T>> {
+  async function montar<T>(in_objTipo: Type<T>, in_strSlug = ''): Promise<ComponentFixture<T>> {
     window.history.replaceState({}, '', `/?task_id=${INT_TASK_ID}`);
 
     TestBed.configureTestingModule({
@@ -238,9 +383,24 @@ describe('paridad con el contrato de campos de React (dataset congelado)', () =>
 
     objFixture.detectChanges();
 
-    objControlador
-      .expectOne((in_objReq) => in_objReq.url === `/api/tasks/${INT_TASK_ID}`)
-      .flush({ id: INT_TASK_ID, process_request_id: 70, data: {} });
+    // ⚠ **El GET de la tarea es CONDICIONAL, y lo obligó la SCR-013 (la primera pantalla sin `task_id`).**
+    // Hasta acá el `expectOne` iba pelado porque las nueve pantallas anteriores completan una tarea de
+    // PM4 y ese GET es su primera petición sin excepción. La SCR-013 es un **tablero**: no completa
+    // ninguna tarea, no lee `task_id` y su carga sale de `GET /requests` paginado, así que el `expectOne`
+    // fallaba con "found none" — un fallo que se lee como defecto de la pantalla cuando es del helper.
+    //
+    // Se busca con `match()` en vez de `expectOne()` a propósito: `match()` devuelve `[]` sin lanzar,
+    // así que la rama "esta pantalla no pide su tarea" es un dato, no una excepción atrapada. Y las
+    // peticiones propias del tablero no quedan sin drenar — caen en el bucle genérico de abajo, que ya
+    // responde `{data: []}` a lo que sea que esté pendiente.
+    const cllTarea = objControlador.match((in_objReq) => in_objReq.url === `/api/tasks/${INT_TASK_ID}`);
+    if (cllTarea.length > 0) {
+      cllTarea[0].flush({
+        id: INT_TASK_ID,
+        process_request_id: 70,
+        data: DIC_APERTURA_DE_RAMAS[in_strSlug]?.datos ?? {},
+      });
+    }
 
     await objFixture.whenStable();
     objFixture.detectChanges();
@@ -260,11 +420,23 @@ describe('paridad con el contrato de campos de React (dataset congelado)', () =>
     // **cascada**: los dos `GET /requests/70/files` salen al montar, y el
     // `GET /collections/46/records` aparece recién en el repintado que dispara el flush de esos dos. Una
     // sola pasada dejaba esa tercera pendiente y el `verify()` ponía rojos los 3 casos de la SCR-008
-    // (medido). El tope de vueltas es un cortacircuitos: una cascada infinita colgaría el spec, y un
-    // spec colgado es peor que uno que falla nombrando la petición que quedó abierta.
-    for (let numVuelta = 0; numVuelta < 5; numVuelta += 1) {
+    // (medido).
+    // ⚠ **Corta con DOS vueltas vacías seguidas, no con una, y eso lo obligó la SCR-0052 (medido).**
+    // El `break` en la primera cola vacía asumía que "vacío" significa "ya drenó", y para las pantallas
+    // que piden sus colecciones en el mismo tick del flush de la tarea es verdad. La SCR-0052 hace
+    // `await this.objTareas.cargar()` y **después** dispara sus cuatro catálogos, así que sus peticiones
+    // nacen un microtask más tarde: la traza real es `v0=0 v1=4 v2=0`, o sea que el `break` de la vuelta
+    // 0 se iba con la cola vacía y dejaba las cuatro abiertas — y el `verify()` del `afterEach` ponía en
+    // rojo los 3 casos de esa pantalla nombrando 4 GET de colección, un fallo que se lee como defecto de
+    // la pantalla y no del helper.
+    //
+    // Con dos vacías el criterio pasa a ser "no nació nada nuevo después de drenar", que es la condición
+    // que de verdad interesa. El tope de vueltas sigue siendo el cortacircuitos: una cascada infinita
+    // colgaría el spec, y un spec colgado es peor que uno que falla nombrando lo que quedó abierto.
+    let numVaciasSeguidas = 0;
+    for (let numVuelta = 0; numVuelta < 8 && numVaciasSeguidas < 2; numVuelta += 1) {
       const cllPendientes = objControlador.match(() => true);
-      if (cllPendientes.length === 0) break;
+      numVaciasSeguidas = cllPendientes.length === 0 ? numVaciasSeguidas + 1 : 0;
 
       for (const objPeticion of cllPendientes) {
         if (!objPeticion.cancelled) objPeticion.flush({ data: [] });
@@ -272,6 +444,29 @@ describe('paridad con el contrato de campos de React (dataset congelado)', () =>
 
       await objFixture.whenStable();
       objFixture.detectChanges();
+    }
+
+    // La apertura de ramas de estado local va **después** del drenaje: abrir el modo reasignación de la
+    // SCR-0051 monta los selects de su bloque, que piden sus usuarios, y esas peticiones tienen que caer
+    // en un drenaje también. De ahí el segundo bucle, con el mismo criterio de dos vueltas vacías.
+    const fnAbrir = DIC_APERTURA_DE_RAMAS[in_strSlug]?.fnAbrir;
+    if (fnAbrir) {
+      fnAbrir(objFixture.nativeElement as HTMLElement);
+      await objFixture.whenStable();
+      objFixture.detectChanges();
+
+      numVaciasSeguidas = 0;
+      for (let numVuelta = 0; numVuelta < 8 && numVaciasSeguidas < 2; numVuelta += 1) {
+        const cllPendientes = objControlador.match(() => true);
+        numVaciasSeguidas = cllPendientes.length === 0 ? numVaciasSeguidas + 1 : 0;
+
+        for (const objPeticion of cllPendientes) {
+          if (!objPeticion.cancelled) objPeticion.flush({ data: [] });
+        }
+
+        await objFixture.whenStable();
+        objFixture.detectChanges();
+      }
     }
 
     return objFixture;
@@ -302,6 +497,18 @@ describe('paridad con el contrato de campos de React (dataset congelado)', () =>
     // escrito en `CLL_PORTADAS` haría que los casos de abajo comparen contra `{}` y pasen vacíos.
     for (const { strSlug } of CLL_PORTADAS) {
       expect(dicPantallasReact[strSlug], `${strSlug} no está en el dataset`).toBeDefined();
+
+      // Y que declare su conteo de contadores. Sin esto, una pantalla nueva en `CLL_PORTADAS` sin
+      // entrada en `DIC_MAXLENGTH_ESPERADOS` compararía `0` contra `undefined` y el caso de los
+      // contadores fallaría con un mensaje que no dice qué falta. Peor: si alguien lo "arreglara" con un
+      // `?? 0`, el cero pasaría a ser el default silencioso y la guarda de anti-vacuidad moriría para
+      // toda pantalla que se olviden de declarar.
+      expect(
+        DIC_MAXLENGTH_ESPERADOS[strSlug],
+        `${strSlug} está en CLL_PORTADAS pero no declara cuántos maxLength traía de React: ` +
+          `sumalo a DIC_MAXLENGTH_ESPERADOS (contá los campos con props.maxLength en el dataset). ` +
+          `Cero es un valor válido, pero tiene que estar escrito.`,
+      ).toBeTypeOf('number');
     }
   });
 
@@ -316,7 +523,7 @@ describe('paridad con el contrato de campos de React (dataset congelado)', () =>
        * llegaría con una clave que el proceso no espera. Acá se ve, porque React no declaraba ese nombre.
        */
       it('⚠ todo campo montado existe en el contrato que declaraba React', async () => {
-        const objFixture = await montar(objTipo);
+        const objFixture = await montar(objTipo, strSlug);
         const dicReact = dicPantallasReact[strSlug];
 
         const cllMontados = cllCamposDeLaFachada(objFixture).map((in_objCampo) =>
@@ -369,19 +576,29 @@ describe('paridad con el contrato de campos de React (dataset congelado)', () =>
        * la plantilla pasa el número, y seguiría verde con los contadores apagados.
        */
       it('⚠ los maxLength del contador visual coinciden con los de React', async () => {
-        const objFixture = await montar(objTipo);
+        const objFixture = await montar(objTipo, strSlug);
         const dicReact = dicPantallasReact[strSlug];
 
         const cllEsperados = Object.entries(dicReact).filter(
           ([, in_objCampo]) => typeof in_objCampo.props?.maxLength === 'number',
         );
 
-        // React declaraba `maxLength` en estas pantallas; si el filtro diera vacío, el `for` no correría
-        // y el caso pasaría sin aseverar nada. Es la guarda que convierte este caso en un test.
+        // ── Anti-vacuidad, y por qué NO es un `toBeGreaterThan(0)` ──
+        // Si el filtro diera vacío el `for` no correría y el caso pasaría sin aseverar nada, así que hay
+        // que fijar su tamaño. Pero el tope no puede ser "toda pantalla tiene al menos uno": la
+        // OS_SCR-003 **no tiene ninguno en React** (verificado con un grep sobre su `.tsx`, no supuesto),
+        // y con el `> 0` este caso se ponía rojo por una pantalla bien portada.
+        //
+        // Así que el conteo esperado se **declara** por pantalla, en `DIC_MAXLENGTH_ESPERADOS`. El cero
+        // queda permitido pero **escrito**, que es lo que separa "esta pantalla no usaba contadores" de
+        // "el extractor los perdió": las dos dan `[]` acá y solo la primera está declarada. Un dataset
+        // que pierda los `maxLength` de una pantalla que sí los tenía sigue poniendo rojo.
         expect(
           cllEsperados.length,
-          `${strSlug} no tiene ningún maxLength en el dataset: ¿el extractor los perdió?`,
-        ).toBeGreaterThan(0);
+          `${strSlug} declara ${DIC_MAXLENGTH_ESPERADOS[strSlug]} maxLength en ` +
+            `DIC_MAXLENGTH_ESPERADOS y el dataset trae ${cllEsperados.length}: si React sí los ` +
+            `declaraba, el extractor los perdió; si de verdad cambió, actualizá la constante.`,
+        ).toBe(DIC_MAXLENGTH_ESPERADOS[strSlug]);
 
         const objRaiz = objFixture.nativeElement as HTMLElement;
 
@@ -415,7 +632,7 @@ describe('paridad con el contrato de campos de React (dataset congelado)', () =>
        * correcto — y el número es justamente el dato que se está congelando.
        */
       it('⚠ los maxLength que invalidan coinciden con los que declaraba React', async () => {
-        const objFixture = await montar(objTipo);
+        const objFixture = await montar(objTipo, strSlug);
         const dicReact = dicPantallasReact[strSlug];
         const objPantalla = objFixture.componentInstance as { form: FormGroup };
 

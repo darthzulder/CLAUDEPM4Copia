@@ -1,0 +1,87 @@
+<!-- ⚠ `(close)` es obligatorio, no decorativo: `ModalZ.change()` hace `open = false` sobre su propio
+     input, así que sin escucharlo la bandera de la pantalla queda en `true` y el modal no vuelve a
+     abrir. El `id="content"` es literal y estático — dentro de un `@if` el `ngAfterContentInit` de
+     `ModalZ` no lo encuentra. -->
+<lib-modal-z [open]="true" tamanio="l" (close)="cerrar.emit()">
+  <ng-template libZTemplate id="content">
+    <div class="modal-wide">
+      <!-- `modal-titulo`, no un `style` en línea: React escribe ahí `--zf-h-20--700`, un token que no
+           existe (la escala de encabezados no tiene sufijo de peso) e invalida el `font` shorthand
+           completo. La clase ya trae el token correcto. -->
+      <h3 class="modal-titulo">Expediente Completo de la Queja</h3>
+      <p class="subsection-note">{{ strSubtitulo() }}</p>
+
+      <div class="modal-scroll-body">
+        <app-info-bar [items]="infoItems()" />
+
+        <!-- Los bloques ya vienen filtrados del `computed()`: acá no hay condiciones. Un bloque sin
+             campos con dato no está en la lista, así que su título tampoco se pinta. -->
+        @for (objBloque of cllBloques(); track objBloque.titulo) {
+          <div class="form-subsection-title--spaced">
+            <h4 class="form-subsection-title">{{ objBloque.titulo }}</h4>
+          </div>
+          <div class="form-row cols-2">
+            @for (objCampo of objBloque.cllCampos; track objCampo.label) {
+              <div>
+                <p class="subsection-note">{{ objCampo.label }}</p>
+                <p>{{ objCampo.valor }}</p>
+              </div>
+            }
+          </div>
+        }
+
+        <!-- Documentos del radicador: los tres textos van en línea acá. En React eran un componente
+             (`DocumentosRadicador.tsx`) cuyo cuerpo entero eran estas tres cadenas sobre
+             `RequestFileList`; el `app-request-file-list` de Angular ya las toma como inputs. -->
+        @if (blnHayDocsRadicador()) {
+          <div class="form-subsection-title--spaced">
+            <h4 class="form-subsection-title">Documentos del Radicador</h4>
+          </div>
+          <app-request-file-list
+            [requestId]="requestId()"
+            [docKeys]="CLL_CLAVES_RADICADOR"
+            label="Documentos adjuntos del radicador"
+            emptyText="El radicador no adjuntó documentos a esta queja."
+            loadingText="Buscando documentos del caso…"
+          />
+        }
+
+        <!-- Historial: cinco columnas de texto. Ver la cabecera del .ts para por qué "Respondió" no
+             es una píldora acá. -->
+        @if (cllFilasHistorial().length) {
+          <div class="form-subsection-title--spaced">
+            <h4 class="form-subsection-title">Historial de Asignaciones</h4>
+          </div>
+          <lib-table-z
+            [headers]="cllColumnasHistorial"
+            [data]="cllFilasHistorial()"
+            typeStyle="zebra"
+          />
+        }
+
+        @if (blnHaySoportes()) {
+          <div class="form-subsection-title--spaced">
+            <h4 class="form-subsection-title">Soportes Internos</h4>
+          </div>
+          <app-request-file-list
+            [requestId]="requestId()"
+            [docKeys]="CLL_CLAVES_SOPORTE"
+            label="Soportes internos del análisis"
+            emptyText="Aún no se han cargado soportes internos en este caso."
+            loadingText="Buscando soportes internos del caso…"
+          />
+        }
+      </div>
+
+      <!-- `[disabled]` explícito: el default de `lib-button-z` es `true`. -->
+      <div z-flex="75" z-align="right:center" class="form-subsection-title--spaced">
+        <lib-button-z
+          label="Cerrar"
+          type="secondary"
+          [disabled]="false"
+          (eventClick)="cerrar.emit()"
+        />
+      </div>
+    </div>
+  </ng-template>
+</lib-modal-z>

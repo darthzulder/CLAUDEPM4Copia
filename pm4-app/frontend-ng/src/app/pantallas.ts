@@ -85,6 +85,39 @@ export const DIC_PANTALLAS: Record<string, CargadorDePantalla> = {
     import(
       '../screens/atencion-cliente/quejas-directas/COL_QD_SCR-003_Correccion_Error_Funcional/correccion-error-funcional'
     ).then((in_objModulo) => in_objModulo.CorreccionErrorFuncional),
+  // Primera pantalla del proceso **P02 — Otras Solicitudes**: las cinco de arriba son de Quejas
+  // Directas. El slug lleva `OS` donde las otras llevan `QD`, y es de PM4, no nuestro.
+  'COL_OS_SCR-003_Bandeja_Gestion_Linea2': () =>
+    import(
+      '../screens/atencion-cliente/otras-solicitudes/COL_OS_SCR-003_Bandeja_Gestion_Linea2/gestion-linea2'
+    ).then((in_objModulo) => in_objModulo.GestionLinea2),
+  // La única pantalla del proyecto que corre dentro de un **subproceso** (SP2): escribe en variables
+  // que viven en el request padre, de ahí su `ParentRequestService`.
+  'COL_QD_SCR-0052_Respuesta_Area_Responsable': () =>
+    import(
+      '../screens/atencion-cliente/quejas-directas/COL_QD_SCR-0052_Respuesta_Area_Responsable/respuesta-area-responsable'
+    ).then((in_objModulo) => in_objModulo.RespuestaAreaResponsable),
+  // El cierre regulatorio de Quejas Directas: el envío a SmartSupervision cierra el caso. Absorbió las
+  // secciones de Momento 3 de la ex SCR-010, que ya no existe como pantalla propia.
+  'COL_QD_SCR-009_Formulario_Superintendencia': () =>
+    import(
+      '../screens/atencion-cliente/quejas-directas/COL_QD_SCR-009_Formulario_Superintendencia/formulario-superintendencia'
+    ).then((in_objModulo) => in_objModulo.FormularioSuperintendencia),
+  // El puesto de trabajo del Gestor de Quejas: detalle del caso, reasignación y redacción de la
+  // respuesta, las tres en una sola pantalla. Es la más grande de Quejas Directas (tres secciones
+  // propias más el modal de expediente) y la única que despacha **cinco** salidas distintas por el
+  // mismo `<form>`, incluida la reasignación de dos PUT.
+  'COL_QD_SCR-0051_Detalle_Reasignacion_Respuesta': () =>
+    import(
+      '../screens/atencion-cliente/quejas-directas/COL_QD_SCR-0051_Detalle_Reasignacion_Respuesta/detalle-reasignacion-respuesta'
+    ).then((in_objModulo) => in_objModulo.DetalleReasignacionRespuesta),
+  // La única pantalla del proyecto que **no completa ninguna tarea**: un tablero de supervisión que
+  // lista todos los casos del proceso. Por eso no recibe `task_id` y su carga es un fetch paginado
+  // propio (`CasosDashboardService`) en vez de `TaskService`.
+  'COL_QD_SCR-013_Dashboard_Gestion_Casos': () =>
+    import(
+      '../screens/atencion-cliente/quejas-directas/COL_QD_SCR-013_Dashboard_Gestion_Casos/dashboard-gestion-casos'
+    ).then((in_objModulo) => in_objModulo.DashboardGestionCasos),
 };
 
 /**

@@ -1,0 +1,259 @@
+@if (blnCargando()) {
+  <div class="screen-wrapper">
+    <div class="screen-loading"><lib-loader-z /></div>
+  </div>
+} @else if (strError()) {
+  <div class="screen-wrapper">
+    <!-- Alerta INLINE (`za-alert`), no la cola imperativa de `lib-alert-z`: es una caja que vive donde
+         está el contenido que describe. `[hide-close]="true"` bindeado y no el atributo pelado: el
+         input está tipado `boolean` y un atributo sin valor vale `''`, que Angular 21 rechaza
+         (`TS2322`). Ver el punto 5b de zds-reexports.ts. -->
+    <za-alert config="negative" [hide-close]="true"
+      >Error al cargar el formulario: {{ strError() }}</za-alert
+    >
+  </div>
+} @else {
+  <!-- ── Plantillas de los badges de la ctx-bar ─────────────────────────────────────────────────
+       Van acá arriba, fuera del contenido, porque `InfoBarComponent` las consume por `TemplateRef` y
+       no por proyección: la barra recibe la plantilla en el `value` del ítem y la instancia con
+       `ngTemplateOutlet`. Es el mecanismo que el componente documenta como razón de aceptar un
+       `TemplateRef` — la maqueta pide píldoras, no texto plano. -->
+  <ng-template #badgeSla>
+    <zds-status-badge [variante]="strVarianteSla()">{{ strTextoSla() }}</zds-status-badge>
+  </ng-template>
+  <ng-template #badgeTipologia>
+    <zds-status-badge variante="info">{{ strTipologia() }}</zds-status-badge>
+  </ng-template>
+  <ng-template #badgeEstado>
+    <!-- Rótulo fijo, no un campo: ver el ⚠ de `cllInfoItems` en el `.ts`. -->
+    <zds-status-badge variante="neutral">Asignado a Línea 2</zds-status-badge>
+  </ng-template>
+
+  <div class="screen-wrapper">
+    <app-screen-header
+      title="Bandeja de Tareas — Gestión Línea 2"
+      subtitle="Análisis técnico especializado — documentación de respuesta y retorno al flujo principal"
+    />
+
+    <div class="screen-content">
+      <app-info-bar [items]="cllInfoItems()" />
+
+      <!-- FLD-042 "Semaforizado" — aviso cuando el caso entra en zona de vencimiento. Es un banner
+           aparte del badge de la barra: el badge informa el estado, este exige una acción. -->
+      @if (blnSlaCritico()) {
+        <za-alert config="negative" [hide-close]="true">
+          El caso tiene <strong>{{ intDiasSlaVisible() }}</strong> día(s) hábil(es) restante(s).
+          Priorice el análisis técnico.
+        </za-alert>
+      }
+
+      <!-- `(ngSubmit)` va a `confirmarAtencion()`: el submit nativo del form (un Enter en un campo)
+           tiene que coincidir con la acción principal de la pantalla, que es la única que valida
+           RUL-003-01. Las otras tres salidas se alcanzan solo por su botón. -->
+      <form [formGroup]="form" (ngSubmit)="confirmarAtencion()" novalidate>
+        <!-- ── S1 · Encabezado Estado del Caso (SEC-009, todo de solo lectura) ── -->
+        <app-form-section title="S1 · Encabezado Estado del Caso">
+          <!-- ⚠ `formControlName` **y** `name`, los dos, en todo campo de la fachada. No es
+               redundancia: `formControlName` es lo que ata el control al `FormGroup` (el wrapper es el
+               `NG_VALUE_ACCESSOR` de ese `NgControl`), y `name` es lo que la fachada usa para el
+               `id="field-<name>"` que necesita `scrollToFirstError` y para pre-crear el control que el
+               `lib-*-z` adopta. Con solo `name` el campo pinta y **nunca llega al form**. -->
+          <div class="form-row cols-4">
+            <zds-input
+              formControlName="os_strBpmCaseId"
+              name="os_strBpmCaseId"
+              label="ID Caso / Código Radicado"
+              [readOnly]="true"
+            />
+
+            <!-- FLD-041 y FLD-042 no son campos de texto en la maqueta sino píldoras, así que van como
+                 badge sobre el mismo `zds-field-wrap` que usan los wrappers de campo — es lo que
+                 mantiene la altura y el espaciado de la grilla `cols-4` alineados con los dos inputs
+                 vecinos. Sin dato caen a un guión en `info-bar-value` y no a una píldora vacía. -->
+            <div class="zds-field-wrap">
+              <span class="info-bar-label">Tipología del Caso</span>
+              <div class="valor-solo-lectura">
+                @if (strTipologia()) {
+                  <zds-status-badge variante="info">{{ strTipologia() }}</zds-status-badge>
+                } @else {
+                  <span class="info-bar-value">—</span>
+                }
+              </div>
+            </div>
+
+            <div class="zds-field-wrap">
+              <span class="info-bar-label">SLA: Días Hábiles Restantes</span>
+              <div class="valor-solo-lectura">
+                @if (blnTieneSlaVisible()) {
+                  <zds-status-badge [variante]="strVarianteSla()">{{ strTextoSla() }}</zds-status-badge>
+                } @else {
+                  <span class="info-bar-value">—</span>
+                }
+              </div>
+            </div>
+
+            <zds-input
+              formControlName="os_strDueDate"
+              name="os_strDueDate"
+              label="Fecha Límite"
+              [readOnly]="true"
+            />
+          </div>
+        </app-form-section>
+
+        <!-- ── S2 · Detalle del Caso Asignado (SEC-010, todo de solo lectura) ── -->
+        <app-form-section title="S2 · Detalle del Caso Asignado">
+          <div class="form-row cols-2">
+            <zds-input
+              formControlName="os_strConsumerName"
+              name="os_strConsumerName"
+              label="Nombre del Consumidor"
+              [readOnly]="true"
+            />
+            <zds-input
+              formControlName="os_strIdentification"
+              name="os_strIdentification"
+              label="Tipo y N.° de Identificación"
+              [readOnly]="true"
+            />
+          </div>
+
+          <div class="form-row cols-2">
+            <zds-input
+              formControlName="os_strProductLine"
+              name="os_strProductLine"
+              label="Producto / Ramo"
+              [readOnly]="true"
+            />
+            <!-- El hueco es deliberado: mantiene "Producto / Ramo" a media grilla en vez de
+                 estirarlo a lo ancho, que es lo que pide la maqueta. -->
+            <div></div>
+          </div>
+
+          <div class="form-row cols-1">
+            <zds-textarea
+              formControlName="os_strCaseDescription"
+              name="os_strCaseDescription"
+              label="Descripción del Caso"
+              [readOnly]="true"
+            />
+          </div>
+
+          <!-- FLD-048 — documentos que cargó el cliente al radicar: solo visualización y descarga.
+               No es un uploader: en esta tarea el cliente ya no interviene. -->
+          <div class="form-row cols-1">
+            <app-request-file-list
+              [requestId]="intRequestId()"
+              [docKeys]="cllDocsCliente"
+              label="Documentos del Cliente"
+              emptyText="El caso no tiene documentos del cliente."
+            />
+          </div>
+        </app-form-section>
+
+        <!-- ── S3 · Análisis y Respuesta Técnica (SEC-011, editable) ── -->
+        <app-form-section title="S3 · Análisis y Respuesta Técnica">
+          <div class="form-row cols-1">
+            <!-- FLD-049 · el único obligatorio de la pantalla. `[obligatorio]` y no `[required]`: la
+                 fachada renombró el input para no chocar con el atributo nativo. -->
+            <zds-textarea
+              formControlName="os_strTechAnalysis"
+              name="os_strTechAnalysis"
+              label="Análisis Técnico / Resolución"
+              [obligatorio]="true"
+              [error]="strErrorAnalisis()"
+              [placeholder]="strPlaceholderAnalisis"
+              [helpText]="strAyudaAnalisis"
+            />
+          </div>
+
+          <div class="form-row cols-1">
+            <!-- FLD-050 · opcional. -->
+            <zds-textarea
+              formControlName="os_strSystemActions"
+              name="os_strSystemActions"
+              label="Acciones Ejecutadas en Sistemas"
+              placeholder="Sistemas consultados, cambios ejecutados, referencias…"
+              helpText="Sistemas consultados, cambios ejecutados."
+            />
+          </div>
+        </app-form-section>
+
+        <!-- ── S4 · Soportes Internos (SEC-012, editable) ── -->
+        <app-form-section title="S4 · Soportes Internos">
+          <app-doc-support-uploader
+            [form]="form"
+            [docKeys]="cllDocsSoporte"
+            title="Adjuntos de Soporte Interno"
+            [intro]="strIntroSoportes"
+            [max]="intMaxSoportes"
+          />
+        </app-form-section>
+
+        <!-- RUL-003-01 / MSG-003-01 — el bloqueo se explica de forma permanente mientras el análisis
+             esté vacío, no solo al intentar enviar: el botón principal está apagado y sin este texto
+             la pantalla no diría por qué. -->
+        @if (!blnPuedeConfirmar()) {
+          <za-alert config="info" [hide-close]="true">
+            Debe documentar el <strong>análisis o resolución</strong> antes de confirmar la atención.
+          </za-alert>
+        }
+
+        <!-- Error de envío — la tarea NO se completó, así que PM4 no cierra el iframe y el usuario se
+             queda mirando esta pantalla. Por eso el fallo se muestra en vez de tragarse. -->
+        @if (strErrorEnvio()) {
+          <za-alert config="negative" [hide-close]="true">
+            No se pudo enviar: {{ strErrorEnvio() }}
+          </za-alert>
+        }
+
+        <!-- ── Acciones (ACT-003-01..04, en el orden de la maqueta) ──
+             `lib-button-z` NO es un `<button>` nativo: es un componente del DS que proyecta su label,
+             así que no lleva `type="button"` (su `type` es la *variante* visual) y necesita
+             `[disabled]` explícito porque su default es `true`. Solo la acción principal es
+             `positive`; las otras tres son salidas secundarias. -->
+        <app-action-bar>
+          <lib-button-z
+            label="Cancelar"
+            [type]="'secondary'"
+            [disabled]="blnEnviando()"
+            (eventClick)="cancelar()"
+          />
+          <lib-button-z
+            label="Reasignar Caso"
+            [type]="'secondary'"
+            [disabled]="blnEnviando()"
+            (eventClick)="blnModalReasignar.set(true)"
+          />
+          <lib-button-z
+            label="Guardar Borrador"
+            [type]="'secondary'"
+            [disabled]="blnEnviando()"
+            [loading]="blnEnviando()"
+            (eventClick)="guardarBorrador()"
+          />
+          <!-- ⚠ `Cancelar` y `Reasignar` NO miran `blnPuedeConfirmar()`: el escenario real de
+               reasignar es "no puedo resolverlo, que lo tome otro", con el análisis sin escribir.
+               Apagarlos con S3 vacío dejaría al usuario sin salida. -->
+          <lib-button-z
+            label="Confirmar Atención ▶"
+            [type]="'positive'"
+            [disabled]="!blnPuedeConfirmar() || blnEnviando()"
+            [loading]="blnEnviando()"
+            (eventClick)="confirmarAtencion()"
+          />
+        </app-action-bar>
+      </form>
+
+      <!-- ACT-003-02 · el modal se monta SIEMPRE y su `@if` interno gobierna el contenido, porque el
+           `ngAfterContentInit` de `ModalZ` corre una vez. Ver la cabecera de `reasignar-caso-modal.ts`. -->
+      <app-reasignar-caso-modal
+        [abierto]="blnModalReasignar()"
+        [form]="form"
+        [enviando]="blnEnviando()"
+        (cerrar)="blnModalReasignar.set(false)"
+        (confirmado)="reasignar($event)"
+      />
+    </div>
+  </div>
+}
