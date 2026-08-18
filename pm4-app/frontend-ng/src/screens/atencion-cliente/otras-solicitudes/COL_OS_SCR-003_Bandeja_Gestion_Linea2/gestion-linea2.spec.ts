@@ -105,6 +105,50 @@ function fijarQueryString(in_strQuery: string): void {
 }
 
 /**
+ * Suplanta `window.top` por un doble cuyo `location.href` es una propiedad **escribible**, y devuelve
+ * un lector de lo último que se le asignó (`null` si nadie navegó) junto con el `restaurar()`.
+ *
+ * ⚠ **Por qué un doble y no leer `window.top.location.href` antes y después.** En jsdom el fixture
+ * corre en el frame de arriba, así que `window.top === window`; y asignarle `location.href` **no
+ * cambia el valor** —jsdom emite `Not implemented: navigation` y sigue—. O sea que un
+ * `expect(href).toBe(hrefDeAntes)` pasa **igual haya navegado o no**: una aserción que no puede
+ * fallar.
+ *
+ * ⚠ **Este archivo la tenía, y era infalible — medido acá, no heredado.** El caso *«si PM4 falla …
+ * NO navega el frame superior»* comparaba `window.top?.location.href` contra sí mismo: degradar el
+ * `if (!blnOk) return;` de `guardarBorrador()` a un `void 0` dejaba **los 30 casos verdes**. Es el
+ * mismo agujero que ya estaba documentado en SCR-0052 y SCR-009; esta pantalla es la tercera con la
+ * misma navegación y era la única que había quedado sin el doble.
+ *
+ * Idéntico al de `formulario-superintendencia.spec.ts` y `respuesta-area-responsable.spec.ts`. Se
+ * duplica en vez de extraerse a un helper compartido porque un arnés de test que se comparte entre
+ * pantallas acopla sus specs: cambiar el doble por una pantalla obliga a revalidar las otras dos.
+ */
+function espiarNavegacionDelTope(): { strDestino: () => string | null; restaurar: () => void } {
+  let strAsignado: string | null = null;
+  const objDoble = {
+    location: {
+      get href(): string {
+        return strAsignado ?? '';
+      },
+      set href(in_strValor: string) {
+        strAsignado = in_strValor;
+      },
+    },
+  };
+  const objDescriptorOriginal = Object.getOwnPropertyDescriptor(window, 'top');
+  Object.defineProperty(window, 'top', { configurable: true, get: () => objDoble });
+
+  return {
+    strDestino: () => strAsignado,
+    restaurar: () => {
+      if (objDescriptorOriginal) Object.defineProperty(window, 'top', objDescriptorOriginal);
+      else Reflect.deleteProperty(window, 'top');
+    },
+  };
+}
+
+/**
  * ⚠ El orden importa: **`await whenStable()` por sí solo NO repinta** bajo
  * `provideZonelessChangeDetection()`. Sin el `detectChanges()` el template se queda en la rama
  * `@if (blnCargando())` para siempre y ningún campo existe.
@@ -559,15 +603,26 @@ describe('SCR-003 OS · ACT-003-04 — Guardar Borrador', () => {
   it('guarda en el request sin completar la tarea, con os_strAction=GUARDAR_BORRADOR', async () => {
     await montar();
     await escribir(OS.strTechAnalysis, 'Avance parcial del análisis.');
-    void objPantalla.guardarBorrador();
-    await asentar();
+    // El espía va aunque este caso no asevere la navegación: el guardado sale bien, así que
+    // `guardarBorrador()` **navega**, y contra el `window.top` real jsdom escupe un
+    // `Not implemented: navigation` al pie de la corrida. Con el doble puesto, la escritura queda
+    // contenida y la salida de la suite no arrastra un error que no es un fallo.
+    const objEspia = espiarNavegacionDelTope();
 
-    const dicDatos = dicPutRequest();
-    expect(dicDatos?.[OS.strAction]).toBe('GUARDAR_BORRADOR');
-    expect(dicDatos?.[OS.strTechAnalysis]).toBe('Avance parcial del análisis.');
-    // Guardar borrador NO avanza el flujo: si completara la tarea, el caso saldría de P02-T12 con el
-    // análisis a medio escribir.
-    expect(objPutTarea()).toBeNull();
+    try {
+      const objPromesa = objPantalla.guardarBorrador();
+      await asentar();
+
+      const dicDatos = dicPutRequest();
+      expect(dicDatos?.[OS.strAction]).toBe('GUARDAR_BORRADOR');
+      expect(dicDatos?.[OS.strTechAnalysis]).toBe('Avance parcial del análisis.');
+      // Guardar borrador NO avanza el flujo: si completara la tarea, el caso saldría de P02-T12 con el
+      // análisis a medio escribir.
+      expect(objPutTarea()).toBeNull();
+      await objPromesa;
+    } finally {
+      objEspia.restaurar();
+    }
   });
 
   it('no exige el análisis: el borrador existe para guardar trabajo incompleto', async () => {
@@ -576,25 +631,64 @@ describe('SCR-003 OS · ACT-003-04 — Guardar Borrador', () => {
     expect(objBoton('Guardar Borrador').blnDeshabilitado).toBe(false);
   });
 
-  it('si PM4 falla, muestra el error y NO navega el frame superior', async () => {
+  it('tras guardar bien, devuelve el frame superior a la bandeja', async () => {
     await montar();
-    const strAntes = window.top?.location.href ?? '';
-    const objPromesa = objPantalla.guardarBorrador();
-    await asentar();
-    objMock
-      .expectOne(
-        (in_objReq) =>
-          in_objReq.method === 'PUT' && in_objReq.url === `/api/requests/${INT_REQUEST_ID}`,
-      )
-      .flush({ message: 'El caso está bloqueado por otro usuario.' }, { status: 409, statusText: 'Conflict' });
-    await objPromesa;
-    await asentar();
+    const objEspia = espiarNavegacionDelTope();
 
-    // ⚠ La navegación va SOLO si el guardado salió bien: navegar tras un fallo perdería el trabajo del
-    // usuario sin decirle nada. Es el motivo de que `enviarCon()` devuelva un booleano.
-    expect(objPantalla.strErrorEnvio()).toBe('El caso está bloqueado por otro usuario.');
-    expect(window.top?.location.href ?? '').toBe(strAntes);
-    expect(strTextoPantalla()).toContain('No se pudo enviar');
+    try {
+      // ⚠ **La promesa se espera DENTRO del `try`.** `guardarBorrador()` escribe
+      // `window.top.location.href` detrás de su último `await`: con un `void` suelto ese `href` cae
+      // cuando el `finally` ya restauró el `window.top` real y jsdom lo reporta **fuera** del caso.
+      const objPromesa = objPantalla.guardarBorrador();
+      await asentar();
+      objMock
+        .expectOne(
+          (in_objReq) =>
+            in_objReq.method === 'PUT' && in_objReq.url === `/api/requests/${INT_REQUEST_ID}`,
+        )
+        .flush({ id: INT_REQUEST_ID });
+      await objPromesa;
+
+      // El destino es el `'/tasks'` de `urlBandejaTareas()` — un defecto preexistente de la app React
+      // que se porta sin arreglar y está fijado en `pm4-context.service.spec.ts`. Acá solo importa que
+      // se haya navegado; el valor lo gobierna ese otro spec.
+      expect(objEspia.strDestino()).toContain('/tasks');
+    } finally {
+      objEspia.restaurar();
+    }
+  });
+
+  it('⚠ si PM4 falla, muestra el error y NO navega el frame superior', async () => {
+    await montar();
+    const objEspia = espiarNavegacionDelTope();
+
+    try {
+      const objPromesa = objPantalla.guardarBorrador();
+      await asentar();
+      objMock
+        .expectOne(
+          (in_objReq) =>
+            in_objReq.method === 'PUT' && in_objReq.url === `/api/requests/${INT_REQUEST_ID}`,
+        )
+        .flush(
+          { message: 'El caso está bloqueado por otro usuario.' },
+          { status: 409, statusText: 'Conflict' },
+        );
+      await objPromesa;
+      await asentar();
+
+      // ⚠ La navegación va SOLO si el guardado salió bien: navegar tras un fallo perdería el trabajo
+      // del usuario sin decirle nada. Es el motivo de que `enviarCon()` devuelva un booleano.
+      //
+      // ⚠ **Medido acá:** con la versión anterior de este caso —que comparaba
+      // `window.top?.location.href` contra el valor leído antes— degradar el `if (!blnOk) return;` a
+      // un `void 0` dejaba los 30 casos del archivo verdes. Ver `espiarNavegacionDelTope()`.
+      expect(objPantalla.strErrorEnvio()).toBe('El caso está bloqueado por otro usuario.');
+      expect(objEspia.strDestino()).toBeNull();
+      expect(strTextoPantalla()).toContain('No se pudo enviar');
+    } finally {
+      objEspia.restaurar();
+    }
   });
 });
 
