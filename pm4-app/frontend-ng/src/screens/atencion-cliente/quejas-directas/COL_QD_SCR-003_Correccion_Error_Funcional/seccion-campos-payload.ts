@@ -1,6 +1,7 @@
 import {
   Component, effect, inject, Injector, input, output, runInInjectionContext, signal, type Signal,
 } from '@angular/core';
+import { toSignal } from '@angular/core/rxjs-interop';
 import { FormControl, FormGroup, ReactiveFormsModule } from '@angular/forms';
 import { FormSectionComponent } from '../../../../components/form-section';
 import { ZdsCheckboxField } from '../../../../components/fields/zds-checkbox-field';
@@ -11,7 +12,7 @@ import { ZdsStatusBadge } from '../../../../components/fields/zds-status-badge';
 import { ZdsTextarea } from '../../../../components/fields/zds-textarea';
 import { ZrAlertInline } from '../../../../components/fields/zds-reexports';
 import { CatalogosService } from '../../../../core/catalogos.service';
-import { codeFromUiValue, descOf } from '../../../../core/collection-helpers';
+import { codeFromUiValue, descOf, uiValueFromCode } from '../../../../core/collection-helpers';
 import type { CollectionOption } from '../../../../core/collection.types';
 import { sincronizarDesc } from '../../../../core/sincronizar-desc';
 import { MatrizMotivosService } from '../fields/matriz-motivos.service';
@@ -133,6 +134,9 @@ export class SeccionCamposPayload {
    */
   protected readonly objGrupoEdicion = new FormGroup<Record<string, FormControl<unknown>>>({});
 
+  /** Valor del satélite del producto, como signal. Ver el constructor y `sembrarPickerDeProducto()`. */
+  private readonly sigSateliteProducto: Signal<unknown>;
+
   constructor() {
     for (const objDef of this.cllCampos) {
       if (!objDef.variable) continue;
@@ -144,6 +148,13 @@ export class SeccionCamposPayload {
     this.objGrupoEdicion.addControl(
       this.nombreUi(QD.strSfcProduct),
       new FormControl<unknown>('') as FormControl<unknown>,
+    );
+
+    // El satélite como signal: es la dependencia de `sembrarPickerDeProducto()`. Ver el ⚠ de ahí para
+    // por qué es este control y no el del código.
+    this.sigSateliteProducto = toSignal(
+      this.objGrupoEdicion.get(this.nombreUi(QD.strSfcProduct))!.valueChanges,
+      { initialValue: '' as unknown },
     );
 
     // El resto del cableado necesita el `form` y el `sigValores` del padre, y los `input()` no tienen
@@ -167,6 +178,7 @@ export class SeccionCamposPayload {
     });
 
     // Las cascadas y el gobierno de habilitación, cada una en su propio efecto. Ver `vincular()`.
+    effect(() => this.sembrarPickerDeProducto());
     effect(() => this.aplicarCascadaMunicipio());
     effect(() => this.aplicarCascadaMomento());
     effect(() => this.aplicarCascadaServicio());
@@ -243,6 +255,143 @@ export class SeccionCamposPayload {
     if (!strValor || in_cllOpciones.some((in_objO) => in_objO.value === strValor)) return;
     this.form().get(in_strCampo)?.setValue('');
     this.marcarEditable(in_strCampo, true);
+  }
+
+  /**
+   * Siembra el picker de producto con el value de UI del código **precargado**.
+   *
+   * ── El defecto que arregla: la cascada entera salía vacía en un caso real ──────────────────────
+   * El satélite `ui-qd_strSfcProduct` traduce **UI → form** por su `valueChanges` (ver `vincular()`),
+   * y esa es la única dirección que existía. Faltaba la inversa, y sin ella la traducción no era un
+   * puente sino una purga: el satélite nace en `''`, y su emisión escribe
+   * `codeFromUiValue('') === ''` **sobre el código que `precargar()` acababa de poner**.
+   *
+   * Con `qd_strSfcProduct` en `''`, `strInsuranceUiValue` → `''` → `strProductLabel` → `''`, y como
+   * ese label es uno de los dos criterios de `cllRowsForProduct`, el nivel 1 de la matriz queda en
+   * `[]` y los **tres** selects de abajo (momento, servicio, motivo) salen vacíos. Medido en el caso
+   * 33964: `dicOriginales` traía `"101"`, el form tenía `""`, y momento/servicio/motivo pintaban 0/0/0
+   * contra los 8/7/7 de React. Escribir `"101"` a mano en el control encendía los tres al instante,
+   * lo que confirma que el corte era este y no la cascada.
+   *
+   * ⚠ **No hay ningún `setValue('')` espurio que buscar, y por eso el defecto costaba de ver.** Se
+   * instrumentó el control y la traza de escrituras salió **vacía**: nadie lo pisa dos veces. El
+   * borrado es la *primera* emisión del satélite, que llega **después** de `precargar()` porque
+   * `ngOnInit` es `async` (`await objTareas.cargar()` cede el hilo, así que la sección ya se pintó una
+   * vez con el satélite vacío antes de que la precarga corra).
+   *
+   * ── Por qué se siembra el satélite y no se blinda el `valueChanges` ────────────────────────────
+   * Ignorar el `''` en el suscriptor haría **imposible vaciar** el producto a mano, y volver al
+   * placeholder es una acción legítima del gestor (el prompt es elegible — ver `ZdsSelect`). Sembrar
+   * ataca la causa: el satélite deja de mentir sobre lo que hay elegido.
+   *
+   * ── ⚠ Por qué la fuente es `dicOriginales` y NO `strInsuranceUiValue()` ───────────────────────
+   * Porque derivar del form es **circular**, y la primera versión de este arreglo lo hacía: cuando
+   * este efecto corre, el borrado ya pasó y `qd_strSfcProduct` está en `''`. Y `strInsuranceUiValue`
+   * se computa leyendo *ese* control (ver el servicio), así que devuelve `''` y no hay nada que
+   * sembrar. Medido en el navegador con esa versión puesta: colección 16 resuelta (12 opciones, con
+   * `101::Autos` entre ellas), `dicOriginales` con `"101"`, y aun así `uiValue: ''`, satélite `''`,
+   * cascadas **0/0/0**. El spec no lo detectó porque bajo jsdom el borrado nunca ocurre, así que el
+   * form todavía tenía el código y la derivación funcionaba (ver el bloque de mutación más abajo).
+   *
+   * `dicOriginales` es la única fuente que **sobrevive al borrado**: es la foto de `task.data`.
+   *
+   * El `_desc` se pasa pero puede faltar (en el caso 33964 llega `undefined`): `uiValueFromCode` cae
+   * entonces al primer registro con ese código, que es su contrato documentado y alcanza acá.
+   *
+   * ── ⚠ Se escribe UN solo control, y el otro se repone solo ─────────────────────────────────────
+   * Solo se escribe el satélite, y **emitiendo**. El código en el form no se toca acá aunque sea lo
+   * que la matriz lee: el suscriptor del satélite en `vincular()` ya hace
+   * `setValue(codeFromUiValue(strUi))` + `syncProductDesc(strUi)`, o sea el código **y** el `_desc`.
+   * Hubo una versión con un `objCodigo.setValue(strCodigo, { emitEvent: false })` explícito y se
+   * quitó: **ninguna mutación la ponía roja**, ni en el spec ni en el navegador sobre el caso 33964.
+   * Era código muerto que parecía defensivo.
+   *
+   * Emitir es además lo que hace que la siembra sea visible para su **propia dependencia** (ver el ⚠
+   * de abajo). No marca la fila como "Modificado" porque el valor que se escribe es el del caso.
+   *
+   * ── ⚠ La dependencia es el satélite, y NO el código — medido ───────────────────────────────────
+   * Es contraintuitivo: lo que cambia de valor en el borrado es el código (`'101'` → `''`), así que
+   * la lectura natural es depender de él vía `sigValores`. **Es falso, y deja el arreglo sin efecto
+   * exactamente en el caso que vino a cubrir.** El control del código está **deshabilitado** mientras
+   * la fila no tenga "Editar" marcado —el estado normal, medido `disabled === true` tanto en el spec
+   * como en el navegador— y un control deshabilitado **no emite**: su `setValue('')` no dispara el
+   * `valueChanges` del form, `sigValores` no se actualiza y el efecto **no corre ni una vez** (sonda:
+   * cero ejecuciones tras el borrado). El satélite sí está habilitado, y es la única señal fiable.
+   *
+   * Corolario del punto anterior: si la siembra escribiera con `emitEvent: false`, el `toSignal` del
+   * satélite se quedaría en `''` para siempre y el `''` del borrado siguiente sería "el mismo valor"
+   * — sin notificación y sin reposición. Las dos decisiones se sostienen mutuamente.
+   *
+   * ── ⚠ Qué cubre el spec de esto, medido por mutación ──────────────────────────────────────────
+   * Cinco mutaciones, cinco casos rojos con nombre:
+   *  - `objUi.setValue(strUi)` → `{ emitEvent: false }` → rojo en *"siembra desde task.data aunque el
+   *    código del form ya esté borrado"* (`expected '' to be '101'`).
+   *  - quitar `this.sigSateliteProducto()` (la dependencia) → rojo en el mismo caso.
+   *  - quitar el `setValue` entero → rojo en **dos**: ese caso y *"un producto SFC precargado enciende
+   *    la cascada del motivo y no se autoborra"* (`expected '' to be '101::Autos'`).
+   *  - quitar la guarda `dicEditables` → rojo en *"el gestor todavía puede vaciar el producto desde el
+   *    picker"* (`expected '101' to be ''`).
+   *  - cambiar la fuente de `dicOriginales` al form (la circularidad original) → rojo en el caso de la
+   *    siembra tras borrado.
+   *
+   * Lo que el spec **no** puede cubrir es el borrado *espontáneo* del widget: **jsdom no lo
+   * reproduce**, porque `lib-input-select-z` no emite su `modelChange` inicial. El caso lo simula a
+   * mano escribiendo `''` en el satélite, que es su efecto exacto (verificado en el navegador: la
+   * traza real y la del spec coinciden control por control). El síntoma de negocio (0/0/0 → 8/7/7) es
+   * verificación de navegador — mismo límite de entorno que el arreglo de `zds-select`, ver el bloque
+   * equivalente en su cabecera.
+   *
+   * El blindaje descartado sí tiene guarda propia: el caso *"el gestor todavía puede vaciar el
+   * producto desde el picker"* se pone rojo (`expected '101' to be ''`) al agregar un
+   * `if (!strUi) return` en el `valueChanges` de `vincular()`.
+   */
+  private sembrarPickerDeProducto(): void {
+    // Las tres lecturas van primero y SIEMPRE: son las dependencias del efecto, y una lectura
+    // después de un `return` no queda registrada. Las dos primeras lo despiertan cuando la colección
+    // 16 resuelve y cuando la precarga llena `dicOriginales`.
+    const cllOpciones = this.objMatriz.cllInsurance();
+    const dicOrig = this.dicOriginales();
+    // La tercera: es la que despierta al efecto cuando el widget borra. Va el satélite y **no** el
+    // código, aunque sea el código el que cambia de valor — el porqué está en el ⚠ del docstring, y
+    // es lo que costó dos intentos.
+    this.sigSateliteProducto();
+
+    // ⚠ El código sale de `dicOriginales`, **no** del form ni de `strInsuranceUiValue()`. Ver el
+    // docstring: cuando este efecto corre, el borrado ya pasó y el form está en `''`, así que
+    // derivar de ahí es circular — la siembra dependería del dato que el borrado destruyó.
+    const strCodigo = dicOrig[QD.strSfcProduct] ?? '';
+    if (!strCodigo || cllOpciones.length === 0) return;
+
+    const strUi = uiValueFromCode(cllOpciones, strCodigo, dicOrig[`${QD.strSfcProduct}_desc`]);
+    if (!strUi) return;
+
+    // ⚠ La fila en edición es la frontera entre "el widget borró" y "el gestor vació", y sin ella el
+    // arreglo no puede tener las dos cosas. Los dos casos escriben `''` en el satélite y son
+    // indistinguibles por el valor; lo que los separa es que **vaciar exige marcar "Editar" primero**
+    // (la fila arranca deshabilitada, ver `sincronizarHabilitacion()`). Así que mientras la fila esté
+    // bloqueada un `''` solo puede venir del `updateControl` de `lib-input-select-z` —medido: es el
+    // emisor real, con ese nombre en el stack— y se repone; en cuanto el gestor la abre, la siembra se
+    // retira y no vuelve a tocar nada.
+    if (this.dicEditables()[QD.strSfcProduct]) return;
+
+    const objUi = this.objGrupoEdicion.get(this.nombreUi(QD.strSfcProduct));
+    if (!objUi) return;
+
+    // Idempotencia: sin esta guarda el efecto se re-dispararía con cada escritura y quedaría en loop.
+    if (objUi.value === strUi) return;
+
+    // ⚠ **Emite a propósito, y las dos consecuencias son necesarias.**
+    //
+    // 1. Es lo que hace que la siembra sea visible para su propia dependencia. Con `emitEvent: false`
+    //    el `toSignal` del satélite se quedaría en `''` para siempre, así que el `''` del borrado
+    //    siguiente sería "el mismo valor": sin notificación, sin efecto, sin reposición. Medido con
+    //    sonda: el efecto corría **cero** veces tras el borrado.
+    // 2. Es lo que repone el código, sin necesidad de escribirlo acá. El suscriptor del satélite en
+    //    `vincular()` hace `setValue(codeFromUiValue(strUi))` y `syncProductDesc(strUi)`, o sea el
+    //    código **y** el `_desc` — que es exactamente lo que hay que restaurar. Se intentó la versión
+    //    con un `objCodigo.setValue(strCodigo, { emitEvent: false })` explícito: ninguna mutación la
+    //    ponía roja, ni acá ni en el navegador (medido sobre el caso 33964), porque era código muerto.
+    objUi.setValue(strUi);
   }
 
   /** El municipio depende del departamento, así que su catálogo se recarga cuando ese cambia. */

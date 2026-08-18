@@ -6,7 +6,10 @@ import { By } from '@angular/platform-browser';
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 import { aseverarContratoDeCampos } from '../../../../components/fields/contrato-pantalla';
 import { PM4_ENV_FALLBACKS } from '../../../../core/pm4-context.service';
-import { QD, SCR003_PAYLOAD_M2_FIELDS, SCR003_UMBRAL_INTENTOS } from '../fields/fields';
+import { MatrizMotivosService } from '../fields/matriz-motivos.service';
+import {
+  QD, QD_COLLECTIONS, SCR003_PAYLOAD_M2_FIELDS, SCR003_UMBRAL_INTENTOS,
+} from '../fields/fields';
 import { CorreccionErrorFuncional } from './correccion-error-funcional';
 
 /**
@@ -215,6 +218,108 @@ function rotulosDeLaFachada(): Record<string, string> {
   }
 
   return dicRotulos;
+}
+
+/**
+ * Monta con un caso que trae **producto SFC y cascada precargados**, y con las colecciones de la matriz
+ * respondidas con datos reales.
+ *
+ * ⚠ No alcanza con `montar()`: su `drenarColecciones()` responde `[]` a **todo**, y con la colección 16
+ * vacía `strInsuranceUiValue` no puede construir ningún value de UI. O sea que el caso pasaría por
+ * vacuidad —cascada vacía porque no hay catálogo, no porque el código se borró— que es exactamente el
+ * falso verde a evitar. Acá las tres `matriz:*` se responden **antes** del drenaje genérico.
+ *
+ * La fila de la matriz es un extracto real del caso 33964: `tipoSolicitud` "Queja" + `productoZurich`
+ * "Autos" es el par que filtra el nivel 1, y los espacios sobrantes de la columna son a propósito —
+ * `normalizarMatriz()` los tolera, y una fila prolija no ejercitaría esa mitad.
+ */
+async function montarConMatriz(): Promise<void> {
+  fijarQueryString(`?task_id=${INT_TASK_ID}`);
+
+  TestBed.configureTestingModule({
+    providers: [
+      provideHttpClient(),
+      provideHttpClientTesting(),
+      { provide: PM4_ENV_FALLBACKS, useValue: OBJ_ENV_VACIO },
+      { provide: ErrorHandler, useValue: objErrores },
+    ],
+  });
+
+  objFixture = TestBed.createComponent(CorreccionErrorFuncional);
+  objPantalla = objFixture.componentInstance;
+  objMock = TestBed.inject(HttpTestingController);
+
+  objFixture.detectChanges();
+
+  objMock
+    .expectOne((in_objReq) => in_objReq.url === `/api/tasks/${INT_TASK_ID}`)
+    .flush(tarea({
+      ...datosTarea(),
+      [QD.strRequestType]: '3',
+      [QD.strSfcProduct]: '101',
+      [`${QD.strSfcProduct}_desc`]: 'Autos',
+      [QD.strInteraction]: 'Asistencias',
+      [QD.strServiceProvided]: 'Servicio de lavado (Alfred)',
+      [QD.strSfcReason]: '132',
+    }));
+
+  await asentar();
+  responderColeccionesDeLaMatriz();
+  drenarColecciones();
+  await asentar();
+}
+
+/** Responde las tres colecciones `matriz:*` con datos reales. Ver `montarConMatriz()`. */
+function responderColeccionesDeLaMatriz(): void {
+  const fnResponder = (
+    in_objDef: { id: number },
+    in_cllFilas: readonly Record<string, unknown>[],
+  ): void => {
+    for (const objReq of objMock.match(
+      (in_objReq) => in_objReq.url.includes(`/collections/${in_objDef.id}/`),
+    )) {
+      objReq.flush({
+        data: in_cllFilas.map((in_objFila, in_intI) => ({ id: in_intI + 1, data: in_objFila })),
+        meta: { total: in_cllFilas.length },
+      });
+    }
+  };
+
+  fnResponder(QD_COLLECTIONS.requestType, [{ codigo: '3', descripcion: 'Queja' }]);
+  // ⚠ Las columnas de la 16 **no** son `codigo`/`descripcion` como las del resto: son
+  // `codigo_producto_sfc`/`nombre_producto_sfc` (ver `collections.ts`). Con las claves genéricas el
+  // catálogo carga con `value`/`label` vacíos y el caso se cae por un motivo que no es el defecto.
+  fnResponder(QD_COLLECTIONS.sfcProduct, [
+    { codigo_producto_sfc: '101', nombre_producto_sfc: 'Autos' },
+  ]);
+  fnResponder(QD_COLLECTIONS.matrixMotivos, [{
+    // Los espacios son deliberados: es lo que la colección 45 guarda de verdad.
+    tipoSolicitud: ' Queja ',
+    productoZurich: 'Autos ',
+    interaccion: 'Asistencias',
+    servicioPrestado: 'Servicio de lavado (Alfred)',
+    codigoMotivoSFC: '132',
+    motivoSFC: 'Demora en la prestación del servicio',
+  }]);
+}
+
+/** La instancia de `MatrizMotivosService` que provee la sección del payload. */
+function matrizDeLaSeccion(): MatrizMotivosService {
+  const objSeccion = objFixture.debugElement.query(By.css('app-seccion-campos-payload'));
+  return (objSeccion.componentInstance as { objMatriz: MatrizMotivosService }).objMatriz;
+}
+
+/** El control satélite del picker de producto (`ui-qd_strSfcProduct`). */
+function pickerDeProducto(): { value: unknown; setValue: (in_gen: unknown) => void } {
+  const objSeccion = objFixture.debugElement.query(By.css('app-seccion-campos-payload'));
+  const objGrupo = (objSeccion.componentInstance as {
+    objGrupoEdicion: { get: (in_str: string) => { value: unknown; setValue: (in_gen: unknown) => void } | null };
+  }).objGrupoEdicion;
+
+  const objControl = objGrupo.get(`ui-${QD.strSfcProduct}`);
+  // Sin el control no hay picker que sembrar y los dos casos de la cascada serían tautologías.
+  expect(objControl).not.toBeNull();
+  return objControl!;
 }
 
 /** Marca una fila del payload como editable, que es lo único que la habilita (ver la sección). */
@@ -790,6 +895,125 @@ describe('SCR-003 · Corrección Error Funcional M1/M2', () => {
     for (const strVariable of cllVariables) {
       expect(objPantalla.form.get(strVariable), strVariable).not.toBeNull();
     }
+  });
+
+  // ── La cascada de la matriz sobre un caso PRECARGADO ──────────────────────────────────────────
+
+  /**
+   * El defecto que este caso fija: **la cascada entera salía vacía en un caso real y sin un solo
+   * error en consola.**
+   *
+   * `ui-qd_strSfcProduct` traducía **UI → form** y nada más. Como el satélite nace en `''`, su primera
+   * emisión escribía `codeFromUiValue('') === ''` encima del código que `precargar()` acababa de poner
+   * — y llegaba después, porque `ngOnInit` es `async` y la sección ya se había pintado una vez con el
+   * satélite vacío. Con el producto en `''`, `strProductLabel` queda en `''`, `cllRowsForProduct`
+   * devuelve `[]` y los **tres** selects de abajo salen sin opciones.
+   *
+   * Medido en el navegador contra el caso real 33964 (producto `101`): momento/servicio/motivo pintaban
+   * **0/0/0** contra los **8/7/7** de React, y escribir `"101"` a mano en el control los encendía al
+   * instante.
+   *
+   * ── ⚠ Qué de este caso cubre el arreglo y qué NO. Medido por mutación, no supuesto ────────────
+   * La aserción que cuenta es **la del satélite** (`'101::Autos'`), y es la única: quitando el
+   * `setValue` de `sembrarPickerDeProducto()` el satélite queda en `''` y esa línea se pone roja.
+   *
+   * Las de la cascada (`cllInteraction`/`cllReason`) **siguen verdes con el arreglo quitado**, y por eso
+   * están anotadas como no-regresión y no como cobertura. La primera versión de este caso aseveraba
+   * *solo* eso —razonando que el satélite es "el mecanismo" y la cascada "lo que el gestor ve"— y era un
+   * falso verde completo: mutación aplicada, 41/41 en verde. El motivo es el mismo que deja sin cubrir
+   * al `zds-select` (ver su cabecera): **bajo jsdom el widget no emite su `modelChange` inicial**, así
+   * que el `''` que borra el código nunca llega y el defecto no se reproduce. Se midió: con la mutación
+   * puesta, `satelite: '', form: '101'` — el form conserva el código y la cascada se enciende igual.
+   *
+   * Corolario: aseverar el satélite **no** es aseverar un detalle de implementación en lugar del
+   * síntoma. Es lo único observable en este entorno que se rompe cuando el arreglo se va, y lo que
+   * garantiza que la próxima emisión del widget escriba `"101"` y no `''`. El síntoma en sí
+   * (0/0/0 vs 8/7/7) es de navegador y se verificó ahí.
+   */
+  it('un producto SFC precargado enciende la cascada del motivo y no se autoborra', async () => {
+    await montarConMatriz();
+
+    const objMatriz = matrizDeLaSeccion();
+
+    // El value de UI del producto precargado, que es la dependencia de la siembra. Va primero: si la
+    // colección 16 no resolviera, `strInsuranceUiValue()` sería `''` y la aserción de abajo pasaría
+    // por vacuidad contra un satélite que tampoco tiene nada que sembrar.
+    expect(objMatriz.strInsuranceUiValue()).toBe('101::Autos');
+
+    // **La aserción del arreglo**, y la única que se pone roja al quitarlo: el satélite tiene que
+    // quedar sembrado con el value de UI del código precargado. Mientras esté en `''`, la próxima
+    // emisión del widget escribe `codeFromUiValue('') === ''` sobre el `"101"` que `precargar()`
+    // acaba de poner, y eso es exactamente el borrado medido en el navegador.
+    expect(pickerDeProducto().value).toBe('101::Autos');
+
+    // Y las derivadas que el gestor ve. Bajo jsdom siguen verdes sin el arreglo (ver el ⚠ de abajo),
+    // así que acá valen como guarda de no-regresión de la cascada, no como cobertura de la siembra.
+    expect(objPantalla.form.get(QD.strSfcProduct)?.value).toBe('101');
+    expect(objMatriz.strProductLabel()).toBe('Autos');
+    expect(objMatriz.cllInteraction().map((in_objO) => in_objO.value)).toEqual(['Asistencias']);
+    expect(objMatriz.cllReason().map((in_objO) => in_objO.value)).toEqual(['132']);
+  });
+
+  /**
+   * **El caso que faltaba, y el que habría atrapado el arreglo roto.** Se escribió *después* de que el
+   * navegador desmintiera la primera versión: el spec estaba verde y las cascadas seguían en 0/0/0.
+   *
+   * El agujero era este. Bajo jsdom el widget no emite, así que el borrado nunca ocurre y el form
+   * conserva el código — o sea que la siembra *podía* derivarse del form y pasar. En el navegador el
+   * form está en `''` cuando el efecto corre, y derivar de ahí es circular. Este caso reproduce ese
+   * estado **a mano**: borra el código como lo haría la emisión del widget, y exige que la siembra lo
+   * reponga igual. Solo puede pasar si la fuente es `dicOriginales`.
+   *
+   * O sea que es el caso que traduce un límite del entorno en una aserción: no simula el widget
+   * (imposible acá), simula su **efecto**, que es lo único que importaba.
+   */
+  it('siembra desde task.data aunque el código del form ya esté borrado', async () => {
+    await montarConMatriz();
+
+    const objControl = objPantalla.form.get(QD.strSfcProduct);
+    expect(objControl).not.toBeNull();
+
+    // El borrado, tal como lo produce la primera emisión del satélite en el navegador: el satélite
+    // queda en `''` y arrastra el código con él. Se escribe el satélite y se deja que su
+    // `valueChanges` haga el resto, que es la secuencia real — no dos escrituras independientes.
+    //
+    // ⚠ **Síncrono a propósito, sin `asentar()` en el medio.** El `valueChanges` es síncrono, así
+    // que el código ya está en `''` cuando esta línea vuelve; el efecto de siembra, en cambio, corre
+    // en la próxima detección de cambios. Meter un `asentar()` acá haría que la reposición pase
+    // *antes* de la aserción de abajo y el estado de partida nunca se podría aseverar — el caso
+    // quedaría sin poder distinguir "la siembra repuso" de "el borrado nunca ocurrió", que es
+    // exactamente la confusión que dejó pasar el arreglo roto.
+    pickerDeProducto().setValue('');
+
+    // El estado de partida, aseverado y no supuesto.
+    expect(objControl!.value).toBe('');
+
+    // Y ahora sí se deja correr el efecto, que es lo que este caso mide.
+    await asentar();
+
+    // La reposición de **las dos** mitades. El código es lo que la matriz lee; el satélite es lo
+    // que impide que la próxima emisión del widget lo vuelva a borrar.
+    expect(objControl!.value).toBe('101');
+    expect(pickerDeProducto().value).toBe('101::Autos');
+    expect(matrizDeLaSeccion().cllInteraction().map((in_objO) => in_objO.value)).toEqual(['Asistencias']);
+  });
+
+  /**
+   * La contracara, y hace falta: el arreglo **no puede** volver imposible vaciar el producto a mano.
+   *
+   * Es el motivo por el que la siembra va sobre el satélite y no como un `if (!valor) return` dentro
+   * del `valueChanges` — ese blindaje habría dejado este caso rojo, porque volver al placeholder es una
+   * acción legítima del gestor (el prompt de `zds-select` es elegible; ver ese wrapper).
+   */
+  it('el gestor todavía puede vaciar el producto desde el picker', async () => {
+    await montarConMatriz();
+    await habilitarFila(QD.strSfcProduct);
+
+    pickerDeProducto().setValue('');
+    await asentar();
+
+    expect(objPantalla.form.get(QD.strSfcProduct)?.value).toBe('');
+    expect(matrizDeLaSeccion().cllInteraction()).toEqual([]);
   });
 
   // ── La rama de error de carga ─────────────────────────────────────────────────────────────────
