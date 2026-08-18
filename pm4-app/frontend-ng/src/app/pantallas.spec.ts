@@ -34,10 +34,15 @@ import { DIC_ALIAS, DIC_PANTALLAS, listarSlugsEnrutables } from './pantallas';
 /**
  * Los slugs que **tienen** su propio spec de pantalla.
  *
- * Las dos listas crecen juntas, de a una por pantalla: las 12 pantallas de negocio se portan en la
- * Fase 5. La primera fue la SCR-008 y la segunda la SCR-004; cada spec vive en la carpeta de su
- * pantalla (`revision-respuesta-sac.spec.ts`, `revision-error-tecnico-api.spec.ts`) y cubre un caso
- * por RUL/ACT, no un smoke.
+ * Las dos listas crecen juntas, de a una por pantalla: las 12 de la Fase 5 —**once** formularios de
+ * negocio más el visor de la doc del Web Service, que cierra la fase—. La primera fue la SCR-008 y la
+ * segunda la SCR-004; cada spec vive en la carpeta de su pantalla (`revision-respuesta-sac.spec.ts`,
+ * `revision-error-tecnico-api.spec.ts`) y cubre un caso por RUL/ACT, no un smoke.
+ *
+ * La 12.ª es la excepción a ese "por RUL/ACT" y vale nombrarla: `smartsupervision-api-docs` no tiene
+ * anexo, ni campos, ni reglas —es un `<iframe>` a un asset estático—, así que sus casos cubren el otro
+ * contrato que tiene una pantalla así: el markup **y que el archivo que el `src` nombra exista en el
+ * disco**. Sigue sin ser un smoke.
  *
  * ⚠ **Los alias NO van acá.** Un alias no es una pantalla nueva (ver `DIC_ALIAS`): no hay nada
  * propio que cubrir, y exigirle un spec forzaría un archivo duplicado del de su destino. Lo que sí
@@ -74,6 +79,11 @@ const CLL_SLUGS_CON_SPEC: string[] = [
   // municipio que RUL-000-09 vacía en la propia precarga), acá los controles se llenan con
   // `patchValue` y las **dos** ramas de envío se aseveran por la URL que sale al backend.
   'COL_QD_SCR-000_CrearRecibirQueja',
+  // La que cierra la Fase 5, y la única que no es un formulario: el visor de la doc del Web Service
+  // Smartsupervisión. Su spec no es un smoke aunque la pantalla sea un solo `<iframe>` — asevera el
+  // markup **y que el asset exista en `public/`**, que es la mitad que React no cubría (allá el caso
+  // quedaba verde con la carpeta `public/docs/` ausente).
+  'smartsupervision-api-docs',
 ];
 
 describe('guarda de inventario de pantallas', () => {

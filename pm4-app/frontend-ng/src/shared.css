@@ -1958,3 +1958,32 @@ z-table :is(th, td)[config*="right"] {
 .section-bar .section-title {
   margin-bottom: 0;
 }
+
+/* Visor de documentación a pantalla completa (`smartsupervision-api-docs`).
+
+   Es el `style` en línea del `<iframe>` de React (`SmartsupervisionApiDocs.tsx`), que acá no se
+   permite en el markup. Aporta **solo geometría**: el DS no tiene componente de visor y esto es
+   layout de pantalla, así que por la política de `shared.css` va como CSS propio y no como
+   candidato a `lib-*-z`.
+
+   `position: fixed` + `inset: 0` es lo que hace el trabajo: saca al iframe del flujo y lo mide contra
+   el viewport, no contra el padre. El `width/height: 100%` viene de React y se conserva porque un
+   `<iframe>` trae `width`/`height` propios de HTML (300×150 por defecto) y así queda explícito que no
+   gobiernan; con `inset: 0` es redundante, no contradictorio.
+
+   Que cubra el viewport entero es deliberado: es una pantalla de documentación, no una pieza de
+   formulario, y no comparte el flujo con nada.
+
+   No reusa `.loading-overlay`, que es la otra clase con `fixed`+`inset`: esa es un **scrim** (fondo
+   translúcido, centrado flex y `z-index`) y acá no va ninguna de las tres cosas. Coincidir en dos
+   declaraciones no las hace el mismo patrón.
+
+   Sin token en el `0` del `inset` ni en el `border: none`: no son escala de espaciado, son la
+   ausencia de offset y la ausencia de borde. */
+.doc-viewer-frame {
+  position: fixed;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  border: none;
+}

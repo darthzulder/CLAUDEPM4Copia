@@ -16,7 +16,8 @@
  * Acá el slug es un string y el componente una función no invocada.
  *
  * ── Se escribió VACÍO en la Fase 4, y eso fue deliberado ────────────────────────────────────
- * Las 12 pantallas de negocio se portan en la **Fase 5**, una por una. Este archivo se escribió
+ * Las 12 pantallas de la **Fase 5** se portan una por una (once formularios de negocio más el visor
+ * de la doc del Web Service, que cierra la fase). Este archivo se escribió
  * en la Fase 4 —antes de que existiera la primera— justamente para que la guarda existiera
  * **antes** que las pantallas que tiene que vigilar: una guarda escrita después se escribe, sin
  * querer, a la medida de lo que ya se construyó. Escrita antes, cada pantalla portada se
@@ -126,6 +127,15 @@ export const DIC_PANTALLAS: Record<string, CargadorDePantalla> = {
     import(
       '../screens/atencion-cliente/quejas-directas/COL_QD_SCR-000_CrearRecibirQueja/crear-recibir-queja'
     ).then((in_objModulo) => in_objModulo.CrearRecibirQueja),
+  // La única que **no es un formulario PM4**: un visor de la documentación del Web Service
+  // Smartsupervisión (SFC). No recibe `task_id`, no consume `TaskService` ni la fachada `zds-*` y no
+  // completa ninguna tarea — es un `<iframe>` a un HTML autónomo de `public/docs/`, embebido así para
+  // aislar el tema oscuro de la doc del CSS global del proyecto. Por eso también es la única sin datos
+  // en `paridad-react.json`: no tiene campos que comparar (ver el filtro de `paridad-react.spec.ts`).
+  'smartsupervision-api-docs': () =>
+    import('../screens/smartsupervision-api-docs/smartsupervision-api-docs').then(
+      (in_objModulo) => in_objModulo.SmartsupervisionApiDocsComponent,
+    ),
 };
 
 /**
