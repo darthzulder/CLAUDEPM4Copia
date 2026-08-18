@@ -70,6 +70,33 @@ function hijo(in_objFixture: ComponentFixture<HostDeFormulario>): InputSelectZ {
   ).componentInstance as InputSelectZ;
 }
 
+/**
+ * Las etiquetas **pintadas** en el listado, leídas del shadow DOM del `z-select`.
+ *
+ * ── ⚠ Por qué se asevera lo pintado y NO la propiedad `options` de ningún elemento ──────────
+ * Porque aseverar la propiedad fue exactamente el falso verde que dejó pasar el defecto real. La
+ * primera versión del arreglo escribía `options` sobre el **`za-select`** —el envoltorio de Angular,
+ * que no tiene shadow root ni reactividad de Lit— y ahí esa propiedad está muerta: nadie la lee. En
+ * el navegador se midió `options.length === 33` en ese elemento y **0 opciones pintadas**. Toda la
+ * suite estaba verde, `tsc` y `npm run verify` también, y el select seguía en blanco.
+ *
+ * Un caso que lea `options` hereda ese agujero: mide lo que el código *escribió*, no lo que el
+ * usuario *ve*. Leer los `<li>` del shadow root no tiene esa salida. Lit **sí** rinde bajo jsdom
+ * (medido con una sonda: `shadowRoot` presente, `<li>` pintados, etiquetas en `textContent`).
+ */
+function etiquetasPintadas(in_objFixture: ComponentFixture<HostDeFormulario>): string[] {
+  const objElemento: Element | null = in_objFixture.nativeElement.querySelector('z-select');
+
+  // El conteo va primero: sin `z-select` —o sin shadow root— el `[...querySelectorAll]` de abajo
+  // devolvería `[]` y un `toEqual([])` pasaría por vacuidad, que es justo el falso verde a evitar.
+  expect(objElemento).not.toBeNull();
+  expect(objElemento!.shadowRoot).not.toBeNull();
+
+  return [...objElemento!.shadowRoot!.querySelectorAll('li')].map((in_objLi) =>
+    (in_objLi.textContent ?? '').trim(),
+  );
+}
+
 describe('ZdsSelect', () => {
   let objFixture: ComponentFixture<HostDeFormulario>;
 
@@ -118,6 +145,55 @@ describe('ZdsSelect', () => {
       { value: '14', description: 'Sucursal' },
       { value: '15', description: '15' },
     ]);
+  });
+
+  it('un catálogo que llega TARDE termina pintado en el listado', async () => {
+    // El escenario real de todas las pantallas: el catálogo sale de una colección PM4, así que
+    // resuelve una respuesta HTTP **después** del primer render. Se asevera lo PINTADO y no
+    // `hijo().options` —lo que el wrapper le entrega a la lib— porque aseverar propiedades es lo que
+    // dejó pasar el defecto real (ver el docstring de `etiquetasPintadas`).
+    //
+    // ── ⚠ ESTE CASO **NO** CUBRE EL ARREGLO DE `zds-select.ts`. LEER ANTES DE CONFIAR ──────────
+    // Se midió por mutación, y el resultado es incómodo pero hay que dejarlo escrito: **quitando el
+    // `afterRenderEffect` entero, este caso sigue pintando las tres etiquetas.** O sea que jsdom
+    // **no reproduce el defecto de producción**. El motivo es coherente con el mecanismo: acá los
+    // `<option>` del slot alcanzan a estar en el DOM antes del render de Lit, así que el getter
+    // `_targetOptionsArray` los encuentra y el listado se pinta sin ayuda. En el navegador el
+    // catálogo llega **más tarde**, después de ese render, y ahí no hay quien agende otro.
+    //
+    // Las tres mutaciones sobre `zds-select.ts`, con su resultado real:
+    //  - quitar el efecto → este caso NO lo detecta (pinta igual);
+    //  - `z-select` → `za-select` (el defecto que se envió) → NO lo detecta por el listado final;
+    //  - `text` → `description` → **verde, 12/12**: la clave nunca se ejerce, porque bajo jsdom el
+    //    slot le gana al getter y la propiedad jamás es la fuente de los datos.
+    //
+    // Entonces lo que este caso sí vale es una **guarda de no-regresión del camino feliz** (que un
+    // catálogo tardío quede pintado, por cualquier vía) y el arnés que deja el listado observable.
+    // La verificación del arreglo es **de navegador**, y así se hizo: `qd_strIdType` (7 opciones) y
+    // `qd_strDepartment` (33) de la SCR-000, que pintaban 0, pintan todas. Queda anotado acá y en la
+    // cabecera de `zds-select.ts` para que nadie lea este verde como cobertura del arreglo.
+    const objHost = objFixture.componentInstance;
+
+    // Arranca sin catálogo, como una pantalla cuyo `objCatalogos.de(...)` todavía no resolvió. El DS
+    // pinta un `<li>` con su propio texto de vacío —literalmente lo que el usuario reportaba ver— y
+    // se asevera ese texto en vez de `[]` para que el estado inicial quede fijado y no pase por
+    // vacuidad. (Sale en inglés porque este arnés no monta los `ZDS_LOCALES` de la app.)
+    objHost.opciones = [];
+    objFixture.componentRef.changeDetectorRef.markForCheck();
+    await objFixture.whenStable();
+    await drenarTimeouts();
+
+    expect(etiquetasPintadas(objFixture)).toEqual(['No options found']);
+
+    // Y ahora llega el catálogo, tarde.
+    objHost.opciones = CLL_OPCIONES;
+    objFixture.componentRef.changeDetectorRef.markForCheck();
+    await objFixture.whenStable();
+    await drenarTimeouts();
+
+    // Se aseveran las ETIQUETAS, no los `value`: una opción sin `text` cae a su `value` ('15'), así
+    // que el orden `text ?? label ?? value` de la fachada queda cubierto de punta a punta.
+    expect(etiquetasPintadas(objFixture)).toEqual(['Internet', 'Sucursal', '15']);
   });
 
   it('el placeholder entra como primera opción de valor vacío, no como input de la lib', async () => {
