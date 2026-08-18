@@ -1,0 +1,47 @@
+<!-- Ocho columnas de texto por `[headers]` + las dos que necesitan un componente del DS por los dos
+     huecos: Estado en `start` (la píldora) y Acción en `end` (el botón Ver).
+
+     ⚠ Los `id="start"`/`id="end"` son literales: el `ngAfterContentInit` de `TableZ` hace
+     `switch (item.id)` y solo reconoce esos dos — cualquier otro id cae en `columnTemplates`, que
+     **nunca se lee**. El contexto que inyecta es `{value: row}`, de ahí el `let-objFila="value"`.
+
+     ⚠ `generciEndName` va con el typo de la librería. Su hermano `genericStartName` sí está bien
+     escrito, lo que lo hace fácil de errar.
+
+     ⚠ La tabla queda montada siempre y el empty state va **afuera**, como bloque hermano: el
+     `<tbody>` de `TableZ` es un `@for` pelado sin rama de lista vacía, así que con `data: []` pinta el
+     encabezado y nada más. Envolverla en un `@if` se comería los rótulos de columna. Mismo motivo que
+     en SCR-003 y SCR-0051. -->
+<lib-table-z
+  [headers]="cllColumnas"
+  [data]="cllFilas()"
+  [showGenericStart]="true"
+  genericStartName="Estado"
+  [showGenericEnd]="true"
+  generciEndName="Acción"
+  typeStyle="zebra"
+>
+  <ng-template libZTemplate id="start" let-objFila="value">
+    <zds-status-badge [variante]="variante(objFila.caso)">{{ objFila.caso.estado }}</zds-status-badge>
+  </ng-template>
+
+  <!-- `[disabled]` explícito: el default de `lib-button-z` es `true` y sin esto el botón nace muerto.
+
+       ⚠ El tamaño va **encadenado en `type`**, no en un input aparte: `ButtonZ` no tiene `size`. Su
+       `type` es un `ToAttrChain<ZButton_Type, ZButton_Size, 'round'>` que la plantilla pasa tal cual al
+       `[config]` de `za-button` — o sea, es literalmente el mismo string que el `config="secondary:s"`
+       de React. Verificado en `zurich-col-lib-zurich.d.ts:61` y en el `.mjs` compilado; los tamaños son
+       `'xs' | 's' | 'm' | 'l'` (`dev-utils/dist/code/Button.props.d.ts:5`). -->
+  <ng-template libZTemplate id="end" let-objFila="value">
+    <lib-button-z
+      label="Ver"
+      type="secondary:s"
+      [disabled]="false"
+      (eventClick)="ver.emit(objFila.caso)"
+    />
+  </ng-template>
+</lib-table-z>
+
+@if (!casos().length) {
+  <p class="subsection-note">No hay casos que coincidan con los filtros seleccionados.</p>
+}
