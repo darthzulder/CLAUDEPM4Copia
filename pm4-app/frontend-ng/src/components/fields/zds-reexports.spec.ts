@@ -35,7 +35,15 @@ import {
  * `AlertZService`. El render real sigue siendo el gate manual en Docker.
  */
 
-/** El caso que toda pantalla tiene que recordar: sin `[disabled]="false"` el botón monta inerte. */
+/**
+ * El defecto del vendor, aseverado **sin** la directiva que lo envuelve. Este host es a propósito el
+ * caso crudo: mide el default de `ButtonZ`, que es una dependencia, no nuestro código.
+ *
+ * Lo que una pantalla debe hacer hoy **no** es esto: es importar `BotonHabilitado` y dejar de escribir
+ * `[disabled]="false"` — ver [`boton-habilitado.ts`](./boton-habilitado.ts) y su guarda. Este spec
+ * sobrevive igual porque si el vendor arreglara el default, la directiva quedaría obsoleta y hay que
+ * enterarse acá y no por casualidad.
+ */
 @Component({
   standalone: true,
   imports: [ZrButton],
@@ -114,8 +122,10 @@ function hijo<T>(
 describe('re-exports de la fachada', () => {
   describe('ZrButton · el disabled arranca en true', () => {
     it('un lib-button-z sin [disabled] queda DESHABILITADO', async () => {
-      // Es el gotcha del plan de migración, y es real. Este test existe para que la regla
-      // "toda pantalla pasa [disabled] explícito" tenga un respaldo ejecutable.
+      // Es el gotcha del plan de migración, y es real. Ya no es la regla operativa —eso lo resuelve
+      // `BotonHabilitado`— pero sigue siendo el **defecto medido** de la dependencia: si una versión
+      // futura de `lib-zurich` lo arregla, este caso se pone rojo y la directiva pasa a ser código
+      // muerto que hay que borrar. Es la única forma de que ese día no pase inadvertido.
       const objFixture = TestBed.createComponent(HostBoton);
       await objFixture.whenStable();
 

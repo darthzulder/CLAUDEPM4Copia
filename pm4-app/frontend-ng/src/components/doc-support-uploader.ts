@@ -1,3 +1,4 @@
+import { BotonHabilitado } from './fields/boton-habilitado';
 import { ChangeDetectionStrategy, Component, inject, input, signal } from '@angular/core';
 import { FormGroup, ReactiveFormsModule } from '@angular/forms';
 import { FileRegistryService } from '../core/file-registry.service';
@@ -103,7 +104,7 @@ const MSG_INVALIDO = 'Solo se permiten archivos pdf, jpg, png o docx, máx 5 MB 
       }
     </div>
   `,
-  imports: [ReactiveFormsModule, ZdsFileInput, ZrButton],
+  imports: [ReactiveFormsModule, ZdsFileInput, ZrButton, BotonHabilitado],
 })
 export class DocSupportUploaderComponent {
   private readonly objRegistro = inject(FileRegistryService);

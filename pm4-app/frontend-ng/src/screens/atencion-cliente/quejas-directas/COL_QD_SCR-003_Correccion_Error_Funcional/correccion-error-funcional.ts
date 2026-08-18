@@ -1,3 +1,4 @@
+import { BotonHabilitado } from '../../../../components/fields/boton-habilitado';
 import {
   Component, computed, inject, type OnDestroy, type OnInit, signal,
 } from '@angular/core';
@@ -129,6 +130,7 @@ interface FilaHistorial {
     ZdsTextarea,
     ZrAlertInline,
     ZrButton,
+    BotonHabilitado,
     ZrLoader,
     ZrModal,
     ZrTable,

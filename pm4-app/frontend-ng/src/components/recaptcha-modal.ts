@@ -1,3 +1,4 @@
+import { BotonHabilitado } from './fields/boton-habilitado';
 import {
   ChangeDetectionStrategy,
   Component,
@@ -158,7 +159,7 @@ type EstadoRecaptcha = 'cargando' | 'listo' | 'error';
       min-height: 78px;
     }
   `,
-  imports: [ZrAlertInline, ZrButton, ZrLoader, ZrModal, ZrTemplate],
+  imports: [ZrAlertInline, ZrButton, BotonHabilitado, ZrLoader, ZrModal, ZrTemplate],
 })
 export class RecaptchaModalComponent {
   private readonly objCargador = inject(RecaptchaLoaderService);

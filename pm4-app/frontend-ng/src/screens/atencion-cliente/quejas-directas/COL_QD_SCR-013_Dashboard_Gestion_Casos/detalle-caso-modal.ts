@@ -1,3 +1,4 @@
+import { BotonHabilitado } from '../../../../components/fields/boton-habilitado';
 import {
   ChangeDetectionStrategy, Component, computed, input, output, TemplateRef, viewChild,
 } from '@angular/core';
@@ -27,7 +28,7 @@ import type { CasoDashboard } from '../fields/types';
 @Component({
   selector: 'app-detalle-caso-modal',
   standalone: true,
-  imports: [ZrModal, ZrTemplate, ZrButton, ZdsStatusBadge, InfoBarComponent],
+  imports: [ZrModal, ZrTemplate, ZrButton, BotonHabilitado, ZdsStatusBadge, InfoBarComponent],
   changeDetection: ChangeDetectionStrategy.OnPush,
   templateUrl: './detalle-caso-modal.html',
 })

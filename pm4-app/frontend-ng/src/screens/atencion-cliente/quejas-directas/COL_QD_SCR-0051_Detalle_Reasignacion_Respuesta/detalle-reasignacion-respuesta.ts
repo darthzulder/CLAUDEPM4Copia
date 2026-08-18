@@ -1,3 +1,4 @@
+import { BotonHabilitado } from '../../../../components/fields/boton-habilitado';
 import {
   ChangeDetectionStrategy, Component, computed, effect, inject, Injector, signal, untracked,
   type OnDestroy, type OnInit, type TemplateRef, viewChild,
@@ -133,6 +134,7 @@ export function siguienteVersion(in_strCurrent: string | undefined): string {
     ZdsStatusBadge,
     ZrAlertInline,
     ZrButton,
+    BotonHabilitado,
     ZrLoader,
   ],
   // `FileRegistryService` por pantalla: retiene el binario de los diez soportes hasta el submit.

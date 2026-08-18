@@ -1,3 +1,4 @@
+import { BotonHabilitado } from '../../../../components/fields/boton-habilitado';
 import { ChangeDetectionStrategy, Component, computed, input, output } from '@angular/core';
 import { ZdsStatusBadge } from '../../../../components/fields/zds-status-badge';
 import {
@@ -67,7 +68,7 @@ interface FilaCaso {
 @Component({
   selector: 'app-tabla-casos',
   standalone: true,
-  imports: [ZrTable, ZrTemplate, ZrButton, ZdsStatusBadge],
+  imports: [ZrTable, ZrTemplate, ZrButton, BotonHabilitado, ZdsStatusBadge],
   changeDetection: ChangeDetectionStrategy.OnPush,
   templateUrl: './tabla-casos.html',
 })

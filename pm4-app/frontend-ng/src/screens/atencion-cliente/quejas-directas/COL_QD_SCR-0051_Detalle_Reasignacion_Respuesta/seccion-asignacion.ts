@@ -1,3 +1,4 @@
+import { BotonHabilitado } from '../../../../components/fields/boton-habilitado';
 import { HttpClient } from '@angular/common/http';
 import {
   ChangeDetectionStrategy, Component, computed, effect, inject, Injector, input, output,
@@ -72,7 +73,7 @@ interface FilaHistorialVista extends AsignacionHistorial {
   standalone: true,
   imports: [
     ReactiveFormsModule, FormSectionComponent, ZdsSelect, ZdsTextarea, ZdsRadio,
-    ZrAlertInline, ZrButton, ZrTable, ZrTemplate,
+    ZrAlertInline, ZrButton, BotonHabilitado, ZrTable, ZrTemplate,
   ],
   // El catálogo de la matriz es de **esta** sección: solo lo usa para sacar los nombres de grupo.
   providers: [CatalogosService],

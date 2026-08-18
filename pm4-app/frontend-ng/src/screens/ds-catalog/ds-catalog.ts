@@ -10,6 +10,7 @@ import { FormSectionComponent } from '../../components/form-section';
 import { ZdsCheckboxField } from '../../components/fields/zds-checkbox-field';
 import { ZdsDate } from '../../components/fields/zds-date';
 import { ZdsFileInput } from '../../components/fields/zds-file-input';
+import { BotonHabilitado } from '../../components/fields/boton-habilitado';
 import { ModeloZa } from '../../components/fields/modelo-za';
 import { ZdsInput } from '../../components/fields/zds-input';
 import { ZdsRadio } from '../../components/fields/zds-radio';
@@ -195,9 +196,11 @@ const STR_LOGO = 'resources/zurich/ZurichLogo_Horz_White_CMYK_no_R.png';
     ZrTextInput,
     ZrTile,
     ZrTooltip,
-    // La directiva que restituye el two-way de los tres `ZaModelElement` de arriba. No se escribe
-    // en la plantilla: su selector es el atributo `[modeloZa]`. Ver `components/fields/modelo-za.ts`.
+    // Las dos directivas que envuelven defectos del DS. Ninguna se escribe en la plantilla: la
+    // primera restituye el two-way de los tres `ZaModelElement` de arriba, la segunda invierte el
+    // `disabled = true` con que `ButtonZ` arranca. Ver sus archivos en `components/fields/`.
     ModeloZa,
+    BotonHabilitado,
   ],
   // `ZdsFileInput` inyecta `FileRegistryService`, que **no** es `providedIn: 'root'` a propósito: es un
   // servicio **por pantalla**, para que los adjuntos de una no se arrastren a la siguiente dentro del

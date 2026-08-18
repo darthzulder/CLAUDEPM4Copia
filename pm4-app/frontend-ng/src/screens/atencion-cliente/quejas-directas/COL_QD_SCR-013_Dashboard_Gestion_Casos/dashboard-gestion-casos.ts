@@ -1,3 +1,4 @@
+import { BotonHabilitado } from '../../../../components/fields/boton-habilitado';
 import {
   ChangeDetectionStrategy, Component, computed, inject, Injector, type OnInit, signal,
 } from '@angular/core';
@@ -69,6 +70,7 @@ const STR_NOMBRE_CSV = 'reporte-casos-quejas-directas.csv';
     ZdsSelect,
     ZrAlertInline,
     ZrButton,
+    BotonHabilitado,
     ZrKpiValue,
     ZrLoader,
     ZrPagination,

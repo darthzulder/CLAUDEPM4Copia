@@ -1,3 +1,4 @@
+import { BotonHabilitado } from './fields/boton-habilitado';
 import { HttpClient } from '@angular/common/http';
 import {
   ChangeDetectionStrategy,
@@ -210,6 +211,7 @@ const INT_MB = INT_KB * INT_KB;
     PreviewModalComponent,
     ZrAlertInline,
     ZrButton,
+    BotonHabilitado,
     ZrLoader,
   ],
   // El servicio se provee ACÁ, no en la pantalla: su estado es "los archivos de este request" y este

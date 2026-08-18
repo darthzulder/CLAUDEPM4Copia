@@ -1,3 +1,4 @@
+import { BotonHabilitado } from '../../../../components/fields/boton-habilitado';
 import {
   ChangeDetectionStrategy,
   Component,
@@ -60,7 +61,15 @@ import { OPTIONS_AREA, OS } from '../fields/fields';
   selector: 'app-reasignar-caso-modal',
   standalone: true,
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [ReactiveFormsModule, ZdsSelect, ZrAlertInline, ZrButton, ZrModal, ZrTemplate],
+  imports: [
+    ReactiveFormsModule,
+    ZdsSelect,
+    ZrAlertInline,
+    ZrButton,
+    BotonHabilitado,
+    ZrModal,
+    ZrTemplate,
+  ],
   template: `
     <lib-modal-z [open]="abierto()" tamanio="m" (close)="cerrar.emit()">
       <ng-template libZTemplate id="content">

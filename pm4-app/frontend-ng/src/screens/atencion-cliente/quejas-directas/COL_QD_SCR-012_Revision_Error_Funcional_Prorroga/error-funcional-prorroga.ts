@@ -1,3 +1,4 @@
+import { BotonHabilitado } from '../../../../components/fields/boton-habilitado';
 import { Component, computed, inject, type OnDestroy, type OnInit, signal } from '@angular/core';
 import { FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { ActionBarComponent } from '../../../../components/action-bar';
@@ -105,6 +106,7 @@ function hoyISO(): string {
     ZdsDate,
     ZrAlertInline,
     ZrButton,
+    BotonHabilitado,
     ZrLoader,
   ],
   // Una instancia de `CollectionService` para el select de FLD-204. Ver el punto 2 de la cabecera.

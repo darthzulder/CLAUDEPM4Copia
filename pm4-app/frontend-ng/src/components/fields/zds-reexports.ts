@@ -5,12 +5,16 @@
  * los usa con el selector nativo del DS.
  *
  * ```ts
+ * import { BotonHabilitado } from '../../components/fields/boton-habilitado';
  * import { ZrButton, ZrTable } from '../../components/fields/zds-reexports';
- * // @Component({ imports: [ZrButton, ZrTable], ... })
+ * // @Component({ imports: [ZrButton, BotonHabilitado, ZrTable], ... })
  * ```
  * ```html
- * <lib-button-z label="Enviar" [disabled]="false" (eventClick)="enviar()" />
+ * <lib-button-z label="Enviar" (eventClick)="enviar()" />
  * ```
+ *
+ * `BotonHabilitado` va junto a `ZrButton` **siempre** —lo exige una guarda— porque el `disabled` del
+ * vendor arranca en `true`. Ver el gotcha 1.
  *
  * ── Por qué son alias y no wrappers, y dónde está el límite de esa decisión ────────────────────
  * Un alias (`export { ButtonZ as ZrButton }`) no puede neutralizar un default ni renombrar un input:
@@ -28,10 +32,17 @@
  *
  * ── Los cinco gotchas medidos en el bundle (no leídos de la doc) ───────────────────────────────
  *
- * **1. `ButtonZ.disabled` arranca en `true`.** Verificado: `disabled = true` en el campo de la clase.
- * O sea que `<lib-button-z label="Enviar" />` **monta deshabilitado**. Toda pantalla tiene que pasar
- * `[disabled]="false"` (o la expresión real) de forma explícita. Es el único gotcha de esta lista que
- * el plan de migración ya anticipaba y que resultó exacto.
+ * **1. `ButtonZ.disabled` arranca en `true` — ya envuelto, ver [`boton-habilitado.ts`](./boton-habilitado.ts).**
+ * Verificado: `disabled = true` en el campo de la clase, así que `<lib-button-z label="Enviar" />`
+ * **monta deshabilitado**, pintado y sin responder al clic. Es el único gotcha de esta lista que el plan
+ * de migración ya anticipaba y que resultó exacto.
+ *
+ * Es también el único que **sí** se pudo esconder detrás de la fachada, a pesar de la restricción del
+ * párrafo anterior: la directiva `BotonHabilitado` invierte el default sin envolver el componente, así
+ * que no hay `ContentChildren` que interceptar. Una pantalla la suma a sus `imports` —nada que escribir
+ * en la plantilla— y sus botones quedan habilitados por omisión. **No hace falta seguir escribiendo
+ * `[disabled]="false"`**; los 43 que ya existen quedan y siguen mandando. La guarda
+ * `guarda-boton-habilitado.spec.ts` pone rojo si una pantalla importa `ZrButton` sin la directiva.
  *
  * **2. `LoaderZ.customStr` es un input MUERTO.** El plan decía "tiene un `custom-str` hardcodeado
  * verde además del bindeado → el wrapper decide y documenta cuál gana". Medido: el wrapper **no puede
@@ -172,50 +183,24 @@
  * `components/fields/` siguen existiendo para los campos donde el wrapper sí aporta (el CVA de los
  * `lib-*-z`, que no lo traen, más label/error/`_desc`).
  *
- * ── ⚠⚠ El `[ngModel]` de `ZaModelElement`: inescribible desde la plantilla ─────────────────────
+ * ── ⚠ El `[ngModel]` de `ZaModelElement` va por `[(modeloZa)]` ────────────────────────────────
  * Afecta a **`ZrTabs`, `ZrSidebar` y `ZrPagination`**, los tres `ZaModelElement` de esta fachada (la
  * otra familia, `ZaBaseInput`, no tiene el problema: va por `[formControl]`, sección de arriba).
  *
- * El vendor declara `@Input() ngModel` con el **nombre pelado, sin alias** — o sea, el mismo nombre
- * que la directiva `NgModel` de Angular. Y `ReactiveFormsModule` re-exporta `NgControlStatus`, cuyo
- * selector es `[formControlName],[ngModel],[formControl]`: matchea el **atributo**, y su `NgControl`
- * es `{self: true}` y **no opcional**. Escribir `[ngModel]` hace que `NgControlStatus` se enganche,
- * no encuentre un `NgControl` y tire **`NG0201` montando la pantalla entera**.
- *
- * Las cuatro variantes, **medidas** con una sonda aislada, no deducidas del mensaje de error:
- *
- * | Módulo de forms importado | Binding | Resultado |
- * |---|---|---|
- * | `FormsModule` | `[ngModel]` | ❌ `NG01203` (ahí matchea `NgModel` y exige un CVA) |
- * | `ReactiveFormsModule` | `[ngModel]` | ❌ `NG0201` — con y sin `<form>` alrededor |
- * | **ninguno** | `[ngModel]` | ✅ el input llega |
- * | `ReactiveFormsModule` | solo `(ngModelChange)` | ✅ monta, el output funciona |
- *
- * Dos conclusiones que cuestan si se asumen al revés: **no es culpa de `FormsModule`** (quitarlo no
- * arregla nada, solo cambia el error), y el problema es el **atributo del input**, no el output — un
- * binding de output no crea atributo, así que `(ngModelChange)` es siempre seguro.
- *
- * **La forma que queda: el two-way partido en dos mitades.** La ida por la instancia, la vuelta por
- * el output:
+ * El vendor declara su input con el **nombre pelado** `ngModel`, el mismo que la directiva `NgModel`
+ * de Angular, así que un `[ngModel]` en la plantilla hace matchear a `NgControlStatus` (que
+ * `ReactiveFormsModule` re-exporta) y tira **`NG0201` montando la pantalla entera**. Los tres se
+ * bindean con la directiva [`ModeloZa`](./modelo-za.ts):
  *
  * ```html
- * <!-- ⚠ SIN [ngModel]: lo escribe el effect por la instancia -->
- * <za-tabs #objTabs [tabs]="cllTabs" (ngModelChange)="sigTab.set($event)" />
- * ```
- * ```ts
- * private readonly objTabs = viewChild.required<ZrTabs>('objTabs');
- * constructor() { effect(() => { this.objTabs().ngModel = this.sigTab(); }); }
+ * <za-tabs [(modeloZa)]="sigTab" [tabs]="cllTabs" />
  * ```
  *
- * Las **dos** mitades hacen falta, y la vuelta es la que se olvida: `ZaModelElement._onChange` pisa
- * el atributo `model` del elemento interno por su cuenta, así que sin `(ngModelChange)` el panel se
- * cierra en pantalla y el signal se queda en `true` — el segundo "abrir" no abre nada, sin error.
- * Es el mismo defecto que el `(close)` de `ModalZ`. Ver `screens/ds-catalog/ds-catalog.ts`, que lo
- * tiene aseverado en su spec por las dos mitades.
- *
- * Alternativa descartada: una directiva con selector `'za-tabs[ngModel], …'` que provea un `NgControl`
- * falso. Funciona, pero deja a `NgControlStatus` pintando `ng-valid`/`ng-touched` sobre un control
- * `null`, que es peor que no tener el binding.
+ * **Toda la explicación vive en `modelo-za.ts`** —causa raíz leída del fuente del vendor, la tabla de
+ * las cuatro variantes medidas, por qué hacen falta las dos mitades y la alternativa descartada— y
+ * **no se repite acá ni en las pantallas**: estaba duplicada en cuatro lugares, y eso fue la deuda
+ * que la directiva cerró. La guarda [`guarda-ngmodel.spec.ts`](./guarda-ngmodel.spec.ts) pone rojo si
+ * un `[ngModel]` reaparece en cualquier `.html`.
  *
  * ── ⚠ `ZrStageBanner` usa `imageSrc` camelCase, y ni él ni `ZrNavigation` proyectan contenido ──
  * Dos trampas de lo que esta fachada ya exportaba, que recién se ven al montar el catálogo porque
@@ -320,8 +305,8 @@ export {
   // inputs, cero slots: no renderiza nada). Ver la tabla del docstring.
   ZaCard as ZrCard,
   ZaFooter as ZrFooter,
-  // ⚠ `ZaModelElement`: su `[ngModel]` NO se puede escribir desde la plantilla. Ver la sección
-  // "El `[ngModel]` de `ZaModelElement`" del docstring — es un `NG0201` que tira la pantalla entera.
+  // ⚠ `ZaModelElement`: se bindea con `[(modeloZa)]`, NO con `[ngModel]` (que tira `NG0201` y deja la
+  // pantalla sin montar). Ver `modelo-za.ts`.
   ZaTabs as ZrTabs,
   ZaTile as ZrTile,
   // ── Display y layout que `lib-zurich` no tiene ──────────────────────────────────────────────
@@ -331,11 +316,11 @@ export {
   ZaIcon as ZrIcon,
   ZaInputGroup as ZrInputGroup,
   ZaKpiValue as ZrKpiValue,
-  // ⚠ `ZaModelElement`, igual que `ZrTabs`: el `[ngModel]` es inescribible. Ver el docstring.
+  // ⚠ `ZaModelElement`, igual que `ZrTabs`: va con `[(modeloZa)]`. Ver `modelo-za.ts`.
   ZaPagination as ZrPagination,
   ZaProgressBar as ZrProgressBar,
   ZaPromo as ZrPromo,
-  // ⚠ `ZaModelElement`, igual que `ZrTabs`: el `[ngModel]` es inescribible. Ver el docstring.
+  // ⚠ `ZaModelElement`, igual que `ZrTabs`: va con `[(modeloZa)]`. Ver `modelo-za.ts`.
   ZaSidebar as ZrSidebar,
   ZaSwitch as ZrSwitch,
   // ⚠ **No se consume en ninguna plantilla: existe para que los SPECS puedan tiparlo.** La píldora

@@ -1,3 +1,4 @@
+import { BotonHabilitado } from '../../../../components/fields/boton-habilitado';
 import { ChangeDetectionStrategy, Component, input, output } from '@angular/core';
 import { ZrButton, ZrModal, ZrTemplate } from '../../../../components/fields/zds-reexports';
 
@@ -35,7 +36,7 @@ import { ZrButton, ZrModal, ZrTemplate } from '../../../../components/fields/zds
   selector: 'app-confirmar-envio-modal',
   standalone: true,
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [ZrButton, ZrModal, ZrTemplate],
+  imports: [ZrButton, BotonHabilitado, ZrModal, ZrTemplate],
   template: `
     <lib-modal-z [open]="abierto()" tamanio="m" (close)="atras.emit()">
       <ng-template libZTemplate id="content">

@@ -1,3 +1,4 @@
+import { BotonHabilitado } from '../../../../components/fields/boton-habilitado';
 import { Component, computed, inject, signal, type OnDestroy, type OnInit } from '@angular/core';
 import { FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { ActionBarComponent } from '../../../../components/action-bar';
@@ -98,6 +99,8 @@ const CLL_CATALOGOS = ['channel', 'sfcProduct', 'sfcReason', 'admission'] as con
     ZdsFileInput,
     ZrAlertInline,
     ZrButton,
+
+    BotonHabilitado,
     ZrLoader,
   ],
   // Los dos por pantalla y no de root: `CatalogosService` cachea los catálogos de **esta** pantalla y

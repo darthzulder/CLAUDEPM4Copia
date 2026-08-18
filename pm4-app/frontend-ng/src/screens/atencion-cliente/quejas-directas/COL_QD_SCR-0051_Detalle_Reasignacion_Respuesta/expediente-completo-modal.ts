@@ -1,3 +1,4 @@
+import { BotonHabilitado } from '../../../../components/fields/boton-habilitado';
 import { ChangeDetectionStrategy, Component, computed, input, output } from '@angular/core';
 import { ZrButton, ZrModal, ZrTable, ZrTemplate, type ModeloTablaZr } from '../../../../components/fields/zds-reexports';
 import { InfoBarComponent, type InfoBarItem } from '../../../../components/info-bar';
@@ -63,7 +64,7 @@ interface FilaExpediente {
 @Component({
   selector: 'app-expediente-completo-modal',
   standalone: true,
-  imports: [ZrModal, ZrTemplate, ZrButton, ZrTable, InfoBarComponent, RequestFileListComponent],
+  imports: [ZrModal, ZrTemplate, ZrButton, BotonHabilitado, ZrTable, InfoBarComponent, RequestFileListComponent],
   changeDetection: ChangeDetectionStrategy.OnPush,
   templateUrl: './expediente-completo-modal.html',
 })

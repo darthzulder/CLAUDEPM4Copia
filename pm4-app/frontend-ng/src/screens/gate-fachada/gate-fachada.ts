@@ -1,3 +1,4 @@
+import { BotonHabilitado } from '../../components/fields/boton-habilitado';
 import { Component, signal } from '@angular/core';
 import {
   FormControl,
@@ -90,6 +91,7 @@ export function requerirTildado(in_strValorTildado: string): ValidatorFn {
     ZdsStatusBadge,
     ZrAlert,
     ZrButton,
+    BotonHabilitado,
     ZrLoader,
   ],
   providers: [FileRegistryService],

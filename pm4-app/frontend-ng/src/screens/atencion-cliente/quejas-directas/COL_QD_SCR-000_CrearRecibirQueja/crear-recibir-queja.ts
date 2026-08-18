@@ -1,3 +1,4 @@
+import { BotonHabilitado } from '../../../../components/fields/boton-habilitado';
 import { HttpClient, HttpParams } from '@angular/common/http';
 import {
   ChangeDetectionStrategy, Component, computed, effect, inject, Injector, type OnDestroy,
@@ -182,6 +183,7 @@ interface AvisoSimilares {
     ZdsSelect,
     ZrAlertInline,
     ZrButton,
+    BotonHabilitado,
     ZrIcon,
     ZrLoader,
     ZrModal,

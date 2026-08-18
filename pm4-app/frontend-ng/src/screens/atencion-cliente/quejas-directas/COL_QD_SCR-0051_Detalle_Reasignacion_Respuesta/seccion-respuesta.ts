@@ -1,3 +1,4 @@
+import { BotonHabilitado } from '../../../../components/fields/boton-habilitado';
 import {
   ChangeDetectionStrategy, Component, computed, effect, inject, Injector, input, output,
   runInInjectionContext, signal, type Signal,
@@ -51,7 +52,7 @@ import {
   selector: 'app-seccion-respuesta',
   standalone: true,
   imports: [
-    ReactiveFormsModule, FormSectionComponent, ZdsSelect, ZdsTextarea, ZrAlertInline, ZrButton,
+    ReactiveFormsModule, FormSectionComponent, ZdsSelect, ZdsTextarea, ZrAlertInline, ZrButton, BotonHabilitado,
     DocSupportUploaderComponent, RequestFileListComponent,
   ],
   // El catálogo de motivos de prórroga es de **esta** sección: nadie más lo usa.

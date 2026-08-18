@@ -1,3 +1,4 @@
+import { BotonHabilitado } from './fields/boton-habilitado';
 import { HttpClient } from '@angular/common/http';
 import {
   ChangeDetectionStrategy,
@@ -162,7 +163,7 @@ const STR_NOMBRE_DEFECTO = 'documento.pdf';
       border-radius: 4px;
     }
   `,
-  imports: [ZrButton, ZrLoader],
+  imports: [ZrButton, BotonHabilitado, ZrLoader],
 })
 export class PdfViewerComponent {
   private readonly objHttp = inject(HttpClient);

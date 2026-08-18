@@ -1,3 +1,4 @@
+import { BotonHabilitado } from '../../../../components/fields/boton-habilitado';
 import { Component, computed, effect, inject, OnDestroy, OnInit, signal } from '@angular/core';
 import { FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { ActionBarComponent } from '../../../../components/action-bar';
@@ -84,6 +85,7 @@ const STR_PLACEHOLDER = '—';
     ZdsTextarea,
     ZrAlertInline,
     ZrButton,
+    BotonHabilitado,
     ZrLoader,
   ],
   providers: [CollectionService],

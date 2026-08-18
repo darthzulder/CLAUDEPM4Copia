@@ -1,3 +1,4 @@
+import { BotonHabilitado } from '../../../../components/fields/boton-habilitado';
 import {
   Component,
   computed,
@@ -105,6 +106,7 @@ import {
     ZdsStatusBadge,
     ZrAlertInline,
     ZrButton,
+    BotonHabilitado,
     ZrLoader,
   ],
   // Registro de binarios POR PANTALLA. Ver el punto 1 de la cabecera y el docstring del servicio.

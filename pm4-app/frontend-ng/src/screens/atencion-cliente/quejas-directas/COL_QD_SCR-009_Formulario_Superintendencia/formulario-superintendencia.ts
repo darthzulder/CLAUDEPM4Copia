@@ -1,3 +1,4 @@
+import { BotonHabilitado } from '../../../../components/fields/boton-habilitado';
 import {
   Component, computed, inject, signal, type OnDestroy, type OnInit,
 } from '@angular/core';
@@ -107,6 +108,7 @@ const DIC_CAMPO_DE_CATALOGO = {
     ZdsSelect,
     ZrAlertInline,
     ZrButton,
+    BotonHabilitado,
     ZrLoader,
   ],
   providers: [CatalogosService],
