@@ -342,3 +342,92 @@ describe('CollectionService · el estado de carga y el fallo', () => {
     expect(String(spyError.mock.calls[0]?.[0])).toContain('id=42');
   });
 });
+
+/**
+ * El contrato ante una colección **vacía de verdad** — el caso que el dato de PM4 produce hoy.
+ *
+ * ── Por qué no alcanzaba lo que ya había ──────────────────────────────────────────────────────
+ * Arriba ya existe *"una respuesta sin la clave `data`"*, que resuelve con `{}`. Esa es la rama de
+ * una respuesta **degradada** del gateway, y cubre el `?.`/`??` de la línea del servicio. Pero el
+ * defecto real de PM4 es otro: el catálogo **responde bien** y su lista viene vacía —
+ * `{data: []}` — que es una respuesta legítima, no un error. Son dos ramas distintas de la misma
+ * línea, y solo una estaba aseverada.
+ *
+ * Hasta ahora `{data: []}` aparecía **cinco veces** en este archivo, pero siempre como relleno de
+ * casos que aseveran otra cosa (la URL, el `per_page`, el PMQL): ninguno miraba el estado
+ * resultante. O sea que el comportamiento ante colección vacía funcionaba sin que nada lo
+ * sostuviera.
+ *
+ * ── El defecto de dato que esto blinda ────────────────────────────────────────────────────────
+ * Medido en PM4 y presente **también en React**: la colección 14 (departamentos) tiene opciones
+ * pero ninguna marcada como activa, y la 15 (municipios) llega sin registros para varios
+ * departamentos. El dato es inalcanzable desde este entorno (`curl` → exit 35, TLS handshake), así
+ * que se verifica en el deploy; lo que corresponde acá es que el **código** no empeore el
+ * problema. La decisión fue explícita del usuario: blindar el código y dejar el dato al deploy.
+ *
+ * Lo que se asevera es "no escribir basura": ante una lista vacía las cuatro piezas quedan vacías
+ * y `cargando` baja igual. Un servicio que en vez de eso dejara `options` en `undefined` haría
+ * explotar el `.map()` de `zds-select`, y uno que dejara las opciones de la carga anterior daría
+ * un select con municipios de otro departamento — que es peor que un select vacío, porque se ve
+ * bien.
+ *
+ * ── La mutación, y la que NO servía ───────────────────────────────────────────────────────────
+ * El plan proponía quitarle el `?? []` a `objResp?.data ?? []`. **Medido: no pone nada rojo.** Es
+ * inefectiva por construcción — `{data: []}` trae la clave, así que `objResp!.data!` devuelve el
+ * mismo `[]`. Ese `??` cubre la rama `{}` (respuesta degradada), que ya estaba aseverada arriba y
+ * es un caso distinto del que estos tres casos tratan.
+ *
+ * La mutación que sí discrimina está en `publicar()`, que es quien decide qué pasa con una lista
+ * vacía: agregarle `if (in_cllRecords.length === 0) return;` antes del primer `set` — el bug
+ * plausible de "no borres si no vino nada" — pone rojo el segundo caso, el marcado con ⚠. Que sea
+ * *ese* el que cae no es casual: es el único de los tres que mide el **borrado**, y el borrado es
+ * todo el punto de la cascada.
+ */
+describe('CollectionService · una colección vacía es una respuesta válida, no un error', () => {
+  it('un catálogo que responde {data: []} deja las cuatro piezas vacías y NO lanza', async () => {
+    const prm = objSvc.cargar(OBJ_DEF);
+    objMock.expectOne('/api/collections/42/records?per_page=500').flush({ data: [] });
+
+    // Que resuelva es parte del contrato: una colección vacía no es un fallo, así que la pantalla
+    // sigue montando. Es lo que permite que el municipio sin opciones no tire SCR-000 entera.
+    await expect(prm).resolves.toBeUndefined();
+    expect(objSvc.options()).toEqual([]);
+    expect(objSvc.rawMap()).toEqual({});
+    expect(objSvc.records()).toEqual([]);
+    // `cargando` tiene que bajar igual, y va por el `finally`. Si se quedara en `true`, el select
+    // mostraría "Cargando opciones..." para siempre — un estado mentiroso, no solo inútil.
+    expect(objSvc.cargando()).toBe(false);
+  });
+
+  it('⚠ una colección vacía BORRA las opciones de la carga anterior', async () => {
+    const prmOk = objSvc.cargar(OBJ_DEF);
+    responder(CLL_RECORDS);
+    await prmOk;
+    expect(objSvc.options()).toHaveLength(2);
+
+    const prmVacia = objSvc.cargar(OBJ_DEF);
+    objMock.expectOne('/api/collections/42/records?per_page=500').flush({ data: [] });
+    await prmVacia;
+
+    // **Este es el caso que importa de los dos.** Es exactamente la cascada de SCR-000: el usuario
+    // cambia de departamento y el municipio se recarga con un PMQL nuevo. Si el departamento nuevo
+    // no tiene municipios y el servicio conservara las opciones anteriores, el select ofrecería
+    // municipios **del departamento viejo** como si fueran válidos. Un select vacío es un problema
+    // de dato visible; uno con opciones equivocadas es un dato incorrecto que se ve correcto y
+    // termina guardado en el caso de PM4.
+    expect(objSvc.options()).toEqual([]);
+    expect(objSvc.rawMap()).toEqual({});
+  });
+
+  it('una colección vacía NO deja options en undefined, que es lo que rompería el select', async () => {
+    const prm = objSvc.cargar(OBJ_DEF);
+    objMock.expectOne('/api/collections/42/records?per_page=500').flush({ data: [] });
+    await prm;
+
+    // Aseverado sobre la forma y no solo sobre la igualdad: `zds-select` hace `this.options().map()`
+    // sin guarda —correctamente, porque el contrato de este servicio es "siempre un array"—, así que
+    // un `undefined` acá sería un `TypeError` al montar la pantalla, no un select vacío.
+    expect(Array.isArray(objSvc.options())).toBe(true);
+    expect(Array.isArray(objSvc.records())).toBe(true);
+  });
+});

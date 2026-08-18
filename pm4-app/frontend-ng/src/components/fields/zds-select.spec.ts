@@ -296,3 +296,122 @@ describe('ZdsSelect', () => {
     expect(fnEnvoltorio().classList.contains('zds-select-wrap--deshabilitado')).toBe(true);
   });
 });
+
+/**
+ * El contrato del select ante un catálogo **vacío** — la mitad visible del defecto de dato de PM4.
+ *
+ * ── El defecto, y por qué se blinda en vez de arreglarse ──────────────────────────────────────
+ * Medido en PM4 y presente **también en React**: la colección 15 (municipios) llega sin registros
+ * para varios departamentos. El dato es inalcanzable desde este entorno (`curl` → exit 35, TLS
+ * handshake), así que la verificación del dato va al deploy — decisión explícita del usuario:
+ * blindar el código, dejar el dato a la nube. Lo que corresponde acá es fijar que el código **no
+ * empeore** el problema, y eso sí es medible bajo jsdom.
+ *
+ * ── Lo que ya estaba cubierto, y lo que no ────────────────────────────────────────────────────
+ * El caso *"un catálogo que llega TARDE"* de arriba arranca con `opciones = []` y asevera que el DS
+ * pinta su propio `['No options found']`. O sea que el estado vacío **sin placeholder** ya estaba
+ * fijado, pero de refilón: es el punto de partida de un test que mide otra cosa, así que nadie
+ * leyéndolo entiende que ahí vive un contrato. Lo que faltaba es el escenario tal como lo usan las
+ * pantallas reales —vacío **con** placeholder— y, sobre todo, que el control del form **no reciba
+ * nada** cuando no hay opciones.
+ *
+ * ── Por qué el control es la aserción que importa ─────────────────────────────────────────────
+ * Un select vacío es un problema de dato **visible**: el usuario ve que no hay municipios y lo
+ * reporta. Un select que le escribiera algo al control sin que el usuario elija —el placeholder
+ * como si fuera un valor, o la primera opción por defecto— es un dato **incorrecto que se ve
+ * correcto** y termina guardado en el caso de PM4 al completar la tarea. Eso es peor, y es lo que
+ * estos casos impiden.
+ *
+ * ── La mejora de UX que el plan dejaba abierta: NO va ─────────────────────────────────────────
+ * El plan preguntaba si además correspondía un texto de "sin opciones" en vez de un desplegable en
+ * blanco. Comparado contra React (`frontend/src/components/fields/ZdsFields.tsx:415-416`): antepone
+ * el placeholder **incondicionalmente**, igual que acá, y el `helpText` de carga dice la misma
+ * frase. La única diferencia es que React le pone `disabled: true` a la opción del placeholder, y
+ * eso es decorativo en los dos lados — la lib emite un `<option>` pelado sin `[disabled]` (ver la
+ * cabecera de `cllOpcionesLib`), así que el DS lo descarta igual. **Comportamiento paritario, sin
+ * diferencia que reportar y nada que cambiar:** el placeholder ya cumple el rol de "sin opciones".
+ *
+ * ── Mutación ──────────────────────────────────────────────────────────────────────────────────
+ * `cllOpcionesLib`: `this.placeholder()` → `this.placeholder() && cllBase.length > 0`, o sea el bug
+ * plausible de "no muestres el desplegable si está vacío". Pone rojo **tres** de estos casos, entre
+ * ellos el que lee el shadow DOM: si el placeholder desapareciera con catálogo vacío, el usuario
+ * vería un desplegable en blanco y no sabría si está cargando o si no hay nada.
+ */
+describe('ZdsSelect · con el catálogo vacío', () => {
+  let objFixture: ComponentFixture<HostDeFormulario>;
+
+  beforeEach(async () => {
+    objFixture = TestBed.createComponent(HostDeFormulario);
+    objFixture.componentInstance.opciones = [];
+    objFixture.componentInstance.placeholder = 'Seleccione un municipio';
+    objFixture.componentRef.changeDetectorRef.markForCheck();
+    await objFixture.whenStable();
+    await drenarTimeouts();
+  });
+
+  it('monta sin lanzar y deja el placeholder como única opción', () => {
+    // Que monte es la mitad del contrato: `cllOpcionesLib` hace `this.options().map()` sin guarda, y
+    // eso es correcto **porque `CollectionService` garantiza un array** (aseverado del otro lado, en
+    // `collection.service.spec.ts`). Los dos specs juntos son la cadena completa: el servicio nunca
+    // entrega `undefined`, y el select no necesita defenderse de algo que no puede pasar.
+    expect(hijo(objFixture).options).toEqual([{ value: '', description: 'Seleccione un municipio' }]);
+  });
+
+  it('el usuario VE el placeholder y no un desplegable en blanco', () => {
+    // Aseverado sobre el shadow DOM y no sobre `options` — por el mismo motivo que el resto de este
+    // archivo: la propiedad mide lo que el código escribió, el `<li>` mide lo que el usuario ve (ver
+    // el docstring de `etiquetasPintadas`). Sin placeholder el DS pone su propio "No options found";
+    // con placeholder, manda el nuestro, que es el que explica **por qué** está vacío.
+    expect(etiquetasPintadas(objFixture)).toEqual(['Seleccione un municipio']);
+  });
+
+  it('⚠ el control del form queda VACÍO: un catálogo sin opciones no escribe nada', () => {
+    const objControl = objFixture.componentInstance.form.controls.qd_strChannel;
+
+    // La aserción de "no escribir basura". El placeholder es un `<option value="">`, así que si el
+    // wrapper lo tratara como una opción real —o si el `modelChange` del DS disparara al montar— el
+    // control quedaría con `''` **marcado como tocado y elegido**, indistinguible de una elección
+    // deliberada del usuario. Queda intacto: sin valor y sin tocar.
+    expect(objControl.value).toBe('');
+    expect(objControl.touched).toBe(false);
+    expect(objControl.dirty).toBe(false);
+  });
+
+  it('un catálogo que se VACÍA borra lo pintado y no deja opciones viejas seleccionables', async () => {
+    // La cascada de SCR-000 vista desde el select: el usuario cambia de departamento y el municipio
+    // se recarga. Es el complemento del caso homónimo en `collection.service.spec.ts` — allá se
+    // asevera que el servicio borra sus opciones, acá que el listado deja de ofrecerlas. Sin las dos
+    // mitades, un select podría seguir pintando municipios del departamento anterior aunque el
+    // servicio ya los hubiera descartado.
+    objFixture.componentInstance.opciones = CLL_OPCIONES;
+    objFixture.componentRef.changeDetectorRef.markForCheck();
+    await objFixture.whenStable();
+    await drenarTimeouts();
+    expect(etiquetasPintadas(objFixture)).toEqual([
+      'Seleccione un municipio',
+      'Internet',
+      'Sucursal',
+      '15',
+    ]);
+
+    objFixture.componentInstance.opciones = [];
+    objFixture.componentRef.changeDetectorRef.markForCheck();
+    await objFixture.whenStable();
+    await drenarTimeouts();
+
+    expect(etiquetasPintadas(objFixture)).toEqual(['Seleccione un municipio']);
+  });
+
+  it('con el catálogo vacío Y cargando, el helpText explica la espera en vez de mentir vacío', async () => {
+    // El estado real de los primeros ~300ms de toda pantalla: el catálogo todavía no resolvió, así
+    // que `options` está vacío y `loading` en true. Sin este texto el usuario ve un select vacío y
+    // concluye que no hay datos, cuando en realidad todavía están viajando. Es la única afordancia
+    // disponible: `lib-input-select-z` **no puede deshabilitarse** (su input `disable` está muerto,
+    // ver el caso de arriba), así que no se puede impedir que abra el desplegable mientras carga.
+    objFixture.componentInstance.loading = true;
+    objFixture.componentRef.changeDetectorRef.markForCheck();
+    await objFixture.whenStable();
+
+    expect(hijo(objFixture).helpText).toBe('Cargando opciones...');
+  });
+});
