@@ -1,8 +1,8 @@
 import {
-  ChangeDetectionStrategy, Component, computed, effect, inject, Injector, type OnInit, signal,
-  viewChild,
+  ChangeDetectionStrategy, Component, computed, inject, Injector, type OnInit, signal,
 } from '@angular/core';
 import { FormControl, FormGroup, ReactiveFormsModule } from '@angular/forms';
+import { ModeloZa } from '../../../../components/fields/modelo-za';
 import { ZdsInput } from '../../../../components/fields/zds-input';
 import { ZdsSelect } from '../../../../components/fields/zds-select';
 import {
@@ -72,6 +72,7 @@ const STR_NOMBRE_CSV = 'reporte-casos-quejas-directas.csv';
     ZrKpiValue,
     ZrLoader,
     ZrPagination,
+    ModeloZa,
   ],
   // `CasosDashboardService` necesita `HolidaysService` para los días hábiles, y `CatalogosService`
   // fabrica los dos catálogos (Tipo y Área) en injectors hijos de este. Ninguno es singleton: su
@@ -215,30 +216,6 @@ export class DashboardGestionCasos implements OnInit {
    * eso la tabla quedaría vacía con la paginación marcando una página que ya no existe.
    */
   protected readonly intPaginaActual = computed(() => Math.min(this.sigPagina(), this.intTotalPaginas()));
-
-  /**
-   * El paginador del DS, para poder escribirle la página desde acá.
-   *
-   * ⚠ Es la contraparte del ⚠ de la plantilla: `[ngModel]` en el HTML activaría `NgControlStatus` de
-   * `ReactiveFormsModule` (selector `[formControlName],[ngModel],[formControl]`), que hace
-   * `inject(NgControl)` sin fallback y tira **NG0201**, dejando la pantalla sin montar. El input es
-   * del DS y no se puede renombrar, así que se escribe por instancia — donde no hay selector que
-   * matchear. `{read: ZaPagination}` para obtener el componente y no el `ElementRef`.
-   */
-  private readonly objPaginador = viewChild(ZrPagination);
-
-  /**
-   * Empuja la página vigente al paginador cada vez que cambia.
-   *
-   * Va por `effect` y no por binding por lo dicho arriba. Lee `intPaginaActual()` (el valor
-   * **acotado**), no `sigPagina()`: si el filtro dejó menos páginas, el paginador tiene que marcar la
-   * que se está mostrando de verdad. El `?.` cubre el primer render, cuando el `@else` todavía no
-   * pintó el paginador porque la pantalla está cargando.
-   */
-  private readonly efPaginador = effect(() => {
-    const objPag = this.objPaginador();
-    if (objPag) objPag.ngModel = this.intPaginaActual();
-  });
 
   private readonly intInicio = computed(() => (this.intPaginaActual() - 1) * SCR013_PAGE_SIZE);
 

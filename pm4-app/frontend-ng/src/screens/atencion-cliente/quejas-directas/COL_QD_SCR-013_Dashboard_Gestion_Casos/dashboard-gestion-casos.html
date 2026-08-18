@@ -113,24 +113,20 @@
         (ver)="abrirDetalle($event)"
       />
 
-      <!-- `za-pagination` lleva su página por el input `ngModel` y avisa por `(ngModelChange)`: hereda
-           de `ZaModelElement`, donde `ngModel` es un `@Input` común (NO un ControlValueAccessor), así
-           que la página no queda atada al `FormGroup` de los filtros — no es un filtro.
+      <!-- La página va por `modeloZa` y NO por `[ngModel]`: el input del DS se llama igual que la
+           directiva de Angular y un `[ngModel]` acá tiraría NG0201. El motivo completo está en
+           `components/fields/modelo-za.ts`, que es lo que hace posible este binding.
 
-           ⚠ **La página se escribe por `viewChild`, NO con un `[ngModel]="…"` en la plantilla, y no es
-           una preferencia de estilo.** `ReactiveFormsModule` —que esta pantalla importa para los cuatro
-           filtros— exporta `NgControlStatus`, cuyo selector es `[formControlName],[ngModel],[formControl]`.
-           Un `[ngModel]` pelado acá lo matchea, y esa directiva hace `inject(NgControl)` sin fallback:
-           `ZaModelElement` no provee ningún `NgControl`, así que el render explota con **NG0201 y la
-           pantalla entera no monta**. No hay forma de desactivar el matcheo por elemento, y el input no
-           se puede renombrar (es del DS). Queda escribirlo desde la clase, donde no hay selector que
-           matchear. Cubierto por el caso de paginación del spec, que fue el que lo destapó. -->
+           Se escribe solo la mitad de ida porque `intPaginaActual` es un `computed` (la página
+           **acotada** al total): la vuelta no puede asignarle, y de hecho no debe — pasa por
+           `irAPagina`, que escribe `sigPagina`, el signal que sí es de escritura. -->
       <div z-flex="wrap:75" z-align="between:center">
         <span class="field-hint">{{ strResumenPagina() }}</span>
         <za-pagination
+          [modeloZa]="intPaginaActual()"
           [pages]="intTotalPaginas()"
           [show-edges]="true"
-          (ngModelChange)="irAPagina($event)"
+          (modeloZaChange)="irAPagina($event)"
         />
       </div>
     </div>

@@ -193,23 +193,12 @@
     </app-form-section>
 
     <!-- ── Pestañas ────────────────────────────────────────────────────────────────────────────
-         `ZaTabs` es de la familia `ZaModelElement`: two-way por `ngModel`, SIN CVA.
-
-         ⚠ **El input `[ngModel]` NO se escribe acá, y no es un olvido: escribirlo revienta la
-         pantalla.** El `ngModel` de estos componentes es un `@Input()` propio que se llama igual
-         que el directivo de Angular, y `NgControlStatus` —que `ReactiveFormsModule` arrastra
-         siempre— tiene selector `[formControlName],[ngModel],[formControl]` y pide un `NgControl`
-         **no opcional**. O sea: el atributo `ngModel` en la plantilla lo matchea, no hay quien
-         provea `NgControl`, y sale `NG0201` al montar. El output `(ngModelChange)` sí es seguro:
-         un binding de salida no crea atributo, así que ningún selector lo ve.
-
-         Por eso el valor entra por la **instancia** (`objTabs` + un `effect` en la clase) y solo el
-         retorno viaja por plantilla. Medido con una sonda aislada, no deducido; el razonamiento
-         completo y la tabla de variantes están en el docstring de la clase.
+         `ZaTabs` es de la familia `ZaModelElement`: two-way por `[(modeloZa)]`, NO por `[ngModel]`
+         (que tiraría `NG0201`). El motivo completo está en `components/fields/modelo-za.ts`.
 
          El contenido de cada pestaña va por `slot="tab-N"`, 1-based, igual que en React. -->
     <app-form-section title="Pestañas (Tabs)">
-      <za-tabs #objTabs [tabs]="cllTabs" (ngModelChange)="sigTab.set($event)">
+      <za-tabs [(modeloZa)]="sigTab" [tabs]="cllTabs">
         <div slot="tab-1">Contenido de Resumen.</div>
         <div slot="tab-2">Contenido de Detalle.</div>
         <div slot="tab-3">Contenido de Historial.</div>
@@ -265,14 +254,11 @@
 
       <div z-flex="75" z-align="between:center">
         <span class="field-hint">Página {{ sigPagina() }} de 5</span>
-        <!-- Mismo cableado que `za-tabs`: `ZaPagination` es `ZaModelElement`, así que el valor entra
-             por la instancia (`objPaginacion`) y **no** por un `[ngModel]` en la plantilla — ver la
-             advertencia de la sección de pestañas. `show-edges` va en kebab por alias. -->
+        <!-- Mismo binding que `za-tabs`. `show-edges` va en kebab por alias. -->
         <za-pagination
-          #objPaginacion
+          [(modeloZa)]="sigPagina"
           [pages]="5"
           [show-edges]="true"
-          (ngModelChange)="sigPagina.set($event)"
         />
       </div>
     </app-form-section>
@@ -379,12 +365,10 @@
     </lib-modal-z>
 
     <!-- El panel lateral queda SIEMPRE montado y su visibilidad la gobierna el modelo, igual que en
-         React. `ZaSidebar` es `ZaModelElement`, así que el valor entra por la instancia
-         (`objSidebar`) y solo el retorno va por plantilla — ver la advertencia de las pestañas. -->
+         React. Mismo binding que las pestañas — `ZaSidebar` también es `ZaModelElement`. -->
     <za-sidebar
-      #objSidebar
+      [(modeloZa)]="sigDrawer"
       config="right"
-      (ngModelChange)="sigDrawer.set($event)"
     >
       <h3 class="modal-titulo">Sidebar de ejemplo</h3>
       <p class="subsection-intro">Panel lateral deslizable.</p>

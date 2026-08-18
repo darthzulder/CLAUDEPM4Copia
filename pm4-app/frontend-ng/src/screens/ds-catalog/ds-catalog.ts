@@ -1,10 +1,8 @@
 import {
   ChangeDetectionStrategy,
   Component,
-  effect,
   inject,
   signal,
-  viewChild,
 } from '@angular/core';
 import { FormControl, FormGroup, ReactiveFormsModule } from '@angular/forms';
 import { FileRegistryService } from '../../core/file-registry.service';
@@ -12,6 +10,7 @@ import { FormSectionComponent } from '../../components/form-section';
 import { ZdsCheckboxField } from '../../components/fields/zds-checkbox-field';
 import { ZdsDate } from '../../components/fields/zds-date';
 import { ZdsFileInput } from '../../components/fields/zds-file-input';
+import { ModeloZa } from '../../components/fields/modelo-za';
 import { ZdsInput } from '../../components/fields/zds-input';
 import { ZdsRadio } from '../../components/fields/zds-radio';
 import { ZdsSelect, type OpcionZds } from '../../components/fields/zds-select';
@@ -107,7 +106,7 @@ const STR_LOGO = 'resources/zurich/ZurichLogo_Horz_White_CMYK_no_R.png';
  *
  * | Base | Componentes de esta pantalla | Cómo se bindea |
  * |---|---|---|
- * | `ZaModelElement` | `ZrTabs`, `ZrSidebar`, `ZrPagination` | `ngModel` **partido** — ver abajo |
+ * | `ZaModelElement` | `ZrTabs`, `ZrSidebar`, `ZrPagination` | `[(modeloZa)]` — ver abajo |
  * | `ZaBaseInput` (⊂ `ZaModelElement`) | `ZrTextInput`, `ZrSwitch`, `ZrCalendar`, `ZrSegmented`, `ZrStepper` | `[formControl]` — CVA nativo |
  *
  * `ZaModelElement` declara `ngModel` como **input común** (+ `ngModelChange`), sin `NG_VALUE_ACCESSOR`:
@@ -117,53 +116,20 @@ const STR_LOGO = 'resources/zurich/ZurichLogo_Horz_White_CMYK_no_R.png';
  * en `dist/esm2022/`). Confundir las dos familias **no da error de tipos**: da un control que nunca se
  * actualiza, o un `NG01203` si se le pone `[formControl]` a los de `ZaModelElement`.
  *
- * ── ⚠⚠ El input `[ngModel]` de esa familia es INESCRIBIBLE en una pantalla con forms ────────────
- * **El defecto más caro de esta fase, y el que más veces me hizo cambiar de diagnóstico.** Vale
- * entero porque cualquier pantalla futura que use `ZrTabs`/`ZrSidebar`/`ZrPagination` lo va a pisar.
+ * ── El `[ngModel]` de esa familia es inescribible, y lo resuelve `modeloZa` ─────────────────────
+ * `ZaModelElement` declara su input con el **nombre pelado** `ngModel`, o sea el mismo que la
+ * directiva `NgModel` de Angular. Con `ReactiveFormsModule` en `imports` —que esta pantalla necesita
+ * para los wrappers `Zds*`— un `[ngModel]` en la plantilla hace matchear a `NgControlStatus` y tira
+ * **`NG0201` tirando la pantalla entera**.
  *
- * `ZaModelElement` declara `@Input() ngModel` con el **nombre de propiedad pelado**, sin alias
- * (verificado en el fuente embebido del sourcemap de `dist/esm2022/_shared/za-base.mjs`). O sea: se
- * llama exactamente igual que el directivo `NgModel` de Angular. Y `ReactiveFormsModule` re-exporta
- * `NgControlStatus`, cuyo selector es:
+ * Los tres se bindean con **`[(modeloZa)]`**, la directiva de
+ * [`components/fields/modelo-za.ts`](../../components/fields/modelo-za.ts), que envuelve el defecto:
+ * ahí está la causa raíz leída del fuente del vendor, la tabla de las cuatro variantes medidas, por
+ * qué hacen falta las dos mitades y la alternativa descartada. **No repetir esa explicación acá ni en
+ * ninguna pantalla nueva:** estaba duplicada en esta clase, en tres comentarios de la plantilla y en
+ * SCR-013, y eso fue precisamente la deuda que la directiva cerró.
  *
- * `[formControlName],[ngModel],[formControl]`   ← un ATRIBUTO, no una etiqueta
- *
- * y cuyo constructor es `constructor(cd: NgControl)` con `{self: true}` y **sin `optional`**. Así
- * que escribir `[ngModel]` en la plantilla hace que `NgControlStatus` matchee el elemento, busque un
- * `NgControl` que nadie provee (el componente del DS no es un CVA) y tire:
- *
- * `NG0201: No provider for NgControl found in NodeInjector`
- *
- * al **montar la pantalla entera**, no solo ese elemento.
- *
- * ── Lo que se midió, con una sonda aislada de 20 líneas ─────────────────────────────────────────
- * No es deducción: se probaron cuatro variantes en un spec desechable, con un `za-tabs` y nada más.
- *
- * | Variante | Resultado |
- * |---|---|
- * | `FormsModule` + `[ngModel]` | ❌ `NG01203` (ahí el que matchea es `NgModel`, que pide un CVA) |
- * | `ReactiveFormsModule` + `[ngModel]`, con o sin `<form>` alrededor | ❌ `NG0201` (`NgControlStatus`) |
- * | **Sin ningún** módulo de forms + `[ngModel]` | ✅ el input llega (`ngModel === 1`) |
- * | `ReactiveFormsModule` + solo `(ngModelChange)`, sin el input | ✅ monta y el output funciona |
- *
- * Las dos conclusiones que importan: **(1)** no es culpa de `FormsModule` —`ReactiveFormsModule`
- * solo también falla, con otro error—, así que "saco `FormsModule`" no era el arreglo; **(2)** el
- * problema es el **atributo del input**, no el output: un binding de salida no crea atributo, así
- * que ningún selector lo ve y `(ngModelChange)` es siempre seguro.
- *
- * ── La forma que queda, y por qué ───────────────────────────────────────────────────────────────
- * El two-way se parte en dos mitades que viajan por caminos distintos:
- * - **ida**: `sincronizarModelosDelDs()` escribe la **propiedad** de la instancia (tomada con
- *   `viewChild.required`), que es el mismo `@Input()` sin pasar por el atributo;
- * - **vuelta**: `(ngModelChange)` en la plantilla, tal cual.
- *
- * Se descartó la alternativa —un directivo propio que provea un `NgControl` de mentira sobre
- * `za-tabs[ngModel]`, que también se probó y **funciona**— porque dejaría a `NgControlStatus`
- * pintando clases `ng-valid`/`ng-touched` a partir de un control `null`: más maquinaria, y encima
- * mintiéndole a Angular sobre lo que el elemento es. Escribir la propiedad no le miente a nadie.
- *
- * `FormsModule` igual **no va** en `imports`: no se usa un solo `[(ngModel)]` de Angular en esta
- * pantalla, y su presencia solo cambiaría `NG0201` por `NG01203` si alguien reintrodujera el input.
+ * `FormsModule` **no va** en `imports`: no se usa un solo `[(ngModel)]` de Angular en esta pantalla.
  *
  * ── ⚠ `imageSrc` NO se escribe igual en las dos librerías ───────────────────────────────────────
  * `ZaWithImage` (base de `ZrPromo`, `ZrTile`, `ZrEmptyState`) declara `imageSrc` con **alias kebab
@@ -182,8 +148,7 @@ const STR_LOGO = 'resources/zurich/ZurichLogo_Horz_White_CMYK_no_R.png';
     //
     // ⚠ Y **este módulo es el que hace inescribible el `[ngModel]`** de `ZrTabs`/`ZrSidebar`/
     // `ZrPagination`: re-exporta `NgControlStatus`, con selector `[…],[ngModel],[…]` y un `NgControl`
-    // no opcional en el constructor. No se puede quitar (los campos lo necesitan) ni convivir con ese
-    // atributo, así que la ida de esos tres two-way va por la instancia. Ver el docstring.
+    // no opcional. No se puede quitar (los campos lo necesitan), así que esos tres van por `ModeloZa`.
     ReactiveFormsModule,
     FormSectionComponent,
     // Los 9 wrappers de campo de la fachada (los que sí necesitan CVA propio porque los `lib-*-z` no
@@ -230,6 +195,9 @@ const STR_LOGO = 'resources/zurich/ZurichLogo_Horz_White_CMYK_no_R.png';
     ZrTextInput,
     ZrTile,
     ZrTooltip,
+    // La directiva que restituye el two-way de los tres `ZaModelElement` de arriba. No se escribe
+    // en la plantilla: su selector es el atributo `[modeloZa]`. Ver `components/fields/modelo-za.ts`.
+    ModeloZa,
   ],
   // `ZdsFileInput` inyecta `FileRegistryService`, que **no** es `providedIn: 'root'` a propósito: es un
   // servicio **por pantalla**, para que los adjuntos de una no se arrastren a la siguiente dentro del
@@ -243,33 +211,6 @@ const STR_LOGO = 'resources/zurich/ZurichLogo_Horz_White_CMYK_no_R.png';
 export class DsCatalog {
   /** La cola de alertas del DS es imperativa: el componente no recibe el mensaje por input. */
   private readonly objAlertas = inject(AlertZService);
-
-  constructor() {
-    this.sincronizarModelosDelDs();
-  }
-
-  /**
-   * Empuja los tres signals a la propiedad `ngModel` de su componente del DS.
-   *
-   * Es la **mitad de ida** del two-way de la familia `ZaModelElement`, y vive acá y no en la
-   * plantilla por el conflicto de `[ngModel]` con `NgControlStatus` (docstring de la clase). La
-   * vuelta la hace `(ngModelChange)` en el `.html`.
-   *
-   * Un solo `effect` para los tres: cada lectura de signal lo suscribe, así que cambiar cualquiera
-   * reescribe los tres — son tres asignaciones de un número/booleano, no hay nada que optimizar, y
-   * un efecto por componente triplicaría el ruido sin comprar nada.
-   *
-   * ⚠ Los `viewChild.required()` se leen **dentro** del efecto, no antes: antes del primer render no
-   * hay vista y `required` tiraría. El efecto corre después, y vuelve a correr cuando el signal de
-   * la query se resuelve, así que la primera escritura llega igual.
-   */
-  private sincronizarModelosDelDs(): void {
-    effect(() => {
-      this.objTabs().ngModel = this.sigTab();
-      this.objPaginacion().ngModel = this.sigPagina();
-      this.objSidebar().ngModel = this.sigDrawer();
-    });
-  }
 
   /**
    * Formulario de muestra: un control por tipo de campo, con los mismos valores por defecto que el
@@ -292,34 +233,14 @@ export class DsCatalog {
     interruptor: new FormControl(true),
   });
 
-  /**
-   * Pestaña activa del `ZrTabs`, 1-based como en React (`useState(1)`).
-   *
-   * El retorno (`(ngModelChange)`) se cablea en la plantilla; la **ida** no puede, por el conflicto
-   * de `[ngModel]` documentado arriba — la escribe `sincronizarModelosDelDs()`.
-   */
+  /** Pestaña activa del `ZrTabs`, 1-based como en React (`useState(1)`). Two-way por `[(modeloZa)]`. */
   readonly sigTab = signal(1);
-  /** Página activa del `ZrPagination`. Mismo cableado partido que `sigTab`. */
+  /** Página activa del `ZrPagination`. Mismo binding que `sigTab`. */
   readonly sigPagina = signal(1);
   /** Visibilidad del modal. Se baja escuchando `(close)`, no solo al hacer clic en el botón. */
   readonly sigModal = signal(false);
   /** Visibilidad del panel lateral. */
   readonly sigDrawer = signal(false);
-
-  /**
-   * Las tres instancias de la familia `ZaModelElement`, tomadas por referencia de plantilla.
-   *
-   * Existen **porque su input `ngModel` no se puede escribir desde la plantilla** (ver la sección
-   * del conflicto en el docstring de la clase): el atributo lo intercepta `NgControlStatus` y la
-   * pantalla no monta. Así que la ida del two-way se hace por la propiedad de la instancia, en
-   * `sincronizarModelosDelDs()`, y la vuelta por `(ngModelChange)` en la plantilla, que sí es seguro.
-   *
-   * Van con `required` porque los tres elementos están **fuera de todo `@if`**: si alguno dejara de
-   * existir, esto se pone rojo al montar en vez de degradarse a un panel que no responde.
-   */
-  private readonly objTabs = viewChild.required<ZrTabs>('objTabs');
-  private readonly objPaginacion = viewChild.required<ZrPagination>('objPaginacion');
-  private readonly objSidebar = viewChild.required<ZrSidebar>('objSidebar');
 
   readonly cllOpciones = CLL_OPCIONES;
   readonly cllSino = CLL_SINO;
