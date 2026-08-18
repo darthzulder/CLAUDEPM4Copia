@@ -13,9 +13,18 @@
 //   3. Los que invoca el frontend como watcher. Tampoco están en el BPMN: COL_QD_Check_Similitud
 //      (70) entra por acá.
 //
-// Las fuentes 2 y 3 se declaran a mano en `pm4-scripts.config.json` (con su motivo), porque
-// detectarlas exigiría analizar el PHP y el TSX — frágil y con falsos negativos justo en los
-// scripts más críticos.
+// Las tres fuentes se resuelven automáticamente:
+//   1 → extraerScriptRefs / extraerSubprocesos, leyendo el BPMN.
+//   2 → extraerDependenciasDeCodigo, leyendo el PHP de los scripts ya vigilados.
+//   3 → extraerSlugsInvocadosPorFrontend + uuidsDesdeRegistro, leyendo el TSX de las pantallas
+//       del proceso y traduciendo el slug con pm4-registry.json.
+//
+// La inferencia de 2 y 3 es CONSERVADORA: un identificador solo cuenta si resuelve a un script
+// que existe en la instancia. Eso descarta solo los falsos positivos obvios (un uuid de colección
+// como FERIADOS_COLLECTION_UUID no resuelve a script, así que se ignora) sin inventar relaciones.
+//
+// Lo que NO se puede inferir —un id armado en runtime, o que venga de una variable de entorno—
+// sigue declarándose en `scriptsExtra`, que queda como escape y no como mecanismo principal.
 
 /**
  * Ids de script referenciados por los `scriptTask` de un BPMN.
@@ -85,6 +94,118 @@ export async function descubrirArbol(intProcesoRaiz, fnTraerBpmn) {
     scriptIds: [...setScripts].sort((a, b) => a - b),
     procesos: [...setProcesosVistos].sort((a, b) => a - b),
   };
+}
+
+/**
+ * Scripts que el CÓDIGO de un script referencia — dependencias que ningún BPMN muestra.
+ *
+ * Reconoce los dos patrones que usan los scripts de este proyecto:
+ *   · un uuid literal, como `const UTIL_DIAS_HABILES_UUID = 'a26a713d-…'`
+ *   · una constante de id, como `$SFC_CORE_SCRIPT_ID = 84`
+ *
+ * Solo cuenta si el identificador RESUELVE a un script de la instancia. Ese filtro es lo que hace
+ * segura la inferencia: un uuid de colección (`FERIADOS_COLLECTION_UUID`) no resuelve a script y
+ * se descarta solo, sin necesidad de adivinar por el nombre de la constante.
+ *
+ * @param {string} strCodigo código PHP del script
+ * @param {{dicPorUuid: Map<string,object>, dicPorId: Map<number,object>}} dicIndices de la instancia
+ * @returns {Set<string>} uuids de los scripts referenciados
+ */
+export function extraerDependenciasDeCodigo(strCodigo, { dicPorUuid, dicPorId }) {
+  const setUuids = new Set();
+  const strFuente = String(strCodigo ?? '');
+
+  for (const objMatch of strFuente.matchAll(/['"]([0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12})['"]/gi)) {
+    const strUuid = objMatch[1].toLowerCase();
+    if (dicPorUuid.has(strUuid)) setUuids.add(strUuid);
+  }
+
+  for (const objMatch of strFuente.matchAll(/\w*SCRIPT_ID\w*\s*=\s*(\d+)/gi)) {
+    const objScript = dicPorId.get(Number(objMatch[1]));
+    if (objScript?.uuid) setUuids.add(objScript.uuid);
+  }
+
+  return setUuids;
+}
+
+/**
+ * Slugs de script que invoca el frontend de este repo.
+ *
+ * Las pantallas nunca usan el id numérico: llaman `resolveScriptId('slug', fallback)` contra
+ * `pm4-registry.json` (regla #6 de CLAUDE.md). Ese slug es la pista, y hay que traducirlo con
+ * uuidsDesdeRegistro() para llegar al script.
+ *
+ * @param {string} strFuente contenido de un .ts/.tsx
+ * @returns {Set<string>} slugs encontrados
+ */
+export function extraerSlugsInvocadosPorFrontend(strFuente) {
+  const setSlugs = new Set();
+  for (const objMatch of String(strFuente ?? '').matchAll(/resolveScriptId\(\s*['"]([^'"]+)['"]/g)) {
+    setSlugs.add(objMatch[1]);
+  }
+  return setSlugs;
+}
+
+/**
+ * Traduce slugs de negocio a uuid usando pm4-registry.json.
+ *
+ * Se resuelve por uuid y no por el `id` del registro porque el id es de la instancia activa: si el
+ * registro quedó desactualizado tras una migración, el uuid sigue apuntando al script correcto.
+ *
+ * @param {Iterable<string>} lstSlugs
+ * @param {{scripts?: Record<string, {uuid?: string}>}} objRegistro contenido de pm4-registry.json
+ * @returns {{uuids: Set<string>, sinRegistrar: string[]}}
+ */
+export function uuidsDesdeRegistro(lstSlugs, objRegistro) {
+  const setUuids = new Set();
+  const lstSinRegistrar = [];
+
+  for (const strSlug of lstSlugs) {
+    const strUuid = objRegistro?.scripts?.[strSlug]?.uuid;
+    if (strUuid) setUuids.add(strUuid);
+    else lstSinRegistrar.push(strSlug);
+  }
+
+  return { uuids: setUuids, sinRegistrar: lstSinRegistrar };
+}
+
+/**
+ * Cierra transitivamente el conjunto de scripts vigilados siguiendo las dependencias del código.
+ *
+ * Hace falta iterar y no una sola pasada: si A (del BPMN) llama a B y B llama a C, C solo aparece
+ * al mirar el código de B, que recién entró al conjunto en la vuelta anterior.
+ *
+ * @param {Set<string>} setUuidsIniciales punto de partida (BPMN + frontend + extras)
+ * @param {Map<string,object>} dicPorUuid scripts de la instancia por uuid
+ * @param {Map<number,object>} dicPorId scripts de la instancia por id
+ * @returns {{uuids: Set<string>, agregados: Array<{uuid: string, desde: string}>}}
+ */
+export function cerrarDependencias(setUuidsIniciales, dicPorUuid, dicPorId) {
+  const setUuids = new Set(setUuidsIniciales);
+  const lstAgregados = [];
+  const lstPendientes = [...setUuids];
+
+  while (lstPendientes.length > 0) {
+    const strUuid = lstPendientes.shift();
+    const objScript = dicPorUuid.get(strUuid);
+    if (!objScript) continue;
+
+    // `codigo` o `code` según de dónde venga el script: la CLI trabaja con la forma normalizada
+    // (`codigo`, ya canonicalizada) y la respuesta cruda de la API trae `code`. Aceptar ambas evita
+    // que el descubrimiento quede mudo por un nombre de campo — que es exactamente lo que pasó la
+    // primera vez que se conectó: detectaba las dependencias con datos crudos y ninguna con los
+    // normalizados, dejando fuera al CORE SFC y a la utilidad de días hábiles sin ningún error.
+    const strCodigo = objScript.codigo ?? objScript.code ?? '';
+
+    for (const strDep of extraerDependenciasDeCodigo(strCodigo, { dicPorUuid, dicPorId })) {
+      if (strDep === strUuid || setUuids.has(strDep)) continue;
+      setUuids.add(strDep);
+      lstPendientes.push(strDep);
+      lstAgregados.push({ uuid: strDep, desde: objScript.title ?? strUuid });
+    }
+  }
+
+  return { uuids: setUuids, agregados: lstAgregados };
 }
 
 /**

@@ -123,24 +123,69 @@ En la instancia conviven varios proyectos (FAST-FLOW, CUW, pruebas). Solo se vig
 declarados en **`pm4-app/scripts/pm4-scripts/pm4-scripts.config.json`** — hoy el 31, que son 13
 scripts de los 62 de la instancia.
 
-**Los scripts de cada proceso se descubren de su BPMN**, siguiendo también los `callActivity` hacia
-sus subprocesos. Así, agregar un `scriptTask` en PM4 no obliga a tocar configuración: la próxima
-captura lo incluye solo.
+Un script puede pertenecer a un proceso por **tres vías distintas**, y las tres se resuelven solas:
 
-Lo único que hay que declarar a mano es lo que **ningún BPMN referencia**, en `scriptsExtra`:
+| Vía | Cómo se descubre | Ejemplo en el proceso 31 |
+|---|---|---|
+| **BPMN** | Los `scriptTask` del proceso y de sus subprocesos, siguiendo los `callActivity` | los 10 del diagrama |
+| **Frontend** | Las pantallas declaradas en `pantallas` se escanean buscando `resolveScriptId('slug')`, y el slug se traduce a uuid con `pm4-registry.json` | `COL_QD_Check_Similitud`, que invoca SCR-000 |
+| **Código** | Lo que un script vigilado invoca en runtime: un uuid literal o una constante `*SCRIPT_ID*`. Se cierra **transitivamente** (si A llama a B y B a C, entra C) | el CORE SFC y la utilidad de días hábiles |
 
-| Caso | Ejemplo en el proceso 31 |
-|---|---|
-| Un script que otro invoca en runtime | el CORE SFC (84) y la utilidad de días hábiles (95) |
-| Un script que dispara el frontend como watcher | `COL_QD_Check_Similitud` (70), desde SCR-000 |
+Por eso `scriptsExtra` está **vacío** en el proceso 31: las tres relaciones se infieren. Queda como
+escape solo para lo que no se puede deducir — un id armado en runtime o que venga de una variable
+de entorno.
 
-Detectarlos automáticamente exigiría analizar el PHP y el TSX — frágil, y con falsos negativos
-justo en los scripts más críticos. Por eso se declaran, cada uno con su motivo.
+La inferencia es **conservadora**: un identificador solo cuenta si resuelve a un script que existe
+en la instancia. Eso descarta los falsos positivos sin adivinar — un `FERIADOS_COLLECTION_UUID`
+apunta a una colección, no resuelve a script, y se ignora solo.
+
+Y cada captura dice de dónde salió cada uno:
+
+```
+[ALCANCE] proceso-31 — proceso 31 + 5 subproceso(s): 13 script(s) vigilado(s).
+  ↳ [DEPENDENCIA] COL_UTIL_Dias_Habiles — lo invoca "COL_QD_Check_SLA_Expire".
+  ↳ [DEPENDENCIA] COL - QD - Core SFC — lo invoca "COL_QD_SS_Sla_Prolongation".
+  ↳ [FRONTEND] 1 script(s) invocado(s) desde las pantallas del proceso.
+```
+
+### Scripts nuevos que quedan fuera
+
+Queda un hueco que ninguna de las tres vías cubre: un script recién creado en la UI y **todavía sin
+cablear a ningún BPMN** —el caso típico mientras se lo desarrolla— no lo descubre nada.
+
+Por eso cada captura avisa de los scripts **creados desde la última captura** que no pertenecen a
+ningún proceso vigilado:
+
+```
+[SIN VIGILAR] 2 script(s) creado(s) desde la ultima captura y fuera de todo proceso:
+  · COL_OS_Asignar_SLA (id 98)
+  · COL_OS_Check_Similitud (id 101)
+  Si pertenecen a un proceso vigilado: cablealos al BPMN, o agregalos a scriptsExtra.
+```
+
+Se acota a los **nuevos** a propósito: la instancia tiene decenas de scripts de otros proyectos que
+nunca van a vigilarse, y listarlos siempre sería ruido que se aprende a ignorar — con lo cual el
+aviso dejaría de servir justo cuando importa. En la primera corrida, sin fecha de referencia, no
+reporta nada.
 
 ### Vigilar un proceso nuevo
 
-Agregá una entrada a `procesos` en el config y corré `npm run pm4:capture -- --all`. Sus scripts
-salen del BPMN; solo hace falta declarar los `scriptsExtra` si los tiene.
+Agregá una entrada a `procesos` en el config, con la carpeta de sus pantallas si las tiene:
+
+```json
+{
+  "id": 36,
+  "carpeta": "proceso-36",
+  "nombre": "COL - Otras Solicitudes",
+  "pantallas": ["frontend/src/screens/atencion-cliente/otras-solicitudes"],
+  "scriptsExtra": []
+}
+```
+
+Y `npm run pm4:capture -- --all`. El resto se descubre.
+
+El campo `pantallas` es lo que atribuye cada watcher a **su** proceso: sin él, las llamadas del
+frontend de FAST-FLOW y las de Quejas Directas se mezclarían.
 
 Si el hook dispara sobre un script **fuera de alcance**, no bloquea: avisa que se sobrescribe sin
 registrar historial y sigue.
@@ -163,8 +208,58 @@ poder abrirlos y grepearlos como archivos normales. Esa carpeta:
 - **Se regenera sola:** si la borrás o clonás el repo de cero, `npm run pm4:capture -- --all` la
   reconstruye.
 
-El respaldo real y versionado sigue siendo la rama `pm4-scripts-historial` — conviene pushearla al
-remoto como cualquier otra.
+El respaldo real y versionado sigue siendo la rama `pm4-scripts-historial`.
+
+## Trabajo en equipo
+
+La rama de historial es un **canal compartido**: todos capturan, todos leen, y no hay PR ni merge de
+por medio. Cada captura hace tres cosas sin que nadie las pida:
+
+1. **`fetch`** de la rama antes de comparar, para no volver a registrar lo que otro ya subió.
+2. **commit** de lo que cambió.
+3. **`push`** a `origin`.
+
+Y si la rama existe en el remoto pero no en tu máquina —el caso de un clone nuevo— **se adopta la
+del remoto**. Sin ese paso se crearía una rama huérfana paralela, sin ancestro común: dos
+historiales que ya no se pueden juntar. Es el fallo más silencioso del modo compartido.
+
+### Qué pasa si dos capturan a la vez
+
+Se resuelve solo. El contenido de esta rama no es una opinión que haya que fusionar: es *el estado
+de PM4*, que es objetivo. Cuando el push sale rechazado porque el remoto avanzó, la herramienta trae
+el remoto y rehace el commit con **dos padres** —el tuyo y el del compañero— usando el árbol del
+remoto como base. Resultado: lo que el otro capturó sobrevive, lo tuyo también, y ambas historias
+quedan en el grafo. No hay conflicto de texto que resolver a mano, ni siquiera en el índice JSON,
+que se regenera entero.
+
+### Dónde vive el canal
+
+El remoto se configura en `pm4-scripts.config.json` (`"remoto": "origin"`). Es un parámetro y no un
+literal porque este repo convive con más de un remoto; cambiarlo no exige tocar código.
+
+La rama vive en el **mismo repo que el código** a propósito: su audiencia es exactamente la misma
+—quien necesita el historial de un script ya tiene el repo— y un snapshot completo pesa ~300 KB, así
+que el volumen no justifica separarlo. Si algún día crece mucho, o alguien necesita el historial sin
+el código, mover una rama huérfana a otro remoto es barato.
+
+### Sobre el push automático
+
+Es la única excepción a la regla de "no pushear sin pedirlo", y está acotada por código: la función
+de push **lanza** si se la invoca con cualquier rama que no sea la de historial, y usa un refspec
+explícito para que la configuración de `push.default` de tu máquina no pueda subir la rama activa
+por accidente.
+
+Si no querés publicar en una corrida puntual: `npm run pm4:capture -- --all --no-push`. El commit
+local queda igual, así que el registro no se pierde — solo se pospone, y la próxima captura lo sube.
+
+Un fallo de red tampoco es grave: el commit ya está en local y se publica en la siguiente captura.
+Perder el push es recuperable; perder el registro, no.
+
+> ⚠️ **Nunca hagas `git checkout pm4-scripts-historial`.** Es una rama huérfana: su árbol contiene
+> solo los `.php`, así que git **vacía el working tree** de todo el resto del proyecto. No se pierde
+> nada commiteado —se vuelve con `git switch <tu-rama>`— pero ver el repo vacío asusta, y lo que
+> tuvieras sin commitear sí se pierde. Para leer los scripts está el espejo `/pm4-scripts/`; para
+> ver el historial, `git log` y `git show`, que no requieren checkout.
 
 ## Detalles que importan
 

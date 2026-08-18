@@ -143,9 +143,17 @@ describe('Arranque de la app (smoke)', () => {
       // Las pantallas son `lazy()`, así que primero aparece el fallback de Suspense. Esperar a
       // que el `.loading-overlay` desaparezca es la señal de que el chunk resolvió y el árbol
       // real se montó — sin esto el test asertaría sobre el spinner y pasaría siempre.
+      //
+      // El timeout es explícito porque `waitFor` NO hereda el `testTimeout` de vitest: usa su
+      // propio default de 1s. Con los 37 archivos de la suite compitiendo por CPU, la pantalla
+      // más pesada (SCR-000, que monta ~15 `useCollection`) se pasaba de ese segundo y el smoke
+      // fallaba de forma intermitente —~1 de cada 3 corridas completas, mientras que aislado
+      // pasaba siempre—. Lo que este test verifica es que la pantalla monta sin explotar, no que
+      // monte rápido, así que el margen no debilita la aserción; y en el caso feliz no cuesta
+      // nada, porque `waitFor` retorna apenas se cumple la condición.
       await waitFor(() => {
         expect(container.querySelector('.loading-overlay')).toBeNull();
-      });
+      }, { timeout: 10_000 });
 
       // El ErrorBoundary de App atrapa cualquier throw del árbol y lo pinta como "Error de
       // Render" junto al stack, así que el mensaje de fallo ya trae el diagnóstico.

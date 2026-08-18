@@ -1,28 +1,22 @@
 {
   "_doc": "Qué procesos PM4 vigila la grabadora de historial. El alcance es POR PROCESO: los scripts de los demás proyectos de la instancia (FAST-FLOW, CUW, pruebas) se ignoran. Para vigilar un proceso nuevo, agregá una entrada acá y corré `npm run pm4:capture -- --all`.",
-  "_descubrimiento": "Los scripts de cada proceso se leen de su BPMN (y del de sus subprocesos, siguiendo los callActivity), así que agregar un scriptTask en PM4 no exige tocar este archivo. Solo hay que declarar en `scriptsExtra` los que NINGÚN BPMN referencia: los que un script invoca en runtime y los que dispara el frontend como watcher.",
+  "remoto": "origin",
+  "_remoto": "Remoto donde vive el canal de historial compartido. 'origin' cubre el caso normal; se cambia aca (sin tocar codigo) si el equipo mueve el repo.",
+  "_fuentes": {
+    "bpmn": "Los scriptTask del proceso y de sus subprocesos (siguiendo los callActivity). Automático: agregar un script al diagrama en PM4 no exige tocar este archivo.",
+    "pantallas": "Carpetas del frontend que pertenecen al proceso. Se escanean buscando resolveScriptId('slug'), y el slug se traduce a uuid con pm4-registry.json. Es lo que ata un watcher —como COL_QD_Check_Similitud, que no está en ningún BPMN— al proceso correcto en vez de dejarlo suelto. El filtro por carpeta evita mezclar: las pantallas de FAST-FLOW invocan sus propios scripts y quedan fuera.",
+    "codigo": "Dependencias que un script vigilado invoca en runtime (uuid literal o constante *SCRIPT_ID*), cerradas transitivamente. Solo cuentan si resuelven a un script existente, así que un uuid de colección se descarta solo.",
+    "scriptsExtra": "Escape para lo que NO se puede inferir: un id armado en runtime o que venga de una variable de entorno. Si algo aparece acá, conviene explicar por qué no se dedujo."
+  },
   "procesos": [
     {
       "id": 31,
       "carpeta": "proceso-31",
       "nombre": "COL - Gestion de Quejas Directas",
-      "scriptsExtra": [
-        {
-          "uuid": "a2560610-9409-4931-bcc7-172aa91f56a9",
-          "titulo": "COL - QD - Core SFC",
-          "motivo": "CORE: login, firma HMAC y HTTP contra la SFC. Lo invocan en runtime los scripts de M1/M2/M3 y prórroga (86/83/89/78); no lo referencia ningún BPMN."
-        },
-        {
-          "uuid": "a26a713d-ea78-48b3-b829-5ddce63cfbd2",
-          "titulo": "COL_UTIL_Dias_Habiles",
-          "motivo": "Utilidad de días hábiles. La invoca COL_QD_Check_SLA_Expire (77) resolviéndola por uuid en runtime."
-        },
-        {
-          "uuid": "a23434ce-0eea-405f-9df7-aa781df863dc",
-          "titulo": "COL_QD_Check_Similitud",
-          "motivo": "Watcher que dispara el frontend desde SCR-000 vía resolveScriptId('similarCasesQuejas'); no es una tarea del proceso."
-        }
-      ]
+      "pantallas": [
+        "frontend/src/screens/atencion-cliente/quejas-directas"
+      ],
+      "scriptsExtra": []
     }
   ]
 }

@@ -10,6 +10,15 @@ import {
   commitearCaptura,
   listarCapturas,
   validarIdentidadGit,
+  STR_RAMA_HISTORIAL,
+  hayRemoto,
+  traerRemoto,
+  puntaLocal,
+  puntaRemota,
+  estadoSincronizacion,
+  moverRamaA,
+  pushearHistorial,
+  STR_REMOTO_POR_DEFECTO,
 } from './historial.mjs';
 
 const STR_RAMA = 'pm4-scripts-historial';
@@ -283,5 +292,183 @@ describe('listarCapturas', () => {
 describe('validarIdentidadGit', () => {
   it('devuelve null cuando hay identidad configurada', () => {
     expect(validarIdentidadGit(strRepo)).toBeNull();
+  });
+});
+
+describe('pushearHistorial · la guarda', () => {
+  it('RECHAZA pushear cualquier rama que no sea la de historial', () => {
+    // El push automático está autorizado solo para el canal de registro. Que sea un throw y no una
+    // convención es lo que hace imposible que este módulo publique el trabajo de alguien por error.
+    expect(() => pushearHistorial(strRepo, 'main')).toThrow(/solo puede pushear/);
+    expect(() => pushearHistorial(strRepo, 'dev')).toThrow(/solo puede pushear/);
+    expect(() => pushearHistorial(strRepo, 'feat/lo-que-sea')).toThrow(/solo puede pushear/);
+  });
+
+  it('la rama permitida es exactamente la de historial', () => {
+    expect(STR_RAMA_HISTORIAL).toBe('pm4-scripts-historial');
+  });
+
+  it('sin remoto configurado informa en vez de fallar', () => {
+    const objRes = pushearHistorial(strRepo, STR_RAMA_HISTORIAL);
+    expect(objRes.ok).toBe(false);
+    expect(objRes.rechazado).toBe(false);
+    expect(objRes.mensaje).toMatch(/remoto/);
+  });
+});
+
+describe('sincronización con el remoto', () => {
+  /** Segundo repo que hace de origin, para ejercitar fetch y push de verdad. */
+  let strRemoto;
+
+  beforeEach(() => {
+    strRemoto = mkdtempSync(join(tmpdir(), 'pm4-hist-remote-'));
+    execFileSync('git', ['init', '--bare', '--quiet'], { cwd: strRemoto, stdio: ['pipe', 'pipe', 'pipe'] });
+    git('remote', 'add', 'origin', strRemoto);
+  });
+
+  afterEach(() => {
+    rmSync(strRemoto, { recursive: true, force: true });
+  });
+
+  it('publica la rama y el remoto la recibe', () => {
+    commitearCaptura({ strRepo, strRama: STR_RAMA_HISTORIAL, dicArchivos: { 'a.php': '<?php\n' }, strMensaje: 'una' });
+    expect(hayRemoto(strRepo)).toBe(true);
+    expect(pushearHistorial(strRepo, STR_RAMA_HISTORIAL).ok).toBe(true);
+
+    const strEnRemoto = execFileSync('git', ['rev-parse', STR_RAMA_HISTORIAL], {
+      cwd: strRemoto, encoding: 'utf8', stdio: ['pipe', 'pipe', 'pipe'],
+    }).trim();
+    expect(strEnRemoto).toBe(puntaLocal(strRepo, STR_RAMA_HISTORIAL));
+  });
+
+  it('reconoce al-dia y adelante', () => {
+    commitearCaptura({ strRepo, strRama: STR_RAMA_HISTORIAL, dicArchivos: { 'a.php': '1\n' }, strMensaje: 'una' });
+    pushearHistorial(strRepo, STR_RAMA_HISTORIAL);
+    traerRemoto(strRepo, STR_RAMA_HISTORIAL);
+    expect(estadoSincronizacion(strRepo, STR_RAMA_HISTORIAL)).toBe('al-dia');
+
+    commitearCaptura({ strRepo, strRama: STR_RAMA_HISTORIAL, dicArchivos: { 'a.php': '2\n' }, strMensaje: 'dos' });
+    expect(estadoSincronizacion(strRepo, STR_RAMA_HISTORIAL)).toBe('adelante');
+  });
+
+  it('un clone nuevo adopta la rama del remoto en vez de crear una paralela', () => {
+    // El fallo más silencioso del modo compartido: sin esto, la máquina que clona ve la rama como
+    // inexistente, crea una huérfana NUEVA, y quedan dos historiales sin ancestro común.
+    commitearCaptura({ strRepo, strRama: STR_RAMA_HISTORIAL, dicArchivos: { 'a.php': '1\n' }, strMensaje: 'del equipo' });
+    pushearHistorial(strRepo, STR_RAMA_HISTORIAL);
+
+    const strClone = mkdtempSync(join(tmpdir(), 'pm4-hist-clone-'));
+    try {
+      execFileSync('git', ['clone', '--quiet', strRemoto, '.'], { cwd: strClone, stdio: ['pipe', 'pipe', 'pipe'] });
+
+      expect(puntaLocal(strClone, STR_RAMA_HISTORIAL)).toBeNull();
+      expect(traerRemoto(strClone, STR_RAMA_HISTORIAL)).toBe(true);
+
+      const strPuntaRemota = puntaRemota(strClone, STR_RAMA_HISTORIAL);
+      expect(strPuntaRemota).not.toBeNull();
+
+      moverRamaA(strClone, STR_RAMA_HISTORIAL, strPuntaRemota);
+      expect(puntaLocal(strClone, STR_RAMA_HISTORIAL)).toBe(strPuntaRemota);
+      expect(leerArchivoDeRama(strClone, STR_RAMA_HISTORIAL, 'a.php')).toBe('1\n');
+    } finally {
+      rmSync(strClone, { recursive: true, force: true });
+    }
+  });
+
+  it('reconcilia una divergencia conservando AMBAS historias', () => {
+    const objBase = commitearCaptura({ strRepo, strRama: STR_RAMA_HISTORIAL, dicArchivos: { 'a.php': 'base\n' }, strMensaje: 'base' });
+    pushearHistorial(strRepo, STR_RAMA_HISTORIAL);
+
+    // Un compañero publica algo que nosotros todavía no tenemos.
+    const strOtro = mkdtempSync(join(tmpdir(), 'pm4-hist-otro-'));
+    let strShaCompanero;
+    try {
+      execFileSync('git', ['clone', '--quiet', strRemoto, '.'], { cwd: strOtro, stdio: ['pipe', 'pipe', 'pipe'] });
+      execFileSync('git', ['config', 'user.name', 'Otro'], { cwd: strOtro, stdio: ['pipe', 'pipe', 'pipe'] });
+      execFileSync('git', ['config', 'user.email', 'otro@example.com'], { cwd: strOtro, stdio: ['pipe', 'pipe', 'pipe'] });
+      traerRemoto(strOtro, STR_RAMA_HISTORIAL);
+      moverRamaA(strOtro, STR_RAMA_HISTORIAL, puntaRemota(strOtro, STR_RAMA_HISTORIAL));
+      strShaCompanero = commitearCaptura({
+        strRepo: strOtro, strRama: STR_RAMA_HISTORIAL,
+        dicArchivos: { 'b.php': 'del companero\n' }, strMensaje: 'del companero',
+      }).sha;
+      expect(pushearHistorial(strOtro, STR_RAMA_HISTORIAL).ok).toBe(true);
+    } finally {
+      rmSync(strOtro, { recursive: true, force: true });
+    }
+
+    // Nosotros capturamos desde la base vieja: divergimos.
+    const objNuestro = commitearCaptura({ strRepo, strRama: STR_RAMA_HISTORIAL, dicArchivos: { 'a.php': 'nuestro\n' }, strMensaje: 'nuestro' });
+    expect(pushearHistorial(strRepo, STR_RAMA_HISTORIAL).rechazado).toBe(true);
+
+    traerRemoto(strRepo, STR_RAMA_HISTORIAL);
+    expect(estadoSincronizacion(strRepo, STR_RAMA_HISTORIAL)).toBe('divergido');
+
+    // Reconciliar: dos padres y el árbol del remoto como base.
+    const strRemotoSha = puntaRemota(strRepo, STR_RAMA_HISTORIAL);
+    commitearCaptura({
+      strRepo, strRama: STR_RAMA_HISTORIAL,
+      dicArchivos: { 'a.php': 'nuestro\n' },
+      strMensaje: 'reconciliado',
+      lstPadres: [objNuestro.sha, strRemotoSha],
+      strTreeBase: strRemotoSha,
+    });
+
+    expect(pushearHistorial(strRepo, STR_RAMA_HISTORIAL).ok).toBe(true);
+
+    // Sobrevive lo del compañero Y lo nuestro, y ambas historias quedan alcanzables.
+    expect(leerArchivoDeRama(strRepo, STR_RAMA_HISTORIAL, 'b.php')).toBe('del companero\n');
+    expect(leerArchivoDeRama(strRepo, STR_RAMA_HISTORIAL, 'a.php')).toBe('nuestro\n');
+    expect(git('merge-base', '--is-ancestor', strShaCompanero, STR_RAMA_HISTORIAL)).toBe('');
+    expect(git('merge-base', '--is-ancestor', objBase.sha, STR_RAMA_HISTORIAL)).toBe('');
+  });
+});
+
+describe('remoto configurable', () => {
+  // Deliberadamente NO se llama "origin": si alguna funcion volviera a cablear ese nombre, estos
+  // tests se caen. Con un remoto llamado origin pasarian igual y la regresion seria invisible.
+  const STR_OTRO_REMOTO = 'zurich';
+  let strRemotoDir;
+
+  beforeEach(() => {
+    strRemotoDir = mkdtempSync(join(tmpdir(), 'pm4-hist-alt-'));
+    execFileSync('git', ['init', '--bare', '--quiet'], { cwd: strRemotoDir, stdio: ['pipe', 'pipe', 'pipe'] });
+    git('remote', 'add', STR_OTRO_REMOTO, strRemotoDir);
+  });
+
+  afterEach(() => {
+    rmSync(strRemotoDir, { recursive: true, force: true });
+  });
+
+  it('el default sigue siendo origin', () => {
+    expect(STR_REMOTO_POR_DEFECTO).toBe('origin');
+  });
+
+  it('hayRemoto consulta el remoto que se le pasa', () => {
+    expect(hayRemoto(strRepo, STR_OTRO_REMOTO)).toBe(true);
+    expect(hayRemoto(strRepo, 'no-existe')).toBe(false);
+  });
+
+  it('publica en el remoto indicado, no en origin', () => {
+    commitearCaptura({ strRepo, strRama: STR_RAMA_HISTORIAL, dicArchivos: { 'a.php': '<?php\n' }, strMensaje: 'una' });
+    expect(pushearHistorial(strRepo, STR_RAMA_HISTORIAL, STR_OTRO_REMOTO).ok).toBe(true);
+
+    const strEnRemoto = execFileSync('git', ['rev-parse', STR_RAMA_HISTORIAL], {
+      cwd: strRemotoDir, encoding: 'utf8', stdio: ['pipe', 'pipe', 'pipe'],
+    }).trim();
+    expect(strEnRemoto).toBe(puntaLocal(strRepo, STR_RAMA_HISTORIAL));
+  });
+
+  it('fetch y comparacion tambien usan el remoto indicado', () => {
+    commitearCaptura({ strRepo, strRama: STR_RAMA_HISTORIAL, dicArchivos: { 'a.php': '1\n' }, strMensaje: 'una' });
+    pushearHistorial(strRepo, STR_RAMA_HISTORIAL, STR_OTRO_REMOTO);
+
+    expect(traerRemoto(strRepo, STR_RAMA_HISTORIAL, STR_OTRO_REMOTO)).toBe(true);
+    expect(puntaRemota(strRepo, STR_RAMA_HISTORIAL, STR_OTRO_REMOTO)).toBe(puntaLocal(strRepo, STR_RAMA_HISTORIAL));
+    expect(estadoSincronizacion(strRepo, STR_RAMA_HISTORIAL, STR_OTRO_REMOTO)).toBe('al-dia');
+  });
+
+  it('la guarda de rama sigue aplicando con cualquier remoto', () => {
+    expect(() => pushearHistorial(strRepo, 'main', STR_OTRO_REMOTO)).toThrow(/solo puede pushear/);
   });
 });
