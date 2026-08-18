@@ -4,18 +4,18 @@
  *
  * El proyecto tiene DOS ramas de larga vida, y cada una es un entorno desplegado:
  *
- *   feat/… fix/… chore/…  ──►  dev   ──►  Render de desarrollo (pruebas)
- *   dev  (release)        ──►  main  ──►  Render de producción
+ *   feat/… fix/… chore/…  ──►  develop  ──►  Render de desarrollo (pruebas)
+ *   develop  (release)    ──►  main     ──►  Render de producción
  *
  * Esa pregunta la necesitan tres consumidores —el hook `pre-push`, el default de
  * `coverage-diff.mjs` y la documentación—, así que la regla vive acá y no repetida en cada uno.
  * Cuando el modelo de ramas cambie, se cambia en un solo archivo.
  *
- * Por qué importa acertarle: antes esto estaba cableado a `main` en los dos primeros. Como `dev`
- * contiene todo `main`, una rama salida de `dev` cumplía "contiene main" por construcción y el
- * chequeo daba verde sin haber mirado nada — mientras la pregunta real ("¿estoy atrás de `dev`?")
- * quedaba sin responder. En cobertura era peor: diffear contra `main` atribuía a tu rama todos
- * los commits que `dev` tiene de más.
+ * Por qué importa acertarle: antes esto estaba cableado a `main` en los dos primeros. Como
+ * `develop` contiene todo `main`, una rama salida de `develop` cumplía "contiene main" por
+ * construcción y el chequeo daba verde sin haber mirado nada — mientras la pregunta real ("¿estoy
+ * atrás de `develop`?") quedaba sin responder. En cobertura era peor: diffear contra `main`
+ * atribuía a tu rama todos los commits que `develop` tiene de más.
  *
  * Uso:
  *   node scripts/integration-base.mjs            # base de la rama actual
@@ -36,11 +36,11 @@ export const STR_RAMA_PRODUCCION = 'main';
  * Rama base de integración, o `null` si no hay ninguna.
  *
  * - `main` → `null`: es la punta del flujo, no se integra en nada.
- * - `dev` → `main`: no porque haya que mergear dev a main en cada push, sino porque un hotfix
- *   aplicado directo sobre `main` deja a `dev` sin ese arreglo. Avisar acá es lo que impide que
- *   el próximo release lo pise silenciosamente.
+ * - `develop` → `main`: no porque haya que mergear develop a main en cada push, sino porque un
+ *   hotfix aplicado directo sobre `main` deja a `develop` sin ese arreglo. Avisar acá es lo que
+ *   impide que el próximo release lo pise silenciosamente.
  * - `release/*` y `hotfix/*` → `main`: van a producción, no a desarrollo.
- * - cualquier otra (feat/…, fix/…, chore/…, docs/…) → `dev`.
+ * - cualquier otra (feat/…, fix/…, chore/…, docs/…) → `develop`.
  */
 export function baseDeIntegracion(in_strRama) {
   if (in_strRama === STR_RAMA_PRODUCCION) return null;

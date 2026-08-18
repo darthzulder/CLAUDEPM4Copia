@@ -83,9 +83,9 @@ ciclo, y son las únicas donde el criterio del usuario no lo puede suplir la aut
 1. **Leer** — el insumo, más `../docs/guides/nomenclatura-variables.md`,
    `outputs/zds-cheatsheet.md`, `outputs/shared-css-catalog.md` y
    `../docs/guides/testing-conventions.md`. Si falta algo, **me detengo y pregunto**.
-2. **Rama** — `git switch -c feat/<slug>` desde `dev` actualizado (ver
+2. **Rama** — `git switch -c feat/<slug>` desde `develop` actualizado (ver
    [Modelo de ramas](#modelo-de-ramas-las-dos-de-larga-vida-son-entornos-desplegados)). Nunca
-   trabajo sobre `dev` ni `main`.
+   trabajo sobre `develop` ni `main`.
 3. **Construir** — `variables.ts` con las colecciones **por nombre** (`resolveCollectionId`,
    jamás un id suelto) · campos `qd_*` con la nomenclatura · UI bajando la
    [Jerarquía de decisión de UI](#jerarquía-de-decisión-de-ui-obligatorio) · registro en
@@ -96,7 +96,7 @@ ciclo, y son las únicas donde el criterio del usuario no lo puede suplir la aut
    rehacerlo.
 6. **Verificar y entregar** — `npm run verify` verde, `npm run coverage:diff` para ver qué quedó
    sin ejercitar, y te reporto: qué construí, qué testeé, **qué mutaciones verifiqué** y qué
-   dejé afuera. Ahí pido la confirmación para commitear. El push y el PR contra `dev` son tuyos.
+   dejé afuera. Ahí pido la confirmación para commitear. El push y el PR contra `develop` son tuyos.
 
 ### Qué significa "con sus tests" para una pantalla
 
@@ -174,11 +174,11 @@ Los anillos 2 y 3 se activan una vez con `npm run setup:hooks`.
 ### Modelo de ramas: las dos de larga vida son entornos desplegados
 
 ```
-feat/…  fix/…  chore/…  ──PR──►  dev   ──►  Render de DESARROLLO
-                    dev  ──PR──►  main  ──►  Render de PRODUCCIÓN
+feat/…  fix/…  chore/…  ──PR──►  develop  ──►  Render de DESARROLLO
+                develop  ──PR──►  main     ──►  Render de PRODUCCIÓN
 ```
 
-La **base** de un cambio es `dev` para el trabajo normal y `main` para un release o `hotfix/*`. La
+La **base** de un cambio es `develop` para el trabajo normal y `main` para un release o `hotfix/*`. La
 regla está en [`scripts/integration-base.mjs`](scripts/integration-base.mjs) y la consumen el hook
 `pre-push` y el informe de cobertura — no la dupliques al escribir tooling nuevo.
 
@@ -418,7 +418,7 @@ Hermano de esta sección: ambas tratan de cómo se referencia y se mantiene lo q
   `scripts/pm4-scripts/pm4-scripts.config.json` (hoy el 31 → 13 scripts de los 62 de la instancia).
   Los scripts de cada proceso se descubren de su BPMN; en `scriptsExtra` se declaran solo los que
   ningún BPMN referencia (los que otro script invoca en runtime, y los watchers del frontend).
-- Los `.php` capturados viven en la rama huérfana `pm4-scripts-historial`, nunca en `dev`. Son
+- Los `.php` capturados viven en la rama huérfana `pm4-scripts-historial`, nunca en `develop`. Son
   registro, no fuente: editarlos no cambia nada en PM4. La rama no se mergea ni se borra.
   La copia navegable de `/pm4-scripts/` (raíz del repo) se **genera** en cada captura y está
   ignorada en git.

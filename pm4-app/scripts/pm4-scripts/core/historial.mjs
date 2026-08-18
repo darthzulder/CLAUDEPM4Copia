@@ -4,7 +4,7 @@
 //
 // 1. La captura se dispara EN MEDIO del trabajo del usuario (un hook PreToolUse, antes de que una
 //    IA sobrescriba un script). Un `git add`/`git commit` porcelain tocaría el índice y la rama
-//    activa, ensuciando `dev`, metiendo commits automáticos dentro de PRs ajenos y pudiendo
+//    activa, ensuciando `develop`, metiendo commits automáticos dentro de PRs ajenos y pudiendo
 //    corromper un `git add -p` a medio hacer.
 //
 // 2. `.githooks/pre-commit` de este repo corre `npm run verify` COMPLETO (lint + typecheck +

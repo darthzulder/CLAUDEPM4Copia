@@ -20,9 +20,9 @@
  *   node scripts/coverage-diff.mjs --base origin/main
  *   node scripts/coverage-diff.mjs --summary "$GITHUB_STEP_SUMMARY"   # además escribe Markdown
  *
- * La base por defecto NO es `main`: la resuelve integration-base.mjs según la rama (`dev` para las
- * ramas de trabajo). Cuando estaba fija en `main`, una rama salida de `dev` se llevaba puestos como
- * "propios" todos los commits que `dev` tiene de más que `main`, y el informe era inservible.
+ * La base por defecto NO es `main`: la resuelve integration-base.mjs según la rama (`develop` para las
+ * ramas de trabajo). Cuando estaba fija en `main`, una rama salida de `develop` se llevaba puestos como
+ * "propios" todos los commits que `develop` tiene de más que `main`, y el informe era inservible.
  *
  * Sin dependencias ni actions de terceros: parsea lcov (formato trivial) y usa git.
  */
@@ -94,7 +94,7 @@ function leerArg(in_strFlag, in_strDefecto) {
 }
 
 // Sin `--base`, la base sale de la rama actual. Si el HEAD está desprendido o la rama es la punta
-// del flujo (`main`), no hay base deducible: se cae a `dev`, que es contra lo que se integra el
+// del flujo (`main`), no hay base deducible: se cae a `develop`, que es contra lo que se integra el
 // trabajo diario, en vez de fallar.
 const STR_BASE = leerArg('--base', `origin/${baseEfectiva() ?? STR_RAMA_DESARROLLO}`);
 const STR_SUMMARY = leerArg('--summary', null);

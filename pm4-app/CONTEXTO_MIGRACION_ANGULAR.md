@@ -139,9 +139,50 @@ Todas heredadas, todas vinculantes. Verbatim donde importa.
 - **Tarea 3 del plan aprobado, diferida *"despues por pantalla"*:** `.doc-card` +5 →
   `lib-accordion-z`; `.form-subsection`/`.products-card` → `lib-card-z`, cada una con su comparación
   visual.
-- **`NG0912`** — colisión de selector `za-calendar` entre `ZaCalendar` y `ZaRangeCalendar`. Warning en
-  stderr, no un fallo.
 - **graphify — del usuario, no tocar.**
+
+### Deudas cerradas antes de la Fase 7 (ago-2026)
+
+Las cuatro que el plan de deudas enumeraba. Se resolvieron **envolviendo el defecto en nuestro
+código**, no vendorizando —decisión explícita del usuario: *"no podemos editar esas librerias […]
+hay q envolver ese defecto en nuestro proyecto documentandolo correspondientemente"*—, que es lo
+contrario de lo que se hizo en React (`frontend/vendor/*.tgz` parcheado).
+
+- **Deuda 1 · el `[ngModel]` de `ZaModelElement`** → `components/fields/modelo-za.ts`. `ZaModelElement`
+  declara el input con el nombre pelado `ngModel`, así que bajo `ReactiveFormsModule` matchea el
+  selector de `NgControlStatus` y su `inject(NgControl)` no opcional tira **`NG0201`**, que se lleva la
+  pantalla entera. La directiva expone `[(modeloZa)]` —atributo propio, así que el choque desaparece
+  por construcción y no por disciplina— y reemplaza el cableado a mano que estaba duplicado en
+  `dashboard-gestion-casos` y `ds-catalog`. Con `guarda-ngmodel.spec.ts` como red: rojo si vuelve a
+  aparecer un `[ngModel]=` en cualquier `.html` de `src`.
+- **Deuda 2 · `ButtonZ.disabled` arranca en `true`** → `components/fields/boton-habilitado.ts`. Un
+  `<lib-button-z>` sin `[disabled]` monta **inerte, sin ningún síntoma**: se pinta normal y no hace
+  nada al clic. Medido: 65/65 tags escriben `[disabled]` y **43 escriben literalmente
+  `[disabled]="false"`**, o sea que dos tercios del binding existente es puro contrapeso del default.
+  La directiva lo invierte desde el constructor (medido: los constructores corren **antes** de que
+  Angular escriba un solo binding, así que la plantilla siempre gana, incluido un `[disabled]="true"`
+  deliberado). Con `guarda-boton-habilitado.spec.ts`.
+- **Deuda 3 · colección vacía** → sin cambio de lógica, solo aserción. Los tres puntos ya eran
+  correctos; lo que faltaba era que algo lo sostuviera. Ver el docstring del bloque en
+  `core/collection.service.spec.ts`, que incluye la mutación efectiva y **la que el plan proponía y
+  quedó medida como inefectiva**.
+- **Deuda 4 · documentación** → esta entrada, más `dev`→`develop` en los 6 docs y scripts que todavía
+  lo decían en prosa (el código ya exportaba `develop`; en la guía de verificación había **comandos
+  ejecutables** —`git switch dev`, `gh pr create --base dev`— que fallaban al copiarse).
+
+### Diferencias conocidas del vendor que NO se envuelven
+
+- **`NG0912`** — colisión de selector `za-calendar` entre `ZaCalendar` y `ZaRangeCalendar`. Warning en
+  stderr, **no** un fallo, y no es deuda nuestra: en `src` no hay **ningún uso** de
+  `ZaRangeCalendar` (las dos únicas menciones son en `.md`, documentando este mismo warning), así que
+  no hay ambigüedad real que resolver y el render no se ve afectado.
+  Envolverlo costaría un alias por el que nadie pasa. Se descuenta en cada corrida.
+- **`FooterZ` está vacía** (`declare class FooterZ { }`, cero inputs, cero slots) — **ya evitado en
+  código**, no pendiente: la fachada exporta `ZaFooter as ZrFooter` y ninguna pantalla usa
+  `lib-footer-z`. El motivo del descarte está en `zds-reexports.ts:233`, `ds-catalog.html:298` y
+  `shared.css:1566`. Ojo con re-investigarlo por grep sobre el `.mjs` (va en una sola línea y
+  devuelve inputs del componente vecino: así se le atribuyó una vez un `routes`/`social` que no
+  tiene) — verificar contra `types/zurich-col-lib-zurich.d.ts`.
 
 ---
 

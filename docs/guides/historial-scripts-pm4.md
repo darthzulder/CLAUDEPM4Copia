@@ -23,7 +23,7 @@ Editarlos no cambia nada en PM4.
 
 ## Dónde vive el historial
 
-En la rama huérfana **`pm4-scripts-historial`**, que nunca se mergea a `dev` ni a `main`. Los `.php`
+En la rama huérfana **`pm4-scripts-historial`**, que nunca se mergea a `develop` ni a `main`. Los `.php`
 no aparecen en el working tree de tu rama activa.
 
 Se escribe con *plumbing* de git (`commit-tree` + `update-ref`), no con `git add`/`git commit`. Dos
