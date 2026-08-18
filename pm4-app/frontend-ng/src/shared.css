@@ -1987,3 +1987,34 @@ z-table :is(th, td)[config*="right"] {
   height: 100%;
   border: none;
 }
+
+/* Anclaje de un `za-badge` a su host (el catálogo lo muestra sobre un botón "Mensajes").
+
+   `ZrBadge` es un contador de notificación: está diseñado para flotar en la esquina de otro elemento,
+   no para vivir suelto en el flujo. React lo lograba metiéndolo DENTRO del `ZrButton` como hijo, y el
+   web-component lo posicionaba desde su propio shadow DOM. En Angular eso no se puede: `ButtonZ`
+   declara `ngContentSelectors: never` — no proyecta contenido, así que un hijo se descarta en
+   silencio. El anclaje tiene que resolverlo la pantalla.
+
+   Es layout puro y el DS no ofrece nada para esto (no hay componente "badge anclado" ni un input de
+   target en `za-badge`), así que por la política de la hoja va como CSS propio: el escalón de `za-*`
+   no aplica cuando el componente existe pero no cubre el posicionamiento.
+
+   `inline-block` y no `inline-flex`: el host es un solo hijo y no hay nada que distribuir; lo único
+   que se necesita del contenedor es que sea `relative` y que se mida por su contenido para que el
+   `top/right` del badge caiga sobre la esquina del botón y no sobre la de la fila entera.
+
+   Los offsets van negativos y en escala `--zs-*` (`--zs-50` = 8px): el badge monta MEDIO afuera, que
+   es como se ve en el DS. `line-height: 0` en el badge evita que su caja de texto le agregue alto
+   fantasma y lo desalinee del borde. */
+.badge-anclado {
+  position: relative;
+  display: inline-block;
+}
+
+.badge-anclado > za-badge {
+  position: absolute;
+  top: calc(-1 * var(--zs-50));
+  right: calc(-1 * var(--zs-50));
+  line-height: 0;
+}

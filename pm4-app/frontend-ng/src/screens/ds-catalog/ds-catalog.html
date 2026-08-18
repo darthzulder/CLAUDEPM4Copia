@@ -1,0 +1,399 @@
+<!--
+  Catálogo del DS. Port de `frontend/src/screens/ds-catalog/DsCatalog.tsx`, **sección por sección y en
+  el mismo orden**, para que la comparación visual lado a lado sea directa.
+
+  Layout con los primitivos del DS (`z-flex`/`z-align`) y las clases de `shared.css`, nunca
+  `display:flex` a mano ni `style` en línea — regla 3 de pm4-app/CLAUDE.md. React usaba `style` en
+  línea en varios puntos de este archivo; acá cada uno de esos casos cae en una clase que ya existe
+  (`.subsection-intro`, `.field-hint`, `.Capt-14`) o en un `z-flex`.
+-->
+<div class="screen-wrapper">
+  <div class="screen-content" z-flex="col:200">
+    <!-- El `h1` va sin clase, igual que en `gate-fachada`: React lo estilaba con un `style` en línea
+         de un solo uso (`font: var(--zf-body-20--700)`), y sumar una clase a shared.css para eso iría
+         contra la política de minimizar la hoja. Si el encabezado de pantalla se vuelve un patrón,
+         sale como componente, no como clase suelta. -->
+    <div>
+      <h1>Catálogo Zurich DS</h1>
+      <p class="subsection-intro">
+        Componentes consumidos desde la fachada <code>zds-reexports</code>. Fuente de verdad visual
+        del proyecto.
+      </p>
+    </div>
+
+    <!-- ── Botones ─────────────────────────────────────────────────────────────────────────────
+         ⚠ `[disabled]="false"` explícito en CADA `lib-button-z`: `ButtonZ.disabled` arranca en
+         `true`, así que un botón sin ese binding se pinta gris y no responde. Es el gotcha 1 de
+         `zds-reexports.ts` y la razón de que aparezca repetido en todo el archivo.
+
+         El `config` de React mapea a `type`, que es una cadena de atributos
+         (`ToAttrChain<ZButton_Type, ZButton_Size, 'round'>`) — de ahí `secondary:s`. -->
+    <app-form-section title="Botones">
+      <div z-flex="wrap:100" z-align="left:center">
+        <lib-button-z label="Primario" type="primary" [disabled]="false" />
+        <lib-button-z label="Secundario" type="secondary" [disabled]="false" />
+        <lib-button-z label="Destructivo" type="negative" [disabled]="false" />
+        <lib-button-z label="Con ícono" type="primary" icon="check:line" [disabled]="false" />
+        <lib-button-z label="Pequeño" type="secondary:s" [disabled]="false" />
+        <!-- El tooltip envuelve al botón por contenido proyectado (`ngContentSelectors: ["*"]`), que
+             es la única forma de anclarlo: no tiene input de target. -->
+        <lib-tooltip-z text="Tooltip sobre un botón" config="top">
+          <lib-button-z label="Con tooltip" type="secondary" icon="info:line" [disabled]="false" />
+        </lib-tooltip-z>
+      </div>
+    </app-form-section>
+
+    <!-- ── Campos de formulario ────────────────────────────────────────────────────────────────
+         Los 9 wrappers con CVA propio, todos dentro del `<form [formGroup]>`. Cada campo lleva
+         `formControlName` **y** `name`: el primero ata el control al FormGroup, el segundo es el
+         input requerido del wrapper (`campo-base.name` es `input.required`). No son redundantes. -->
+    <app-form-section title="Campos de formulario">
+      <form [formGroup]="objForm" z-flex="col:150">
+        <div class="form-row cols-2">
+          <zds-input formControlName="txt" name="txt" label="Texto" />
+          <zds-select formControlName="sel" name="sel" label="Select" [options]="cllOpciones" />
+          <zds-date formControlName="fec" name="fec" label="Fecha" />
+          <zds-radio
+            formControlName="rad"
+            name="rad"
+            label="Radio"
+            [options]="cllOpciones"
+            [inline]="true"
+          />
+        </div>
+
+        <zds-textarea formControlName="area" name="area" label="Área de texto" />
+
+        <div z-flex="wrap:200" z-align="left:center">
+          <zds-checkbox-field formControlName="chk" name="chk" label="Acepto los términos" />
+
+          <!-- `ZrSegmented` (`za-segmented-control`) es de la familia `ZaBaseInput`: trae CVA propio,
+               así que va con `[formControl…]` DIRECTO, sin wrapper `Zds*`. Ver la tabla de las dos
+               familias en el docstring de la clase. -->
+          <za-segmented-control formControlName="seg" name="seg" [options]="cllSino" />
+        </div>
+
+        <!-- Igual que el anterior: `ZaStepper` extiende `ZaBaseInput`. React lo envolvía en un
+             `ZdsStepper` porque su DS de React no traía CVA; el de Angular sí. -->
+        <za-stepper formControlName="step" name="step" label="Paso" [steps]="5" />
+
+        <!-- El 9º wrapper, que el catálogo de React no tiene (no existía). -->
+        <zds-file-input
+          formControlName="arch"
+          name="arch"
+          label="Documento de soporte"
+          [allowedExtensions]="['pdf', 'jpg', 'png']"
+          [maxSizeMb]="5"
+        />
+      </form>
+    </app-form-section>
+
+    <!-- ── InputGroup ──────────────────────────────────────────────────────────────────────────
+         El `<output>` va como contenido proyectado, igual que en React. `ZrTextInput` acá NO se
+         bindea a un control: se exhibe suelto, con `label`, para mostrar el grupo. -->
+    <app-form-section title="Grupo de inputs (InputGroup)">
+      <za-input-group legend="Importe">
+        <output>€</output>
+        <za-text-input label="Cantidad" name="importe" />
+      </za-input-group>
+    </app-form-section>
+
+    <!-- ── Calendario inline ───────────────────────────────────────────────────────────────────
+         `ZrCalendar` también trae CVA nativo. `wide` es un input propio del componente.
+         ⚠ Sus otros inputs SOLO responden al alias kebab (`calendar-type`, `first-weekday`,
+         `today-nav`…): `[calendarType]` compila y no hace nada. -->
+    <app-form-section title="Calendario (inline)">
+      <div [formGroup]="objForm">
+        <za-calendar formControlName="cal" name="cal" [wide]="true" first-weekday="monday" />
+      </div>
+    </app-form-section>
+
+    <!-- ── Estados y etiquetas ─────────────────────────────────────────────────────────────────
+         `zds-status-badge` recibe el texto por contenido proyectado, no por input, para dar paridad
+         exacta con el `ZdsStatusBadge` de React. -->
+    <app-form-section title="Estados y etiquetas">
+      <div z-flex="wrap:75" z-align="left:center">
+        <zds-status-badge variante="success">Aprobado</zds-status-badge>
+        <zds-status-badge variante="danger">Rechazado</zds-status-badge>
+        <zds-status-badge variante="info">En revisión</zds-status-badge>
+        <zds-status-badge variante="neutral">Pendiente</zds-status-badge>
+        <za-tag fill="peach">Tag</za-tag>
+        <za-chip content="Chip" />
+        <!-- ⚠ `ZaIcon.icon` es `required: true` en su declaración de inputs, así que un `<za-icon />`
+             pelado **no compila** (`NG8008`). El nombre del set va en la forma `<nombre>:<estilo>`,
+             igual que en el `icon` de `lib-button-z`. React no exhibía el ícono suelto —solo dentro
+             de botones—, así que este es un componente MÁS que el catálogo original; va porque el
+             ícono es parte de la fachada y el caso "los 39 símbolos montan" del spec lo exige. -->
+        <za-icon icon="check:line" />
+        <!-- El interruptor: `ZaSwitch` extiende `ZaBooleanInput` ⊂ `ZaBaseInput`, así que también
+             lleva `[formControl…]` directo. -->
+        <div [formGroup]="objForm">
+          <za-switch formControlName="interruptor" name="interruptor" label="Notificarme" />
+        </div>
+        <!-- ⚠ `ZrBadge` es un contador de notificación: va ANCLADO a un host (botón/ícono), no
+             standalone — flota a la esquina superior derecha. El `lib-button-z` NO proyecta
+             contenido (`ngContentSelectors: never`), así que el badge no puede ir adentro como en
+             React: se ancla con un contenedor propio. Es una diferencia de la librería, medida, no
+             una licencia de diseño. -->
+        <div class="badge-anclado">
+          <lib-button-z
+            label="Mensajes"
+            type="secondary"
+            icon="mail-closed:line"
+            [disabled]="false"
+          />
+          <za-badge config="text" text="3" fill="peach" />
+        </div>
+      </div>
+    </app-form-section>
+
+    <!-- ── Feedback ────────────────────────────────────────────────────────────────────────────
+         Las 4 alertas declarativas de React van con `za-alert` (= `ZrAlertInline`), que es la caja
+         inline y recibe el mensaje por contenido. El `lib-alert-z` de `lib-zurich` es otra cosa: una
+         cola IMPERATIVA que se alimenta por `AlertZService` y no recibe el mensaje por input. Se
+         muestran las dos, que es justo lo que un catálogo tiene que enseñar. -->
+    <app-form-section title="Feedback">
+      <za-alert config="info" [hide-close]="true">Alerta informativa.</za-alert>
+      <za-alert config="positive" [hide-close]="true">Operación exitosa.</za-alert>
+      <za-alert config="negative" [hide-close]="true">Ha ocurrido un error.</za-alert>
+      <za-alert config="alert" [hide-close]="true">Advertencia importante.</za-alert>
+
+      <!-- La cola imperativa: se monta UNA vez y los mensajes entran por el servicio. -->
+      <lib-alert-z />
+      <div z-flex="wrap:75" z-align="left:center">
+        <lib-button-z
+          label="Encolar alertas (AlertZService)"
+          type="secondary"
+          [disabled]="false"
+          (eventClick)="encolarAlertas()"
+        />
+        <lib-button-z
+          label="Limpiar cola"
+          type="secondary"
+          [disabled]="false"
+          (eventClick)="limpiarAlertas()"
+        />
+      </div>
+
+      <!-- ⚠ `progress-bar-title` y `no-percentage` van en kebab: son alias, y la forma camelCase
+           (`[progressBarTitle]`) compila sin error y no llega al componente. -->
+      <za-progress-bar
+        config="linear"
+        [progress]="3"
+        [max]="5"
+        [no-percentage]="true"
+        progress-bar-title="Paso 3 de 5"
+      />
+
+      <div z-flex="100" z-align="left:center">
+        <!-- `ZrLoader` es verde y de 50px y no hay input que lo cambie (`customStr` está muerto). -->
+        <lib-loader-z />
+        <span class="field-hint">Indicador de carga (ZrLoader)</span>
+      </div>
+    </app-form-section>
+
+    <!-- ── Pestañas ────────────────────────────────────────────────────────────────────────────
+         `ZaTabs` es de la familia `ZaModelElement`: two-way por `ngModel`, SIN CVA.
+
+         ⚠ **El input `[ngModel]` NO se escribe acá, y no es un olvido: escribirlo revienta la
+         pantalla.** El `ngModel` de estos componentes es un `@Input()` propio que se llama igual
+         que el directivo de Angular, y `NgControlStatus` —que `ReactiveFormsModule` arrastra
+         siempre— tiene selector `[formControlName],[ngModel],[formControl]` y pide un `NgControl`
+         **no opcional**. O sea: el atributo `ngModel` en la plantilla lo matchea, no hay quien
+         provea `NgControl`, y sale `NG0201` al montar. El output `(ngModelChange)` sí es seguro:
+         un binding de salida no crea atributo, así que ningún selector lo ve.
+
+         Por eso el valor entra por la **instancia** (`objTabs` + un `effect` en la clase) y solo el
+         retorno viaja por plantilla. Medido con una sonda aislada, no deducido; el razonamiento
+         completo y la tabla de variantes están en el docstring de la clase.
+
+         El contenido de cada pestaña va por `slot="tab-N"`, 1-based, igual que en React. -->
+    <app-form-section title="Pestañas (Tabs)">
+      <za-tabs #objTabs [tabs]="cllTabs" (ngModelChange)="sigTab.set($event)">
+        <div slot="tab-1">Contenido de Resumen.</div>
+        <div slot="tab-2">Contenido de Detalle.</div>
+        <div slot="tab-3">Contenido de Historial.</div>
+      </za-tabs>
+    </app-form-section>
+
+    <!-- ── Tabla ───────────────────────────────────────────────────────────────────────────────
+         ⚠ Va **data-driven** (`[headers]` + `[data]`) y no con el `<table>` crudo que React
+         proyectaba adentro: `TableZ` no proyecta markup, arma la tabla desde sus inputs. En
+         `headers`, `title` es el rótulo visible y `key` la propiedad que se lee de cada fila.
+         Es la misma decisión ya tomada en SCR-003, por la política "gana el componente del DS". -->
+    <app-form-section title="Tabla">
+      <lib-table-z [headers]="cllCabeceras" [data]="cllFilas" />
+    </app-form-section>
+
+    <!-- ── Tarjetas ────────────────────────────────────────────────────────────────────────────
+         ⚠ `ZrCard`/`ZrTile` son los `za-*`, no los `lib-*-z`: `CardZ` y `TileZ` piden otra forma de
+         datos (`showHeader`/`img`/`nameButton` + `ZTemplate`) y el catálogo se vería distinto de
+         React en los dos. Decisión consultada y aprobada; la tabla de comparación está en el
+         docstring de `zds-reexports.ts`.
+
+         ⚠ No poner `z-flex` sobre `za-card`: tiene su propio layout interno. -->
+    <app-form-section title="Tarjetas">
+      <div class="form-row cols-2">
+        <za-card config="grid">
+          <strong>ZrCard</strong>
+          <p class="subsection-intro">Contenedor genérico del DS.</p>
+        </za-card>
+        <za-tile
+          header="ZrTile"
+          content="Superficie de contenido estructurada (header + body + media)."
+        />
+      </div>
+    </app-form-section>
+
+    <!-- ── KPI, estado vacío y paginación ──────────────────────────────────────────────────────
+         Los colores por KPI que React ponía con `style={{ '--z-kpi-value--color': … }}` van acá con
+         `.kpi-warn`/`.kpi-danger`/`.kpi-ok`, que **ya existen** en shared.css desde SCR-013 y se
+         nombraron a propósito por el estado que comunican y no por la pantalla, para que la próxima
+         las reuse. Ésta es esa próxima: cero CSS nuevo. -->
+    <app-form-section title="KPI, estado vacío y paginación">
+      <div z-flex="wrap:100">
+        <za-kpi-value [amount]="12" header="Casos abiertos" />
+        <za-kpi-value [amount]="3" header="Próximos a vencer" class="kpi-warn" />
+        <za-kpi-value [amount]="1" header="Vencidos" class="kpi-danger" />
+        <za-kpi-value [amount]="45" header="Cerrados" class="kpi-ok" />
+      </div>
+
+      <za-empty-state
+        header="Sin resultados"
+        content="No hay registros que coincidan con el filtro aplicado."
+      />
+
+      <div z-flex="75" z-align="between:center">
+        <span class="field-hint">Página {{ sigPagina() }} de 5</span>
+        <!-- Mismo cableado que `za-tabs`: `ZaPagination` es `ZaModelElement`, así que el valor entra
+             por la instancia (`objPaginacion`) y **no** por un `[ngModel]` en la plantilla — ver la
+             advertencia de la sección de pestañas. `show-edges` va en kebab por alias. -->
+        <za-pagination
+          #objPaginacion
+          [pages]="5"
+          [show-edges]="true"
+          (ngModelChange)="sigPagina.set($event)"
+        />
+      </div>
+    </app-form-section>
+
+    <!-- ── Navegación y banners ────────────────────────────────────────────────────────────────
+         ⚠ `NavigationZ` y `StageBannerZ` tienen `ngContentSelectors: never`: no proyectan contenido,
+         así que el `<img slot="logo">` que React mete dentro de `ZrNavigation` **no tiene
+         equivalente**. Forzarlo con un `<img>` hermano sería inventar UI que el componente no ofrece.
+
+         ✅ Y no hace falta: **el logo igual aparece**, medido en el navegador. Lo pinta el
+         `z-navigation` interno desde su propio shadow DOM por CSS (no es un `<img>` ni un `<svg>`, y
+         nosotros proyectamos cero). Queda mejor que en React, donde el logo proyectado se ve gris
+         tenue. La ausencia de slots es real; que por eso faltara el logo era una suposición falsa.
+
+         ⚠ Y ojo con el `imageSrc`, que se escribe DISTINTO en las dos librerías: `[imageSrc]`
+         camelCase en el `lib-stage-banner-z`, `[image-src]` kebab en los `za-*` (`ZaWithImage`). Ver
+         la sección del docstring. Acá va el logo del proyecto, resuelto por `STR_LOGO`. -->
+    <app-form-section title="Navegación y banners (vendor)">
+      <lib-navigation-z [routes]="cllRutas" />
+
+      <lib-stage-banner-z
+        shape="3"
+        category="Atención al cliente"
+        content="Ejemplo de banner hero centrado (ZrStageBanner)."
+        [addImage]="true"
+        [imageSrc]="STR_LOGO"
+      />
+
+      <za-promo
+        header="Radica tu PQR"
+        content="Ejemplo de banner asimétrico (ZrPromo)."
+        category="Atención al cliente"
+        shape="3"
+        [image-src]="STR_LOGO"
+      />
+
+      <!-- ⚠ Éste es el `za-footer`, y no el `lib-footer-z`, por una razón dura: `FooterZ` está
+           **vacía** — cero inputs, cero slots, no renderiza nada configurable. `ZaFooter` sí declara
+           el `columns`/`social` que la nota de pm4-app/CLAUDE.md advierte que el `lib-*` no tiene.
+           El paquete equivocado era el `lib-*`, no la prop.
+
+           ⚠ `columns` exige **2, 3 o 4** columnas (restricción de `length` en el tipo): React le pasa
+           una sola y viola el contrato. Ver el comentario de `cllColumnasFooter`.
+
+           ⚠ `social-text` va en kebab, como `progress-bar-title`: la propiedad se llama `socialText`
+           y su alias es el kebab, así que `[socialText]` compilaría sin llegar al componente. -->
+      <za-footer
+        [columns]="cllColumnasFooter"
+        [social]="dicRedesFooter"
+        social-text="Seguinos en nuestras redes"
+        [footer]="cllPieFooter"
+      />
+    </app-form-section>
+
+    <!-- ── Overlays ────────────────────────────────────────────────────────────────────────────-->
+    <app-form-section title="Overlays">
+      <div z-flex="wrap:100">
+        <lib-button-z
+          label="Abrir modal"
+          type="primary"
+          [disabled]="false"
+          (eventClick)="sigModal.set(true)"
+        />
+        <lib-button-z
+          label="Abrir sidebar"
+          type="secondary"
+          icon="menu:line"
+          [disabled]="false"
+          (eventClick)="sigDrawer.set(true)"
+        />
+      </div>
+    </app-form-section>
+
+    <!-- ⚠ Tres reglas duras del contrato de slots de `ModalZ`, las tres con fallas silenciosas:
+         1. El contenido va en `<ng-template libZTemplate id="content">`, no como hijo directo.
+         2. El `id` es un atributo ESTÁTICO (`@Attribute('id')`, resuelto una sola vez): un
+            `[id]="expr"` llega `null` y el slot queda sin asignar, sin error.
+         3. El `ng-template` NO puede estar dentro de un `@if`: `ngAfterContentInit` corre UNA vez y
+            si el template no está ahí, `ModalZ` guarda `undefined` y no vuelve a mirar. Como la
+            pantalla monta con el modal CERRADO, esa es la condición inicial real. El `@if` va
+            ADENTRO del slot.
+
+         React montaba el modal completo dentro de un `{blnModal && …}` para reiniciar su estado; acá
+         eso rompería la regla 3, y el `@if` interno cumple la misma función.
+
+         El `(close)` NO es opcional: `ModalZ.change()` escribe `this.open = false` sobre su propio
+         input, así que sin bajar la bandera de la pantalla el segundo "Abrir modal" no abriría nada.
+         Eso está asertado en el spec. -->
+    <lib-modal-z [open]="sigModal()" tamanio="m" (close)="sigModal.set(false)">
+      <ng-template libZTemplate id="content">
+        @if (sigModal()) {
+          <h3 class="modal-titulo">Modal de ejemplo</h3>
+          <p class="subsection-intro">Diálogo centrado con backdrop.</p>
+        }
+      </ng-template>
+      <ng-template libZTemplate id="buttons">
+        <lib-button-z
+          label="Cerrar"
+          type="secondary"
+          [disabled]="false"
+          (eventClick)="sigModal.set(false)"
+        />
+      </ng-template>
+    </lib-modal-z>
+
+    <!-- El panel lateral queda SIEMPRE montado y su visibilidad la gobierna el modelo, igual que en
+         React. `ZaSidebar` es `ZaModelElement`, así que el valor entra por la instancia
+         (`objSidebar`) y solo el retorno va por plantilla — ver la advertencia de las pestañas. -->
+    <za-sidebar
+      #objSidebar
+      config="right"
+      (ngModelChange)="sigDrawer.set($event)"
+    >
+      <h3 class="modal-titulo">Sidebar de ejemplo</h3>
+      <p class="subsection-intro">Panel lateral deslizable.</p>
+      <lib-button-z
+        label="Cerrar"
+        type="secondary"
+        [disabled]="false"
+        (eventClick)="sigDrawer.set(false)"
+      />
+    </za-sidebar>
+  </div>
+</div>

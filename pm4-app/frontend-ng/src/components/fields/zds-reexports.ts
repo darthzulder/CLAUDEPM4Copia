@@ -132,6 +132,130 @@
  * inputs de `za-*` se verifican contra `dist/fesm2022/angular.mjs` antes de escribirlos, nunca se
  * asumen por el nombre que tendrían en otra librería.
  *
+ * ── ⚠ Y ojo con el ALIAS KEBAB: el input existe, tipa bien, y el camelCase no llega ───────────
+ * Varios inputs de `za-*` **solo** se pueden bindear por su alias en kebab-case. El nombre de la
+ * propiedad TypeScript no es un binding válido: `[calendarType]="'range'"` **compila y no hace nada**
+ * (Angular no encuentra un input con ese nombre público y lo trata como propiedad del DOM). El
+ * síntoma es el peor posible — cero error, componente montado, comportamiento default.
+ *
+ * Verificado contra los `.d.ts` por componente (la lista de `ɵɵComponentDeclaration`, que es donde
+ * viven los alias reales), no por grep sobre el `.mjs`:
+ *
+ * | Componente | Alias kebab obligatorios |
+ * |---|---|
+ * | `ZrCalendar` | `calendar-type`, `first-weekday`, `today-nav`, `selected-nav`, `today-text`, `selected-text` |
+ * | `ZrProgressBar` | `progress-bar-title`, `no-percentage` |
+ * | `ZrTextInput` | `input-type`, `max-length`, `data-list`, `align-right` |
+ * | *(todos los que heredan de `ZaBaseInput`)* | `help-text` |
+ *
+ * O sea: `<za-calendar calendar-type="range" />`, no `[calendarType]`. Los demás inputs de esos
+ * componentes (`wide`, `progress`, `config`, `max`, `placeholder`, `pattern`, `icon`…) sí coinciden con
+ * su nombre de propiedad. Es la misma familia de defecto que el `[attr.x]` de más abajo: el DOM se ve
+ * bien y el render está mal.
+ *
+ * ── CVA nativo: cuatro `za-*` son campos de formulario y NO necesitan wrapper ──────────────────
+ * `ZaBaseInput` implementa `ControlValueAccessor` **completo** (`writeValue`, `registerOnChange`,
+ * `registerOnTouched`, `setDisabledState`) y aporta `label`, `disabled`, `required`, `invalid`,
+ * `locale`, `helpText`, `(blur)` y `(validated)`. `ZaInput` agrega `config`, `readonly`,
+ * `autocomplete` y `(enter)`.
+ *
+ * `ZrSegmented` y `ZrTextInput` extienden `ZaInput`; `ZrStepper` y `ZrCalendar` extienden
+ * `ZaBaseInput`. Los cuatro se usan con **`[formControl]` directo**:
+ *
+ * ```html
+ * <za-stepper [formControl]="objPaso" [steps]="5" label="Paso" />
+ * ```
+ *
+ * Por eso llevan prefijo `Zr` (re-export pelado) y no `Zds` (wrapper con CVA), aunque el plan de
+ * migración los bautizara `ZdsSegmented`/`ZdsStepper`/`ZdsCalendar`: **no hay CVA que agregar**. Es la
+ * misma decisión —y por el mismo motivo— que ya se había tomado con `ZrSwitch`. Los `Zds*` de
+ * `components/fields/` siguen existiendo para los campos donde el wrapper sí aporta (el CVA de los
+ * `lib-*-z`, que no lo traen, más label/error/`_desc`).
+ *
+ * ── ⚠⚠ El `[ngModel]` de `ZaModelElement`: inescribible desde la plantilla ─────────────────────
+ * Afecta a **`ZrTabs`, `ZrSidebar` y `ZrPagination`**, los tres `ZaModelElement` de esta fachada (la
+ * otra familia, `ZaBaseInput`, no tiene el problema: va por `[formControl]`, sección de arriba).
+ *
+ * El vendor declara `@Input() ngModel` con el **nombre pelado, sin alias** — o sea, el mismo nombre
+ * que la directiva `NgModel` de Angular. Y `ReactiveFormsModule` re-exporta `NgControlStatus`, cuyo
+ * selector es `[formControlName],[ngModel],[formControl]`: matchea el **atributo**, y su `NgControl`
+ * es `{self: true}` y **no opcional**. Escribir `[ngModel]` hace que `NgControlStatus` se enganche,
+ * no encuentre un `NgControl` y tire **`NG0201` montando la pantalla entera**.
+ *
+ * Las cuatro variantes, **medidas** con una sonda aislada, no deducidas del mensaje de error:
+ *
+ * | Módulo de forms importado | Binding | Resultado |
+ * |---|---|---|
+ * | `FormsModule` | `[ngModel]` | ❌ `NG01203` (ahí matchea `NgModel` y exige un CVA) |
+ * | `ReactiveFormsModule` | `[ngModel]` | ❌ `NG0201` — con y sin `<form>` alrededor |
+ * | **ninguno** | `[ngModel]` | ✅ el input llega |
+ * | `ReactiveFormsModule` | solo `(ngModelChange)` | ✅ monta, el output funciona |
+ *
+ * Dos conclusiones que cuestan si se asumen al revés: **no es culpa de `FormsModule`** (quitarlo no
+ * arregla nada, solo cambia el error), y el problema es el **atributo del input**, no el output — un
+ * binding de output no crea atributo, así que `(ngModelChange)` es siempre seguro.
+ *
+ * **La forma que queda: el two-way partido en dos mitades.** La ida por la instancia, la vuelta por
+ * el output:
+ *
+ * ```html
+ * <!-- ⚠ SIN [ngModel]: lo escribe el effect por la instancia -->
+ * <za-tabs #objTabs [tabs]="cllTabs" (ngModelChange)="sigTab.set($event)" />
+ * ```
+ * ```ts
+ * private readonly objTabs = viewChild.required<ZrTabs>('objTabs');
+ * constructor() { effect(() => { this.objTabs().ngModel = this.sigTab(); }); }
+ * ```
+ *
+ * Las **dos** mitades hacen falta, y la vuelta es la que se olvida: `ZaModelElement._onChange` pisa
+ * el atributo `model` del elemento interno por su cuenta, así que sin `(ngModelChange)` el panel se
+ * cierra en pantalla y el signal se queda en `true` — el segundo "abrir" no abre nada, sin error.
+ * Es el mismo defecto que el `(close)` de `ModalZ`. Ver `screens/ds-catalog/ds-catalog.ts`, que lo
+ * tiene aseverado en su spec por las dos mitades.
+ *
+ * Alternativa descartada: una directiva con selector `'za-tabs[ngModel], …'` que provea un `NgControl`
+ * falso. Funciona, pero deja a `NgControlStatus` pintando `ng-valid`/`ng-touched` sobre un control
+ * `null`, que es peor que no tener el binding.
+ *
+ * ── ⚠ `ZrStageBanner` usa `imageSrc` camelCase, y ni él ni `ZrNavigation` proyectan contenido ──
+ * Dos trampas de lo que esta fachada ya exportaba, que recién se ven al montar el catálogo porque
+ * ninguna pantalla de negocio los usa así:
+ *
+ * 1. `StageBannerZ` declara **`imageSrc`** (camelCase), no el `image-src` kebab que escribe React.
+ *    No es inconsistencia nuestra: React le habla al custom element de Lit (atributo), mientras
+ *    `lib-stage-banner-z` es un componente de Angular (input). Igual con `addImage` y `roundedBanner`.
+ * 2. `NavigationZ` y `StageBannerZ` tienen **`ngContentSelectors: never`** — cero slots. Así que el
+ *    `<img slot="logo">` que React proyecta dentro de `ZrNavigation` **no tiene equivalente**: no hay
+ *    dónde ponerlo. `routes`/`social` sí existen y funcionan.
+ *
+ *    ✅ **Y resulta que no hace falta, medido en el navegador:** el logo de Zurich igual aparece,
+ *    porque lo pinta el `z-navigation` interno desde su **propio shadow DOM, por CSS** — no es un
+ *    `<img>` ni un `<svg>` (se verificó enumerando el shadow root: cero elementos de imagen, y cero
+ *    `<img>` proyectados por nosotros). O sea que la ausencia de slots no cuesta nada acá, y el
+ *    resultado queda **mejor** que en React, donde ese logo proyectado se ve gris tenue. Sigue siendo
+ *    cierto que no se puede proyectar nada; lo que era falso era suponer que por eso el logo faltaría.
+ *
+ * ── Card / Tile / Tabs / Footer bajan a `za-*`; Tooltip se queda en `lib-zurich` ───────────────
+ * La jerarquía es `lib-zurich` → `za-*` → CSS propio, y acá se aplicó con una excepción **medida y
+ * aprobada**, no por comodidad: para estos cuatro las dos librerías exponen APIs **incompatibles**, y
+ * la de `lib-zurich` no puede expresar lo que la pantalla necesita.
+ *
+ * | | `lib-zurich` | `za-*` (el que se usa) |
+ * |---|---|---|
+ * | Card | `CardZ`: `showHeader`, `showFooter`, `bgColor` + slots `ZTemplate` | `ZaCard`: `content`, `level`, `size`, `config`, `clickable` |
+ * | Tile | `TileZ`: `img`, `nameButton`, `imgLeft`, `disabled` + slots | `ZaTile`: `header`, `content` |
+ * | Tabs | `TabsZ`: `headers[{title,key}]` + `data{}` | `ZaTabs`: `tabs[]`, `disabled` |
+ * | Footer | `FooterZ`: **`{}` — cero inputs, cero slots** | `ZaFooter`: `columns`, `social`, `social-text`, `footer` |
+ *
+ * **`FooterZ` está vacía: no renderiza nada configurable.** Es el defecto que la nota de
+ * `pm4-app/CLAUDE.md` advierte (se le había atribuido un `routes`/`social` que no tiene) — y la
+ * contracara del mismo hallazgo es que **`ZaFooter` sí tiene ese `columns`/`social`**. El paquete
+ * equivocado era el `lib-*`, no la prop.
+ *
+ * `ZrTooltip` **sí** sale de `lib-zurich`: `TooltipZ` y `ZaTooltip` exponen el mismo `text`/`config`,
+ * así que ahí el primer escalón de la jerarquía no cuesta nada. Es la razón por la que la excepción es
+ * de cuatro componentes y no de cinco.
+ *
  * ── Y ojo con CÓMO los `lib-*-z` reenvían a los `za-*`: `[attr.x]` no cablea un input ─────────
  * Un input de `lib-*-z` puede existir, tipar bien, aceptar el valor **y no llegar a destino**. El caso
  * medido: `TextareaZ` reenvía el límite del contador con `[attr.max-length]="maxLength ? maxNumber : ''"`
@@ -169,6 +293,10 @@ export {
   NavigationZ as ZrNavigation,
   StageBannerZ as ZrStageBanner,
   TableZ as ZrTable,
+  // El único de los cinco Card/Tile/Tabs/Tooltip/Footer que se queda en `lib-zurich`: su API
+  // (`text`/`config`) es idéntica a la de `ZaTooltip`, así que respetar el primer escalón de la
+  // jerarquía no cuesta paridad. Ver la tabla de comparación en el docstring.
+  TooltipZ as ZrTooltip,
   ZTemplate as ZrTemplate,
 } from '@zurich-col/lib-zurich';
 
@@ -177,9 +305,38 @@ export {
   // `ZrAlert` dentro del markup. No sustituye a `ZrAlert` (la cola imperativa de `lib-alert-z`) —
   // son dos usos distintos y las dos siguen vivas.
   ZaAlert as ZrAlertInline,
+  // ── Los cuatro con CVA nativo: se usan con `[formControl]` directo, sin wrapper ──────────────
+  // Heredan `ControlValueAccessor` de `ZaBaseInput`, así que un `Zds*` no tendría nada que agregar.
+  // Ver la sección "CVA nativo" del docstring para por qué el prefijo es `Zr` y no `Zds`.
+  //
+  // ⚠ Sus inputs con alias kebab (`calendar-type`, `first-weekday`, `input-type`, `max-length`…) NO
+  // se pueden bindear por el nombre de la propiedad: `[calendarType]` compila y no hace nada.
+  ZaCalendar as ZrCalendar,
+  ZaSegmentedControl as ZrSegmented,
+  ZaStepper as ZrStepper,
+  ZaTextInput as ZrTextInput,
+  // ── Card / Tile / Tabs / Footer: bajan a `za-*` por API incompatible con `lib-zurich` ────────
+  // No es un atajo. `CardZ`/`TileZ`/`TabsZ` piden otra forma de datos y `FooterZ` está VACÍA (cero
+  // inputs, cero slots: no renderiza nada). Ver la tabla del docstring.
+  ZaCard as ZrCard,
+  ZaFooter as ZrFooter,
+  // ⚠ `ZaModelElement`: su `[ngModel]` NO se puede escribir desde la plantilla. Ver la sección
+  // "El `[ngModel]` de `ZaModelElement`" del docstring — es un `NG0201` que tira la pantalla entera.
+  ZaTabs as ZrTabs,
+  ZaTile as ZrTile,
+  // ── Display y layout que `lib-zurich` no tiene ──────────────────────────────────────────────
+  ZaBadge as ZrBadge,
+  ZaChip as ZrChip,
+  ZaEmptyState as ZrEmptyState,
   ZaIcon as ZrIcon,
+  ZaInputGroup as ZrInputGroup,
   ZaKpiValue as ZrKpiValue,
+  // ⚠ `ZaModelElement`, igual que `ZrTabs`: el `[ngModel]` es inescribible. Ver el docstring.
   ZaPagination as ZrPagination,
+  ZaProgressBar as ZrProgressBar,
+  ZaPromo as ZrPromo,
+  // ⚠ `ZaModelElement`, igual que `ZrTabs`: el `[ngModel]` es inescribible. Ver el docstring.
+  ZaSidebar as ZrSidebar,
   ZaSwitch as ZrSwitch,
   // ⚠ **No se consume en ninguna plantilla: existe para que los SPECS puedan tiparlo.** La píldora
   // de estado se usa siempre por `zds-status-badge`, que es quien envuelve `za-tag` y decide el

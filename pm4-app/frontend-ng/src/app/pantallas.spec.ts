@@ -84,6 +84,14 @@ const CLL_SLUGS_CON_SPEC: string[] = [
   // markup **y que el asset exista en `public/`**, que es la mitad que React no cubría (allá el caso
   // quedaba verde con la carpeta `public/docs/` ausente).
   'smartsupervision-api-docs',
+  // Fase 6 — no es una pantalla de negocio sino el catálogo del DS, y su spec tampoco es un smoke:
+  // asevera que **los 39 símbolos de la fachada montan**, nombrando en el mensaje los que falten. Es
+  // lo que lo convierte en guarda de regresión del design system y no en una página de muestra. Cubre
+  // además las dos familias de binding que el DS confunde a la vista (`[formControl]` con CVA nativo
+  // vs el `ngModel` **partido en dos mitades**, que es la forma que hay que usar porque el `[ngModel]`
+  // de esa familia colisiona con las directivas de forms de Angular) y los alias kebab, que fallan
+  // **en silencio** si se escriben en camelCase.
+  'ds-catalog',
 ];
 
 describe('guarda de inventario de pantallas', () => {

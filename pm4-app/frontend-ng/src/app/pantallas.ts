@@ -136,6 +136,19 @@ export const DIC_PANTALLAS: Record<string, CargadorDePantalla> = {
     import('../screens/smartsupervision-api-docs/smartsupervision-api-docs').then(
       (in_objModulo) => in_objModulo.SmartsupervisionApiDocsComponent,
     ),
+  // El catálogo del design system — la "referencia visual viva" que designa `pm4-app/CLAUDE.md` como
+  // molde de uso cuando no hay pantalla análoga que clonar. Como la anterior, **no es una pantalla de
+  // PM4**: no recibe `task_id` ni `case_id`, no consume `TaskService` y no completa ninguna tarea. Su
+  // `FormGroup` es de muestra, para que los campos tengan un control real que reflejar.
+  //
+  // Es la segunda sin datos en `paridad-react.json` (0 ocurrencias), así que tampoco va en
+  // `CLL_PORTADAS` ni en `DIC_MAXLENGTH_ESPERADOS`: la guarda de paridad filtra por los slugs **con
+  // datos** (`cllConDatos` en `paridad-react.spec.ts`), y no hay campos que comparar.
+  //
+  // Por eso también el slug va en minúsculas con guion y no con el patrón `COL_*`: no hay contrato de
+  // nombre con el BPM que respetar.
+  'ds-catalog': () =>
+    import('../screens/ds-catalog/ds-catalog').then((in_objModulo) => in_objModulo.DsCatalog),
 };
 
 /**
