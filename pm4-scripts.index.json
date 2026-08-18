@@ -1,7 +1,7 @@
 {
   "version": 1,
   "instance": "https://cozurich.dev.cloud.processmaker.net",
-  "generatedAt": "2026-08-12T22:05:18.685Z",
+  "generatedAt": "2026-08-18T14:08:12.571Z",
   "normalization": {
     "encoding": "utf-8",
     "bom": false,
@@ -24,8 +24,8 @@
       "title": "COL_QD_Check_Similitud",
       "language": "php",
       "lastKnownId": 70,
-      "sha256": "d69c9808dbd42f968ad0b3bcd4139db945e6193baf8412744315c478e39fdf5a",
-      "capturadoEn": "2026-08-12T20:17:53.097Z"
+      "sha256": "eb45f2578edb41998037a990f9bb9ef0fc71afb5efd4560db247093a694798f4",
+      "capturadoEn": "2026-08-18T14:08:12.570Z"
     },
     "a23469c1-3607-482e-933d-feea61fb63fa": {
       "slug": "col-qd-asignar-sla",

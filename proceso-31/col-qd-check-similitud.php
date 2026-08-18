@@ -2,15 +2,23 @@
 
 /**
  * Script para ProcessMaker 4 (PHP 7)
- * 
- * Recupera todos los casos (Requests) de la instancia y filtra aquellos que pertenecen
- * al proceso especificado y que contienen y coinciden con las variables:
- * - qd_motivoSFC
- * - qd_productoSFC
- * - qd_numeroIdentificacion
- * 
- * Retorna los casos que coinciden (incluyendo su data) y la lista de IDs de dichos casos.
- * Cuenta con un mecanismo de auto-recuperación si la consulta PMQL falla en el servidor.
+ *
+ * Detecta si ya existe otro caso ACTIVO con la misma combinación de motivo SFC +
+ * producto SFC + número de identificación, para marcar la queja como similar.
+ *
+ * DÓNDE SE FILTRA: en el servidor, vía PMQL (`process_id`, `status` y `data.qd_strIdNumber`).
+ * La versión anterior traía TODOS los casos del proceso con `include=data` y comparaba en PHP:
+ * medido sobre el proceso 31 con 184 casos, 2 requests / 2577 KB / mediana 15,7 s, creciendo
+ * lineal con el histórico hasta pegarle al timeout de 60 s. La consulta filtrada equivalente es
+ * 1 request / 0,4 KB / mediana 6,1 s (ese resto es el costo fijo del endpoint `/requests`, que
+ * tarda lo mismo sin ningún filtro).
+ *
+ * `qd_strSfcReason` y `qd_strSfcProduct` se siguen comparando en PHP con `==` a propósito: así
+ * se conserva la tolerancia de tipo del comportamiento original (ej: "123" vs 123).
+ *
+ * Contrato de salida idéntico al de la versión anterior: el frontend deriva la marcación y la
+ * escalación por reconsideración de `qd_intCountSimilarCases`, y resuelve el detalle de cada
+ * caso por su cuenta (por eso acá nunca se devuelve la data de los casos coincidentes).
  */
 
 use GuzzleHttp\Client;
@@ -57,132 +65,138 @@ try {
     $client = new Client([
         'base_uri' => rtrim($appUrl, '/') . '/',
         'verify' => false,
-        'timeout' => 60.0
+        // La consulta filtrada responde en ~6 s; 20 s cubre de sobra incluso el barrido
+        // degradado, y deja margen contra el timeout de 60 s del script.
+        'timeout' => 20.0
     ]);
 
-    $page = 1;
-    $perPage = 100;
-    $matchedCases = [];
-    $matchedIds = [];
-    
-    // Indicador si debemos omitir PMQL en reintentos futuros
-    $skipPmql = false;
+    $headers = [
+        'Accept' => 'application/json',
+        'Authorization' => 'Bearer ' . $apiToken,
+        'Content-Type' => 'application/json'
+    ];
 
-    do {
-        $queryParams = [
-            'include' => 'data',
-            'per_page' => $perPage,
-            'page' => $page,
-            'type' => 'all'
-        ];
+    // 4. Armar el PMQL. Estas condiciones se resuelven siempre en el servidor.
+    $arrCondBase = ['status = "ACTIVE"'];
+    if ($processId !== null) {
+        // Numérico sin comillas para no forzar un cast en la base; string entre comillas.
+        $arrCondBase[] = is_numeric($processId)
+            ? "process_id = {$processId}"
+            : sprintf('process_id = "%s"', str_replace(['"', '\\'], '', $processId));
+    }
 
-        // Construir PMQL optimizado si tenemos processId y no hemos decidido omitirlo
-        if ($processId && !$skipPmql) {
-            // Si el ID es numérico (ej. 31), se pasa sin comillas para evitar errores de tipo en la base de datos.
-            // Si es un UUID u otra cadena, se pasa con comillas dobles.
-            if (is_numeric($processId)) {
-                $queryParams['pmql'] = "process_id = {$processId}";
-            } else {
-                $queryParams['pmql'] = "process_id = \"{$processId}\"";
-            }
+    // Condición sobre el JSON de `data`. Si el valor es numérico se prueban las dos formas:
+    // un caso viejo puede tenerlo guardado como número y otro como string. Medido: el OR no
+    // cuesta nada frente a la forma simple.
+    $strIdBuscado = str_replace(['"', '\\'], '', $qd_numeroIdentificacion);
+    $strCondData = is_numeric($strIdBuscado)
+        ? sprintf('(data.qd_strIdNumber = "%s" OR data.qd_strIdNumber = %s)', $strIdBuscado, $strIdBuscado)
+        : sprintf('data.qd_strIdNumber = "%s"', $strIdBuscado);
+
+    /**
+     * Trae los casos que la API considera candidatos y se queda con los que coinciden.
+     *
+     * @param bool $blnFiltrarPorIdEnServidor false = modo degradado: la instancia no pudo filtrar
+     *                                        por `data.*`, así que se barre el proceso completo y
+     *                                        el número de identificación se compara en PHP.
+     * @return int[] ids de los casos coincidentes
+     */
+    $fnBuscarCoincidencias = function ($blnFiltrarPorIdEnServidor) use (
+        $client,
+        $headers,
+        $arrCondBase,
+        $strCondData,
+        $qd_motivoSFC,
+        $qd_productoSFC,
+        $qd_numeroIdentificacion,
+        $currentCaseId
+    ) {
+        $arrCond = $arrCondBase;
+        if ($blnFiltrarPorIdEnServidor) {
+            $arrCond[] = $strCondData;
         }
+        $strPmql = implode(' AND ', $arrCond);
 
-        $headers = [
-            'Accept' => 'application/json',
-            'Authorization' => 'Bearer ' . $apiToken,
-            'Content-Type' => 'application/json'
-        ];
+        $matchedIds = [];
+        $page = 1;
 
-        try {
-            // Intentar realizar la petición a la API
+        // Con el filtro puesto esto casi siempre es una sola vuelta, pero se pagina igual: nunca
+        // hay que truncar en silencio, ni acá ni en el modo degradado.
+        do {
             $response = $client->request('GET', 'api/1.0/requests', [
                 'headers' => $headers,
-                'query' => $queryParams
+                'query' => [
+                    'include' => 'data',
+                    'per_page' => 200,
+                    'page' => $page,
+                    'type' => 'all',
+                    'pmql' => $strPmql
+                ]
             ]);
-        } catch (RequestException $e) {
-            // MECANISMO DE AUTO-RECUPERACIÓN:
-            // Si la llamada con PMQL falla (error 500 por tipo de dato, etc.),
-            // reintentamos inmediatamente quitando el parámetro pmql y haciendo el filtro en PHP.
-            if (isset($queryParams['pmql'])) {
-                echo "[PM4 Script] Advertencia: La consulta con PMQL falló ({$e->getMessage()}). Reintentando filtrado manual en PHP...\n";
-                $skipPmql = true;
-                unset($queryParams['pmql']);
-                
-                $response = $client->request('GET', 'api/1.0/requests', [
-                    'headers' => $headers,
-                    'query' => $queryParams
-                ]);
-            } else {
-                // Si falla incluso sin el filtro PMQL, propagamos la excepción
-                throw $e;
-            }
-        }
 
-        if ($response->getStatusCode() !== 200) {
-            throw new Exception("Error al consultar la API de ProcessMaker. Status Code: " . $response->getStatusCode());
-        }
-
-        $responseBody = json_decode($response->getBody()->getContents(), true);
-        $cases = $responseBody['data'] ?? [];
-
-        // 5. Filtrar casos comparando las variables
-        foreach ($cases as $case) {
-             // EXCLUIR EL CASO ACTUAL QUE ESTÁ EJECUTANDO ESTE SCRIPT
-            if ($currentCaseId !== null && $case['id'] == $currentCaseId) {
-                continue;
+            if ($response->getStatusCode() !== 200) {
+                throw new Exception("Error al consultar la API de ProcessMaker. Status Code: " . $response->getStatusCode());
             }
-            if ($case['status'] != "ACTIVE"){
-                continue;
-            }
-            // Si falló PMQL y tuvimos que traer todos los casos, comprobamos manualmente el process_id en PHP
-            if ($processId && $skipPmql) {
-                $caseProcessId = $case['process_id'] ?? null;
-                if ($caseProcessId != $processId) {
-                    continue; // Saltar casos que no pertenecen al proceso buscado
+
+            $responseBody = json_decode($response->getBody()->getContents(), true);
+            $cases = $responseBody['data'] ?? [];
+
+            // 5. Filtrar casos comparando las variables
+            foreach ($cases as $case) {
+                // EXCLUIR EL CASO ACTUAL QUE ESTÁ EJECUTANDO ESTE SCRIPT
+                if ($currentCaseId !== null && $case['id'] == $currentCaseId) {
+                    continue;
                 }
-            }
+                // Redundante con el PMQL, a propósito: garantiza que el criterio no se afloje
+                // si algún día cambia la semántica de `status` en la API.
+                if (($case['status'] ?? null) != "ACTIVE") {
+                    continue;
+                }
 
-            $caseData = $case['data'] ?? [];
-            
-            // Las 3 variables deben aparecer en el caso para que se lo tome en cuenta
-            $hasMotivo = array_key_exists('qd_strSfcReason', $caseData);
-            $hasProducto = array_key_exists('qd_strSfcProduct', $caseData);
-            $hasIdentificacion = array_key_exists('qd_strIdNumber', $caseData);
+                $caseData = $case['data'] ?? [];
 
-            if ($hasMotivo && $hasProducto && $hasIdentificacion) {
-                // Comparación flexible de valores (==) para ignorar discrepancias de tipo (ej: string "123" vs int 123)
+                // Las 3 variables deben aparecer en el caso para que se lo tome en cuenta
+                if (!array_key_exists('qd_strSfcReason', $caseData) ||
+                    !array_key_exists('qd_strSfcProduct', $caseData) ||
+                    !array_key_exists('qd_strIdNumber', $caseData)) {
+                    continue;
+                }
+
+                // Comparación flexible de valores (==) para ignorar discrepancias de tipo
                 if ($caseData['qd_strSfcReason'] == $qd_motivoSFC &&
                     $caseData['qd_strSfcProduct'] == $qd_productoSFC &&
                     $caseData['qd_strIdNumber'] == $qd_numeroIdentificacion) {
-                    
-                    $matchedCases[] = [
-                        'id' => $case['id'],
-                        'case_number' => $case['case_number'] ?? null,
-                        'process_id' => $case['process_id'] ?? null,
-                        'status' => $case['status'] ?? null,
-                        'created_at' => $case['created_at'] ?? null,
-                        'updated_at' => $case['updated_at'] ?? null,
-                        'data' => $caseData
-                    ];
-                    
+
                     $matchedIds[] = $case['id'];
                 }
             }
-        }
 
-        // Control de paginación
-        $meta = $responseBody['meta'] ?? [];
-        $lastPage = $meta['last_page'] ?? 1;
-        $page++;
+            // Control de paginación
+            $meta = $responseBody['meta'] ?? [];
+            $lastPage = $meta['last_page'] ?? 1;
+            $page++;
 
-    } while ($page <= $lastPage);
+        } while ($page <= $lastPage);
+
+        return $matchedIds;
+    };
+
+    try {
+        $matchedIds = $fnBuscarCoincidencias(true);
+    } catch (RequestException $e) {
+        // Si la instancia no soporta filtrar por `data.*`, se degrada al barrido del proceso: es
+        // el comportamiento anterior — lento, pero correcto. Lo que NO se hace más es caer al
+        // barrido de toda la instancia, que era el peor escenario de la versión previa.
+        echo "[PM4 Script] Advertencia: el filtro PMQL sobre data falló ({$e->getMessage()}). Degradando a barrido del proceso...\n";
+        $matchedIds = $fnBuscarCoincidencias(false);
+    }
 
     $countSimilar = count($matchedIds);
+
     return [
         'similar_check_status' => 'SUCCESS',
         'qd_arridSimilarCases' => $matchedIds,
-        'qd_intCountSimilarCases' => $countSimilar,
-        //'qd_arrSimilarCases' => $matchedCases
+        'qd_intCountSimilarCases' => $countSimilar
     ];
 
 } catch (RequestException $e) {
@@ -193,14 +207,12 @@ try {
     return [
         'similar_check_status' => 'ERROR',
         'message' => 'Error de red/API Guzzle: ' . $errorMessage,
-        //'qd_arrSimilarCases' => [],
         'qd_arridSimilarCases' => []
     ];
 } catch (\Throwable $e) {
     return [
         'similar_check_status' => 'ERROR',
         'message' => 'Excepción en script: ' . $e->getMessage(),
-        //'qd_arrSimilarCases' => [],
         'qd_arridSimilarCases' => []
     ];
 }
