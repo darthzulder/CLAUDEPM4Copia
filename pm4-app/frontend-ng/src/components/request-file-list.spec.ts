@@ -122,6 +122,38 @@ describe('RequestFileListComponent', () => {
     // `verify()` en `afterEach` y no al final de cada caso: si una aserción falla antes, la línea
     // final no corre y la petición pendiente se filtraría al caso siguiente como un fallo fantasma.
     objHttp.verify();
+
+    // ── El `restoreAllMocks` y los spies sobre globals del entorno ─────────────────────────────
+    // Los casos de descarga de abajo espían `URL.createObjectURL`, `URL.revokeObjectURL`,
+    // `console.error` y `document.createElement`, que **no** son objetos del componente: son globals
+    // del entorno, compartidos por todos los archivos que caen en el mismo worker de Vitest. Un
+    // reporte interno de la Fase 5 los marcó como fuente de flakiness bajo paralelismo. **Se midió y
+    // no lo son**, y conviene dejar la medición escrita para no volver a "arreglar" lo que no está
+    // roto:
+    //
+    // Dos specs temporales en el mismo worker (forzado con `VITEST_MAX_WORKERS=1`, verificado por
+    // `process.pid` idéntico), el primero espiando los cuatro globals y **sin** restaurarlos:
+    //   revoke=false create=false console=false createElement=false   ← los cuatro limpios en el 2.º
+    // O sea que Vitest restaura los spies al cerrar cada archivo, incluso los que apuntan a globals
+    // del entorno y aunque el archivo culpable nunca llame a `restoreAllMocks`.
+    //
+    // ⚠⚠ Lo que **sí** se filtra entre archivos del mismo worker es la asignación **cruda** a un
+    // global (`URL.revokeObjectURL = vi.fn()` sobrevive y el archivo siguiente lo hereda, contador de
+    // llamadas incluido). Vitest deshace lo que registró `vi.spyOn`; no puede deshacer lo que nunca
+    // vio. **Y ese era el flaky de verdad, en otro archivo:**
+    // `COL_QD_SCR-013_Dashboard_Gestion_Casos/dashboard-gestion-casos.spec.ts` asignaba directo, así
+    // que su `vi.fn()` llegaba vivo hasta acá y el caso *"un fallo de descarga NO pinta ningún
+    // mensaje"* de abajo recibía `LLAMADAS=[["blob:fake"]]` contra su
+    // `expect(fnRevocar).not.toHaveBeenCalled()`. Verde este archivo solo, rojo en la suite completa.
+    // Corregido allá (a `vi.spyOn`), que es donde estaba el defecto.
+    //
+    // Regla que queda: sobre un global del entorno, siempre `vi.spyOn`, nunca una asignación directa.
+    // Ninguno de los casos de este archivo la usa.
+    //
+    // Este `restoreAllMocks()` sigue haciendo falta, pero por el motivo intra-archivo: sin él, el spy
+    // de `document.createElement` de un caso sobrevive al siguiente **dentro de este mismo archivo**,
+    // y ahí Angular construye los nodos de su template con esa función. Medido quitando esta línea:
+    // pone rojo *"⚠ un fallo de descarga NO pinta ningún mensaje (se preserva React)"* (1 de 20).
     vi.restoreAllMocks();
   });
 

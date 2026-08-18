@@ -615,14 +615,30 @@ describe('DashboardGestionCasos (SCR-013)', () => {
       ]);
 
       // Se espía la fábrica del blob y el `click` del ancla: es la única forma de ver qué se bajó sin
-      // un navegador real. `URL.createObjectURL` no existe en jsdom, así que se define.
+      // un navegador real.
+      //
+      // ⚠⚠ **`vi.spyOn` y NUNCA una asignación cruda `URL.createObjectURL = vi.fn()`, aunque las dos
+      // funcionen dentro de este archivo.** La versión anterior asignaba directo, con el motivo de que
+      // "`URL.createObjectURL` no existe en jsdom, así que se define". **Ese motivo es falso**: se midió
+      // y jsdom trae las dos como `function`. Lo que sí falta en jsdom es `Blob.prototype.arrayBuffer`,
+      // que está shimmeado en `test-setup.ts` — probablemente de ahí venía la confusión.
+      //
+      // Y la asignación cruda costaba un test flaky **en otro archivo**: `URL` es un global del
+      // entorno, compartido por todos los specs que caen en el mismo worker de Vitest.
+      // `restoreAllMocks()` deshace lo que registró `vi.spyOn`, pero no puede deshacer una asignación
+      // que nunca vio, así que este `vi.fn()` quedaba clavado en `URL` para todo archivo posterior —
+      // con su contador de llamadas ya cargado. El síntoma aparecía en
+      // `components/request-file-list.spec.ts`: su caso *"un fallo de descarga NO pinta ningún
+      // mensaje"* asevera `expect(fnRevocar).not.toHaveBeenCalled()` y recibía
+      // `LLAMADAS=[["blob:fake"]]` — el `blob:fake` de ACÁ. Verde el archivo solo, rojo en la suite
+      // completa, y solo cuando el scheduler ponía los dos archivos en el mismo worker: 2 de 3
+      // corridas con `VITEST_MAX_WORKERS=1`, intermitente sin forzarlo.
       const cllBlobs: Blob[] = [];
-      const objUrl = URL as unknown as { createObjectURL?: unknown; revokeObjectURL?: unknown };
-      objUrl.createObjectURL = vi.fn((in_objBlob: Blob) => {
-        cllBlobs.push(in_objBlob);
+      vi.spyOn(URL, 'createObjectURL').mockImplementation((in_objBlob: Blob | MediaSource) => {
+        cllBlobs.push(in_objBlob as Blob);
         return 'blob:fake';
       });
-      objUrl.revokeObjectURL = vi.fn();
+      const fnRevocar = vi.spyOn(URL, 'revokeObjectURL').mockImplementation(() => undefined);
       let strDescarga = '';
       const fnClick = vi
         .spyOn(HTMLAnchorElement.prototype, 'click')
@@ -655,7 +671,7 @@ describe('DashboardGestionCasos (SCR-013)', () => {
       expect(strCsv).not.toContain('AAA-1');
 
       // El blob se libera siempre. Sin el `finally`, un `click()` que tire deja el blob retenido.
-      expect(objUrl.revokeObjectURL).toHaveBeenCalledWith('blob:fake');
+      expect(fnRevocar).toHaveBeenCalledWith('blob:fake');
     });
   });
 
