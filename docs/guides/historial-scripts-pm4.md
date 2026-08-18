@@ -223,6 +223,21 @@ Y si la rama existe en el remoto pero no en tu máquina —el caso de un clone n
 del remoto**. Sin ese paso se crearía una rama huérfana paralela, sin ancestro común: dos
 historiales que ya no se pueden juntar. Es el fallo más silencioso del modo compartido.
 
+### ¿Hay que pullear la rama?
+
+**No.** `capture` y `status` hacen `fetch` solos y adoptan la rama del remoto si no la tenés. Un
+compañero que clona el repo no necesita ningún paso previo: corre la herramienta y ya.
+
+Y para *trabajar* en un script tampoco hace falta el historial: el script se edita en la UI de PM4,
+que sigue siendo la fuente de verdad. El historial es registro, no fuente.
+
+Lo único que **nunca** hay que hacer es `git checkout pm4-scripts-historial` (ver la advertencia de
+más abajo). Si querés la rama en local sin checkout:
+
+```bash
+git fetch origin pm4-scripts-historial:pm4-scripts-historial
+```
+
 ### Qué pasa si dos capturan a la vez
 
 Se resuelve solo. El contenido de esta rama no es una opinión que haya que fusionar: es *el estado

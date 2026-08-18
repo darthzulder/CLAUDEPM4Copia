@@ -338,7 +338,11 @@ function cuerpoCommit(lstCapturados, strMotivo) {
 }
 
 /**
- * Pone la rama local al día con el remoto antes de capturar.
+ * Pone la rama local al día con el canal compartido.
+ *
+ * La llaman `capture` Y `status`, no solo la primera: sin esto, en una máquina recién clonada
+ * `status` leería un índice local inexistente y reportaría como NUEVOS los scripts que el equipo
+ * ya tiene registrados — diciéndole a quien recién llega que no hay historial cuando sí lo hay.
  *
  * Cuatro situaciones, y solo dos requieren acción:
  *   · la rama existe en el remoto y no en local (clone nuevo) → se crea local desde el remoto. Sin
@@ -350,7 +354,7 @@ function cuerpoCommit(lstCapturados, strMotivo) {
  *
  * @returns {{avisos: string[], estado: string}}
  */
-function sincronizarAntesDeCapturar() {
+function sincronizarConElCanal() {
   const lstAvisos = [];
   if (!hayRemoto(STR_REPO, STR_REMOTO)) return { avisos: [], estado: 'sin-remoto' };
 
@@ -449,7 +453,7 @@ async function cmdCapture() {
   // ── Sincronización previa ────────────────────────────────────────────────────────────────
   // Sin esto, dos personas capturando en paralelo se pisan: cada una parte de su punta local y
   // vuelve a registrar lo que la otra ya había subido.
-  const objSync = sincronizarAntesDeCapturar();
+  const objSync = sincronizarConElCanal();
   for (const strAviso of objSync.avisos) log(strAviso);
 
   const objIndice = leerIndice(STR_REPO, STR_RAMA, STR_RUTA_INDICE);
@@ -591,6 +595,8 @@ async function cmdCapture() {
 
 // ── status ──────────────────────────────────────────────────────────────────────────────────
 async function cmdStatus() {
+  for (const strAviso of sincronizarConElCanal().avisos) log(strAviso);
+
   const objIndice = leerIndice(STR_REPO, STR_RAMA, STR_RUTA_INDICE);
   const lstTodos = await obtenerScriptsRemotos();
   const { dicCarpetaPorUuid, lstAvisos } = await resolverAlcance(lstTodos);
