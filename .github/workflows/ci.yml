@@ -24,7 +24,7 @@ on:
   # Las ramas de trabajo no van acá: se verifican vía `pull_request`, que además prueba el
   # resultado del merge. Cubrirlas con '**' duplicaría cada corrida sin agregar información.
   push:
-    branches: [main, dev]
+    branches: [main, develop]
   # Sin filtro de `branches` a propósito: dispara para PRs con cualquier base, así que cubre
   # igual los `feat/… → dev` del día a día y los `dev → main` de release.
   pull_request:
@@ -56,24 +56,12 @@ jobs:
           cache: 'npm'
           cache-dependency-path: pm4-app/package-lock.json
 
-      # Python + pytest tienen que estar ANTES de `verify`: el script sondea el intérprete y,
-      # si no lo encuentra, salta el paso del cotizador con un aviso. En CI ese salto no es
-      # aceptable — acá es donde la verificación tiene que ser completa.
-      - name: Setup Python 3.13
-        uses: actions/setup-python@v5
-        with:
-          python-version: '3.13'
-
       # `npm ci` resuelve @zurich/* desde los .tgz vendorizados y commiteados en
       # frontend/vendor/, así que no depende del registro de ZDS (decomisionado en
       # dic-2025) ni de credenciales.
       - name: Install (Node)
         working-directory: pm4-app
         run: npm ci
-
-      - name: Install (Python)
-        working-directory: pm4-app/cotizador-service
-        run: pip install -r requirements-dev.txt
 
       # Un solo paso a propósito. Antes este workflow enumeraba build/lint/test por su cuenta y
       # ya había divergido del hook local (el hook no corría pytest), con el resultado clásico

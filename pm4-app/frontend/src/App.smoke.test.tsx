@@ -79,21 +79,9 @@ const CLL_SLUGS = [
   'COL_QD_SCR-011_Revision_Error_Tecnico_Prorroga',
   'COL_QD_SCR-012_Revision_Error_Funcional_Prorroga',
   'COL_QD_SCR-013_Dashboard_Gestion_Casos',
+  'COL_OS_SCR-003_Bandeja_Gestion_Linea2',
   'ds-catalog',
   'smartsupervision-api-docs',
-];
-
-/**
- * Slugs de FAST-FLOW, fuera de alcance por decisión del proyecto (marcados para reemplazo).
- *
- * Se enumeran en vez de omitirse en silencio porque la guarda de abajo los necesita para
- * cuadrar el total contra `SCREENS`. Si mañana FAST-FLOW se elimina, esta lista queda vacía y
- * la guarda sigue siendo válida.
- */
-const CLL_SLUGS_FAST_FLOW = [
-  'cotizador-fast-flow', 'solicitud-cotizacion-cuw', 'ff-fl', 'ff-fl-cotizacion',
-  'respuesta-cotizacion', 'opciones-cotizacion', 'nota-cobertura', 'doc-sarlaft',
-  'rev-sarlaft', 'sol-doc-emi', 'ver-doc-emi', 'estado-correo',
 ];
 
 beforeEach(() => {
@@ -118,7 +106,7 @@ describe('Arranque de la app (smoke)', () => {
   // pantalla menos — exactamente la clase de falso verde que este proyecto ya tuvo.
   it('la lista de este test cubre TODAS las pantallas registradas en App.tsx', () => {
     const setRegistradas = new Set(Object.keys(SCREENS));
-    const setCubiertas = new Set([...CLL_SLUGS, ...CLL_SLUGS_FAST_FLOW]);
+    const setCubiertas = new Set(CLL_SLUGS);
 
     // Se reportan las diferencias en ambos sentidos con el nombre del slug: si falla, el
     // mensaje dice QUÉ pantalla falta, no solo que dos números no coinciden.

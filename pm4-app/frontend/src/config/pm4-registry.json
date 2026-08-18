@@ -2,73 +2,6 @@
   "instance": "https://cozurich.dev.cloud.processmaker.net",
   "generatedAt": "2026-08-06T19:50:20.866Z",
   "collections": {
-    "intermediarios": {
-      "id": 4,
-      "title": "Listado_intermediarios"
-    },
-    "naic": {
-      "id": 2,
-      "title": "Configuraciones COL",
-      "note": "⚠️ conocido incorrecto — id 2 no tiene los campos que este slug espera (frm_actividad/frm_codigo). FAST-FLOW legado, revisión diferida (ver collections.ts)."
-    },
-    "correosIntermediari": {
-      "id": 5,
-      "title": "Actividades CIIU DO",
-      "note": "⚠️ conocido incorrecto — ninguna colección de la instancia tiene frm_mail_intermediario/frm_id_intermediario. FAST-FLOW legado, revisión diferida."
-    },
-    "actividadesCIIU_dyo": {
-      "id": 5,
-      "title": "Actividades CIIU DO"
-    },
-    "actividadesCIIU_cc": {
-      "id": 6,
-      "title": "Actividades CIIU Crime",
-      "note": "Asume 'cc' = línea Crime — no confirmado con negocio."
-    },
-    "actividadesCIIU_pdysi": {
-      "id": 7,
-      "title": "Actividades CIIU Cyber",
-      "note": "Asume 'pdysi' = línea Cyber — no confirmado con negocio."
-    },
-    "actividadesCIIU_pi": {
-      "id": 8,
-      "title": "Actividades CIIU PI"
-    },
-    "correosIntermediario": {
-      "id": 5,
-      "title": "Actividades CIIU DO",
-      "note": "⚠️ duplicado de correosIntermediari — mismo problema, mismo diferido."
-    },
-    "comerciales": {
-      "id": 5,
-      "title": "Actividades CIIU DO",
-      "note": "⚠️ conocido incorrecto — ninguna colección de la instancia tiene frm_nombre_comercial. FAST-FLOW legado, revisión diferida."
-    },
-    "suscriptores": {
-      "id": 25,
-      "title": "cat-prod-digital",
-      "note": "⚠️ conocido incorrecto — id 25 es en realidad cat-prod-digital (usado por digitalProduct); ninguna colección tiene frm_suscriptores. FAST-FLOW legado, revisión diferida."
-    },
-    "actividadNaic": {
-      "id": 6,
-      "title": "Actividades CIIU Crime",
-      "note": "⚠️ carga sin error pero apunta a la línea Crime, no a un NAIC genérico CO — ambiguo, revisión diferida."
-    },
-    "departamentosFF": {
-      "id": 14,
-      "title": "cat-dpto",
-      "note": "Corregido 2026-08-04 (era id 19 por copy-paste con receptionInstance)."
-    },
-    "municipiosTomador": {
-      "id": 15,
-      "title": "cat-mpio",
-      "note": "Corregido 2026-08-04 (era id 19 por copy-paste con receptionInstance)."
-    },
-    "municipiosAsegurado": {
-      "id": 15,
-      "title": "cat-mpio",
-      "note": "Corregido 2026-08-04 (era id 19 por copy-paste con receptionInstance)."
-    },
     "requestType": {
       "id": 18,
       "title": "cat-tipo-sol"
@@ -216,25 +149,9 @@
     "holidaysColombia": {
       "id": 48,
       "title": "cat-feriados-colombia"
-    },
-    "paisesExportacionesCuw": {
-      "id": 36,
-      "title": "cat-usuarios-role",
-      "note": "⚠️ conocido incorrecto — id 36 no tiene pais_reg_pais. Ninguna colección de la instancia lo tiene. FAST-FLOW legado (DetalleExportaciones.tsx), revisión diferida."
     }
   },
   "scripts": {
-    "consultarClienteTiaFastFlow": {
-      "id": 56,
-      "uuid": "a1e47abd-c833-4e04-94f7-bf3b07afa845",
-      "title": "COL - FF - Obtener cliente TIA"
-    },
-    "consultarClienteTiaCuw": {
-      "id": 50,
-      "uuid": "a071b67b-2c12-4f57-8996-607f72883e94",
-      "title": "Generar URL de WebEntry",
-      "note": "⚠️ mismatch conocido — el título real no corresponde a 'obtener cliente'. FAST-FLOW legado, revisión diferida (ver SolicitudCotizacionCuw.tsx)."
-    },
     "similarCasesQuejas": {
       "id": 70,
       "uuid": "a23434ce-0eea-405f-9df7-aa781df863dc",

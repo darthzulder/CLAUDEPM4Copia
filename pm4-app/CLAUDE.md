@@ -27,8 +27,8 @@ Aplican a **todo** cambio de código en este proyecto, no solo a pantallas nueva
 2. **Nunca inventar UI** — seguir la [Jerarquía de decisión de UI](#jerarquía-de-decisión-de-ui-obligatorio)
    y, si vas a crear algo, revisar primero `frontend/vendor/*.tgz` (contenido real del DS) vía
    [`outputs/react/VENDOR_COMPONENT_CATALOG.md`](outputs/react/VENDOR_COMPONENT_CATALOG.md).
-3. **Arquitectura BFF** — toda llamada externa (PM4, `cotizador-service`, futuras APIs) pasa
-   por `backend/`, nunca directo desde una pantalla. Ver [Principio arquitectónico: BFF](#principio-arquitectónico-backend-for-frontend-bff).
+3. **Arquitectura BFF** — toda llamada externa (PM4, futuras APIs) pasa por `backend/`,
+   nunca directo desde una pantalla. Ver [Principio arquitectónico: BFF](#principio-arquitectónico-backend-for-frontend-bff).
 4. **Tests automatizados obligatorios** para lógica nueva/modificada (frontend y backend) y
    para componentes/pantallas propios. Ver [Tests automatizados (OBLIGATORIO)](#tests-automatizados-obligatorio)
    y [`../docs/guides/testing-conventions.md`](../docs/guides/testing-conventions.md).
@@ -147,7 +147,7 @@ npm run dev
 
 URL del iframe en PM4:
 ```
-http://localhost:5173/?screen=cotizador-fast-flow&task_id=123&token=eyJ...
+http://localhost:5173/?screen=COL_QD_SCR-000_CrearRecibirQueja&task_id=123&token=eyJ...
 ```
 
 ---
@@ -155,11 +155,11 @@ http://localhost:5173/?screen=cotizador-fast-flow&task_id=123&token=eyJ...
 ## ⚠️ Antes de hacer commit / push a git — OBLIGATORIO
 
 ```bash
-npm run verify   # lint front+back · typecheck · builds · tests front+back · pytest cotizador
+npm run verify   # lint front+back · typecheck · builds · tests front+back
 ```
 
 Un solo comando: es la **única definición de verde** del proyecto
-(`pm4-app/scripts/verify.mjs`) e incluye el `pytest` del cotizador. Si algo falla —TypeScript,
+(`pm4-app/scripts/verify.mjs`). Si algo falla —TypeScript,
 lint, empaquetado o **tests**— **corregir antes de commitear**. Tampoco commitear con un test
 preexistente que dejó de pasar por el cambio actual.
 
@@ -250,10 +250,9 @@ pm4-app/
 ## Principio arquitectónico: Backend For Frontend (BFF)
 
 `backend/` **ya es** un BFF puro hoy — proxy + inyección de token, cero llamadas directas
-del frontend a PM4 o al `cotizador-service`. Esta sección existe para que **se mantenga
-así**:
+del frontend a PM4. Esta sección existe para que **se mantenga así**:
 
-- Toda integración externa nueva (PM4, `cotizador-service`, cualquier API futura) se agrega
+- Toda integración externa nueva (PM4, cualquier API futura) se agrega
   como ruta en `backend/src/routes/`, nunca se llama directo desde una pantalla.
 - El frontend solo habla con rutas **relativas** `/api/*` a través de `api/pm4Client.ts`
   (o el cliente equivalente que corresponda) — nunca un `fetch`/`axios` a un host externo
@@ -333,15 +332,6 @@ await completeTask(payload);
 - Reenvía a PM4 como `multipart/form-data` con `form-data` + axios
 - Usa el mismo token que el resto del proxy (`x-pm4-token`)
 - PM4 responde `{ message: "The file was uploaded.", fileUploadId: <number> }`
-
-### Campos de documento por producto (ff-fl)
-
-| Producto | Campos de nombre |
-|----------|-----------------|
-| D&O      | `frm_dyo_doc_01_nombre`, `frm_dyo_doc_02_nombre`, `frm_dyo_doc_03_nombre` |
-| CC       | `frm_cc_doc_01_nombre`, `frm_cc_doc_02_nombre`, `frm_cc_doc_03_nombre` |
-| PDySI    | `frm_pdysi_doc_01_nombre`, `frm_pdysi_doc_02_nombre`, `frm_pdysi_doc_03_nombre` |
-| PI       | `frm_pi_doc_01_nombre`, `frm_pi_doc_02_nombre`, `frm_pi_doc_03_nombre` |
 
 ---
 
@@ -449,19 +439,12 @@ Hermano de esta sección: ambas tratan de cómo se referencia y se mantiene lo q
 - Flujo completo, comandos de consulta y vuelta atrás:
   [`../docs/guides/historial-scripts-pm4.md`](../docs/guides/historial-scripts-pm4.md).
 
-⚠️ Varias colecciones de FAST-FLOW (`naic`, `correosIntermediari`/`correosIntermediario`,
-`comerciales`, `suscriptores`, `actividadNaic`) y el script `consultarClienteTiaCuw` (id 50)
-están **verificadas como incorrectas/huérfanas** contra la instancia actual (no corresponden
-a ninguna colección/script real, o apuntan a uno con otro propósito) — es código legado,
-diferido para revisión de negocio aparte. Ver las notas `⚠️` en `pm4-registry.json` y los
-comentarios en `core/collections.ts`.
-
 ---
 
 ## Tests automatizados (OBLIGATORIO)
 
 Necesitan test, si son nuevos o los estás modificando:
-- **Lógica pura** — `core/*.ts`, helpers, `backend/src/lib/*.ts`, `cotizador-service/app.py`.
+- **Lógica pura** — `core/*.ts`, helpers, `backend/src/lib/*.ts`.
 - **Componentes propios** (`components/*.tsx`) y **pantallas** — al menos un smoke test con
   React Testing Library (`.test.tsx`, project `components` de Vitest; confirmado compatible
   con los custom elements de `@zurich/web-components`).
@@ -475,7 +458,6 @@ Comandos:
 npm run verify                      # build + lint + tests (frontend y backend) — el gate completo
 npm run test --workspace=frontend   # vitest — projects 'logic' (node) y 'components' (jsdom)
 npm run test --workspace=backend    # vitest — lib/*.ts
-pytest -q                           # desde cotizador-service/
 ```
 
 - Qué necesita test y cómo escribirlo (incluidas las 4 trampas de testear controles del DS
@@ -531,8 +513,8 @@ donde un fallo es silencioso y caro:
   con un fixture queda satisfecho; se cubre el gate de envío (`blnCanSubmit`) y las
   secciones condicionales, no el submit real.
 
-**`FAST-FLOW/*` queda deliberadamente fuera de esta tanda** (se va a eliminar/reemplazar) —
-es la única cobertura de pantallas que sigue en deuda.
+**`FAST-FLOW/*` fue eliminado del proyecto (ago-2026)** — ya no queda deuda de cobertura
+pendiente por ese lado.
 
 Qué implica en la práctica:
 - **Lo que toques, lo cubrís.** No hace falta un backfill masivo antes de poder trabajar; sí
@@ -541,17 +523,6 @@ Qué implica en la práctica:
   commit) es parte del cambio, no un extra opcional.
 - Al testear fechas, recordá que la zona horaria está **fijada** en `vitest.config.ts`
   (`America/Bogota`) — ver `docs/guides/testing-conventions.md`.
-
----
-
-## Pantallas implementadas
-
-### `cotizador-fast-flow`
-- **Archivo JSON original:** `54_9f760fcd-..._COL - FF - Form - Cotizador Fast Flow.json`
-- **Subforms en PM4:** Información general, Información tomador, Datos cotización, Propuesta económica, Plan de pago
-- **Colecciones:** NAIC (ID 2), Intermediarios (ID 4), Correos (ID 5)
-- **Watchers:** Obtener token Tia (on_load), Obtener Token ZDiligence (on_load), Tomador NIT (on change frm_tomador_numDoc)
-- **Variables clave:** `frm_gen_*`, `frm_tomador_*`, `frm_tom_*`, `frm_cot_*`, `frm_plan_*`
 
 ---
 
@@ -621,12 +592,9 @@ Al construir UI hay **dos ejes** con escaleras distintas. Recorre cada una **de 
 | `ZdsStatusBadge` | `components/fields/ZdsFields` | Píldora de estado (`success`/`danger`/`info`/`neutral`) sobre `ZrBadge` |
 | `ScreenHeader` | `components/ScreenHeader` | Cabecera azul con título/subtítulo + logo Zurich |
 | `InfoBar` | `components/InfoBar` | Barra de pares label/valor |
-| `HelpModal` | `components/HelpModal` | Contenido de modal de ayuda (se monta dentro de `ZrModal`) |
 | `PreviewModal` | `components/PreviewModal` | Modal de vista previa de documento |
 | `PdfViewer` | `components/PdfViewer` | Visor de PDF/archivo PM4 vía blob |
-| `ResultCard` | `components/ResultCard` | Card centrado de resultado/confirmación (variantes) |
-| `DocList` / `DocItem` | `components/DocList`, `components/DocItem` | Lista/fila de documentos (modo upload o validación) |
-| `DocCard` | `components/DocCard` | Card de un archivo ya existente (ícono+nombre+meta+acciones), con cuerpo expandible opcional — no confundir con `DocItem` (checklist de documentos requeridos) |
+| `DocCard` | `components/DocCard` | Card de un archivo ya existente (ícono+nombre+meta+acciones), con cuerpo expandible opcional |
 | `RequestFileList` | `components/RequestFileList` | Lista de solo lectura de archivos ya subidos al request (filtra por `data_name`), con previsualizar + descargar |
 | `DocSupportUploader` | `components/DocSupportUploader` | Bloque de carga de documentos de soporte |
 | `RecaptchaModal` | `components/RecaptchaModal` | Modal con reCAPTCHA v2 (checkbox); `onVerified(token)` al pasar. Site key en `VITE_RECAPTCHA_SITE_KEY`, verificación server-side en `/api/recaptcha/verify` |
