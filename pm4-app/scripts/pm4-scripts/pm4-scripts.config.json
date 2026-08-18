@@ -1,5 +1,7 @@
 {
   "_doc": "Qué procesos PM4 vigila la grabadora de historial. El alcance es POR PROCESO: los scripts de los demás proyectos de la instancia (FAST-FLOW, CUW, pruebas) se ignoran. Para vigilar un proceso nuevo, agregá una entrada acá y corré `npm run pm4:capture -- --all`.",
+  "remoto": "origin",
+  "_remoto": "Remoto donde vive el canal de historial compartido. 'origin' cubre el caso normal; se cambia aca (sin tocar codigo) si el equipo mueve el repo.",
   "_fuentes": {
     "bpmn": "Los scriptTask del proceso y de sus subprocesos (siguiendo los callActivity). Automático: agregar un script al diagrama en PM4 no exige tocar este archivo.",
     "pantallas": "Carpetas del frontend que pertenecen al proceso. Se escanean buscando resolveScriptId('slug'), y el slug se traduce a uuid con pm4-registry.json. Es lo que ata un watcher —como COL_QD_Check_Similitud, que no está en ningún BPMN— al proceso correcto en vez de dejarlo suelto. El filtro por carpeta evita mezclar: las pantallas de FAST-FLOW invocan sus propios scripts y quedan fuera.",
@@ -11,7 +13,9 @@
       "id": 31,
       "carpeta": "proceso-31",
       "nombre": "COL - Gestion de Quejas Directas",
-      "pantallas": ["frontend/src/screens/atencion-cliente/quejas-directas"],
+      "pantallas": [
+        "frontend/src/screens/atencion-cliente/quejas-directas"
+      ],
       "scriptsExtra": []
     }
   ]

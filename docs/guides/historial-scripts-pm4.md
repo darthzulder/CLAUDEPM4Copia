@@ -148,6 +148,26 @@ Y cada captura dice de dónde salió cada uno:
   ↳ [FRONTEND] 1 script(s) invocado(s) desde las pantallas del proceso.
 ```
 
+### Scripts nuevos que quedan fuera
+
+Queda un hueco que ninguna de las tres vías cubre: un script recién creado en la UI y **todavía sin
+cablear a ningún BPMN** —el caso típico mientras se lo desarrolla— no lo descubre nada.
+
+Por eso cada captura avisa de los scripts **creados desde la última captura** que no pertenecen a
+ningún proceso vigilado:
+
+```
+[SIN VIGILAR] 2 script(s) creado(s) desde la ultima captura y fuera de todo proceso:
+  · COL_OS_Asignar_SLA (id 98)
+  · COL_OS_Check_Similitud (id 101)
+  Si pertenecen a un proceso vigilado: cablealos al BPMN, o agregalos a scriptsExtra.
+```
+
+Se acota a los **nuevos** a propósito: la instancia tiene decenas de scripts de otros proyectos que
+nunca van a vigilarse, y listarlos siempre sería ruido que se aprende a ignorar — con lo cual el
+aviso dejaría de servir justo cuando importa. En la primera corrida, sin fecha de referencia, no
+reporta nada.
+
 ### Vigilar un proceso nuevo
 
 Agregá una entrada a `procesos` en el config, con la carpeta de sus pantallas si las tiene:
@@ -211,6 +231,16 @@ el remoto y rehace el commit con **dos padres** —el tuyo y el del compañero�
 remoto como base. Resultado: lo que el otro capturó sobrevive, lo tuyo también, y ambas historias
 quedan en el grafo. No hay conflicto de texto que resolver a mano, ni siquiera en el índice JSON,
 que se regenera entero.
+
+### Dónde vive el canal
+
+El remoto se configura en `pm4-scripts.config.json` (`"remoto": "origin"`). Es un parámetro y no un
+literal porque este repo convive con más de un remoto; cambiarlo no exige tocar código.
+
+La rama vive en el **mismo repo que el código** a propósito: su audiencia es exactamente la misma
+—quien necesita el historial de un script ya tiene el repo— y un snapshot completo pesa ~300 KB, así
+que el volumen no justifica separarlo. Si algún día crece mucho, o alguien necesita el historial sin
+el código, mover una rama huérfana a otro remoto es barato.
 
 ### Sobre el push automático
 

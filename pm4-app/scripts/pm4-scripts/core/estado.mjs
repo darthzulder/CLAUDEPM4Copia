@@ -117,3 +117,37 @@ export function slugDesdeTitulo(strTitulo) {
   // Un título compuesto solo por símbolos dejaría un nombre de archivo vacío.
   return strSlug || 'script-sin-titulo';
 }
+
+/**
+ * Scripts de la instancia que NADIE está vigilando y que aparecieron después de la última captura.
+ *
+ * Existe porque el alcance por proceso deja un hueco real: un script recién creado en la UI y aún
+ * no cableado a ningún BPMN —el caso típico mientras se lo desarrolla— no lo descubre ninguna de
+ * las tres vías, y su historial no se registra sin que nadie avise.
+ *
+ * Se acota a los CREADOS DESPUÉS de la última captura a propósito. La instancia tiene decenas de
+ * scripts de otros proyectos que nunca van a vigilarse; listarlos todos sería ruido permanente que
+ * se aprende a ignorar, y entonces el aviso dejaría de servir justo cuando importa. Acotado, solo
+ * aparece cuando hay algo accionable.
+ *
+ * @param {Array<{uuid: string, id: number, title: string, createdAt?: string}>} lstTodos scripts de la instancia
+ * @param {Set<string>} setVigilados uuids que ya están dentro del alcance
+ * @param {string | undefined} strDesde ISO de la última captura; sin ella no se reporta nada
+ * @returns {Array<{uuid: string, id: number, title: string, createdAt: string}>} más nuevos primero
+ */
+export function detectarNuevosSinVigilar(lstTodos, setVigilados, strDesde) {
+  // Sin referencia temporal (primera corrida, o índice recién creado) callamos: reportar los ~50
+  // scripts ajenos de la instancia sería exactamente el ruido que este diseño evita.
+  if (!strDesde) return [];
+
+  const intDesde = Date.parse(strDesde);
+  if (Number.isNaN(intDesde)) return [];
+
+  return lstTodos
+    .filter((objScript) => !setVigilados.has(objScript.uuid))
+    .filter((objScript) => {
+      const intCreado = Date.parse(objScript.createdAt ?? '');
+      return !Number.isNaN(intCreado) && intCreado > intDesde;
+    })
+    .sort((objA, objB) => Date.parse(objB.createdAt) - Date.parse(objA.createdAt));
+}

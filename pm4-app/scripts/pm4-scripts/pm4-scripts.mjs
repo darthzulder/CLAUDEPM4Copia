@@ -24,7 +24,12 @@ import { readFileSync, readdirSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
 import { dirname, join } from 'node:path';
 import { normalizar } from './core/canonicalizar.mjs';
-import { compararInstancia, detectarCambiosDeId, slugDesdeTitulo } from './core/estado.mjs';
+import {
+  compararInstancia,
+  detectarCambiosDeId,
+  detectarNuevosSinVigilar,
+  slugDesdeTitulo,
+} from './core/estado.mjs';
 import {
   commitearCaptura,
   leerIndice,
@@ -36,6 +41,7 @@ import {
   moverRamaA,
   pushearHistorial,
   hayRemoto,
+  STR_REMOTO_POR_DEFECTO,
 } from './core/historial.mjs';
 import {
   descubrirArbol,
@@ -142,6 +148,8 @@ async function obtenerScriptsRemotos() {
         codigo: objNorm.codigo,
         sha256: objNorm.sha256,
         vacio: objNorm.vacio,
+        // Solo se usa para avisar de scripts nuevos fuera de alcance; no entra en el hash.
+        createdAt: objScript.created_at ?? null,
       };
     });
 }
@@ -167,6 +175,20 @@ function leerConfig() {
     throw new Error(`no se pudo leer ${STR_CONFIG_PATH}: ${excError.message}`);
   }
 }
+
+/**
+ * Remoto donde vive el canal de historial. Configurable porque el repo correcto depende del equipo
+ * y este proyecto convive con más de un remoto; `origin` cubre el caso normal.
+ */
+function leerRemoto() {
+  try {
+    return JSON.parse(readFileSync(STR_CONFIG_PATH, 'utf8')).remoto || STR_REMOTO_POR_DEFECTO;
+  } catch {
+    return STR_REMOTO_POR_DEFECTO;
+  }
+}
+
+const STR_REMOTO = leerRemoto();
 
 /** pm4-registry.json, que traduce el slug de negocio que usa el frontend a uuid. */
 function leerRegistro() {
@@ -268,6 +290,19 @@ async function resolverAlcance(lstRemotos) {
     }
   }
 
+  // Aviso de lo que queda FUERA: un script creado hace poco y que ninguna via descubre es casi
+  // siempre uno recien hecho en la UI y todavia sin cablear. Es el unico hueco por el que hoy se
+  // puede perder historial sin enterarse.
+  const strUltima = leerIndice(STR_REPO, STR_RAMA, STR_RUTA_INDICE).generatedAt;
+  const lstNuevos = detectarNuevosSinVigilar(lstRemotos, new Set(dicCarpetaPorUuid.keys()), strUltima);
+  if (lstNuevos.length > 0) {
+    lstAvisos.push(`[SIN VIGILAR] ${lstNuevos.length} script(s) creado(s) desde la ultima captura y fuera de todo proceso:`);
+    for (const objScript of lstNuevos) {
+      lstAvisos.push(`  · ${objScript.title} (id ${objScript.id})`);
+    }
+    lstAvisos.push('  Si pertenecen a un proceso vigilado: cablealos al BPMN, o agregalos a scriptsExtra en pm4-scripts.config.json.');
+  }
+
   return { dicCarpetaPorUuid, lstAvisos };
 }
 
@@ -317,12 +352,12 @@ function cuerpoCommit(lstCapturados, strMotivo) {
  */
 function sincronizarAntesDeCapturar() {
   const lstAvisos = [];
-  if (!hayRemoto(STR_REPO)) return { avisos: [], estado: 'sin-remoto' };
+  if (!hayRemoto(STR_REPO, STR_REMOTO)) return { avisos: [], estado: 'sin-remoto' };
 
-  traerRemoto(STR_REPO, STR_RAMA);
+  traerRemoto(STR_REPO, STR_RAMA, STR_REMOTO);
 
   const strLocal = puntaLocal(STR_REPO, STR_RAMA);
-  const strRemoto = puntaRemota(STR_REPO, STR_RAMA);
+  const strRemoto = puntaRemota(STR_REPO, STR_RAMA, STR_REMOTO);
 
   if (!strLocal && strRemoto) {
     moverRamaA(STR_REPO, STR_RAMA, strRemoto);
@@ -330,7 +365,7 @@ function sincronizarAntesDeCapturar() {
     return { avisos: lstAvisos, estado: 'al-dia' };
   }
 
-  const strEstado = estadoSincronizacion(STR_REPO, STR_RAMA);
+  const strEstado = estadoSincronizacion(STR_REPO, STR_RAMA, STR_REMOTO);
   if (strEstado === 'detras') {
     moverRamaA(STR_REPO, STR_RAMA, strRemoto);
     lstAvisos.push(`[SYNC] rama local adelantada al remoto (${strRemoto.slice(0, 7)}).`);
@@ -352,16 +387,16 @@ function sincronizarAntesDeCapturar() {
  * captura. Perder el push es recuperable; perder el registro, no.
  */
 function publicarHistorial(dicArchivos, strMensaje) {
-  const objPush = pushearHistorial(STR_REPO, STR_RAMA);
-  if (objPush.ok) return { ok: true, aviso: `[PUSH] ${STR_RAMA} publicada en origin.` };
+  const objPush = pushearHistorial(STR_REPO, STR_RAMA, STR_REMOTO);
+  if (objPush.ok) return { ok: true, aviso: `[PUSH] ${STR_RAMA} publicada en ${STR_REMOTO}.` };
 
   if (!objPush.rechazado) {
     return { ok: false, aviso: `[PUSH] no se pudo publicar (${objPush.mensaje}). El commit está en local; se subirá en la próxima captura.` };
   }
 
   // Carrera: alguien pusheó entre nuestro fetch y nuestro push.
-  traerRemoto(STR_REPO, STR_RAMA);
-  const strRemoto = puntaRemota(STR_REPO, STR_RAMA);
+  traerRemoto(STR_REPO, STR_RAMA, STR_REMOTO);
+  const strRemoto = puntaRemota(STR_REPO, STR_RAMA, STR_REMOTO);
   const strLocal = puntaLocal(STR_REPO, STR_RAMA);
   if (!strRemoto || !strLocal) {
     return { ok: false, aviso: '[PUSH] rechazado y no se pudo leer el remoto; el commit queda en local.' };
@@ -376,7 +411,7 @@ function publicarHistorial(dicArchivos, strMensaje) {
     strTreeBase: strRemoto,
   });
 
-  const objReintento = pushearHistorial(STR_REPO, STR_RAMA);
+  const objReintento = pushearHistorial(STR_REPO, STR_RAMA, STR_REMOTO);
   return objReintento.ok
     ? { ok: true, aviso: `[PUSH] reconciliado con el remoto y publicado (${objMerge.sha.slice(0, 7)}).` }
     : { ok: false, aviso: `[PUSH] sigue rechazado tras reconciliar (${objReintento.mensaje}). El commit está en local.` };
@@ -387,14 +422,14 @@ function publicarHistorial(dicArchivos, strMensaje) {
  * capturado nada. Cubre el historial que quedó sin subir por falta de red o de un push anterior.
  */
 function publicarSiHayPendiente() {
-  if (BLN_NO_PUSH || !hayRemoto(STR_REPO)) return { ok: false, aviso: '' };
+  if (BLN_NO_PUSH || !hayRemoto(STR_REPO, STR_REMOTO)) return { ok: false, aviso: '' };
 
-  const strEstado = estadoSincronizacion(STR_REPO, STR_RAMA);
+  const strEstado = estadoSincronizacion(STR_REPO, STR_RAMA, STR_REMOTO);
   if (strEstado !== 'adelante' && strEstado !== 'sin-remoto') return { ok: false, aviso: '' };
 
-  const objPush = pushearHistorial(STR_REPO, STR_RAMA);
+  const objPush = pushearHistorial(STR_REPO, STR_RAMA, STR_REMOTO);
   return objPush.ok
-    ? { ok: true, aviso: `[PUSH] historial local pendiente publicado en origin.` }
+    ? { ok: true, aviso: `[PUSH] historial local pendiente publicado en ${STR_REMOTO}.` }
     : { ok: false, aviso: `[PUSH] quedan commits sin publicar (${objPush.mensaje}).` };
 }
 

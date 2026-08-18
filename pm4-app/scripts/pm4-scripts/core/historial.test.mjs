@@ -18,6 +18,7 @@ import {
   estadoSincronizacion,
   moverRamaA,
   pushearHistorial,
+  STR_REMOTO_POR_DEFECTO,
 } from './historial.mjs';
 
 const STR_RAMA = 'pm4-scripts-historial';
@@ -420,5 +421,54 @@ describe('sincronización con el remoto', () => {
     expect(leerArchivoDeRama(strRepo, STR_RAMA_HISTORIAL, 'a.php')).toBe('nuestro\n');
     expect(git('merge-base', '--is-ancestor', strShaCompanero, STR_RAMA_HISTORIAL)).toBe('');
     expect(git('merge-base', '--is-ancestor', objBase.sha, STR_RAMA_HISTORIAL)).toBe('');
+  });
+});
+
+describe('remoto configurable', () => {
+  // Deliberadamente NO se llama "origin": si alguna funcion volviera a cablear ese nombre, estos
+  // tests se caen. Con un remoto llamado origin pasarian igual y la regresion seria invisible.
+  const STR_OTRO_REMOTO = 'zurich';
+  let strRemotoDir;
+
+  beforeEach(() => {
+    strRemotoDir = mkdtempSync(join(tmpdir(), 'pm4-hist-alt-'));
+    execFileSync('git', ['init', '--bare', '--quiet'], { cwd: strRemotoDir, stdio: ['pipe', 'pipe', 'pipe'] });
+    git('remote', 'add', STR_OTRO_REMOTO, strRemotoDir);
+  });
+
+  afterEach(() => {
+    rmSync(strRemotoDir, { recursive: true, force: true });
+  });
+
+  it('el default sigue siendo origin', () => {
+    expect(STR_REMOTO_POR_DEFECTO).toBe('origin');
+  });
+
+  it('hayRemoto consulta el remoto que se le pasa', () => {
+    expect(hayRemoto(strRepo, STR_OTRO_REMOTO)).toBe(true);
+    expect(hayRemoto(strRepo, 'no-existe')).toBe(false);
+  });
+
+  it('publica en el remoto indicado, no en origin', () => {
+    commitearCaptura({ strRepo, strRama: STR_RAMA_HISTORIAL, dicArchivos: { 'a.php': '<?php\n' }, strMensaje: 'una' });
+    expect(pushearHistorial(strRepo, STR_RAMA_HISTORIAL, STR_OTRO_REMOTO).ok).toBe(true);
+
+    const strEnRemoto = execFileSync('git', ['rev-parse', STR_RAMA_HISTORIAL], {
+      cwd: strRemotoDir, encoding: 'utf8', stdio: ['pipe', 'pipe', 'pipe'],
+    }).trim();
+    expect(strEnRemoto).toBe(puntaLocal(strRepo, STR_RAMA_HISTORIAL));
+  });
+
+  it('fetch y comparacion tambien usan el remoto indicado', () => {
+    commitearCaptura({ strRepo, strRama: STR_RAMA_HISTORIAL, dicArchivos: { 'a.php': '1\n' }, strMensaje: 'una' });
+    pushearHistorial(strRepo, STR_RAMA_HISTORIAL, STR_OTRO_REMOTO);
+
+    expect(traerRemoto(strRepo, STR_RAMA_HISTORIAL, STR_OTRO_REMOTO)).toBe(true);
+    expect(puntaRemota(strRepo, STR_RAMA_HISTORIAL, STR_OTRO_REMOTO)).toBe(puntaLocal(strRepo, STR_RAMA_HISTORIAL));
+    expect(estadoSincronizacion(strRepo, STR_RAMA_HISTORIAL, STR_OTRO_REMOTO)).toBe('al-dia');
+  });
+
+  it('la guarda de rama sigue aplicando con cualquier remoto', () => {
+    expect(() => pushearHistorial(strRepo, 'main', STR_OTRO_REMOTO)).toThrow(/solo puede pushear/);
   });
 });

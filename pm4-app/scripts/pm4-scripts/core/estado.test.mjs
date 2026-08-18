@@ -4,6 +4,7 @@ import {
   clasificarScript,
   compararInstancia,
   detectarCambiosDeId,
+  detectarNuevosSinVigilar,
   slugDesdeTitulo,
 } from './estado.mjs';
 
@@ -120,5 +121,54 @@ describe('slugDesdeTitulo', () => {
 
   it('degrada a un nombre usable si el título es solo símbolos', () => {
     expect(slugDesdeTitulo('***')).toBe('script-sin-titulo');
+  });
+});
+
+describe('detectarNuevosSinVigilar', () => {
+  const LST_TODOS = [
+    { uuid: 'u-vig', id: 1, title: 'Vigilado', createdAt: '2026-08-14T10:00:00Z' },
+    { uuid: 'u-nuevo', id: 2, title: 'Nuevo suelto', createdAt: '2026-08-14T10:00:00Z' },
+    { uuid: 'u-viejo', id: 3, title: 'Viejo ajeno', createdAt: '2026-01-01T10:00:00Z' },
+  ];
+  const SET_VIGILADOS = new Set(['u-vig']);
+
+  it('reporta solo lo NO vigilado y creado despues de la referencia', () => {
+    const lst = detectarNuevosSinVigilar(LST_TODOS, SET_VIGILADOS, '2026-08-01T00:00:00Z');
+    expect(lst.map((o) => o.uuid)).toEqual(['u-nuevo']);
+  });
+
+  it('calla sin fecha de referencia — evita listar los ~50 scripts ajenos en la primera corrida', () => {
+    expect(detectarNuevosSinVigilar(LST_TODOS, SET_VIGILADOS, undefined)).toEqual([]);
+    expect(detectarNuevosSinVigilar(LST_TODOS, SET_VIGILADOS, '')).toEqual([]);
+  });
+
+  it('calla con una fecha de referencia invalida en vez de reportar todo', () => {
+    expect(detectarNuevosSinVigilar(LST_TODOS, SET_VIGILADOS, 'no-es-fecha')).toEqual([]);
+  });
+
+  it('nunca reporta un script vigilado, por nuevo que sea', () => {
+    const lst = detectarNuevosSinVigilar(LST_TODOS, new Set(['u-vig', 'u-nuevo']), '2026-08-01T00:00:00Z');
+    expect(lst).toEqual([]);
+  });
+
+  it('ignora los creados ANTES de la referencia', () => {
+    const lst = detectarNuevosSinVigilar(LST_TODOS, SET_VIGILADOS, '2026-08-01T00:00:00Z');
+    expect(lst.map((o) => o.uuid)).not.toContain('u-viejo');
+  });
+
+  it('ordena del mas nuevo al mas viejo', () => {
+    const lstDesordenada = [
+      { uuid: 'a', id: 1, title: 'A', createdAt: '2026-08-05T00:00:00Z' },
+      { uuid: 'b', id: 2, title: 'B', createdAt: '2026-08-14T00:00:00Z' },
+    ];
+    const lst = detectarNuevosSinVigilar(lstDesordenada, new Set(), '2026-08-01T00:00:00Z');
+    expect(lst.map((o) => o.uuid)).toEqual(['b', 'a']);
+  });
+
+  it('tolera un script sin fecha de creacion sin romperse', () => {
+    const lst = detectarNuevosSinVigilar(
+      [{ uuid: 'x', id: 9, title: 'Sin fecha' }], new Set(), '2026-08-01T00:00:00Z',
+    );
+    expect(lst).toEqual([]);
   });
 });

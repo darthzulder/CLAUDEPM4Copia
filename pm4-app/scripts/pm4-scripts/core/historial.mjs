@@ -39,6 +39,16 @@ const STR_MODO_BLOB = '100644';
 export const STR_RAMA_HISTORIAL = 'pm4-scripts-historial';
 
 /**
+ * Remoto por defecto del canal de historial.
+ *
+ * Es un parámetro y no un literal repetido porque el remoto correcto depende del equipo: hoy es el
+ * fork donde vive el trabajo, pero este proyecto ya convive con más de un remoto (un upstream y el
+ * de la organización) y ya sufrió una migración de instancia PM4. Que se pueda cambiar desde
+ * `pm4-scripts.config.json` evita tener que tocar código el día que la respuesta cambie.
+ */
+export const STR_REMOTO_POR_DEFECTO = 'origin';
+
+/**
  * Corre git y devuelve stdout como string.
  *
  * `stdio` se declara explícitamente porque el default de execFileSync **reenvía stderr al proceso
@@ -114,9 +124,9 @@ export function leerIndice(strRepo, strRama, strRutaIndice) {
 }
 
 /** ¿Hay un remoto `origin` configurado? Sin él, todo el modo compartido se omite en silencio. */
-export function hayRemoto(strRepo) {
+export function hayRemoto(strRepo, strRemoto = STR_REMOTO_POR_DEFECTO) {
   try {
-    return git(['remote', 'get-url', 'origin'], { strRepo }).trim() !== '';
+    return git(['remote', 'get-url', strRemoto], { strRepo }).trim() !== '';
   } catch {
     return false;
   }
@@ -128,10 +138,10 @@ export function hayRemoto(strRepo) {
  *
  * @returns {boolean} true si el fetch se hizo; false si no hay remoto o falló (sin red, por ej.)
  */
-export function traerRemoto(strRepo, strRama) {
-  if (!hayRemoto(strRepo)) return false;
+export function traerRemoto(strRepo, strRama, strRemoto = STR_REMOTO_POR_DEFECTO) {
+  if (!hayRemoto(strRepo, strRemoto)) return false;
   try {
-    git(['fetch', 'origin', `${strRama}:refs/remotes/origin/${strRama}`], { strRepo });
+    git(['fetch', strRemoto, `${strRama}:refs/remotes/${strRemoto}/${strRama}`], { strRepo });
     return true;
   } catch {
     // La rama puede no existir aún en el remoto (primera vez), o no haber red. Ninguno es fatal:
@@ -141,9 +151,9 @@ export function traerRemoto(strRepo, strRama) {
 }
 
 /** Punta de la rama en el remoto ya fetcheado, o null si no existe. */
-export function puntaRemota(strRepo, strRama) {
+export function puntaRemota(strRepo, strRama, strRemoto = STR_REMOTO_POR_DEFECTO) {
   try {
-    return git(['rev-parse', '--verify', '--quiet', `refs/remotes/origin/${strRama}`], { strRepo }).trim() || null;
+    return git(['rev-parse', '--verify', '--quiet', `refs/remotes/${strRemoto}/${strRama}`], { strRepo }).trim() || null;
   } catch {
     return null;
   }
@@ -167,17 +177,17 @@ export function puntaLocal(strRepo, strRama) {
  *
  * @returns {'sin-local'|'sin-remoto'|'al-dia'|'detras'|'adelante'|'divergido'}
  */
-export function estadoSincronizacion(strRepo, strRama) {
+export function estadoSincronizacion(strRepo, strRama, strRemoto = STR_REMOTO_POR_DEFECTO) {
   const strLocal = puntaLocal(strRepo, strRama);
-  const strRemoto = puntaRemota(strRepo, strRama);
+  const strRemoto_ = puntaRemota(strRepo, strRama, strRemoto);
 
-  if (!strLocal && !strRemoto) return 'sin-local';
+  if (!strLocal && !strRemoto_) return 'sin-local';
   if (!strLocal) return 'sin-local';
-  if (!strRemoto) return 'sin-remoto';
-  if (strLocal === strRemoto) return 'al-dia';
+  if (!strRemoto_) return 'sin-remoto';
+  if (strLocal === strRemoto_) return 'al-dia';
 
-  const blnRemotoEsAncestro = esAncestro(strRepo, strRemoto, strLocal);
-  const blnLocalEsAncestro = esAncestro(strRepo, strLocal, strRemoto);
+  const blnRemotoEsAncestro = esAncestro(strRepo, strRemoto_, strLocal);
+  const blnLocalEsAncestro = esAncestro(strRepo, strLocal, strRemoto_);
 
   if (blnLocalEsAncestro) return 'detras';
   if (blnRemotoEsAncestro) return 'adelante';
@@ -211,19 +221,19 @@ export function moverRamaA(strRepo, strRama, strSha) {
  *   avanzó y hay que reconciliar; cualquier otro fallo (sin red, sin permisos) viene con ok=false
  *   y rechazado=false, y NO es fatal: el commit ya está en local y se subirá en la próxima captura.
  */
-export function pushearHistorial(strRepo, strRama) {
+export function pushearHistorial(strRepo, strRama, strRemoto = STR_REMOTO_POR_DEFECTO) {
   if (strRama !== STR_RAMA_HISTORIAL) {
     throw new Error(
       `pushearHistorial solo puede pushear '${STR_RAMA_HISTORIAL}'; se pidió '${strRama}'. ` +
       'El push automático está autorizado únicamente para la rama de historial.',
     );
   }
-  if (!hayRemoto(strRepo)) {
-    return { ok: false, rechazado: false, mensaje: 'no hay remoto origin configurado' };
+  if (!hayRemoto(strRepo, strRemoto)) {
+    return { ok: false, rechazado: false, mensaje: `no hay remoto '${strRemoto}' configurado` };
   }
 
   try {
-    git(['push', 'origin', `refs/heads/${strRama}:refs/heads/${strRama}`], { strRepo });
+    git(['push', strRemoto, `refs/heads/${strRama}:refs/heads/${strRama}`], { strRepo });
     return { ok: true, rechazado: false, mensaje: '' };
   } catch (excError) {
     const strMensaje = String(excError.message ?? '');
