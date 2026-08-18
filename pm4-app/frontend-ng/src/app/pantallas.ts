@@ -118,6 +118,14 @@ export const DIC_PANTALLAS: Record<string, CargadorDePantalla> = {
     import(
       '../screens/atencion-cliente/quejas-directas/COL_QD_SCR-013_Dashboard_Gestion_Casos/dashboard-gestion-casos'
     ).then((in_objModulo) => in_objModulo.DashboardGestionCasos),
+  // La única publicada como **página web pública** (Web Entry): se abre sin `task_id` ni `case_id` y
+  // **crea** el caso en vez de completar una tarea. De ahí sus dos modos de envío (`process_events`
+  // vs `completarTarea`) y su chrome propio de sitio público (`app-pqr-page`) en vez del header de
+  // pantalla embebida. Ver el docstring de `CrearRecibirQueja`.
+  'COL_QD_SCR-000_CrearRecibirQueja': () =>
+    import(
+      '../screens/atencion-cliente/quejas-directas/COL_QD_SCR-000_CrearRecibirQueja/crear-recibir-queja'
+    ).then((in_objModulo) => in_objModulo.CrearRecibirQueja),
 };
 
 /**

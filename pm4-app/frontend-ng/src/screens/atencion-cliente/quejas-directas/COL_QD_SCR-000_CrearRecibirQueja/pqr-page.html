@@ -1,0 +1,41 @@
+<div class="pqr-page">
+  <!-- Barra maquetada a mano, NO `lib-navigation-z`: ese wrapper no tiene `<ng-content>`, así que el
+       logo no tendría dónde proyectarse. Ver la ⚠ Divergencia 1 de la clase. -->
+  <div class="pqr-topnav">
+    <img [src]="rutaLogo" alt="Zurich" class="pqr-topnav-logo" />
+  </div>
+
+  <!-- El titular va por `content` (el slot grande, `<h3>`, `--zf-h-48`). El intro NO cabe en el
+       banner: `category` es el slot de arriba y es el chico. Ver la ⚠ Divergencia 2.
+       `category=""` es OBLIGATORIO: su default es el literal 'Category Header', que se pintaría en
+       inglés arriba del titular. Los colores van por `customStr` — ver la ⚠ Divergencia 3. -->
+  <lib-stage-banner-z
+    shape="3"
+    category=""
+    [content]="titulo()"
+    [customStr]="strTokensBanner"
+  />
+
+  <!-- El intro que React pintaba dentro del banner. Va acá, sobre el fondo gris y alineado con la
+       columna de secciones, porque el wrapper del DS solo admite una pieza de texto en el slot
+       grande. Ver la ⚠ Divergencia 2 de la clase. -->
+  <p class="pqr-intro">{{ intro() }}</p>
+
+  <ng-content />
+
+  <footer class="pqr-footer">
+    <div class="pqr-footer-col">
+      <a href="#" class="pqr-footer-link">Zurich Compañía de Seguros</a>
+      <a href="#" class="pqr-footer-link pqr-footer-link--sub">Política de tratamiento de datos</a>
+    </div>
+    <div class="pqr-footer-divider"></div>
+    <div class="pqr-footer-col">
+      <a href="#" class="pqr-footer-link">¿Tienes problemas?</a>
+      <a href="#" class="pqr-footer-link pqr-footer-link--sub">Soporte IT</a>
+    </div>
+    <div class="pqr-footer-legal">
+      <a href="#">Privacidad y términos de uso</a>
+      <span>©2026 Zurich</span>
+    </div>
+  </footer>
+</div>

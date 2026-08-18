@@ -1,0 +1,148 @@
+<!-- ── S3 · Detalle de la queja ───────────────────────────────────────────────────────────────────
+     Un solo `[formGroup]`, el de la PANTALLA. Cada campo lleva `formControlName` **y** `name`: el
+     segundo produce el `id="field-<name>"` que `scrollToFirstError()` necesita. -->
+<app-pqr-section titulo="Detalle de la queja" [formGroup]="form()">
+  <!-- Producto SFC + el momento que la matriz deriva de él. El producto va por un control SATÉLITE
+       (`objProductoUi`), no por `formControlName`: la colección 16 repite códigos y el select del DS
+       indexa por `value`, así que el picker necesita `código::etiqueta` para distinguir los dos
+       productos que comparten el 104. El control real guarda el código puro. -->
+  <div class="form-row cols-2">
+    <zds-select
+      [formControl]="objProductoUi"
+      [name]="QD.strSfcProduct"
+      label="Producto SFC (seguro)"
+      [options]="objMatriz.cllInsuranceUi()"
+      [loading]="objMatriz.blnCargando()"
+      [obligatorio]="true"
+      [error]="mensajeDeError(QD.strSfcProduct)"
+    />
+    <zds-select
+      [formControlName]="QD.strInteraction"
+      [name]="QD.strInteraction"
+      label="Momento de la interacción"
+      [options]="objMatriz.cllInteraction()"
+      [obligatorio]="true"
+      [error]="mensajeDeError(QD.strInteraction)"
+    />
+  </div>
+
+  <!-- El servicio prestado aplica SOLO en Asistencias: fuera de ahí la matriz no lo usa para filtrar
+       y su efecto lo vacía. La placa aparece solo en la familia Autos. Cuando una de las dos falta,
+       va un hueco vacío para que la fila no se descuadre — es lo que hace React. -->
+  <div class="form-row cols-2">
+    @if (objMatriz.blnIsAsistencias()) {
+      <zds-select
+        [formControlName]="QD.strServiceProvided"
+        [name]="QD.strServiceProvided"
+        label="Servicio prestado"
+        [options]="objMatriz.cllService()"
+        [obligatorio]="true"
+        [error]="mensajeDeError(QD.strServiceProvided)"
+      />
+    } @else {
+      <div></div>
+    }
+
+    @if (blnEsAutos()) {
+      <zds-input
+        [formControlName]="QD.strPlate"
+        [name]="QD.strPlate"
+        label="Placa del vehículo"
+        placeholder="ABC123"
+        [obligatorio]="true"
+        [error]="mensajeDeError(QD.strPlate)"
+      />
+    } @else {
+      <div></div>
+    }
+  </div>
+
+  <!-- El motivo SFC es el último nivel de la cascada y el único donde el value NO es el texto: guarda
+       `codigoMotivoSFC`, que es el código que espera la Superintendencia. De su fila salen los cinco
+       campos de back (rol responsable, escalamiento, resarcimiento, SLA y relación con fraude). -->
+  <div class="form-row cols-1">
+    <zds-select
+      [formControlName]="QD.strSfcReason"
+      [name]="QD.strSfcReason"
+      label="Motivo SFC"
+      [options]="objMatriz.cllReason()"
+      [obligatorio]="true"
+      [error]="mensajeDeError(QD.strSfcReason)"
+    />
+  </div>
+
+  <!-- FLD-329 · el detalle de la queja.
+       ⚠ React pone "Por favor ingresa el detalle de la queja" como `placeholder`, y acá no hay dónde:
+       `lib-textarea-z` **no tiene input `placeholder`** (verificado en los tipos del DS — de sus 13
+       inputs ninguno lo es). El `helpText` es el único canal de texto de apoyo del componente, y se
+       usa para adelantar el mínimo de 50, que en React recién aparece como mensaje de error, o sea
+       después de fallar. Es la única divergencia de texto deliberada de la pantalla. -->
+  <div class="form-row cols-1">
+    <zds-textarea
+      [formControlName]="QD.strComplaintText"
+      [name]="QD.strComplaintText"
+      label="Ingresa el detalle"
+      helpText="Mínimo 50 caracteres."
+      [maxLength]="2000"
+      [obligatorio]="true"
+      [error]="mensajeDeError(QD.strComplaintText)"
+    />
+  </div>
+
+  <!-- FLD-325/326 · la réplica. El checkbox guarda el contrato de texto de PM4 ('SI'/'NO'), no un
+       booleano — de ahí `checkedValue`/`uncheckedValue`. El argumento vive detrás del `@if`. -->
+  <div class="form-row cols-1">
+    <zds-checkbox-field
+      [formControlName]="QD.strReply"
+      [name]="QD.strReply"
+      label="¿Ya habías radicado previamente la misma queja o es una reconsideración?"
+      checkedValue="SI"
+      uncheckedValue="NO"
+    />
+  </div>
+
+  @if (blnReplica()) {
+    <div class="form-row cols-1">
+      <zds-textarea
+        [formControlName]="QD.strReplyArgument"
+        [name]="QD.strReplyArgument"
+        label="Argumento de la réplica"
+        [maxLength]="2000"
+        [obligatorio]="true"
+        [error]="mensajeDeError(QD.strReplyArgument)"
+      />
+    </div>
+  }
+
+  <!-- Los adjuntos, detrás de un switch que es estado de UI y NO un campo de PM4.
+       `za-switch` es un CVA nativo, pero acá no se ata a ningún control a propósito: lo que viaja al
+       proceso son las cinco claves `qd_strDoc*`, no la decisión de mostrarlas. Se lee/escribe por
+       `[checked]` + `(change)`, que son los dos canales que no pasan por `ngModel` — un `[ngModel]`
+       junto a `ReactiveFormsModule` es NG0201 y la pantalla entera no monta. -->
+  <div class="pqr-toggle-row">
+    <za-switch
+      label="Deseo adjuntar documentos de soporte"
+      [checked]="blnAdjuntos()"
+      (change)="alCambiarSwitch($event)"
+    />
+  </div>
+
+  @if (blnAdjuntos()) {
+    <!-- `[max]="5"` explícito: el default del bloque es 3 (lo usa SCR-0051) y SCR-000 admite cinco.
+         El tope real igual lo acota la cantidad de claves declaradas — ver el componente. -->
+    <app-doc-support-uploader
+      [form]="form()"
+      [docKeys]="cllClavesAdjuntos"
+      [max]="5"
+      title="Documentos de soporte"
+      intro="Adjunta los documentos que respalden tu queja. Se pueden agregar hasta 5 documentos."
+    />
+  }
+
+  <!-- Variables de back sin campo visible que esta sección escribe por sus efectos:
+       Detalle de producto (FLD-324, primera opción del catálogo · ⚠ con el filtro roto que se
+       preserva), Admisión (FLD-331, código '9' salvo Defensor), Ente de control (FLD-332, "Otros"),
+       Tutela (FLD-333, "No"), Queja exprés (FLD-334, "No"), y los cinco que deriva el motivo:
+       rol responsable, escalamiento al Defensor, resarcimiento, SLA asignado y relación con fraude
+       (este último ausente de la ficha 1.0 — ver la clase). -->
+</app-pqr-section>

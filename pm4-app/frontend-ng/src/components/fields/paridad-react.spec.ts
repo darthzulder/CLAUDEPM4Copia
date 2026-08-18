@@ -17,6 +17,7 @@ import { RespuestaAreaResponsable } from '../../screens/atencion-cliente/quejas-
 import { FormularioSuperintendencia } from '../../screens/atencion-cliente/quejas-directas/COL_QD_SCR-009_Formulario_Superintendencia/formulario-superintendencia';
 import { DetalleReasignacionRespuesta } from '../../screens/atencion-cliente/quejas-directas/COL_QD_SCR-0051_Detalle_Reasignacion_Respuesta/detalle-reasignacion-respuesta';
 import { DashboardGestionCasos } from '../../screens/atencion-cliente/quejas-directas/COL_QD_SCR-013_Dashboard_Gestion_Casos/dashboard-gestion-casos';
+import { CrearRecibirQueja } from '../../screens/atencion-cliente/quejas-directas/COL_QD_SCR-000_CrearRecibirQueja/crear-recibir-queja';
 
 /**
  * ⚠ **Paridad contra el contrato de campos que declaraba React, congelado como dato de migración.**
@@ -101,6 +102,7 @@ const CLL_PORTADAS: readonly { readonly strSlug: string; readonly objTipo: Type<
   { strSlug: 'COL_QD_SCR-009_Formulario_Superintendencia', objTipo: FormularioSuperintendencia },
   { strSlug: 'COL_QD_SCR-0051_Detalle_Reasignacion_Respuesta', objTipo: DetalleReasignacionRespuesta },
   { strSlug: 'COL_QD_SCR-013_Dashboard_Gestion_Casos', objTipo: DashboardGestionCasos },
+  { strSlug: 'COL_QD_SCR-000_CrearRecibirQueja', objTipo: CrearRecibirQueja },
 ];
 
 /**
@@ -150,6 +152,16 @@ const DIC_MAXLENGTH_ESPERADOS: Readonly<Record<string, number>> = {
   // tendría a qué aplicarse. La pantalla igual hereda el caso de huérfanos, que es el que atrapa un
   // rename de filtro al portar.
   'COL_QD_SCR-013_Dashboard_Gestion_Casos': 0,
+  // Dos, contados del dataset: los **únicos** dos `ZdsTextarea` de la pantalla, los dos con
+  // `maxLength: 2000`. Se distinguen por sus validadores: el que además trae `minLength(50)` es
+  // `qd_strComplaintText` (FLD-327), y el pelado es `qd_strReplyArgument`. Que sean 2 sobre 29 campos no
+  // es un olvido de React: los otros 27 son selects, radios, fechas y el checkbox de autorización, y a
+  // ninguno le aplica un tope de longitud.
+  //
+  // ⚠ **Uno de los dos vive detrás de un `@if`**, así que esta pantalla necesita su entrada en
+  // `DIC_APERTURA_DE_RAMAS` — igual que la SCR-0051 y por el mismo motivo. Sin sembrar la rama, el caso
+  // encontraría 1 contador y fallaría nombrando un textarea que nunca se montó.
+  'COL_QD_SCR-000_CrearRecibirQueja': 2,
 };
 
 /**
@@ -310,6 +322,16 @@ const DIC_APERTURA_DE_RAMAS: Readonly<
       // el caso de los contadores, nombrando el campo que no encontró — que es el mensaje útil.
       objHost?.querySelector('za-button')?.dispatchEvent(new Event('click', { bubbles: true }));
     },
+  },
+  // Uno de los dos `maxLength` de la SCR-000 es condicional: `qd_strReplyArgument` (el argumento de la
+  // réplica) vive detrás del `@if` que se abre cuando `qd_strReply === 'SI'`. Es un dato del caso, así
+  // que alcanza con sembrarlo — no hace falta `fnAbrir`.
+  //
+  // ⚠ El valor es el literal `'SI'` y no un `true`: el checkbox de réplica es un `zds-checkbox-field` con
+  // `checkedValue`/`uncheckedValue` en `'SI'`/`'NO'`, que es el contrato de PM4 para ese campo. Sembrar
+  // `true` dejaría el `@if` cerrado y el caso fallaría nombrando el textarea que no montó.
+  'COL_QD_SCR-000_CrearRecibirQueja': {
+    datos: { qd_strReply: 'SI' },
   },
 };
 

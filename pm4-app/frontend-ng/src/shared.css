@@ -1441,11 +1441,55 @@ z-table :is(th, td)[config*="right"] {
    responsive es interno del componente (@container), no hace falta
    replicar breakpoints a mano. */
 
+/* ⚠ En Angular este banner lleva SOLO el titular. Verificado 2026-08-17 sobre
+   `web-components/dist/stage-banner.js`: el `z-stage-banner` rinde
+   `<main><h6>{category}</h6><h3>{content}</h3></main>`, o sea que el slot chico
+   (`--zf-body-20--600`) va ARRIBA del grande (`--zf-h-48`). React metía titular
+   + párrafo juntos dentro de `content` con `font` inline, algo que su wrapper
+   permite porque tipa `content: string | ReactNode`; el wrapper de Colombia lo
+   tipa `string` y su plantilla lo interpola como texto (`{{ content }}`), así
+   que la composición no cruza. Poner el intro en `category` lo pintaría chico y
+   por encima del titular — invertido respecto del diseño. El intro sale del
+   banner y va como `.pqr-intro` (abajo). Efecto colateral BUENO: el titular
+   recupera `--zf-h-48`, el tamaño que tenía `.pqr-banner-title` antes de las dos
+   migraciones (React lo había bajado a `--zf-h-44` al forzar el font inline). */
+
+/* ⚠ `.pqr-topnav`/`.pqr-topnav-links` se habían borrado al migrar a ZrNavigation
+   en React; en Angular la barra vuelve a maquetarse a mano y `.pqr-topnav`
+   revive. Motivo verificado 2026-08-17 en la plantilla compilada de
+   `lib-navigation-z` (`fesm2022/zurich-col-lib-zurich.mjs`), que es entera
+   `<za-navigation config="" [routes] [social]></za-navigation>`: no tiene
+   `<ng-content>` en ninguna parte, así que el `<img slot="logo">` que React le
+   proyectaba no tiene dónde ir y Angular lo descartaría en silencio (barra sin
+   logo). El wrapper tampoco reenvía `isotype`/`menu`/`with-top`/`custom`, que
+   son los inputs de `za-navigation` que podrían haber servido. Cae bajo la regla
+   "layout o estructura → CSS propio": lo que se necesita es una barra de altura
+   fija con un logo, no navegación con rutas y redes. */
+.pqr-topnav {
+  display: flex;
+  align-items: center;
+  height: 80px;
+  padding: var(--zs-100) var(--zs-200);
+  background: var(--zc-blue-dark);
+}
+
 /* Hoja de formulario: columna central de 1130px sobre el fondo gris. */
 .pqr-form {
   width: min(1130px, 100%);
   margin: var(--zs-200) auto 0;
   padding: 0 var(--zs-200);
+}
+
+/* Bajada del formulario: el párrafo que en React vivía dentro del banner (ver el
+   ⚠ de arriba). Comparte la columna central de `.pqr-form` pero con su propio
+   margen, porque va sobre el fondo gris y no dentro del card blanco — no se
+   reusa `.pqr-note`, cuyo margen asume estar dentro de una sección. */
+.pqr-intro {
+  width: min(1130px, 100%);
+  margin: var(--zs-200) auto 0;
+  padding: 0 var(--zs-200);
+  font: var(--zf-body-20--300);
+  color: var(--zc-blue-dark);
 }
 
 /* Sección: card blanco con título azul 24px y divisoria navy. Las secciones se
@@ -1599,12 +1643,23 @@ z-table :is(th, td)[config*="right"] {
   border-radius: 50%;
 }
 
+/* El `color` va acá y no en un `style` en línea sobre el `za-icon` como en React: el proyecto no
+   admite estilos ad-hoc, y el par fondo+color del círculo es un patrón compartido por los dos modales
+   de SCR-000, no una excepción de uno.
+
+   Setear `color` en el contenedor alcanza: `z-icon` (el elemento que `za-icon` pinta adentro) no es un
+   SVG con `fill`, es un `background-color: var(--z-icon--color, currentColor)` recortado por una
+   `mask` — así que el color se hereda por `currentColor`. Verificado 2026-08-18 en
+   `@zurich/css-components/dist/Icon.css`. La alternativa sería `--z-icon--color`, que es más
+   específica pero no hereda a un futuro segundo ícono en el mismo círculo. */
 .pqr-modal-icon--info {
   background: var(--z-blue-light);
+  color: var(--z-blue-dark);
 }
 
 .pqr-modal-icon--warning {
   background: var(--zc-lemon-20);
+  color: var(--z-warning-deep);
 }
 
 .pqr-modal-title {

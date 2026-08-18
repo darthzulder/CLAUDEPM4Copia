@@ -304,6 +304,28 @@ deliberadamente distintos, para no alterar el comportamiento actual ni de casual
 hacerlo funcionar. **Se notifica al usuario para que decida si corregir este bug por
 separado** (fuera del alcance de este refactor de nomenclatura).
 
+**Ampliación medida (ago-2026, al portar SCR-000 a Angular):** "sigue sin recargarse
+dinámicamente" es correcto pero se venía leyendo como *"el filtro no se aplica y el catálogo
+llega completo"* — y eso es **falso**. `CollectionService.cargar()` abre con un gate duro:
+
+```ts
+if (in_objDef.dependsOn && !in_dicWatchValues?.[in_objDef.dependsOn]) { this.limpiar(); return; }
+```
+(`core/collection.service.ts:102-105`, mismo comportamiento que el `useCollection` de React)
+
+O sea que la clave ausente **no degrada el filtro: cancela la petición**. El catálogo no llega
+ni completo ni filtrado — no llega. Verificado en dos lados: en jsdom, sondeando las peticiones
+al montar SCR-000 (ids `[16,18,45,21,22,30,32]` — el **40 nunca aparece**, con producto elegido
+o sin él), y contra el backend real en el navegador (log de red: todos los catálogos 200, la
+colección 40 ausente).
+
+**Consecuencia de negocio, que es lo que hay que decidir:** `qd_strProductDetail` (**FLD-324**)
+se siembra con "la primera opción del catálogo", así que sin catálogo viaja **siempre vacío** a
+PM4 — hoy, en React, en producción. No es un riesgo del port: es el estado actual del proceso.
+Fijado con dos casos en `COL_QD_SCR-000_.../seccion-detalle-queja.spec.ts` (`contarGets(40) === 0`
+y `leer(strProductDetail) === ''`), de modo que el día que alguien haga coincidir los tokens la
+suite se pone roja nombrando el cambio en vez de dejarlo pasar en silencio.
+
 ## Convención `_desc` — código + descripción para campos de colección
 
 Todo campo respaldado por una colección PM4 sigue esta regla: el campo base guarda el

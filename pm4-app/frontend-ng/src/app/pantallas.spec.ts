@@ -69,6 +69,11 @@ const CLL_SLUGS_CON_SPEC: string[] = [
   // `start`/`end`, el typo `generciEndName` y el empty state como hermano— se degradan **sin** poner
   // rojo nada de la pantalla.
   'COL_QD_SCR-013_Dashboard_Gestion_Casos',
+  // La única Web Entry, y la que cierra la brecha declarada del spec React: allá el envío exitoso
+  // era inaseverable (~20 obligatorios en selects del DS no interactuables bajo jsdom, más el
+  // municipio que RUL-000-09 vacía en la propia precarga), acá los controles se llenan con
+  // `patchValue` y las **dos** ramas de envío se aseveran por la URL que sale al backend.
+  'COL_QD_SCR-000_CrearRecibirQueja',
 ];
 
 describe('guarda de inventario de pantallas', () => {
