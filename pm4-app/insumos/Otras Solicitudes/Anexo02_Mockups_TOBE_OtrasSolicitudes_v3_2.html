@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Mockups TO-BE v3.1 — Gestión de Otras Solicitudes | Zurich Seguros Colombia</title>
+<title>Mockups TO-BE v3.2 — Gestión de Otras Solicitudes | Zurich Seguros Colombia</title>
 <style>
 :root{
   --bg:#f0f4f8;--panel:#fff;--text:#1e293b;--muted:#64748b;--border:#cbd5e1;
@@ -130,7 +130,7 @@ button{border:0;border-radius:6px;padding:9px 18px;cursor:pointer;font-size:13px
 
 <nav class="nav">
   <div class="nav-inner">
-    <div class="nav-brand"><em>Zurich</em> · Otras Solicitudes TO-BE v3.1</div>
+    <div class="nav-brand"><em>Zurich</em> · Otras Solicitudes TO-BE v3.2</div>
     <div class="nav-group"><span class="nav-group-label">Índice</span><a href="#" onclick="showScreen('index')">📋 Todas</a></div>
     <div class="nav-group"><span class="nav-group-label">P02</span><a href="#" onclick="showScreen('scr003')">PAN-03 Línea 2</a></div>
     <div class="nav-group"><span class="nav-group-label">SP01 VD</span><a href="#" onclick="showScreen('scr004')">PAN-04 Reporte SIC</a><a href="#" onclick="showScreen('scr005')">PAN-05 Análisis</a></div>
@@ -147,12 +147,13 @@ button{border:0;border-radius:6px;padding:9px 18px;cursor:pointer;font-size:13px
 <div class="screen active" id="screen-index">
   <div class="form-body">
     <div class="idx-hero">
-      <h1>📋 Mockups TO-BE v3.1 — Gestión de Otras Solicitudes</h1>
+      <h1>📋 Mockups TO-BE v3.2 — Gestión de Otras Solicitudes</h1>
       <p>Zurich Seguros Colombia · ProcessMaker 4 BPMS · 7 pantallas · 7 procesos/subprocesos · BeePM — Beesmartec · Mayo 2026 · rev. Ago 2026 · ACZ-OS-001</p>
     </div>
-    <div class="alert alert-crit"><span class="alert-icon">⚠</span><div><strong>NOTAS REGULATORIAS CRÍTICAS:</strong> SP01 VD: Reporte a SIC pendiente validación legal (Ley 1581/2012). SP02 DP: Plazos legales (15/10/30 días hábiles) pendientes de confirmar con equipo legal de Zurich. SP05: Toda respuesta debe usar plantilla corporativa — no se permite texto libre (RUL-010-01). SLA por tipología pendiente de parametrización antes del go-live.</div></div>
+    <div class="alert alert-crit"><span class="alert-icon">⚠</span><div><strong>NOTAS REGULATORIAS CRÍTICAS:</strong> SP01 VD: Reporte a SIC pendiente validación legal (Ley 1581/2012). SP02 DP: Plazos legales (15/10/30 días hábiles) pendientes de confirmar con equipo legal de Zurich. SP05: Toda respuesta debe usar plantilla corporativa — no se permite texto libre (RUL-006-01, RUL-081-05). SLA por tipología pendiente de parametrización antes del go-live.</div></div>
     <div class="alert alert-info"><span class="alert-icon">🔄</span><div><strong>Revisión v3.1 (ago-2026) — consistencia, sin cambios funcionales:</strong> maquetas realineadas contra <em>03_Campos</em>; IDs duplicados renumerados (FLD-158 y SEC-039/040/041 de SCR-012 → FLD-193 y SEC-052/053/054); alta de CAT-TIPO-DATOS, CAT-CANAL-SIC y CAT-USUARIOS-ROLE con valores <em>dummy</em> pendientes de validación; 12 reglas de <em>05_Reglas</em> que faltaban en las maquetas ya sincronizadas; SP06 documentado como subproceso sin pantalla. En estos mockups: se corrigieron dos referencias a reglas inexistentes (RUL-011-01, RUL-020), se alinearon las opciones de los catálogos nuevos y se agregó el botón Cancelar de SCR-003. A la inversa, los botones <em>Guardar Borrador</em> de SCR-003 y de la antigua pantalla de Modificación que este prototipo ya ofrecía se dieron de alta en el anexo como ACT-003-04 y como la acción equivalente de esa pantalla (hoy ACT-081-02).</div></div>
     <div class="alert alert-info"><span class="alert-icon">🆕</span><div><strong>Refinamiento ago-2026 — unificación del SP03:</strong> los cuatro subtipos de requerimiento (Solicitud de Información, Modificación, Cancelación y Otros Requerimientos) se gestionan ahora en una sola pantalla, <strong>SCR-081 · PAN-08.1</strong>, cuyas secciones condicionales se adaptan al <em>Tipo de Requerimiento</em>. Las pantallas <strong>SCR-008 · PAN-08</strong> y <strong>SCR-009 · PAN-09</strong> fueron eliminadas y sus IDs quedan retirados (no se reutilizan). Total: 8 → 7 pantallas.</div></div>
+    <div class="alert alert-info"><span class="alert-icon">🆕</span><div><strong>Refinamiento ago-2026 — simplificación de PAN-10 (Sugerencia / Felicitación):</strong> la pantalla queda reducida a una única sección, <strong>S1 Datos del Caso (solo lectura)</strong>, y a un único botón, <strong>Cerrar Sugerencia/Felicitación</strong> (ACT-010-01). Se eliminaron las secciones de análisis y decisión de comunicación y, en una segunda pasada, también las de preparación de la respuesta final (selección de plantilla, redacción y adjuntos de soporte) con sus campos, reglas y mensajes asociados: PAN-10 ya no redacta respuesta al cliente. Todos los IDs de sección, campo, acción, regla y mensaje suprimidos quedan retirados y no se reutilizan; el detalle está en el <em>CHANGELOG</em> del anexo.</div></div>
     <div class="idx-section">
       <h2><span class="tag tag-p02">P02</span> Proceso Principal — Gestión de Otras Solicitudes</h2>
       <div class="alert alert-info"><span class="alert-icon">ℹ</span><div>La <strong>radicación</strong> y la <strong>clasificación/tipificación</strong> inicial se realizan ahora en la pantalla externa <strong>PAN-000 · Radicación PQRS</strong> (fuera del alcance de este documento). Las antiguas <strong>PAN-01</strong> (Formulario de Radicación) y <strong>PAN-02</strong> (Clasificación y Tipificación) fueron eliminadas de estos mockups.</div></div>
@@ -182,7 +183,7 @@ button{border:0;border-radius:6px;padding:9px 18px;cursor:pointer;font-size:13px
     <div class="idx-section">
       <h2><span class="tag tag-sp04">SP04</span> Gestión Sugerencia y Felicitación</h2>
       <div class="idx-grid">
-        <a class="idx-card" onclick="showScreen('scr010')"><div class="idx-card-id">SCR-010 · PAN-10 · SP04-T02</div><div class="idx-card-name">Registro Sugerencia / Felicitación</div><div class="idx-card-desc">Análisis del contenido y decisión de comunicación al cliente</div><div class="idx-card-role">👤 Gestor de Experiencia</div></a>
+        <a class="idx-card" onclick="showScreen('scr010')"><div class="idx-card-id">SCR-010 · PAN-10 · SP04-T02</div><div class="idx-card-name">Registro Sugerencia / Felicitación</div><div class="idx-card-desc">Consulta del caso y cierre de la sugerencia o felicitación</div><div class="idx-card-role">👤 Gestor de Experiencia</div></a>
       </div>
     </div>
     <div class="idx-section">
@@ -765,7 +766,7 @@ button{border:0;border-radius:6px;padding:9px 18px;cursor:pointer;font-size:13px
       <div class="scr-badge">SCR-010 · PAN-10</div>
       <div>
         <div class="scr-title">Formulario de Registro de Sugerencia / Felicitación</div>
-        <div class="scr-sub">Análisis del contenido, registro del hallazgo o reconocimiento y decisión de comunicación al cliente</div>
+        <div class="scr-sub">Consulta de los datos del caso y cierre de la sugerencia o felicitación</div>
         <div class="scr-tags"><span class="tag tag-sp04">SP04</span><span class="tag tag-role">👤 Gestor de Experiencia</span><span class="tag" style="background:#dcfce7;color:#166534">SP04-T02</span></div>
       </div>
     </div>
@@ -788,93 +789,12 @@ button{border:0;border-radius:6px;padding:9px 18px;cursor:pointer;font-size:13px
       </div>
     </div>
 
-    <div class="fpanel">
-      <div class="fpanel-head" onclick="togglePanel(this)">💡 S2 — Tipo de Manifestación y Análisis</div>
-      <div class="fpanel-body">
-        <div class="g2">
-          <div class="field"><label class="fl">Tipo de Manifestación <span class="req">*</span></label>
-            <select onchange="updateManiestacion(this)"><option value="">Seleccione...</option><option value="sugerencia" selected>Sugerencia</option><option value="felicitacion">Felicitación</option></select>
-          </div>
-          <div class="field"><label class="fl">Área Referida <span class="req">*</span></label>
-            <select><option>Seleccione...</option><option selected>Siniestros</option><option>SAC — Servicio al Cliente</option><option>Producto</option><option>Tecnología / Canales Digitales</option></select>
-          </div>
-          <div class="field span2" id="campo-sugerencia"><label class="fl">Análisis del Contenido <span class="req">*</span></label>
-            <textarea rows="3" placeholder="Analizar la pertinencia de la sugerencia, su potencial impacto en el proceso y área correspondiente. Registrar como hallazgo de mejora si es relevante..."></textarea>
-          </div>
-          <div class="field span2 cond-section" id="campo-felicitacion"><label class="fl">Nota de Reconocimiento Interno <span class="req cond">◆ Requerido si Felicitación</span></label>
-            <textarea rows="3" placeholder="Redactar la notificación interna para el área o colaborador destacado en la felicitación del cliente..."></textarea>
-          </div>
-        </div>
-      </div>
-    </div>
-
-    <div class="fpanel">
-      <div class="fpanel-head" onclick="togglePanel(this)">📬 S3 — Decisión de Comunicación al Cliente</div>
-      <div class="fpanel-body">
-        <div class="field"><label class="fl">¿Requiere Comunicación Formal al Cliente? <span class="req">*</span></label>
-          <div class="radio-group">
-            <label><input type="radio" name="req_com" value="si" onchange="document.getElementById('sec-respuesta-10').classList.add('visible')"> Sí — Continuar a SP05 Respuesta Final</label>
-            <label><input type="radio" name="req_com" value="no" checked onchange="document.getElementById('sec-respuesta-10').classList.remove('visible')"> No — Cierre interno sin correo al cliente</label>
-          </div>
-          <span class="fhelp">Si No: el sistema cerrará el caso internamente sin enviar correo ni encuesta al cliente. Si Sí: se despliegan las secciones de preparación de la respuesta final (SP05).</span>
-        </div>
-      </div>
-    </div>
-
-    <!-- Secciones condicionales de preparación de la Respuesta Final (SP05): se despliegan solo si ¿Requiere Comunicación Formal al Cliente? = Sí -->
-    <div class="cond-section" id="sec-respuesta-10">
-      <div class="alert alert-err"><span class="alert-icon">🔴</span><div><strong>RUL-010-01 — RESTRICCIÓN:</strong> No se permite crear respuestas en texto libre sin seleccionar una plantilla corporativa aprobada. Toda respuesta final debe partir de una plantilla del catálogo del BPM. El botón <em>Continuar a Respuesta Final</em> permanecerá deshabilitado hasta seleccionar plantilla.</div></div>
-
-      <div class="fpanel">
-        <div class="fpanel-head" onclick="togglePanel(this)">📋 S4 — Selección de Plantilla (condicional)</div>
-        <div class="fpanel-body">
-          <div class="g2">
-            <div class="field"><label class="fl">Plantilla Corporativa <span class="req cond">◆ Condicional</span></label>
-              <select onchange="updatePlantilla10(this)">
-                <option value="">Seleccione plantilla obligatoria...</option>
-                <option value="dp">TPL-DP — Plantilla Derecho de Petición</option>
-                <option value="vd">TPL-VD — Plantilla Vulneración de Datos</option>
-                <option value="req">TPL-REQ — Plantilla Requerimiento</option>
-                <option value="sug">TPL-SUG — Plantilla Sugerencia</option>
-                <option value="fel">TPL-FEL — Plantilla Felicitación</option>
-              </select>
-              <span class="fhelp">⚠️ Pendiente parametrización de plantillas por equipo de Comunicaciones/SAC.</span>
-            </div>
-            <div class="field"><label class="fl">Vista Previa de la Plantilla</label>
-              <div id="vista-plantilla-10" style="padding:10px;background:#f8fafc;border:1px solid var(--border);border-radius:6px;font-size:12px;color:var(--muted);min-height:60px">Seleccione una plantilla para ver su contenido base...</div>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <div class="fpanel">
-        <div class="fpanel-head" onclick="togglePanel(this)">✍️ S5 — Redacción de Respuesta Final (condicional)</div>
-        <div class="fpanel-body">
-          <div class="g2">
-            <div class="field span2">
-              <label class="fl">Respuesta Final Personalizada <span class="req cond">◆ Condicional</span></label>
-              <textarea id="respuesta-final-10" rows="8" placeholder="[Seleccione una plantilla primero para cargar el contenido base]&#10;&#10;Los campos variables se autocompletan con los datos del caso: {{nombreCliente}}, {{numeroCaso}}, {{fechaLimite}}, etc."></textarea>
-              <div style="display:flex;justify-content:space-between;margin-top:4px">
-                <span class="fhelp" id="chars-counter-10">Mínimo 100 caracteres</span>
-                <span class="fhelp" id="chars-count-10">0 caracteres</span>
-              </div>
-            </div>
-            <div class="field span2"><label class="fl">Comentario Adicional (solo uso interno)</label><textarea rows="2" placeholder="Notas internas — no van al cliente ni a la aprobación formal..."></textarea></div>
-          </div>
-        </div>
-      </div>
-
-      <div class="fpanel">
-        <div class="fpanel-head" onclick="togglePanel(this)">📎 S6 — Adjuntos de Soporte para el Cliente (condicional)</div>
-        <div class="fpanel-body">
-          <div class="file-zone">📎 Adjunte documentos que se enviarán al cliente junto con la respuesta<br><span style="font-size:11px">PDF, JPG, PNG · Máx 5 archivos, 5 MB c/u</span></div>
-        </div>
-      </div>
-    </div>
+    <!-- Rev. ago-2026: la pantalla queda reducida a la consulta del caso y al cierre. La preparación
+         de la respuesta final al cliente ya no se realiza aquí (ver CHANGELOG del anexo). -->
+    <div class="alert alert-info"><span class="alert-icon">ℹ️</span><div><strong>Alcance de la pantalla:</strong> PAN-10 solo consulta los datos del caso y ejecuta el cierre de la sugerencia o felicitación. No se redacta respuesta al cliente en esta pantalla: la notificación se genera en el cierre (SP06).</div></div>
 
     <div class="actions">
-      <button class="btn-secondary" type="button">✕ Cancelar</button>
-      <button class="btn-primary" type="button">✔ Registrar y Determinar Comunicación →</button>
+      <button class="btn-primary" type="button">✔ Cerrar Sugerencia/Felicitación</button>
     </div>
   </div>
 </div>
@@ -1050,7 +970,7 @@ var PLANTILLAS_RESPUESTA={
   'fel':'Estimado/a {{nombreCliente}},\n\nRecibimos con mucha satisfacción su felicitación. Nos alegra saber que nuestro equipo superó sus expectativas...\n\n[Campos auto: nombreCliente, areaDestacada]'
 };
 
-// Helper compartido: aplica la plantilla seleccionada sobre los elementos con el sufijo dado ('-06' para SCR-006, '-10' para SCR-010).
+// Helper compartido: aplica la plantilla seleccionada sobre los elementos con el sufijo dado ('-06' para SCR-006, '-081' para SCR-081).
 function applyPlantilla(sel,suffix){
   var vista=document.getElementById('vista-plantilla'+suffix);
   var btn=document.getElementById('btn-enviar-aprobacion'+suffix);
@@ -1067,7 +987,6 @@ function applyPlantilla(sel,suffix){
 
 function updatePlantilla06(sel){ applyPlantilla(sel,'-06'); }
 function updatePlantilla081(sel){ applyPlantilla(sel,'-081'); }
-function updatePlantilla10(sel){ applyPlantilla(sel,'-10'); }
 
 // Contador de caracteres reutilizable
 function attachCharCounter(suffix){
@@ -1189,7 +1108,6 @@ function updateViable081(v){
 document.addEventListener('DOMContentLoaded',function(){
   attachCharCounter('-06');
   attachCharCounter('-081');
-  attachCharCounter('-10');
   // Resaltar en el menú superior la pantalla activa al cargar (índice por defecto).
   var act=document.querySelector('.screen.active');
   var id=act?act.id.replace('screen-',''):'index';
@@ -1218,17 +1136,6 @@ function aprobarRespuesta(){
   }
 }
 
-function updateManiestacion(sel){
-  var sug=document.getElementById('campo-sugerencia');
-  var fel=document.getElementById('campo-felicitacion');
-  if(sel.value==='felicitacion'){
-    if(sug) sug.style.display='none';
-    if(fel) {fel.classList.add('visible');fel.style.display='block';}
-  } else {
-    if(sug) sug.style.display='block';
-    if(fel) {fel.classList.remove('visible');fel.style.display='none';}
-  }
-}
 </script>
 </body>
 </html>

@@ -30,11 +30,6 @@
 | SEC-061 | SCR-081 | S7 Redacción de Respuesta Final | Sección de formulario | 7 | 2 | Sí | Siempre |
 | SEC-062 | SCR-081 | S8 Adjuntos de Soporte para el Cliente | Sección de formulario | 8 | 2 | Sí | Siempre |
 | SEC-032 | SCR-010 | S1 Datos del Caso (solo lectura) | Sección de formulario | 1 | 2 | Sí | Siempre |
-| SEC-033 | SCR-010 | S2 Tipo de Manifestación y Análisis | Sección de formulario | 2 | 2 | Sí | Siempre |
-| SEC-034 | SCR-010 | S3 Decisión de Comunicación al Cliente | Sección de formulario | 3 | 2 | Sí | Siempre |
-| SEC-049 | SCR-010 | S4 Selección de Plantilla | Sección de formulario | 4 | 2 | No | Solo si requiereComunicacion = Sí |
-| SEC-050 | SCR-010 | S5 Redacción de Respuesta Final | Sección de formulario | 5 | 2 | No | Solo si requiereComunicacion = Sí |
-| SEC-051 | SCR-010 | S6 Adjuntos de Soporte para el Cliente | Sección de formulario | 6 | 2 | No | Solo si requiereComunicacion = Sí |
 | SEC-052 | SCR-012 | S1 Contexto del Caso | Sección de formulario | 1 | 2 | Sí | Siempre |
 | SEC-053 | SCR-012 | S2 Respuesta para Revisión (solo lectura) | Sección de formulario | 2 | 2 | Sí | Siempre |
 | SEC-054 | SCR-012 | S3 Decisión del Líder SAC | Sección de formulario | 3 | 2 | Sí | Siempre |
