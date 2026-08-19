@@ -187,10 +187,27 @@ export class SeccionDetalleQueja {
 
     // El picker: el satélite guarda `código::etiqueta`, el control real el código puro.
     this.objProductoUi.valueChanges.subscribe((in_strUi: string) => {
-      in_objForm.get(QD.strSfcProduct)?.setValue(codeFromUiValue(in_strUi));
+      // ⚠ El orden de estas dos líneas importa, y es la razón de que el `_desc` vaya primero.
+      //
       // El `_desc` del producto NO sale de `sincronizarDesc()`: la colección 16 repite códigos, así
       // que la única fuente correcta de la etiqueta es lo que el usuario clickeó. Ver el servicio.
+      //
+      // `syncProductDesc()` escribe con `emitEvent: false` (no puede emitir: reentraría en los ~10
+      // `sincronizarDesc` de este form). Entonces la **única** emisión de este handler es la del código,
+      // de abajo, y es la que refresca el espejo `sigValores` de la pantalla. Si el `_desc` se escribiera
+      // después, esa emisión ya habría fotografiado el valor viejo y el espejo quedaría un paso atrás:
+      // el resumen MSG-000-08 —que lee del espejo, no del form— mostraría "Producto: —".
+      //
+      // Escribiendo el `_desc` antes, la emisión del código fotografía los dos campos juntos.
+      //
+      // Es el mismo orden que los otros ~30 `_desc` del proyecto obtienen **gratis**, y de ahí que este
+      // sea el único que hubo que arreglar: `sincronizarDesc()` se suscribe al `valueChanges` del control
+      // **hijo** (el del código), y Angular notifica al hijo antes de recalcular y emitir el padre. O sea
+      // `escribirDesc()` ya escribió cuando el suscriptor del espejo —que está en el `FormGroup`— lee.
+      // Medido con una sonda, con el `_desc` predeclarado y creado por `addControl`: idéntico en los dos.
+      // El producto no tiene esa garantía porque su escritura nace de un satélite que no es del form.
       this.objMatriz.syncProductDesc(in_strUi);
+      in_objForm.get(QD.strSfcProduct)?.setValue(codeFromUiValue(in_strUi));
     });
 
     // El switch arranca encendido si el caso ya traía algún adjunto: es la condición de React, y sin

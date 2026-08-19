@@ -1383,16 +1383,19 @@ z-table :is(th, td)[config*="right"] {
   overflow-y: auto;
 }
 
-/* Título del modal ancho. Reemplaza el `style={{...}}` en línea que usan las pantallas React
+/* Título del modal ancho. Reemplaza el `style={{...}}` en línea que usaban las pantallas React
    equivalentes (SCR-004/SCR-011/SCR-003, las tres con los mismos tres valores): la regla 3
    prohíbe estilos ad-hoc, y tres copias del mismo objeto ya eran la definición de no-DRY.
+   Hoy la única viva es la SCR-003 —las otras dos se eliminaron del proyecto en ago-2026—, pero
+   la clase se queda: la usa esa pantalla y el criterio de no volver a estilos en línea no cambia.
 
    No va por `lib-modal-z` con el slot `title`: ese slot pinta el encabezado del modal CON su
    botón de cierre al lado, y acá el título va DENTRO del cuerpo desplazable, arriba del textarea.
    Son dos posiciones distintas del layout, no dos estilos del mismo elemento.
 
-   ⚠ Existía como clase referenciada y NO definida en `revision-error-tecnico-api.html:198` y
-   `revision-error-tecnico-prorroga.html:236` desde que se portaron: un `class=` que no matchea
+   ⚠ Existía como clase referenciada y NO definida en las plantillas de las ex SCR-004 y SCR-011
+   (`revision-error-tecnico-api.html` / `-prorroga.html`, ya eliminadas) desde que se portaron:
+   el modo de falla vale igual y por eso queda anotado — un `class=` que no matchea
    ninguna regla no da error en ningún gate —ni lint, ni build, ni spec— así que los dos h3
    venían pintando con los estilos por defecto del navegador. Es el modo de falla del CSS: la
    ausencia se ve como "un poco distinto", no como roto.

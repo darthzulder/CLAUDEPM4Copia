@@ -186,8 +186,11 @@ export class ExpedienteCompletoModal {
   );
 
   /**
-   * Cinco columnas, no las ocho de S7: el expediente es un resumen y omite Motivo, Comentario y
-   * Adjunto (los dos últimos requieren interacción, que un documento no tiene). Es la tabla de React.
+   * Cinco columnas, no las de S7: el expediente es un resumen y omite Comentario y Adjunto (los dos
+   * requieren interacción, que un documento no tiene). Es la tabla de React.
+   *
+   * También omitía el *Motivo*, y esa diferencia ya no existe: la columna salió de S7 en ago-2026
+   * porque `CAT-MOTIVO-REASIG` está retirado y pintaba `''`. Acá no hubo cambio.
    *
    * Sin `readonly` en el tipo: el input `data` de `TableZ` es mutable y un array `readonly` rebota
    * con TS4104.

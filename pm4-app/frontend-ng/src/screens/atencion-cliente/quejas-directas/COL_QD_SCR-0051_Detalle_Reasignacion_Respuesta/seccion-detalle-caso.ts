@@ -45,6 +45,11 @@ import { leerColumnaMatriz, MatrizMotivosService, normalizarMatriz } from '../fi
  *
  * `MatrizMotivosService` deja esta política a la pantalla a propósito — ver su docstring.
  *
+ * Y la de la placa hace algo más que limpiar: **guarda el valor y lo repone** si el usuario vuelve a
+ * un producto de Autos. Es el único punto de esta sección donde el porte se aparta de React a
+ * propósito, por pedido del usuario. Ver `limpiarPlaca()`, que explica por qué el stash no es un
+ * control del form y qué le pasa a la marcación de FLD-156/179 en el ida y vuelta.
+ *
  * ── Los regulatorios se re-derivan, pero el SLA y el rol responsable NO ─────────────────────────
  * Al re-elegir el motivo se reescriben escalamiento, resarcimiento y relación con fraude desde la fila
  * de la matriz. `qd_strSlaAssigned` y el rol responsable **conservan** lo que asignó M1: es decisión de
@@ -155,8 +160,12 @@ export class SeccionDetalleCaso {
     // El picker: el satélite guarda `código::etiqueta` y acá se traduce al control real.
     this.objGrupoUi.get(this.strNombreUiProducto)?.valueChanges.subscribe((in_genUi: unknown) => {
       const strUi = String(in_genUi ?? '');
-      in_objForm.get(QD.strSfcProduct)?.setValue(codeFromUiValue(strUi));
+      // El `_desc` **antes** del código, por lo mismo que en SCR-000: `syncProductDesc()` escribe con
+      // `emitEvent: false`, así que la única emisión de este handler es la del código y es la que
+      // refresca el espejo `sigValores`. Al revés, el espejo queda un paso atrás y el expediente
+      // completo —que se alimenta de `sigValores()`— pintaría el producto anterior al cambio.
       this.objMatriz.syncProductDesc(strUi);
+      in_objForm.get(QD.strSfcProduct)?.setValue(codeFromUiValue(strUi));
     });
   }
 
@@ -303,13 +312,60 @@ export class SeccionDetalleCaso {
   }
 
   /**
-   * La placa no sobrevive fuera de Autos. El gate en `cllInsurance()` cargado es imprescindible:
-   * mientras el catálogo no llega, `blnIsAutos` es `false` por defecto y esto borraría la placa
-   * precargada de un caso de Autos.
+   * La placa que se limpió al salir de Autos, para poder reponerla si el usuario vuelve.
+   *
+   * ⚠ Vive en la **instancia** y no en el form a propósito: no es un campo del caso y no tiene
+   * variable `qd_*`, así que un control (aunque fuera deshabilitado) viajaría a PM4 en el
+   * `getRawValue()` del payload. Como es estado de UI de esta sección, muere con ella — que es lo
+   * correcto: al recargar la pantalla, la placa vuelve a ser la que trae el caso.
+   */
+  private strPlacaGuardada = '';
+
+  /**
+   * La placa no sobrevive fuera de Autos, pero **se recupera al volver**.
+   *
+   * El gate en `cllInsurance()` cargado es imprescindible: mientras el catálogo no llega,
+   * `blnIsAutos` es `false` por defecto y esto borraría la placa precargada de un caso de Autos.
+   *
+   * ── Único cambio de comportamiento de la tanda: acá NO se porta React ─────────────────────────
+   * React hace `setValue('')` y pierde el dato para siempre (`SeccionDetalleCaso` de su `.tsx`), así
+   * que esto **no es paridad**: es una mejora deliberada, pedida por el usuario. Un gestor que se
+   * equivoca de producto y corrige perdía una placa que ya había tipeado, sin ninguna razón de
+   * negocio — fuera de Autos el campo ni se pinta, así que el valor no molesta a nadie mientras
+   * espera.
+   *
+   * ── Por qué esto devuelve la marcación a su valor original, y está bien ──────────────────────
+   * `strPlate` es uno de los cinco `CLASSIFICATION_FIELDS` que la pantalla compara contra el
+   * snapshot congelado `dicOriginal` (FLD-156/179). Al reponer el valor que traía el caso, ese campo
+   * deja de contar como cambio y `qd_strMarking` vuelve al original en vez de quedarse en `'2'`.
+   * Es la consecuencia correcta —el caso volvió a su clasificación de origen, así que no está
+   * modificado— y va fijada con un caso de test, porque es lo que un refactor futuro podría romper
+   * sin darse cuenta.
+   *
+   * La escritura **emite** (a diferencia de `sincronizarHabilitacion()`): `sigValores` se alimenta
+   * del `valueChanges` de la pantalla, y es justamente ese espejo el que tiene que ver la placa
+   * repuesta para que el efecto de la marcación la recalcule. La re-entrada converge en una vuelta
+   * porque después de escribir las dos guardas cortan.
    */
   private limpiarPlaca(): void {
     if (this.objMatriz.cllInsurance().length === 0) return;
-    if (!this.blnEsAutos() && this.leer(QD.strPlate)) this.form().get(QD.strPlate)?.setValue('');
+
+    const objControl = this.form().get(QD.strPlate);
+    if (!objControl) return;
+    const strActual = this.leer(QD.strPlate);
+
+    if (!this.blnEsAutos()) {
+      if (!strActual) return;
+      this.strPlacaGuardada = strActual;
+      objControl.setValue('');
+      return;
+    }
+
+    // De vuelta en Autos. Solo se repone sobre un campo **vacío**: si el usuario ya tipeó otra placa,
+    // lo que él escribió gana sobre lo que guardamos.
+    if (strActual || !this.strPlacaGuardada) return;
+    objControl.setValue(this.strPlacaGuardada);
+    this.strPlacaGuardada = '';
   }
 
   /**

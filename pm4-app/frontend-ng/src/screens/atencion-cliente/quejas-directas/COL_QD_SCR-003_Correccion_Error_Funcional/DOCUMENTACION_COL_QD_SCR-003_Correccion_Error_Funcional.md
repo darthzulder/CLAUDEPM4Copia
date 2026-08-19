@@ -82,7 +82,7 @@ Los FLD-040..045 se muestran **si el caso los trae**; como ningún script los es
 | Intento N.° actual (M1/M2) | `qd_strM1M2AttemptNum` | `qd_strAttemptNum` | `zds-input` `[readOnly]` | FLD-044 / script M2 |
 | Endpoint Invocado | `qd_strEndpointCalled` | — | `zds-input` `[readOnly]` | script M2 |
 | Mensaje de Error SFC | `qd_strSfcErrorMessage` | `qd_strApiTechMessage` | `zds-textarea` `[readOnly]` | FLD-043 / script M2 |
-| Payload Enviado (JSON) | `qd_strPayloadSent` | — | `zds-textarea` `[readOnly]` (igual que SCR-004) | FLD-054 |
+| Payload Enviado (JSON) | `qd_strPayloadSent` | — | `zds-textarea` `[readOnly]` (igual que la ex SCR-004) | FLD-054 |
 | Log técnico completo (modal) | `qd_strCompleteLogAPI` | — | `zds-textarea` `[readOnly]` | script M2 |
 
 > **Campos retirados de la UI** (ningún script los emite, salían siempre vacíos):
@@ -91,7 +91,7 @@ Los FLD-040..045 se muestran **si el caso los trae**; como ningún script los es
 > alimenta la píldora "Señalado por la SFC" de S2 y las tres viajan en el `completeTask`. La
 > fecha/hora del rechazo consta en el log completo (`timestamp` de `_sfc_respons_logs`).
 >
-> El **Payload Enviado** se muestra en S1 en solo lectura (a diferencia de SCR-004, donde es
+> El **Payload Enviado** se muestra en S1 en solo lectura (a diferencia de la ex SCR-004, donde era
 > editable): en SCR-003 la corrección se hace campo por campo en S2 y el body se regenera.
 
 ### S2 — Campos a Corregir (SEC-009, editable) — editor del payload de Momento 2
@@ -146,7 +146,7 @@ Cada campo de catálogo guarda el **código** y sincroniza su compañera `<campo
 |---|---|---|---|
 | Acción/decisión BPMN | `qd_strAction` | `'CORREGIR_REENVIAR' \| 'ESCALAR_SOPORTE'` | Inferido de ACT-003-01 / ACT-003-02 (ver §10) |
 | Payload del reenvío (se vacía al corregir) | `qd_strPayloadSent` | `''` al reenviar | Regla de `opMomento2` (ver §7) |
-| Flag de ajuste de payload | `qd_strPayloadAdjustNeeded` | `'NO'` al reenviar | FLD-058 (compartido con SCR-004) |
+| Flag de ajuste de payload | `qd_strPayloadAdjustNeeded` | `'NO'` al reenviar | FLD-058 (lo compartía con la ex SCR-004) |
 
 ---
 
@@ -192,9 +192,9 @@ Cada campo de catálogo guarda el **código** y sincroniza su compañera `<campo
 
 | Comportamiento | Implementación | Fuente |
 |---|---|---|
-| Panel de error con acento rojo | `app-form-section color="var(--z-red)"` (igual que SCR-004) | Anexo02 > SCR-003 > tipo "Panel de error" |
+| Panel de error con acento rojo | `app-form-section color="var(--z-red)"` (igual que la ex SCR-004) | Anexo02 > SCR-003 > tipo "Panel de error" |
 | Banner de error 400 funcional | `za-alert config="negative" [hide-close]="true"` con el número de intento | Anexo02 > SCR-003 (contexto/criterio de aceptación) |
-| "Ver Log Completo" abre modal | `ACT-003-03`: `lib-button-z [type]="'link'"` en el slot `action` → `lib-modal-z tamanio="l"` con `qd_strCompleteLogAPI` — mismo patrón que SCR-004 | Anexo02 > SCR-003 > ACT-003-03 |
+| "Ver Log Completo" abre modal | `ACT-003-03`: `lib-button-z [type]="'link'"` en el slot `action` → `lib-modal-z tamanio="l"` con `qd_strCompleteLogAPI` — mismo patrón que la ex SCR-004 | Anexo02 > SCR-003 > ACT-003-03 |
 | Edición bajo checkbox | Cada fila del payload trae un `zds-checkbox-field` "Editar" en un **FormGroup satélite** (estado local de UI, **no** viaja a PM4): desmarcado ⇒ el control queda `disabled`; al desmarcar se restaura el valor original de `task.data` | Requerimiento 2026-08-04 |
 | Desbloqueo en cascada | Marcar "Editar" en departamento o producto deja editables las filas dependientes (municipio / momento / servicio / motivo) | Derivado de las dependencias de catálogo |
 | Píldoras por fila | `zds-status-badge` "Modificado" (valor ≠ original) y "Señalado por la SFC" (`esSenalado()`: la clave del body o su token aparece en `qd_strAffectedField` / el mensaje de error) | Patrón del proyecto |
@@ -232,7 +232,8 @@ Cada campo de catálogo guarda el **código** y sincroniza su compañera `<campo
 - **FLD-040..045 no los emite ningún script.** `Solo Momento 2.php` (`sfcCamposErrorTecnico`)
   escribe `qd_strHttpCode`, `qd_strErrorType`, `qd_strEndpointCalled`, `qd_strApiTechMessage`,
   `qd_strCompleteLogAPI`, `qd_strAttemptNum` y `qd_strPayloadSent` — el mismo juego que
-  consume SCR-004. Se verificó contra el `task.data` real de un rechazo 400 (caso BPM 216):
+  consumía la ex SCR-004 (eliminada en ago-2026; hoy esta pantalla es la única que lo pinta,
+  pero lo escribe el script de PM4, no el frontend). Se verificó contra el `task.data` real de un rechazo 400 (caso BPM 216):
   los campos propios de SCR-003 llegan ausentes. La pantalla los muestra si existen y, si no,
   cae a esas variables. **Pendiente con TI:** decidir si el script debe emitir además el
   campo afectado y el valor rechazado (hoy solo se pueden inferir del mensaje de la SFC).
@@ -347,7 +348,7 @@ caso que hoy tiene un solo usuario.
 | Divergencia | Motivo |
 |---|---|
 | El empty state del historial va **afuera** de la tabla, que queda montada siempre | El `<tbody>` de `TableZ` es un `@for` pelado, **sin rama de lista vacía** (verificado sobre la plantilla del `.mjs`): con `data: []` pinta el encabezado y nada más — que es justo la paridad con React, donde los rótulos de columna se ven aunque no haya intentos. El `<td colspan="4" class="record-empty">` de React no tiene equivalente y lo resuelve la pantalla con un `@if (!length)` **hermano** de la tabla. **Ojo:** envolver la tabla en un `@if (length)` se come las cabeceras — así estuvo hasta la revisión visual del 2026-08-16, con la suite verde y el spec aseverando el defecto |
-| `tamanio="l"` en lugar de la clase `.modal-wide` | El ancho lo gobierna el componente del DS (política de `shared.css`). Es lo que hacen las otras tres modales del proyecto |
+| `tamanio="l"` en lugar de la clase `.modal-wide` | No se usa la clase porque el ancho de una modal es cosa del componente y no de nuestra hoja (política de `shared.css`), y es lo que hacen las otras modales del proyecto. **⚠ ago-2026 · corrección:** esta fila decía que `tamanio` *gobernaba* el ancho, y es falso — medido, no existe ningún `tamanio` en `@zurich/web-components/dist/modal.js` ni en `@zurich/angular-components`, así que el atributo es inerte. El ancho lo fija el SCSS del modal (`min-width:20vw`, `max-width:calc(100vw - var(--zs-100))`) más su padding y el contenido. Se deja puesto porque quitarlo no cambia nada; lo que no hay que hacer es apoyarse en él para dimensionar. Ver el bloque del tamaño en `components/preview-modal.ts`, donde esta creencia sí causó un desajuste real |
 | No hay botón "Cerrar" propio en el modal | `ModalZ` ya pinta su X, y el slot `buttons` quedaría redundante en una modal de solo lectura |
 | El `_desc` se sincroniza con una **función**, no con el array | `sincronizarDesc()` recibe las opciones como thunk: pasarle el array captura el `[]` del primer instante (antes de que responda el GET) y el `_desc` nunca se escribe |
 | El bloqueo de filas usa `control.disable()`, no `[disabled]` en la plantilla | `zds-select` **no se puede deshabilitar**: su input `disable` (sin "d" final) existe pero no se lee en ninguna parte de la lib, y `disabled` tampoco. Va con `emitEvent: false`, porque el efecto depende de `sigValores`, que se alimenta de `valueChanges` — emitir re-entraría en el mismo efecto |
@@ -437,7 +438,7 @@ Cuatro cosas que aparecieron por instrumentación o por lectura, no por un caso 
 3. **El cuerpo de un `effect()` no es contexto de inyección (NG0203), y esta pantalla es la primera del
    porte que se choca con eso.** `sincronizarDesc()` hace `inject(DestroyRef)`, así que llamarla
    directo desde el efecto que cablea el form **tira NG0203 en el primer render** — invisible al
-   compilar. Va con `runInInjectionContext`. **Y la diferencia con SCR-012 es la que importa:** allá
+   compilar. Va con `runInInjectionContext`. **Y la diferencia con la ex SCR-012 es la que importa:** allá
    el `FormGroup` es un campo de instancia de la pantalla, disponible en el constructor. Acá el form
    llega por `input()`, y eso obliga a diferir el cableado a un efecto — que es justo donde el
    contexto de inyección ya no existe.
@@ -474,7 +475,7 @@ y marcadas en el código como pendientes de caso — incluido el **piso de 5 car
 filas salgan señaladas: peor que ninguna, porque el gestor pierde la única pista de dónde mirar.
 
 **Nota de infraestructura del spec, porque el porte la estrena.** Este archivo necesita un
-`drenarColecciones()` que SCR-011 no necesitaba, y por un motivo concreto: `SeccionCamposPayload`
+`drenarColecciones()` que la ex SCR-011 no necesitaba, y por un motivo concreto: `SeccionCamposPayload`
 declara `CatalogosService`/`MatrizMotivosService` en **su propio** `providers`. Corre **dos veces** —en
 `montar()` y en el `afterEach`, **antes** de `verify()`— porque el catálogo de municipios se recarga
 desde un `effect`, así que **toda** escritura al departamento (incluida la de `precargar()`) dispara un

@@ -7,11 +7,15 @@ import { cllCamposDeLaFachada } from '../../../../components/fields/contrato-pan
 import { PM4_ENV_FALLBACKS } from '../../../../core/pm4-context.service';
 import {
   QD,
+  QD_COLLECTIONS,
   SCR0051_MAX_AYUDANTES,
   SCR0051_SLA_UMBRAL_PRORROGA,
 } from '../fields/fields';
 import type { AsignacionHistorial } from '../fields/types';
 import { DetalleReasignacionRespuesta } from './detalle-reasignacion-respuesta';
+// Solo para el `By.directive()` del caso de las columnas de S7 — ver ahí por qué no va por el DOM.
+import { SeccionAsignacion } from './seccion-asignacion';
+import { SeccionDetalleCaso } from './seccion-detalle-caso';
 
 /**
  * SCR-0051 · Detalle / Reasignación / Respuesta — **un caso por RUL del anexo**, no un smoke.
@@ -191,6 +195,27 @@ async function drenarPeticiones(): Promise<void> {
  */
 let blnGrupoVacio = false;
 
+/**
+ * Cuando está en `true`, el drenado responde el catálogo de productos (colección 16) **con datos** en
+ * vez de `{data: []}`.
+ *
+ * ⚠ Va como bandera y **no** como comportamiento por defecto a propósito. El catálogo vacío es el
+ * escenario de casi todos los casos de este archivo, y sembrarlo para todos cambiaría el entorno de
+ * ~40 casos de una sola vez: con productos cargados `blnIsAutos` empieza a resolver de verdad y
+ * `limpiarPlaca()` deja de cortar en su primera guarda, o sea que la placa pasaría a moverse en casos
+ * que nada tienen que ver con ella. Igual que `blnGrupoVacio`, se resetea en el `beforeEach`.
+ *
+ * Lo consume un solo caso: el ida y vuelta de la marcación de FLD-156/179 a través del stash de la
+ * placa. El resto del stash se prueba montando la sección sola, en `seccion-detalle-caso.spec.ts`.
+ */
+let blnCatalogoProductos = false;
+
+/** `'101'` Autos y `'200'` Hogar. Misma forma que PM4 y que el fixture de la sección. */
+const CLL_PRODUCTOS = [
+  { id: 1, data: { codigo_producto_sfc: '101', nombre_producto_sfc: 'Autos' } },
+  { id: 2, data: { codigo_producto_sfc: '200', nombre_producto_sfc: 'Hogar' } },
+];
+
 async function responderGrupos(): Promise<void> {
   // ⚠ Hacen falta DOS vueltas limpias seguidas para dar el drenado por terminado, no una.
   // `usuariosDeGrupo()` es una cadena de dos GET: al responder el `/groups` el segundo (`/{id}/users`)
@@ -238,6 +263,11 @@ async function responderGrupos(): Promise<void> {
                 },
               ],
         });
+      } else if (
+        blnCatalogoProductos
+        && strUrl === `/api/collections/${QD_COLLECTIONS.sfcProduct.id}/records`
+      ) {
+        objPeticion.flush({ data: CLL_PRODUCTOS });
       } else {
         objPeticion.flush({ data: [] });
       }
@@ -425,6 +455,7 @@ describe('SCR-0051 · Detalle / Reasignación / Respuesta', () => {
     // eslint-disable-next-line @typescript-eslint/no-empty-function
     Element.prototype.scrollIntoView = () => {};
     blnGrupoVacio = false;
+    blnCatalogoProductos = false;
   });
 
   // ── Ruido aceptado: "Error: Not implemented: navigation (except hash changes)" ────────────────
@@ -481,6 +512,39 @@ describe('SCR-0051 · Detalle / Reasignación / Respuesta', () => {
     await montar({ ...datosTarea(), [QD.lstAssignHistory]: 'no soy un array' });
 
     expect(objPantalla.form.get(QD.lstAssignHistory)?.value).toEqual([]);
+  });
+
+  it('S7 · el historial no tiene columna Motivo (CAT-MOTIVO-REASIG retirado)', async () => {
+    // ⚠ Hay que **sembrar** el historial: S7 va dentro de `@if (blnMostrarAyuda() || cllHistorial().length)`,
+    // así que con el fixture por defecto la sección no existe y el `query` devuelve `null`. La primera
+    // versión de este caso montaba pelado y fallaba por eso, no por las columnas — lo delató la guarda
+    // de "la tabla tiene que estar montada", que por eso se queda.
+    await montar({
+      ...datosTarea(),
+      [QD.lstAssignHistory]: [
+        { fecha: '2026-08-01', de: 'jperez', para: 'mrios', motivo: 'dato histórico', observaciones: 'Revisar' },
+      ],
+    });
+
+    // El *Motivo* (FLD-093) ya no se captura: `registrarAyuda()` escribe `motivo: ''`, así que la
+    // columna pintaba vacío en todas las filas nuevas y salió en ago-2026. La clave **sigue** en
+    // `AsignacionHistorial` —la fila de arriba la trae con dato a propósito— porque los casos
+    // históricos ya la tienen guardada: esto asevera el display, no el modelo.
+    //
+    // ⚠ Se asevera el array de la sección y **no** el DOM de la tabla, y no por comodidad: bajo jsdom
+    // `lib-table-z` es un custom element de Lit que no hace upgrade, y medido con una sonda, los
+    // bindings de propiedad (`[headers]`, `[data]`, `[showGenericEnd]`) **no llegan a ninguna parte** —
+    // ni a `nativeElement`, ni a `debugElement.properties`, ni a `attributes`, donde solo sobreviven
+    // los atributos estáticos (`generciEndName`, `typeStyle`). O sea que un `querySelectorAll('th')` o
+    // un `.headers` sale vacío con las columnas correctas Y con las incorrectas: sería la tautología
+    // que el spec de SCR-0052 documenta. El array es el contrato que el componente ofrece a la tabla.
+    const objSeccion = objFixture.debugElement.query(By.directive(SeccionAsignacion))
+      ?.componentInstance as { cllColumnasHistorial?: readonly { title: string }[] } | undefined;
+    const cllTitulos = (objSeccion?.cllColumnasHistorial ?? []).map((in_objCol) => in_objCol.title);
+
+    expect(cllTitulos, 'la sección del historial tiene que estar montada').not.toHaveLength(0);
+    expect(cllTitulos).not.toContain('Motivo');
+    expect(cllTitulos).toEqual(['Fecha', 'De', 'Para', 'Observaciones', 'Respondió', 'Comentario']);
   });
 
   // ── RUL-0051-01 / 01-bis · reasignación y el usuario resuelto ──────────────────────────────────
@@ -743,6 +807,84 @@ describe('SCR-0051 · Detalle / Reasignación / Respuesta', () => {
 
     await escribir({ [QD.strPlate]: 'ABC123' });
     expect(objPantalla.form.get(QD.strMarking)?.value).toBe('1');
+  });
+
+  it('FLD-156/179 · el stash de la placa devuelve la marcación al salir y volver de Autos', async () => {
+    // El cruce de las dos reglas, y la razón por la que el stash necesita un caso **acá** y no solo en
+    // el spec de la sección: `strPlate` es uno de los cinco `CLASSIFICATION_FIELDS` que se comparan
+    // contra el `dicOriginal` congelado, así que la limpieza de `limpiarPlaca()` **mueve la marcación**
+    // sin que el usuario haya tocado la placa. Reponerla es lo que la devuelve a la que trajo el caso.
+    //
+    // Sin la reposición esto termina en `'2'`: el caso quedaría marcado como reclasificado solo porque
+    // el gestor se equivocó de producto y corrigió — y la marcación viaja a PM4.
+    //
+    // ⚠ Requiere el catálogo de productos sembrado (ver `blnCatalogoProductos`): con la lista vacía
+    // `blnIsAutos` es `false` por defecto, `limpiarPlaca()` corta en su primera guarda y este caso
+    // pasaría sin ejercitar nada.
+    blnCatalogoProductos = true;
+    await montar({ ...datosTarea(), [QD.strSfcProduct]: '101' });
+    expect(objPantalla.form.get(QD.strMarking)?.value).toBe('1');
+    expect(objPantalla.form.get(QD.strPlate)?.value).toBe('ABC123');
+
+    // Fuera de Autos: la placa se limpia y **por eso** la clasificación difiere del original.
+    await escribir({ [QD.strSfcProduct]: '200' });
+    expect(objPantalla.form.get(QD.strPlate)?.value).toBe('');
+    expect(objPantalla.form.get(QD.strMarking)?.value).toBe('2');
+
+    // De vuelta en Autos: el stash repone la placa y la marcación vuelve sola.
+    await escribir({ [QD.strSfcProduct]: '101' });
+    expect(objPantalla.form.get(QD.strPlate)?.value).toBe('ABC123');
+    expect(
+      objPantalla.form.get(QD.strMarking)?.value,
+      'con la placa repuesta la clasificación coincide con el original y la marcación es 1',
+    ).toBe('1');
+  });
+
+  // ── El `_desc` del producto ────────────────────────────────────────────────────────────────────
+
+  /**
+   * Cambiar el producto tiene que dejar la etiqueta nueva **en el espejo**, no solo en el form.
+   *
+   * El `_desc` del producto no lo escribe `sincronizarDesc()` —la colección 16 repite códigos: `104`
+   * es "Garantía extendida" y "Copropiedades"—, sino `syncProductDesc()` con la etiqueta que el usuario
+   * eligió, y con `emitEvent: false` para no reentrar en los otros `sincronizarDesc` del form. Como no
+   * emite, la única emisión del handler del picker es la del **código**, así que el `_desc` tiene que
+   * escribirse antes: si va después, esa emisión fotografía el `_desc` viejo y el espejo queda un paso
+   * atrás. El expediente completo se alimenta de `sigValores()`, así que ahí se ve el producto anterior.
+   *
+   * Se escribe por el control satélite y no con `patchValue` sobre `qd_strSfcProduct`, porque el
+   * satélite es el único camino que produce el `_desc`. Y se elige el **segundo** de los dos registros
+   * que comparten el 104: es lo que distingue este mecanismo de un `sincronizarDesc`, que resolvería por
+   * código y devolvería el primero.
+   */
+  it('⚠ cambiar el producto deja la etiqueta nueva en el espejo, no solo en el form', async () => {
+    await montar();
+
+    const objSeccion = objFixture.debugElement.query(By.directive(SeccionDetalleCaso))
+      .componentInstance as SeccionDetalleCaso;
+    const objCatalogo = objSeccion['objMatriz']['objProducto'];
+
+    // La colección 16 con los dos homónimos. El drenado genérico responde `{data:[]}`, así que sin esta
+    // siembra `labelFromUiValue` no tendría con qué desambiguar y el caso sería vacuo.
+    void objCatalogo.cargar(QD_COLLECTIONS.sfcProduct);
+    await asentar();
+    objMock
+      .expectOne((in_objReq) => in_objReq.url.includes('/collections/16/records'))
+      .flush({
+        data: [
+          { data: { codigo_producto_sfc: '104', nombre_producto_sfc: 'Garantía extendida' } },
+          { data: { codigo_producto_sfc: '104', nombre_producto_sfc: 'Copropiedades' } },
+        ],
+      });
+    await asentar();
+
+    objSeccion['objGrupoUi'].get(`ui-${QD.strSfcProduct}`)?.setValue('104::Copropiedades');
+    await responderGrupos();
+
+    expect(objPantalla.form.getRawValue()[QD.strSfcProduct]).toBe('104');
+    expect(objPantalla.form.getRawValue()[`${QD.strSfcProduct}_desc`]).toBe('Copropiedades');
+    // El que se pone rojo si el `_desc` se escribe después del código.
+    expect(objPantalla.sigValores()[`${QD.strSfcProduct}_desc`]).toBe('Copropiedades');
   });
 
   // ── RUL-0051-08 · el gate de envío ─────────────────────────────────────────────────────────────

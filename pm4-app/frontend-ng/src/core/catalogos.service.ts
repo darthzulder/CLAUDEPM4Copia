@@ -9,8 +9,8 @@ import type { CollectionDef } from './collection.types';
  * ── El problema que resuelve, y por qué no se resuelve con `providers` ───────────────────────────
  * `CollectionService` es deliberadamente **no singleton** (ver su docstring): su estado pertenece a
  * *un* select, y un singleton haría que el último `cargar()` le pisara las `options` a los demás. Las
- * pantallas con un solo catálogo lo declaran en su `providers` y listo — así lo hacen SCR-008 y
- * SCR-012.
+ * pantallas con un solo catálogo lo declaran en su `providers` y listo — así lo hace SCR-008 (y así
+ * lo hacía la ex SCR-012, eliminada del proyecto).
  *
  * Eso deja de escalar a partir del segundo catálogo, y el motivo es que **el array `providers` de
  * Angular resuelve por token**: repetir `providers: [CollectionService, CollectionService]` no da dos

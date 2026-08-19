@@ -562,7 +562,10 @@ donde un fallo es silencioso y caro:
 - **Las 10 pantallas de Quejas Directas tienen smoke test** (antes solo `SCR-0052`), más
   `ds-catalog` y `smartsupervision-api-docs`, que no son de Quejas Directas:
   `ds-catalog`, `smartsupervision-api-docs`, `SCR-000`, `SCR-003`, `SCR-004`, `SCR-008`,
-  `SCR-009`, `SCR-0051`, `SCR-011`, `SCR-012`, `SCR-013`. `SCR-000`
+  `SCR-009`, `SCR-0051`, `SCR-011`, `SCR-012`, `SCR-013` — las **SCR-004, 011 y 012** se
+  eliminaron del proyecto en ago-2026 (§6-sexies de `CONTEXTO_MIGRACION_ANGULAR.md`), así
+  que sus smoke tests ya no están; el inventario se conserva porque es el registro de qué
+  cubrió esa tanda. `SCR-000`
   (`CrearRecibirQueja.test.tsx`) NO cubre el flujo end-to-end de envío exitoso
   (`checkSimilarCases` → `recaptcha/verify` → `completeTask`/`process_events`): exige ~20
   campos obligatorios repartidos en selects del DS no interactuables vía `fireEvent` en

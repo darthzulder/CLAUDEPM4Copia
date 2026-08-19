@@ -35,9 +35,14 @@ import { DIC_ALIAS, DIC_PANTALLAS, listarSlugsEnrutables } from './pantallas';
  * Los slugs que **tienen** su propio spec de pantalla.
  *
  * Las dos listas crecen juntas, de a una por pantalla: las 12 de la Fase 5 —**once** formularios de
- * negocio más el visor de la doc del Web Service, que cierra la fase—. La primera fue la SCR-008 y la
- * segunda la SCR-004; cada spec vive en la carpeta de su pantalla (`revision-respuesta-sac.spec.ts`,
- * `revision-error-tecnico-api.spec.ts`) y cubre un caso por RUL/ACT, no un smoke.
+ * negocio más el visor de la doc del Web Service, que cierra la fase—. La primera fue la SCR-008;
+ * cada spec vive en la carpeta de su pantalla (`revision-respuesta-sac.spec.ts`,
+ * `correccion-error-funcional.spec.ts`) y cubre un caso por RUL/ACT, no un smoke.
+ *
+ * ⚠ **Las listas también se recortan.** Las SCR-004, 011 y 012 salieron del proyecto cuando el
+ * proceso en PM4 dejó de usarlas: la Fase 5 portó 12, y hoy el registro tiene menos. El número de
+ * arriba es el histórico de la fase, no el inventario vivo — ése es `DIC_PANTALLAS`, y los casos de
+ * abajo son los que hacen que las dos listas no se separen.
  *
  * La 12.ª es la excepción a ese "por RUL/ACT" y vale nombrarla: `smartsupervision-api-docs` no tiene
  * anexo, ni campos, ni reglas —es un `<iframe>` a un asset estático—, así que sus casos cubren el otro
@@ -53,9 +58,8 @@ import { DIC_ALIAS, DIC_PANTALLAS, listarSlugsEnrutables } from './pantallas';
 const CLL_SLUGS_CON_SPEC: string[] = [
   // Fase 5 — un slug por pantalla portada, en el mismo commit que su spec.
   'COL_QD_SCR-008_Revision_Respuesta_SAC',
-  'COL_QD_SCR-004_Revision_Error_Tecnico_API',
-  'COL_QD_SCR-011_Revision_Error_Tecnico_Prorroga',
-  'COL_QD_SCR-012_Revision_Error_Funcional_Prorroga',
+  // Las SCR-004, 011 y 012 estaban acá con sus tres specs. Se eliminaron del proyecto porque el
+  // proceso en PM4 ya no las usa; esta lista es un inventario, así que sus slugs salen con ellas.
   'COL_QD_SCR-003_Correccion_Error_Funcional',
   // La única de Otras Solicitudes hasta ahora, y la única con DOS specs: la pantalla
   // (`gestion-linea2.spec.ts`) y su modal de reasignación (`reasignar-caso-modal.spec.ts`).

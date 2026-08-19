@@ -142,11 +142,13 @@ export const QD = {
   // ── Metadato de flujo (compartido por varias pantallas, unión por screen) ─
   strAction: 'qd_strAction',                           // antes qd_accion
 
-  // ── SCR-004 / SCR-011 · Revisión Error Técnico API y Prórroga ─────────────
+  // ── Diagnóstico de error técnico de la API (Momento 2/3) ──────────────────
   // Los scripts de Momento 2/3 escriben SIEMPRE estas variables cuando la API
   // de SmartSupervision falla — también cuando el paso fallido es la prórroga
-  // (viaja como prorroga_queja dentro del body de cierre). SCR-011 comparte por
-  // eso el mismo juego de campos (FLD-190..196 quedan unificados aquí).
+  // (viaja como prorroga_queja dentro del body de cierre), así que un único
+  // juego de campos cubre los dos casos (FLD-190..196 quedan unificados aquí).
+  // Las pintaban las ex SCR-004 y SCR-011, ya eliminadas; hoy las consume la
+  // SCR-003, y quien las escribe sigue siendo PM4, no el frontend.
   strHttpCode: 'qd_strHttpCode',                       // FLD-050/190 · antes qd_codigoHTTP / qd_strExtHttpCode
   strErrorType: 'qd_strErrorType',                     // FLD-051/191 · antes qd_tipoError / qd_strExtErrorType
   strApiTechMessage: 'qd_strApiTechMessage',           // FLD-052/192 · antes qd_mensajeTecnicoAPI / qd_strExtTechMessage (mismo valor que qd_SSHTTPSP3_message)
@@ -199,11 +201,10 @@ export const QD = {
   strEntityType: 'qd_strEntityType',                   // Excel Cierre #46 · tipo entidad (default "13", envío M3 SFC)
   strEntityCode: 'qd_strEntityCode',                   // Excel Cierre #47 · código entidad (default "9", envío M3 SFC)
 
-  // ── SCR-011 · Revisión Error Técnico Prórroga ─────────────────────────────
-  // Sin campos propios: reusa el juego de SCR-004 (arriba). Las variantes
-  // qd_strExt* (FLD-190..196) se retiraron porque ningún script las escribía.
-
-  // ── SCR-012 · Corrección Error Funcional Prórroga ─────────────────────────
+  // ── Error funcional de la prórroga ────────────────────────────────────────
+  // Las pintaba la ex SCR-012, ya eliminada. `strExtensionReason` es la única
+  // del juego que sigue viva en pantalla (la SCR-0051 la usa); el resto queda
+  // declarada porque el script de prórroga de PM4 las escribe igual.
   strExtErrorCode: 'qd_strExtErrorCode',               // FLD-200 · antes qd_codigoErrorProrroga
   strExtAffectedField: 'qd_strExtAffectedField',       // FLD-201 · antes qd_campoAfectadoProrroga
   strExtErrorMessage: 'qd_strExtErrorMessage',         // FLD-202 · antes qd_mensajeErrorProrroga
@@ -336,7 +337,7 @@ export interface QdFields {
   // Metadato de flujo compartido
   qd_strAction: string;
 
-  // SCR-004 / SCR-011 (mismo juego de variables)
+  // Diagnóstico de error técnico de la API (Momento 2/3) — lo consume la SCR-003
   qd_strHttpCode: string;
   qd_strErrorType: string;
   qd_strApiTechMessage: string;
@@ -389,9 +390,7 @@ export interface QdFields {
   qd_strEntityType: string;
   qd_strEntityCode: string;
 
-  // SCR-011 → sin campos propios (usa los de SCR-004)
-
-  // SCR-012
+  // Error funcional de la prórroga — sólo strExtensionReason se pinta hoy (SCR-0051)
   qd_strExtErrorCode: string;
   qd_strExtAffectedField: string;
   qd_strExtErrorMessage: string;
@@ -499,7 +498,7 @@ export const QD_COLLECTIONS = {
 // OPCIONES ESTÁTICAS COMPARTIDAS
 // ═══════════════════════════════════════════════════════════════════════════
 
-// Sí/No genérico — usado por SCR-000 (réplica), SCR-004, SCR-009, SCR-010, SCR-0051.
+// Sí/No genérico — usado por SCR-000 (réplica), SCR-009 y SCR-0051.
 export const OPTIONS_SI_NO = [
   { value: 'SI', label: 'Sí' },
   { value: 'NO', label: 'No' },
@@ -737,7 +736,7 @@ export type CorreccionErrorFuncionalFormData = Omit<Pick<QdFields,
   | typeof QD.strSfcErrorCode | typeof QD.strAffectedField | typeof QD.strRejectedValue
   | typeof QD.strSfcErrorMessage | typeof QD.strM1M2AttemptNum | typeof QD.strRejectionDate
   | typeof QD.strFieldCorrection | typeof QD.strCorrectionJustif | typeof QD.lstAttemptHistory
-  // Diagnóstico que SÍ emite el script de Momento 2 (mismo juego que SCR-004): los
+  // Diagnóstico que SÍ emite el script de Momento 2 (el juego de qd_strHttpCode…): los
   // FLD-040..045 de arriba no los escribe ningún script hoy, así que S1 cae a estos.
   | typeof QD.strHttpCode | typeof QD.strErrorType | typeof QD.strApiTechMessage
   | typeof QD.strCompleteLogAPI | typeof QD.strEndpointCalled | typeof QD.strAttemptNum
@@ -802,36 +801,6 @@ export const SCR003_DEFAULTS: Partial<CorreccionErrorFuncionalFormData> = {
   [QD.strInteraction]: '',
   [QD.strServiceProvided]: '',
   [QD.strAction]: 'CORREGIR_REENVIAR',
-};
-
-// ═══════════════════════════════════════════════════════════════════════════
-// SCR-004 — Revisión Error Técnico API
-// ═══════════════════════════════════════════════════════════════════════════
-
-// AUTORIZAR_REENVIO → ACT-004-01 (ejecuta SP1-T02). ESCALAR_PROVEEDOR (ACT-004-02)
-// se retiró de la pantalla, así que ya no es un valor posible aquí.
-export type AccionErrorTecnico = 'AUTORIZAR_REENVIO';
-
-export type RevisionErrorTecnicoApiFormData = Omit<Pick<QdFields,
-  | typeof QD.strHttpCode | typeof QD.strErrorType | typeof QD.strApiTechMessage
-  | typeof QD.strCompleteLogAPI
-  | typeof QD.strEndpointCalled | typeof QD.strPayloadSent | typeof QD.strAttemptNum
-  | typeof QD.strRootCause | typeof QD.strCorrectionApplied | typeof QD.strPayloadAdjustNeeded
-  | typeof QD.strAction
->, typeof QD.strAction> & { [QD.strAction]: AccionErrorTecnico };
-
-export const SCR004_DEFAULTS: Partial<RevisionErrorTecnicoApiFormData> = {
-  [QD.strHttpCode]: '',
-  [QD.strErrorType]: '',
-  [QD.strApiTechMessage]: '',
-  [QD.strCompleteLogAPI]: '',
-  [QD.strEndpointCalled]: '',
-  [QD.strPayloadSent]: '',
-  [QD.strAttemptNum]: '',
-  [QD.strRootCause]: '',
-  [QD.strCorrectionApplied]: '',
-  [QD.strPayloadAdjustNeeded]: 'NO',
-  [QD.strAction]: 'AUTORIZAR_REENVIO',
 };
 
 // ═══════════════════════════════════════════════════════════════════════════
@@ -985,62 +954,16 @@ export const SCR009_DEFAULTS: Partial<FormularioSuperintendenciaFormData> = {
 // SCR009_DEFAULTS / AccionFormularioSFC ('ENVIAR_SFC'). Ver la carpeta
 // COL_QD_SCR-009_Formulario_Superintendencia.
 
-// ═══════════════════════════════════════════════════════════════════════════
-// SCR-011 — Revisión Error Técnico Prórroga
-// ═══════════════════════════════════════════════════════════════════════════
-
-// AUTORIZAR_REENVIO → ACT-011-01 (ejecuta SP4-T01) · ESCALAR_PROVEEDOR → ACT-011-02.
-export type AccionErrorTecnicoProrroga = 'AUTORIZAR_REENVIO' | 'ESCALAR_PROVEEDOR';
-
-// Mismas variables que SCR-004: el error de prórroga lo reporta el mismo script
-// de Momento 2/3 (la prórroga viaja como prorroga_queja en el body de cierre),
-// así que los diagnósticos llegan en qd_strHttpCode / qd_strErrorType / etc.
-export type RevisionErrorTecnicoProrrogaFormData = Omit<Pick<QdFields,
-  | typeof QD.strHttpCode | typeof QD.strErrorType | typeof QD.strApiTechMessage
-  | typeof QD.strCompleteLogAPI
-  | typeof QD.strEndpointCalled | typeof QD.strPayloadSent | typeof QD.strAttemptNum
-  | typeof QD.strRootCause | typeof QD.strCorrectionApplied | typeof QD.strPayloadAdjustNeeded
-  | typeof QD.strAction
->, typeof QD.strAction> & { [QD.strAction]: AccionErrorTecnicoProrroga };
-
-export const SCR011_DEFAULTS: Partial<RevisionErrorTecnicoProrrogaFormData> = {
-  [QD.strHttpCode]: '',
-  [QD.strErrorType]: '',
-  [QD.strApiTechMessage]: '',
-  [QD.strCompleteLogAPI]: '',
-  [QD.strEndpointCalled]: '',
-  [QD.strPayloadSent]: '',
-  [QD.strAttemptNum]: '',
-  [QD.strRootCause]: '',
-  [QD.strCorrectionApplied]: '',
-  [QD.strPayloadAdjustNeeded]: 'NO',
-  [QD.strAction]: 'AUTORIZAR_REENVIO',
-};
-
-// ═══════════════════════════════════════════════════════════════════════════
-// SCR-012 — Corrección Error Funcional Prórroga
-// ═══════════════════════════════════════════════════════════════════════════
-
-// REENVIAR → ACT-012-01 (ejecuta SP4-T01) · CANCELAR → ACT-012-02.
-export type AccionErrorFuncionalProrroga = 'REENVIAR' | 'CANCELAR';
-
-export type ErrorFuncionalProrrogaFormData = Omit<Pick<QdFields,
-  | typeof QD.strExtErrorCode | typeof QD.strExtAffectedField | typeof QD.strExtErrorMessage
-  | typeof QD.strExtCurrentAttempt | typeof QD.strExtensionReason | typeof QD.strNewDeadline
-  | typeof QD.strExtensionCounter | typeof QD.strExtensionJustif | typeof QD.strAction
->, typeof QD.strAction> & { [QD.strAction]: AccionErrorFuncionalProrroga };
-
-export const SCR012_DEFAULTS: Partial<ErrorFuncionalProrrogaFormData> = {
-  [QD.strExtErrorCode]: '',
-  [QD.strExtAffectedField]: '',
-  [QD.strExtErrorMessage]: '',
-  [QD.strExtCurrentAttempt]: '',
-  [QD.strExtensionReason]: '',
-  [QD.strNewDeadline]: '',
-  [QD.strExtensionCounter]: '',
-  [QD.strExtensionJustif]: '',
-  [QD.strAction]: 'REENVIAR',
-};
+// Acá vivían los descriptores de las **SCR-004, 011 y 012** (`*FormData`, `SCR00*_DEFAULTS` y sus
+// tipos de acción). Las tres pantallas se eliminaron del proyecto porque el proceso en PM4 ya no las
+// usa, y un tipo de formulario sin formulario no tiene qué describir.
+//
+// ⚠ Las **variables** `qd_*` que consumían (`qd_strHttpCode`, `qd_strRootCause`, `qd_strExt*`, …)
+// **siguen declaradas arriba**, aunque hoy ninguna pantalla las pinte. No es olvido: `QD` es el
+// contrato de nombres con el BPM y esas variables las escribe un script de PM4, no el frontend.
+// Borrarlas del catálogo diría "esta variable no existe en el proceso", que es distinto de "ninguna
+// pantalla la muestra". La SCR-003 además comparte varias con la ex SCR-004 (mismo script de
+// Momento 2), así que sacarlas rompería una pantalla viva.
 
 // ═══════════════════════════════════════════════════════════════════════════
 // SCR-0051 — Detalle / Reasignación / Respuesta

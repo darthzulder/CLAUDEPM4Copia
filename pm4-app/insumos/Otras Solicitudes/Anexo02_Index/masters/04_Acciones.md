@@ -22,7 +22,6 @@
 | ACT-081-04 | SCR-081 | Enviar Solicitud | Primaria | usuarioResponsable seleccionado | Envía la solicitud de información adicional al responsable y la agrega al Historial de Solicitudes (S3). | — (permanece en SP03) |
 | ACT-081-05 | SCR-081 | Ver Respuesta | Enlace | Fila con ¿Respondida? = Sí | Abre popup con el análisis técnico, las acciones ejecutadas y el link de descarga de soportes internos. | — (permanece en SP03) |
 | ACT-081-06 | SCR-081 | Registrar No Viabilidad | Secundaria | tipoRequerimiento = Modificación, modificacionViable = No y motivo ingresado | Registra el motivo de no viabilidad y continúa a la redacción de la respuesta final. | SP05-T05 Aprobar respuesta |
-| ACT-010-01 | SCR-010 | Registrar y Determinar Comunicación | Primaria | Campos de análisis completados y requiereComunicacion seleccionado | Si Sí → SP05. Si No → cierre interno. | SP05 o Cierre interno |
-| ACT-010-02 | SCR-010 | Cancelar | Secundaria | Siempre | Descarta los cambios. | — |
+| ACT-010-01 | SCR-010 | Cerrar Sugerencia/Felicitación | Primaria | Siempre habilitada (la pantalla no tiene campos editables) | Cierra el caso de sugerencia / felicitación y lo entrega a SP06 para la notificación al cliente. | SP06 Cierre y Notificación al Cliente |
 | ACT-012-01 | SCR-012 | Aprobar Respuesta | Primaria | Siempre | Aprueba la respuesta. El sistema genera el PDF final y avanza al SP06. | SP05-T07 → SP06 Cierre |
 | ACT-012-02 | SCR-012 | Devolver con Observaciones | Secundaria | obsLiderSAC no vacío | Devuelve con observaciones al Gestor de Experiencia para ajuste. | SP05-T06 Ajuste Respuesta |

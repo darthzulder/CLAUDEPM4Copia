@@ -271,7 +271,8 @@ pantallas portadas antes subía archivos, así que acá se ejercita por primera 
 registro-por-pantalla / servicio-de-root que la Fase 4 dejó armado. El `FileRegistryService` va en los
 `providers` del **componente**, no en root: si fuera singleton, los adjuntos de una pantalla viajarían a
 la siguiente dentro del mismo iframe. Es la misma razón por la que `CollectionService` se provee por
-pantalla en SCR-012 (§12.2 de su documento).
+pantalla — así lo hacía la ex SCR-012, ya eliminada del proyecto (ver el docstring de
+`core/catalogos.service.ts`, que es donde vive el razonamiento completo).
 
 Los adjuntos se suben **antes** del PUT, y el orden es contrato: el `<docKey>_id` que PM4 devuelve al
 subir cada archivo viaja dentro del mismo `data`, así que sin subir primero no hay id que mandar.
@@ -287,9 +288,10 @@ La mutación 3 de §12.5 es exactamente ese defecto.
 ⚠ No se puede escribir `this.form.valid` dentro de un `computed`: `valid` es un *getter* de
 `AbstractControl`, **no un signal**, así que no crea dependencia reactiva y el computed queda con el
 valor cacheado del primer render (form vacío → inválido). El síntoma es que el botón principal no se
-habilita nunca y la acción queda **inalcanzable**. Está medido y documentado en SCR-012 (§12.5 de su
-documento), que lo aprendió a los golpes; acá se aplicó desde el principio, así que esta pantalla es la
-primera del port donde el defecto **no ocurrió**.
+habilita nunca y la acción queda **inalcanzable**. Está medido y documentado en el §5.2 de
+`pm4-app/CONTEXTO_MIGRACION_ANGULAR.md` — lo aprendió a los golpes la ex SCR-012, ya eliminada del
+proyecto, y por eso la lección vive ahí y no en la ficha de una pantalla; acá se aplicó desde el
+principio, así que esta pantalla es la primera del port donde el defecto **no ocurrió**.
 
 Lo mismo vale para `hasError()`: `strErrorAnalisis` lee `this.sigValores()` en su primera línea —sin
 usar el valor— justamente para crear la dependencia que el `hasError()` del control no crea solo.
@@ -311,7 +313,7 @@ las dos implementaciones.
 `os_strTechAnalysis` lleva `required` + `minLength(100)`, pero *Cancelar* y *Reasignar* no miran
 `form.valid` en ningún momento. El escenario real de reasignar es justamente *"no puedo resolverlo, que
 lo tome otro"*, con el análisis sin escribir; y *Guardar Borrador* existe para guardar trabajo
-**incompleto**. Es el mismo contrato que `cancelar()` en SCR-012 (§12.3 de su documento), y acá hay un
+**incompleto**. Es el mismo contrato que tenía `cancelar()` en la ex SCR-012, y acá hay un
 caso por cada una de las tres acciones: *reasignar NO exige el análisis técnico*, *sigue alcanzable con
 S3 vacío* y *no exige el análisis: el borrador existe para guardar trabajo incompleto*.
 
@@ -378,7 +380,7 @@ lo tanto que la causa estuviera en la pantalla. La primera hipótesis —una col
 **c) `scrollIntoView` no existe en jsdom, y su fallo NO pone rojo el caso.** `scrollToFirstError` lo
 llama dentro de un `setTimeout`, así que la excepción sale como *unhandled process error* y Vitest
 imprime `Tests N passed` seguido de `Errors 1` — que es fácil de leer como verde. Se stubea en un
-`beforeEach` de raíz. Es la misma trampa que el spec de SCR-012 ya documentaba.
+`beforeEach` de raíz. Es la misma trampa que el spec de la ex SCR-012 ya documentaba.
 
 **Y hay un mensaje de jsdom que sí es esperado:** `Not implemented: navigation (except hash changes)`
 en el caso feliz del borrador. Es jsdom registrando la asignación real de `window.top.location.href`

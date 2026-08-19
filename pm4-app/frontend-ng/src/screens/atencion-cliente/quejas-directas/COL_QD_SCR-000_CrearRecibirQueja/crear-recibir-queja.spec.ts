@@ -9,10 +9,11 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { RecaptchaWidgetComponent } from '../../../../components/recaptcha-widget';
 import { PM4_ENV_FALLBACKS } from '../../../../core/pm4-context.service';
 import {
-  buildSfcCode, QD,
+  buildSfcCode, QD, QD_COLLECTIONS,
   SCR000_WEB_ENTRY_EVENT_ID, SCR000_WEB_ENTRY_PROCESS_ID,
 } from '../fields/fields';
 import { CrearRecibirQueja } from './crear-recibir-queja';
+import { SeccionDetalleQueja } from './seccion-detalle-queja';
 
 /**
  * SCR-000 · Crear/Recibir Queja — **un caso por regla**, no un smoke.
@@ -313,6 +314,17 @@ function form(): import('@angular/forms').FormGroup {
 
 function leer(in_strCampo: string): unknown {
   return form().getRawValue()[in_strCampo];
+}
+
+/**
+ * La instancia de S3, para llegar al control satélite del picker de producto.
+ *
+ * Hace falta la instancia real —y no un `patchValue` sobre `qd_strSfcProduct`— porque el `_desc` del
+ * producto se escribe desde el `valueChanges` de ese satélite: escribir el código directo saltea el
+ * único código que lo produce.
+ */
+function seccionDetalle(): SeccionDetalleQueja {
+  return objFixture.debugElement.query(By.directive(SeccionDetalleQueja)).componentInstance;
 }
 
 /**
@@ -1087,6 +1099,61 @@ describe('SCR-000 · Crear/Recibir Queja', () => {
 
     expect(leer(QD.strDepartment)).toBe('11');
     expect(leer(QD.strCity)).toBe('');
+  });
+
+  /**
+   * ⚠ El `_desc` del producto tiene que llegar al **espejo reactivo**, no solo al control.
+   *
+   * Son los dos defectos que dejaban "Producto: —" en el resumen MSG-000-08 y el producto ilegible en
+   * SCR-0051, y ninguno se veía desde los specs que ya había:
+   *
+   * 1. `qd_strSfcProduct_desc` **no estaba declarado** en el `FormGroup` de la pantalla, y a diferencia
+   *    del resto de los `_desc` a este **nadie lo crea**: `sincronizarDesc()` (que hace el `addControl`)
+   *    está deliberadamente fuera del producto, porque la colección 16 repite códigos. El único que lo
+   *    escribe es `syncProductDesc()`, y arranca con un `if (!objControl) return`.
+   * 2. Ese `setValue` va con `emitEvent: false`, así que aunque el control exista **no** dispara el
+   *    `valueChanges` que alimenta `sigValores` — y `cllResumen` lee de `sigValores`, no del form.
+   *
+   * `seccion-detalle-queja.spec.ts` no podía verlo: su `crearForm()` declara el `_desc` a mano y lee el
+   * control con `getRawValue()`, o sea que puentea las dos mitades. Por eso este caso va acá, sobre el
+   * `FormGroup` **real** de la pantalla y contra `cllResumen()`, que es lo que ve el ciudadano.
+   *
+   * Y el producto se elige **por el picker**, no con un `patchValue`: escribir `strSfcProduct` directo
+   * (lo que hace `dicObligatorios()`) nunca pasa por `syncProductDesc()`, que es el código bajo prueba.
+   */
+  it('⚠ el `_desc` del producto llega al resumen MSG-000-08 y al payload', async () => {
+    await montarWebEntry();
+
+    // El catálogo del producto lo pide la cascada (`matriz:sfcProduct`, colección 16). `drenarColecciones()`
+    // ya lo respondió con `[]` al montar, así que hay que recargarlo con opciones de verdad: sin ellas
+    // `toUiOptions()` no tiene de dónde sacar la etiqueta y el caso pasaría vacuamente.
+    const objCatalogo = seccionDetalle()['objMatriz']['objProducto'];
+    void objCatalogo.cargar(QD_COLLECTIONS.sfcProduct);
+    await asentar();
+    objMock
+      .expectOne((in_objReq) => in_objReq.url.includes('/collections/16/records'))
+      .flush({
+        data: [
+          { data: { codigo_producto_sfc: '104', nombre_producto_sfc: 'Garantía extendida' } },
+          { data: { codigo_producto_sfc: '104', nombre_producto_sfc: 'Copropiedades' } },
+        ],
+      });
+    await asentar();
+
+    // El value de UI del **segundo** de los dos que comparten el 104: es el que distingue este mecanismo
+    // de un `sincronizarDesc()` normal, que resolvería por código y elegiría el primero.
+    seccionDetalle()['objProductoUi'].setValue('104::Copropiedades');
+    await asentar();
+
+    // El código puro es lo que viaja como dato del caso, y eso ya funcionaba.
+    expect(leer(QD.strSfcProduct)).toBe('104');
+    // La etiqueta tiene que estar en el control **y** en el espejo reactivo del que lee el resumen.
+    expect(leer(`${QD.strSfcProduct}_desc`)).toBe('Copropiedades');
+    expect(objPantalla['sigValores']()[`${QD.strSfcProduct}_desc`]).toBe('Copropiedades');
+
+    // Lo que ve el ciudadano en MSG-000-08. Un `'—'` acá es el bug reportado.
+    const objFila = objPantalla['cllResumen']().find((in_objF) => in_objF.label === 'Producto');
+    expect(objFila?.value).toBe('Copropiedades');
   });
 
   it('la precarga no convierte los booleanos en el string "false"', async () => {
