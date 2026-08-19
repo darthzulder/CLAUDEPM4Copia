@@ -1,3 +1,4 @@
+import { effect, Injector, runInInjectionContext, signal } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
 import { FormControl, FormGroup } from '@angular/forms';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
@@ -181,16 +182,138 @@ describe('sincronizarDesc · las opciones se leen tarde, no se capturan', () => 
     // Es el motivo de que el parámetro sea una FUNCIÓN. Cuando la pantalla llama a `sincronizarDesc`
     // en su constructor, el `CollectionService` todavía no cargó: las opciones son []. Con un array
     // capturado, el `_desc` quedaría para siempre en el código crudo.
-    let lstOpciones: CollectionOption[] = [];
+    const objOpciones = signal<readonly CollectionOption[]>([]);
     const objForm = armarForm();
-    sincronizar(objForm, 'qd_strChannel', () => lstOpciones);
+    sincronizar(objForm, 'qd_strChannel', objOpciones);
 
     objForm.get('qd_strChannel')!.setValue('13');
     expect(objForm.get('qd_strChannel_desc')!.value).toBe('13'); // sin catálogo todavía
 
-    lstOpciones = LST_CANALES; // llega la colección
+    objOpciones.set(LST_CANALES); // llega la colección
     objForm.get('qd_strChannel')!.setValue('13'); // mismo código, ahora sí resuelve
     // Ojo: `setValue` con el mismo valor SÍ emite en Reactive Forms, así que esto realmente re-resuelve.
+    expect(objForm.get('qd_strChannel_desc')!.value).toBe('Internet');
+  });
+
+  it('REGRESIÓN · el catálogo que llega DESPUÉS del código repara el _desc solo', () => {
+    // ES EL CASO CENTRAL DE LA CORRECCIÓN, y el orden real de la app: el código lo siembra un efecto
+    // (o lo trae `task.data`) y el catálogo llega por HTTP más tarde. Nadie vuelve a escribir el
+    // código, así que si la sincronización depende SOLO del `valueChanges` del control, el `_desc`
+    // queda en el código crudo PARA SIEMPRE y la pantalla de destino pinta el número.
+    //
+    // React no tenía este defecto: `useSyncDesc` lleva `in_lstOptions` en las deps del `useEffect`,
+    // así que la llegada del catálogo re-dispara el efecto. Esta es la mitad que faltaba portar.
+    const objOpciones = signal<readonly CollectionOption[]>([]);
+    const objForm = armarForm();
+    sincronizar(objForm, 'qd_strChannel', objOpciones);
+
+    objForm.get('qd_strChannel')!.setValue('13');
+    expect(objForm.get('qd_strChannel_desc')!.value).toBe('13'); // todavía el código crudo
+
+    // Llega el catálogo y NADIE toca el control. Antes de la corrección esto se quedaba en '13'.
+    objOpciones.set(LST_CANALES);
+    TestBed.tick();
+
+    expect(objForm.get('qd_strChannel_desc')!.value).toBe('Internet');
+  });
+
+  it('REGRESIÓN · repara el _desc de un control DESHABILITADO', () => {
+    // `qd_strReceptionInstance` de SCR-000 suma un segundo motivo de falla: `bloquearInstancia()` lo
+    // deshabilita, y un control deshabilitado NO emite `valueChanges` ni con un `setValue()`
+    // explícito. Por la vía del control ese campo no se re-sincroniza nunca; por la vía de las
+    // opciones sí, y es lo que este caso fija.
+    const objOpciones = signal<readonly CollectionOption[]>([]);
+    const objForm = armarForm('13');
+    sincronizar(objForm, 'qd_strChannel', objOpciones);
+    objForm.get('qd_strChannel')!.disable();
+
+    objOpciones.set(LST_CANALES);
+    TestBed.tick();
+
+    expect(objForm.get('qd_strChannel_desc')!.value).toBe('Internet');
+  });
+
+  it('un cambio de catálogo posterior reescribe el _desc con la etiqueta nueva', () => {
+    // Corolario: negocio puede renombrar una etiqueta en la colección. Si el `_desc` sólo se
+    // escribiera una vez, el caso viajaría con la etiqueta vieja indefinidamente.
+    const objOpciones = signal<readonly CollectionOption[]>(LST_CANALES);
+    const objForm = armarForm('13');
+    sincronizar(objForm, 'qd_strChannel', objOpciones);
+    expect(objForm.get('qd_strChannel_desc')!.value).toBe('Internet');
+
+    objOpciones.set([{ value: '13', label: 'Canal Digital' }]);
+    TestBed.tick();
+
+    expect(objForm.get('qd_strChannel_desc')!.value).toBe('Canal Digital');
+  });
+
+  it('la reparación por catálogo tampoco emite el valueChanges del form', () => {
+    // Mismo contrato que la escritura por cambio de código: `emitEvent: false`. Si la reparación
+    // emitiera, haría reaccionar a las otras ~9 sincronizaciones del mismo form.
+    const objOpciones = signal<readonly CollectionOption[]>([]);
+    const objForm = armarForm('13');
+    sincronizar(objForm, 'qd_strChannel', objOpciones);
+
+    const fnEspia = vi.fn();
+    objForm.valueChanges.subscribe(fnEspia);
+
+    objOpciones.set(LST_CANALES);
+    TestBed.tick();
+
+    expect(objForm.get('qd_strChannel_desc')!.value).toBe('Internet');
+    expect(fnEspia).not.toHaveBeenCalled();
+  });
+
+  it('un catálogo que se VACÍA no degrada un _desc ya resuelto', () => {
+    // El vacío significa "todavía no sé", no "ya no hay etiqueta". `CollectionService.limpiar()` deja
+    // las opciones en [] mientras una RECARGA está en vuelo (y también si su GET falla): sin la guarda
+    // de la vía 2, ese hueco reescribiría el `_desc` con el código crudo y la vía 1 no lo repararía
+    // nunca, porque el código no cambió. Se midió en el `_desc` de FLD-324 de SCR-000, que recarga su
+    // catálogo por filtro — el síntoma fue un `_desc` en 'D1' donde se esperaba 'Detalle uno'.
+    const objOpciones = signal<readonly CollectionOption[]>(LST_CANALES);
+    const objForm = armarForm('13');
+    sincronizar(objForm, 'qd_strChannel', objOpciones);
+    expect(objForm.get('qd_strChannel_desc')!.value).toBe('Internet');
+
+    objOpciones.set([]); // arranca la recarga: el catálogo se vacía
+    TestBed.tick();
+
+    expect(objForm.get('qd_strChannel_desc')!.value).toBe('Internet');
+  });
+
+  it('se puede llamar DESDE DENTRO de un effect() sin lanzar NG0602', () => {
+    // No es un caso teórico: 8 secciones llaman a `sincronizarDesc()` dentro de un `effect()` de
+    // vinculación, porque necesitan el `form` del padre y los `input()` no tienen valor en el
+    // constructor. Crear un `effect()` dentro de un contexto reactivo lanza NG0602, y el síntoma
+    // aparece a 8 pantallas de distancia sin nombrar este archivo (216 rojos la primera vez).
+    // De ahí el `untracked()` que envuelve la creación del efecto en la vía de las opciones.
+    const objOpciones = signal<readonly CollectionOption[]>([]);
+    const objForm = armarForm('13');
+    const objInjector = TestBed.inject(Injector);
+
+    TestBed.runInInjectionContext(() => {
+      effect(() => {
+        runInInjectionContext(objInjector, () => sincronizarDesc(objForm, 'qd_strChannel', objOpciones));
+      });
+    });
+    // Si el `untracked` no estuviera, el NG0602 se tragaría acá: `effect()` reporta al ErrorHandler
+    // global, no al spec (ver `throw-en-afterrender-no-pone-rojo-el-spec`). Por eso no se asevera
+    // "no lanza" sino el EFECTO observable: la etiqueta se repara igual que en el caso plano.
+    TestBed.tick();
+    objOpciones.set(LST_CANALES);
+    TestBed.tick();
+
+    expect(objForm.get('qd_strChannel_desc')!.value).toBe('Internet');
+  });
+
+  it('sigue aceptando un getter plano, no sólo un signal', () => {
+    // Los ~25 call sites pasan una arrow (`() => this.cllX()`). La corrección no puede exigir un
+    // `Signal`: adentro se envuelve, y un getter que ya lee signals se sigue rastreando igual.
+    const objForm = armarForm();
+    sincronizar(objForm, 'qd_strChannel', () => LST_CANALES);
+
+    objForm.get('qd_strChannel')!.setValue('13');
+
     expect(objForm.get('qd_strChannel_desc')!.value).toBe('Internet');
   });
 });
