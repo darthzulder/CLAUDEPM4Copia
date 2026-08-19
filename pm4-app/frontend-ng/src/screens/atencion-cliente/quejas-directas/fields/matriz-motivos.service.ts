@@ -272,6 +272,12 @@ export class MatrizMotivosService {
    *
    * `emitEvent: false` para no reentrar en el `valueChanges` que alimenta `sigValores`: el `_desc` no
    * participa de la cascada y una vuelta extra solo dispararía los efectos de la pantalla de nuevo.
+   *
+   * ⚠ Corolario para quien llame: como no emite, esta escritura **no** refresca el espejo `sigValores`
+   * por sí sola. Hay que llamarla **antes** de escribir el código del producto, para que la emisión de
+   * ese `setValue` fotografíe los dos campos juntos. Al revés, el espejo queda un paso atrás y el
+   * resumen MSG-000-08 —que lee del espejo— pinta "Producto: —". Ver el `valueChanges` del satélite en
+   * `seccion-detalle-queja.ts`, que documenta el orden.
    */
   public syncProductDesc(in_strUiValue: string): void {
     const objControl = this.objForm?.get(`${QD.strSfcProduct}_desc`);

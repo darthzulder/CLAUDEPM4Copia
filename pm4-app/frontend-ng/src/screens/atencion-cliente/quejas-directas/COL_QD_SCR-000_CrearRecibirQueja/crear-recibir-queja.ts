@@ -220,6 +220,10 @@ export class CrearRecibirQueja implements OnInit, OnDestroy {
    * Los `_desc` de los campos con código no se declaran acá: los **crea** `sincronizarDesc()` si no
    * existen, y cada sección engancha los suyos. Los que sí se declaran son los que esta pantalla
    * sincroniza (S1) más los que arrancan con valor de negocio.
+   *
+   * ⚠ La única excepción es `qd_strSfcProduct_desc`, que **sí** se declara abajo: el producto es el
+   * único campo con código que no pasa por `sincronizarDesc()` —la colección 16 repite códigos, ver
+   * el docstring de `vincular()` en `matriz-motivos.service.ts`— así que nadie lo crearía.
    */
   protected readonly form = new FormGroup({
     // ── S1 · Tipo de solicitud y rol ──────────────────────────────────────────────────────────────
@@ -282,6 +286,19 @@ export class CrearRecibirQueja implements OnInit, OnDestroy {
 
     // ── S3 · Detalle de la queja ──────────────────────────────────────────────────────────────────
     [QD.strSfcProduct]: new FormControl('', [Validators.required]),
+    // ⚠ El `_desc` del producto se declara acá y no lo crea `sincronizarDesc()` (que es lo que pasa con
+    //   los otros ~10 campos con código de esta pantalla). Motivo: la colección 16 repite códigos —`104`
+    //   es "Garantía extendida" **y** "Copropiedades"—, así que resolver la etiqueta por código elegiría
+    //   la equivocada. La única fuente correcta es lo que el usuario tocó, y por eso lo escribe
+    //   `MatrizMotivosService.syncProductDesc()` desde el satélite del picker de S3.
+    //
+    //   Sin este control ese escritor no tenía dónde escribir (abre con `if (!objControl) return`) y la
+    //   etiqueta no llegaba a `getRawValue()`: el resumen MSG-000-08 mostraba "Producto: —" y el `_desc`
+    //   viajaba vacío a PM4, con lo que SCR-0051 caía al `uiValueFromCode` sin desambiguador y
+    //   preseleccionaba el primer registro con ese código.
+    //
+    //   Se declara junto al producto, y no en S1 con los demás, porque su escritor vive en S3.
+    [`${QD.strSfcProduct}_desc`]: new FormControl(''),
     [QD.strInteraction]: new FormControl('', [Validators.required]),
     // Servicio prestado: obligatorio **solo** en Asistencias, por el mismo mecanismo que los cinco
     // campos de nombre de arriba — el `@if (blnIsAsistencias())` de `seccion-detalle-queja.html` monta
@@ -514,7 +531,10 @@ export class CrearRecibirQueja implements OnInit, OnDestroy {
   private precargar(): void {
     const dicDatos = (this.objTareas.tarea()?.data ?? {}) as Record<string, unknown>;
     const dicDefaults = SCR000_DEFAULTS as Record<string, unknown>;
-    const dicParche: Record<string, unknown> = {};
+    // `string | boolean` y no `unknown`: es lo que el bucle abajo garantiza, y es lo que `patchValue`
+    // acepta. Con `unknown` el compilador rechaza el parche (TS2345) desde que el form declara una
+    // clave computada —el `_desc` del producto—, porque eso le agrega una firma de índice `string`.
+    const dicParche: Record<string, string | boolean> = {};
 
     for (const strClave of Object.keys(this.form.controls)) {
       const genValor = strClave in dicDatos ? dicDatos[strClave] : dicDefaults[strClave];
