@@ -30,8 +30,10 @@ el DS `lib-*-z`) están en **`CONTEXTO_MIGRACION_ANGULAR.md`**, que es lectura o
 tocar `frontend-ng`.
 
 **Stack Angular (`frontend-ng`, desplegado):** Angular 21 + TypeScript 5.9 · Reactive Forms ·
-`@zurich/web-components`/`css-components`/`angular-components` **0.8.2** + `@zurich-col/lib-zurich`
-2.6.16, instalados del feed de Azure (ver `InsumosZurich/FEED-ZURICH.md`), **no vendorizados**.
+`@zurich/web-components`/`css-components`/`angular-components`/`design-tokens`/`dev-utils` **0.8.2**
++ `@zurich-col/lib-zurich` 2.6.16, **vendorizados** en `vendor/zurich-angular/*.tgz` (raíz del repo,
+ver `vendor/zurich-angular/README.md`). El feed de Azure (`InsumosZurich/FEED-ZURICH.md`) es de dónde
+salieron esos `.tgz`, no de dónde se instalan hoy: el equipo ya no tiene acceso al feed.
 
 **Stack React (`frontend`, referencia de paridad):** React 19.2.7 + TypeScript 5.9.3 + Vite 8.1.2 ·
 Express 5.2.1 + Node 24 (backend/proxy, compartido) · react-hook-form 7.80.0 ·
@@ -710,9 +712,14 @@ real de React en vez de una copia congelada de React 18 (necesario para React 19
 estos `.tgz` a mano ni correr `npm update` sobre `@zurich/*`** — no hay versión nueva que instalar (el
 paquete está descontinuado) y una actualización involuntaria perdería el parche.
 
-> **En Angular (`frontend-ng`) NO hay vendorizado ni parche.** El DS son paquetes instalados del feed
-> de Azure: `@zurich/{web,css,angular}-components@0.8.2` + `@zurich-col/lib-zurich@2.6.16` (ver
-> `InsumosZurich/FEED-ZURICH.md`). La colisión de versiones la resuelve el hoisting de npm sola: la
+> **En Angular (`frontend-ng`) también hay vendorizado, pero NO hay parche.** Los seis paquetes del DS
+> —`@zurich/{web,css,angular}-components`, `design-tokens` y `dev-utils` 0.8.2, más
+> `@zurich-col/lib-zurich` 2.6.16— se resuelven con `file:../../vendor/zurich-angular/*.tgz`, no del
+> feed de Azure: el equipo perdió el acceso al feed, así que los `.tgz` de `vendor/zurich-angular/`
+> son la única fuente instalable. Se vendorizaron **tal cual salieron del feed**, sin modificar —a
+> diferencia de los de React, que llevan el parche del jsx-runtime. Vale la misma prohibición: **no
+> correr `npm update` sobre `@zurich/*` ni reapuntar al feed**, porque no hay de dónde bajarlos.
+> La colisión de versiones la resuelve el hoisting de npm sola: la
 > 0.8.1 de React queda hoisteada en el `node_modules` raíz y la 0.8.2 anidada en
 > `frontend-ng/node_modules`, así que cada workspace resuelve la suya por resolución de Node.
 > **Y la política ante un defecto del vendor es la opuesta a la de React:** por decisión explícita del
