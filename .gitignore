@@ -20,6 +20,13 @@ graphify-out/cache/
 # Un graphify-out anidado fuera de la raíz es siempre un artefacto stray
 # (ver nota en CLAUDE.md sobre cache_root al correr extract() en subcarpetas).
 **/*/graphify-out/
+# Respaldo que `graphify update` hace del grafo anterior antes de reescribirlo: una
+# carpeta por fecha, ~12 MB cada una. Es rollback local, no historia del proyecto — para
+# eso ya está git sobre `graph.json`.
+graphify-out/20[0-9][0-9]-[0-9][0-9]-[0-9][0-9]/
+# Visualización generada (601 nodos de comunidad). Se regenera en cada update y no se lee
+# desde el código; `GRAPH_REPORT.md` es la salida que sí se consulta.
+graphify-out/graph.html
 
 # Salida generada del scanner de SonarQube
 .scannerwork/
