@@ -1,28 +1,28 @@
 # Graph Report - bpm-screens-acz-processmaker  (2026-08-19)
 
 ## Corpus Check
-- 803 files · ~3,396,380 words
+- 803 files · ~3,393,700 words
 - Verdict: corpus is large enough that graph structure adds value.
 
 ## Summary
-- 9120 nodes · 15418 edges · 595 communities (358 shown, 237 thin omitted)
+- 9120 nodes · 15418 edges · 593 communities (359 shown, 234 thin omitted)
 - Extraction: 99% EXTRACTED · 1% INFERRED · 0% AMBIGUOUS · INFERRED: 197 edges (avg confidence: 0.88)
 - Token cost: 0 input · 0 output
 
 ## Graph Freshness
-- Built from commit: `cb1a965a`
+- Built from commit: `1f2dd91f`
 - Run `git rev-parse HEAD` and compare to check if the graph is stale.
 - Run `graphify update .` after code changes (no API cost).
 
 ## Community Hubs (Navigation)
 - swagger-ui-bundle.js
-- detalle-reasignacion-respuesta.ts
+- dashboard-gestion-casos.ts
 - swagger-ui-standalone-preset.js
 - ZrForm Component
 - p
 - call
 - crear-recibir-queja.ts
-- zds-required.spec.ts
+- FileRegistryService
 - 7. Canonical Examples
 - 6. Canonical Examples
 - 7. Canonical Examples
@@ -53,15 +53,15 @@
 - ZdsFields.tsx
 - frontend/src/screens/atencion-cliente/quejas-directas/fields/fields.ts
 - fe-lib-zurich/src/app/app.ts
-- makeSequence
+- urlApi
 - indexOf
 - Contexto de trabajo — migración a Angular 21 (Fase 7)
-- formulario-superintendencia.spec.ts
+- FormularioSuperintendencia
 - SP2-T04 Revisar respuesta borrador (SAC)
 - devDependencies
 - ZrForm — Zurich Web Components (React)
 - hd
-- collection.service.ts
+- detalle-reasignacion-respuesta.ts
 - 4. Canonical Examples
 - zds-radio.spec.ts
 - HTMLRenderer
@@ -70,7 +70,7 @@
 - Parameter
 - Catálogo CAT-TIPO-SOLIC-PQRS
 - gestion-linea2.ts
-- CorreccionErrorFuncional
+- correccion-error-funcional.spec.ts
 - zurich-col-lib-zurich.mjs
 - .getValue
 - .first
@@ -83,7 +83,7 @@
 - 4. Campos Implementados
 - assertNotInfinite
 - seccion-consumidor.spec.ts
-- .render
+- clear
 - GestionLinea2.tsx
 - package/package.json
 - Documentación Funcional — Pantalla `COL_QD_SCR-000_CrearRecibirQueja`
@@ -200,7 +200,7 @@
 - 10. Composition Patterns
 - Zurich Layouts — Grid (`z-grid` + `column`)
 - 11. Composition Patterns
-- ModalZ
+- AccordionZ
 - writeScalar
 - Convención: metadato qd_accion (decisión BPMN por botón)
 - CampoBase
@@ -258,7 +258,7 @@
 - InputSelectZ
 - TabsZ
 - TableZ
-- zds-date.spec.ts
+- coverageReporters
 - Ficha Técnica: SCR-0052 — Respuesta del Área Responsable
 - 5. `column` Attribute
 - 3. Available Font Weights
@@ -418,7 +418,7 @@
 - Example
 - ModelCollapse
 - operation_servers_OperationServers
-- ErrorBoundary
+- sliceFactory
 - zds-checkbox-field.spec.ts
 - zds-input.spec.ts
 - payload.mjs
@@ -427,7 +427,7 @@
 - StageBannerZ
 - MediaType
 - pm4Resolve.ts
-- DocSupportUploaderComponent
+- @angular/compiler
 - OAuthFlow
 - OAuthFlows
 - guarda-formcontrolname.spec.ts
@@ -443,7 +443,6 @@
 - TooltipZ
 - fe-lib-zurich/src/server.ts
 - CardZ
-- @zurich/angular-components
 - AlertZ
 - CardZ
 - Zurich Brand Icons Asset Document
@@ -454,7 +453,6 @@
 - Zurich Vertical Blue Logo CMYK
 - ModalZ
 - development
-- coverageThresholds
 - Contact
 - auth_item_Auths
 - ServerVariable
@@ -615,15 +613,15 @@
 ## Import Cycles
 - None detected.
 
-## Communities (595 total, 237 thin omitted)
+## Communities (593 total, 234 thin omitted)
 
 ### Community 0 - "swagger-ui-bundle.js"
 Cohesion: 0.00
 Nodes (216): actions_show(), afterWrite(), _arity(), arrayClone(), asciiSlice(), assertIsFunction(), AuthorizeBtn, $b() (+208 more)
 
-### Community 1 - "detalle-reasignacion-respuesta.ts"
-Cohesion: 0.03
-Nodes (65): RFC-4180, DIC_FILL, Host, Component, Component, VarianteEstado, ZdsStatusBadge, addBusinessDays() (+57 more)
+### Community 1 - "dashboard-gestion-casos.ts"
+Cohesion: 0.04
+Nodes (48): RFC-4180, DIC_FILL, Host, Component, Component, VarianteEstado, ZdsStatusBadge, CasosDashboardService (+40 more)
 
 ### Community 2 - "swagger-ui-standalone-preset.js"
 Cohesion: 0.02
@@ -639,15 +637,15 @@ Nodes (139): ab(), Ac(), ad(), Af(), ag(), ah(), aj(), bb() (+131 more)
 
 ### Community 5 - "call"
 Cohesion: 0.02
-Nodes (80): addNumericSeparator(), ApiDOMError, appendClass(), _arrayLikeToArray(), cacheResultThrough(), call(), _checkForMethod(), classNames() (+72 more)
+Nodes (73): addNumericSeparator(), ApiDOMError, _arrayLikeToArray(), cacheResultThrough(), call(), _checkForMethod(), cleanUpNextTick(), cloneSpecificValue() (+65 more)
 
 ### Community 6 - "crear-recibir-queja.ts"
-Cohesion: 0.04
-Nodes (82): ActionBarComponent, Component, HostDeFormulario, Component, Wrapper, drenarTimeouts(), HostDePrecarga, montar() (+74 more)
+Cohesion: 0.05
+Nodes (75): ActionBarComponent, Component, drenarTimeouts(), HostDePrecarga, montar(), Component, Component, ZdsInput (+67 more)
 
-### Community 7 - "zds-required.spec.ts"
-Cohesion: 0.04
-Nodes (28): CampoZaBase, proveerAccessorDePaso(), Directive, ElementoFileInput, ElementoFalso, Host, Component, ZaFileInputInterno (+20 more)
+### Community 7 - "FileRegistryService"
+Cohesion: 0.05
+Nodes (19): CampoZaBase, proveerAccessorDePaso(), Directive, ElementoFileInput, ElementoFalso, Host, Component, ZaFileInputInterno (+11 more)
 
 ### Community 8 - "7. Canonical Examples"
 Cohesion: 0.04
@@ -682,8 +680,8 @@ Cohesion: 0.15
 Nodes (6): pad(), selloFechaHora(), selloFechaHoraDesdeIso(), RevisionRespuestaSac, Component, AccionRevisionSAC
 
 ### Community 16 - ".reduce"
-Cohesion: 0.06
-Nodes (41): build_request_buildRequest(), buildRequest(), context_tree_createNode(), context_tree_updateNode(), ContextTree, copyProps(), done(), encode() (+33 more)
+Cohesion: 0.07
+Nodes (38): build_request_buildRequest(), buildRequest(), context_tree_createNode(), context_tree_updateNode(), ContextTree, copyProps(), encode(), encodeCharacters() (+30 more)
 
 ### Community 17 - "6. Canonical Examples"
 Cohesion: 0.05
@@ -711,7 +709,7 @@ Nodes (17): InfoBarComponent, InfoBarItem, Host, Component, Component, BloqueExp
 
 ### Community 23 - "toArray"
 Cohesion: 0.03
-Nodes (118): assertNotInfinite(), auths_Auths, clear(), concatFactory(), countByFactory(), createNodes(), deepEqual(), deepMerger() (+110 more)
+Nodes (114): assertNotInfinite(), auths_Auths, concatFactory(), countByFactory(), createNodes(), deepEqual(), deepMerger(), deepMergerWith() (+106 more)
 
 ### Community 24 - "DetalleReasignacionRespuesta.tsx"
 Cohesion: 0.07
@@ -730,8 +728,8 @@ Cohesion: 0.05
 Nodes (37): 10. TypeScript Type Hint (suggested), 11.1 Trigger + Modal (canonical), 11.2 Modal as a form host, 11.3 Card inside a modal (rich content surface), 11. Composition Patterns, 1. AI Implementation Instructions, 2. Import, 3. Props (Parameters) (+29 more)
 
 ### Community 28 - "respuesta-area-responsable.spec.ts"
-Cohesion: 0.05
-Nodes (51): aseverarContratoDeCampos(), cllCamposDeLaFachada(), objHijoDelDs(), HostIdsRepetidos, HostNombresDivergentes, HostSano, HostSinCampos, HostSinFormControlName (+43 more)
+Cohesion: 0.04
+Nodes (62): aseverarContratoDeCampos(), cllCamposDeLaFachada(), objHijoDelDs(), HostIdsRepetidos, HostNombresDivergentes, HostSano, HostSinCampos, HostSinFormControlName (+54 more)
 
 ### Community 29 - "6. Canonical Examples"
 Cohesion: 0.06
@@ -751,11 +749,11 @@ Nodes (25): App, appConfig, routes, Component, ManejadorDeErrores, Injectable, I
 
 ### Community 33 - ".push"
 Cohesion: 0.02
-Nodes (59): afterTransform(), al(), AllOfVisitor, AnyOfVisitor, arrObjKeys(), asciiWrite(), blitBuffer(), captureMatchIfValid() (+51 more)
+Nodes (64): afterTransform(), al(), AllOfVisitor, AnyOfVisitor, arrObjKeys(), asciiWrite(), blitBuffer(), captureMatchIfValid() (+56 more)
 
 ### Community 34 - ".concat"
 Cohesion: 0.04
-Nodes (63): _addListener(), AllLineNumbers(), arrayLikeToArray_arrayLikeToArray(), assembleLineNumberStyles(), _assertThisInitialized(), Autolinker(), beginKeywords(), check() (+55 more)
+Nodes (59): _addListener(), AllLineNumbers(), arrayLikeToArray_arrayLikeToArray(), assembleLineNumberStyles(), _assertThisInitialized(), Autolinker(), beginKeywords(), check() (+51 more)
 
 ### Community 35 - "ZdsFields.tsx"
 Cohesion: 0.06
@@ -769,21 +767,21 @@ Nodes (43): CorreccionErrorFuncional, StatusVariant, ZdsSelect(), FormSection(),
 Cohesion: 0.06
 Nodes (23): Attribute, AccordionZ, Component, ContentChildren, Input, ButtonZ, Component, Input (+15 more)
 
-### Community 38 - "makeSequence"
-Cohesion: 0.17
-Nodes (19): flattenFactory(), flatDeep(), flipFactory(), getIterator(), interposeFactory(), iteratorDone(), iteratorValue(), makeSequence() (+11 more)
+### Community 38 - "urlApi"
+Cohesion: 0.07
+Nodes (22): interceptorPm4Token(), resolverToken(), LST_PROVIDERS_ENV, OBJ_ENV_VACIO, STR_BASE_API, urlApi(), mensajeDeError(), ParentRequestService (+14 more)
 
 ### Community 39 - "indexOf"
 Cohesion: 0.03
-Nodes (108): absolutifyPointer(), allocUnsafe(), applyOperation(), applyPatch(), applyReducer(), _areEquals(), assertSize(), b64toB64UrlEncoded() (+100 more)
+Nodes (94): absolutifyPointer(), appendClass(), applyOperation(), applyPatch(), applyReducer(), _areEquals(), b64toB64UrlEncoded(), base64Text() (+86 more)
 
 ### Community 40 - "Contexto de trabajo — migración a Angular 21 (Fase 7)"
 Cohesion: 0.04
 Nodes (48): 1. Estado actual, en una tabla, 2. Directivas del usuario, vigentes, 3. Lo que sigue, en orden, 4. Trampas del entorno (las que cuestan tiempo), 5.1 Angular 21 zoneless + Vitest/jsdom, 5.2 Reactive Forms, 5.3 El DS (`lib-*-z` y `za-*`), 5.4 Trampas de infraestructura de specs (de SCR-003, las más caras) (+40 more)
 
-### Community 41 - "formulario-superintendencia.spec.ts"
-Cohesion: 0.06
-Nodes (27): FormularioSuperintendencia, asentar(), asentarHasta(), asentarHastaQue(), CLL_ROTULOS_TEXTO, CLL_TITULOS_SECCION, cllCamposDs(), completarCondEspecial() (+19 more)
+### Community 41 - "FormularioSuperintendencia"
+Cohesion: 0.20
+Nodes (3): FormularioSuperintendencia, Component, AccionFormularioSFC
 
 ### Community 42 - "SP2-T04 Revisar respuesta borrador (SAC)"
 Cohesion: 0.67
@@ -801,9 +799,9 @@ Nodes (28): 10. Composition Pattern (TextInput + Form), 1. AI Implementation Ins
 Cohesion: 0.05
 Nodes (43): Ae(), ai(), Be(), bj(), Ce(), ch(), ci(), cj() (+35 more)
 
-### Community 46 - "collection.service.ts"
-Cohesion: 0.17
-Nodes (7): OBJ_DEF_A, OBJ_DEF_B, CollectionService, CLL_RECORDS, OBJ_DEF, Injectable, CollectionDef
+### Community 46 - "detalle-reasignacion-respuesta.ts"
+Cohesion: 0.09
+Nodes (24): addBusinessDays(), atMidnight(), countBusinessDaysBetween(), diasHabilesRestantes(), EstadoSlaCaso, estadoSlaPorDiasRestantes(), estadoSlaVariant(), isBusinessDay() (+16 more)
 
 ### Community 47 - "4. Canonical Examples"
 Cohesion: 0.07
@@ -826,16 +824,16 @@ Cohesion: 0.06
 Nodes (5): hasKey(), Header, IdentityManager, Parameter, RequestBody
 
 ### Community 54 - "gestion-linea2.ts"
-Cohesion: 0.03
-Nodes (65): interceptorPm4Token(), resolverToken(), LST_PROVIDERS_ENV, OBJ_ENV_VACIO, STR_BASE_API, urlApi(), CampoParidad, CLL_PORTADAS (+57 more)
+Cohesion: 0.04
+Nodes (45): DocSupportUploaderComponent, Component, CampoParidad, CLL_PORTADAS, DIC_APERTURA_DE_RAMAS, DIC_MAXLENGTH_ESPERADOS, DIC_NOMBRES_DINAMICOS, dicPantallasReact (+37 more)
 
-### Community 55 - "CorreccionErrorFuncional"
-Cohesion: 0.21
-Nodes (3): CorreccionErrorFuncional, Component, AccionErrorFuncional
+### Community 55 - "correccion-error-funcional.spec.ts"
+Cohesion: 0.10
+Nodes (15): CorreccionErrorFuncional, asentar(), datosTarea(), drenarColecciones(), ErroresDePrueba, fijarQueryString(), habilitarFila(), montar() (+7 more)
 
 ### Community 56 - "zurich-col-lib-zurich.mjs"
 Cohesion: 0.06
-Nodes (18): AccordionZ, AvatarZ, ButtonZ, DynamicPipe, FooterZ, LoaderZ, NavigationZ, PictogramZ (+10 more)
+Nodes (18): AvatarZ, ButtonZ, DynamicPipe, FooterZ, LoaderZ, ModalZ, NavigationZ, PictogramZ (+10 more)
 
 ### Community 57 - ".getValue"
 Cohesion: 0.07
@@ -850,12 +848,12 @@ Cohesion: 0.08
 Nodes (25): 10. Suposiciones Realizadas, 11. Cobertura de Trazabilidad, 1. Encabezado, 2. Resumen, 3. Archivos de Insumo Analizados, 4. Campos Implementados, 5. Validaciones Implementadas, 6. Mensajes de Error / Sistema (+17 more)
 
 ### Community 60 - "isIterable"
-Cohesion: 0.12
-Nodes (35): concatFactory(), deepEqual(), deepMerger(), deepMergerWith(), emptySequence(), forceIterator(), fromJS(), fromJSDefault() (+27 more)
+Cohesion: 0.11
+Nodes (37): concatFactory(), deepEqual(), deepMerger(), deepMergerWith(), emptySequence(), forceIterator(), fromJS(), fromJSDefault() (+29 more)
 
 ### Community 61 - "Og"
-Cohesion: 0.16
-Nodes (33): dj(), G(), $h(), J(), Ka(), Lg(), Mg(), Ng() (+25 more)
+Cohesion: 0.11
+Nodes (45): dj(), G(), $h(), J(), Ka(), Lg(), Mg(), Ng() (+37 more)
 
 ### Community 62 - "7. Canonical Examples"
 Cohesion: 0.06
@@ -881,9 +879,9 @@ Nodes (32): assertNotInfinite(), countByFactory(), createNodes(), emptyMap(), em
 Cohesion: 0.10
 Nodes (15): SeccionConsumidor, asentar(), catPlano(), drenarColecciones(), ErroresDePrueba, escribir(), getsDeColeccion(), HostPrueba (+7 more)
 
-### Community 68 - ".render"
-Cohesion: 0.09
-Nodes (13): arrCopy(), clearRequest(), clearResponse(), clearValidateParams(), createHtmlReadyId(), defaultZipper(), getKnownSyntaxHighlighterLanguage(), Parameters (+5 more)
+### Community 68 - "clear"
+Cohesion: 0.06
+Nodes (22): arrCopy(), cachedHashString(), clear(), clearRequest(), clearResponse(), clearValidateParams(), createHtmlReadyId(), defaultZipper() (+14 more)
 
 ### Community 69 - "GestionLinea2.tsx"
 Cohesion: 0.11
@@ -902,8 +900,8 @@ Cohesion: 0.11
 Nodes (22): 1. `GLOBAL_COLLECTIONS.city` (antes `qd_ciudad`, municipios) — SÍ cambia, 1. `GLOBAL_COLLECTIONS.qd_ciudad` (municipios) — SÍ cambia, 2. `GLOBAL_COLLECTIONS.areaUsers` (antes `qd_usuariosRole`) — el `dependsOn` NO cambia, 2. `GLOBAL_COLLECTIONS.areaUsers` (antes `qd_usuariosRole`) — el shim se tradujo a inglés, 2. `GLOBAL_COLLECTIONS.qd_usuariosRole` — NO cambia, 3. `GLOBAL_COLLECTIONS.productDetail` (antes `qd_detalleProducto`) — el `dependsOn` NO cambia (bug preexistente, se preserva), 3. `GLOBAL_COLLECTIONS.productDetail` (antes `qd_detalleProducto`) — tokens huérfanos traducidos por separado (bug preexistente, se preserva), 3. `GLOBAL_COLLECTIONS.qd_detalleProducto` — NO cambia (bug preexistente, se preserva) (+14 more)
 
 ### Community 73 - "serialise"
-Cohesion: 0.08
-Nodes (26): addToSet(), arrayIndexOf(), bidirectionalIndexOf(), cleanArray(), clone(), _cloneRegExp(), convertKeyToRefract(), createDOMPurify() (+18 more)
+Cohesion: 0.05
+Nodes (44): addToSet(), allocUnsafe(), arrayIndexOf(), assertSize(), base64ToBytes(), base64Write(), bidirectionalIndexOf(), Buffer() (+36 more)
 
 ### Community 74 - "Oauth2"
 Cohesion: 0.07
@@ -1034,8 +1032,8 @@ Cohesion: 0.12
 Nodes (17): 9.1 Apply heading by size, regardless of tag, 9.2 Display heading (hero), 9.3 Heading with Ogg emphasis, 9.4 Body and caption via tokens, 9.5 React component using body / caption tokens, 9.6 Display heading inside a card, 9.7 Bold body callout, 9.8 Avoid: anti-pattern examples (+9 more)
 
 ### Community 108 - "Componentes de campo — `ZdsFields.tsx`"
-Cohesion: 0.19
-Nodes (15): Bootstrap y registro de ZDS (dos únicos puntos autorizados), code:bash (node scripts/pm4-registry-sync.mjs --check    # solo reporta), code:bash (npm run verify                      # build + lint + tests (), code:tsx (import { ZdsInput, ZdsSelect, ZdsRadio, ZdsDate, ZdsTextarea), code:tsx (const { control, handleSubmit, reset, formState: { errors } ), code:block15 (outputs/zds-cheatsheet.md       ← qué componentes/props EXIS), Componentes de campo — `ZdsFields.tsx`, Convenciones de código (+7 more)
+Cohesion: 0.16
+Nodes (18): Bootstrap y registro de ZDS (dos únicos puntos autorizados), code:tsx (for (const [docKey, file] of fileRegistry.current.entries())), code:bash (node scripts/pm4-registry-sync.mjs --check    # solo reporta), code:bash (npm run verify                      # build + lint + tests (), code:tsx (import { ZdsInput, ZdsSelect, ZdsRadio, ZdsDate, ZdsTextarea), code:tsx (const { control, handleSubmit, reset, formState: { errors } ), code:block15 (outputs/zds-cheatsheet.md       ← qué componentes/props EXIS), Componentes de campo — `ZdsFields.tsx` (+10 more)
 
 ### Community 109 - "Zurich Web Components — Master Index for AI Agents"
 Cohesion: 0.06
@@ -1075,7 +1073,7 @@ Nodes (8): RowWithGroup, TagZ, Component, Input, TABLE_CONSTANTS, DynamicPipe, T
 
 ### Community 118 - "dependencies"
 Cohesion: 0.09
-Nodes (23): dependencies, @angular/common, @angular/compiler, @angular/core, @angular/platform-browser, @angular/router, primeflex, rxjs (+15 more)
+Nodes (23): dependencies, @angular/common, @angular/core, @angular/platform-browser, @angular/router, primeflex, rxjs, tslib (+15 more)
 
 ### Community 119 - "composeNode"
 Cohesion: 0.19
@@ -1183,7 +1181,7 @@ Nodes (3): SeccionDetalleQueja, strSiNo(), Component
 
 ### Community 146 - "frontend-ng/src/screens/atencion-cliente/quejas-directas/fields/fields.ts"
 Cohesion: 0.04
-Nodes (57): Pm4Registry, Pm4RegistryCollectionEntry, Pm4RegistryProcessEntry, Pm4RegistryScriptEntry, objRegistry, resolveCollectionId(), resolveProcessEvent(), resolveScriptId() (+49 more)
+Nodes (58): Pm4Registry, Pm4RegistryCollectionEntry, Pm4RegistryProcessEntry, Pm4RegistryScriptEntry, objRegistry, resolveCollectionId(), resolveProcessEvent(), resolveScriptId() (+50 more)
 
 ### Community 147 - "Entorno local y gate de verificación"
 Cohesion: 0.10
@@ -1214,8 +1212,8 @@ Cohesion: 0.14
 Nodes (13): 1. AI Implementation Instructions, 2. Import, 3. Props (Parameters), 4. Events, 5. Slots, 7. Behavior Rules (for the AI), 8. Quick Decision Tree (for the AI), 9. TypeScript Type Hint (suggested) (+5 more)
 
 ### Community 156 - "updateList"
-Cohesion: 0.15
-Nodes (19): a(), editableVNode(), emptyList(), ensureSize(), getTailOffset(), isList(), iterateList(), iterateLeaf() (+11 more)
+Cohesion: 0.21
+Nodes (15): a(), editableVNode(), emptyList(), getTailOffset(), isList(), iterateList(), iterateLeaf(), iterateNode() (+7 more)
 
 ### Community 157 - "PM4 App — Contexto para Claude Code"
 Cohesion: 0.13
@@ -1325,6 +1323,10 @@ Nodes (17): blockHeader(), chooseScalarStyle(), codePointAt(), detectType(), dro
 Cohesion: 0.67
 Nodes (3): Documentación SCR-008 Revisión Respuesta SAC, Documentación SCR-009 Formulario Superintendencia, Convención: metadato qd_accion (decisión BPMN por botón)
 
+### Community 188 - "CampoBase"
+Cohesion: 0.06
+Nodes (20): HostDeFormulario, Component, Wrapper, CampoBase, Directive, Component, ZdsCheckboxField, HostDeFormulario (+12 more)
+
 ### Community 189 - "Ficha Técnica: SCR-003 — Bandeja de Tareas — Gestión Línea 2"
 Cohesion: 0.12
 Nodes (17): 🎛 Acciones Asociadas (Inventario Maestro), 🎯 Acciones y Botones, 📋 Campos de la Pantalla (Vista de Maqueta), 📚 Catálogos Referenciados, Contexto de Proceso, ✅ Criterios de Aceptación, 🧪 Criterios de Aceptación QA (Checklist de Calidad), ⚙ Diccionario de Campos (Detalle Técnico Maestro) (+9 more)
@@ -1342,8 +1344,8 @@ Cohesion: 0.20
 Nodes (9): 1. AI Implementation Instructions, 5. Behavior Rules (for the AI), 6. Quick Decision Tree (for the AI), 7. Cheat Sheet, code:block1 (z-flex="<?direction>:<?wrap>:<?gap>"), code:block18 (User asks for...                                        → Us), code:block19 (z-flex grammar:   "<?direction>:<?wrap>:<?gap>"), code:block2 (z-align="<justify>:<?align>:<?content>") (+1 more)
 
 ### Community 193 - "Patrón de implementación"
-Cohesion: 0.25
-Nodes (8): Campos de documento por producto (ff-fl), code:tsx (for (const [docKey, file] of fileRegistry.current.entries())), code:tsx (const fileRegistry = useRef(new Map<string, File>());), code:tsx (onChange={(e) => {), Historial de los scripts PHP (rama `pm4-scripts-historial`), Patrón de implementación, Registro de IDs PM4 (colecciones, scripts, procesos), Subida de archivos
+Cohesion: 0.29
+Nodes (7): Campos de documento por producto (ff-fl), code:block7 (PM4 genera iframe URL con ?token=&task_id=&screen=), code:tsx (const fileRegistry = useRef(new Map<string, File>());), code:tsx (onChange={(e) => {), Flujo de datos, Patrón de implementación, Subida de archivos
 
 ### Community 194 - "Ficha Técnica: SCR-012 — Pantalla de Aprobación de Respuesta Final"
 Cohesion: 0.12
@@ -1498,8 +1500,8 @@ Cohesion: 0.33
 Nodes (6): ¿Clase o componente nuevo? *(bifurcación del escalón "crear")*, Eje A — Elemento *(qué es la cosa: campo, botón, pill, modal, card…)*, Eje B — Layout *(cómo se acomoda: stack, fila, grid, alineación)*, Hechos de `z-flex`/`z-align` (verificados contra el CSS compilado), Jerarquía de decisión de UI (OBLIGATORIO), Regla transversal (SIEMPRE, sin importar el escalón)
 
 ### Community 237 - "⚠️ Antes de hacer commit / push a git — OBLIGATORIO"
-Cohesion: 0.22
-Nodes (10): ⚠️ Antes de hacer commit / push a git — OBLIGATORIO, Arquitectura de archivos, code:bash (npm run verify   # lint front+back · typecheck · builds · te), code:block4 (feat/…  fix/…  chore/…  ──PR──►  dev   ──►  Render de DESARR), code:block5 (PM4_BASE_URL=https://<instancia-pm4-actual>   # instancia ac), code:block6 (pm4-app/), code:block7 (PM4 genera iframe URL con ?token=&task_id=&screen=), Flujo de datos (+2 more)
+Cohesion: 0.29
+Nodes (8): ⚠️ Antes de hacer commit / push a git — OBLIGATORIO, Arquitectura de archivos, code:bash (npm run verify   # lint front+back · typecheck · builds · te), code:block4 (feat/…  fix/…  chore/…  ──PR──►  dev   ──►  Render de DESARR), code:block5 (PM4_BASE_URL=https://<instancia-pm4-actual>   # instancia ac), code:block6 (pm4-app/), Modelo de ramas: las dos de larga vida son entornos desplegados, Variables de entorno (`.env` en raíz de pm4-app)
 
 ### Community 239 - "verify.mjs"
 Cohesion: 0.13
@@ -1512,6 +1514,10 @@ Nodes (5): InputSelectZ, Component, Input, Output, ViewChild
 ### Community 241 - "TabsZ"
 Cohesion: 0.18
 Nodes (4): TabsZ, Component, ContentChildren, Input
+
+### Community 243 - "coverageReporters"
+Cohesion: 0.50
+Nodes (4): coverageReporters, json-summary, lcov, text-summary
 
 ### Community 244 - "Ficha Técnica: SCR-0052 — Respuesta del Área Responsable"
 Cohesion: 0.14
@@ -1726,8 +1732,8 @@ Cohesion: 0.22
 Nodes (9): test, architect, prefix, projectType, root, schematics, sourceRoot, frontend-ng (+1 more)
 
 ### Community 328 - "options"
-Cohesion: 0.22
-Nodes (9): buildTarget, coverageInclude, coverageReporters, runner, options, json-summary, lcov, src/**/*.ts (+1 more)
+Cohesion: 0.20
+Nodes (10): branches, functions, lines, statements, buildTarget, coverageInclude, coverageThresholds, runner (+2 more)
 
 ### Community 330 - "coverageExclude"
 Cohesion: 0.22
@@ -1837,9 +1843,9 @@ Nodes (7): options, assets, browser, styles, tsConfig, node_modules/@zurich/css-
 Cohesion: 0.29
 Nodes (3): close(), nodeStream(), tag()
 
-### Community 404 - "ErrorBoundary"
-Cohesion: 0.29
-Nodes (3): ErrorBoundary, isSeq(), reify()
+### Community 404 - "sliceFactory"
+Cohesion: 0.13
+Nodes (12): ensureSize(), ErrorBoundary, isSeq(), reify(), resolveBegin(), resolveEnd(), resolveIndex(), resolveSize() (+4 more)
 
 ### Community 405 - "zds-checkbox-field.spec.ts"
 Cohesion: 0.33
@@ -1917,10 +1923,6 @@ Nodes (4): angularApp, app, browserDistFolder, reqHandler
 Cohesion: 0.40
 Nodes (5): development, buildTarget, extractLicenses, optimization, sourceMap
 
-### Community 440 - "coverageThresholds"
-Cohesion: 0.40
-Nodes (5): branches, functions, lines, statements, coverageThresholds
-
 ### Community 445 - "colision-escritores.spec.ts"
 Cohesion: 0.50
 Nodes (4): drenarTimeouts(), HostConControlPrecreado, montar(), Component
@@ -1960,16 +1962,16 @@ Nodes (4): iterateList(), iterateLeaf(), iterateNode(), iterateNodeOrLeaf()
 ## Knowledge Gaps
 - **2546 isolated node(s):** `$schema`, `version`, `newProjectRoot`, `projectType`, `style` (+2541 more)
   These have ≤1 connection - possible missing edges or undocumented components.
-- **237 thin communities (<3 nodes) omitted from report** — run `graphify query` to explore isolated nodes.
+- **234 thin communities (<3 nodes) omitted from report** — run `graphify query` to explore isolated nodes.
 
 ## Suggested Questions
 _Questions this graph is uniquely positioned to answer:_
 
-- **Why does `createDOMPurify()` connect `serialise` to `swagger-ui-bundle.js`, `.concat`, `call`, `indexOf`, `forEach`, `collection.service.ts`?**
+- **Why does `createDOMPurify()` connect `serialise` to `swagger-ui-bundle.js`, `.concat`, `call`, `indexOf`, `forEach`, `detalle-reasignacion-respuesta.ts`?**
   _High betweenness centrality (0.150) - this node is a cross-community bridge._
-- **Why does `CatalogosService` connect `crear-recibir-queja.ts` to `detalle-reasignacion-respuesta.ts`, `seccion-detalle-queja.spec.ts`, `collection.service.ts`?**
+- **Why does `CatalogosService` connect `crear-recibir-queja.ts` to `dashboard-gestion-casos.ts`, `seccion-detalle-queja.spec.ts`, `detalle-reasignacion-respuesta.ts`?**
   _High betweenness centrality (0.104) - this node is a cross-community bridge._
-- **Why does `CollectionService` connect `collection.service.ts` to `detalle-reasignacion-respuesta.ts`, `crear-recibir-queja.ts`?**
+- **Why does `CollectionService` connect `detalle-reasignacion-respuesta.ts` to `dashboard-gestion-casos.ts`, `crear-recibir-queja.ts`?**
   _High betweenness centrality (0.043) - this node is a cross-community bridge._
 - **Are the 2 inferred relationships involving `p()` (e.g. with `interposeFactory()` and `zipWithFactory()`) actually correct?**
   _`p()` has 2 INFERRED edges - model-reasoned connections that need verification._
@@ -1977,5 +1979,5 @@ _Questions this graph is uniquely positioned to answer:_
   _2546 weakly-connected nodes found - possible documentation gaps or missing edges._
 - **Should `swagger-ui-bundle.js` be split into smaller, more focused modules?**
   _Cohesion score 0.0044166614746665 - nodes in this community are weakly interconnected._
-- **Should `detalle-reasignacion-respuesta.ts` be split into smaller, more focused modules?**
-  _Cohesion score 0.033053445288551246 - nodes in this community are weakly interconnected._
+- **Should `dashboard-gestion-casos.ts` be split into smaller, more focused modules?**
+  _Cohesion score 0.037719298245614034 - nodes in this community are weakly interconnected._

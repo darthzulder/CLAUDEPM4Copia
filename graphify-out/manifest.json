@@ -941,52 +941,46 @@
     "ast_hash": "b3bee3df80c9d2f0be036b52c3bd333b",
     "semantic_hash": ""
   },
-  "pm4-app/insumos/Otras Solicitudes/Anexo02_Mockups_TOBE_OtrasSolicitudes_v3_1.html": {
-    "mtime": 1787160705.6552358,
-    "seen": 1787169478.2110813,
-    "ast_hash": "406c16af399e8becb389415ead49ad70",
-    "semantic_hash": ""
-  },
   "pm4-app/insumos/Otras Solicitudes/Anexo02_Index/README.md": {
-    "mtime": 1787160705.5981288,
-    "seen": 1787169478.2110434,
-    "ast_hash": "824edd1fff2c14647c61b09601b64e18",
+    "mtime": 1787171181.7875414,
+    "seen": 1787171423.8734012,
+    "ast_hash": "e4b94259348f14b154280912dbdd87d8",
     "semantic_hash": ""
   },
   "pm4-app/insumos/Otras Solicitudes/Anexo02_Index/masters/01_Pantallas.md": {
-    "mtime": 1787160705.6016414,
-    "seen": 1787169478.2110453,
-    "ast_hash": "f746e4ec457be6064ae4e475674f2e5c",
+    "mtime": 1787171181.7904925,
+    "seen": 1787171423.8734047,
+    "ast_hash": "e8291c5a5a8eb3d274ca3a90a20f9062",
     "semantic_hash": ""
   },
   "pm4-app/insumos/Otras Solicitudes/Anexo02_Index/masters/02_Secciones.md": {
-    "mtime": 1787160705.6056485,
-    "seen": 1787169478.2110474,
-    "ast_hash": "d4bb351edb5ec4562c390bd34227c328",
+    "mtime": 1787171181.7939978,
+    "seen": 1787171423.8734064,
+    "ast_hash": "533f1e8d2f18711bd0497e92c4b08518",
     "semantic_hash": ""
   },
   "pm4-app/insumos/Otras Solicitudes/Anexo02_Index/masters/03_Campos.md": {
-    "mtime": 1787160705.607685,
-    "seen": 1787169478.2110496,
-    "ast_hash": "985e65d5f3f638008c03e90b8e423345",
+    "mtime": 1787171181.7964284,
+    "seen": 1787171423.8734078,
+    "ast_hash": "bff6c62b06a84b7a3cde4cbc13919e49",
     "semantic_hash": ""
   },
   "pm4-app/insumos/Otras Solicitudes/Anexo02_Index/masters/04_Acciones.md": {
-    "mtime": 1787160705.618229,
-    "seen": 1787169478.2110517,
-    "ast_hash": "14665a0143dbb88eda0b8f8ad8945119",
+    "mtime": 1787171181.8017197,
+    "seen": 1787171423.8734095,
+    "ast_hash": "bb7743e40bc9ee7391100b5486874a9e",
     "semantic_hash": ""
   },
   "pm4-app/insumos/Otras Solicitudes/Anexo02_Index/masters/05_Reglas.md": {
-    "mtime": 1787160705.6244829,
-    "seen": 1787169478.2110536,
-    "ast_hash": "c0ea79be7043782264959654b752bdd6",
+    "mtime": 1787171181.805352,
+    "seen": 1787171423.8734114,
+    "ast_hash": "5527e08a6fed7b62dea848c8650fd26c",
     "semantic_hash": ""
   },
   "pm4-app/insumos/Otras Solicitudes/Anexo02_Index/masters/06_Mensajes.md": {
-    "mtime": 1787160705.627997,
-    "seen": 1787169478.2110553,
-    "ast_hash": "8607d189313fffafb4d16d595ab34e74",
+    "mtime": 1787171181.8081052,
+    "seen": 1787171423.873413,
+    "ast_hash": "e565841721372fce3ed2c2756ad349aa",
     "semantic_hash": ""
   },
   "pm4-app/insumos/Otras Solicitudes/Anexo02_Index/masters/07_Catalogs.md": {
@@ -1002,9 +996,9 @@
     "semantic_hash": ""
   },
   "pm4-app/insumos/Otras Solicitudes/Anexo02_Index/masters/10_Trazabilidad_BPMN.md": {
-    "mtime": 1787160705.6390262,
-    "seen": 1787169478.2110615,
-    "ast_hash": "5e133baf0af8231004bced5473e41be5",
+    "mtime": 1787171181.8113594,
+    "seen": 1787171423.8737123,
+    "ast_hash": "ff5fcf3c6e16c1643d890392b7fc211d",
     "semantic_hash": ""
   },
   "pm4-app/insumos/Otras Solicitudes/Anexo02_Index/masters/11_Checklist_QA.md": {
@@ -1038,15 +1032,15 @@
     "semantic_hash": ""
   },
   "pm4-app/insumos/Otras Solicitudes/Anexo02_Index/screens/SCR-010.md": {
-    "mtime": 1786659720.4386694,
-    "seen": 1787169478.2110748,
-    "ast_hash": "0ab3fb4064ab520f1b278eb7bb3510f7",
+    "mtime": 1787171181.814371,
+    "seen": 1787171423.874345,
+    "ast_hash": "2167ca4bfb9bea98760dce3f9672bb07",
     "semantic_hash": ""
   },
   "pm4-app/insumos/Otras Solicitudes/Anexo02_Index/screens/SCR-012.md": {
-    "mtime": 1786659720.4386694,
-    "seen": 1787169478.211077,
-    "ast_hash": "d9a01b44382071724d1db1f971529c19",
+    "mtime": 1787171181.8173676,
+    "seen": 1787171423.8743465,
+    "ast_hash": "7750f4575757ff844b9a1a0fd22d81db",
     "semantic_hash": ""
   },
   "pm4-app/insumos/Quejas directas/Anexo02_Index/README.md": {
@@ -3717,6 +3711,12 @@
     "mtime": 1787160704.874357,
     "seen": 1787169478.211221,
     "ast_hash": "28d7a4a12eff6c453653726d30b3c2c0",
+    "semantic_hash": ""
+  },
+  "pm4-app/insumos/Otras Solicitudes/Anexo02_Mockups_TOBE_OtrasSolicitudes_v3_2.html": {
+    "mtime": 1787171181.8193655,
+    "seen": 1787171423.8744564,
+    "ast_hash": "bc3964ef484376b679a705b326e127e2",
     "semantic_hash": ""
   }
 }
