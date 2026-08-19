@@ -8,9 +8,6 @@ import dicParidad from './paridad-react.json' with { type: 'json' };
 import { cllCamposDeLaFachada } from './contrato-pantalla';
 import { PM4_ENV_FALLBACKS } from '../../core/pm4-context.service';
 import { RevisionRespuestaSac } from '../../screens/atencion-cliente/quejas-directas/COL_QD_SCR-008_Revision_Respuesta_SAC/revision-respuesta-sac';
-import { RevisionErrorTecnicoApi } from '../../screens/atencion-cliente/quejas-directas/COL_QD_SCR-004_Revision_Error_Tecnico_API/revision-error-tecnico-api';
-import { RevisionErrorTecnicoProrroga } from '../../screens/atencion-cliente/quejas-directas/COL_QD_SCR-011_Revision_Error_Tecnico_Prorroga/revision-error-tecnico-prorroga';
-import { ErrorFuncionalProrroga } from '../../screens/atencion-cliente/quejas-directas/COL_QD_SCR-012_Revision_Error_Funcional_Prorroga/error-funcional-prorroga';
 import { CorreccionErrorFuncional } from '../../screens/atencion-cliente/quejas-directas/COL_QD_SCR-003_Correccion_Error_Funcional/correccion-error-funcional';
 import { GestionLinea2 } from '../../screens/atencion-cliente/otras-solicitudes/COL_OS_SCR-003_Bandeja_Gestion_Linea2/gestion-linea2';
 import { RespuestaAreaResponsable } from '../../screens/atencion-cliente/quejas-directas/COL_QD_SCR-0052_Respuesta_Area_Responsable/respuesta-area-responsable';
@@ -93,9 +90,10 @@ const dicPantallasReact = dicParidad.pantallas as unknown as Record<
  */
 const CLL_PORTADAS: readonly { readonly strSlug: string; readonly objTipo: Type<unknown> }[] = [
   { strSlug: 'COL_QD_SCR-008_Revision_Respuesta_SAC', objTipo: RevisionRespuestaSac },
-  { strSlug: 'COL_QD_SCR-004_Revision_Error_Tecnico_API', objTipo: RevisionErrorTecnicoApi },
-  { strSlug: 'COL_QD_SCR-011_Revision_Error_Tecnico_Prorroga', objTipo: RevisionErrorTecnicoProrroga },
-  { strSlug: 'COL_QD_SCR-012_Revision_Error_Funcional_Prorroga', objTipo: ErrorFuncionalProrroga },
+  // Las SCR-004, 011 y 012 se comparaban acá hasta que se eliminaron del proyecto (PM4 ya no las
+  // usa). Sus entradas siguen en `paridad-react.json` —el dataset es una foto congelada de React y
+  // no se reescribe a mano—, pero la guarda de inventario de abajo compara contra `DIC_PANTALLAS`,
+  // así que un slug que ya no está enrutado no exige comparación.
   { strSlug: 'COL_QD_SCR-003_Correccion_Error_Funcional', objTipo: CorreccionErrorFuncional },
   { strSlug: 'COL_OS_SCR-003_Bandeja_Gestion_Linea2', objTipo: GestionLinea2 },
   { strSlug: 'COL_QD_SCR-0052_Respuesta_Area_Responsable', objTipo: RespuestaAreaResponsable },
@@ -121,9 +119,6 @@ const CLL_PORTADAS: readonly { readonly strSlug: string; readonly objTipo: Type<
  */
 const DIC_MAXLENGTH_ESPERADOS: Readonly<Record<string, number>> = {
   'COL_QD_SCR-008_Revision_Respuesta_SAC': 3,
-  'COL_QD_SCR-004_Revision_Error_Tecnico_API': 2,
-  'COL_QD_SCR-011_Revision_Error_Tecnico_Prorroga': 2,
-  'COL_QD_SCR-012_Revision_Error_Funcional_Prorroga': 1,
   'COL_QD_SCR-003_Correccion_Error_Funcional': 1,
   // ⚠ Cero DECLARADO, verificado por grep sobre `GestionLinea2.tsx`/`ReasignarCasoModal.tsx` de React:
   // ningún campo llevaba `maxLength`. La pantalla igual hereda el caso de huérfanos de arriba, que es
@@ -213,7 +208,7 @@ const DIC_NOMBRES_DINAMICOS: Readonly<Record<string, readonly string[]>> = {
   // escribe hoy. Los del editor de payload (`dinamico:strName`) salen de un `@for` sobre las 20 claves.
   'COL_QD_SCR-003_Correccion_Error_Funcional': [
     // S1 · los tres campos de nombre resuelto en runtime. Solo van los del juego que este fixture monta
-    // de verdad: con `data: {}` el fallback elige el juego que consume la SCR-004
+    // de verdad: con `data: {}` el fallback elige el juego de error técnico
     // (`sfcCamposErrorTecnico()`). Los del anexo (`qd_strErrorCodeSFC`, `qd_intAttemptNumber`,
     // `qd_strErrorMessageSFC`) **no se listan** aunque la pantalla los sepa montar: la guarda de abajo
     // los rechaza por no estar montados, y con razón — una exención que este fixture no ejercita es una
@@ -664,7 +659,7 @@ describe('paridad con el contrato de campos de React (dataset congelado)', () =>
 
         // ⚠ No se exige `> 0` acá, y la diferencia con el caso de arriba es real: React declaraba el
         // `rules.maxLength` en unas pantallas y no en otras (la SCR-008 tiene los tres contadores
-        // visuales **sin** `rules`, la SCR-004 tiene los dos con ambos). Exigir que siempre haya alguno
+        // visuales **sin** `rules`; otras los traían con ambos). Exigir que siempre haya alguno
         // pondría rojo un port correcto. La cobertura de que el dataset no esté vacío la da el primer
         // caso del archivo, que es donde corresponde.
         if (!cllEsperados.length) {

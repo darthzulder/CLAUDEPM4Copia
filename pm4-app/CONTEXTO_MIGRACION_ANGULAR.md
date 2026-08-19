@@ -19,10 +19,10 @@
 |---|---|
 | Rama | `feat/angular-migration` |
 | Fase | **7** (que el despliegue sirva Angular). La Fase 5 quedó cerrada con las 13 pantallas |
-| Pantallas portadas | **13** (12 de negocio + `smartsupervision-api-docs`; la SCR-010 se eliminó por orden del usuario) |
+| Pantallas portadas | **10** hoy. La Fase 5 portó 13 (12 de negocio + `smartsupervision-api-docs`); la SCR-010 se eliminó por orden del usuario, y en ago-2026 salieron las **SCR-004, 011 y 012** porque el proceso en PM4 dejó de usarlas (§6-sexies) |
 | Último commit | `93a8fc9` — Deuda 4 (la última de las cuatro previas a la Fase 7) |
 | `lint` + `verify` | ✅ verdes al cierre de las deudas (11/12 pasos — pytest saltado por no existir `cotizador-service/`) |
-| Revisión visual Playwright | ✅ hecha para SCR-003, SCR-011 y SCR-012 (§6-bis, §6-ter) |
+| Revisión visual Playwright | ✅ hecha para SCR-003, SCR-011 y SCR-012 (§6-bis, §6-ter) — las dos últimas ya eliminadas del proyecto; el registro se conserva porque las lecciones de método siguen valiendo |
 | Qué se sirve en producción | **Angular** (`frontend-ng/dist/frontend-ng/browser`). React quedó fuera del build y del deploy, pero sigue en el árbol (§6-quinquies) |
 
 ### Trabajo sin commitear (regla 8: nadie commitea sin confirmación explícita)
@@ -236,7 +236,13 @@ la sesión.
   validador corre.** Los casos que quieren aseverar un formato roto tienen que llamar
   `habilitarFila()` primero. **Y es comportamiento real de la pantalla:** un formato roto en una fila
   que el gestor no desbloqueó **no bloquea el reenvío**.
-- **`form.valid` es un getter, no un signal.**
+- **`form.valid` es un getter, no un signal.** Escribirlo dentro de un `computed()` **no crea
+  dependencia reactiva**: el computed se queda con el valor del primer render (form vacío ⇒ inválido) y
+  el botón principal **no se habilita nunca**, dejando la acción inalcanzable. La salida es derivar del
+  espejo `sigValores()` (leerlo aunque no se use el valor, para crear la dependencia). Lo mismo vale
+  para `hasError()`. Lo aprendió a los golpes la ex SCR-012 —y era la referencia que citaban las
+  fichas de OS_SCR-003 y SCR-0052 hasta que esa pantalla se eliminó; **por eso queda acá**, que es
+  donde no depende de que la pantalla que lo descubrió siga existiendo.
 - **`getRawValue()` y nunca `value`** — `value` omite los deshabilitados. Es *"el defecto más caro que
   el porte podía introducir"* (casos 29 y 34 de SCR-003).
 - **`validadorFormato()` NO es `Validators.pattern`** deliberadamente: la tolerancia al vacío es la
@@ -691,6 +697,44 @@ Su propia postergación: *"la revision de flujo real en PM4 necesariamente deve 
 Abrir una tarea real desde un nodo del BPM con el iframe y el token de verdad; el widget de reCAPTCHA
 con la site key de Render; y las colecciones 14/15 de la Deuda 3, que son un defecto de dato inmedible
 desde acá (TLS handshake, exit 35).
+
+---
+
+## 6-sexies. La eliminación de las SCR-004, 011 y 012 (2026-08-19)
+
+El usuario informó que **el proceso en PM4 ya no usa esas tres pantallas**, así que se borraron del
+proyecto. No es un refactor: es superficie que había que seguir manteniendo verde sin que ningún nodo
+del BPM la abriera nunca.
+
+**Se borraron en los DOS frontends**, por decisión explícita del usuario. El motivo es el mismo que
+justifica que React siga en el árbol: es la **referencia de paridad**, y conservar la referencia de
+una pantalla que ya no existe no aporta nada que comparar.
+
+### Lo que se borró y lo que se quedó
+
+| Cosa | Decisión |
+|---|---|
+| Las 6 carpetas de pantalla (`.ts`/`.tsx`, `.html`, `.spec`, `DOCUMENTACION_*.md`) | **Borradas** |
+| `DIC_PANTALLAS`, `SCREENS`, y las dos guardas de inventario (`pantallas.spec.ts`, `App.smoke.test.tsx`) | **Desregistradas** — dejar un slug de una pantalla borrada pone la suite roja nombrándolo, que es justo para lo que están |
+| Los 9 símbolos estructurales de `fields.ts` (`SCR00*_DEFAULTS`, `*FormData`, `Accion*`) | **Borrados** — 0 consumidores fuera de su propio archivo |
+| Las variables `qd_*` que esas pantallas pintaban (`qd_strHttpCode`, `qd_strRootCause`, `qd_strExt*`…) | **Se quedan.** `QD` es el contrato de nombres con el BPM y esas variables las escribe un script de PM4. Borrarlas afirmaría *"esta variable no existe en el proceso"*, que no es lo mismo que *"ninguna pantalla la pinta"* — y la SCR-003 comparte varias (mismo script de Momento 2), así que sacarlas rompería una pantalla viva |
+| `paridad-react.json` | **Sin tocar.** Es una foto congelada del React de referencia, generada por script y no reescrita a mano; el spec compara contra `DIC_PANTALLAS`, así que las entradas de sobra no aseveran nada |
+| `insumos/` (Anexo02 del cliente) | **Sin tocar.** Es la especificación funcional del cliente, no código nuestro. Además *Otras Solicitudes* tiene **sus propias** SCR-004 y SCR-012, que son otro namespace y siguen vigentes |
+
+### Las menciones en prosa: qué se reescribió y qué no
+
+El `grep` por `SCR-004|SCR-011|SCR-012` da ~40 aciertos en código vivo, y **la mayoría se quedó
+como estaba**. La distinción que se aplicó:
+
+- **Si la mención dice qué pantalla consume algo hoy** → se reescribió (`catalogos.service.ts` citaba
+  la SCR-012 como ejemplo vivo del patrón de `providers`; los rótulos de `fields.ts` agrupaban
+  variables por la pantalla que las pintaba).
+- **Si la mención narra una lección aprendida construyendo esa pantalla** → se dejó, marcando que la
+  pantalla ya no existe pero el modo de falla sí. El `+16` del radio de `zds-radio.ts`, el
+  `required` sin validador de `campo-base.ts`, la tautología de rótulos de `SCR-012`: borrar esas
+  referencias dejaría código vivo sin el porqué que lo explica, que es peor que una mención a algo
+  eliminado. Las §6-ter y §6-quater de este archivo son registro con fecha y se conservan íntegras
+  por la misma razón.
 
 ---
 

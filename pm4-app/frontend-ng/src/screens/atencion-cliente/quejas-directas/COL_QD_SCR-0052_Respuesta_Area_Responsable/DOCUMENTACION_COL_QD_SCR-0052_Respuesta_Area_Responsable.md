@@ -168,8 +168,9 @@ comentario" (continúa SP2-T02); también permite guardar borrador o volver a la
 > **`blnPuedeEnviar()` se deriva de `sigValores()`, nunca de `form.valid`.** `valid` es un *getter* de
 > `AbstractControl`, no un signal: leerlo dentro de un `computed` no crea dependencia reactiva y el
 > computed queda con el valor del primer render (form vacío ⇒ inválido), o sea el botón principal
-> apagado **para siempre**. Está medido y documentado en la §12.5 de SCR-012, y acá se aplicó desde el
-> principio en vez de volver a pagarlo.
+> apagado **para siempre**. Está medido y documentado en el §5.2 de
+> `pm4-app/CONTEXTO_MIGRACION_ANGULAR.md` (lo pagó la ex SCR-012, ya eliminada del proyecto), y acá se
+> aplicó desde el principio en vez de volver a pagarlo.
 
 ---
 

@@ -223,6 +223,12 @@ y `qd_strServiceProvided` guardan el texto de `interaccion`/`servicioPrestado`.
   Momento 2/3 escriben siempre esas variables ante un fallo de la API — la prórroga
   viaja como `prorroga_queja` dentro del body de cierre, no en una llamada aparte —
   así que las variantes `Ext*` nunca se poblaban.
+- **⚠ Las SCR-004, 011 y 012 se eliminaron del proyecto (ago-2026)** porque el proceso en
+  PM4 dejó de usarlas. **Las filas de la tabla se conservan y siguen siendo correctas:** la
+  columna de pantalla es la **procedencia** del rename, no un inventario de pantallas vivas,
+  y las variables `qd_*` que esas pantallas pintaban siguen declaradas en `fields.ts` porque
+  las escribe un script de PM4 (y la SCR-003 consume el juego de error técnico). Lo que ya no
+  existe es el formulario que las mostraba.
 
 ## Fuera de alcance del rename de campos PM4 (no cuentan hacia los 143)
 

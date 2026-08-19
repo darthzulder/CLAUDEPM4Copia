@@ -26,7 +26,8 @@ import { ZdsTextarea } from './zds-textarea';
  * Costó un diagnóstico entero porque el defecto es **invisible** en el caso común: si el control
  * declara `Validators.required` además de marcarse el wrapper, el validador filtrado es redundante y
  * no cambia nada observable. Sólo se ve cuando una pantalla necesita el asterisco **sin** el
- * validador — SCR-011, cuya acción de escalar tiene que ser alcanzable con los campos de S2 vacíos.
+ * validador — el caso que lo descubrió fue la ex SCR-011, cuya acción de escalar tenía que ser
+ * alcanzable con los campos de S2 vacíos. La pantalla se eliminó; el modo de falla, no.
  *
  * ── Por qué la aserción va sobre `errors` de un control pelado ───────────────────────────────
  * Podría aseverarse que la clase no tiene una propiedad `required`, pero eso es una aserción sobre la

@@ -29,10 +29,11 @@
  * `pantalla-no-encontrada.spec.ts`, que iteraban un registro vacío—, que era exactamente el
  * momento previsto para volver a leerlos.
  *
- * La segunda es `COL_QD_SCR-004_Revision_Error_Tecnico_API`, y con **dos** entradas empieza a
- * valer algo que con una sola no se podía distinguir: los casos que recorren el registro real
- * (el puente de `indice-pantallas.spec.ts`, el `strDisponibles` de `pantalla-no-encontrada`)
- * ahora se pondrían rojos ante un recorte que devolviera *una* pantalla, no solo ante `[]`.
+ * Con **más de una** entrada empieza a valer algo que con una sola no se podía distinguir: los casos
+ * que recorren el registro real (el puente de `indice-pantallas.spec.ts`, el `strDisponibles` de
+ * `pantalla-no-encontrada`) se ponen rojos ante un recorte que devuelva *una* pantalla, no solo ante
+ * `[]`. (La segunda portada fue la `COL_QD_SCR-004_Revision_Error_Tecnico_API`; se borró después,
+ * junto con la 011 y la 012, cuando el proceso en PM4 dejó de usarlas.)
  *
  * Agregar una pantalla en la Fase 5 son dos líneas, en dos archivos, y las dos son obligatorias:
  * 1. una entrada acá, con su slug real de PM4 y su `loadComponent`;
@@ -70,18 +71,9 @@ export const DIC_PANTALLAS: Record<string, CargadorDePantalla> = {
     import(
       '../screens/atencion-cliente/quejas-directas/COL_QD_SCR-008_Revision_Respuesta_SAC/revision-respuesta-sac'
     ).then((in_objModulo) => in_objModulo.RevisionRespuestaSac),
-  'COL_QD_SCR-004_Revision_Error_Tecnico_API': () =>
-    import(
-      '../screens/atencion-cliente/quejas-directas/COL_QD_SCR-004_Revision_Error_Tecnico_API/revision-error-tecnico-api'
-    ).then((in_objModulo) => in_objModulo.RevisionErrorTecnicoApi),
-  'COL_QD_SCR-011_Revision_Error_Tecnico_Prorroga': () =>
-    import(
-      '../screens/atencion-cliente/quejas-directas/COL_QD_SCR-011_Revision_Error_Tecnico_Prorroga/revision-error-tecnico-prorroga'
-    ).then((in_objModulo) => in_objModulo.RevisionErrorTecnicoProrroga),
-  'COL_QD_SCR-012_Revision_Error_Funcional_Prorroga': () =>
-    import(
-      '../screens/atencion-cliente/quejas-directas/COL_QD_SCR-012_Revision_Error_Funcional_Prorroga/error-funcional-prorroga'
-    ).then((in_objModulo) => in_objModulo.ErrorFuncionalProrroga),
+  // Acá vivían las SCR-004, 011 y 012. El proceso en PM4 ya no las usa, así que se borraron: una
+  // pantalla registrada que ningún nodo del BPM abre es superficie muerta que igual hay que mantener
+  // verde. Sus slugs caen ahora en el "pantalla no encontrada" de siempre, que es lo correcto.
   'COL_QD_SCR-003_Correccion_Error_Funcional': () =>
     import(
       '../screens/atencion-cliente/quejas-directas/COL_QD_SCR-003_Correccion_Error_Funcional/correccion-error-funcional'

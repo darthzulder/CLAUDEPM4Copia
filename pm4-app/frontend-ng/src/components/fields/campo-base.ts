@@ -103,7 +103,8 @@ export abstract class CampoBase<T> implements ControlValueAccessor, OnInit {
    * las opciones consideradas que no depende de que nadie se olvide: neutralizar el validador después
    * de montado sería pelear contra un directivo que sigue enganchado, y derivar el asterisco de
    * `hasValidator(Validators.required)` le quitaría el asterisco a los campos que lo necesitan **sin**
-   * validador (SCR-011 escala con los campos vacíos a propósito).
+   * validador (la ex SCR-011 escalaba con los campos vacíos a propósito; el caso sigue siendo posible
+   * y por eso la decisión no cambia).
    *
    * `zds-required.spec.ts` es la guarda: se pone roja si un wrapper vuelve a aceptar `required`.
    *
