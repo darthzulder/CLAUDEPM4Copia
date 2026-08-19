@@ -1,0 +1,143 @@
+@if (blnCargando()) {
+  <div class="screen-wrapper">
+    <div class="screen-loading"><lib-loader-z /></div>
+  </div>
+} @else {
+  <!-- ⚠ A diferencia de las nueve pantallas anteriores, un error **no** reemplaza la pantalla: este
+       tablero degrada a `SAMPLE_CASES` y sigue siendo usable, así que el error va como una caja más
+       arriba de la tabla y no como rama exclusiva. Ver el bloque de `SAMPLE_CASES` en la clase. -->
+  <div class="screen-wrapper">
+    <app-screen-header title="Dashboard — Gestión de Casos" />
+
+    <div class="screen-content">
+      <!-- Alerta INLINE (`za-alert`), no la cola imperativa de `lib-alert-z`: describe el contenido de
+           la pantalla, no el resultado de una acción. `[hide-close]="true"` bindeado y no el atributo
+           pelado — el input está tipado `boolean` y un atributo sin valor vale `''` (TS2322). -->
+      <za-alert config="info" [hide-close]="true">
+        Vista en tiempo real de todos los casos activos. Los contadores se actualizan automáticamente.
+        Los casos <strong>Vencidos</strong> requieren atención inmediata.
+      </za-alert>
+
+      @if (strError()) {
+        <za-alert config="negative" [hide-close]="true">
+          No se pudieron cargar los casos desde PM4 ({{ strError() }}). Mostrando datos de ejemplo.
+        </za-alert>
+      }
+
+      <!-- Barra de título + descarga. `section-bar` en vez del `style="margin: var(--zs-100) 0"` que
+           React pone en línea: el proyecto no admite estilos ad-hoc y el margen es un patrón, no una
+           excepción de esta pantalla. -->
+      <div z-flex="100" z-align="between:center" class="section-bar">
+        <h2 class="section-title">Gestión de Casos</h2>
+        <!-- El tamaño va encadenado en `type` (`ButtonZ` no tiene `size`), y `[disabled]` es
+             obligatorio explícito porque su default es `true`. -->
+        <lib-button-z
+          label="Descargar reporte"
+          type="primary:s"
+          icon="download:line"
+          [disabled]="blnDescargaBloqueada()"
+          (eventClick)="descargarCSV()"
+        />
+      </div>
+
+      <!-- KPIs de SLA. El semáforo va por clase tokenizada y no por el `style` en línea de React:
+           `za-kpi-value` colorea el número con `--z-kpi-value--color`, y las tres clases de
+           `shared.css` lo setean con tokens del DS. `config` no sirve acá — solo tiñe el
+           `difference`, que esta pantalla no usa. -->
+      <div z-flex="wrap:100">
+        <za-kpi-value [amount]="objKpis().abiertos" header="Casos abiertos" />
+        <za-kpi-value [amount]="objKpis().porVencer" header="Próximos a vencer" class="kpi-warn" />
+        <za-kpi-value [amount]="objKpis().vencidos" header="Vencidos" class="kpi-danger" />
+        <za-kpi-value [amount]="objKpis().cerrados" header="Cerrados" class="kpi-ok" />
+      </div>
+
+      <app-form-section title="Filtros">
+        <!-- ⚠ `formControlName` **y** `name`, los dos, en todo campo de la fachada: el primero ata el
+             control al `FormGroup`, el segundo genera el `id="field-<name>"`. Con solo `name` el campo
+             pinta y nunca llega al form.
+
+             ⚠ Tipo y Área **no** llevan búsqueda: React usa `withSearch` y `zds-select` no tiene ese
+             input. Ver el bloque de pérdidas en la clase. -->
+        <form [formGroup]="form" novalidate>
+          <div class="form-row cols-4">
+            <zds-select
+              formControlName="filtroTipo"
+              name="filtroTipo"
+              label="Tipo de solicitud"
+              [options]="cllOpcionesTipo()"
+            />
+            <zds-select
+              formControlName="filtroEstado"
+              name="filtroEstado"
+              label="Estado"
+              [options]="cllOpcionesEstado"
+            />
+            <zds-select
+              formControlName="filtroArea"
+              name="filtroArea"
+              label="Área responsable"
+              [options]="cllOpcionesArea()"
+            />
+            <zds-input
+              formControlName="filtroBuscar"
+              name="filtroBuscar"
+              label="Buscar por caso o responsable"
+              icon="search:line"
+            />
+          </div>
+
+          <!-- Los dos botones son `type="button"` implícito por no estar en un `<form>` con submit:
+               `lib-button-z` no emite submit nativo (su `type` es la variante visual), así que el
+               único camino es `(eventClick)`. Por eso el form no tiene `(ngSubmit)`. -->
+          <div z-flex="75" z-align="right:center" class="section-spacer">
+            <lib-button-z
+              label="Limpiar"
+              type="secondary:s"
+              [disabled]="false"
+              (eventClick)="limpiarFiltros()"
+            />
+            <lib-button-z
+              label="Aplicar filtros"
+              type="primary:s"
+              [disabled]="false"
+              (eventClick)="aplicarFiltros()"
+            />
+          </div>
+        </form>
+      </app-form-section>
+
+      <app-tabla-casos
+        [casos]="cllPagina()"
+        [tipoMap]="dicTipoMap()"
+        [areaMap]="dicAreaMap()"
+        (ver)="abrirDetalle($event)"
+      />
+
+      <!-- La página va por `modeloZa` y NO por `[ngModel]`: el input del DS se llama igual que la
+           directiva de Angular y un `[ngModel]` acá tiraría NG0201. El motivo completo está en
+           `components/fields/modelo-za.ts`, que es lo que hace posible este binding.
+
+           Se escribe solo la mitad de ida porque `intPaginaActual` es un `computed` (la página
+           **acotada** al total): la vuelta no puede asignarle, y de hecho no debe — pasa por
+           `irAPagina`, que escribe `sigPagina`, el signal que sí es de escritura. -->
+      <div z-flex="wrap:75" z-align="between:center">
+        <span class="field-hint">{{ strResumenPagina() }}</span>
+        <za-pagination
+          [modeloZa]="intPaginaActual()"
+          [pages]="intTotalPaginas()"
+          [show-edges]="true"
+          (modeloZaChange)="irAPagina($event)"
+        />
+      </div>
+    </div>
+  </div>
+
+  @if (sigCasoSel(); as objCaso) {
+    <app-detalle-caso-modal
+      [caso]="objCaso"
+      [tipoMap]="dicTipoMap()"
+      [areaMap]="dicAreaMap()"
+      (cerrar)="cerrarDetalle()"
+    />
+  }
+}

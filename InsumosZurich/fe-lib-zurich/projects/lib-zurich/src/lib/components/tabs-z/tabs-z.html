@@ -1,0 +1,18 @@
+@if (tabs.length > 0) {
+  <za-tabs (change)="onTabChange($event)">
+    @for (tab of tabs; track tab.key) {
+      <option
+        [value]="tab.title"
+        [attr.icon]="tab.icon"
+        [disabled]="tab.disabled"
+      >
+        {{ tab.content }}
+      </option>
+    }
+  </za-tabs>
+}
+<div>
+  @if (activeTemplate) {
+    <ng-container *ngTemplateOutlet="activeTemplate"></ng-container>
+  }
+</div>

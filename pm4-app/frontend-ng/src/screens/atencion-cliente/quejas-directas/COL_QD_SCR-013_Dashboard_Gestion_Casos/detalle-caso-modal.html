@@ -1,0 +1,41 @@
+<!-- La píldora de Estado que viaja en el item de la barra. Se declara **fuera** del `id="content"`
+     porque un `<ng-template>` no renderiza donde está escrito: lo pinta el `ngTemplateOutlet` de
+     `app-info-bar`. Ponerlo adentro del slot no cambia nada funcional, pero acá arriba deja claro que
+     no es parte del layout del modal. -->
+<ng-template #tplEstado>
+  <zds-status-badge [variante]="strVariante()">{{ caso().estado }}</zds-status-badge>
+</ng-template>
+
+<!-- ⚠ `(close)` es obligatorio: `ModalZ.change()` hace `open = false` sobre su propio input, así que
+     sin escucharlo la bandera de la pantalla queda en `true` y el modal no vuelve a abrir. El
+     `id="content"` es literal y estático — dentro de un `@if` el `ngAfterContentInit` de `ModalZ` no
+     lo encuentra. -->
+<lib-modal-z [open]="true" tamanio="l" (close)="cerrar.emit()">
+  <ng-template libZTemplate id="content">
+    <div class="modal-wide">
+      <!-- `modal-titulo`, no un `style` en línea: React escribe ahí `--zf-h-20` con un `fontWeight`
+           aparte, y la clase ya trae el token del DS. -->
+      <h3 class="modal-titulo">Caso #{{ caso().numeroCaso }} — {{ strTipo() }}</h3>
+      <p class="subsection-note">{{ strArea() }} · Responsable: {{ caso().responsable || '—' }}</p>
+
+      <div class="modal-scroll-body">
+        <app-info-bar [items]="cllItems()" />
+
+        <div class="field-wrap section-spacer">
+          <span class="form-label">Descripción / Motivo</span>
+          <!-- `texto-multilinea` es el `white-space: pre-wrap` que React pone en línea: el texto de la
+               queja viene de un textarea y sus saltos de línea son parte del dato. La clase ya existía
+               (la agregó SCR-0052) y es exactamente este patrón — no hace falta CSS nuevo. -->
+          <p class="texto-multilinea">
+            {{ caso().descripcion || 'Sin descripción registrada.' }}
+          </p>
+        </div>
+      </div>
+
+      <!-- `[disabled]` explícito: el default de `lib-button-z` es `true`. -->
+      <div z-flex="75" z-align="right:center" class="section-spacer">
+        <lib-button-z label="Cerrar" type="secondary" [disabled]="false" (eventClick)="cerrar.emit()" />
+      </div>
+    </div>
+  </ng-template>
+</lib-modal-z>

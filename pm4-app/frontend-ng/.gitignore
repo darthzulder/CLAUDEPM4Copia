@@ -1,0 +1,14 @@
+# Solo lo específico de Angular que el .gitignore de la raíz del repo no cubre.
+# Todo lo genérico (node_modules/, dist/, coverage/, .vscode/, .idea/, *.log, .DS_Store,
+# Thumbs.db) ya está ignorado allá — duplicarlo acá solo crea dos lugares que se desincronizan.
+
+# Caché del build de Angular (@angular/build). Puede llegar a cientos de MB.
+/.angular/cache
+
+# Salida de tsc --noEmit / los proyectos de tsconfig
+/out-tsc
+/tmp
+
+# Fallbacks de entorno generados desde `pm4-app/.env` por scripts/gen-env-define.mjs.
+# Se regenera en cada build/dev/test y PUEDE CONTENER UN TOKEN PM4 de desarrollo — no commitear.
+/src/env.generated.ts

@@ -9,6 +9,8 @@ LocalFiles/
 
 # Claude Code — configuración local personal
 .claude/settings.local.json
+# Config de servidores MCP: es local de cada máquina y suele llevar credenciales/URL de PM4.
+.mcp.json
 
 # Graphify outputs
 #graphify-out/
@@ -20,6 +22,21 @@ graphify-out/cache/
 # Un graphify-out anidado fuera de la raíz es siempre un artefacto stray
 # (ver nota en CLAUDE.md sobre cache_root al correr extract() en subcarpetas).
 **/*/graphify-out/
+# Respaldo que `graphify update` hace del grafo anterior antes de reescribirlo: una
+# carpeta por fecha, ~12 MB cada una. Es rollback local, no historia del proyecto — para
+# eso ya está git sobre `graph.json`.
+graphify-out/20[0-9][0-9]-[0-9][0-9]-[0-9][0-9]/
+# Visualización generada (601 nodos de comunidad). Se regenera en cada update y no se lee
+# desde el código; `GRAPH_REPORT.md` es la salida que sí se consulta.
+graphify-out/graph.html
+
+# Salida generada del scanner de SonarQube
+.scannerwork/
+**/.scannerwork/
+
+# Credenciales del feed de Azure Artifacts (contienen :_password= en base64)
+.npmrc
+**/.npmrc
 
 # Scratch/debug — nunca deben versionarse (histórico: contuvieron token/URL de PM4)
 pm4-app/_t.txt
@@ -99,8 +116,26 @@ coverage/
 Thumbs.db
 desktop.ini
 
+# Artefactos del MCP de Playwright — snapshots, logs de consola y screenshots que el
+# servidor escribe en el cwd al navegar. Son de una sesión concreta y pesados (los logs
+# de consola llegan a varios MB).
+.playwright-mcp/
+**/.playwright-mcp/
+
 # Espejo local de los scripts PM4 — generado por scripts/pm4-scripts en cada captura.
 # El respaldo versionado es la rama `pm4-scripts-historial`; esto es solo la copia navegable.
 # La barra inicial ancla el patrón a la raíz: sin ella también ignoraría el código de la
 # herramienta, que vive en pm4-app/scripts/pm4-scripts/.
 /pm4-scripts/
+
+# CA del proxy TLS corporativo (`CN=ssldecrypt.latam.zurich.com`), que el backend necesita
+# para que Node confíe en la cadena que la red inyecta al hablar con PM4.
+#
+# No se versiona, y el motivo NO es que sea secreta —es una CA pública que la política
+# corporativa instala en el almacén de cada máquina Zurich—: es que es **un artefacto del
+# entorno de red**, no del proyecto. Commitearla implicaría que el repo declara en qué red se
+# compila, y dejaría un certificado congelado que caduca (jun-2031) o rota sin que nada avise;
+# peor, alguien fuera de la red corporativa lo cargaría sin necesitarlo. Cada dev exporta el
+# suyo del almacén de Windows con el procedimiento de `certs/README.md`, que además verifica
+# la huella contra la que presenta la conexión — cosa que un archivo commiteado no puede hacer.
+pm4-app/certs/*.pem

@@ -1,0 +1,14 @@
+<za-text-input
+  [id]="name"
+  [name]="name"
+  label="{{label}}"
+  [config]="lineType? 'line': ''"
+  [(ngModel)]="model"
+  (ngModelChange)="modelChange.emit(model)"
+  [input-type]="inputType == 'text'? 'text': inputType == 'tel'? 'tel': inputType == 'email'? 'email': inputType == 'url'? 'url': 'text'"
+  help-text="{{helpText}}"
+  [invalid]="valid"
+  [required]="required"
+  [readonly]="readonly"
+  [icon]="icon"
+></za-text-input>

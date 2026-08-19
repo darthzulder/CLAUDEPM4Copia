@@ -5,14 +5,11 @@ import { ZrLoader } from './components/fields/ZdsFields';
 // (?screen=), así que no tiene sentido descargar las ~15 en un único bundle.
 const CrearRecibirQueja = lazy(() => import('./screens/atencion-cliente/quejas-directas/COL_QD_SCR-000_CrearRecibirQueja/CrearRecibirQueja'));
 const DsCatalog = lazy(() => import('./screens/ds-catalog/DsCatalog'));
-const RevisionErrorTecnicoApi = lazy(() => import('./screens/atencion-cliente/quejas-directas/COL_QD_SCR-004_Revision_Error_Tecnico_API/RevisionErrorTecnicoApi'));
 const CorreccionErrorFuncional = lazy(() => import('./screens/atencion-cliente/quejas-directas/COL_QD_SCR-003_Correccion_Error_Funcional/CorreccionErrorFuncional'));
 const DetalleReasignacionRespuesta = lazy(() => import('./screens/atencion-cliente/quejas-directas/COL_QD_SCR-0051_Detalle_Reasignacion_Respuesta/DetalleReasignacionRespuesta'));
 const RespuestaAreaResponsable = lazy(() => import('./screens/atencion-cliente/quejas-directas/COL_QD_SCR-0052_Respuesta_Area_Responsable/RespuestaAreaResponsable'));
 const RevisionRespuestaSac = lazy(() => import('./screens/atencion-cliente/quejas-directas/COL_QD_SCR-008_Revision_Respuesta_SAC/RevisionRespuestaSac'));
 const FormularioSuperintendencia = lazy(() => import('./screens/atencion-cliente/quejas-directas/COL_QD_SCR-009_Formulario_Superintendencia/FormularioSuperintendencia'));
-const RevisionErrorTecnicoProrroga = lazy(() => import('./screens/atencion-cliente/quejas-directas/COL_QD_SCR-011_Revision_Error_Tecnico_Prorroga/RevisionErrorTecnicoProrroga'));
-const ErrorFuncionalProrroga = lazy(() => import('./screens/atencion-cliente/quejas-directas/COL_QD_SCR-012_Revision_Error_Funcional_Prorroga/ErrorFuncionalProrroga'));
 const DashboardGestionCasos = lazy(() => import('./screens/atencion-cliente/quejas-directas/COL_QD_SCR-013_Dashboard_Gestion_Casos/DashboardGestionCasos'));
 const GestionLinea2 = lazy(() => import('./screens/atencion-cliente/otras-solicitudes/COL_OS_SCR-003_Bandeja_Gestion_Linea2/GestionLinea2'));
 const SmartsupervisionApiDocs = lazy(() => import('./screens/smartsupervision-api-docs/SmartsupervisionApiDocs'));
@@ -41,7 +38,9 @@ class ErrorBoundary extends Component<{ children: ReactNode }, { error: Error | 
 // contra esta y ponerse en rojo si se agrega una pantalla sin cubrirla; no es API para nadie más.
 export const SCREENS: Record<string, React.ComponentType> = {
   'COL_QD_SCR-000_CrearRecibirQueja': CrearRecibirQueja,
-  'COL_QD_SCR-004_Revision_Error_Tecnico_API': RevisionErrorTecnicoApi,
+  // Las SCR-004, 011 y 012 estaban registradas acá. El proceso en PM4 ya no las usa, así que se
+  // borraron del proyecto — también de este frontend, que es la referencia de paridad de Angular:
+  // conservar la referencia de una pantalla que ya no existe no aporta nada que comparar.
   'COL_QD_SCR-003_Correccion_Error_Funcional': CorreccionErrorFuncional,
   'COL_QD_SCR-0051_Detalle_Reasignacion_Respuesta': DetalleReasignacionRespuesta,
   'COL_QD_SCR-0052_Respuesta_Area_Responsable': RespuestaAreaResponsable,
@@ -50,8 +49,6 @@ export const SCREENS: Record<string, React.ComponentType> = {
   // La ex SCR-010 (Cierre M3) se fusionó en la SCR-009: alias para que cualquier
   // nodo del BPM que aún apunte al slug antiguo renderice el formulario unificado.
   'COL_QD_SCR-010_cierre-m3': FormularioSuperintendencia,
-  'COL_QD_SCR-011_Revision_Error_Tecnico_Prorroga': RevisionErrorTecnicoProrroga,
-  'COL_QD_SCR-012_Revision_Error_Funcional_Prorroga': ErrorFuncionalProrroga,
   'COL_QD_SCR-013_Dashboard_Gestion_Casos': DashboardGestionCasos,
   'COL_OS_SCR-003_Bandeja_Gestion_Linea2': GestionLinea2,
   'ds-catalog': DsCatalog,

@@ -1,0 +1,90 @@
+<!-- ── S4 · Datos de Fraude CE-019-2024 (SEC-031) ────────────────────────────────────────────── -->
+<app-form-section title="Datos de Fraude CE-019-2024">
+  <div class="form-row cols-1">
+    <div class="zds-field-wrap">
+      <span class="info-bar-label">¿Relacionada con Fraude?</span>
+      <div class="valor-solo-lectura">
+        <span class="info-bar-value">{{ blnEsFraude() ? 'Sí' : 'No' }}</span>
+      </div>
+    </div>
+  </div>
+
+  @if (blnEsFraude()) {
+    <div class="form-row cols-2" [formGroup]="form()">
+      <zds-select
+        [formControlName]="QD.strFraudType"
+        [name]="QD.strFraudType"
+        label="Tipo de Fraude"
+        [options]="cllTipoFraude()"
+        [obligatorio]="true"
+      />
+      <zds-select
+        [formControlName]="QD.strFraudModality"
+        [name]="QD.strFraudModality"
+        label="Modalidad de Fraude"
+        [options]="cllModalidadFraude()"
+        [obligatorio]="true"
+      />
+    </div>
+    <div class="form-row cols-2" [formGroup]="form()">
+      <zds-input
+        [formControlName]="QD.strClaimedAmount"
+        [name]="QD.strClaimedAmount"
+        label="Monto Reclamado (COP)"
+        [obligatorio]="true"
+      />
+      <zds-input
+        [formControlName]="QD.strAcknowledgedAmount"
+        [name]="QD.strAcknowledgedAmount"
+        label="Monto Reconocido (COP)"
+        [obligatorio]="true"
+      />
+    </div>
+  }
+</app-form-section>
+
+<!-- ── S5 · Anexos del Formulario (SEC-032) ──────────────────────────────────────────────────── -->
+<app-form-section title="Anexos del Formulario">
+  <!-- FLD-163/164 — siempre "Sí" (Excel PQRS V3.0 #163/#164): se muestran fijos y bloqueados. El
+       bloqueo va por `disabled` **en cada opción**, no con `control.disable()`, para que los dos
+       valores sigan viajando a PM4 y sigan alimentando el gate. El porqué completo —incluida la
+       verificación contra el web component de Lit— está en la cabecera del componente. -->
+  <div class="form-row cols-2" [formGroup]="form()">
+    <zds-radio
+      [formControlName]="QD.strIncludesComplaintAnnex"
+      [name]="QD.strIncludesComplaintAnnex"
+      label="¿Incluye Anexos a la Queja?"
+      [options]="CLL_SI_NO_BLOQUEADO"
+      [inline]="true"
+      [obligatorio]="true"
+    />
+    <zds-radio
+      [formControlName]="QD.strIncludesReplyAttach"
+      [name]="QD.strIncludesReplyAttach"
+      label="¿Incluye Adjunto Respuesta Final?"
+      [options]="CLL_SI_NO_BLOQUEADO"
+      [inline]="true"
+      [obligatorio]="true"
+    />
+  </div>
+
+  <app-request-file-list
+    [requestId]="requestId()"
+    [fileIds]="[intPdfRespuestaFinal()]"
+    label="PDF Respuesta Final (generado)"
+    emptyText="Aún no se ha generado el PDF de respuesta final."
+    loadingText="Buscando el PDF de respuesta final…"
+  />
+
+  <!-- Prórroga (código) — campo "Back", automático (Excel PQRS V3.0 #55). El div vacío que lo
+       acompaña conserva la grilla de 2 columnas del React, donde la celda derecha va libre. -->
+  <div class="form-row cols-2">
+    <div class="zds-field-wrap">
+      <span class="info-bar-label">Prórroga (Código)</span>
+      <div class="valor-solo-lectura">
+        <span class="info-bar-value">{{ strProrroga() }}</span>
+      </div>
+    </div>
+    <div></div>
+  </div>
+</app-form-section>

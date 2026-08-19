@@ -54,7 +54,8 @@ export default function CorreccionErrorFuncional() {
   // ── S1 · el script de Momento 2 NO escribe FLD-040..045 ────────────────────
   // sfcCamposErrorTecnico() emite qd_strHttpCode / qd_strErrorType /
   // qd_strApiTechMessage / qd_strCompleteLogAPI / qd_strAttemptNum / qd_strPayloadSent
-  // (el mismo juego que consume SCR-004). Si el caso trae los campos propios de
+  // (el juego que consumía la ex SCR-004; hoy esta pantalla es la única que lo
+  // pinta, pero quien lo escribe sigue siendo el script). Si el caso trae los campos propios de
   // SCR-003 se muestran esos; si no, se cae a las variables que el script sí emite.
   const nmErrorCode = objWatch[QD.strSfcErrorCode] ? QD.strSfcErrorCode : QD.strHttpCode;
   const nmErrorMessage = objWatch[QD.strSfcErrorMessage] ? QD.strSfcErrorMessage : QD.strApiTechMessage;
@@ -288,7 +289,7 @@ export default function CorreccionErrorFuncional() {
       </div>
 
       {/* ACT-003-03 · Ver Log Completo — un único campo con el log que emite el
-          script de Momento 2 en qd_strCompleteLogAPI (igual que SCR-004). */}
+          script de Momento 2 en qd_strCompleteLogAPI (mismo patrón que la ex SCR-004). */}
       {blnShowLog && (
         <ZrModal model={blnShowLog} onChange={(open: boolean) => setBlnShowLog(open)}>
           <div className="modal-wide">

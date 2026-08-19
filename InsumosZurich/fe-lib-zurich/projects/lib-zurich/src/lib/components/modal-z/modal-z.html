@@ -1,0 +1,39 @@
+@if (ShowBackdrop){ @if (open) {
+<div class="modal-backdrop" (click)="change($event)"></div>
+} } @if (open) {
+<div
+  class="modal-window"
+  tabindex="-1"
+  role="dialog"
+  aria-modal="true"
+  [ngClass]="[
+    tamanio == 'l'?
+    'modal-window--l': tamanio == 'm'?
+    'modal-window--m': tamanio == 's'?
+    'modal-window--s': tamanio == 'xs'?
+    'modal-window--xs': 'modal-window--xs']"
+>
+  <div class="grid">
+    <div class="col">
+      <ng-template [ngTemplateOutlet]="title"></ng-template>
+    </div>
+    <div class="col">
+      <za-icon
+        icon="close:line"
+        class="modal-close"
+        (click)="change($event)"
+      ></za-icon>
+    </div>
+  </div>
+  <div class="grid overflow_content mb-3">
+    <div class="col">
+      <ng-template [ngTemplateOutlet]="content"></ng-template>
+    </div>
+  </div>
+  <div class="grid">
+    <div class="col">
+      <ng-template [ngTemplateOutlet]="buttons"></ng-template>
+    </div>
+  </div>
+</div>
+}

@@ -73,7 +73,7 @@ Los FLD-040..045 se muestran **si el caso los trae**; como ningún script los es
 | Intento N.° actual (M1/M2) | `qd_strM1M2AttemptNum` | `qd_strAttemptNum` | `ZdsInput` readOnly | FLD-044 / script M2 |
 | Endpoint Invocado | `qd_strEndpointCalled` | — | `ZdsInput` readOnly | script M2 |
 | Mensaje de Error SFC | `qd_strSfcErrorMessage` | `qd_strApiTechMessage` | `ZdsTextarea` readOnly | FLD-043 / script M2 |
-| Payload Enviado (JSON) | `qd_strPayloadSent` | — | `ZdsTextarea` readOnly (igual que SCR-004) | FLD-054 |
+| Payload Enviado (JSON) | `qd_strPayloadSent` | — | `ZdsTextarea` readOnly (igual que la ex SCR-004) | FLD-054 |
 | Log técnico completo (modal) | `qd_strCompleteLogAPI` | — | `ZdsTextarea` readOnly | script M2 |
 
 > **Campos retirados de la UI** (ningún script los emite, salían siempre vacíos):
@@ -82,7 +82,7 @@ Los FLD-040..045 se muestran **si el caso los trae**; como ningún script los es
 > alimenta la píldora "Señalado por la SFC" de S2 y las tres viajan en el `completeTask`. La
 > fecha/hora del rechazo consta en el log completo (`timestamp` de `_sfc_respons_logs`).
 >
-> El **Payload Enviado** se muestra en S1 en solo lectura (a diferencia de SCR-004, donde es
+> El **Payload Enviado** se muestra en S1 en solo lectura (a diferencia de la ex SCR-004, donde era
 > editable): en SCR-003 la corrección se hace campo por campo en S2 y el body se regenera.
 
 ### S2 — Campos a Corregir (SEC-009, editable) — editor del payload de Momento 2
@@ -137,7 +137,7 @@ Cada campo de catálogo guarda el **código** y sincroniza su compañera `<campo
 |---|---|---|---|
 | Acción/decisión BPMN | `qd_strAction` | `'CORREGIR_REENVIAR' \| 'ESCALAR_SOPORTE'` | Inferido de ACT-003-01 / ACT-003-02 (ver §10) |
 | Payload del reenvío (se vacía al corregir) | `qd_strPayloadSent` | `''` al reenviar | Regla de `opMomento2` (ver §7) |
-| Flag de ajuste de payload | `qd_strPayloadAdjustNeeded` | `'NO'` al reenviar | FLD-058 (compartido con SCR-004) |
+| Flag de ajuste de payload | `qd_strPayloadAdjustNeeded` | `'NO'` al reenviar | FLD-058 (lo compartía con la ex SCR-004) |
 
 ---
 
@@ -183,9 +183,9 @@ Cada campo de catálogo guarda el **código** y sincroniza su compañera `<campo
 
 | Comportamiento | Implementación | Fuente |
 |---|---|---|
-| Panel de error con acento rojo | `FormSection color="var(--z-red)"` (igual que SCR-004) | Anexo02 > SCR-003 > tipo "Panel de error" |
+| Panel de error con acento rojo | `FormSection color="var(--z-red)"` (igual que la ex SCR-004) | Anexo02 > SCR-003 > tipo "Panel de error" |
 | Banner de error 400 funcional | `ZrAlert config="negative"` con el número de intento | Anexo02 > SCR-003 (contexto/criterio de aceptación) |
-| "Ver Log Completo" abre modal | `ACT-003-03`: `ZrButton config="link"` → `ZrModal` (`.modal-wide` + `.modal-scroll-body`) con `qd_strCompleteLogAPI` — mismo patrón que SCR-004 | Anexo02 > SCR-003 > ACT-003-03 |
+| "Ver Log Completo" abre modal | `ACT-003-03`: `ZrButton config="link"` → `ZrModal` (`.modal-wide` + `.modal-scroll-body`) con `qd_strCompleteLogAPI` — mismo patrón que la ex SCR-004 | Anexo02 > SCR-003 > ACT-003-03 |
 | Edición bajo checkbox | Cada fila del payload trae un `ZrCheckbox` "Editar" (estado local de UI, **no** viaja a PM4): desmarcado ⇒ `readOnly`/`disabled`; al desmarcar se restaura el valor original de `task.data` | Requerimiento 2026-08-04 |
 | Desbloqueo en cascada | Marcar "Editar" en departamento o producto deja editables las filas dependientes (municipio / momento / servicio / motivo) | Derivado de las dependencias de catálogo |
 | Píldoras por fila | `ZdsStatusBadge` "Modificado" (valor ≠ original) y "Señalado por la SFC" (la clave del body o su token aparece en `qd_strAffectedField` / el mensaje de error) | Patrón del proyecto |
@@ -223,7 +223,8 @@ Cada campo de catálogo guarda el **código** y sincroniza su compañera `<campo
 - **FLD-040..045 no los emite ningún script.** `Solo Momento 2.php` (`sfcCamposErrorTecnico`)
   escribe `qd_strHttpCode`, `qd_strErrorType`, `qd_strEndpointCalled`, `qd_strApiTechMessage`,
   `qd_strCompleteLogAPI`, `qd_strAttemptNum` y `qd_strPayloadSent` — el mismo juego que
-  consume SCR-004. Se verificó contra el `task.data` real de un rechazo 400 (caso BPM 216):
+  consumía la ex SCR-004 (eliminada en ago-2026; hoy esta pantalla es la única que lo pinta,
+  pero lo escribe el script de PM4, no el frontend). Se verificó contra el `task.data` real de un rechazo 400 (caso BPM 216):
   los campos propios de SCR-003 llegan ausentes. La pantalla los muestra si existen y, si no,
   cae a esas variables. **Pendiente con TI:** decidir si el script debe emitir además el
   campo afectado y el valor rechazado (hoy solo se pueden inferir del mensaje de la SFC).

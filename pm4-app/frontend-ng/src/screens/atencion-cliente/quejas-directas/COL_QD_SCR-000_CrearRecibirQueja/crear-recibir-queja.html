@@ -1,0 +1,308 @@
+<!-- ── SCR-000 · Crear/Recibir Queja ──────────────────────────────────────────────────────────────────
+     Cuatro estados excluyentes bajo el mismo chrome (`app-pqr-page`), más dos modales.
+
+     El chrome envuelve TODOS los estados, incluidos el de carga y el de error, a propósito: es una
+     página pública, así que un ciudadano que entra con la red lenta o con el backend caído tiene que
+     ver la marca y el titular de Zurich, no un spinner huérfano sobre fondo blanco. En las pantallas
+     embebidas como tarea eso no importa (el chrome de PM4 rodea el iframe); acá no hay nada alrededor. -->
+<app-pqr-page [titulo]="STR_BANNER_TITULO" [intro]="STR_BANNER_INTRO">
+  @if (blnCargando()) {
+    <div class="screen-loading"><lib-loader-z /></div>
+  } @else if (strErrorCarga()) {
+    <app-pqr-section titulo="Radicación PQRs">
+      <!-- Alerta INLINE (`za-alert`), no la cola imperativa de `lib-alert-z`: es una caja que vive
+           donde está escrita. `[hide-close]="true"` porque un error de carga no se descarta — no hay
+           nada debajo que ver. Mismo criterio que SCR-003. -->
+      <za-alert config="negative" [hide-close]="true"
+        >Error al cargar el formulario: {{ strErrorCarga() }}</za-alert
+      >
+    </app-pqr-section>
+  } @else {
+    <!-- ⚠ Un solo `[formGroup]` para la pantalla entera, y las dos secciones reciben ESTE grupo por
+         input en vez de declarar el suyo. Un `[formControlName]` sin `formGroup` ancestro es NG01050
+         en runtime y `tsc` no lo ve; y dos grupos separados dejarían el gate de envío leyendo un
+         objeto distinto del que el usuario está llenando.
+
+         Sin `(ngSubmit)`: `lib-button-z` **no emite submit nativo** (su `type` es la variante visual
+         del DS, no el `type` del `<button>`), así que el único camino real es su `(eventClick)`. Un
+         `(ngSubmit)` acá quedaría colgado sin que nada lo dispare y sin ningún error. -->
+    <form class="pqr-form" [formGroup]="form" novalidate>
+      <!-- ── S1 · Tipo de solicitud y rol del radicador ─────────────────────────────────────────── -->
+      <app-pqr-section titulo="Tipo de solicitud y rol">
+        <div class="form-row cols-1">
+          <zds-select
+            [formControlName]="QD.strRequestType"
+            [name]="QD.strRequestType"
+            label="¿A qué está asociado tu comentario?"
+            [options]="cllTiposSolicitud()"
+            [obligatorio]="true"
+            [error]="mensajeDeError(QD.strRequestType)"
+          />
+        </div>
+
+        <div class="form-row cols-2">
+          <!-- Los tres puntos retirados (móvil, audio respuesta, otros) no se ofrecen — ver la clase.
+               El catálogo completo sigue enganchado al `_desc`, así que un caso histórico con uno de
+               ellos conserva su descripción legible. -->
+          <zds-select
+            [formControlName]="QD.strReceptionPoint"
+            [name]="QD.strReceptionPoint"
+            label="Punto de recepción"
+            [options]="cllPuntosVisibles()"
+            [obligatorio]="true"
+            [error]="mensajeDeError(QD.strReceptionPoint)"
+          />
+          <!-- Sin `[disabled]`: `zds-select` no tiene ese input. El bloqueo es estado del control y lo
+               pone `bloquearInstancia()` — RUL-000-01 la asigna, el ciudadano no la elige. -->
+          <zds-select
+            [formControlName]="QD.strReceptionInstance"
+            [name]="QD.strReceptionInstance"
+            label="Instancia de recepción"
+            [options]="cllInstancias()"
+            helpText="Se asigna automáticamente según tu rol."
+          />
+        </div>
+
+        <div class="form-row cols-2">
+          <zds-select
+            [formControlName]="QD.strFilerRole"
+            [name]="QD.strFilerRole"
+            label="Selecciona tu rol"
+            [options]="cllRoles()"
+            [obligatorio]="true"
+            [error]="mensajeDeError(QD.strFilerRole)"
+          />
+          <!-- RUL-000-01 · la Alianza solo aplica al Empleado Zurich. Cuando no, va un hueco vacío
+               para que "Selecciona tu rol" no se estire a las dos columnas — es lo que hace React. -->
+          @if (blnEsEmpleadoZurich()) {
+            <zds-select
+              [formControlName]="QD.strAlliance"
+              [name]="QD.strAlliance"
+              label="Alianza"
+              [options]="cllAlianzas()"
+            />
+          } @else {
+            <div></div>
+          }
+        </div>
+      </app-pqr-section>
+
+      <!-- ── S2 · Datos del Consumidor Financiero ─────────────────────────────────────────────────
+           `sigValores` viaja como el signal mismo (sin invocarlo): la sección lo lee con `()()` y así
+           depende del valor, no de una foto del momento del binding. -->
+      <app-seccion-consumidor
+        [form]="form"
+        [sigValores]="sigValores"
+        [blnIntentoEnvio]="blnIntentoEnvio()"
+      />
+
+      <!-- ── S3 · Detalle de la queja ──────────────────────────────────────────────────────────── -->
+      <app-seccion-detalle-queja
+        [form]="form"
+        [sigValores]="sigValores"
+        [blnIntentoEnvio]="blnIntentoEnvio()"
+      />
+
+      <!-- ── S4 · Autorización y envío ─────────────────────────────────────────────────────────── -->
+      <app-pqr-section titulo="Autorización y envío">
+        <div class="form-row cols-1">
+          <zds-checkbox-field
+            [formControlName]="QD.blnDataAuth"
+            [name]="QD.blnDataAuth"
+            label="Autorizo el tratamiento de mis datos personales de conformidad a la Política de Privacidad"
+          />
+        </div>
+
+        <!-- El aviso espera el primer intento de envío: pintarlo al abrir la pantalla acusaría al
+             ciudadano de no haber aceptado algo que todavía no leyó. -->
+        @if (blnIntentoEnvio() && !blnAutorizo()) {
+          <za-alert config="alert" [hide-close]="true">
+            Debe aceptar el tratamiento de datos personales para poder radicar su solicitud.
+          </za-alert>
+        }
+
+        <p class="pqr-note">
+          Si deseas recibir una copia de la respuesta en otro correo electrónico, ingrésalo a
+          continuación
+        </p>
+
+        <div class="form-row cols-1">
+          <zds-input
+            [formControlName]="QD.strCcEmail"
+            [name]="QD.strCcEmail"
+            label="Correo electrónico adicional"
+            inputType="email"
+            [error]="mensajeDeError(QD.strCcEmail)"
+          />
+        </div>
+
+        <!-- El captcha. `(expirado)` NO es opcional: el token vive 2 minutos y el widget destilda el
+             checkbox al vencer, así que sin esta mitad la pantalla seguiría creyendo que hay
+             validación humana y el `siteverify` del backend contestaría `timeout-or-duplicate` sobre
+             una casilla que el usuario ve tildada. Ver el ⚠ de `recaptcha-widget.ts`. -->
+        <app-recaptcha-widget
+          (verificado)="alVerificarCaptcha($event)"
+          (expirado)="alExpirarCaptcha()"
+        />
+
+        @if (strErrorEnvio()) {
+          <za-alert config="negative" [hide-close]="true">{{ strErrorEnvio() }}</za-alert>
+        }
+      </app-pqr-section>
+
+      <!-- ── S6 · Responsable asignado ─────────────────────────────────────────────────────────────
+           Solo cuando el caso ya tiene responsable, o sea nunca en una radicación nueva: es la
+           sección que ve quien abre la pantalla como tarea sobre un caso ya asignado. -->
+      @if (blnTieneResponsable()) {
+        <app-pqr-section titulo="Responsable asignado">
+          <div class="form-row cols-2">
+            <zds-input
+              [formControlName]="QD.strAssigneeRole"
+              [name]="QD.strAssigneeRole"
+              label="Rol (Grupo)"
+              [readOnly]="true"
+            />
+            <zds-input
+              [formControlName]="QD.strAssignee"
+              [name]="QD.strAssignee"
+              label="Responsable"
+              [readOnly]="true"
+            />
+          </div>
+        </app-pqr-section>
+      }
+
+      <!-- `.pqr-actions` y no `app-action-bar`: esta barra es del ancho de la página pública
+           (`min(1130px, 100%)` centrado), no del ancho de una card de formulario. Es la clase que
+           usa React y ya existe en `shared.css`.
+
+           En los dos botones: `label` es un input (no contenido proyectado), el tamaño y la variante
+           van encadenados en `type`, `[disabled]` es explícito porque su default es `true`, y la
+           acción va por `(eventClick)`. -->
+      <div class="pqr-actions">
+        <lib-button-z
+          label="Limpiar queja"
+          type="secondary"
+          [disabled]="false"
+          (eventClick)="limpiarFormulario()"
+        />
+        <lib-button-z
+          label="Enviar PQR"
+          type="positive"
+          icon="send:line"
+          [disabled]="blnRadicando() || blnEnviando() || !blnPuedeEnviar()"
+          (eventClick)="enviar()"
+        />
+      </div>
+    </form>
+  }
+
+  <!-- Overlay de radicación: cubre la cadena entera (similares → verify → envío), que son entre dos y
+       cuatro viajes al backend. Sin él, el formulario queda interactivo y un segundo clic en "Enviar
+       PQR" radicaría el caso dos veces. -->
+  @if (blnRadicando()) {
+    <div class="loading-overlay">
+      <lib-loader-z />
+      <p>Radicando tu solicitud...</p>
+    </div>
+  }
+</app-pqr-page>
+
+<!-- ── MSG-000-08 · el resumen de la radicación exitosa ─────────────────────────────────────────────
+     Va FUERA de `app-pqr-page` porque es un overlay de página completa y no una pieza del flujo del
+     formulario.
+
+     ⚠ Las tres reglas duras del contrato de slots de `ModalZ`, las tres con fallas silenciosas:
+     1. El contenido va en `<ng-template libZTemplate id="…">`; un hijo directo NO se pinta.
+     2. El `id` es un atributo ESTÁTICO (`@Attribute('id')`, se resuelve una sola vez): un `[id]="…"`
+        llega `null` y el slot queda sin asignar.
+     3. El `ng-template` NO puede estar dentro de un `@if`: `ngAfterContentInit` corre una vez, y la
+        pantalla monta con los dos modales CERRADOS. El `@if` va ADENTRO del slot.
+     Los ids reales son `title`, `content` y `buttons` — no `header`/`footer`.
+
+     El `(close)` tampoco es opcional: `ModalZ.change()` escribe `this.open = false` sobre su propio
+     input, así que sin bajar la bandera de la pantalla el modal no vuelve a abrirse nunca. -->
+<lib-modal-z [open]="blnEnviado()" tamanio="m" (close)="volverAlInicio()">
+  <ng-template libZTemplate id="content">
+    @if (blnEnviado()) {
+      <div class="pqr-modal-head">
+        <!-- El color del ícono lo pone la clase, no un `style` en línea: el proyecto no admite
+             estilos ad-hoc, y el par fondo+color del círculo es un patrón (lo comparten los dos
+             modales de esta pantalla) que ya vive en `.pqr-modal-icon--info/--warning`. -->
+        <span class="pqr-modal-icon pqr-modal-icon--info">
+          <za-icon icon="check:line" config="l" />
+        </span>
+        <div>
+          <h4 class="pqr-modal-title">¡PQR enviada exitosamente!</h4>
+          <p class="pqr-modal-text">
+            Tu solicitud ha sido radicada con éxito. A continuación el resumen:
+          </p>
+        </div>
+      </div>
+
+      <div class="pqr-summary">
+        @for (objFila of cllResumen(); track objFila.label) {
+          <div class="pqr-summary-row">
+            <span class="pqr-summary-label">{{ objFila.label }}</span>
+            <span class="pqr-summary-value">{{ objFila.value }}</span>
+          </div>
+        }
+      </div>
+    }
+  </ng-template>
+
+  <ng-template libZTemplate id="buttons">
+    <lib-button-z
+      label="Ir al inicio"
+      type="primary:l"
+      icon="arrow-right:line"
+      [disabled]="false"
+      (eventClick)="volverAlInicio()"
+    />
+  </ng-template>
+</lib-modal-z>
+
+<!-- ── El aviso de casos similares ─────────────────────────────────────────────────────────────────
+     Es un aviso, no un bloqueo: el ciudadano tiene derecho a radicar igual, y "Continuar" es la salida
+     afirmativa. `(close)` cae en "No continuar" porque cerrar con la X o con Escape es una negativa:
+     tratarla como confirmación radicaría el caso duplicado que este modal existe para evitar. -->
+<lib-modal-z [open]="!!objAvisoSimilares()" tamanio="m" (close)="cancelarSimilares()">
+  <ng-template libZTemplate id="content">
+    @if (objAvisoSimilares()) {
+      <div class="pqr-modal-head">
+        <span class="pqr-modal-icon pqr-modal-icon--warning">
+          <za-icon icon="alert-triangle:line" config="l" />
+        </span>
+        <div>
+          <h4 class="pqr-modal-title">Encontramos casos similares</h4>
+          <p class="pqr-modal-text">{{ strTextoSimilares() }}</p>
+        </div>
+      </div>
+
+      <div class="pqr-summary">
+        @for (strLinea of cllLineasSimilares(); track strLinea) {
+          <div class="pqr-summary-row pqr-summary-row--single">
+            <span class="pqr-summary-value">{{ strLinea }}</span>
+          </div>
+        }
+      </div>
+    }
+  </ng-template>
+
+  <ng-template libZTemplate id="buttons">
+    <div z-flex="75" z-align="right:center">
+      <lib-button-z
+        label="No continuar"
+        type="secondary"
+        [disabled]="false"
+        (eventClick)="cancelarSimilares()"
+      />
+      <lib-button-z
+        label="Continuar"
+        type="primary"
+        [disabled]="false"
+        (eventClick)="confirmarSimilares()"
+      />
+    </div>
+  </ng-template>
+</lib-modal-z>

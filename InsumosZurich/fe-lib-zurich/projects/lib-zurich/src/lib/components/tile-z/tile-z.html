@@ -1,0 +1,25 @@
+<div class="flex-with">
+  <za-tile custom-str="width:100%" [config]="imgLeft? 'left': ''">
+    <img slot="image-src" [src]="img" alt />
+    <span slot="header">
+      <ng-template [ngTemplateOutlet]="title"></ng-template>
+    </span>
+
+    <div class="content">
+      <ng-template [ngTemplateOutlet]="content"></ng-template>
+    </div>
+
+    <div slot="actions">
+      @if (customButtons) {
+      <ng-template [ngTemplateOutlet]="buttons"></ng-template>
+      } @else {
+      <lib-button-z
+        type="secondary:xs"
+        [disabled]="false"
+        [label]="nameButton"
+        (eventClick)="eventButtonClick($event)"
+      ></lib-button-z>
+      }
+    </div>
+  </za-tile>
+</div>

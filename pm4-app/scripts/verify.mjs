@@ -25,12 +25,19 @@
  * Runner de los pasos de Node/npm (ver `detectarRunnerNode`): host si tiene la versión
  * correcta, `pm4-app-container` si no. Se decide POR PASO, no una vez para todo el script, así
  * que también beneficia un `npm run verify` corrido a mano, no solo el de los hooks. El host
- * se prefiere sobre Docker cuando los dos están disponibles: `App.smoke.test.tsx` es
- * intermitente dentro del contenedor bajo el pool de workers de Vitest compitiendo por I/O
- * contra el bind mount de Windows, y 100% estable corriendo nativo (confirmado: 3/3 corridas
- * en host, 478/478 tests, contra 1-4 fallos variables por corrida dentro de Docker). El
- * contenedor sigue siendo un respaldo válido —trae garantizada la versión correcta de Node—
- * nunca la primera opción.
+ * se prefiere sobre Docker cuando los dos están disponibles: trae la misma versión de Node sin
+ * el costo de I/O del bind mount de Windows. El contenedor sigue siendo un respaldo válido
+ * —también garantiza el major correcto— nunca la primera opción.
+ *
+ * CORREGIDO (ago-2026): este encabezado atribuía la intermitencia de `App.smoke.test.tsx` al
+ * contenedor, y por lo tanto la preferencia por el host se leía como su mitigación. Era un
+ * diagnóstico equivocado. La causa real vivía en el propio test: sus `waitFor` usaban el
+ * default de 1000 ms de RTL mientras el `testTimeout` de vitest.config.ts es 15_000, así que
+ * bajo contención del pool de workers abandonaban la espera con 14 s de presupuesto sin usar.
+ * Reprodujo también en host al sumar los pasos de `frontend-ng` (más carga en la misma
+ * máquina), lo que descartó a Docker como factor. Arreglado alineando los dos timeouts, con la
+ * mutación que lo confirma documentada en el comentario de ese `waitFor`. Si vuelve a aparecer
+ * intermitencia ahí, el sospechoso ya no es el contenedor.
  */
 
 import { spawnSync } from 'node:child_process';
@@ -47,29 +54,49 @@ const STR_DIR_RAIZ = path.resolve(path.dirname(fileURLToPath(import.meta.url)), 
 const NUM_NODE_MAJOR_REQUERIDO = 24;
 const STR_CONTENEDOR = 'pm4-app-container';
 
+// Imagen del fallback de `pytest` (ver detectarPython). Versión fijada, no `python:alpine`: un
+// tag flotante haría que el gate cambie de intérprete sin que nadie lo decida, que es
+// exactamente el drift que el major fijo de Node evita del otro lado.
+const STR_IMAGEN_PYTHON = 'python:3.12-alpine';
+
 const blnVerbose = process.argv.includes('--verbose');
 const blnSoloListar = process.argv.includes('--list');
 
 /**
- * Intérprete de Python con `pytest` disponible, o `null` si no hay ninguno.
+ * Dónde correr `pytest`: host si hay un intérprete con pytest, imagen efímera de Docker si no.
+ * Devuelve `{ modo, detalle }` con `modo: null` cuando no hay ninguna de las dos.
  *
  * Se sondea en vez de asumirlo: en Windows es normal no tener Python instalado, y bloquear
- * cada commit del frontend por eso sería absurdo. Si no está, el paso se SALTA con aviso
- * ruidoso — CI siempre lo corre, así que la cobertura del cotizador nunca se pierde de
- * verdad, solo se retrasa hasta el PR.
+ * cada commit del frontend por eso sería absurdo.
  *
- * Sin fallback a Docker a propósito, a diferencia de `detectarRunnerNode`: el cotizador vive
- * en su propio contenedor (`cotizador-service-container`, ver docker-compose.yml), que no es
- * el mismo que corre Node, y sumarle esa segunda ruta de detección no está pedido por nada
- * de lo que motivó este cambio (la flake era de Vitest/jsdom, no de pytest). Queda como
- * mejora futura independiente si hace falta.
+ * ── Por qué hay fallback a Docker, y por qué es una imagen efímera y no un contenedor ────────
+ * Este comentario decía que no había fallback porque "el cotizador vive en su propio contenedor
+ * (`cotizador-service-container`, ver docker-compose.yml)". **Eso ya no es cierto**: hoy
+ * `docker-compose.yml` declara UN solo servicio (`pm4-app`), así que ese contenedor no existe y
+ * la razón para no tener fallback se cayó con él. En una máquina sin permisos para instalar
+ * Python —el caso real que motivó esto— el paso quedaba saltado para siempre.
+ *
+ * Por eso el fallback usa `docker run --rm python:3.12-alpine`, que no depende de que ningún
+ * servicio esté levantado: monta el directorio del cotizador y se borra al terminar. Instala las
+ * dependencias en el mismo comando porque la imagen base no las trae (ver `STR_CMD_PYTEST_DOCKER`),
+ * lo que cuesta unos segundos por corrida — aceptable para un paso que hoy no corre nunca, y el
+ * lugar natural para optimizarlo es una imagen propia si algún día molesta.
+ *
+ * El orden host → docker → skip es el mismo de `detectarRunnerNode`, a propósito: dos criterios
+ * distintos para "dónde corro esto" serían una divergencia más para mantener.
  */
 function detectarPython() {
   for (const strCmd of ['python', 'python3', 'py']) {
     const objProbe = spawnSync(`${strCmd} -m pytest --version`, { stdio: 'ignore', shell: true });
-    if (objProbe.status === 0) return strCmd;
+    if (objProbe.status === 0) return { modo: 'host', detalle: strCmd };
   }
-  return null;
+
+  // `docker info` y no `docker --version`: el binario puede existir con el daemon apagado, y en
+  // ese caso el `docker run` de abajo fallaría con un error que parecería un test roto.
+  const objDocker = spawnSync('docker', ['info'], { stdio: 'ignore' });
+  if (objDocker.status === 0) return { modo: 'docker', detalle: STR_IMAGEN_PYTHON };
+
+  return { modo: null, detalle: null };
 }
 
 /**
@@ -95,9 +122,36 @@ function detectarRunnerNode() {
   return { modo: null, detalle: null };
 }
 
-const STR_PYTHON = detectarPython();
+const OBJ_RUNNER_PYTHON = detectarPython();
 const OBJ_RUNNER_NODE = detectarRunnerNode();
 const STR_DIR_COTIZADOR = path.join(STR_DIR_RAIZ, 'cotizador-service');
+
+/**
+ * El `pytest` del cotizador dentro de una imagen efímera (ver detectarPython).
+ *
+ * Tres decisiones que no son obvias al leerlo:
+ * - **`-v "<dir>:/app"`** monta el cotizador del host, así que el contenedor corre el código del
+ *   working tree — no una copia. Es lo que hace que el paso sirva como gate y no como museo.
+ * - **`sh -c` con el `pip install` adelante** porque `python:3.12-alpine` no trae pytest ni las
+ *   dependencias del servicio. `-q` en los dos comandos para no ensuciar la salida del gate.
+ * - **`requirements-dev.txt` si existe, si no `requirements.txt`**, resuelto DENTRO del shell del
+ *   contenedor (`[ -f ... ]`) y no acá con `existsSync`: así la decisión la toma el árbol montado
+ *   en el momento de correr, que es el único estado que importa.
+ *
+ * Verificado que el `-f` llega a `pytest` en los tres casos (sin ningún requirements, solo
+ * `requirements.txt`, y ambos): el `&&`/`||` está agrupado en `{ ... }` para que un `[ -f ]` falso
+ * no aborte la cadena, y el exit code que sale es el de `pytest`, que es el que lee el gate.
+ *
+ * **Ojo si lo copiás a mano en Git Bash:** MSYS reescribe `/app` a una ruta de Windows y docker
+ * responde `the working directory '...' is invalid`. Hay que prefijar `MSYS_NO_PATHCONV=1`. Desde
+ * acá no pasa —`spawnSync` no pasa por ese shell— así que es una trampa de depuración manual, no
+ * del script.
+ */
+const STR_CMD_PYTEST_DOCKER = [
+  `docker run --rm -v "${STR_DIR_COTIZADOR}:/app" -w /app ${STR_IMAGEN_PYTHON}`,
+  `sh -c "pip install -q pytest && { [ -f requirements-dev.txt ] && pip install -q -r requirements-dev.txt`,
+  `|| { [ -f requirements.txt ] && pip install -q -r requirements.txt; }; }; python -m pytest -q"`,
+].join(' ');
 
 /**
  * Los pasos, en orden de costo creciente: lo que falla barato falla primero.
@@ -105,13 +159,39 @@ const STR_DIR_COTIZADOR = path.join(STR_DIR_RAIZ, 'cotizador-service');
  * `lint` y `typecheck` tardan segundos y atrapan la mayoría de los errores de tipeo, así que
  * van antes de los builds y de los ~13s de la suite de jsdom.
  */
+/**
+ * ── El estado de los DOS frontends después de la Fase 7 ─────────────────────────────────────────
+ *
+ * La Fase 7 cerró la migración: **el frontend desplegado es Angular** (`frontend-ng`). React
+ * (`frontend`) ya no se buildea en el deploy —salió del script `build` de la raíz— ni lo sirve el
+ * backend, pero **sigue en el árbol** como referencia de paridad viva mientras el usuario valida el
+ * despliegue en la nube.
+ *
+ * Por eso sus tres pasos siguen acá y no se borraron: mientras el código exista, tiene que compilar
+ * y pasar sus tests, porque un React roto silenciosamente deja de servir para comparar justo cuando
+ * hace falta. Van con `saltarPorque` condicionado a que la carpeta exista, así que el día que se
+ * borre el gate sigue verde sin tener que tocar este archivo en ese mismo commit — que es
+ * exactamente el tipo de acoplamiento que hace que un borrado "simple" salga rojo por otra causa.
+ *
+ * El `lint` de `frontend-ng` incluye su propio `tsc --noEmit`, así que no necesita paso de typecheck
+ * aparte.
+ */
+// `STR_DIR_RAIZ` es `pm4-app/` (este script vive en `pm4-app/scripts/`), no la raíz del repo.
+const STR_DIR_REACT = path.join(STR_DIR_RAIZ, 'frontend');
+const STR_SALTO_REACT = !existsSync(STR_DIR_REACT)
+  ? 'el workspace `frontend` (React) ya no está en el árbol — retirado tras la Fase 7'
+  : null;
+
 const CLL_PASOS = [
-  { nombre: 'lint · frontend',     cmd: 'npm run lint --workspace=frontend' },
+  { nombre: 'lint · frontend',     cmd: 'npm run lint --workspace=frontend',  saltarPorque: STR_SALTO_REACT },
+  { nombre: 'lint · frontend-ng',  cmd: 'npm run lint --workspace=frontend-ng' },
   { nombre: 'lint · backend',      cmd: 'npm run lint --workspace=backend' },
   { nombre: 'typecheck · backend', cmd: 'npm run typecheck --workspace=backend' },
-  { nombre: 'build · frontend',    cmd: 'npm run build --workspace=frontend' },
+  { nombre: 'build · frontend',    cmd: 'npm run build --workspace=frontend', saltarPorque: STR_SALTO_REACT },
+  { nombre: 'build · frontend-ng', cmd: 'npm run build --workspace=frontend-ng' },
   { nombre: 'build · backend',     cmd: 'npm run build --workspace=backend' },
-  { nombre: 'test · frontend',     cmd: 'npm run test --workspace=frontend' },
+  { nombre: 'test · frontend',     cmd: 'npm run test --workspace=frontend',  saltarPorque: STR_SALTO_REACT },
+  { nombre: 'test · frontend-ng',  cmd: 'npm run test --workspace=frontend-ng' },
   { nombre: 'test · backend',      cmd: 'npm run test --workspace=backend' },
   // Los utilitarios de scripts/ no pertenecen a ningún workspace, así que necesitan su propio
   // paso: agregarlos al script `test` del package.json no tendría efecto acá, porque esta lista
@@ -119,16 +199,21 @@ const CLL_PASOS = [
   { nombre: 'test · scripts',      cmd: 'npm run test:scripts' },
   {
     nombre: 'test · cotizador (pytest)',
-    cmd: `${STR_PYTHON ?? 'python'} -m pytest -q`,
+    // Host: el intérprete detectado, con el cwd del servicio. Docker: una imagen efímera que monta
+    // ese mismo directorio (el `-w /app` de adentro hace de cwd, así que `cwd` acá es indistinto).
+    cmd: OBJ_RUNNER_PYTHON.modo === 'docker'
+      ? STR_CMD_PYTEST_DOCKER
+      : `${OBJ_RUNNER_PYTHON.detalle ?? 'python'} -m pytest -q`,
     cwd: STR_DIR_COTIZADOR,
     // Nunca se delega a `pm4-app-container` (ver detectarRunnerNode): ese contenedor no trae
-    // Python, y el fallback de este paso es su propio criterio de host-only + skip, no Docker.
+    // Python. Este paso tiene su propio runner —host o imagen efímera— resuelto en el `cmd`.
     blnEsPython: true,
-    // Se salta —con aviso— si no hay Python con pytest, o si el servicio no está en el árbol.
+    // Se salta —con aviso— si el servicio no está en el árbol, o si no hay NI Python NI Docker.
+    // El orden importa: sin el directorio, qué runner haya es irrelevante.
     saltarPorque: !existsSync(STR_DIR_COTIZADOR)
       ? 'no existe cotizador-service/ en este árbol'
-      : !STR_PYTHON
-        ? 'no hay Python con pytest en el PATH (CI sí lo corre; instalá: pip install -r cotizador-service/requirements-dev.txt)'
+      : OBJ_RUNNER_PYTHON.modo === null
+        ? 'no hay Python con pytest en el PATH ni Docker disponible (CI sí lo corre; instalá: pip install -r cotizador-service/requirements-dev.txt, o levantá Docker)'
         : null,
   },
 ];
@@ -156,7 +241,12 @@ const strRunnerNode = OBJ_RUNNER_NODE.modo === 'host'
   : OBJ_RUNNER_NODE.modo === 'docker'
     ? `docker (${OBJ_RUNNER_NODE.detalle})`
     : 'SIN RUNNER — pasos Node saltados';
-console.log(`[verify] ${CLL_PASOS.length} pasos · node/npm: ${strRunnerNode}${STR_PYTHON ? ` · python: ${STR_PYTHON}` : ''}`);
+// El runner de Python se nombra igual que el de Node —modo + detalle— para que el banner diga de
+// dónde salió cada mitad del gate sin tener que leer el script.
+const strRunnerPython = OBJ_RUNNER_PYTHON.modo
+  ? ` · python: ${OBJ_RUNNER_PYTHON.modo} (${OBJ_RUNNER_PYTHON.detalle})`
+  : '';
+console.log(`[verify] ${CLL_PASOS.length} pasos · node/npm: ${strRunnerNode}${strRunnerPython}`);
 
 const cllSaltados = [];
 const intInicioTotal = Date.now();

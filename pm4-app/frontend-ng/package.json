@@ -1,0 +1,49 @@
+{
+  "name": "frontend-ng",
+  "version": "0.0.0",
+  "private": true,
+  "scripts": {
+    "ng": "ng",
+    "dev": "node scripts/gen-env-define.mjs && ng serve",
+    "start": "node scripts/gen-env-define.mjs && ng serve",
+    "build": "node scripts/gen-env-define.mjs && ng build",
+    "watch": "node scripts/gen-env-define.mjs && ng build --watch --configuration development",
+    "lint": "node scripts/gen-env-define.mjs && eslint src --max-warnings=0 && tsc -p tsconfig.app.json --noEmit",
+    "test": "node scripts/gen-env-define.mjs && cross-env TZ=America/Bogota ng test",
+    "test:watch": "node scripts/gen-env-define.mjs && cross-env TZ=America/Bogota ng test --watch",
+    "coverage": "node scripts/gen-env-define.mjs && cross-env TZ=America/Bogota ng test --coverage",
+    "env:gen": "node scripts/gen-env-define.mjs"
+  },
+  "dependencies": {
+    "@angular/common": "21.2.20",
+    "@angular/compiler": "21.2.20",
+    "@angular/core": "21.2.20",
+    "@angular/forms": "21.2.20",
+    "@angular/platform-browser": "21.2.20",
+    "@angular/router": "21.2.20",
+    "@zurich-col/lib-zurich": "file:../../vendor/zurich-angular/zurich-col-lib-zurich-2.6.16.tgz",
+    "@zurich/angular-components": "file:../../vendor/zurich-angular/zurich-angular-components-0.8.2.tgz",
+    "@zurich/css-components": "file:../../vendor/zurich-angular/zurich-css-components-0.8.2.tgz",
+    "@zurich/design-tokens": "file:../../vendor/zurich-angular/zurich-design-tokens-0.8.2.tgz",
+    "@zurich/dev-utils": "file:../../vendor/zurich-angular/zurich-dev-utils-0.8.2.tgz",
+    "@zurich/web-components": "file:../../vendor/zurich-angular/zurich-web-components-0.8.2.tgz",
+    "primeflex": "^4.0.0",
+    "rxjs": "~7.8.0",
+    "tslib": "^2.3.0"
+  },
+  "devDependencies": {
+    "@angular/build": "^21.2.21",
+    "@angular/cli": "^21.2.21",
+    "@angular/compiler-cli": "21.2.20",
+    "@typescript-eslint/parser": "^8.46.0",
+    "@vitest/coverage-v8": "^4.0.8",
+    "angular-eslint": "^21.0.0",
+    "cross-env": "^7.0.3",
+    "eslint": "^9.39.0",
+    "jsdom": "^28.0.0",
+    "prettier": "^3.8.1",
+    "typescript": "~5.9.2",
+    "typescript-eslint": "^8.46.0",
+    "vitest": "^4.0.8"
+  }
+}

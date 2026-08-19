@@ -1,0 +1,125 @@
+<!-- ── S2 · Datos del Consumidor Financiero ──────────────────────────────────────────────────────
+     Todos los campos van bajo un solo `[formGroup]`: es el form de la PANTALLA, no una copia. El
+     `name` de cada uno no es redundante con `formControlName` — produce el `id="field-<name>"` que
+     `scrollToFirstError()` necesita para saltar al primer campo en rojo. -->
+<app-pqr-section titulo="Datos del Consumidor Financiero" [formGroup]="form()">
+  <!-- Identificación + tipo de persona derivado. El tercer hueco es de SOLO LECTURA: el tipo de
+       persona lo decide el tipo de documento (RUL-000-02/03), no el ciudadano. -->
+  <div class="form-row cols-3">
+    <!-- Sin buscador: `zds-select` no tiene `withSearch` y React sí lo usaba acá. Reportado. -->
+    <zds-select
+      [formControlName]="QD.strIdType"
+      [name]="QD.strIdType"
+      label="Tipo de identificación"
+      [options]="cllTiposDocumento()"
+      [obligatorio]="true"
+      [error]="mensajeDeError(QD.strIdType)"
+    />
+    <zds-input
+      [formControlName]="QD.strIdNumber"
+      [name]="QD.strIdNumber"
+      label="Número de identificación"
+      [obligatorio]="true"
+      [error]="mensajeDeError(QD.strIdNumber)"
+    />
+    <app-pqr-readonly label="Tipo de persona" [valor]="strTipoPersonaDesc()" />
+  </div>
+
+  <!-- Persona natural (RUL-000-03) — el modelo guarda nombres y apellidos completos, un campo cada
+       uno, no primer/segundo por separado. -->
+  @if (!blnEsJuridica()) {
+    <div class="form-row cols-2">
+      <zds-input
+        [formControlName]="QD.strFirstName"
+        [name]="QD.strFirstName"
+        label="Nombres"
+        [obligatorio]="true"
+        [error]="mensajeDeError(QD.strFirstName)"
+      />
+      <zds-input
+        [formControlName]="QD.strLastName"
+        [name]="QD.strLastName"
+        label="Apellidos"
+        [obligatorio]="true"
+        [error]="mensajeDeError(QD.strLastName)"
+      />
+    </div>
+  }
+
+  <!-- Persona jurídica (RUL-000-02) — razón social + la persona de contacto que responde por ella. -->
+  @if (blnEsJuridica()) {
+    <div class="form-row cols-1">
+      <zds-input
+        [formControlName]="QD.strCompanyName"
+        [name]="QD.strCompanyName"
+        label="Razón social"
+        [obligatorio]="true"
+        [error]="mensajeDeError(QD.strCompanyName)"
+      />
+    </div>
+    <div class="form-row cols-2">
+      <zds-input
+        [formControlName]="QD.strContactFirstName"
+        [name]="QD.strContactFirstName"
+        label="Nombres de la persona de contacto"
+        [obligatorio]="true"
+        [error]="mensajeDeError(QD.strContactFirstName)"
+      />
+      <zds-input
+        [formControlName]="QD.strContactLastName"
+        [name]="QD.strContactLastName"
+        label="Apellidos de la persona de contacto"
+        [obligatorio]="true"
+        [error]="mensajeDeError(QD.strContactLastName)"
+      />
+    </div>
+  }
+
+  <div class="form-row cols-2">
+    <zds-input
+      [formControlName]="QD.strEmail"
+      [name]="QD.strEmail"
+      label="Correo"
+      inputType="email"
+      [obligatorio]="true"
+      [error]="mensajeDeError(QD.strEmail)"
+    />
+    <zds-input
+      [formControlName]="QD.strPhone"
+      [name]="QD.strPhone"
+      label="Celular"
+      inputType="tel"
+      [obligatorio]="true"
+      [error]="mensajeDeError(QD.strPhone)"
+    />
+  </div>
+
+  <div class="form-row cols-2">
+    <zds-select
+      [formControlName]="QD.strDepartment"
+      [name]="QD.strDepartment"
+      label="Departamento"
+      [options]="cllDepartamentos()"
+      [obligatorio]="true"
+      [error]="mensajeDeError(QD.strDepartment)"
+    />
+    <!-- Sin `[disabled]`: `zds-select` no tiene ese input (el `disable` que declara la lib nunca se
+         lee). El bloqueo mientras no haya departamento es el estado del control, que
+         `sincronizarBloqueoMunicipio()` gobierna. -->
+    <zds-select
+      [formControlName]="QD.strCity"
+      [name]="QD.strCity"
+      label="Municipio"
+      [options]="cllMunicipios()"
+      [placeholder]="strPlaceholderMunicipio()"
+      [loading]="blnCargandoMunicipios()"
+      [obligatorio]="true"
+      [error]="mensajeDeError(QD.strCity)"
+    />
+  </div>
+
+  <!-- Variables de back sin campo visible, que viajan con su default por los efectos de la clase:
+       País (RUL-000-10, fijo en Colombia), Dirección (FLD-319, vacía pendiente API SFC), Sexo
+       (FLD-320, "No Aplica"), LGBTIQ+ (FLD-321, "No") y Condición especial (FLD-322, "No aplica").
+       Los tres últimos se resuelven contra su catálogo, no con un código fijo — ver la clase. -->
+</app-pqr-section>

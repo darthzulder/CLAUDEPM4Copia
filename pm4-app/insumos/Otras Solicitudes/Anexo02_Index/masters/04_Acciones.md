@@ -16,21 +16,12 @@
 | ACT-006-03 | SCR-006 | Ver Respuesta | Enlace | Fila con ¿Respondida? = Sí | Abre popup con el análisis técnico del responsable y el link de descarga de soportes internos. | — (permanece en SP02-T03) |
 | ACT-006-04 | SCR-006 | Guardar Borrador | Secundaria | Siempre | Guarda el progreso de la respuesta sin avanzar el flujo. | — |
 | ACT-006-05 | SCR-006 | Enviar a Aprobación | Primaria | plantillaSeleccionada y respuestaFinal con mín 100 car. | Envía la respuesta final al Líder SAC para aprobación. | SP05-T05 Aprobación Líder SAC |
-| ACT-007-01 | SCR-007 | Registrar y Avanzar | Primaria | analisisFondo, posicionZurich y respuestaDP no vacíos | Registra el análisis y la respuesta en el expediente. Habilita SP05. | SP05 Preparar Respuesta Final |
-| ACT-007-02 | SCR-007 | Guardar Borrador | Secundaria | Siempre | Guarda el progreso sin avanzar el flujo. | — |
-| ACT-007-03 | SCR-007 | Cancelar | Secundaria | Siempre | Descarta los cambios. | — |
-| ACT-008-01 | SCR-008 | Registrar y Avanzar | Primaria | respuestaInfo no vacío | Registra la información en el expediente y avanza al SP05. | SP05 Preparar Respuesta Final |
-| ACT-008-02 | SCR-008 | Guardar Borrador | Secundaria | Siempre | Guarda el progreso sin avanzar. | — |
-| ACT-008-03 | SCR-008 | Cancelar | Secundaria | Siempre | Descarta los cambios. | — |
-| ACT-008-04 | SCR-008 | Enviar Solicitud | Primaria | usuarioResponsable seleccionado | Envía la solicitud de información adicional al responsable y la agrega al Historial de Solicitudes (S3). | — (permanece en SP03-SP02) |
-| ACT-008-05 | SCR-008 | Ver Respuesta | Enlace | Fila con ¿Respondida? = Sí | Abre popup con el análisis técnico, las acciones ejecutadas y el link de descarga de soportes internos. | — (permanece en SP03-SP02) |
-| ACT-009-01 | SCR-009 | Confirmar Modificación | Primaria | Evidencia adjuntada cuando modificacion = Sí | Registra la evidencia y avanza al SP05 si viable. | SP05 Preparar Respuesta Final |
-| ACT-009-02 | SCR-009 | Registrar No Viabilidad | Secundaria | modificacionViable = No y motivo ingresado | Registra el motivo de no viabilidad y avanza al SP05. | SP05 Preparar Respuesta Final |
-| ACT-009-03 | SCR-009 | Cancelar | Destructiva | Siempre | Descarta los cambios. | — |
-| ACT-009-04 | SCR-009 | Enviar Solicitud | Primaria | usuarioResponsable seleccionado | Envía la solicitud de información adicional al responsable y la agrega al Historial de Solicitudes (S4). | — (permanece en SP03-SP03) |
-| ACT-009-05 | SCR-009 | Ver Respuesta | Enlace | Fila con ¿Respondida? = Sí | Abre popup con el análisis técnico, las acciones ejecutadas y el link de descarga de soportes internos. | — (permanece en SP03-SP03) |
-| ACT-009-06 | SCR-009 | Guardar Borrador | Secundaria | Siempre | Guarda el progreso de la verificación sin avanzar el flujo. | — |
-| ACT-010-01 | SCR-010 | Registrar y Determinar Comunicación | Primaria | Campos de análisis completados y requiereComunicacion seleccionado | Si Sí → SP05. Si No → cierre interno. | SP05 o Cierre interno |
-| ACT-010-02 | SCR-010 | Cancelar | Secundaria | Siempre | Descarta los cambios. | — |
+| ACT-081-01 | SCR-081 | Enviar a Aprobación | Primaria | plantillaSeleccionada y respuestaFinal ≥ 100 car. y sección del subtipo completa | Envía la respuesta final a aprobación del Líder SAC. | SP05-T05 Aprobar respuesta |
+| ACT-081-02 | SCR-081 | Guardar Borrador | Secundaria | Siempre | Guarda el progreso sin avanzar. | — |
+| ACT-081-03 | SCR-081 | Cancelar | Secundaria | Siempre | Descarta los cambios. | — |
+| ACT-081-04 | SCR-081 | Enviar Solicitud | Primaria | usuarioResponsable seleccionado | Envía la solicitud de información adicional al responsable y la agrega al Historial de Solicitudes (S3). | — (permanece en SP03) |
+| ACT-081-05 | SCR-081 | Ver Respuesta | Enlace | Fila con ¿Respondida? = Sí | Abre popup con el análisis técnico, las acciones ejecutadas y el link de descarga de soportes internos. | — (permanece en SP03) |
+| ACT-081-06 | SCR-081 | Registrar No Viabilidad | Secundaria | tipoRequerimiento = Modificación, modificacionViable = No y motivo ingresado | Registra el motivo de no viabilidad y continúa a la redacción de la respuesta final. | SP05-T05 Aprobar respuesta |
+| ACT-010-01 | SCR-010 | Cerrar Sugerencia/Felicitación | Primaria | Siempre habilitada (la pantalla no tiene campos editables) | Cierra el caso de sugerencia / felicitación y lo entrega a SP06 para la notificación al cliente. | SP06 Cierre y Notificación al Cliente |
 | ACT-012-01 | SCR-012 | Aprobar Respuesta | Primaria | Siempre | Aprueba la respuesta. El sistema genera el PDF final y avanza al SP06. | SP05-T07 → SP06 Cierre |
 | ACT-012-02 | SCR-012 | Devolver con Observaciones | Secundaria | obsLiderSAC no vacío | Devuelve con observaciones al Gestor de Experiencia para ajuste. | SP05-T06 Ajuste Respuesta |

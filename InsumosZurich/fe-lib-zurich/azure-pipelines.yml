@@ -1,0 +1,168 @@
+# Pipeline de Azure DevOps para proyecto Angular
+# Compila, empaqueta y publica artefactos
+
+trigger:
+  branches:
+    include:
+      - main
+      - develop
+      - release/*
+
+pool:
+  vmImage: 'ubuntu-latest'
+
+variables:
+  nodeVersion: '20.x'
+  projectName: 'lib-angular'
+  buildConfiguration: 'production'
+  artifactName: $(projectName)
+  feedName: 'Librerias-estandar'  # Reemplazar con el nombre de tu feed
+
+stages:
+- stage: Build
+  displayName: 'Build y Empaquetado'
+  jobs:
+  - job: BuildAngular
+    displayName: 'Build Angular App'
+    steps:
+    
+    # Paso 1: Configurar Node.js
+    - task: NodeTool@0
+      displayName: 'Instalar Node.js'
+      inputs:
+        versionSpec: $(nodeVersion)
+    
+    # Paso 2: Instalar dependencias
+    - task: Npm@1
+      displayName: 'npm install'
+      inputs:
+        command: 'install'
+        workingDir: '$(System.DefaultWorkingDirectory)'
+    
+    # Paso 3: Limpiar cache si es necesario (opcional)
+    - task: Npm@1
+      displayName: 'npm cache clean'
+      inputs:
+        command: 'custom'
+        customCommand: 'cache clean --force'
+      continueOnError: true
+    
+    # Paso 4: Build del proyecto Angular
+    - task: Npm@1
+      displayName: 'Build Angular - Producción'
+      inputs:
+        command: 'custom'
+        customCommand: 'run build -- --configuration=$(buildConfiguration)'
+        workingDir: '$(System.DefaultWorkingDirectory)'
+    
+    # Paso 5: Comprimir carpeta dist en ZIP
+    - task: ArchiveFiles@2
+      displayName: 'Comprimir dist a ZIP'
+      inputs:
+        rootFolderOrFile: '$(System.DefaultWorkingDirectory)/dist'
+        includeRootFolder: false
+        archiveType: 'zip'
+        archiveFile: '$(Build.ArtifactStagingDirectory)/$(artifactName).zip'
+        replaceExistingArchive: true
+        verbose: true
+    
+    # Paso 6: Publicar como Pipeline Artifact
+    - task: PublishPipelineArtifact@1
+      displayName: 'Publicar Pipeline Artifact'
+      inputs:
+        targetPath: '$(Build.ArtifactStagingDirectory)/$(artifactName).zip'
+        artifact: '$(artifactName)'
+        publishLocation: 'pipeline'
+    
+    # Paso 7: Publicar en Azure Artifacts (Feed)
+    - task: UniversalPackages@0
+      displayName: 'Publicar en Azure Artifacts Feed'
+      inputs:
+        command: 'publish'
+        publishDirectory: '$(Build.ArtifactStagingDirectory)'
+        feedsToUsePublish: 'internal'
+        vstsFeedPublish: '$(feedName)'
+        vstsFeedPackagePublish: '$(projectName)'
+        versionOption: 'custom'
+        versionPublish: '1.0.0'
+        packagePublishDescription: 'Build Angular $(Build.BuildNumber)'
+    
+    # Paso 8: Crear release notes (opcional)
+    - task: PowerShell@2
+      displayName: 'Generar información de build'
+      inputs:
+        targetType: 'inline'
+        script: |
+          Write-Host "================================"
+          Write-Host "Build completado exitosamente"
+          Write-Host "================================"
+          Write-Host "Número de Build: $(Build.BuildNumber)"
+          Write-Host "Rama: $(Build.SourceBranchName)"
+          Write-Host "Commit: $(Build.SourceVersion)"
+          Write-Host "Artefacto: $(artifactName).zip"
+          Write-Host "Feed: $(feedName)"
+          Write-Host "================================"
+          
+          # Crear archivo de metadatos
+          $metadata = @{
+              BuildNumber = "$(Build.BuildNumber)"
+              Branch = "$(Build.SourceBranchName)"
+              Commit = "$(Build.SourceVersion)"
+              Date = Get-Date -Format "yyyy-MM-dd HH:mm:ss"
+              ArtifactName = "$(artifactName).zip"
+          }
+          
+          $metadata | ConvertTo-Json | Out-File -FilePath "$(Build.ArtifactStagingDirectory)/build-info.json"
+    
+    # Paso 9: Publicar metadatos como artefacto adicional (opcional)
+    - task: PublishPipelineArtifact@1
+      displayName: 'Publicar metadatos de build'
+      inputs:
+        targetPath: '$(Build.ArtifactStagingDirectory)/build-info.json'
+        artifact: 'build-metadata'
+        publishLocation: 'pipeline'
+      continueOnError: true
+
+- stage: Validation
+  displayName: 'Validación Post-Build'
+  dependsOn: Build
+  condition: succeeded()
+  jobs:
+  - job: ValidateArtifacts
+    displayName: 'Validar Artefactos'
+    steps:
+    
+    # Descargar y validar el artefacto publicado
+    - task: DownloadPipelineArtifact@2
+      displayName: 'Descargar artefacto para validación'
+      inputs:
+        buildType: 'current'
+        artifactName: '$(artifactName)'
+        targetPath: '$(Pipeline.Workspace)/validation'
+    
+    - task: PowerShell@2
+      displayName: 'Validar archivo ZIP'
+      inputs:
+        targetType: 'inline'
+        script: |
+          $zipPath = "$(Pipeline.Workspace)/validation/$(artifactName).zip"
+          
+          if (Test-Path $zipPath) {
+              $fileInfo = Get-Item $zipPath
+              Write-Host "✅ Archivo ZIP encontrado: $($fileInfo.Name)"
+              Write-Host "   Tamaño: $([math]::Round($fileInfo.Length / 1MB, 2)) MB"
+              
+              # Verificar que el archivo no esté vacío
+              if ($fileInfo.Length -eq 0) {
+                  Write-Error "❌ El archivo ZIP está vacío"
+                  exit 1
+              }
+              
+              Write-Host "✅ Validación exitosa"
+          } else {
+              Write-Error "❌ No se encontró el archivo ZIP"
+              exit 1
+          }
+
+
+

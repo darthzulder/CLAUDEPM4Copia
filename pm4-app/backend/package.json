@@ -2,7 +2,7 @@
   "name": "backend",
   "private": true,
   "scripts": {
-    "dev": "tsx watch src/server.ts",
+    "dev": "cross-env NODE_EXTRA_CA_CERTS=../certs/zurich-ssldecrypt.pem tsx watch src/server.ts",
     "prebuild": "node -e \"require('node:fs').rmSync('dist',{recursive:true,force:true})\"",
     "build": "tsc",
     "typecheck": "tsc -p tsconfig.check.json",
@@ -26,6 +26,7 @@
     "@types/node": "^24.0.0",
     "@typescript-eslint/parser": "^8.62.0",
     "@vitest/coverage-v8": "^4.1.10",
+    "cross-env": "^7.0.3",
     "eslint": "^10.5.0",
     "tsx": "^4.22.4",
     "typescript": "^5.9.3",

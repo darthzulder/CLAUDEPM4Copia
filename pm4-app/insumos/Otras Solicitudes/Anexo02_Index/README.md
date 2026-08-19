@@ -1,6 +1,6 @@
 # Índice de Mockups y Especificaciones TO-BE (Anexo 02) — Otras Solicitudes
 
-Este directorio contiene una versión indexada en Markdown del archivo Excel `Anexo02_Mockups_TOBE_OtrasSolicitudes_v3_1.xlsx`. Fue diseñado para facilitar la búsqueda, lectura y análisis de las pantallas, campos, reglas y mensajes por parte de desarrolladores y Modelos de Inteligencia Artificial (IA).
+Este directorio contiene una versión indexada en Markdown del archivo Excel `Anexo02_Mockups_TOBE_OtrasSolicitudes_v3_2.xlsx`. Fue diseñado para facilitar la búsqueda, lectura y análisis de las pantallas, campos, reglas y mensajes por parte de desarrolladores y Modelos de Inteligencia Artificial (IA).
 
 > Proceso: **Gestión de Otras Solicitudes** (Derechos de Petición, Solicitudes de Información, Modificaciones, Sugerencias/Felicitaciones y Vulneración de Datos) — Servicio de Atención al Consumidor Financiero, Zurich Colombia.
 > El índice equivalente para el otro proceso vive en [`../../Quejas directas/Anexo02_Index/`](../../Quejas%20directas/Anexo02_Index/).
@@ -43,9 +43,7 @@ A continuación se listan las pantallas del proceso, agrupadas por su rol y tare
 | [SCR-004](screens/SCR-004.md) | Formulario de Reporte a SIC (Vulneración Datos) ⚠️ | Formulario regulatorio — PENDIENTE LEGAL | SP01-T03 | Área de Protección de Datos |
 | [SCR-005](screens/SCR-005.md) | Formulario de Análisis de Impacto y Medidas Correctivas | Formulario de análisis de incidente | SP01-T04 | Área de Protección de Datos |
 | [SCR-006](screens/SCR-006.md) | Asignación de Responsable, Historial de Asignaciones y Preparación de Respuesta del DP | Formulario de asignación | SP02-T03 | Gestor de Experiencia |
-| [SCR-007](screens/SCR-007.md) | Formulario de Gestión y Respuesta al DP | Formulario de gestión | SP02-T04 | Gestor de Experiencia / Usuario de Línea 2 |
-| [SCR-008](screens/SCR-008.md) | Formulario de Gestión de Requerimiento de Información | Formulario de gestión de requerimiento | SP03-SP02 | Gestor de Experiencia |
-| [SCR-009](screens/SCR-009.md) | Formulario de Gestión de Solicitud de Modificación | Formulario de modificación | SP03-SP03 | Usuario Zurich Responsable |
+| [SCR-081](screens/SCR-081.md) | Formulario Único de Gestión de Requerimientos (Información, Modificación, Cancelación y Otros) | Formulario único de gestión de requerimiento (4 subtipos) | SP03-SP01 a SP03-SP04 | Gestor de Experiencia / Usuario Zurich Responsable |
 | [SCR-010](screens/SCR-010.md) | Formulario de Registro de Sugerencia / Felicitación | Formulario de registro | SP04-T02 | Gestor de Experiencia |
 | [SCR-012](screens/SCR-012.md) | Pantalla de Aprobación de Respuesta Final | Formulario de aprobación | SP05-T05 | Líder SAC |
 
@@ -54,7 +52,7 @@ A continuación se listan las pantallas del proceso, agrupadas por su rol y tare
 
 ## Cómo Actualizar este Índice
 
-Este índice se autogenera a partir del archivo Excel utilizando un script de Python. Si realizas cambios en el archivo Excel `Anexo02_Mockups_TOBE_OtrasSolicitudes_v3_1.xlsx`, puedes regenerar todo el índice de la siguiente manera:
+Este índice se autogenera a partir del archivo Excel utilizando un script de Python. Si realizas cambios en el archivo Excel `Anexo02_Mockups_TOBE_OtrasSolicitudes_v3_2.xlsx`, puedes regenerar todo el índice de la siguiente manera:
 
 1. Asegúrate de tener instalados `pandas` y `openpyxl`:
    ```bash

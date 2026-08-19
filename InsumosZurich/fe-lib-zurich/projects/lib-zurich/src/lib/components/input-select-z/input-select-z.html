@@ -1,0 +1,38 @@
+@if (multiSelect) {
+<za-multiselect
+  #selectInput
+  label="{{label}}"
+  [name]="name"
+  [id]="name"
+  [label]="label"
+  [(ngModel)]="model"
+  (ngModelChange)="modelChange.emit(model)"
+  [config]="typeLine? 'line': ''"
+  [required]="required"
+  [invalid]="invalid"
+>
+  @for (item of options; track $index) {
+  <option [value]="item.value">{{item.description}}</option>
+  }
+</za-multiselect>
+} @else {
+<div class="select-wrapper">
+  <za-select
+    #selectInput
+    class="select-absolute"
+    label="{{label}}"
+    [name]="name"
+    [id]="name"
+    [(ngModel)]="model"
+    (ngModelChange)="modelChange.emit(model)"
+    [config]="typeLine? 'line': ''"
+    [required]="required"
+    [invalid]="invalid"
+    help-text="{{helpText}}"
+  >
+    @for (item of options; track $index) {
+    <option [value]="item.value">{{item.description}}</option>
+    }
+  </za-select>
+</div>
+}

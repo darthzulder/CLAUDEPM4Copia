@@ -1,0 +1,151 @@
+<!-- ── S10 · Configuración de Respuesta (SEC-056) ────────────────────────────────────────────────
+     Va primero porque condiciona qué campos se muestran en S8 (RUL-0051-09). Ver la cabecera del
+     componente. -->
+<app-form-section title="Configuración de Respuesta">
+  <div class="form-row cols-2" [formGroup]="form()">
+    <zds-select
+      [formControlName]="QD.strFavorability"
+      [name]="QD.strFavorability"
+      label="Respuesta a favor de"
+      [options]="CLL_FAVOR"
+      [obligatorio]="true"
+      helpText="⚠ Pendiente catálogo (CAT-FAVOR). Indica a quién favorece la resolución."
+    />
+    <!-- Relleno: conserva la grilla de 2 columnas con un solo campo, igual que React. -->
+    <div></div>
+  </div>
+</app-form-section>
+
+<!-- ── S8 · Elaboración de Respuesta Técnica (SEC-054) ───────────────────────────────────────── -->
+<app-form-section title="Elaboración de Respuesta Técnica">
+  <!-- Solo en el reingreso: lo que el Analista SAC devolvió (FLD-131, SCR-008). -->
+  @if (blnDevueltoPorSac()) {
+    <div class="form-row cols-1" [formGroup]="form()">
+      <zds-textarea
+        [formControlName]="QD.strSacRemarks"
+        [name]="QD.strSacRemarks"
+        label="Observaciones SAC"
+        [readOnly]="true"
+        helpText="Devuelto por el Analista SAC en la revisión de respuesta."
+      />
+    </div>
+  }
+
+  <div class="form-row cols-1" [formGroup]="form()">
+    <zds-textarea
+      [formControlName]="QD.strClientResponse"
+      [name]="QD.strClientResponse"
+      label="Respuesta al Cliente (borrador)"
+      [obligatorio]="true"
+      [maxLength]="5000"
+      helpText="Este texto irá en la carta PDF de respuesta final."
+    />
+  </div>
+
+  <!-- RUL-0051-09 · solo con la respuesta a favor del Cliente. -->
+  @if (blnMostrarAcciones()) {
+    <div class="form-row cols-1" [formGroup]="form()">
+      <zds-textarea
+        [formControlName]="QD.strActionsTaken"
+        [name]="QD.strActionsTaken"
+        label="Acciones Tomadas"
+        [maxLength]="2000"
+        helpText="Visible porque la respuesta es a favor del Cliente."
+      />
+    </div>
+  }
+</app-form-section>
+
+<!-- ── S9 · Soportes Internos (SEC-055, FLD-113) ─────────────────────────────────────────────── -->
+<app-form-section title="Soportes Internos">
+  <!-- El cuerpo entero va como columna con gap del DS (`z-flex="col:75"`) en vez de los dos
+       `style={{marginTop}}` que React pone sobre el select de prórroga y la barra de botones. Es lo
+       que manda el eje B de la jerarquía de UI: el espaciado entre bloques apilados es layout y se
+       resuelve con el primitivo, no con márgenes ad-hoc por elemento. Mismo resultado visual (el gap
+       75 es el `--zs-75` que React usaba) y sin estilo en línea.
+
+       El gap 75 es válido: la escala de `z-flex` es 50/75/100/150/200/300/400/600. -->
+  <div z-flex="col:75">
+  <!-- Caja inline (`za-alert`), no `AlertZService`: es el estado permanente de este bloque, no el
+       resultado de una acción, así que vive donde está el contenido que describe. `hide-close` porque
+       no es descartable — la advertencia aplica siempre. -->
+  <za-alert config="info" [hide-close]="true">
+    Estos adjuntos son de uso interno: <strong>no van al cliente ni a la SFC</strong>.
+  </za-alert>
+
+  <!-- Reingreso tras devolución del SAC: los soportes de la vuelta anterior, en solo lectura. Sin
+       esto el gestor no sabe qué ya está cargado y vuelve a adjuntar lo mismo. -->
+  @if (blnDevueltoPorSac()) {
+    <div class="form-row cols-1">
+      <app-request-file-list
+        [requestId]="requestId()"
+        [docKeys]="CLL_CLAVES_SOPORTE"
+        label="Soportes internos ya cargados"
+        emptyText="Aún no se han cargado soportes internos en este caso."
+        loadingText="Buscando soportes internos del caso…"
+      />
+    </div>
+  }
+
+  <!-- ⚠ Extensiones, tope de 5 MB y texto del error son constantes de este componente, no inputs: los
+       soportes de esta pantalla validan con las reglas de SCR-000. Ver la cabecera del .ts. -->
+  <app-doc-support-uploader
+    [form]="form()"
+    [docKeys]="CLL_CLAVES_SOPORTE"
+    title="Adjuntos internos de soporte"
+    [intro]="strIntroSoportes"
+    [max]="INT_MAX_SOPORTES"
+  />
+
+  <!-- ACT-0051-04 · paso 1 de 2: el motivo aparece al pedir prórroga, y el botón de enviar recién con
+       el motivo elegido.
+
+       ⚠ Sin `withSearch`: ese input no existe en `zds-select`. Diferencia de render con React,
+       documentada en la cabecera del .ts y en la ficha. -->
+  @if (blnModoProrroga()) {
+    <div class="form-row cols-1" [formGroup]="form()">
+      <zds-select
+        [formControlName]="QD.strExtensionReason"
+        [name]="QD.strExtensionReason"
+        label="Motivo de la prórroga"
+        [options]="cllMotivosProrroga()"
+        [obligatorio]="true"
+        helpText="Catálogo CAT-MOTIVO-PRORROGA (motivo_prorr)."
+      />
+    </div>
+  }
+
+  <!-- `[disabled]` explícito en los cuatro: el default de `lib-button-z` es `true`. -->
+  <div z-flex="75" z-align="right:center">
+    <lib-button-z
+      label="Vista Previa Respuesta Final"
+      type="secondary"
+      [disabled]="false"
+      (eventClick)="vistaPrevia.emit()"
+    />
+    @if (!blnModoProrroga()) {
+      <!-- RUL-0051-03 · fuera del umbral de SLA la prórroga no se ofrece. -->
+      <lib-button-z
+        label="Solicitar Prórroga Regulatoria"
+        type="secondary"
+        [disabled]="!slaCritico() || enviando()"
+        (eventClick)="abrirModoProrroga()"
+      />
+    } @else {
+      <lib-button-z
+        label="Cancelar"
+        type="secondary"
+        [disabled]="enviando()"
+        (eventClick)="cancelarModoProrroga()"
+      />
+      <lib-button-z
+        label="Enviar Prórroga ▶"
+        type="positive"
+        [disabled]="!blnPuedeEnviarProrroga() || enviando()"
+        [loading]="enviando()"
+        (eventClick)="emitirSolicitarProrroga()"
+      />
+    }
+    </div>
+  </div>
+</app-form-section>
