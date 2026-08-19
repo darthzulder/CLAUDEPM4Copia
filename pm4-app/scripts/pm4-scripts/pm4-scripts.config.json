@@ -17,6 +17,21 @@
         "frontend/src/screens/atencion-cliente/quejas-directas"
       ],
       "scriptsExtra": []
+    },
+    {
+      "id": 36,
+      "carpeta": "proceso-36",
+      "nombre": "COL - Otras Solicitudes - Proceso",
+      "pantallas": [
+        "frontend/src/screens/atencion-cliente/otras-solicitudes"
+      ],
+      "scriptsExtra": [
+        {
+          "uuid": "a2805fe0-fab2-4fc4-bb89-630d6c480845",
+          "titulo": "COL_OS_Check_Similitud",
+          "motivo": "Watcher de casos similares del flujo OS; lo dispara el frontend al crear la solicitud, no es una tarea del proceso."
+        }
+      ]
     }
   ]
 }
