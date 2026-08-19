@@ -278,6 +278,23 @@ seleccionada, evitando vaciar los valores heredados de M1 mientras la matriz aú
 | Carga múltiple de soportes (máx 10) | `doc-support-uploader [intMax]="10"` | FLD-113 |
 | Ver Expediente / Vista Previa | `za-modal` (link / secondary) | ACT-0051-06 / ACT-0051-05 |
 | Estados loading/error/submitting | `za-loader`, `za-alert`, botones `loading/disabled` | CLAUDE.md |
+| **Placa que se repone al volver a Autos** | `limpiarPlaca()` guarda el valor antes de vaciarlo y lo repone si el producto vuelve a ser de Autos y el campo está vacío | ⚠ decisión del usuario (ago-2026) — **no** está en el Anexo |
+
+> **⚠ ago-2026 · la placa es el único punto de esta pantalla donde Angular NO se comporta como
+> React.** El resto de la tanda de correcciones es paridad; esta es una mejora pedida por el usuario.
+> En React (y en Angular hasta ago-2026) salir de un producto de Autos hacía `setValue('')` y el dato
+> se perdía: un gestor que se equivocaba de producto y corregía tenía que volver a tipear una placa
+> que ya había escrito. Ahora el valor se guarda en un campo privado de la sección y se repone al
+> volver.
+>
+> Tres límites que son contrato, y están explicados en `limpiarPlaca()`:
+> - **El stash NO es un control del form.** El payload se arma con `getRawValue()`, que incluye los
+>   deshabilitados, así que un control extra viajaría a PM4 como una variable `qd_*` inexistente. Al
+>   ser estado de UI de la sección, muere con ella: al recargar la pantalla la placa vuelve a ser la
+>   que trae el caso, que es lo correcto.
+> - **Solo repone sobre un campo vacío.** Si el usuario ya tipeó otra placa, lo que él escribió gana.
+> - **La escritura emite** (a diferencia de sus hermanas con `emitEvent: false`), justamente para que
+>   el espejo `sigValores` vea la placa repuesta y la marcación de FLD-156/179 se recalcule.
 
 ---
 
@@ -292,6 +309,8 @@ seleccionada, evitando vaciar los valores heredados de M1 mientras la matriz aú
 | `qd_strSlaAssigned` | banner SLA + "Solicitar Prórroga" | Habilita si el SLA es **calculable** y ≤ 2 (ver §5) | RUL-0051-03 |
 | `qd_lstAssignHistory` | formulario de ayudante | Lo reemplaza por MSG-0051-06 al llegar a 4 | RUL-0051-08 |
 | `qd_strRegulatoryClass` | `qd_strMarking` | Si cambia respecto del snapshot inicial, la marcación pasa a `'2'` | FLD-156/179 |
+| `qd_strSfcProduct` | `qd_strPlate` | Fuera de Autos se vacía (guardando el valor); al volver se repone si está vacío. Requiere el catálogo de productos ya cargado | ⚠ ago-2026, ver §8 |
+| `qd_strPlate` | `qd_strMarking` | Es uno de los cinco campos de clasificación, así que la limpieza de la placa **mueve la marcación a `'2'`** y la reposición la devuelve a la original | FLD-156/179 |
 
 > **⚠ corregido en 2.0 — se cayó una fila y ninguna de las dos primeras dependía de un mapa.** La
 > 1.0 listaba `qd_blnHasAssignee` → "oculta asignación si ya hay responsable"; esa dependencia **no

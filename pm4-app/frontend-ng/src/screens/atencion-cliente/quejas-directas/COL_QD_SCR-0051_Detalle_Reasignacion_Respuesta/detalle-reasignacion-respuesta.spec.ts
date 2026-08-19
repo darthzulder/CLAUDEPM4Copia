@@ -7,6 +7,7 @@ import { cllCamposDeLaFachada } from '../../../../components/fields/contrato-pan
 import { PM4_ENV_FALLBACKS } from '../../../../core/pm4-context.service';
 import {
   QD,
+  QD_COLLECTIONS,
   SCR0051_MAX_AYUDANTES,
   SCR0051_SLA_UMBRAL_PRORROGA,
 } from '../fields/fields';
@@ -193,6 +194,27 @@ async function drenarPeticiones(): Promise<void> {
  */
 let blnGrupoVacio = false;
 
+/**
+ * Cuando está en `true`, el drenado responde el catálogo de productos (colección 16) **con datos** en
+ * vez de `{data: []}`.
+ *
+ * ⚠ Va como bandera y **no** como comportamiento por defecto a propósito. El catálogo vacío es el
+ * escenario de casi todos los casos de este archivo, y sembrarlo para todos cambiaría el entorno de
+ * ~40 casos de una sola vez: con productos cargados `blnIsAutos` empieza a resolver de verdad y
+ * `limpiarPlaca()` deja de cortar en su primera guarda, o sea que la placa pasaría a moverse en casos
+ * que nada tienen que ver con ella. Igual que `blnGrupoVacio`, se resetea en el `beforeEach`.
+ *
+ * Lo consume un solo caso: el ida y vuelta de la marcación de FLD-156/179 a través del stash de la
+ * placa. El resto del stash se prueba montando la sección sola, en `seccion-detalle-caso.spec.ts`.
+ */
+let blnCatalogoProductos = false;
+
+/** `'101'` Autos y `'200'` Hogar. Misma forma que PM4 y que el fixture de la sección. */
+const CLL_PRODUCTOS = [
+  { id: 1, data: { codigo_producto_sfc: '101', nombre_producto_sfc: 'Autos' } },
+  { id: 2, data: { codigo_producto_sfc: '200', nombre_producto_sfc: 'Hogar' } },
+];
+
 async function responderGrupos(): Promise<void> {
   // ⚠ Hacen falta DOS vueltas limpias seguidas para dar el drenado por terminado, no una.
   // `usuariosDeGrupo()` es una cadena de dos GET: al responder el `/groups` el segundo (`/{id}/users`)
@@ -240,6 +262,11 @@ async function responderGrupos(): Promise<void> {
                 },
               ],
         });
+      } else if (
+        blnCatalogoProductos
+        && strUrl === `/api/collections/${QD_COLLECTIONS.sfcProduct.id}/records`
+      ) {
+        objPeticion.flush({ data: CLL_PRODUCTOS });
       } else {
         objPeticion.flush({ data: [] });
       }
@@ -427,6 +454,7 @@ describe('SCR-0051 · Detalle / Reasignación / Respuesta', () => {
     // eslint-disable-next-line @typescript-eslint/no-empty-function
     Element.prototype.scrollIntoView = () => {};
     blnGrupoVacio = false;
+    blnCatalogoProductos = false;
   });
 
   // ── Ruido aceptado: "Error: Not implemented: navigation (except hash changes)" ────────────────
@@ -778,6 +806,37 @@ describe('SCR-0051 · Detalle / Reasignación / Respuesta', () => {
 
     await escribir({ [QD.strPlate]: 'ABC123' });
     expect(objPantalla.form.get(QD.strMarking)?.value).toBe('1');
+  });
+
+  it('FLD-156/179 · el stash de la placa devuelve la marcación al salir y volver de Autos', async () => {
+    // El cruce de las dos reglas, y la razón por la que el stash necesita un caso **acá** y no solo en
+    // el spec de la sección: `strPlate` es uno de los cinco `CLASSIFICATION_FIELDS` que se comparan
+    // contra el `dicOriginal` congelado, así que la limpieza de `limpiarPlaca()` **mueve la marcación**
+    // sin que el usuario haya tocado la placa. Reponerla es lo que la devuelve a la que trajo el caso.
+    //
+    // Sin la reposición esto termina en `'2'`: el caso quedaría marcado como reclasificado solo porque
+    // el gestor se equivocó de producto y corrigió — y la marcación viaja a PM4.
+    //
+    // ⚠ Requiere el catálogo de productos sembrado (ver `blnCatalogoProductos`): con la lista vacía
+    // `blnIsAutos` es `false` por defecto, `limpiarPlaca()` corta en su primera guarda y este caso
+    // pasaría sin ejercitar nada.
+    blnCatalogoProductos = true;
+    await montar({ ...datosTarea(), [QD.strSfcProduct]: '101' });
+    expect(objPantalla.form.get(QD.strMarking)?.value).toBe('1');
+    expect(objPantalla.form.get(QD.strPlate)?.value).toBe('ABC123');
+
+    // Fuera de Autos: la placa se limpia y **por eso** la clasificación difiere del original.
+    await escribir({ [QD.strSfcProduct]: '200' });
+    expect(objPantalla.form.get(QD.strPlate)?.value).toBe('');
+    expect(objPantalla.form.get(QD.strMarking)?.value).toBe('2');
+
+    // De vuelta en Autos: el stash repone la placa y la marcación vuelve sola.
+    await escribir({ [QD.strSfcProduct]: '101' });
+    expect(objPantalla.form.get(QD.strPlate)?.value).toBe('ABC123');
+    expect(
+      objPantalla.form.get(QD.strMarking)?.value,
+      'con la placa repuesta la clasificación coincide con el original y la marcación es 1',
+    ).toBe('1');
   });
 
   // ── RUL-0051-08 · el gate de envío ─────────────────────────────────────────────────────────────
