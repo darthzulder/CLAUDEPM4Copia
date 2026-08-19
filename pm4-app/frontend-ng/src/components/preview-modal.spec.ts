@@ -124,6 +124,31 @@ describe('PreviewModalComponent', () => {
     expect(objFixture.nativeElement.querySelector('.visor-doble')).not.toBeNull();
   });
 
+  it('⚠ anula el padding del modal y aclara el backdrop por custom property (paridad React)', async () => {
+    // El caso del tamaño de la vista previa, y va sobre el `style` **inline** del `lib-modal-z` porque
+    // ahí es donde el DS lee las dos propiedades: su SCSS declara
+    // `padding: var(--z-modal--padding, var(--zs-150))` y `background-color: var(--z-modal--backdrop, …)`
+    // en el `section`/`main` de su shadow DOM, así que el valor tiene que estar en el host para heredar.
+    //
+    // ⚠ Vale un caso propio, aunque parezca cosmético, por dos motivos medidos:
+    //   1. El desajuste que esto arregla se diagnosticó mal una vez. El culpable señalado fue un
+    //      `tamanio="l"` que **no existe en el DS** (ni en `web-components/dist/modal.js` ni en
+    //      `angular-components`): era un atributo inerte. El ancho lo movía el padding heredado, que es
+    //      justo lo que estas dos líneas anulan — y sin test, volver a perderlas no rompe nada visible
+    //      en la suite.
+    //   2. Un `[style.--z-modal--padding]` mal escrito **no da error de compilación**: Angular acepta
+    //      cualquier nombre de propiedad custom y simplemente no aplica nada. El modo de falla es
+    //      silencioso, que es la definición de lo que hay que aseverar.
+    await objFixture.whenStable();
+
+    const objModal = objFixture.nativeElement.querySelector('lib-modal-z') as HTMLElement;
+    expect(objModal.style.getPropertyValue('--z-modal--padding')).toBe('0');
+    // El mismo `color-mix` que pone React en el `style` de su `ZrModal` (`PreviewModal.tsx:27-31`).
+    expect(objModal.style.getPropertyValue('--z-modal--backdrop')).toBe(
+      'color-mix(in srgb, var(--z-modal-backdrop) 55%, transparent)',
+    );
+  });
+
   it('con abierto=false no pinta el cuerpo', async () => {
     // El equivalente del `if (!isOpen) return null` de React. Ojo con la diferencia deliberada: acá el
     // `ng-template` del slot **sigue montado** (ver el ⚠ del componente: si viviera dentro de un `@if`

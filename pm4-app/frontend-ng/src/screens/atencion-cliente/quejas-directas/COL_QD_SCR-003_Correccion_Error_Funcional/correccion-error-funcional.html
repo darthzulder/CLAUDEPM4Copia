@@ -223,8 +223,17 @@
             `@if` va ADENTRO del slot.
          Ver `preview-modal.ts`, que es el ejemplo funcionando, y el punto 3 de zds-reexports.ts.
 
-         `tamanio="l"` y no la clase `.modal-wide` que envuelve React: el ancho lo gobierna el
-         componente del DS. Es lo que hacen las otras tres modales del proyecto.
+         `tamanio="l"` y no la clase `.modal-wide` que envuelve React: se dejó de usar la clase porque
+         el ancho es cosa del componente y no de nuestra hoja, y es lo que hacen las otras modales del
+         proyecto.
+
+         ⚠ ago-2026 · este comentario decía que `tamanio` gobernaba el ancho. **No es cierto, medido**:
+         no existe ningún `tamanio` en `@zurich/web-components/dist/modal.js` ni en
+         `@zurich/angular-components`; llega al DOM como atributo desconocido y no hace nada. El ancho
+         real lo fija el SCSS del modal (`min-width:20vw; max-width:calc(100vw - var(--zs-100))`) más el
+         contenido. Se deja puesto porque quitarlo no cambia nada y está en 8 sitios vivos; lo que NO
+         hay que hacer es apoyarse en él para dimensionar algo. El caso donde esto sí importó y cómo se
+         corrigió está en `components/preview-modal.ts`.
 
          El `(close)` es obligatorio, no opcional: `ModalZ.change()` escribe `this.open = false` sobre
          su propio input, así que sin bajar la bandera de la pantalla el segundo `abrirLog()` no

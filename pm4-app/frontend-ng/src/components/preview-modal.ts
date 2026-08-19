@@ -122,13 +122,37 @@ export interface DocumentoVistaPrevia {
  * `URL.createObjectURL()` local (verificado en SCR-008 y SCR-0051), así que la comprobación no cambia
  * el comportamiento vigente — cambia lo que pasa el día que alguien pase otra cosa. Va con caso de
  * test para las dos ramas.
+ *
+ * ── ⚠ El tamaño: `tamanio="l"` NO existía, y el desajuste era el padding ──────────────────────────
+ * La vista previa se veía más ancha que la de React. El diagnóstico previo —anotado en la ficha de la
+ * SCR-003— era que `tamanio="l"` en `lib-modal-z` se traducía a un `width: 60vw` del DS que le ganaba
+ * al `min(1080px, 94vw)` de `.preview-modal`. **Está mal, medido:** no hay ningún `tamanio` ni ningún
+ * `60vw` en `@zurich/web-components/dist/modal.js` ni en `@zurich/angular-components`. El atributo era
+ * inerte: llegaba al DOM como atributo desconocido y no gobernaba nada.
+ *
+ * El contrato real del modal es su SCSS, y ahí está la diferencia:
+ * `:host>main>section{min-width:20vw; max-width:calc(100vw - var(--zs-100));
+ * padding:var(--z-modal--padding, var(--zs-150)); padding-top:var(--zs-300)}`. O sea que el `section`
+ * suma su padding **alrededor** de un cuerpo que ya mide `min(1080px, 94vw)`, y React lo anula:
+ * `--z-modal--padding: 0` en el `style` de su `ZrModal` (`components/PreviewModal.tsx:27-31`). Con el
+ * padding heredado, el ancho total quedaba `1080px + 2·var(--zs-150)`.
+ *
+ * ⚠ `.preview-modal` es **idéntico byte a byte** entre los dos frontends, así que el CSS propio no
+ * tenía nada que corregir: lo que faltaba portar eran las dos custom properties del `style` de React —
+ * el padding y el `--z-modal--backdrop` más transparente. Van bindeadas y con test, porque un
+ * `[style.--*]` mal escrito no da error de compilación: simplemente no se aplica.
  */
 @Component({
   selector: 'app-preview-modal',
   standalone: true,
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
-    <lib-modal-z [open]="abierto()" tamanio="l" (close)="cerrar.emit()">
+    <lib-modal-z
+      [open]="abierto()"
+      [style.--z-modal--padding]="'0'"
+      [style.--z-modal--backdrop]="STR_BACKDROP"
+      (close)="cerrar.emit()"
+    >
       <!-- Ver el doble aviso del componente: el id va como atributo ESTATICO y este template no
            puede quedar dentro de un @if, porque ModalZ lee los slots una sola vez. -->
       <ng-template libZTemplate id="content">
@@ -161,6 +185,15 @@ export interface DocumentoVistaPrevia {
   imports: [PdfViewerComponent, ZrIcon, ZrModal, ZrTemplate],
 })
 export class PreviewModalComponent {
+  /**
+   * El backdrop más transparente de React (`--z-modal--backdrop` en el `style` de su `ZrModal`).
+   *
+   * Va como constante y no inline en la plantilla porque un `color-mix(...)` con comas dentro de un
+   * binding de plantilla se lee peor y hay que escaparlo.
+   */
+  protected readonly STR_BACKDROP =
+    'color-mix(in srgb, var(--z-modal-backdrop) 55%, transparent)';
+
   private readonly objSanitizador = inject(DomSanitizer);
 
   public readonly abierto = input<boolean>(false);
