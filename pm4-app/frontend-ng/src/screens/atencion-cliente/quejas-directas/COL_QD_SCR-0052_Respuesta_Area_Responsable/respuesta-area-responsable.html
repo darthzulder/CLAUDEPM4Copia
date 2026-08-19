@@ -1,0 +1,300 @@
+@if (blnCargando()) {
+  <div class="screen-wrapper">
+    <div class="screen-loading"><lib-loader-z /></div>
+  </div>
+} @else if (strError()) {
+  <div class="screen-wrapper">
+    <!-- Alerta INLINE (`za-alert`), no la cola imperativa de `lib-alert-z`: es una caja que vive donde
+         está el contenido que describe. `[hide-close]="true"` bindeado y no el atributo pelado: el
+         input está tipado `boolean` y un atributo sin valor vale `''`, que Angular 21 rechaza
+         (`TS2322`). Ver el punto 5b de zds-reexports.ts. -->
+    <za-alert config="negative" [hide-close]="true"
+      >Error al cargar el formulario: {{ strError() }}</za-alert
+    >
+  </div>
+} @else {
+  <div class="screen-wrapper">
+    <!-- Sin subtítulo: React monta el `ScreenHeader` solo con `title`, y agregar uno sería inventar
+         copy que el insumo no tiene. -->
+    <app-screen-header title="Respuesta del Área Responsable" />
+
+    <div class="screen-content">
+      <form [formGroup]="form" (ngSubmit)="enviar()" novalidate>
+        <!-- ── S1 · Datos del Consumidor (solo lectura) ──
+             Los dos primeros campos NO son controles: son valores derivados (`strNombre` fusiona razón
+             social o nombre+apellido, `strIdentificacion` concatena tipo y número), así que van como
+             texto sobre el mismo `zds-field-wrap` que usan los wrappers — es lo que mantiene la altura
+             y el espaciado de la grilla alineados con los campos vecinos. -->
+        <app-form-section title="Datos del Consumidor">
+          <div class="form-row cols-2">
+            <div class="zds-field-wrap">
+              <!-- FLD-066 · "Nombre del Consumidor", el rótulo del anexo y el de React. El borrador de
+                   este port puso "Nombre / Razón Social" —que describe mejor lo que el `strNombre()`
+                   calcula— y era copy inventado: ni el insumo ni el original lo dicen. -->
+              <span class="info-bar-label">Nombre del Consumidor</span>
+              <div class="valor-solo-lectura">
+                <span class="info-bar-value">{{ strNombre() || '—' }}</span>
+              </div>
+            </div>
+
+            <div class="zds-field-wrap">
+              <span class="info-bar-label">Tipo y N.° de Identificación</span>
+              <div class="valor-solo-lectura">
+                <span class="info-bar-value">{{ strIdentificacion() || '—' }}</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="form-row cols-2">
+            <!-- ⚠ `formControlName` **y** `name`, los dos, en todo campo de la fachada. No es
+                 redundancia: `formControlName` es lo que ata el control al `FormGroup` (el wrapper es el
+                 `NG_VALUE_ACCESSOR` de ese `NgControl`), y `name` es lo que la fachada usa para el
+                 `id="field-<name>"` que necesita `scrollToFirstError`. Con solo `name` el campo pinta y
+                 **nunca llega al form**. -->
+            <zds-input
+              formControlName="qd_strEmail"
+              name="qd_strEmail"
+              label="Correo Electrónico"
+              [readOnly]="true"
+            />
+
+            <!-- FLD-315 · el `_desc` viene resuelto en el caso y se pinta tal cual, sin `descOf()`.
+                 ⚠ Va como **campo** (`zds-input` readOnly) y no como texto: es lo que monta React y lo
+                 que el dataset congelado de `paridad-react.spec.ts` declara. Ver el `.ts`. -->
+            <zds-input
+              formControlName="qd_strPersonType_desc"
+              name="qd_strPersonType_desc"
+              label="Tipo de Persona"
+              [readOnly]="true"
+            />
+          </div>
+        </app-form-section>
+
+        <!-- ── S2 · Clasificación de la Queja (solo lectura) ──
+             Los cuatro campos de catálogo se muestran por su etiqueta (`descDe()`), no por el código:
+             a un área responsable el "13" de `qd_strChannel` no le dice nada. El código sigue viajando
+             en el control, que es el contrato con PM4. -->
+        <app-form-section title="Clasificación Regulatoria">
+          <div class="form-row cols-3">
+            <div class="zds-field-wrap">
+              <span class="info-bar-label">Canal de Recepción</span>
+              <div class="valor-solo-lectura">
+                <span class="info-bar-value">{{ descDe('channel') }}</span>
+              </div>
+            </div>
+
+            <div class="zds-field-wrap">
+              <span class="info-bar-label">Producto SFC</span>
+              <div class="valor-solo-lectura">
+                <span class="info-bar-value">{{ descDe('sfcProduct') }}</span>
+              </div>
+            </div>
+
+            <div class="zds-field-wrap">
+              <span class="info-bar-label">Motivo SFC</span>
+              <div class="valor-solo-lectura">
+                <span class="info-bar-value">{{ descDe('sfcReason') }}</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="form-row cols-3">
+            <!-- El `_desc` de la instancia va como campo, igual que el de Tipo de Persona: el back lo
+                 escribe resuelto y esta pantalla no carga esa colección.
+
+                 ⚠ FLD-073 · el anexo rotula este campo **"Instancia / Punto de Recepción"** y React
+                 pone "Instancia de Recepción". Se porta el de React porque la migración no cambia copy
+                 de la app desplegada, y la divergencia queda anotada en la ficha: el punto de recepción
+                 (`qd_strReceptionPoint`) es un campo aparte que esta pantalla nunca mostró. -->
+            <zds-input
+              formControlName="qd_strReceptionInstance_desc"
+              name="qd_strReceptionInstance_desc"
+              label="Instancia de Recepción"
+              [readOnly]="true"
+            />
+
+            <div class="zds-field-wrap">
+              <span class="info-bar-label">Admisión</span>
+              <div class="valor-solo-lectura">
+                <span class="info-bar-value">{{ descDe('admission') }}</span>
+              </div>
+            </div>
+
+            <!-- FLD-332 · el `_desc` viene resuelto en el caso (el back lo escribe desde CAT-ENTE). -->
+            <zds-input
+              formControlName="qd_strControlEntity_desc"
+              name="qd_strControlEntity_desc"
+              label="Ente de Control"
+              [readOnly]="true"
+            />
+          </div>
+        </app-form-section>
+
+        <!-- ── S3 · Descripción de la Queja (solo lectura) ──
+             ⚠ El "Asunto de la Queja" repite el **mismo** `descDe('sfcReason')` que S2 muestra como
+             "Motivo SFC". Está así en React (líneas 231 y 249 del `.tsx`) y se porta tal cual: es una
+             duplicación del original, no un descuido del port. Queda anotada en la ficha. -->
+        <app-form-section title="Descripción de la Queja">
+          <div class="form-row cols-1">
+            <div class="zds-field-wrap">
+              <span class="info-bar-label">Asunto de la Queja</span>
+              <div class="valor-solo-lectura">
+                <span class="info-bar-value">{{ descDe('sfcReason') }}</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="form-row cols-1">
+            <zds-textarea
+              formControlName="qd_strComplaintText"
+              name="qd_strComplaintText"
+              label="Descripción / Texto de la Queja"
+              [readOnly]="true"
+            />
+          </div>
+        </app-form-section>
+
+        <!-- ── S4 · Solicitud de Ayuda (solo lectura) ──
+             Se pinta de la fila del historial indexada por `qd_intHelpNumber - 1` (ver `objSolicitud()`
+             en el `.ts`), no de campos propios de la pantalla.
+
+             ⚠ Sin fila se muestran los cuatro guiones, **no** una alerta de "no hay solicitud": es lo
+             que hace React (`objRequest?.fecha || '—'`, con `objRequest` posiblemente `undefined`) y
+             cambiarlo sería reinterpretar la pantalla. El caso está aseverado en el spec.
+
+             ⚠ La ficha de React documenta esta sección como "Datos de la Asignación (SEC-057)" con tres
+             campos propios (`qd_strAssigneeArea` / `qd_strAssigneeUser` / `qd_strAssignmentRemarks`,
+             FLD-351/352/353). Eso NO es lo que el código envía: la ficha quedó vieja. Se porta el
+             código y la divergencia queda anotada en la ficha nueva. -->
+        <app-form-section title="Solicitud de Ayuda">
+          <div class="form-row cols-2">
+            <div class="zds-field-wrap">
+              <span class="info-bar-label">Fecha de solicitud</span>
+              <div class="valor-solo-lectura">
+                <span class="info-bar-value">{{ objSolicitud()?.fecha || '—' }}</span>
+              </div>
+            </div>
+
+            <div class="zds-field-wrap">
+              <span class="info-bar-label">Solicitado por</span>
+              <div class="valor-solo-lectura">
+                <span class="info-bar-value">{{ objSolicitud()?.de || '—' }}</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="form-row cols-1">
+            <div class="zds-field-wrap">
+              <span class="info-bar-label">Motivo</span>
+              <div class="valor-solo-lectura">
+                <span class="info-bar-value">{{ objSolicitud()?.motivo || '—' }}</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="form-row cols-1">
+            <div class="zds-field-wrap">
+              <span class="info-bar-label">Observaciones</span>
+              <!-- `whiteSpace: pre-wrap` en React: las observaciones del Analista SAC vienen con saltos
+                   de línea y sin esto se leerían como un párrafo corrido. Va como clase, no como estilo
+                   en línea (regla de `shared.css`). -->
+              <div class="valor-solo-lectura">
+                <span class="info-bar-value texto-multilinea">{{
+                  objSolicitud()?.observaciones || '—'
+                }}</span>
+              </div>
+            </div>
+          </div>
+        </app-form-section>
+
+        <!-- ── S5 · Comentario y Adjunto (lo ÚNICO editable de la pantalla) ── -->
+        <app-form-section title="Comentario y Adjunto">
+          <div class="form-row cols-1">
+            <!-- FLD-354 · RUL-0052-01. `[obligatorio]` y no `[required]`: la fachada renombró el input
+                 para no chocar con el atributo nativo. El `[maxLength]` es el contador visual
+                 (`0/2000`); el límite efectivo es el `Validators.maxLength` del `.ts`. -->
+            <zds-textarea
+              formControlName="qd_strAreaComment"
+              name="qd_strAreaComment"
+              label="Comentario"
+              [obligatorio]="true"
+              [maxLength]="2000"
+              [error]="strErrorComentario()"
+              helpText="Comentario visible en el historial del caso."
+            />
+          </div>
+
+          <div class="form-row cols-1">
+            <!-- FLD-355 · adjunto opcional. Las extensiones se pasan explícitas porque el default del
+                 wrapper no incluye `xls`/`xlsx`, que es el formato en el que un área responsable tiene
+                 sus liquidaciones. Ver `cllExtensiones` en el `.ts`. -->
+            <zds-file-input
+              formControlName="qd_strAreaAttach"
+              name="qd_strAreaAttach"
+              label="Adjuntar archivo"
+              [allowedExtensions]="cllExtensiones"
+              [maxSizeMb]="intMaxAdjuntoMb"
+              [errorMessage]="strMensajeExtension"
+              [error]="strErrorAdjunto()"
+              (aceptado)="alAceptarAdjunto($event)"
+              (rechazado)="alRechazarAdjunto($event)"
+            />
+          </div>
+
+          <!-- MSG-0052-01 · RUL-0052-01 — el bloqueo se explica de forma permanente mientras el
+               comentario esté vacío, no solo al intentar enviar: el botón principal está apagado y sin
+               este texto la pantalla no diría por qué. Va DENTRO de la tarjeta, como en React. -->
+          @if (!blnPuedeEnviar()) {
+            <za-alert config="info" [hide-close]="true">
+              Debe escribir un <strong>comentario</strong> antes de enviarlo.
+            </za-alert>
+          }
+        </app-form-section>
+
+        <!-- Error de envío — la tarea NO se completó, así que PM4 no cierra el iframe y el usuario se
+             queda mirando esta pantalla. Por eso el fallo se muestra en vez de tragarse. -->
+        @if (strErrorEnvio()) {
+          <za-alert config="negative" [hide-close]="true">
+            No se pudo enviar: {{ strErrorEnvio() }}
+          </za-alert>
+        }
+
+        <!-- ── Acciones (ACT-0052-01..03, en el orden de la maqueta) ──
+             `lib-button-z` NO es un `<button>` nativo: es un componente del DS que proyecta su label,
+             así que no lleva `type="button"` (su `type` es la *variante* visual) y necesita
+             `[disabled]` explícito porque su default es `true`. Solo la acción principal es
+             `positive`. -->
+        <app-action-bar>
+          <!-- ⚠ `link` con su flecha y **sin** `[disabled]` atado al envío: es como está en React
+               (`config="link" icon="arrow-left:line"`, sin `disabled`). Volver no escribe nada, así que
+               apagarlo mientras se envía dejaría al usuario encerrado si el PUT se cuelga.
+               El `[disabled]="false"` es explícito porque el default del DS es `true`. -->
+          <lib-button-z
+            label="Volver"
+            [type]="'link'"
+            icon="arrow-left:line"
+            [disabled]="false"
+            (eventClick)="volver()"
+          />
+          <!-- ⚠ *Guardar Borrador* NO mira `blnPuedeEnviar()`: guardar a medio escribir es
+               precisamente para lo que sirve. Apagarlo con el comentario vacío dejaría al usuario sin
+               forma de salir de la pantalla conservando lo poco que hubiera escrito. -->
+          <lib-button-z
+            label="Guardar Borrador"
+            [type]="'secondary'"
+            [disabled]="blnEnviando()"
+            [loading]="blnEnviando()"
+            (eventClick)="guardarBorrador()"
+          />
+          <lib-button-z
+            label="Enviar comentario ▶"
+            [type]="'positive'"
+            [disabled]="!blnPuedeEnviar() || blnEnviando()"
+            [loading]="blnEnviando()"
+            (eventClick)="enviar()"
+          />
+        </app-action-bar>
+      </form>
+    </div>
+  </div>
+}

@@ -42,36 +42,16 @@
 | SCR-006 | ¿Los permisos por rol están definidos en la hoja 08_Permisos? | Pendiente | — | BeePM | Mayo 2026 |
 | SCR-006 | ¿La Historia de Usuario tiene las 3 partes: Como / Quiero / Para? | Pendiente | — | BeePM | Mayo 2026 |
 | SCR-006 | ¿El Criterio de Aceptación tiene las 3 partes: Dado que / Cuando / Entonces? | Pendiente | — | BeePM | Mayo 2026 |
-| SCR-007 | ¿Todos los campos obligatorios están identificados en la hoja 03_Campos? | Pendiente | — | BeePM | Mayo 2026 |
-| SCR-007 | ¿Cada campo tiene control UI asignado? | Pendiente | — | BeePM | Mayo 2026 |
-| SCR-007 | ¿Todos los catálogos referenciados existen en la hoja 07_Catalogs? | Pendiente | — | BeePM | Mayo 2026 |
-| SCR-007 | ¿Todas las acciones tienen condición de habilitación y resultado BPMN? | Pendiente | — | BeePM | Mayo 2026 |
-| SCR-007 | ¿Cada campo obligatorio tiene mensaje de error en la hoja 06_Mensajes? | Pendiente | — | BeePM | Mayo 2026 |
-| SCR-007 | ¿Las reglas críticas están documentadas en la hoja 05_Reglas? | Pendiente | — | BeePM | Mayo 2026 |
-| SCR-007 | ¿La pantalla tiene trazabilidad con al menos una tarea BPMN en la hoja 10? | Pendiente | — | BeePM | Mayo 2026 |
-| SCR-007 | ¿Los permisos por rol están definidos en la hoja 08_Permisos? | Pendiente | — | BeePM | Mayo 2026 |
-| SCR-007 | ¿La Historia de Usuario tiene las 3 partes: Como / Quiero / Para? | Pendiente | — | BeePM | Mayo 2026 |
-| SCR-007 | ¿El Criterio de Aceptación tiene las 3 partes: Dado que / Cuando / Entonces? | Pendiente | — | BeePM | Mayo 2026 |
-| SCR-008 | ¿Todos los campos obligatorios están identificados en la hoja 03_Campos? | Pendiente | — | BeePM | Mayo 2026 |
-| SCR-008 | ¿Cada campo tiene control UI asignado? | Pendiente | — | BeePM | Mayo 2026 |
-| SCR-008 | ¿Todos los catálogos referenciados existen en la hoja 07_Catalogs? | Pendiente | — | BeePM | Mayo 2026 |
-| SCR-008 | ¿Todas las acciones tienen condición de habilitación y resultado BPMN? | Pendiente | — | BeePM | Mayo 2026 |
-| SCR-008 | ¿Cada campo obligatorio tiene mensaje de error en la hoja 06_Mensajes? | Pendiente | — | BeePM | Mayo 2026 |
-| SCR-008 | ¿Las reglas críticas están documentadas en la hoja 05_Reglas? | Pendiente | — | BeePM | Mayo 2026 |
-| SCR-008 | ¿La pantalla tiene trazabilidad con al menos una tarea BPMN en la hoja 10? | Pendiente | — | BeePM | Mayo 2026 |
-| SCR-008 | ¿Los permisos por rol están definidos en la hoja 08_Permisos? | Pendiente | — | BeePM | Mayo 2026 |
-| SCR-008 | ¿La Historia de Usuario tiene las 3 partes: Como / Quiero / Para? | Pendiente | — | BeePM | Mayo 2026 |
-| SCR-008 | ¿El Criterio de Aceptación tiene las 3 partes: Dado que / Cuando / Entonces? | Pendiente | — | BeePM | Mayo 2026 |
-| SCR-009 | ¿Todos los campos obligatorios están identificados en la hoja 03_Campos? | Pendiente | — | BeePM | Mayo 2026 |
-| SCR-009 | ¿Cada campo tiene control UI asignado? | Pendiente | — | BeePM | Mayo 2026 |
-| SCR-009 | ¿Todos los catálogos referenciados existen en la hoja 07_Catalogs? | Pendiente | — | BeePM | Mayo 2026 |
-| SCR-009 | ¿Todas las acciones tienen condición de habilitación y resultado BPMN? | Pendiente | — | BeePM | Mayo 2026 |
-| SCR-009 | ¿Cada campo obligatorio tiene mensaje de error en la hoja 06_Mensajes? | Pendiente | — | BeePM | Mayo 2026 |
-| SCR-009 | ¿Las reglas críticas están documentadas en la hoja 05_Reglas? | Pendiente | — | BeePM | Mayo 2026 |
-| SCR-009 | ¿La pantalla tiene trazabilidad con al menos una tarea BPMN en la hoja 10? | Pendiente | — | BeePM | Mayo 2026 |
-| SCR-009 | ¿Los permisos por rol están definidos en la hoja 08_Permisos? | Pendiente | — | BeePM | Mayo 2026 |
-| SCR-009 | ¿La Historia de Usuario tiene las 3 partes: Como / Quiero / Para? | Pendiente | — | BeePM | Mayo 2026 |
-| SCR-009 | ¿El Criterio de Aceptación tiene las 3 partes: Dado que / Cuando / Entonces? | Pendiente | — | BeePM | Mayo 2026 |
+| SCR-081 | ¿Todos los campos obligatorios están identificados en la hoja 03_Campos? | Pendiente | — | Zurich | Ago 2026 |
+| SCR-081 | ¿Cada campo tiene control UI asignado? | Pendiente | — | Zurich | Ago 2026 |
+| SCR-081 | ¿Todos los catálogos referenciados existen en la hoja 07_Catalogs? | Pendiente | — | Zurich | Ago 2026 |
+| SCR-081 | ¿Todas las acciones tienen condición de habilitación y resultado BPMN? | Pendiente | — | Zurich | Ago 2026 |
+| SCR-081 | ¿Cada campo obligatorio tiene mensaje de error en la hoja 06_Mensajes? | Pendiente | — | Zurich | Ago 2026 |
+| SCR-081 | ¿Las reglas críticas están documentadas en la hoja 05_Reglas? | Pendiente | — | Zurich | Ago 2026 |
+| SCR-081 | ¿La pantalla tiene trazabilidad con al menos una tarea BPMN en la hoja 10? | Pendiente | — | Zurich | Ago 2026 |
+| SCR-081 | ¿Los permisos por rol están definidos en la hoja 08_Permisos? | Pendiente | — | Zurich | Ago 2026 |
+| SCR-081 | ¿La Historia de Usuario tiene las 3 partes: Como / Quiero / Para? | Pendiente | — | Zurich | Ago 2026 |
+| SCR-081 | ¿El Criterio de Aceptación tiene las 3 partes: Dado que / Cuando / Entonces? | Pendiente | — | Zurich | Ago 2026 |
 | SCR-010 | ¿Todos los campos obligatorios están identificados en la hoja 03_Campos? | Pendiente | — | BeePM | Mayo 2026 |
 | SCR-010 | ¿Cada campo tiene control UI asignado? | Pendiente | — | BeePM | Mayo 2026 |
 | SCR-010 | ¿Todos los catálogos referenciados existen en la hoja 07_Catalogs? | Pendiente | — | BeePM | Mayo 2026 |

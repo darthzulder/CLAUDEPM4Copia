@@ -1,0 +1,33 @@
+<za-accordion custom-str="outline:0px;summary-margin:{{summaryMargin}}rem">
+  <div slot="summary">
+    @if(titleInput) {
+    <div class="grid">
+      <div class="col-6">
+        <lib-input-text-z
+          label="{{modelInput == '' || modelInput == undefined ? label: ''}}"
+          [lineType]="true"
+          [readonly]="readonlyInput"
+          [(model)]="modelInput"
+          [group]="groupInput"
+          [manualValidation]="true"
+          [valid]="validInput"
+        ></lib-input-text-z>
+      </div>
+      <div class="col-6">
+        <lib-button-z
+          [type]="'link'"
+          [icon]="'edit:line'"
+          [disabled]="false"
+          (eventClick)="changeRead()"
+        ></lib-button-z>
+      </div>
+    </div>
+
+    } @else { {{titleLabel}} }
+  </div>
+  <div class="grid">
+    <div class="col-12">
+      <ng-template [ngTemplateOutlet]="content"></ng-template>
+    </div>
+  </div>
+</za-accordion>

@@ -1,0 +1,5 @@
+.banner-redondeado {
+  z-stage-banner::part(stage-banner) {
+    border-radius: 12px; /* o el valor que necesites */
+  }
+}

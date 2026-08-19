@@ -1,0 +1,181 @@
+<!-- ── S1 · Datos del Consumidor (SEC-047) ───────────────────────────────────────────────────── -->
+<app-form-section title="Datos del Consumidor">
+  <!-- Nombre e identificación llegan ya derivados de la pantalla: son de solo lectura y no tienen
+       control propio, así que van como pares label/valor y no como campos deshabilitados. -->
+  <div class="form-row cols-2">
+    <div class="zds-field-wrap">
+      <span class="info-bar-label">Nombre del Consumidor</span>
+      <div class="valor-solo-lectura">
+        <span class="info-bar-value">{{ nombre() || '—' }}</span>
+      </div>
+    </div>
+    <div class="zds-field-wrap">
+      <span class="info-bar-label">Identificación</span>
+      <div class="valor-solo-lectura">
+        <span class="info-bar-value">{{ identificacion() || '—' }}</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- El correo y el tipo de persona SÍ son campos en React (`<ZdsInput readOnly>`), no texto plano.
+       Pintarlos como par label/valor sería un cambio de render de contrabando — ver el docstring de
+       los `_desc` en la pantalla. -->
+  <div class="form-row cols-2" [formGroup]="form()">
+    <zds-input
+      [formControlName]="QD.strEmail"
+      [name]="QD.strEmail"
+      label="Correo Electrónico"
+      inputType="email"
+      [readOnly]="true"
+    />
+    <zds-input
+      [formControlName]="QD.strPersonType + '_desc'"
+      [name]="QD.strPersonType + '_desc'"
+      label="Tipo de Persona"
+      [readOnly]="true"
+    />
+  </div>
+</app-form-section>
+
+<!-- ── S2 · Clasificación Regulatoria (precargada M1) (SEC-048) ──────────────────────────────── -->
+<app-form-section title="Clasificación Regulatoria (precargada M1)">
+  <!-- El producto va contra un control SATÉLITE (`ui-qd_strSfcProduct`), no contra el campo del caso:
+       la colección 16 repite códigos y el picker indexa por `value`. La traducción al código puro y la
+       escritura del `_desc` están en `vincular()`. Ver la cabecera del componente. -->
+  <div class="form-row cols-2">
+    <div [formGroup]="objGrupoUi">
+      <zds-select
+        [formControlName]="strNombreUiProducto"
+        [name]="strNombreUiProducto"
+        label="Producto SFC (seguro)"
+        [options]="objMatriz.cllInsuranceUi()"
+        placeholder="Seleccione el seguro..."
+        [loading]="objMatriz.blnCargando()"
+        [obligatorio]="true"
+      />
+    </div>
+    <div [formGroup]="form()">
+      <!-- Sin `[disabled]`: `zds-select` no tiene ese input. El bloqueo es el estado del control, que
+           `sincronizarHabilitacion()` gobierna. -->
+      <zds-select
+        [formControlName]="QD.strInteraction"
+        [name]="QD.strInteraction"
+        label="Momento / Interacción"
+        [options]="objMatriz.cllInteraction()"
+        [placeholder]="strPlaceholderMomento()"
+        [loading]="objMatriz.blnCargando()"
+        [obligatorio]="true"
+      />
+    </div>
+  </div>
+
+  <!-- Servicio y placa son condicionales y NO comparten fila en React: cada uno aparece con un `<div />`
+       de relleno que conserva la grilla de 2 columnas. Se porta igual. -->
+  @if (blnEsAsistencias() || blnEsAutos()) {
+    <div class="form-row cols-2" [formGroup]="form()">
+      @if (blnEsAsistencias()) {
+        <zds-select
+          [formControlName]="QD.strServiceProvided"
+          [name]="QD.strServiceProvided"
+          label="Servicio Prestado"
+          [options]="objMatriz.cllService()"
+          placeholder="Seleccione el servicio..."
+          [loading]="objMatriz.blnCargando()"
+          [obligatorio]="true"
+        />
+      } @else {
+        <div></div>
+      }
+      @if (blnEsAutos()) {
+        <zds-input
+          [formControlName]="QD.strPlate"
+          [name]="QD.strPlate"
+          label="Placa del Vehículo"
+        />
+      } @else {
+        <div></div>
+      }
+    </div>
+  }
+
+  <div class="form-row cols-1" [formGroup]="form()">
+    <zds-select
+      [formControlName]="QD.strSfcReason"
+      [name]="QD.strSfcReason"
+      label="Motivo SFC"
+      [options]="objMatriz.cllReason()"
+      [placeholder]="strPlaceholderMotivo()"
+      [loading]="objMatriz.blnCargando()"
+      [obligatorio]="true"
+    />
+  </div>
+
+  <!-- Canal, instancia de recepción y admisión: los tres son "Back" y de solo lectura. Canal y admisión
+       se resuelven contra su catálogo (`descOf`), la instancia viaja como `_desc` porque su catálogo no
+       se carga en esta pantalla. -->
+  <div class="form-row cols-3">
+    <div class="zds-field-wrap">
+      <span class="info-bar-label">Canal de Ingreso</span>
+      <div class="valor-solo-lectura">
+        <span class="info-bar-value">{{ strDescCanal() || '—' }}</span>
+      </div>
+    </div>
+    <div [formGroup]="form()">
+      <zds-input
+        [formControlName]="QD.strReceptionInstance + '_desc'"
+        [name]="QD.strReceptionInstance + '_desc'"
+        label="Instancia de Recepción"
+        [readOnly]="true"
+      />
+    </div>
+    <div class="zds-field-wrap">
+      <span class="info-bar-label">Admisión</span>
+      <div class="valor-solo-lectura">
+        <span class="info-bar-value">{{ strDescAdmision() || '—' }}</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="form-row cols-3" [formGroup]="form()">
+    <zds-input
+      [formControlName]="QD.strControlEntity + '_desc'"
+      [name]="QD.strControlEntity + '_desc'"
+      label="Entidad de Control"
+      [readOnly]="true"
+    />
+    <div></div>
+    <div></div>
+  </div>
+</app-form-section>
+
+<!-- ── S3 · Descripción de la Queja (SEC-049) ────────────────────────────────────────────────── -->
+<app-form-section title="Descripción de la Queja">
+  <!-- El asunto es la etiqueta del motivo, con los dos fallbacks que evitan el flash del código crudo
+       mientras la matriz carga. Ver `strDescMotivo` en el componente. -->
+  <div class="form-row cols-1">
+    <div class="zds-field-wrap">
+      <span class="info-bar-label">Asunto de la Queja</span>
+      <div class="valor-solo-lectura">
+        <span class="info-bar-value">{{ strDescMotivo() }}</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="form-row cols-1" [formGroup]="form()">
+    <zds-textarea
+      [formControlName]="QD.strComplaintText"
+      [name]="QD.strComplaintText"
+      label="Descripción de los Hechos"
+      [readOnly]="true"
+    />
+  </div>
+
+  <!-- Los adjuntos que subió el radicador en SCR-000, filtrados por sus cinco `data_name`. -->
+  <app-request-file-list
+    [requestId]="requestId()"
+    [docKeys]="cllClavesAdjunto"
+    label="Documentos del radicador"
+    emptyText="El radicador no adjuntó documentos."
+    loadingText="Buscando los documentos del caso…"
+  />
+</app-form-section>

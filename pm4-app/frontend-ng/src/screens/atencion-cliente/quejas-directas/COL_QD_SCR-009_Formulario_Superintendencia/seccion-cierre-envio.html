@@ -1,0 +1,67 @@
+<!-- ── S6 · Datos de Cierre Regulatorio (Back, solo lectura) ─────────────────────────────────── -->
+<app-form-section title="Datos de Cierre Regulatorio">
+  <div class="form-row cols-2" [formGroup]="form()">
+    <zds-input
+      [formControlName]="QD.strUpdateDate"
+      [name]="QD.strUpdateDate"
+      label="Fecha de Actualización"
+      [readOnly]="true"
+    />
+    <zds-input
+      [formControlName]="QD.strClosureDate"
+      [name]="QD.strClosureDate"
+      label="Fecha de Cierre"
+      [readOnly]="true"
+    />
+  </div>
+</app-form-section>
+
+<!-- ── S7 · Estado del Envío a SmartSupervision (SFC) ────────────────────────────────────────── -->
+<app-form-section title="Estado del Envío a SmartSupervision (SFC)">
+  <div class="form-row cols-2">
+    <div class="zds-field-wrap">
+      <span class="info-bar-label">Estado del envío a SFC</span>
+      <!-- `.valor-solo-lectura` y no un `style` en línea: es la clase que ya existe para este mismo
+           `margin-top: var(--zs-50)` que React repetía en el JSX (ver shared.css). -->
+      <div class="valor-solo-lectura">
+        <zds-status-badge [variante]="strVariante()">{{ strEstado() }}</zds-status-badge>
+      </div>
+    </div>
+
+    <div class="zds-field-wrap">
+      <span class="info-bar-label">Intentos de envío</span>
+      <div class="valor-solo-lectura">
+        <span class="info-bar-value">{{ strIntentos() }}</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="form-row cols-1" [formGroup]="form()">
+    <zds-input
+      [formControlName]="QD.strSfcCode"
+      [name]="QD.strSfcCode"
+      label="Código SFC / Número de Radicado"
+      [readOnly]="true"
+    />
+  </div>
+
+  @if (strUltimoError()) {
+    <div class="form-row cols-1">
+      <div class="zds-field-wrap">
+        <span class="info-bar-label">Último error registrado</span>
+        <div class="valor-solo-lectura">
+          <span class="info-bar-value">{{ strUltimoError() }}</span>
+        </div>
+      </div>
+    </div>
+  }
+
+  @if (blnRechazado()) {
+    <!-- `[hide-close]="true"` bindeado, no el atributo pelado: `hide-close` es un input del
+         componente y un atributo literal no ejecuta el setter (TS2322 al compilar la plantilla). -->
+    <za-alert config="negative" [hide-close]="true">
+      <strong>Envío rechazado por SFC.</strong> Revise el error indicado y reenvíe una vez corregido
+      en el back.
+    </za-alert>
+  }
+</app-form-section>

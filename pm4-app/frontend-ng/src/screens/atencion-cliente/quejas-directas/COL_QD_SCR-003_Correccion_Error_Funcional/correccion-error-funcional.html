@@ -1,0 +1,256 @@
+@if (blnCargando()) {
+  <div class="screen-wrapper">
+    <div class="screen-loading"><lib-loader-z /></div>
+  </div>
+} @else if (strError()) {
+  <div class="screen-wrapper">
+    <!-- Alerta INLINE (`za-alert`), no la cola imperativa de `lib-alert-z`: es una caja que vive donde
+         está el contenido que describe. `[hide-close]="true"` bindeado y no como atributo pelado — el
+         input está tipado `boolean` y un atributo sin valor vale `''`, que Angular 21 rechaza con
+         TS2322. Ver el punto 5b de `zds-reexports.ts`. -->
+    <za-alert config="negative" [hide-close]="true"
+      >Error al cargar el formulario: {{ strError() }}</za-alert
+    >
+  </div>
+} @else {
+  <div class="screen-wrapper">
+    <app-screen-header title="Corrección Error Funcional M1/M2" />
+
+    <div class="screen-content">
+      <!-- `(ngSubmit)` va a `reenviar()` y NO a `escalar()`: el submit nativo del form (un Enter en
+           cualquier campo) tiene que coincidir con la acción principal. Escalar es la salida de
+           excepción y solo se alcanza por su botón — que un Enter derivara el caso a soporte técnico
+           sería un accidente irreversible desde el lado de PM4. Mismo criterio que SCR-011. -->
+      <form [formGroup]="form" (ngSubmit)="reenviar()" novalidate>
+        <!-- ── S1 · Panel de Error SmartSupervision (SEC, todo de solo lectura) ──
+             Cabecera en rojo porque la sección describe una falla, no un dato de trámite. Token del DS
+             (`--z-red`), nunca un hex (regla 3 de CLAUDE.md). -->
+        <app-form-section title="Panel de Error SmartSupervision" color="var(--z-red)">
+          <!-- ACT-003-03 · el botón va en el slot `[action]`, que `FormSectionComponent` pinta a la
+               derecha del encabezado. El `[disabled]="false"` explícito es OBLIGATORIO: el default de
+               `lib-button-z` es `disabled = true`, así que omitirlo deja el botón muerto. -->
+          <lib-button-z
+            action
+            label="Ver Log Completo"
+            [type]="'link'"
+            icon="file-text:line"
+            [disabled]="false"
+            (eventClick)="abrirLog()"
+          />
+
+          <za-alert config="negative" [hide-close]="true">
+            SmartSupervision <strong>rechazó la radicación (HTTP 400 funcional)</strong> por datos
+            inválidos. Corrija los campos señalados en la sección siguiente y reenvíe — el body se
+            <strong>regenera</strong> con las variables corregidas.
+            <!-- El sufijo del intento solo aparece si el caso trae el dato, igual que el `&&` de React:
+                 sin valor no se inventa un "#". -->
+            @if (strIntento()) {
+              <span> Intento actual <strong>#{{ strIntento() }}</strong>.</span>
+            }
+          </za-alert>
+
+          <!-- ⚠ `formControlName` **y** `name`, los dos, en todo campo de la fachada. No es
+               redundancia: `formControlName` ata el control al `FormGroup` (el wrapper es el
+               `NG_VALUE_ACCESSOR` de ese `NgControl`), y `name` es lo que produce el
+               `id="field-<name>"` que necesita `scrollToFirstError` y lo que pre-crea el control que
+               el `lib-*-z` adopta. Con solo `name` el campo pinta y **nunca llega al form**.
+
+               ⚠ Tres de estos campos son DINÁMICOS (`[formControlName]`/`[name]` con un `computed()`)
+               y esa es la particularidad del porte de esta pantalla: el anexo declara FLD-040..045
+               pero **ningún script los escribe hoy** — `sfcCamposErrorTecnico()` emite el juego que
+               consume SCR-004. Los tres se atan al nombre que el caso REALMENTE trae, con fallback al
+               del anexo. El detalle completo está en la cabecera del .ts. -->
+          <div class="form-row cols-3">
+            <zds-input
+              [formControlName]="nmErrorCode()"
+              [name]="nmErrorCode()"
+              label="Código de Error SFC / HTTP"
+              [readOnly]="true"
+            />
+            <zds-input
+              formControlName="qd_strErrorType"
+              name="qd_strErrorType"
+              label="Tipo de Error"
+              [readOnly]="true"
+            />
+            <zds-input
+              [formControlName]="nmAttempt()"
+              [name]="nmAttempt()"
+              label="Intento N.° actual (M1/M2)"
+              [readOnly]="true"
+            />
+          </div>
+          <div class="form-row cols-1">
+            <zds-input
+              formControlName="qd_strEndpointCalled"
+              name="qd_strEndpointCalled"
+              label="Endpoint Invocado"
+              [readOnly]="true"
+            />
+          </div>
+          <div class="form-row cols-1">
+            <zds-textarea
+              [formControlName]="nmErrorMessage()"
+              [name]="nmErrorMessage()"
+              label="Mensaje de Error SFC"
+              [readOnly]="true"
+              helpText="Mensaje literal devuelto por SmartSupervision — solo lectura."
+            />
+          </div>
+          <div class="form-row cols-1">
+            <!-- El payload es evidencia, NO el editor: se corrige por las variables del caso en S2 y el
+                 script regenera el body. De ahí el `[readOnly]` y el texto de ayuda que lo dice — un
+                 gestor que editara este JSON perdería el cambio, porque `reenviar()` manda
+                 `qd_strPayloadSent: ''` justamente para forzar la regeneración. -->
+            <zds-textarea
+              formControlName="qd_strPayloadSent"
+              name="qd_strPayloadSent"
+              label="Payload Enviado (JSON)"
+              [readOnly]="true"
+              helpText="JSON del body que se envió en el intento fallido — solo lectura. Para corregirlo use la sección Campos a Corregir: el body se regenera con las variables del caso."
+            />
+          </div>
+
+          <!-- **RUL-003-02 / MSG-003-02** (🟡 ADVIERTE, no bloquea) · a partir de 3 intentos conviene
+               escalar. `config="alert"` y no `negative`: es una sugerencia, y el rojo ya lo ocupa el
+               rechazo mismo arriba. Ninguna de las dos acciones queda deshabilitada por esto. -->
+          @if (blnMuchosIntentos()) {
+            <za-alert config="alert" [hide-close]="true">
+              Ha intentado <strong>{{ strIntento() }}</strong> veces. Si el problema persiste,
+              considere <strong>escalar a soporte técnico</strong>.
+            </za-alert>
+          }
+        </app-form-section>
+
+        <!-- ── S2 · Campos a Corregir (editor del payload de Momento 2) ──
+             `[sigValores]` recibe **el signal, no su valor**: la sección lo llama internamente para
+             derivar sus propios computeds, así que pasarle `sigValores()` le entregaría una foto y las
+             filas dejarían de reaccionar. Ver el docstring de su input.
+
+             La pantalla NO provee `CatalogosService` ni `MatrizMotivosService`: los 13 catálogos son un
+             detalle de cómo se pintan estas filas y viven en el `providers` de la sección. El padre no
+             tiene ningún select propio. -->
+        <app-seccion-campos-payload
+          [form]="form"
+          [sigValores]="sigValores"
+          [dicOriginales]="dicOriginales()"
+          [objPayloadEnviado]="objPayloadEnviado()"
+          [strSenalado]="strSenalado()"
+        />
+
+        <!-- ── S2b · FLD-047 · Justificación (opcional; el tope sí se valida) ── -->
+        <app-form-section title="Justificación de la Corrección">
+          <div class="form-row cols-1">
+            <!-- Sin `[obligatorio]`: RUL-003-01 no bloquea el reenvío (ver la cabecera del .ts), así
+                 que este campo es un comentario opcional del gestor. El único corte es el tope de
+                 caracteres, que sí es validador del control porque un texto más largo lo rechazaría la
+                 SFC de todos modos.
+
+                 El detalle de qué campos cambió NO se escribe acá: lo arma `lstCambios()` y viaja en
+                 `qd_strFieldCorrection`, que es la trazabilidad de FLD-046. -->
+            <zds-textarea
+              [formControlName]="QD.strCorrectionJustif"
+              [name]="QD.strCorrectionJustif"
+              label="Justificación de la corrección"
+              [maxLength]="INT_MAX_JUSTIF"
+              [error]="strErrorJustif()"
+              helpText="Comentario opcional del gestor sobre el ajuste aplicado. El detalle de los campos modificados se registra automáticamente."
+            />
+          </div>
+        </app-form-section>
+
+        <!-- ── S3 · FLD-048 · Historial de Intentos (solo lectura) ──
+             ⚠ Va con `lib-table-z` **data-driven** (`[headers]` + `[data]`) y no con el `<table>` crudo
+             que React proyectaba dentro de `ZrTable`: `TableZ` no proyecta markup, arma la tabla desde
+             sus inputs. Es además lo que manda la política de `shared.css` ("gana el componente del
+             DS"), y las filas del historial mapean 1:1 a columnas `{title, key}`.
+
+             ⚠ La tabla queda montada SIEMPRE y el empty state va **afuera**, como bloque hermano: el
+             `<tbody>` de `TableZ` es un `@for (row of viewData)` pelado, **sin rama de lista vacía**
+             (verificado sobre la plantilla del `.mjs`), así que con `data: []` pinta el encabezado y
+             nada más — que es justo la paridad con React, donde los rótulos de columna se ven aunque
+             no haya intentos. Envolver la tabla en un `@if (length)` se los comía. La fila
+             `<td colspan="4" class="record-empty">` de React no tiene equivalente en el componente y
+             tiene que resolverla la pantalla. -->
+        <app-form-section title="Historial de Intentos">
+          <lib-table-z [headers]="cllColumnasHistorial" [data]="cllHistorial()" />
+          @if (!cllHistorial().length) {
+            <div class="record-empty">Sin intentos anteriores registrados</div>
+          }
+        </app-form-section>
+
+        <!-- ── Acciones (ACT-003-01 y ACT-003-02) ──
+             ⚠ Ninguno de los dos se deshabilita por una regla de negocio, solo por el envío en curso, y
+             eso es deliberado: **RUL-003-01 no bloquea** (un 400 funcional puede resolverse sin cambiar
+             ningún dato — ver la cabecera del .ts), y escalar es la salida que el gestor usa cuando la
+             corrección no alcanza, así que condicionarla la volvería inalcanzable en su escenario.
+
+             El `[disabled]` explícito es obligatorio de todos modos: sin él `lib-button-z` nace muerto
+             (su default es `true`).
+
+             Ojo con el reflejo de poner `type="button"` en escalar para que no dispare el `(ngSubmit)`:
+             no hace falta y además no existe. `ButtonZ` no es un `<button>` nativo — su plantilla es un
+             `<za-button>` (custom element de Lit), así que no participa del submit implícito del
+             `<form>`. Y su input `type` es la **variante del DS** (`primary`/`secondary`/`positive`/
+             `link`, que viaja al `[config]` del `za-button`), no el `type` del HTML. -->
+        <app-action-bar>
+          <lib-button-z
+            label="Escalar a Soporte Técnico"
+            [type]="'secondary'"
+            [disabled]="blnEnviando()"
+            [loading]="blnEnviando()"
+            (eventClick)="escalar()"
+          />
+          <lib-button-z
+            label="Corregir y Reenviar ▶"
+            [type]="'positive'"
+            [disabled]="blnEnviando()"
+            [loading]="blnEnviando()"
+            (eventClick)="reenviar()"
+          />
+        </app-action-bar>
+      </form>
+    </div>
+
+    <!-- ── ACT-003-03 · Modal del log completo ──
+         ⚠ Tres reglas duras del contrato de slots de `ModalZ`, las tres con fallas silenciosas:
+         1. El contenido va en `<ng-template libZTemplate id="content">`, no como hijo directo.
+         2. El `id` es un atributo ESTÁTICO: `ModalZ` lo lee con `@Attribute('id')`, que resuelve una
+            sola vez — un `[id]="expr"` llega `null` y el slot queda sin asignar, sin error.
+         3. El `ng-template` NO puede estar dentro de un `@if`: `ngAfterContentInit` corre UNA vez y si
+            el template no está en ese momento, `ModalZ` guarda `undefined` y no vuelve a mirar. Como
+            la pantalla monta con el modal CERRADO, esa es justamente la condición inicial real. El
+            `@if` va ADENTRO del slot.
+         Ver `preview-modal.ts`, que es el ejemplo funcionando, y el punto 3 de zds-reexports.ts.
+
+         `tamanio="l"` y no la clase `.modal-wide` que envuelve React: el ancho lo gobierna el
+         componente del DS. Es lo que hacen las otras tres modales del proyecto.
+
+         El `(close)` es obligatorio, no opcional: `ModalZ.change()` escribe `this.open = false` sobre
+         su propio input, así que sin bajar la bandera de la pantalla el segundo `abrirLog()` no
+         abriría nada. Tampoco hay botón "Cerrar" propio como en React — el `ModalZ` ya pinta su X, y
+         el slot `buttons` quedaría redundante para una modal de solo lectura. -->
+    <lib-modal-z [open]="blnVerLog()" tamanio="l" (close)="cerrarLog()">
+      <ng-template libZTemplate id="content">
+        @if (blnVerLog()) {
+          <h3 class="modal-titulo">Log completo del rechazo funcional</h3>
+          <div class="modal-scroll-body">
+            <!-- `qd_strCompleteLogAPI` es un campo AGREGADO sin FLD en el anexo: lo emite el script de
+                 Momento 2 (§10.5 de la DOCUMENTACION). El modal es hermano del `<form>` en el árbol de
+                 la plantilla, así que este `formControlName` no tiene `formGroup` ancestro y sin el
+                 `[formGroup]` local tiraría **NG01050** en runtime. -->
+            <div [formGroup]="form">
+              <zds-textarea
+                [formControlName]="QD.strCompleteLogAPI"
+                [name]="QD.strCompleteLogAPI"
+                label="Log Completo"
+                [readOnly]="true"
+                [elastic]="true"
+              />
+            </div>
+          </div>
+        }
+      </ng-template>
+    </lib-modal-z>
+  </div>
+}

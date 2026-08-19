@@ -1,0 +1,158 @@
+<!--
+  Pantalla del gate 2. El layout usa los primitivos del DS (`z-flex`, `form-row.cols-*` de
+  shared.css) y NO define ninguna hoja de estilos propia, por la regla 3 de pm4-app/CLAUDE.md:
+  shared.css es la única hoja global permitida y no se crea un styles.css por pantalla.
+-->
+<div class="gate-fachada" z-flex="col:200">
+  <header z-flex="col:75">
+    <h1>Gate 2 · fachada ZdsFields</h1>
+    <p class="Capt-14">
+      Los 8 wrappers de campo montados en un FormGroup real. Esta pantalla existe para verificar a
+      mano lo que jsdom no puede ver: que los componentes del DS <strong>pintan</strong> y que lo que
+      se ve en pantalla es lo que Reactive Forms tiene adentro.
+    </p>
+  </header>
+
+  <!-- El contenedor de alertas del DS: se monta UNA vez y los mensajes se disparan por
+       AlertZService. No recibe el mensaje por input — ver el gotcha 5 de zds-reexports.ts. -->
+  <lib-alert-z />
+
+  <div z-flex="75" z-align="left:center">
+    <lib-button-z label="Precargar (simula PM4)" [disabled]="false" (eventClick)="precargar()" />
+    <lib-button-z label="Marcar todo tocado" [disabled]="false" (eventClick)="tocarTodo()" />
+    <lib-button-z label="Alternar loading" [disabled]="false" (eventClick)="alternarCarga()" />
+    <lib-button-z
+      label="Alternar error de servidor"
+      [disabled]="false"
+      (eventClick)="simularErrorServidor()"
+    />
+    <lib-button-z label="Limpiar" [disabled]="false" (eventClick)="limpiar()" />
+  </div>
+
+  <!-- Estado del form, para comparar contra lo que pinta el DS sin abrir las devtools. -->
+  <div z-flex="100" z-align="left:center">
+    <!-- El texto va como contenido proyectado, no por input: el wrapper usa <ng-content> para dar
+         paridad exacta con el ZrTag de la fachada React. -->
+    <zds-status-badge [variante]="form.valid ? 'success' : 'danger'">
+      {{ form.valid ? 'FormGroup válido' : 'FormGroup inválido' }}
+    </zds-status-badge>
+    <zds-status-badge [variante]="form.touched ? 'info' : 'neutral'">
+      {{ form.touched ? 'tocado' : 'sin tocar' }}
+    </zds-status-badge>
+    @if (blnCargando()) {
+      <lib-loader-z label="Cargando opciones" />
+    }
+  </div>
+
+  <form [formGroup]="form" z-flex="col:150">
+    <div class="form-row cols-2">
+      <zds-input
+        formControlName="qd_strNombre"
+        name="qd_strNombre"
+        label="Nombre completo"
+        placeholder="Escriba y borre para ver el required"
+        helpText="Máx 40 caracteres (Validators.maxLength en el control)"
+        [obligatorio]="true"
+      />
+
+      <!-- inputType="email" trae el ícono `mail-closed:line` por default, igual que en React. -->
+      <zds-input
+        formControlName="qd_strCorreo"
+        name="qd_strCorreo"
+        label="Correo electrónico"
+        inputType="email"
+        placeholder="nombre@zurich.com"
+        [obligatorio]="true"
+        [error]="strErrorServidor()"
+      />
+    </div>
+
+    <div class="form-row cols-2">
+      <!-- `loading` solo cambia el help-text: este select NO se puede deshabilitar (`disable` es un
+           input muerto en la lib). Ver el gotcha en zds-select.ts. -->
+      <zds-select
+        formControlName="qd_strCanal"
+        name="qd_strCanal"
+        label="Canal de ingreso"
+        placeholder="Seleccione un canal..."
+        [options]="cllCanales"
+        [loading]="blnCargando()"
+        [obligatorio]="true"
+      />
+
+      <zds-select
+        formControlName="qd_strDepartamento"
+        name="qd_strDepartamento"
+        label="Departamento"
+        placeholder="Seleccione..."
+        [options]="cllDepartamentos"
+        helpText="Sin required: sirve para ver que un campo válido NO se pinta en rojo cuando otro sí"
+      />
+    </div>
+
+    <zds-textarea
+      formControlName="qd_strDetalle"
+      name="qd_strDetalle"
+      label="Detalle de la solicitud"
+      placeholder="Mínimo 10 caracteres"
+      helpText="El contador de largo sale del par maxLength(bool) + maxNumber(num) de la lib"
+      [maxLength]="500"
+      [obligatorio]="true"
+    />
+
+    <div class="form-row cols-2">
+      <!-- El date NO tiene helpText: el input no existe en la lib (0 ocurrencias). Pasarlo sería
+           ofrecer un prop inerte. -->
+      <zds-date
+        formControlName="qd_strFecha"
+        name="qd_strFecha"
+        label="Fecha del hecho"
+        max="2026-12-31"
+      />
+
+      <zds-radio
+        formControlName="qd_strTipoPersona"
+        name="qd_strTipoPersona"
+        label="Tipo de persona"
+        [options]="cllTiposPersona"
+        [inline]="true"
+      />
+    </div>
+
+    <!-- checkedValue/uncheckedValue: el control guarda 'SI'/'NO' (contrato de texto de PM4) mientras
+         el za-checkbox recibe el booleano que necesita. Es el único wrapper que TRANSFORMA el valor,
+         y por eso el único con FormGroup satélite. -->
+    <zds-checkbox-field
+      formControlName="qd_strAutoriza"
+      name="qd_strAutoriza"
+      label="Autorizo el tratamiento de mis datos personales"
+      helpText="La obligatoriedad la declara requerirTildado('SI') en el control, no el [obligatorio]"
+      checkedValue="SI"
+      uncheckedValue="NO"
+      [obligatorio]="true"
+    />
+
+    <zds-file-input
+      formControlName="qd_strSoporte"
+      name="qd_strSoporte"
+      label="Documento de soporte"
+      [allowedExtensions]="['pdf', 'jpg', 'png']"
+      [maxSizeMb]="5"
+      [error]="strErrorSoporte()"
+      (rechazado)="strErrorSoporte.set($event)"
+      (aceptado)="strErrorSoporte.set('')"
+    />
+
+    <div z-flex="75" z-align="right:center">
+      <lib-button-z label="Volcar el valor del form" [disabled]="false" (eventClick)="enviar()" />
+    </div>
+  </form>
+
+  @if (strResultado()) {
+    <section z-flex="col:75">
+      <h2 class="Capt-14">Valor del FormGroup</h2>
+      <!-- Se compara con lo que se ve en los campos: si difieren, el CVA está mintiendo. -->
+      <pre>{{ strResultado() }}</pre>
+    </section>
+  }
+</div>

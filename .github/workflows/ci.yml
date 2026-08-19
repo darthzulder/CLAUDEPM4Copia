@@ -18,7 +18,7 @@ name: CI
 
 on:
   # Solo las dos ramas de larga vida en `push`, porque las dos son entornos DESPLEGADOS:
-  # `dev` → Render de desarrollo, `main` → Render de producción. Un rojo ahí significa que un
+  # `develop` → Render de desarrollo, `main` → Render de producción. Un rojo ahí significa que un
   # entorno quedó roto, así que la corrida post-merge es la señal que importa.
   #
   # Las ramas de trabajo no van acá: se verifican vía `pull_request`, que además prueba el
@@ -26,7 +26,7 @@ on:
   push:
     branches: [main, develop]
   # Sin filtro de `branches` a propósito: dispara para PRs con cualquier base, así que cubre
-  # igual los `feat/… → dev` del día a día y los `dev → main` de release.
+  # igual los `feat/… → develop` del día a día y los `develop → main` de release.
   pull_request:
 
 # Si se pushea de nuevo a la misma rama, cancelar la corrida anterior en vez de acumular.

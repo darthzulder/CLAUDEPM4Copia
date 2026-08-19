@@ -1,0 +1,182 @@
+@if (blnCargando()) {
+  <div class="screen-wrapper">
+    <div class="screen-loading"><lib-loader-z /></div>
+  </div>
+} @else if (strError()) {
+  <div class="screen-wrapper">
+    <!-- Alerta INLINE (`za-alert`), no la cola imperativa de `lib-alert-z`: es una caja que vive donde
+         está el contenido que describe. `[hide-close]="true"` bindeado y no el atributo pelado: el
+         input está tipado `boolean` y un atributo sin valor vale `''`, que Angular 21 rechaza. -->
+    <za-alert config="negative" [hide-close]="true"
+      >Error al cargar el formulario: {{ strError() }}</za-alert
+    >
+  </div>
+} @else {
+  <div class="screen-wrapper">
+    <!-- Sin subtítulo: React monta el `ScreenHeader` solo con `title`. -->
+    <app-screen-header title="Formulario Superintendencia" />
+
+    <div class="screen-content">
+      <form [formGroup]="form" (ngSubmit)="solicitarEnvio()" novalidate>
+        <!-- ── S2 · Datos del Consumidor — Campos SFC (SEC-029) ──────────────────────────────────
+             Sexo y LGBTIQ+ llegan precargados desde SCR-000 (default "No Aplica"/"No") y acá son
+             seleccionables por el Analista SAC: el select muestra la descripción y guarda el código; su
+             `_desc` compañera viaja sola vía `sincronizarDesc`, sin campo visible propio.
+
+             Producto Digital es editable (colección 25, default "No" = código '2') y Condición Especial
+             sigue siendo Front editable y obligatoria (Excel PQRS V3.0 #23/#26).
+
+             ⚠ El anexo marca FLD-149 Producto Digital como "Back, solo lectura" y el código lo rinde
+             editable. Se porta como está en React —cambiarlo sería arreglar por contrabando en una
+             migración de framework— y queda anotado como divergencia en la ficha. -->
+        <app-form-section title="Datos del Consumidor — Campos SFC">
+          <div class="form-row cols-2">
+            <zds-select
+              [formControlName]="QD.strSex"
+              [name]="QD.strSex"
+              label="Sexo"
+              [options]="cllOpcionesDe('sex')"
+            />
+            <zds-select
+              [formControlName]="QD.strLgbtiq"
+              [name]="QD.strLgbtiq"
+              label="LGBTIQ+"
+              [options]="cllOpcionesDe('lgbtiq')"
+            />
+          </div>
+          <div class="form-row cols-2">
+            <zds-select
+              [formControlName]="QD.strDigitalProduct"
+              [name]="QD.strDigitalProduct"
+              label="Producto Digital"
+              [options]="cllOpcionesDe('digitalProduct')"
+            />
+            <zds-select
+              [formControlName]="QD.strSpecialCondition"
+              [name]="QD.strSpecialCondition"
+              label="Condición Especial"
+              [options]="cllOpcionesDe('specialCondition')"
+              [obligatorio]="true"
+              [error]="strErrorCondEspecial()"
+              helpText="CAT-COND-ESP (Front, obligatorio SFC)."
+            />
+          </div>
+        </app-form-section>
+
+        <!-- ── S3 · Condición de la Queja (SEC-030) ──────────────────────────────────────────────
+             Back / solo lectura, salvo Marcación. "Estado de la Queja o Reclamo" NO se muestra: el
+             campo sigue viajando en el payload (se fuerza a "Cerrada" = '4' en la precarga) pero el
+             gestor no lo ve ni lo edita — ver la cabecera del componente. -->
+        <app-form-section title="Condición de la Queja">
+          <div class="form-row cols-3">
+            <div class="zds-field-wrap">
+              <span class="info-bar-label">Favorabilidad</span>
+              <div class="valor-solo-lectura">
+                <span class="info-bar-value">{{ descDe('favorability') }}</span>
+              </div>
+            </div>
+            <div class="zds-field-wrap">
+              <span class="info-bar-label">Aceptación</span>
+              <div class="valor-solo-lectura">
+                <span class="info-bar-value">{{ descDe('acceptance') }}</span>
+              </div>
+            </div>
+            <div class="zds-field-wrap">
+              <span class="info-bar-label">Rectificación</span>
+              <div class="valor-solo-lectura">
+                <span class="info-bar-value">{{ descDe('rectification') }}</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="form-row cols-3">
+            <div class="zds-field-wrap">
+              <span class="info-bar-label">Desistimiento</span>
+              <div class="valor-solo-lectura">
+                <span class="info-bar-value">{{ descDe('withdrawal') }}</span>
+              </div>
+            </div>
+            <div class="zds-field-wrap">
+              <span class="info-bar-label">Tutela</span>
+              <div class="valor-solo-lectura">
+                <span class="info-bar-value">{{ descDe('tutela') }}</span>
+              </div>
+            </div>
+            <div class="zds-field-wrap">
+              <span class="info-bar-label">Queja Exprés</span>
+              <div class="valor-solo-lectura">
+                <span class="info-bar-value">{{ descDe('expressComplaint') }}</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Marcación tiene etiquetas de opción largas → a ancho completo (cols-1) para que el
+               dropdown no trunque el texto. El `placeholder="-"` es la opción inicial sin valor.
+
+               ⚠ El anexo marca FLD-156 Marcación como "Back, solo lectura" y acá es editable, igual
+               que en React. Anotado como divergencia en la ficha. -->
+          <div class="form-row cols-1">
+            <zds-select
+              [formControlName]="QD.strMarking"
+              [name]="QD.strMarking"
+              label="Marcación"
+              [options]="cllOpcionesDe('marking')"
+              placeholder="-"
+            />
+          </div>
+        </app-form-section>
+
+        <!-- ── S4 Datos de Fraude · S5 Anexos del Formulario ─────────────────────────────────── -->
+        <app-seccion-fraude-anexos
+          [form]="form"
+          [sigValores]="sigValores"
+          [requestId]="objTarea()?.process_request_id ?? null"
+        />
+
+        <!-- ── S6/S7 · Cierre Regulatorio M3 (fusionado desde la ex SCR-010) ─────────────────── -->
+        <app-seccion-cierre-envio [form]="form" [sigValores]="sigValores" />
+
+        <!-- MSG-009-02 — bloqueo si faltan los editables obligatorios. -->
+        @if (!blnPuedeEnviar()) {
+          <za-alert config="info" [hide-close]="true">
+            <span>
+              Complete <strong>Condición Especial</strong>, los indicadores de anexos@if (blnEsFraude()) {
+                y los <strong>datos de fraude</strong> (tipo, modalidad y montos)
+              } antes de enviar.
+            </span>
+          </za-alert>
+        }
+
+        <!-- ── Acciones: Guardar Borrador (ACT-009-02) y Enviar (ACT-009-03) ─────────────────────
+             `[disabled]` explícito en los dos: el default de ButtonZ es `true`, así que un botón sin
+             el binding nace deshabilitado. -->
+        <app-action-bar>
+          <lib-button-z
+            label="Guardar Borrador"
+            [type]="'secondary'"
+            [disabled]="blnEnviando()"
+            [loading]="blnEnviando()"
+            (eventClick)="guardarBorrador()"
+          />
+          <lib-button-z
+            [label]="strRotuloEnviar()"
+            [type]="'positive'"
+            [disabled]="!blnPuedeEnviar() || blnEnviando()"
+            [loading]="blnEnviando()"
+            (eventClick)="solicitarEnvio()"
+          />
+        </app-action-bar>
+      </form>
+    </div>
+
+    <!-- Popup de confirmación previo al envío (el envío cierra el caso). Monta SIEMPRE: los slots de
+         `lib-modal-z` se indexan una única vez en `ngAfterContentInit`, así que detrás de un `@if`
+         abriría vacío. El `@if` va adentro del slot — ver la cabecera del modal. -->
+    <app-confirmar-envio-modal
+      [abierto]="blnMostrarConfirmacion()"
+      [enviando]="blnEnviando()"
+      (atras)="cerrarConfirmacion()"
+      (confirmar)="confirmarEnvio()"
+    />
+  </div>
+}

@@ -9,19 +9,19 @@ Dos ramas de larga vida, y **cada una es un entorno desplegado**. Eso es lo que 
 cada gate: un rojo en cualquiera de las dos significa que un entorno quedó roto.
 
 ```
-feat/…  fix/…  chore/…  ──PR──►  dev   ──►  Render de DESARROLLO (pruebas)
-                    dev  ──PR──►  main  ──►  Render de PRODUCCIÓN
+feat/…  fix/…  chore/…  ──PR──►  develop  ──►  Render de DESARROLLO (pruebas)
+                develop  ──PR──►  main     ──►  Render de PRODUCCIÓN
 ```
 
-De ahí sale la **rama base** de cada cambio: `dev` para el trabajo normal, `main` para un release
+De ahí sale la **rama base** de cada cambio: `develop` para el trabajo normal, `main` para un release
 o un `hotfix/*`. La regla vive en un solo lugar —[`pm4-app/scripts/integration-base.mjs`](../../pm4-app/scripts/integration-base.mjs)—
 y la consumen el hook `pre-push` y el informe de cobertura, para que no haya dos versiones de la
 verdad. Se puede pisar en local con `git config pm4.integrationBase <rama>`.
 
-> **Por qué se calcula en vez de estar fija.** Cablearla a `main` daba un falso verde: `dev`
-> contiene todo `main`, así que cualquier rama salida de `dev` cumple "contiene main" por
+> **Por qué se calcula en vez de estar fija.** Cablearla a `main` daba un falso verde: `develop`
+> contiene todo `main`, así que cualquier rama salida de `develop` cumple "contiene main" por
 > construcción, y el chequeo felicitaba sin haber mirado nada — mientras la pregunta real, *¿estoy
-> atrás de `dev`?*, quedaba sin responder.
+> atrás de `develop`?*, quedaba sin responder.
 
 ## Los cuatro anillos
 
@@ -41,7 +41,7 @@ En eventos `pull_request`, GitHub hace checkout de la **merge commit** — la ra
 integradas — y corre la suite sobre eso. Ningún hook local puede hacerlo: cuando corrés `verify` en
 tu máquina, estás probando **tu rama sola**.
 
-La diferencia importa para una clase entera de roturas. `dev` renombra un campo `qd_*`; tu rama,
+La diferencia importa para una clase entera de roturas. `develop` renombra un campo `qd_*`; tu rama,
 salida de antes, agrega un uso del nombre viejo. Las dos están verdes por separado. La combinación
 no compila. Eso es un *semantic conflict*, y **solo aparece al probar el merge**.
 
@@ -50,7 +50,7 @@ nunca prueba esa combinación, y CI llega después de que la rama base ya está 
 desplegado detrás.
 
 El trigger `pull_request` **no tiene filtro de ramas**, así que esto vale igual para los
-`feat/… → dev` del día a día y para los `dev → main` de release.
+`feat/… → develop` del día a día y para los `develop → main` de release.
 
 ### Una sola definición de verde
 
@@ -94,14 +94,14 @@ Ambos eligen runner solos:
 1. **Alcanza los commits hechos con `--no-verify`.** Ese escape es legítimo para trabajo en
    progreso, pero deja código sin verificar; el anillo 3 lo agarra antes de que salga de la
    máquina.
-2. **Avisa si la rama quedó detrás de su base** (`dev` para las ramas de trabajo, `main` para
-   `dev`/`release/*`/`hotfix/*`), con el número de commits. El aviso **no bloquea** a propósito:
+2. **Avisa si la rama quedó detrás de su base** (`develop` para las ramas de trabajo, `main` para
+   `develop`/`release/*`/`hotfix/*`), con el número de commits. El aviso **no bloquea** a propósito:
    obligar a traer la base en cada push volvería insoportable trabajar en una rama larga. Quien
    bloquea es el anillo 4, con *"require branches to be up to date"*, donde el chequeo importa
    porque ahí sí estás por integrar.
 
-   En `dev` la base es `main`, y no porque haya que mergear a producción en cada push: es para
-   detectar que un `hotfix` aplicado directo sobre `main` dejó a `dev` sin ese arreglo. Sin ese
+   En `develop` la base es `main`, y no porque haya que mergear a producción en cada push: es para
+   detectar que un `hotfix` aplicado directo sobre `main` dejó a `develop` sin ese arreglo. Sin ese
    aviso, el próximo release lo pisa en silencio.
 
 **No repite trabajo.** Si el `pre-commit` ya verificó exactamente este árbol, el `pre-push` lo
@@ -115,10 +115,10 @@ serían lo mismo y la marca mentiría). Mismo árbol ⇒ mismo resultado.
 mergear una rama roja ni pushear directo a una rama desplegada.
 
 Hacen falta **dos reglas**, una por rama de larga vida. Proteger solo `main` no alcanza: la
-integración diaria pasa por `dev`, así que sin protegerla se puede romper el entorno de desarrollo
+integración diaria pasa por `develop`, así que sin protegerla se puede romper el entorno de desarrollo
 todos los días y `main` recién se enteraría en el release, con todos los commits mezclados encima.
 
-En GitHub → *Settings* → *Branches* → *Add branch protection rule*, una para `dev` y otra para
+En GitHub → *Settings* → *Branches* → *Add branch protection rule*, una para `develop` y otra para
 `main`, con la misma configuración:
 
 - ✅ **Require a pull request before merging** — es lo que fuerza que se pruebe el merge.
@@ -127,7 +127,7 @@ En GitHub → *Settings* → *Branches* → *Add branch protection rule*, una pa
   base vieja y el *semantic conflict* pasa igual.
 - ✅ **Do not allow bypassing the above settings** — si el admin puede saltarlo, no es un gate.
 
-> Con un solo desarrollador, *up to date* casi no genera fricción: `dev` no se mueve mientras tenés
+> Con un solo desarrollador, *up to date* casi no genera fricción: `develop` no se mueve mientras tenés
 > un PR abierto. Con varios contribuyentes en paralelo sí obliga a actualizar la rama antes de
 > mergear — que es exactamente el punto.
 
@@ -153,7 +153,7 @@ Con `gh` instalado se puede saltear la espera del paso 1, porque la API acepta u
 que todavía no reportó. Hay que correrlo **para cada rama**:
 
 ```bash
-for STR_RAMA in dev main; do
+for STR_RAMA in develop main; do
   gh api -X PUT "repos/:owner/:repo/branches/$STR_RAMA/protection" --input - <<'JSON'
 {
   "required_status_checks": { "strict": true, "contexts": ["verify"] },
@@ -181,33 +181,33 @@ esperando un reporte que nunca llega.
 > hacerlo; **no pushea nunca** salvo pedido explícito. El `git push`, el PR y el merge son del
 > usuario. Ver [`pm4-app/CLAUDE.md` → Flujo de trabajo con Claude](../../pm4-app/CLAUDE.md#flujo-de-trabajo-con-claude).
 
-### Trabajo normal → `dev` (Render de desarrollo)
+### Trabajo normal → `develop` (Render de desarrollo)
 
 ```bash
-git switch dev && git pull          # partir de la base actualizada
-git switch -c feat/lo-que-sea       # nunca trabajar sobre dev ni main
+git switch develop && git pull          # partir de la base actualizada
+git switch -c feat/lo-que-sea       # nunca trabajar sobre develop ni main
 # … código + sus tests …
 git commit                          # anillo 2 (~30 s)
-git merge origin/dev                # traer la base ANTES de pushear, para integrar
+git merge origin/develop                # traer la base ANTES de pushear, para integrar
 npm run verify                      # verificar el resultado integrado
-git push -u origin feat/lo-que-sea  # anillo 3 (avisa si quedaste detrás de dev)
-gh pr create --base dev             # o el botón en GitHub → anillo 4 sobre la merge commit
-# check verde ⇒ Merge. Nunca `git merge` local a dev.
+git push -u origin feat/lo-que-sea  # anillo 3 (avisa si quedaste detrás de develop)
+gh pr create --base develop             # o el botón en GitHub → anillo 4 sobre la merge commit
+# check verde ⇒ Merge. Nunca `git merge` local a develop.
 ```
 
 ### Release → `main` (Render de producción)
 
 ```bash
-git switch dev && git pull
-npm run verify                      # dev tiene que estar verde ANTES de proponer el release
+git switch develop && git pull
+npm run verify                      # develop tiene que estar verde ANTES de proponer el release
 git push                            # si hubiera algo local sin pushear
-gh pr create --base main --head dev --title "release: …"
-# CI corre sobre main+dev integrados ⇒ check verde ⇒ Merge ⇒ deploy a producción
+gh pr create --base main --head develop --title "release: …"
+# CI corre sobre main+develop integrados ⇒ check verde ⇒ Merge ⇒ deploy a producción
 ```
 
-> **Si alguna vez aplicás un `hotfix` directo sobre `main`, mergealo de vuelta a `dev`.** Si no,
-> `dev` queda sin ese arreglo y el próximo release lo revierte en silencio. El `pre-push` te lo
-> avisa cuando pushees `dev` (ahí su base es `main`), pero el aviso no bloquea: la disciplina es
+> **Si alguna vez aplicás un `hotfix` directo sobre `main`, mergealo de vuelta a `develop`.** Si no,
+> `develop` queda sin ese arreglo y el próximo release lo revierte en silencio. El `pre-push` te lo
+> avisa cuando pushees `develop` (ahí su base es `main`), pero el aviso no bloquea: la disciplina es
 > tuya.
 
 ### Qué parte de mi cambio quedó sin probar
@@ -216,7 +216,7 @@ gh pr create --base main --head dev --title "release: …"
 npm run coverage && npm run coverage:diff
 ```
 
-Sin `--base`, compara contra la base de integración de tu rama (`dev` para las ramas de trabajo),
+Sin `--base`, compara contra la base de integración de tu rama (`develop` para las ramas de trabajo),
 no contra `main`. En un PR sale solo, con la base real del PR.
 
 ## Node en el host — opcional, pero recomendado

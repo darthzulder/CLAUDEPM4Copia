@@ -1,0 +1,18 @@
+<div class="alert-z-container">
+  @for (alert of alerts; track alert.id) {
+    <div
+      [ngClass]="getItemClasses(alert)"
+      [ngStyle]="{ width: (alert.widthPercent ?? 100) + '%'}"
+    >
+      <za-alert
+        [config]="alert.config || 'info'"
+        (close)="close(alert.id)"
+      >
+        @if (alert.title) {
+          <strong>{{ alert.title }}</strong>
+        }
+        {{ alert.message }}
+      </za-alert>
+    </div>
+  }
+</div>

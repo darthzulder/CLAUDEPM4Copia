@@ -1,0 +1,103 @@
+<div class="grid">
+  <div class="col">
+    <za-table [zebra]="typeStyle == 'odd'? 'odd': true">
+      <table>
+        @if (!hideHeader) {
+        <thead>
+          <tr>
+            @if (showGenericStart) {
+            <th>{{ genericStartName }}</th>
+            } @for (head of headers; track $index) {
+            <th>{{ head.title }}</th>
+            } @if (showGenericEnd) {
+            <th>{{ generciEndName }}</th>
+            } @if (tableCheck) {
+            <th class="align-item-center">
+              <lib-checkbox-z
+                #checkAll
+                class="checkAll"
+                (eventChange)="selectAll($event)"
+              ></lib-checkbox-z>
+              <samp> Action</samp>
+            </th>
+            }
+          </tr>
+        </thead>
+        }
+        <tbody>
+          @for (row of viewData; track $index) {
+          <tr>
+            @if(showGenericStart) {
+            <td>
+              <ng-template
+                [ngTemplateOutlet]="genericStartT"
+                [ngTemplateOutletContext]="{value: row}"
+              ></ng-template>
+            </td>
+            } @for (itemH of headers; track $index) { @if(itemH.groupLabel) {
+            @if (row._showGroup) {
+            <td class="group-label" [attr.rowspan]="row._rowspan ?? null">
+              {{ row[itemH.key!] }}
+            </td>
+            } }@else { @if (itemH.isSubGroup) { @if (itemH.isTag) {
+
+            <td>
+              <lib-tag-z
+                colorTag="{{ validColorByCoincidencia(row[itemH.key!][itemH.subGroupIndice!][itemH.subGroupkey!]) }}"
+                [icon]="itemH.iconTag"
+                [iconRight]="itemH.iconRight"
+                label="{{row[itemH.key!][itemH.subGroupIndice!][itemH.subGroupkey!] | dynamicPipe: itemH.pipe}}"
+              ></lib-tag-z>
+            </td>
+            } @else {
+            <td>
+              {{row[itemH.key!][itemH.subGroupIndice!][itemH.subGroupkey!] |
+              dynamicPipe: itemH.pipe}}
+            </td>
+            } } @else { @if (itemH.isTag) {
+            <td>
+              <lib-tag-z
+                colorTag="{{validColorByCoincidencia(row[itemH.key!])}}"
+                [icon]="itemH.iconTag"
+                [iconRight]="itemH.iconRight"
+                [label]=" row[itemH.key!] | dynamicPipe: itemH.pipe"
+              ></lib-tag-z>
+            </td>
+            } @else {
+            <td>{{ row[itemH.key!] | dynamicPipe: itemH.pipe }}</td>
+            } } } } @if(showGenericEnd) {
+            <td>
+              <ng-template
+                [ngTemplateOutlet]="genericEndT"
+                [ngTemplateOutletContext]="{value: row}"
+              ></ng-template>
+            </td>
+            } @if (tableCheck) {
+            <td class="align-item-center">
+              <lib-checkbox-z
+                class="singleCheck"
+                (eventChange)="simpleCheck($event, row, $index)"
+              ></lib-checkbox-z>
+            </td>
+            }
+          </tr>
+          }
+        </tbody>
+      </table>
+    </za-table>
+  </div>
+</div>
+@if (pages > 1) {
+<div class="grid">
+  <div class="col">
+    <div class="flex justify-content-center flex-wrap">
+      <za-pagination
+        [disabled]="disablePage"
+        [pages]="pages"
+        model="{{page}}"
+        (change)="eventChangePage($event)"
+      ></za-pagination>
+    </div>
+  </div>
+</div>
+}

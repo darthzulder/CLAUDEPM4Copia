@@ -144,16 +144,19 @@ describe('Arranque de la app (smoke)', () => {
       // que el `.loading-overlay` desaparezca es la señal de que el chunk resolvió y el árbol
       // real se montó — sin esto el test asertaría sobre el spinner y pasaría siempre.
       //
-      // El timeout es explícito porque `waitFor` NO hereda el `testTimeout` de vitest: usa su
-      // propio default de 1s. Con los 37 archivos de la suite compitiendo por CPU, la pantalla
-      // más pesada (SCR-000, que monta ~15 `useCollection`) se pasaba de ese segundo y el smoke
-      // fallaba de forma intermitente —~1 de cada 3 corridas completas, mientras que aislado
-      // pasaba siempre—. Lo que este test verifica es que la pantalla monta sin explotar, no que
-      // monte rápido, así que el margen no debilita la aserción; y en el caso feliz no cuesta
-      // nada, porque `waitFor` retorna apenas se cumple la condición.
+      // El `timeout` explícito NO es cosmético: el default de RTL es 1000 ms, mientras que el
+      // `testTimeout` de vitest.config.ts es 15_000. Esa asimetría era la causa real de la
+      // intermitencia que el encabezado de scripts/verify.mjs atribuía a Docker: con los 34
+      // archivos de la suite compitiendo por el pool de workers, resolver el chunk de una
+      // pantalla cargada de componentes del DS pasa del segundo, y `waitFor` abandonaba cuando
+      // al test le quedaban 14 s de presupuesto sin usar. Aislado (`vitest run
+      // src/App.smoke.test.tsx`) pasaba 17/17 siempre; en la suite completa fallaban 1-2
+      // pantallas distintas por corrida, y con `--maxWorkers=1` volvían a pasar 413/413. Alinear
+      // los dos números elimina la carrera sin ocultar una rotura real: si una pantalla explota
+      // de verdad, el ErrorBoundary la pinta y la aserción de abajo falla igual, sin esperar.
       await waitFor(() => {
         expect(container.querySelector('.loading-overlay')).toBeNull();
-      }, { timeout: 10_000 });
+      }, { timeout: 15_000 });
 
       // El ErrorBoundary de App atrapa cualquier throw del árbol y lo pinta como "Error de
       // Render" junto al stack, así que el mensaje de fallo ya trae el diagnóstico.

@@ -1,0 +1,287 @@
+@if (blnCargando()) {
+  <div class="screen-wrapper">
+    <div class="screen-loading"><lib-loader-z /></div>
+  </div>
+} @else if (strError()) {
+  <div class="screen-wrapper">
+    <!-- Alerta INLINE (`za-alert`), no la cola imperativa de `lib-alert-z`: en React esto es un
+         `<ZrAlert>` dentro del markup, o sea una caja que vive donde está el contenido que describe.
+         Mandarlo por `AlertZService` lo movería al contenedor global y habría que llamar `.remove()`
+         a mano. Ver el punto 5b de zds-reexports.ts. -->
+    <!-- `[hide-close]="true"` y no el atributo pelado `hide-close`: el input está tipado `boolean` y
+         un atributo sin valor vale `''`, que Angular 21 rechaza al chequear el template
+         (`TS2322: Type '""' is not assignable to type 'boolean'`). No es cosmético — el mismo
+         atributo en HTML plano sí funcionaría, así que la forma correcta acá es el binding. -->
+    <za-alert config="negative" [hide-close]="true"
+      >Error al cargar el formulario: {{ strError() }}</za-alert
+    >
+  </div>
+} @else {
+  <div class="screen-wrapper">
+    <app-screen-header title="Revisión Respuesta SAC" />
+
+    <div class="screen-content">
+      <!-- RUL-008-02 / MSG-008-02 — banner de SLA crítico (≤ 3 días hábiles). -->
+      @if (blnSlaCritico()) {
+        <za-alert config="negative" [hide-close]="true">
+          ⚠ El caso tiene <strong>{{ strSlaAsignado() }}</strong> día(s) hábil(es). Priorice la
+          revisión.
+        </za-alert>
+      }
+
+      <!-- `(ngSubmit)` va a `devolver()` igual que el `onSubmit={onDevolver}` de React: el submit
+           nativo del form (Enter en un campo) es la acción de devolver, no la de aprobar. -->
+      <!-- ⚠ Todo `zds-*` de este form lleva `formControlName` **y** `name`, y los dos hacen falta:
+           son dos contratos distintos que se parecen. `formControlName` es lo que engancha el wrapper
+           al `FormGroup` de esta pantalla (Angular); `name` es lo que el `lib-*-z` de adentro usa para
+           adoptar el control en vez de inventarse un `name-<ts>-<n>` (ver `campo-base.ts`).
+
+           Esta pantalla nació **sin** `formControlName` en ninguno de sus 9 campos, y el efecto fue
+           que los 9 quedaron muertos: sin `formControlName` no hay `NgControl`, así que `CampoBase`
+           cae a su group de respaldo, `writeValue()` nunca corre —el `patchValue()` de la precarga
+           escribía controles que nadie escuchaba— y el `(modelChange)` de vuelta muere en el no-op de
+           `fnAlCambiar`. O sea: los de solo lectura mostraban vacío y los 3 editables no podían llegar
+           al form ni siendo tipeados. Medido contra React lado a lado con la task 171840: React
+           pintaba 8 de 9 con datos reales, Angular los 9 vacíos.
+
+           Y no lo vio ningún test porque los 380 specs manejan el form **directo**
+           (`objPantalla.form.get(...)`, `patchValue`) y ninguno aseveraba que el valor llegara al
+           componente renderizado. La guarda que cierra eso está al final del spec. -->
+      <form [formGroup]="form" (ngSubmit)="devolver()" novalidate>
+        <!-- ── S1 · Contexto del Caso (SEC-025, solo lectura) ── -->
+        <app-form-section title="Contexto del Caso">
+          <div class="form-row cols-3">
+            <zds-input
+              formControlName="qd_strSfcCode"
+              name="qd_strSfcCode"
+              label="ID Caso / Código SFC"
+              [readOnly]="true"
+            />
+            <zds-input
+              formControlName="qd_strSlaAssigned"
+              name="qd_strSlaAssigned"
+              label="SLA: Días hábiles restantes"
+              [readOnly]="true"
+            />
+            <!-- Versión bajo revisión: texto plano, no es un campo editable del formulario. -->
+            <div class="zds-field-wrap">
+              <span class="info-bar-label">Versión bajo revisión</span>
+              <div class="info-bar-value valor-solo-lectura">{{ strVersionRevision() }}</div>
+            </div>
+          </div>
+          <div class="form-row cols-2">
+            <!-- Área Responsable = rol responsable derivado de cat_matriz_motivos en M1
+                 (qd_strResponsableRole), no el grupo PM4 de asignación. -->
+            <zds-input
+              formControlName="qd_strResponsableRole"
+              name="qd_strResponsableRole"
+              label="Área Responsable"
+              [readOnly]="true"
+            />
+            <!-- Sellada por SCR-0051 al enviar el borrador a revisión (qd_strDraftDate). -->
+            <zds-input
+              formControlName="qd_strDraftDate"
+              name="qd_strDraftDate"
+              label="Fecha de elaboración del borrador"
+              [readOnly]="true"
+            />
+          </div>
+        </app-form-section>
+
+        <!-- ── Clasificación Regulatoria (solo lectura, heredada de M1) ──
+             Mismo bloque de referencia que muestra SCR-0051, aquí siempre de solo lectura: el SAC la
+             consulta para revisar la respuesta, no la reclasifica. -->
+        <app-form-section title="Clasificación Regulatoria">
+          <div class="form-row cols-2">
+            <div class="zds-field-wrap">
+              <span class="info-bar-label">Producto SFC (seguro)</span>
+              <div class="info-bar-value valor-solo-lectura">{{ descDe('qd_strSfcProduct') }}</div>
+            </div>
+            <div class="zds-field-wrap">
+              <span class="info-bar-label">Momento</span>
+              <div class="info-bar-value valor-solo-lectura">{{ strInteraccion() }}</div>
+            </div>
+          </div>
+          <div class="form-row cols-1">
+            <div class="zds-field-wrap">
+              <span class="info-bar-label">Motivo SFC</span>
+              <div class="info-bar-value valor-solo-lectura">{{ descDe('qd_strSfcReason') }}</div>
+            </div>
+          </div>
+          <div class="form-row cols-3">
+            <div class="zds-field-wrap">
+              <span class="info-bar-label">Canal de Recepción</span>
+              <div class="info-bar-value valor-solo-lectura">{{ descDe('qd_strChannel') }}</div>
+            </div>
+            <div class="zds-field-wrap">
+              <span class="info-bar-label">Instancia de Recepción</span>
+              <div class="info-bar-value valor-solo-lectura">
+                {{ descDe('qd_strReceptionInstance') }}
+              </div>
+            </div>
+            <div class="zds-field-wrap">
+              <span class="info-bar-label">Admisión</span>
+              <div class="info-bar-value valor-solo-lectura">{{ descDe('qd_strAdmission') }}</div>
+            </div>
+          </div>
+          <div class="form-row cols-3">
+            <div class="zds-field-wrap">
+              <span class="info-bar-label">Ente de Control</span>
+              <div class="info-bar-value valor-solo-lectura">{{ descDe('qd_strControlEntity') }}</div>
+            </div>
+            <!-- Las dos celdas vacías preservan la grilla de 3 columnas del original: sin ellas el
+                 Ente de Control se estiraría al ancho completo de la fila. -->
+            <div></div>
+            <div></div>
+          </div>
+        </app-form-section>
+
+        <!-- ── Descripción de la Queja (solo lectura) ──
+             Asunto (= motivo SFC) y texto original del radicador, tal cual en SCR-0051. -->
+        <app-form-section title="Descripción de la Queja">
+          <div class="form-row cols-1">
+            <div class="zds-field-wrap">
+              <span class="info-bar-label">Asunto de la Queja</span>
+              <div class="info-bar-value valor-solo-lectura">{{ descDe('qd_strSfcReason') }}</div>
+            </div>
+          </div>
+          <div class="form-row cols-1">
+            <zds-textarea
+              formControlName="qd_strComplaintText"
+              name="qd_strComplaintText"
+              label="Descripción / Texto de la Queja"
+              [readOnly]="true"
+            />
+          </div>
+
+          <!-- Adjuntos del radicador (los que subió el cliente en SCR-000, qd_strAttach01..05). -->
+          <app-request-file-list
+            [requestId]="objTarea()?.process_request_id ?? null"
+            [docKeys]="cllAdjuntosRadicador"
+            label="Documentos adjuntos del radicador"
+            emptyText="El radicador no adjuntó documentos a esta queja."
+            loadingText="Buscando documentos del caso…"
+          />
+        </app-form-section>
+
+        <!-- ── S2 · Respuesta del Área (SEC-026) ──
+             ⚠ Respuesta al Cliente y Acciones Tomadas son EDITABLES, y eso divergía del anexo §4
+             (que las lista `readOnly`). Se porta la implementación, no el anexo: el SAC puede
+             corregir el texto del área antes de aprobar/devolver, y la divergencia está registrada
+             en §10 del DOCUMENTACION de esta pantalla.
+
+             El `[maxLength]` es el **contador visual** del DS (`9/5000`); el límite que de verdad
+             invalida es el `Validators.maxLength(5000)` del control. Hacen falta los dos, y el
+             porqué está en el bloque del `form` en el .ts. -->
+        <app-form-section title="Respuesta del Área">
+          <div class="form-row cols-1">
+            <zds-textarea
+              formControlName="qd_strClientResponse"
+              name="qd_strClientResponse"
+              label="Respuesta al Cliente"
+              [maxLength]="5000"
+            />
+          </div>
+          <div class="form-row cols-1">
+            <zds-textarea
+              formControlName="qd_strActionsTaken"
+              name="qd_strActionsTaken"
+              label="Acciones Tomadas"
+              [maxLength]="5000"
+            />
+          </div>
+          <div class="form-row cols-1">
+            <!-- Resarcimiento al administrador heredado de cat_matriz_motivos (qd_strCompensation). -->
+            <zds-input
+              formControlName="qd_strCompensation"
+              name="qd_strCompensation"
+              label="¿Reconocimiento al cliente?"
+              [readOnly]="true"
+            />
+          </div>
+
+          <!-- FLD-130 — soportes internos adjuntos (previsualizar + descargar). El área los subió en
+               SCR-0051 con data_name qd_strSupport01..10. El anexo describía chips sin descarga;
+               se porta la implementación (ver §10 del DOCUMENTACION). -->
+          <app-request-file-list
+            [requestId]="objTarea()?.process_request_id ?? null"
+            [docKeys]="cllSoportesInternos"
+            label="Soportes internos adjuntos"
+            emptyText="Sin soportes adjuntos."
+            loadingText="Buscando soportes internos…"
+          />
+        </app-form-section>
+
+        <!-- ── S3 · Decisión del Analista SAC (SEC-027) ── -->
+        <app-form-section title="Decisión del Analista SAC">
+          <div class="form-row cols-1">
+            <zds-textarea
+              formControlName="qd_strSacRemarks"
+              name="qd_strSacRemarks"
+              label="Observaciones SAC"
+              [maxLength]="2000"
+              [error]="strErrorObservaciones()"
+              helpText="Obligatorio al devolver; opcional al aprobar. Se envía al área responsable."
+            />
+          </div>
+
+          <!-- RUL-008-01 / MSG-008-01 — observaciones obligatorias para devolver. -->
+          @if (!blnPuedeDevolver()) {
+            <za-alert config="info" [hide-close]="true">
+              Debe documentar las <strong>observaciones</strong> para poder devolver la respuesta al
+              área responsable.
+            </za-alert>
+          }
+        </app-form-section>
+
+        <!-- ── Acciones (ACT-008-01..04) ──
+             ⚠ Tres diferencias de contrato con el `ZrButton` de React, verificadas en el `.mjs` y no
+             asumidas: el texto va por el input `label` (no como contenido proyectado), la variante se
+             llama **`type`** (no `config`, que es el input del `za-button` de abajo), y el evento es
+             `(eventClick)`. Y el `[disabled]="false"` explícito es obligatorio: el default de
+             `lib-button-z` es `disabled = true`, así que omitirlo deja el botón muerto. -->
+        <app-action-bar>
+          <lib-button-z
+            label="Vista Previa Respuesta Final"
+            [type]="'secondary'"
+            [disabled]="false"
+            (eventClick)="abrirVistaPrevia()"
+          />
+          <lib-button-z
+            label="Reasignar Caso"
+            [type]="'secondary'"
+            [disabled]="blnEnviando()"
+            [loading]="blnEnviando()"
+            (eventClick)="reasignar()"
+          />
+          <!-- RUL-008-01 · el `[disabled]` es afordancia, NO la guarda: un botón deshabilitado del DS
+               igual dispara su handler bajo jsdom (trampa 1 de testing-conventions.md), así que el
+               corte real vive en `devolver()`. Las dos cosas son necesarias. -->
+          <lib-button-z
+            label="Devolver con Observaciones"
+            [type]="'negative'"
+            [disabled]="!blnPuedeDevolver() || blnEnviando()"
+            [loading]="blnEnviando()"
+            (eventClick)="devolver()"
+          />
+          <lib-button-z
+            label="Aprobar Respuesta ▶"
+            [type]="'positive'"
+            [disabled]="blnEnviando()"
+            [loading]="blnEnviando()"
+            (eventClick)="aprobar()"
+          />
+        </app-action-bar>
+      </form>
+    </div>
+
+    <!-- ACT-008-04 · Vista Previa Respuesta Final (visor ancho reutilizado, igual que SCR-0051).
+         El `&& strUrlVistaPrevia()` replica el `isOpen` de React: el modal no se abre hasta que el
+         blob de la carta existe, así que nunca se ve el visor vacío mientras se arma el HTML. -->
+    <app-preview-modal
+      [abierto]="blnVerVistaPrevia() && !!strUrlVistaPrevia()"
+      [documento]="objDocumentoVistaPrevia()"
+      (cerrar)="cerrarVistaPrevia()"
+    />
+  </div>
+}

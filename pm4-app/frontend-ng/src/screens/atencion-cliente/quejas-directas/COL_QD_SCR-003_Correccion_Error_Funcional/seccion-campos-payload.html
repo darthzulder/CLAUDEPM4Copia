@@ -1,0 +1,153 @@
+<app-form-section title="Campos a Corregir">
+  <!-- Alerta INLINE (`za-alert` vía el alias `ZrAlertInline`), no la cola imperativa de
+       `lib-alert-z`: describe el contenido que tiene al lado. `[hide-close]="true"` bindeado y no
+       como atributo pelado — el input está tipado `boolean` y un atributo sin valor vale `''`, que
+       Angular 21 rechaza con TS2322. Ver el punto 5b de `zds-reexports.ts`. -->
+  <za-alert config="info" [hide-close]="true">
+    Marque <strong>Editar</strong> en el campo que quiere corregir. Cada fila muestra la clave del
+    body de la SFC y la <strong>variable del caso</strong> de la que el script la lee; al reenviar,
+    el body se <strong>regenera</strong> con los valores nuevos.
+  </za-alert>
+
+  <!-- ⚠ El `[formGroup]` del payload va acá, en el contenedor de las filas, y no lo pone la pantalla
+       padre: un `[formControlName]` sin `formGroup` ancestro tira **NG01050** en runtime (no lo ve
+       `tsc`; lo encontró la sonda de montaje). Y tiene que ser el form del padre y no una copia —
+       `input.required<FormGroup>()`—, porque esta sección escribe sobre los controles que después
+       viajan a PM4.
+
+       Los checkboxes "Editar" y el picker de producto viven en `objGrupoEdicion` y por eso abren su
+       propio `[formGroup]` más abajo: anidado, el más cercano gana, que es exactamente lo que se
+       necesita para que un `edit-qd_*` no termine en el payload. -->
+  <div z-flex="col:150" [formGroup]="form()">
+    @for (objDef of cllCampos; track $index) {
+      @if (!objDef.variable) {
+        <!-- Constantes del CORE y valores derivados: sin variable del caso que editar, así que no
+             hay control ni checkbox. Se pinta lo que el script alcanzó a enviar, que es la única
+             fuente de esos tres valores desde el lado de la pantalla.
+
+             Va con `.info-bar-label`/`.info-bar-value` crudas dentro de `.zds-field-wrap` y no con
+             `app-info-bar`: ese componente pinta una **barra** de pares label/valor y acá cada fila
+             tiene que alinearse con las de abajo, que son campos de la fachada. Meterlo rompería la
+             columna. Es el mismo markup que usa la fachada React para este caso. -->
+        <div class="zds-field-wrap">
+          <span class="info-bar-label">{{ objDef.label }}</span>
+          <div class="info-bar-value">{{ strDelPayload(objDef.key) }}</div>
+          <span class="field-hint">{{ objDef.key }} · {{ objDef.note }}</span>
+        </div>
+      } @else {
+        <div z-flex="col:50">
+          <div class="form-row cols-2 row-align-bottom">
+            <!-- ⚠ `formControlName` **y** `name`, los dos, en todo campo de la fachada.
+                 `formControlName` ata el control al `FormGroup` (el wrapper es el `NG_VALUE_ACCESSOR`
+                 de ese `NgControl`); `name` es lo que produce el `id="field-<name>"` que necesita
+                 `scrollToFirstError` y lo que pre-crea el control que el `lib-*-z` adopta. Con solo
+                 `name` el campo pinta y **nunca llega al form**.
+
+                 Acá los dos son **dinámicos** (`[formControlName]`/`[name]` con la variable de la
+                 fila): el descriptor es el que decide qué campos existen, así que enumerarlos a mano
+                 duplicaría `SCR003_PAYLOAD_M2_FIELDS` y dejaría las dos listas libres de divergir.
+
+                 Ninguna rama pasa `[readOnly]` ni `[disabled]` para bloquear la fila: eso lo gobierna
+                 `control.disable()`/`enable()` desde `sincronizarHabilitacion()`, porque `zds-select`
+                 **no se puede deshabilitar** (su `disable`/`disabled` son inputs muertos). Un
+                 `[readOnly]` acá bloquearía los inputs de texto y dejaría los selects abiertos — el
+                 peor de los dos mundos, porque se vería consistente y no lo sería. -->
+
+            @if (objDef.variable === QD.strSfcProduct) {
+              <!-- Producto SFC. El select se ata al control satélite `ui-<var>` (que guarda
+                   `código::etiqueta`) y no a la variable del caso: la colección 16 repite códigos y el
+                   picker indexa por `value`. La traducción al código puro la hace el `valueChanges`
+                   de `vincular()`. De ahí el `[formGroup]` propio: el control vive en
+                   `objGrupoEdicion`, no en el form de la pantalla. -->
+              <div [formGroup]="objGrupoEdicion">
+                <zds-select
+                  [formControlName]="nombreUi(objDef.variable)"
+                  [name]="nombreUi(objDef.variable)"
+                  [label]="objDef.label"
+                  [options]="objMatriz.cllInsuranceUi()"
+                  [loading]="objMatriz.blnCargando()"
+                />
+              </div>
+            } @else if (objDef.control === 'select') {
+              <zds-select
+                [formControlName]="objDef.variable"
+                [name]="objDef.variable"
+                [label]="objDef.label"
+                [options]="cllOpcionesDeFila(objDef)"
+                [loading]="objDef.cascade ? objMatriz.blnCargando() : false"
+              />
+            } @else if (objDef.control === 'sino') {
+              <zds-radio
+                [formControlName]="objDef.variable"
+                [name]="objDef.variable"
+                [label]="objDef.label"
+                [options]="OPTIONS_SI_NO"
+                [inline]="true"
+              />
+            } @else if (objDef.control === 'textarea') {
+              <!-- El 4000 no es decorativo: es el límite de la columna en la SFC. Va en el wrapper y
+                   no como validador del control porque el corte tiene que ser al tipear — un
+                   `maxLength` de Angular solo invalidaría el form al enviar, y el gestor perdería el
+                   texto que la SFC iba a rechazar de todos modos. -->
+              <zds-textarea
+                [formControlName]="objDef.variable"
+                [name]="objDef.variable"
+                [label]="objDef.label"
+                [maxLength]="4000"
+              />
+            } @else {
+              <!-- text · digits · date. Los validadores de formato (solo dígitos, DD/MM/AAAA) viven
+                   en el `FormGroup` de la pantalla, no acá: son parte de la definición del campo, y
+                   los tres son **tolerantes con vacío** porque ningún campo del payload es
+                   obligatorio en esta pantalla — el bloqueo lo pone el script/la SFC. -->
+              <zds-input
+                [formControlName]="objDef.variable"
+                [name]="objDef.variable"
+                [label]="objDef.label"
+              />
+            }
+
+            <div z-flex="75" z-align="left:center" [formGroup]="objGrupoEdicion">
+              <!-- El checkbox "Editar" es estado de UI y vive en el `FormGroup` satélite, así que
+                   necesita su propio `[formGroup]` — el `formGroup` del padre es el del payload y un
+                   `edit-qd_*` ahí viajaría a PM4 como campo inventado.
+
+                   El handler NO se ata acá con un `(output)`: `ZdsCheckboxField` no tiene ninguno
+                   —es un CVA puro— así que la reacción va por el `valueChanges` del control satélite,
+                   suscrito en `vincular()`. Y eso es lo correcto además de lo único posible: la
+                   restauración del original solo debe correr ante la **acción del gestor**, y como
+                   `marcarEditable()` escribe con `emitEvent: false`, las escrituras que hace la
+                   cascada no reentran en el handler ni pisan el valor que acaba de limpiar. -->
+              <zds-checkbox-field
+                [formControlName]="nombreEdicion(objDef.variable)"
+                [name]="nombreEdicion(objDef.variable)"
+                label="Editar"
+              />
+              @if (blnModificado(objDef.variable)) {
+                <zds-status-badge variante="info">Modificado</zds-status-badge>
+              }
+              @if (blnSenalado(objDef, objDef.variable)) {
+                <zds-status-badge variante="danger">Señalado por la SFC</zds-status-badge>
+              }
+            </div>
+          </div>
+
+          <!-- La pista de la fila. Muestra la clave del body (o que la fila es auxiliar y no viaja),
+               la variable del caso de la que el script lee, el valor legible actual y —solo si
+               cambió— el original. Es lo que le permite al gestor entender por qué la SFC se quejó de
+               un campo cuyo rótulo no coincide con el nombre de la clave. -->
+          <span class="field-hint">
+            {{ objDef.aux ? 'auxiliar (no viaja en el body)' : objDef.key }} ·
+            <code>{{ objDef.variable }}</code> · valor actual: {{ descActual(objDef) }}
+            @if (blnModificado(objDef.variable)) {
+              <span> · original: {{ strOriginalDe(objDef.variable) || '(vacío)' }}</span>
+            }
+            @if (objDef.note) {
+              <span> — {{ objDef.note }}</span>
+            }
+          </span>
+        </div>
+      }
+    }
+  </div>
+</app-form-section>

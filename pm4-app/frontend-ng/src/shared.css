@@ -1,0 +1,2020 @@
+/* ==========================================================================
+   SHARED — ESTILOS COMUNES DE LAS PANTALLAS DE PM4
+   Importado una sola vez desde el array `styles` de angular.json.
+   ==========================================================================
+
+   ⚠ ESTA HOJA **NO** ES UNA COPIA DE LA DE REACT, Y NO DEBE CONVERGER A ELLA.
+
+   Se copió tal cual en la Fase 1 de la migración para no bloquear el porte, pero la política
+   acordada (2026-08-16) es la inversa: **minimizar este archivo priorizando componentes ZDS de
+   Colombia (`lib-*-z`) como base.** El motivo es histórico — cuando se escribió el `shared.css` de
+   React no se conocía el inventario completo del DS, así que hay bloques que reimplementan a mano
+   cosas que el DS ya da hechas.
+
+   El criterio, en dos preguntas:
+     1. ¿Esto es un **elemento visual** (card, tag, acordeón, badge, loader)? → buscar el `lib-*-z`
+        que lo cubra y usarlo. Primero `@zurich-col/lib-zurich`, después `za-*`, y solo si ninguno
+        alcanza, CSS acá.
+     2. ¿Esto es **layout o estructura** (grillas, posicionamiento, overlays, breakpoints)? → CSS
+        propio acá. El DS no cubre layout de pantalla y forzarlo empeora las cosas.
+
+   Sobre el resultado visual: **no hace falta que sea idéntico a React**, pero sí lo más parecido
+   posible. Si un componente del DS se ve algo distinto del CSS a mano, gana el componente del DS.
+
+   **Cuándo se migra cada bloque: al portar la pantalla que lo usa, no antes.** Hoy buena parte de
+   esta hoja es CSS anticipado —sus pantallas todavía no se portaron (vamos 3 de 12)—, y reescribir
+   un bloque sin una pantalla que lo consuma deja el cambio sin forma de verificarse contra el React
+   de referencia. Los bloques ya investigados llevan una nota `⏳ CANDIDATO ZDS PENDIENTE` con el
+   componente, sus inputs verificados y qué reemplaza; los descartados llevan el motivo, para que no
+   se vuelva a investigar lo mismo.
+   ========================================================================== */
+
+/* ── 1. TOKENS & ALIASES ZURICH ────────────────────────────────────────── */
+:root {
+  --z-blue: var(--zc-blue-zurich);
+  --z-blue-dark: var(--zc-blue-dark);
+  --z-blue-light: var(--zc-blue-sky-10);
+  --z-green: var(--zc-moss-aa);
+  --z-red: var(--zc-peach-aa);
+  --z-orange: var(--zc-lemon-aa);
+  --z-bg: var(--zg-white-zurich);
+  --z-border: var(--zg-9);
+  --z-text: var(--zc-blue-dark);
+  --z-muted: var(--zg-5);
+  /* Sombra de elevación. El color se deriva del token negro del DS vía color-mix (resultado
+     idéntico al rgba).
+
+     ⚠ Corrige lo que decía antes: **el DS sí expone tokens de elevación** — `--zd-1`..`--zd-8`
+     existen en `@zurich/css-components/dist/base.css` (verificado 2026-08-16). Lo que no hay es
+     uno equivalente a esta sombra:
+         --zd-1:          0 1px 5px 0 rgba(0,0,0,.07), 0 2px 2px 0 …, 0 3px 1px -2px …
+         --z-card-shadow: 0 1px 3px …7%, 0 6px 18px …6%
+     `--zd-1` son 3 capas pegadas al borde (realce tipo material); esta son 2 capas difusas y
+     amplias. Sustituir **cambia el aspecto**, y la paridad visual con React —que usa esta— es el
+     requisito. Se mantiene a propósito, no por ausencia de token. */
+  --z-card-shadow:
+    0 1px 3px color-mix(in srgb, var(--zg-black) 7%, transparent),
+    0 6px 18px color-mix(in srgb, var(--zg-black) 6%, transparent);
+  /* Excepciones: sin equivalente exacto en ZDS 0.8.1. Centralizadas aquí para
+     que sigan siendo única fuente de verdad, aunque no sean tokens del DS. */
+  --z-card-border: #DDE3EC;    /* borde azul-grisáceo de cards (sin token DS) */
+  --z-warning-deep: #B8860B;   /* ámbar legible p/ícono warning sobre lemon */
+  --z-modal-backdrop: #0B1B3C; /* navy del scrim de modales (sin token DS) */
+
+  /* ⚠ `--z-sf-base` y `--z-ct-primary` NO son sustitutos de `--zg-white` / `--z-text`.
+     Son tokens **de tema**: el DS los redefine invertidos según el ancestro (verificado
+     2026-08-16 en `@zurich/css-components/dist/base.css`).
+
+         :root, *[z-theme=light]  →  --z-sf-base: var(--zg-white)      --z-ct-primary: var(--zc-blue-dark)
+         *[z-theme=dark]          →  --z-sf-base: var(--zc-blue-dark)  --z-ct-primary: var(--zg-white)
+
+     Usarlos donde hoy hay un color fijo no es tokenizar: es **adoptar theming**, y un
+     `z-theme="dark"` en cualquier ancestro daría vuelta el fondo de las cards. Eso es un cambio
+     funcional, fuera del alcance de la migración (que es paridad con React, no rediseño). Si algún
+     día se quiere modo oscuro, se decide aparte y se revisa toda esta hoja de una vez —no de a un
+     token por pantalla, que dejaría la mitad clara y la mitad oscura. */
+
+  /* ── RADIOS: por qué van con `--zs-*` y no con `--z-rd-*` ───────────────────────────────
+     Inventariado 2026-08-16 sobre el CSS compilado de los tres paquetes. El DS **no** usa sus
+     propios tokens de radio: tiene tres (`--z-rd-s`=16px, `--z-rd-m`=24px, `--z-rd-l`=40px) y
+     `--z-rd-s` aparece **una sola vez** en toda la librería (`kpi-value`). Lo que usa en todos
+     los demás componentes son los tokens de **espaciado**:
+
+         var(--zs-25)   color-input, progress-bar
+         var(--zs-50)   selectable-cards, share-bar, vertical-stepper
+         var(--zs-75)   alert, chip, file-input
+         var(--zs-100)  action-card, alert, article-card
+         var(--zs-150)  modal, rating, selection-tag, tag
+         var(--zs-12)   progress-tracker
+
+     Y deja crudos los que la escala no cubre: `5px` (checkbox), `16px` (tooltip), `28px`
+     (button), `100px` (badge), `1000px` (skeleton), `50%` (23 veces).
+
+     Por eso acá los radios que coinciden exacto con la escala van tokenizados
+     (2px→`--zs-12`, 4px→`--zs-25`, 8px→`--zs-50`, 12px→`--zs-75`): es el patrón del DS, no una
+     licencia. Los `@zurich-col/lib-*-z` de Colombia, por su parte, usan `4px`/`6px`/`12px`/
+     `1.5rem`/`50%` **todos crudos** — pero eso vive en su shadow DOM y no condiciona nada de acá:
+     esta hoja estila contenedores propios, nunca componentes del DS.
+
+     Los 8 radios que quedan crudos, y el motivo de cada uno (para que no se lean como descuido):
+       · `50%` ×3  — forma geométrica (círculo), no un punto de la escala. El DS hace lo mismo.
+       · `999px` ×1 — pill. El DS usa `100px`/`1000px` crudos para el mismo efecto.
+       · `10px` ×3 — **sin token**: cae entre `--zs-50` (8px) y `--zs-75` (12px). Tokenizarlo
+                     cambiaría el aspecto, y el requisito es acercarse a React, no redondear.
+       · `3px` ×1  — ídem, entre `--zs-12` (2px) y `--zs-25` (4px). */
+}
+
+@font-face {
+  font-family: 'ZurichSans';
+  src: url('https://bpm.beesmart.ec/fonts/zurich/ZurichSans-Regular.ttf') format('truetype');
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+
+* {
+  font-family: ZurichSans, Arial, Helvetica, sans-serif;
+  box-sizing: border-box;
+}
+
+/* ── 1b. TYPOGRAPHY AND THEMING CONSOLIDATION ──────────────────────────── */
+/* Caption 12 — muted */
+.preview-modal-doc-desc,
+.file-name-empty,
+.file-name-chip,
+.field-hint,
+.doc-meta,
+.quote-summary-cell--muted,
+.subsection-note {
+  font: var(--zf-capt-12);
+  color: var(--z-muted);
+}
+
+/* Caption 12 — bold label */
+.info-bar-label,
+.section-title,
+.doc-num-badge,
+.doc-table-header,
+.pdf-viewer-label,
+.additional-emails-header,
+.cover-note-label,
+.doc-row-label,
+.activities-product-label,
+.billing-block-label,
+.form-label {
+  font: var(--zf-capt-12--700);
+}
+
+.info-bar-label,
+.section-title,
+.doc-num-badge,
+.doc-table-header,
+.pdf-viewer-label,
+.additional-emails-header,
+.cover-note-label,
+.form-label {
+  color: var(--z-muted);
+}
+
+.doc-row-label,
+.activities-product-label,
+.billing-block-label {
+  color: var(--z-blue);
+}
+
+/* Caption 14 — regular */
+.screen-loading,
+.doc-desc,
+.pdf-viewer-state,
+.subsection-intro,
+.no-docs-card p {
+  font: var(--zf-capt-14);
+}
+
+/* Caption 14 — bold (incluye info-bar-value, antes 600) */
+.preview-modal-doc-name,
+.info-bar-value,
+.doc-name {
+  font: var(--zf-capt-14--700);
+  color: var(--z-text);
+}
+
+.form-subsection-title,
+.decision-title,
+.subsection-title {
+  font: var(--zf-capt-14--700);
+  color: var(--z-blue);
+  display: flex;
+  align-items: center;
+  gap: var(--zs-50);
+}
+
+/* Body 14 — regular sobre texto base */
+z-table td,
+.service-item,
+.quote-summary-cell {
+  font: var(--zf-body-14);
+  color: var(--z-text);
+}
+
+/* Body 14 — bold sobre texto base */
+z-table th,
+.quote-summary-label {
+  font: var(--zf-body-14--700);
+  color: var(--z-text);
+}
+
+/* Body 14 — muted */
+.email-status-note,
+.quote-summary-status {
+  font: var(--zf-body-14);
+  color: var(--z-muted);
+}
+
+/* Uppercase micro-labels (letter-spacing .3px) */
+.info-bar-label,
+.pdf-viewer-label,
+.additional-emails-header,
+.doc-table-header,
+.cover-note-label,
+.form-label,
+.billing-block-label {
+  text-transform: uppercase;
+  letter-spacing: .3px;
+}
+
+/* Uppercase section headers (letter-spacing .55px) */
+.section-title,
+.form-section-header span,
+.quote-summary-product-header,
+.screen-header .title-block h1 {
+  text-transform: uppercase;
+  letter-spacing: .55px;
+}
+
+/* ── 1c. STATUS AND BACKGROUND CONSOLIDATION ──────────────────────────── */
+.doc-num-badge--aprobada {
+  background: var(--zc-moss-20);
+  color: var(--zc-moss-aa);
+}
+
+.doc-num-badge--rechazada {
+  background: var(--zc-peach-10);
+  color: var(--z-red);
+}
+
+.policyholder-create-body {
+  background: var(--zc-lemon-20);
+}
+
+/* ── 2. ESTRUCTURA Y BASE ──────────────────────────────────────────────── */
+.screen-wrapper {
+  min-height: 100vh;
+  background: var(--z-bg);
+}
+
+.screen-content {
+  max-width: 960px;
+  margin: 0 auto;
+  padding: var(--zs-150) var(--zs-150) var(--zs-400);
+}
+
+/* ── 3. ESTADOS DE CARGA Y ERROR globales ────────────────────────────── */
+
+/* Ninguno de estos dos es candidato a `lib-loader-z`, aunque el nombre lo sugiera (revisado
+   2026-08-16). `LoaderZ` expone solo `customStr` + `label`: **es el spinner**, y ya se usa dentro
+   de estos contenedores. Lo que hacen estas dos clases es **posicionarlo** — centrado en 60vh y
+   overlay fijo con scrim —, y eso no lo cubre ningún input del componente. Es layout de pantalla,
+   se queda como CSS propio. */
+.screen-loading {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 60vh;
+  gap: var(--zs-100);
+  color: var(--z-muted);
+}
+
+.loading-overlay {
+  position: fixed;
+  inset: 0;
+  background: color-mix(in srgb, var(--zg-white) 70%, transparent);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+}
+
+/* ── 4. LAYOUT DE FORMULARIOS Y GRID ───────────────────────────────────── */
+
+/* Grilla de campos. Investigado 2026-08-16 al portar: `za-fieldset` / `z-fieldset` NO la reemplaza,
+   aunque a primera vista parezca el candidato (su `:host` y su `fieldset>div` son `display: grid`).
+
+   - Su input `config` **no es de layout**: el `render()` solo lo propaga como atributo a los inputs
+     hijos (`z-text-input`, `z-select`, …), o sea que gobierna la apariencia de los controles. No
+     existe un `config="row"` que arme columnas — era una suposición del plan de migración que el
+     código del componente no respalda.
+   - Las columnas irían por `--z-fieldset--template`, una custom property, no por atributo. Eso
+     obligaría a un `style="--z-fieldset--template: 1fr 1fr 1fr"` inline por fila y por pantalla
+     (estilo ad-hoc, contra la regla 3), y los tres breakpoints de abajo no se pueden expresar en un
+     inline: habría que escribir CSS igual, pero repartido entre una custom property y media queries
+     sobre un custom element.
+   - Su `gap` está fijo en `var(--zs-100)` (16px) sin token de override; acá son 24px (`--zs-150`).
+     Migrar cambiaría el espaciado de todas las filas, y el requisito es paridad con React.
+
+   Aparte, envuelve el contenido en `<fieldset>` + `<legend>`: una `form-row` no es una agrupación
+   lógica de campos (eso es `FormSection`), así que la semántica tampoco corresponde. */
+.form-row {
+  display: grid;
+  gap: var(--zs-150);
+  margin-bottom: 0;
+  overflow: visible;
+}
+
+.form-row.cols-1 {
+  grid-template-columns: 1fr;
+}
+
+.form-row.cols-2 {
+  grid-template-columns: 1fr 1fr;
+}
+
+.form-row.cols-3 {
+  grid-template-columns: 1fr 1fr 1fr;
+}
+
+.form-row.cols-4 {
+  grid-template-columns: 1fr 1fr 1fr 1fr;
+}
+
+@media (max-width: 900px) {
+
+  .form-row.cols-3,
+  .form-row.cols-4 {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+
+@media (max-width: 600px) {
+
+  .form-row.cols-2,
+  .form-row.cols-3,
+  .form-row.cols-4 {
+    grid-template-columns: 1fr;
+  }
+}
+
+.form-row.row-align-bottom {
+  align-items: flex-end;
+}
+
+.section-spacer {
+  height: var(--zs-100);
+}
+
+
+
+/* Clases de spans de columnas */
+.col-span-2 {
+  grid-column: span 2;
+}
+
+.col-span-3 {
+  grid-column: span 3;
+}
+
+.col-span-4 {
+  grid-column: span 4;
+}
+
+@media (max-width: 900px) {
+
+  .col-span-3,
+  .col-span-4 {
+    grid-column: span 2;
+  }
+}
+
+@media (max-width: 600px) {
+
+  .col-span-2,
+  .col-span-3,
+  .col-span-4 {
+    grid-column: span 1;
+  }
+}
+
+/* Wrappers de campos ZDS */
+/* Base común: cada campo reserva la misma caja (pill + línea de ayuda),
+   así los pills alinean en la fila exista o no helpText, sea input o select. */
+.zds-field-wrap,
+.zds-select-wrap {
+  width: 100%;
+  min-height: 68px;
+}
+
+.zds-select-wrap {
+  position: relative;
+  height: 68px;
+  overflow: visible;
+  z-index: 0;
+}
+
+.zds-select-wrap:focus-within {
+  z-index: 200;
+}
+
+.zds-select-wrap>* {
+  position: absolute;
+  width: 100%;
+  top: 0;
+}
+
+/* `lib-input-select-z` no tiene input de deshabilitado que funcione (`disable`/`disabled` son
+   muertos — ver el bloque de gotchas de `zds-select.ts`), así que `control.disable()` bloquea el
+   campo pero lo deja viéndose habilitado. El `z-select` de React lo resuelve dentro del propio DS
+   computando `opacity: .5` en el host cuando lleva `disabled`; se replica ese mismo valor acá.
+   `pointer-events` NO se toca: el bloqueo real ya lo hace Angular (el listado no abre y el valor no
+   se propaga), y apagarlos además mataría el tooltip/foco del campo. */
+.zds-select-wrap--deshabilitado {
+  opacity: .5;
+}
+
+/* Campos de entrada: se usan los DEFAULTS del DS sin overrides (radio pill
+   1.75rem, fondo --z-bg-light-base, estado readonly nativo via color/borde). */
+
+/* Sub-secciones básicas */
+
+/* ⏳ CANDIDATO ZDS PENDIENTE → `lib-card-z` **sí** reemplaza este bloque (y `.products-card`).
+   Verificado 2026-08-16 leyendo el CSS compilado de `z-card` (`web-components/dist/card.js`),
+   que es lo que `lib-card-z` envuelve. Su `:host>div` es configurable entero por tokens:
+
+       --z-card--radius   (def. --zs-150)   --z-card--bg       (def. --z-sf-base)
+       --z-card--padding  (def. --zs-150)   --z-card--gap      (def. --zs-100)
+       --z-card--border                     --z-card--shadow   (def. --zd-1)
+
+   y ya es `display: grid` con `gap`, o sea lo mismo que el `flex-direction: column` + `gap` de
+   acá. Con `--z-card--border` / `--radius` / `--gap` / `--padding` se llega al mismo aspecto.
+
+   ⚠ Matiz importante, porque contradice a medias la nota de `.form-section-card`: el
+   `background ... !important` de `z-card` **no** descarta el componente en general — solo impide
+   un fondo **distinto por slot**, que es lo que `FormSection` necesita (franja de color sólido
+   separada del cuerpo blanco) y esta subsección **no**. Acá el fondo es uno solo.
+
+   No se migra todavía: la pantalla que usa esta clase no está portada. Se migra al portar la
+   pantalla, comparando contra React — política de reducción de esta hoja. */
+.form-subsection {
+  border: 1px solid var(--z-border);
+  border-radius: var(--zs-50);
+  padding: var(--zs-100) var(--zs-150) var(--zs-75);
+  background: var(--zg-white);
+  display: flex;
+  flex-direction: column;
+  gap: var(--zs-150);
+}
+
+/* El z-table global es overflow-x:auto y recorta los dropdowns ZDS; dentro de
+   una subsección siempre queremos dejarlos desplegar. */
+.form-subsection z-table {
+  overflow: visible;
+}
+
+.form-subsection-title {
+  margin-bottom: var(--zs-100);
+}
+
+.form-subsection-title--spaced {
+  margin-top: var(--zs-75);
+}
+
+/* Barras de acento verticales (3px) */
+.form-subsection-title::before,
+.subsection-title::before,
+.decision-accent,
+.form-section-header::before,
+.quote-summary-product-header::before {
+  content: '';
+  display: inline-block;
+  width: 3px;
+  height: 14px;
+  border-radius: var(--zs-12);
+  flex-shrink: 0;
+}
+
+.form-subsection-title::before,
+.subsection-title::before,
+.decision-accent {
+  background: var(--z-blue);
+}
+
+.form-section-header::before,
+.quote-summary-product-header::before {
+  background: color-mix(in srgb, var(--zg-white) 45%, transparent);
+}
+
+/* Tabla z-table celda overrides */
+z-table {
+  --z-table--cell-padding: var(--zs-75) var(--zs-100);
+  display: block;
+  width: 100%;
+  overflow-x: auto;
+}
+
+z-table table {
+  width: 100%;
+  border-collapse: collapse;
+  border-spacing: 0;
+  border-top: 1px solid var(--z-border);
+  border-bottom: 1px solid var(--z-border);
+  margin: var(--zs-100) auto;
+}
+
+z-table th,
+z-table td {
+  padding: var(--z-table--cell-padding, var(--zs-75) var(--zs-100));
+  border-bottom: 1px solid var(--z-border);
+  vertical-align: middle;
+  text-align: left;
+}
+
+z-table th {
+  letter-spacing: .4px;
+}
+
+z-table :is(th, td)[config*="center"] {
+  text-align: center;
+}
+
+z-table :is(th, td)[config*="right"] {
+  text-align: right;
+}
+
+/* Barra de acciones al pie del form (ver componente ActionBar). El layout flex
+   lo aportan z-flex/z-align; aquí solo borde/margen/padding (tokens, sin
+   equivalente en el DS). */
+.action-bar {
+  border-top: 1px solid var(--z-border);
+  margin-top: var(--zs-150);
+  padding: var(--zs-150) var(--zs-200) var(--zs-50);
+}
+
+/* ── 5. ESTILOS DE COMPONENTES REUTILIZABLES ───────────────────────────── */
+
+/* Component: ScreenHeader */
+.screen-header {
+  background: var(--z-blue);
+  padding: var(--zs-150) var(--zs-200);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  box-shadow: 0 4px 12px color-mix(in srgb, var(--zc-blue-zurich) 35%, transparent);
+}
+
+.screen-header .title-block {
+  color: var(--zg-white-zurich);
+}
+
+.screen-header .title-block h1 {
+  font: var(--zf-body-16--700);
+  margin: 0 0 var(--zs-25);
+}
+
+.screen-header .subtitle {
+  display: flex;
+  gap: var(--zs-100);
+  font: var(--zf-capt-12);
+  color: color-mix(in srgb, var(--zg-white) 80%, transparent);
+}
+
+.screen-header .subtitle span {
+  display: flex;
+  align-items: center;
+  gap: var(--zs-25);
+}
+
+.screen-header .subtitle span::before {
+  content: '';
+  display: inline-block;
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background: color-mix(in srgb, var(--zg-white) 55%, transparent);
+}
+
+.screen-header .subtitle span:first-child::before {
+  display: none;
+}
+
+.header-logo {
+  height: 44px;
+  width: auto;
+  object-fit: contain;
+  flex-shrink: 0;
+}
+
+/* Component: FormSection — CSS de dominio, confirmado dos veces contra el DS.
+
+   Lo que hace falta es una franja de color sólido full-width **separada** del cuerpo blanco.
+   Ninguna card del DS puede darla, y el motivo NO es el mismo en React que en Angular:
+
+   - React (investigado 2026-08-06): `ZrCard` expone un solo slot `content`, sin slot de header;
+     `ZrTile` rinde el header como texto plano dentro de `main`, con el mismo fondo que el resto.
+   - Angular (verificado 2026-08-16, al portar): `lib-card-z` **sí tiene** slot de header
+     (`showHeader` + `<ng-template libZTemplate id="header">`), así que el argumento de React no
+     aplica acá y hay que mirar otra cosa. Lo que bloquea es el CSS de `z-card`, que pone el fondo
+     sobre el **único `<div>` envolvente** y con `!important`:
+         :host > div { background: var(--z-card--bg, var(--z-sf-base)) !important; }
+     El `bg:` que `CardZ.buildCustomStr()` arma desde su input `bgColor` termina en ese
+     `--z-card--bg`, o sea que pinta la **card entera** — header y cuerpo comparten superficie.
+     Un `bg` por slot no existe.
+
+     ⚠ Alcance de ese `!important`, para no sobre-leerlo: descarta `lib-card-z` **solo** cuando se
+     necesitan dos superficies distintas en la misma card, que es este caso. Para una caja de fondo
+     único `lib-card-z` sirve perfectamente y es configurable por tokens (`--z-card--radius`,
+     `--padding`, `--gap`, `--border`, `--shadow`) — ver la nota de `.form-subsection`.
+
+   El matiz importa para no re-investigar: "no tiene slot de header" era el motivo en React y **ya
+   no es cierto** en Angular. Si mañana aparece una card del DS con slot de header, eso por sí solo
+   no habilita nada — lo que hay que revisar es si el fondo es por slot o por wrapper.
+
+   Gotcha de `lib-card-z` si algún día se lo usa para otra cosa: `buildCustomStr()` corre **solo**
+   en `ngAfterContentInit`, así que cambiar `bgColor` después del primer render no propaga nada. */
+.form-section-card {
+  margin-bottom: var(--zs-250);
+  background: var(--zg-white);
+  border: 1px solid var(--z-card-border);
+  border-radius: var(--zs-75);
+  box-shadow: var(--z-card-shadow);
+}
+
+.form-section-header {
+  padding: var(--zs-100) var(--zs-200);
+  display: flex;
+  align-items: center;
+  gap: var(--zs-50);
+  border-radius: var(--zs-75) var(--zs-75) 0 0;
+}
+
+.form-section-header span {
+  color: var(--zg-white-zurich);
+  font: var(--zf-capt-12--700);
+}
+
+
+.form-section-body {
+  padding: var(--zs-200) var(--zs-300) var(--zs-200);
+  display: flex;
+  flex-direction: column;
+  gap: var(--zs-200);
+  overflow: visible;
+}
+
+/* Component: ResultCard → migrado a ZrCard + ZrIcon (defaults DS). Sin CSS propio. */
+
+
+/* Component: PreviewModal */
+.preview-modal {
+  width: min(1080px, 94vw);
+  display: flex;
+  flex-direction: column;
+}
+
+.preview-modal-header {
+  padding: var(--zs-100) var(--zs-150);
+  border-bottom: 1px solid var(--z-border);
+  background: var(--zg-white-zurich);
+}
+
+.preview-modal-title {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--zs-75);
+}
+
+.preview-modal-doc-name {
+  word-break: break-word;
+}
+
+.preview-modal-doc-desc {
+  margin-top: 2px;
+  line-height: 1.4;
+}
+
+.preview-modal-iframe {
+  width: 100%;
+  height: min(82vh, 820px);
+  border: none;
+  display: block;
+}
+
+/* Component: InfoBar — investigado 2026-08-06: ZrListItem invierte la
+   jerarquía tipográfica (header grande/primario, content chico/secundario,
+   al revés de label chico + valor grande), sin borde+sombra de contenedor
+   propios. ZrInputGroup solo fusiona inputs reales adyacentes, no pares
+   texto label/valor. ZrTile es de tamaño fijo con panel de imagen, para 1
+   imagen+texto, no N pares en fila. Sin componente ZDS equivalente,
+   InfoBar.tsx se mantiene igual. */
+.info-bar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--zs-150);
+  background: var(--zg-white);
+  border: 1px solid var(--z-border);
+  border-radius: 10px;
+  padding: var(--zs-100) var(--zs-150);
+  margin-bottom: var(--zs-150);
+  box-shadow: var(--z-card-shadow);
+}
+
+.info-bar-item {
+  display: flex;
+  flex-direction: column;
+  gap: var(--zs-12);
+}
+
+.section-title {
+  margin-bottom: var(--zs-75);
+  padding-left: var(--zs-25);
+}
+
+@media (max-width: 900px) {
+  .info-bar {
+    flex-direction: column;
+    gap: var(--zs-75);
+  }
+}
+
+.doc-item {
+  display: flex;
+  align-items: center;
+  gap: var(--zs-100);
+  padding: var(--zs-100) var(--zs-150);
+  border: 1px solid var(--z-border);
+  border-radius: 10px;
+  background: var(--zg-white-zurich);
+  transition: border-color .15s, background .15s, box-shadow .15s;
+}
+
+.doc-item:hover {
+  border-color: var(--z-blue);
+  background: var(--zg-white);
+  box-shadow: 0 2px 8px color-mix(in srgb, var(--zc-blue-zurich) 8%, transparent);
+}
+
+.doc-item.is-loaded {
+  border-color: var(--zc-moss-aa);
+  background: var(--zg-white);
+  box-shadow: 0 2px 8px color-mix(in srgb, var(--zc-moss-aa) 7%, transparent);
+}
+
+/* Círculo numerado de paso. Buscado componente ZDS 2026-08-16, no hay — y los dos candidatos
+   que parecen serlo, no lo son:
+     · `lib-tag-z` (`TagZ`): etiqueta con padding horizontal y texto por el input `label`.
+       No es un círculo y no admite contenido por slot.
+     · `lib-shape-z` (`ShapeZ`): `shape: '1'..'7'` + `size`, pero es **decorativo** —
+       `zShapeSlots: never[]` en `@zurich/dev-utils/dist/code/Shape.props.d.ts`, o sea que
+       no tiene dónde poner el número. Los '1'..'7' son formas, no dígitos.
+   Queda como CSS de dominio. El `50%` es forma geométrica, no escala (ver nota de radios en :root). */
+.doc-num-badge {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--zg-9);
+  transition: background .2s, color .2s;
+}
+
+.doc-num-badge--loaded {
+  background: var(--zc-moss-aa);
+  color: var(--zg-white-zurich);
+}
+
+.doc-body {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+
+.doc-desc {
+  color: var(--z-text);
+  line-height: 1.4;
+}
+
+
+.doc-status-wrap {
+  flex-shrink: 0;
+  width: 88px;
+  display: flex;
+  justify-content: center;
+}
+
+.file-name-empty {
+  padding: 2px 4px;
+}
+
+.doc-file-area,
+.doc-file-area--validation {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 5px;
+  flex-shrink: 0;
+  flex-grow: 0;
+}
+
+.doc-file-area {
+  width: 210px;
+}
+
+.file-name-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  background: var(--zg-9);
+  border-radius: var(--zs-25);
+  padding: 2px 7px;
+}
+
+.doc-preview-trigger {
+  flex-shrink: 0;
+}
+
+.doc-table-header {
+  display: flex;
+  align-items: center;
+  gap: var(--zs-100);
+  padding: var(--zs-50) var(--zs-150) var(--zs-50) calc(32px + var(--zs-100) + var(--zs-100));
+  border-bottom: 1px solid var(--z-border);
+  margin-bottom: var(--zs-75);
+}
+
+.doc-table-col-desc {
+  flex: 1;
+}
+
+.doc-table-col-file {
+  width: 200px;
+}
+
+.doc-table-col-val {
+  width: 180px;
+}
+
+.doc-item--validation {
+  gap: var(--zs-75);
+}
+
+.doc-file-area--validation {
+  width: 200px;
+}
+
+.doc-num-badge--en-revision {
+  background: color-mix(in srgb, var(--zc-blue-zurich) 15%, transparent);
+  color: var(--z-blue);
+}
+
+
+.validation-select-wrap {
+  flex-shrink: 0;
+  width: 180px;
+  position: relative;
+  z-index: 0;
+}
+
+.validation-select-wrap:focus-within {
+  z-index: 50;
+}
+
+.decision-section {
+  padding: var(--zs-150) var(--zs-200) var(--zs-100);
+  border-top: 2px dashed var(--z-border);
+  margin-top: var(--zs-50);
+}
+
+.decision-title {
+  margin-bottom: var(--zs-150);
+}
+
+
+
+/* Component: PdfViewer */
+.pdf-viewer {
+  width: 100%;
+}
+
+.pdf-viewer-label {
+  margin-bottom: var(--zs-50);
+}
+
+.pdf-viewer-state {
+  display: flex;
+  align-items: center;
+  gap: var(--zs-75);
+  padding: var(--zs-150);
+  background: var(--zg-white-zurich);
+  border: 1px solid var(--z-border);
+  border-radius: var(--zs-50);
+  color: var(--z-muted);
+}
+
+.pdf-viewer-error {
+  color: var(--z-red);
+}
+
+.pdf-viewer-actions {
+  display: flex;
+  justify-content: flex-end;
+  padding-top: var(--zs-50);
+}
+
+/* ── 6. DISEÑOS ESPECÍFICOS DE LAS PANTALLAS (Keep DRY) ──────────────────── */
+
+/* ---- Cotizador y tomador ---- */
+/* .lookup-wrapper → migrado a z-flex z-align="left:bottom" 2026-08-06
+   (layout trivial sin estilo visual propio, Eje B escalón 1). */
+
+.form-group--billing {
+  margin-top: var(--zs-25);
+}
+
+/* Labels y requireds */
+.form-group {
+  margin-bottom: var(--zs-100);
+}
+
+.form-label {
+  display: block;
+  margin-bottom: var(--zs-25);
+}
+
+.required-star {
+  color: var(--z-red);
+  margin-right: var(--zs-12);
+}
+
+/* Checkboxes y facturación */
+
+.checkbox-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--zs-75);
+}
+
+@media (max-width: 700px) {
+  .checkbox-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+.activities-product-label {
+  line-height: 1.3;
+}
+
+/* Investigado 2026-08-06: ActionCard/Tile son cards de tamaño fijo con
+   imagen/pictograma obligatorio, no pensadas para envolver un ZdsSelect
+   real de react-hook-form. SelectableCards/MultiSelectableCards extienden
+   BaseInput_Props (su propio model/options tipados) — son inputs de
+   selección de tarjeta con estado propio, incompatibles con envolver un
+   campo de formulario externo. Sin componente ZDS equivalente. */
+.billing-grid {
+  display: grid;
+  gap: var(--zs-100);
+  grid-template-columns: repeat(auto-fill, minmax(210px, 1fr));
+  margin-top: var(--zs-25);
+}
+
+.billing-block {
+  background: var(--zg-white-zurich);
+  border: 1px solid var(--z-border);
+  border-radius: var(--zs-50);
+  padding: var(--zs-75) var(--zs-100);
+}
+
+.billing-block-label {
+  margin-bottom: var(--zs-50);
+}
+
+.additional-emails-header {
+  margin-bottom: var(--zs-75);
+  padding-top: var(--zs-75);
+  border-top: 1px dashed var(--z-border);
+  display: flex;
+  align-items: center;
+  gap: var(--zs-50);
+}
+
+/* Colapsable de tomador */
+.policyholder-create-body {
+  border: 1.5px solid var(--zc-lemon-aa);
+  border-radius: var(--zs-50);
+  padding: var(--zs-150) var(--zs-150) var(--zs-75);
+  margin-bottom: var(--zs-25);
+}
+
+/* Products card */
+/* ⏳ CANDIDATO ZDS PENDIENTE → `lib-card-z`, mismo caso que `.form-subsection` (fondo único,
+   configurable por `--z-card--radius` / `--shadow` / `--border`). Ver esa nota para el detalle.
+   El `10px` de acá no tiene token (cae entre `--zs-50` y `--zs-75`), así que migrar a `lib-card-z`
+   además resuelve el radio: pasaría a ser el del DS en vez de un valor crudo intermedio. */
+.products-card {
+  background: var(--zg-white);
+  border-radius: 10px;
+  box-shadow: var(--z-card-shadow);
+  margin-bottom: var(--zs-150);
+  overflow: visible;
+  border: 1px solid var(--z-card-border);
+}
+
+.products-tab-body {
+  padding: var(--zs-150) var(--zs-200) var(--zs-100);
+}
+
+/* Subsecciones apiladas, intro/nota, fila de documento y listas (genérico) */
+.form-subsection--stack {
+  margin-bottom: var(--zs-150);
+}
+
+.form-subsection--stack:last-child {
+  margin-bottom: 0;
+}
+
+.subsection-intro {
+  color: var(--z-text);
+  margin: 0 0 var(--zs-100);
+  line-height: 1.5;
+}
+
+.subsection-note {
+  margin: var(--zs-75) 0 0;
+  font-style: italic;
+}
+
+/* .si-no-select-all → migrado a z-flex="50" z-align="right" + style inline
+   (margin-bottom, único resto sin primitivo) 2026-08-06. */
+
+.doc-row {
+  display: flex;
+  align-items: center;
+  gap: var(--zs-75);
+  padding: var(--zs-50) var(--zs-75);
+  border: 1px solid var(--z-border);
+  border-radius: var(--zs-50);
+  background: var(--zg-white);
+}
+
+.doc-row-label {
+  min-width: 96px;
+  flex-shrink: 0;
+}
+
+.service-list {
+  margin: var(--zs-25) 0 0 0;
+  padding-left: var(--zs-100);
+}
+
+.service-item {
+  padding: var(--zs-12) 0;
+  line-height: 1.5;
+}
+
+/* Tables / Records */
+/* .record-table-header → migrado a z-flex z-align="right" + style inline
+   (margin-bottom) 2026-08-06. */
+
+.record-empty {
+  text-align: center;
+  color: var(--z-muted);
+  padding: var(--zs-150);
+}
+
+.record-validation-msg {
+  text-align: right;
+  font-size: 12px;
+  color: var(--z-red);
+  margin-top: var(--zs-50);
+}
+
+.record-validation-msg strong {
+  font-weight: 700;
+}
+
+/* Info bars and section titles */
+.subsection-title {
+  margin-bottom: var(--zs-50);
+}
+
+/* .cover-note-toggle → migrado a z-flex="75" z-align="left:center" 2026-08-06
+   (layout trivial sin estilo visual propio). */
+
+/* Stack de label + control con gap 4px: --zs-25 no existe como gap de z-flex
+   (cuyo mínimo es 50 = 8px), por eso se mantiene como clase. */
+.field-wrap {
+  display: flex;
+  flex-direction: column;
+  gap: var(--zs-25);
+}
+
+.field-hint {
+  font-weight: 400;
+  margin-left: var(--zs-25);
+}
+
+/* Resumen de cotizaciones (preview). Investigado 2026-08-06: el componente
+   `Quote` del vendor (categoría molecules) es un FALSO AMIGO — sus props
+   reales (`quote-src`/`author-name`/`content`/`description`) son las de
+   una cita/testimonio, no una cotización de seguros. Ni ActionCard ni Tile
+   tienen una franja de header con color sólido full-width separada del
+   cuerpo (mismo hallazgo que FormSection, arriba) — el cuerpo tabular ya
+   usa ZrTable/z-table; solo el header de color + contenedor con
+   border-radius/overflow quedan sin equivalente ZDS. */
+.quote-summary-body {
+  padding: var(--zs-150) var(--zs-200);
+  display: flex;
+  flex-direction: column;
+  gap: var(--zs-100);
+}
+
+.quote-summary-product {
+  border: 1px solid var(--zg-9);
+  border-radius: var(--zs-50);
+  overflow: hidden;
+}
+
+.quote-summary-product-header {
+  background: var(--zc-blue-zurich);
+  color: var(--zg-white-zurich);
+  font: var(--zf-capt-12--700);
+  padding: var(--zs-75) var(--zs-150);
+  display: flex;
+  align-items: center;
+  gap: var(--zs-50);
+}
+
+.quote-summary-status {
+  display: flex;
+  align-items: center;
+  gap: var(--zs-75);
+  padding: var(--zs-100) var(--zs-200);
+}
+
+
+.quote-summary-status--hint {
+  font-style: italic;
+}
+
+/* Respuesta cotización screen */
+.result-content {
+  max-width: 640px;
+  margin: 0 auto;
+  padding: var(--zs-200) var(--zs-150) var(--zs-400);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+/* .result-actions → migrado a z-flex z-align="center" + style inline
+   (margin-top) 2026-08-06. */
+
+/* Opciones cotización screen. .screen-body → migrado a z-grid="main"+column
+   2026-08-06 (ver OpcionesCotizacion.tsx) — resto mínimo: align-items (grid
+   por defecto es stretch) y el colapso a 1 columna bajo 767px (grid mobile
+   de z-grid es de 6 columnas fijas; el atributo `column` del hijo no se
+   puede duplicar en JSX para agregar el prefijo `m:`, así que el colapso se
+   fuerza acá por atributo). Diferencia aceptada: el aside pasa de 380px fijo
+   a ~290-350px variable por breakpoint, y el punto de colapso se mueve de
+   1024px a 767px. */
+.screen-body {
+  align-items: start;
+}
+
+@media (max-width: 767px) {
+  .screen-body > [column] {
+    grid-column: 1 / -1;
+  }
+}
+
+.decision-actions {
+  padding: var(--zs-100) var(--zs-150) var(--zs-150);
+  display: flex;
+  justify-content: flex-end;
+  border-top: 1px solid var(--z-border);
+}
+
+/* Nota Cobertura screen */
+
+/* ⏳ CANDIDATO ZDS PENDIENTE → `lib-accordion-z` reemplaza este bloque y los 5 de abajo
+   (`.doc-card-header`, `:hover`, `.is-open`, `.doc-info`, `.doc-actions`, `.doc-viewer`).
+   Verificado 2026-08-16 en `types/zurich-col-lib-zurich.d.ts`, clase `AccordionZ`:
+
+       titleLabel: string        ← el texto del header (hoy `.doc-card-header` + `.doc-info`)
+       label: string
+       readonlyInput: boolean
+       template: QueryList<ZTemplate>   ← cuerpo por `<ng-template libZTemplate id="...">`
+       changeRead(): void        ← el abrir/cerrar que hoy es la clase `.is-open` a mano
+
+   O sea que el estado de apertura, el header clickeable y el cuerpo colapsable ya los da el
+   componente; acá se están reimplementando a mano. **No se migra todavía a propósito:** las
+   pantallas que usan estas clases (VisualizarDocumentos, RequestFileList) no están portadas aún,
+   y sin la pantalla al lado del React no hay con qué comparar visualmente. Se migra al portar la
+   pantalla — política de reducción de esta hoja, ver el encabezado del archivo. */
+.doc-card {
+  border: 1px solid var(--z-border);
+  border-radius: var(--zs-50);
+  overflow: hidden;
+  background: var(--zg-white-zurich);
+}
+
+.doc-card-header {
+  display: flex;
+  align-items: center;
+  gap: var(--zs-75);
+  padding: var(--zs-75) var(--zs-100);
+  background: var(--zg-white);
+  border-bottom: 1px solid transparent;
+  transition: background .1s;
+}
+
+.doc-card-header:hover {
+  background: var(--zg-white-zurich);
+}
+
+.doc-card.is-open .doc-card-header {
+  border-bottom-color: var(--z-border);
+  background: var(--z-blue-light);
+}
+
+.doc-info {
+  flex: 1;
+  min-width: 0;
+}
+
+.doc-name {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.doc-meta {
+  margin-top: 2px;
+}
+
+.doc-actions {
+  display: flex;
+  gap: var(--zs-50);
+  flex-shrink: 0;
+}
+
+.doc-viewer {
+  padding: var(--zs-100);
+  background: var(--zg-white-zurich);
+}
+
+/* .no-docs-card → migrado a z-flex="col:75" z-align="center:center" + style
+   inline (tokens) 2026-08-06 — no era un "estado vacío" (eso ya usaba ZrAlert
+   config="info"), sino el bloque de carga (ZrLoader + texto); no calzaba con
+   ZrEmptyState. Ver RequestFileList.tsx y VisualizarDocumentos.tsx. */
+
+/* Estado Correo screen */
+.email-status-content {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: var(--zs-300) var(--zs-200);
+  gap: var(--zs-200);
+}
+
+.email-status-note {
+  margin-top: var(--zs-150);
+  border-top: 1px dashed var(--zg-9);
+  padding-top: var(--zs-100);
+}
+
+/* Investigado 2026-08-06: ZrTag (radius --zs-150=24px, sin word-break) y
+   ZrChip (siempre interactivo, con botón de cierre integrado) no calzan con
+   un correo electrónico completo de solo lectura que necesita quebrarse —
+   CSS de dominio confirmado, sin componente ZDS equivalente.
+
+   Re-verificado 2026-08-16 contra la lib de Colombia, que es la base ahora: `lib-tag-z`
+   (clase `TagZ`) expone **solo** `label` / `colorTag` / `icon` / `iconRight` / `fill`
+   (10 paletas: moss, azure, teal, lilac, candy, peach, mint, lime, lemon, powder-pink).
+   Sin salida para `word-break`, y el texto va por el input `label` (string), no por slot —
+   así que no hay dónde meter un quiebre. El motivo de 2026-08-06 sigue vigente con la lib
+   nueva, por una razón distinta a la de React: no es el radio, es que el contenido es un
+   input de texto plano y no un slot. Se mantiene como CSS de dominio. */
+.email-status-badge {
+  display: inline-block;
+  margin: var(--zs-75) 0;
+  padding: var(--zs-75) var(--zs-150);
+  background: color-mix(in srgb, var(--zc-blue-zurich) 8%, transparent);
+  border: 1px solid var(--zc-blue-zurich);
+  border-radius: 999px;
+  font: var(--zf-body-14--700);
+  color: var(--zc-blue-zurich);
+  word-break: break-all;
+  max-width: 100%;
+}
+
+.email-status-badge--error {
+  background: color-mix(in srgb, var(--zc-peach-aa) 8%, transparent);
+  border-color: var(--zc-peach-aa);
+  color: var(--zc-peach-aa);
+}
+
+/* .email-status-actions → migrado a z-flex z-align="center" 2026-08-06
+   (layout trivial sin estilo visual propio). */
+
+.email-status-overlay {
+  position: fixed;
+  inset: 0;
+  background: color-mix(in srgb, var(--zg-white) 75%, transparent);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: var(--zs-100);
+  z-index: 100;
+  font: var(--zf-body-16--700);
+  color: var(--zc-blue-zurich);
+}
+
+/* Error logs & validation lists */
+.affected-fields-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--zs-50);
+  padding: var(--zs-50) 0;
+  min-height: 38px;
+  align-items: center;
+}
+
+
+/* ========== revisar-queja-asignar ========== */
+/* =====================================================
+   REVISAR QUEJA Y ASIGNAR RESPONSABLE — SP2-T01
+   Proceso: SP2-T01 | Quejas Directas | Zurich Colombia
+   ===================================================== */
+
+/* ──────────────────────────────────────
+   BADGE DE PRIORIDAD
+────────────────────────────────────── */
+
+/* .sla-* → indicador SLA no usado en TSX, eliminado */
+
+
+/* ========== dashboard-gestion-casos (SCR-013 / PAN-13) ========== */
+/* =====================================================
+   DASHBOARD — GESTIÓN DE CASOS — P01 (Supervisor / Jefe SAC)
+   Patrones de dominio sin equivalente en el DS: KPIs de SLA,
+   punto-semáforo de días y barras de encabezado/paginación.
+   ===================================================== */
+
+/* .dashboard-toolbar → migrado a z-flex="100" z-align="between:center" +
+   style inline (margin) 2026-08-06. z-align sí soporta "between"
+   (justify-content:space-between) — confirmado contra el CSS real; la nota
+   de DOCUMENTACION_COL_QD_SCR-013...md que decía lo contrario está
+   desactualizada, corregida en el mismo commit. */
+
+/* .kpi-grid / .kpi-card / .dashboard-pagination → migrados a ZrKpiValue/ZrPagination
+   2026-08-06 (ver outputs/react/molecules/zurich-kpivalue.md y
+   outputs/react/layout/zurich-pagination.md). Layout con z-flex, sin clase propia. */
+
+/* ── Modal ancho con cuerpo desplazable (logs, textos largos) ──────────────
+   Mismo ancho que .preview-modal para que todos los modales grandes coincidan.
+   Se aplica al contenedor que va DENTRO de ZrModal (el web component maneja
+   su propio layout, no se le ponen clases ni z-flex encima). */
+.modal-wide {
+  width: min(1080px, 94vw);
+}
+
+.modal-scroll-body {
+  max-height: min(62vh, 620px);
+  overflow-y: auto;
+}
+
+/* Título del modal ancho. Reemplaza el `style={{...}}` en línea que usan las pantallas React
+   equivalentes (SCR-004/SCR-011/SCR-003, las tres con los mismos tres valores): la regla 3
+   prohíbe estilos ad-hoc, y tres copias del mismo objeto ya eran la definición de no-DRY.
+
+   No va por `lib-modal-z` con el slot `title`: ese slot pinta el encabezado del modal CON su
+   botón de cierre al lado, y acá el título va DENTRO del cuerpo desplazable, arriba del textarea.
+   Son dos posiciones distintas del layout, no dos estilos del mismo elemento.
+
+   ⚠ Existía como clase referenciada y NO definida en `revision-error-tecnico-api.html:198` y
+   `revision-error-tecnico-prorroga.html:236` desde que se portaron: un `class=` que no matchea
+   ninguna regla no da error en ningún gate —ni lint, ni build, ni spec— así que los dos h3
+   venían pintando con los estilos por defecto del navegador. Es el modo de falla del CSS: la
+   ausencia se ve como "un poco distinto", no como roto.
+
+   ⚠ `--zf-body-20--700` y NO `--zf-h-20--700`, que es lo que dicen los `style` en línea de las
+   6 pantallas React: la escala de headings **no lleva sufijo de peso** (`--zf-h-20` es
+   `300 1.25rem/1.875rem`, light), así que `--zf-h-20--700` no resuelve a nada e invalida el
+   shorthand `font` COMPLETO — los h3 de React tampoco están pintando con ese estilo. Los
+   sufijos `--700` existen solo en las familias `body-*` y `capt-*`. Mismo criterio que
+   `.pqr-modal-title`, donde el proyecto ya lo había medido. */
+.modal-titulo {
+  margin: 0 0 var(--zs-75);
+  font: var(--zf-body-20--700);
+  color: var(--z-text);
+}
+
+/* ── PÁGINA PÚBLICA DE RADICACIÓN (maquetado web Zurich) ───────────────────
+   Chrome de página pública: barra de navegación, banner, hoja de secciones y
+   footer corporativo. Es el maquetado del sitio Zurich (no el chrome de una
+   tarea PM4, que usa .screen-header / .form-section-card).
+   Equivalencias de color del diseño → tokens DS:
+     #23366F navy → --zc-blue-dark   ·  #2167AE azul → --zc-blue-zurich
+     #ECEEEF gris → --zg-white-zurich ·  #828A8B borde → --zg-6 · #ABABAB → --zg-8 */
+.pqr-page {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+  background: var(--z-bg);
+}
+
+/* .pqr-topnav/.pqr-topnav-links → migrados a ZrNavigation 2026-08-06 (ver
+   PqrPage.tsx). .pqr-topnav-logo se mantiene: sigue dimensionando el <img>
+   del logo dentro del slot "logo" del componente. */
+.pqr-topnav-logo {
+  height: 42px;
+  width: auto;
+  object-fit: contain;
+}
+
+/* .pqr-banner/.pqr-banner-content/.pqr-banner-title/.pqr-banner-text/
+   .pqr-banner-shapes → migrados a ZrStageBanner 2026-08-10 (ver PqrPage.tsx),
+   sin imagen (regla de negocio: este banner no lleva imagen/pictograma).
+   ZrPromo se descartó porque fuerza un círculo de imagen aunque no se le
+   pase `image-src` (`forceImage:true` en su fuente vendorizado); ZrStageBanner
+   sin `pictogram`/`image-src` renderiza solo texto + `<z-shape>`. El
+   responsive es interno del componente (@container), no hace falta
+   replicar breakpoints a mano. */
+
+/* ⚠ En Angular este banner lleva SOLO el titular. Verificado 2026-08-17 sobre
+   `web-components/dist/stage-banner.js`: el `z-stage-banner` rinde
+   `<main><h6>{category}</h6><h3>{content}</h3></main>`, o sea que el slot chico
+   (`--zf-body-20--600`) va ARRIBA del grande (`--zf-h-48`). React metía titular
+   + párrafo juntos dentro de `content` con `font` inline, algo que su wrapper
+   permite porque tipa `content: string | ReactNode`; el wrapper de Colombia lo
+   tipa `string` y su plantilla lo interpola como texto (`{{ content }}`), así
+   que la composición no cruza. Poner el intro en `category` lo pintaría chico y
+   por encima del titular — invertido respecto del diseño. El intro sale del
+   banner y va como `.pqr-intro` (abajo). Efecto colateral BUENO: el titular
+   recupera `--zf-h-48`, el tamaño que tenía `.pqr-banner-title` antes de las dos
+   migraciones (React lo había bajado a `--zf-h-44` al forzar el font inline). */
+
+/* ⚠ `.pqr-topnav`/`.pqr-topnav-links` se habían borrado al migrar a ZrNavigation
+   en React; en Angular la barra vuelve a maquetarse a mano y `.pqr-topnav`
+   revive. Motivo verificado 2026-08-17 en la plantilla compilada de
+   `lib-navigation-z` (`fesm2022/zurich-col-lib-zurich.mjs`), que es entera
+   `<za-navigation config="" [routes] [social]></za-navigation>`: no tiene
+   `<ng-content>` en ninguna parte, así que el `<img slot="logo">` que React le
+   proyectaba no tiene dónde ir y Angular lo descartaría en silencio (barra sin
+   logo). El wrapper tampoco reenvía `isotype`/`menu`/`with-top`/`custom`, que
+   son los inputs de `za-navigation` que podrían haber servido. Cae bajo la regla
+   "layout o estructura → CSS propio": lo que se necesita es una barra de altura
+   fija con un logo, no navegación con rutas y redes. */
+.pqr-topnav {
+  display: flex;
+  align-items: center;
+  height: 80px;
+  padding: var(--zs-100) var(--zs-200);
+  background: var(--zc-blue-dark);
+}
+
+/* Hoja de formulario: columna central de 1130px sobre el fondo gris. */
+.pqr-form {
+  width: min(1130px, 100%);
+  margin: var(--zs-200) auto 0;
+  padding: 0 var(--zs-200);
+}
+
+/* Bajada del formulario: el párrafo que en React vivía dentro del banner (ver el
+   ⚠ de arriba). Comparte la columna central de `.pqr-form` pero con su propio
+   margen, porque va sobre el fondo gris y no dentro del card blanco — no se
+   reusa `.pqr-note`, cuyo margen asume estar dentro de una sección. */
+.pqr-intro {
+  width: min(1130px, 100%);
+  margin: var(--zs-200) auto 0;
+  padding: 0 var(--zs-200);
+  font: var(--zf-body-20--300);
+  color: var(--zc-blue-dark);
+}
+
+/* Sección: card blanco con título azul 24px y divisoria navy. Las secciones se
+   apilan sin separación para leerse como una sola hoja (igual que el diseño). */
+.pqr-section {
+  background: var(--zg-white);
+  padding: 0 var(--zs-200) var(--zs-200);
+}
+
+.pqr-section-title {
+  margin: 0;
+  padding-top: var(--zs-200);
+  font: var(--zf-h-24);
+  font-weight: 400;
+  color: var(--z-blue);
+}
+
+.pqr-section-divider {
+  border: none;
+  height: 1px;
+  background: var(--zc-blue-dark);
+  margin: var(--zs-50) 0 var(--zs-200);
+}
+
+/* Campo de solo lectura en línea: etiqueta 12px azul + valor 18px navy subrayado. */
+.pqr-readonly {
+  display: flex;
+  flex-direction: column;
+}
+
+.pqr-readonly-label {
+  font: var(--zf-capt-12--500);
+  color: var(--z-blue);
+}
+
+.pqr-readonly-value {
+  padding: var(--zs-12) 0 var(--zs-25);
+  border-bottom: 1px solid var(--zg-6);
+  font: var(--zf-body-18--300);
+  color: var(--zc-blue-dark);
+}
+
+/* Texto de apoyo dentro de una sección (18px navy, como el diseño). */
+.pqr-note {
+  margin: var(--zs-150) 0 var(--zs-75);
+  font: var(--zf-body-18);
+  color: var(--zc-blue-dark);
+}
+
+/* Fila de switch/checkbox suelto dentro de una sección. */
+.pqr-toggle-row {
+  margin-top: var(--zs-100);
+}
+
+/* Barra de acciones de la página pública: botones alineados a la derecha. */
+.pqr-actions {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: var(--zs-100);
+  width: min(1130px, 100%);
+  margin: 0 auto;
+  padding: var(--zs-200);
+}
+
+/* Footer corporativo: dos columnas de enlaces, divisoria vertical y legales.
+   Investigado 2026-08-06: ZrFooter (habilitado en ZdsFields.tsx) NO calza —
+   su render() real pinta `columns[].header` como <h4> de texto plano, nunca
+   envuelto en z-link, y los dos "encabezados" de columna de este diseño SÍ
+   son links clickeables ("Zurich Compañía de Seguros", "¿Tienes
+   problemas?"); migrar rompería esa interacción. La alternativa (`footer`,
+   fila plana) tampoco sirve: solo admite un listado y ya está reservada
+   para la fila de legales. CSS de dominio confirmado, se mantiene. */
+/* `lib-footer-z` NO reemplaza este bloque ni los `.pqr-footer-*` de abajo. Verificado
+   2026-08-16 en `types/zurich-col-lib-zurich.d.ts`: la clase `FooterZ` está **vacía** —
+   `declare class FooterZ { }`, cero inputs. Su contenido (links y redes) es hardcodeado de la
+   lib, no configurable, y acá se necesitan los links legales específicos de esta pantalla PQR.
+   (Un grep sobre el `.mjs` minificado devuelve `routes`/`social` para este selector, pero son
+   inputs del componente **vecino** en el bundle: los `.mjs` van en una línea, así que la
+   proximidad textual no respeta límites de componente. El `.d.ts` es la fuente confiable.) */
+.pqr-footer {
+  display: flex;
+  align-items: center;
+  gap: var(--zs-150);
+  flex-wrap: wrap;
+  min-height: 92px;
+  padding: var(--zs-100) var(--zs-150);
+  background: var(--zg-white);
+  /* .pqr-page es flex-column: esto ancla el footer al fondo cuando el contenido
+     (p.ej. la pantalla de éxito/error, mucho más corta que el formulario) no
+     alcanza a llenar el viewport, en vez de quedar flotando a media página. */
+  margin-top: auto;
+}
+
+.pqr-footer-col {
+  display: flex;
+  flex-direction: column;
+}
+
+.pqr-footer-link {
+  font: var(--zf-body-16);
+  color: var(--zc-blue-dark);
+  text-decoration: none;
+}
+
+.pqr-footer-link--sub {
+  font: var(--zf-body-14--300);
+}
+
+.pqr-footer-divider {
+  width: 1px;
+  height: 48px;
+  background: var(--zc-blue-dark);
+  margin: 0 var(--zs-150);
+}
+
+.pqr-footer-legal {
+  display: flex;
+  align-items: center;
+  gap: var(--zs-150);
+  margin-left: auto;
+  font: var(--zf-body-14--300);
+  color: var(--zc-blue-dark);
+}
+
+.pqr-footer-legal a {
+  color: inherit;
+  text-decoration: none;
+}
+
+/* Cabecera de modal (SCR-000): ícono circular + título + texto de apoyo. La
+   comparten el modal de confirmación de envío (MSG-000-08) y el de casos
+   similares — solo cambia el color del ícono (modificador --info/--warning).
+   Investigado 2026-08-06 contra el vendor real (ListItem/EventListItem/Avatar/
+   Alert/ActionCard): ninguno ofrece ícono circular de tamaño libre + fila
+   flex-start — CSS de dominio confirmado, sin componente ZDS equivalente. */
+.pqr-modal-head {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--zs-150);
+  margin-bottom: var(--zs-200);
+}
+
+.pqr-modal-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex: 0 0 auto;
+  width: 64px;
+  height: 64px;
+  border-radius: 50%;
+}
+
+/* El `color` va acá y no en un `style` en línea sobre el `za-icon` como en React: el proyecto no
+   admite estilos ad-hoc, y el par fondo+color del círculo es un patrón compartido por los dos modales
+   de SCR-000, no una excepción de uno.
+
+   Setear `color` en el contenedor alcanza: `z-icon` (el elemento que `za-icon` pinta adentro) no es un
+   SVG con `fill`, es un `background-color: var(--z-icon--color, currentColor)` recortado por una
+   `mask` — así que el color se hereda por `currentColor`. Verificado 2026-08-18 en
+   `@zurich/css-components/dist/Icon.css`. La alternativa sería `--z-icon--color`, que es más
+   específica pero no hereda a un futuro segundo ícono en el mismo círculo. */
+.pqr-modal-icon--info {
+  background: var(--z-blue-light);
+  color: var(--z-blue-dark);
+}
+
+.pqr-modal-icon--warning {
+  background: var(--zc-lemon-20);
+  color: var(--z-warning-deep);
+}
+
+.pqr-modal-title {
+  margin: 0 0 var(--zs-50);
+  /* Body-20 en negrita, no un token --zf-h-* (esa escala no lleva sufijo de peso —
+     --zf-h-20--700 no existe y invalida todo el shorthand `font`). Mismo criterio
+     que el título de ResultCard.tsx (--zf-body-20--700). */
+  font: var(--zf-body-20--700);
+  color: var(--z-blue-dark);
+}
+
+.pqr-modal-text {
+  margin: 0;
+  font: var(--zf-body-16);
+  color: var(--z-text);
+}
+
+/* Tarjeta gris con los datos del caso, fila por dato con divisoria fina.
+   Usa el token crudo --zg-white-zurich (no el alias --z-bg): dentro de ZrModal
+   el DS redefine --z-bg a blanco para el contenido proyectado, y el alias
+   perdería el gris. Investigado 2026-08-06: z-table/InputGroup/ListItem no
+   ofrecen "card + fila con borde solo entre filas + label/valor" — sin
+   componente ZDS equivalente confirmado. */
+.pqr-summary {
+  display: flex;
+  flex-direction: column;
+  background: var(--zg-white-zurich);
+  border-radius: var(--zs-100);
+  padding: 0 var(--zs-150);
+  margin-bottom: var(--zs-200);
+}
+
+.pqr-summary-row {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: var(--zs-150);
+  padding: var(--zs-100) 0;
+  border-bottom: 1px solid var(--z-border);
+  font: var(--zf-body-16);
+}
+
+.pqr-summary-row:last-child {
+  border-bottom: none;
+}
+
+/* Fila de una sola columna (p.ej. cada caso similar en su propia línea, sin
+   par etiqueta/valor). */
+.pqr-summary-row--single {
+  justify-content: flex-start;
+  color: var(--z-text);
+}
+
+.pqr-summary-label {
+  font-weight: 500;
+  color: var(--z-blue-dark);
+}
+
+.pqr-summary-value {
+  color: var(--z-text);
+  text-align: right;
+}
+
+/* ─────────────────────────────────────────────────────────────────────────────
+   Índice de pantallas y páginas de diagnóstico (Fase 4)
+
+   Son las tres vistas que NO son pantallas de negocio: el índice que se ve sin
+   `?screen=`, el "pantalla no encontrada" y el error de render. En React vivían
+   como objetos de estilo en línea dentro de `App.tsx` (`DEBUG_BANNER_STYLE` y
+   los `style={{...}}` del `ScreenIndex`), lo que acá no es una opción: la
+   jerarquía de UI de CLAUDE.md prohíbe estilos ad-hoc y manda todo CSS nuevo al
+   final de esta hoja, tokenizado. Por eso el port las convierte en clases.
+
+   Nombradas por componente (`pm4-indice-*`, `pm4-diag-*`), nunca por pantalla.
+   ───────────────────────────────────────────────────────────────────────────── */
+
+.pm4-indice {
+  min-height: 100vh;
+  background: var(--zg-white-zurich);
+  padding: var(--zs-300) var(--zs-200);
+  position: relative;
+}
+
+/* El hash del commit, arriba a la derecha: sirve para saber qué build está
+   corriendo dentro del iframe, donde no hay barra de direcciones útil. */
+.pm4-indice-commit {
+  position: absolute;
+  top: var(--zs-100);
+  right: var(--zs-150);
+  font: var(--zf-body-12);
+  color: var(--zg-7);
+}
+
+.pm4-indice-cuerpo {
+  max-width: 800px;
+  margin: 0 auto;
+}
+
+.pm4-indice-titulo {
+  margin: 0;
+  font: var(--zf-h-24);
+  color: var(--z-blue-dark);
+}
+
+/* La barrita azul vertical al lado del título. Es decorativa: va con
+   `aria-hidden` en el template. */
+.pm4-indice-marca {
+  width: 6px;
+  height: 32px;
+  background: var(--z-blue);
+  border-radius: 3px;
+}
+
+.pm4-indice-conteo {
+  margin: 0 0 0 18px;
+  color: var(--zg-5);
+  font: var(--zf-body-14);
+}
+
+.pm4-indice-grilla {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+  gap: var(--zs-100);
+}
+
+/* Cada tarjeta es un `<a href="?screen=...">`: navegación real, no un handler
+   de click, así que funciona con el teclado y con "abrir en pestaña nueva". */
+.pm4-indice-item {
+  display: block;
+  padding: var(--zs-100) var(--zs-150);
+  background: var(--zg-white);
+  border: 1.5px solid var(--zg-9);
+  border-radius: var(--zs-50);
+  text-decoration: none;
+  color: var(--z-blue-dark);
+  font: var(--zf-body-14);
+  transition: border-color .15s, color .15s, box-shadow .15s;
+  box-shadow: 0 1px 3px color-mix(in srgb, var(--zg-black) 6%, transparent);
+}
+
+/* El hover se hace con CSS y no con `onMouseEnter`/`onMouseLeave` como en
+   React: ahí eran tres asignaciones a `style` por evento, acá es una regla. De
+   paso cubre `:focus-visible`, que la versión de React no cubría. */
+.pm4-indice-item:hover,
+.pm4-indice-item:focus-visible {
+  border-color: var(--z-blue);
+  color: var(--z-blue);
+  box-shadow: 0 4px 12px color-mix(in srgb, var(--z-blue) 15%, transparent);
+}
+
+.pm4-indice-item-prefijo {
+  display: block;
+  color: var(--zg-7);
+  font: var(--zf-body-12);
+  margin-bottom: var(--zs-50);
+}
+
+/* Aviso de que el token salió del `.env` y no del `?token=` de PM4. Fijo arriba
+   y sin capturar el mouse, para que no tape ni bloquee nada del formulario. */
+.pm4-banner-debug {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 99999;
+  background: var(--zc-peach-aa);
+  color: var(--zg-white);
+  text-align: center;
+  padding: var(--zs-75) var(--zs-150);
+  font: var(--zf-body-12);
+  font-weight: 700;
+  letter-spacing: .4px;
+  pointer-events: none;
+}
+
+.pm4-diag {
+  padding: var(--zs-200);
+}
+
+.pm4-diag-error {
+  color: var(--zc-peach-aa);
+}
+
+/* El stack completo, sin recortar: es el equivalente del `<pre>` del
+   ErrorBoundary de React y el único lugar donde se puede leer y copiar. */
+.pm4-diag-stack {
+  white-space: pre-wrap;
+  font: var(--zf-body-14);
+}
+
+/* Separación del valor respecto de su etiqueta en un bloque de solo lectura
+   (`.zds-field-wrap` > `.info-bar-label` + `.info-bar-value`).
+
+   Existe porque en React esto era un `style={{ marginTop: 'var(--zs-50)' }}` repetido
+   ~10 veces en el JSX de SCR-008. El token es el mismo, así que el render no cambia;
+   lo que cambia es que deja de ser estilo en línea por pantalla, que la regla 3 de
+   pm4-app/CLAUDE.md no permite. Sirve para cualquier pantalla con bloques de contexto
+   de solo lectura — SCR-0051 y SCR-0052 tienen los mismos. */
+.valor-solo-lectura {
+  margin-top: var(--zs-50);
+}
+
+/* Caja de campo SIN el piso de 68px — para los wrappers que React renderiza pelados.
+
+   `.zds-field-wrap` reserva 68px a propósito (pill de 48 + línea de helpText), y eso es lo que
+   alinea los pills de una `form-row` exista o no el helpText. Pero React solo envuelve en esa
+   clase a `ZdsInput`, `ZdsTextarea` y `ZdsDate`: el radio, el checkbox y el file-input van
+   **sin div**, así que su alto es el del control y nada más.
+
+   Acá los 7 wrappers necesitan el div igual, porque es donde vive el `id="field-<name>"` que
+   `scrollToFirstError` busca (los `za-*`/`lib-*-z` cablean su propio `id` sobre el custom element
+   de adentro, así que ponerlo en el componente del DS no sirve — ver `campo-za-base.ts`). O sea
+   que el div se queda y lo que sobra es el piso.
+
+   Medido con Playwright contra React, mismo `task_id`, wrapper por wrapper (alto de la caja vs
+   alto real del control):
+
+     zds-input        48 → 68  (+20)  ← a propósito, React hace lo mismo
+     zds-date         48 → 68  (+20)  ← ídem
+     zds-textarea    166 → 166 ( +0)  ← más alto que el piso, inerte
+     zds-radio        52 → 68  (+16)  ← divergencia: React no lo envuelve
+     zds-checkbox     44 → 68  (+24)  ← la peor, y la que no se había visto
+     zds-file-input  236 → 236 ( +0)  ← piso inerte, pero la clase igual corresponde
+
+   Un matiz de esa tabla que cuesta caro leer mal: los 44px del checkbox son el alto del
+   **contenido del wrap**, no el del `za-checkbox`, que mide 17. La diferencia es que
+   `lib-checkbox-z` rinde el label y el helpText como HERMANOS del checkbox dentro del mismo
+   wrap, así que medir solo el `firstElementChild` da 17 y sobreestima el aire en 27px.
+
+   El +16 del radio es lo que hacía que la SCR-011 midiera 1815px de alto contra los 1799px de
+   React: el delta nacía en la tercera `form-row` de la segunda tarjeta y subía intacto hasta el
+   `body`. El +24 del checkbox no se había visto porque ninguna de las pantallas portadas hasta
+   ahora tiene uno; estaba esperando a la primera que lo tuviera.
+
+   Verificado en el navegador después del arreglo: la SCR-011 pasó a medir 1799/1707/1619 en
+   `body`/`.screen-content`/`form` — idéntica a React en los tres niveles— y el wrap del radio
+   computa `min-height: 0px` y rinde 52px. */
+.zds-field-bare {
+  width: 100%;
+}
+
+/* Valor de solo lectura que conserva sus saltos de línea.
+
+   Es el `style={{ whiteSpace: 'pre-wrap' }}` que React pone en línea sobre el `.info-bar-value`
+   de las observaciones de SCR-0052 (`RespuestaAreaResponsable.tsx:278`). Se saca a clase por la
+   regla 3 de pm4-app/CLAUDE.md —nada de estilo en línea *ad-hoc* por pantalla— y se nombra por
+   el patrón, no por la pantalla: cualquier texto libre que un usuario escribió en un textarea y
+   que otra pantalla muestra en modo consulta necesita exactamente esto. Sin la regla, los saltos
+   de línea que el Analista SAC puso en sus observaciones se leen como un párrafo corrido.
+
+   Va sobre el `.info-bar-value`, no sobre el `.valor-solo-lectura`: el margen y el quiebre de
+   línea son cosas distintas y se combinan (`<span class="info-bar-value texto-multilinea">`). */
+.texto-multilinea {
+  white-space: pre-wrap;
+}
+
+/* Semáforo de los KPI de SLA de SCR-013 (Próximos a vencer / Vencidos / Cerrados).
+
+   `za-kpi-value` colorea su número con la custom property `--z-kpi-value--color`, y React la setea
+   con un `style` en línea por cada tarjeta (`DashboardGestionCasos.tsx:126-128`). Acá va como clase
+   por la regla 3 de pm4-app/CLAUDE.md: nada de estilo en línea *ad-hoc*.
+
+   Se nombran por el ESTADO que comunican y no por la pantalla ni por el KPI, porque el semáforo
+   verde/naranja/rojo es el mismo lenguaje que ya usan `zds-status-badge` y las alertas — la próxima
+   pantalla con un contador de SLA reusa estas tres y no agrega otras.
+
+   ⚠ El `config` del componente NO sirve para esto: sus dos variantes (`positive`/`negative`) tiñen el
+   `difference` (la flechita de variación), no el valor, y esta pantalla no pasa `difference`. Por eso
+   la custom property es el único camino, y no un atajo. */
+.kpi-warn {
+  --z-kpi-value--color: var(--z-orange);
+}
+
+.kpi-danger {
+  --z-kpi-value--color: var(--z-red);
+}
+
+.kpi-ok {
+  --z-kpi-value--color: var(--z-green);
+}
+
+/* Barra de encabezado de una sección con acción a la derecha (título + botón).
+
+   Es el `style={{ margin: 'var(--zs-100) 0' }}` que React pone en línea sobre el
+   `z-flex="100" z-align="between:center"` de SCR-013 (`DashboardGestionCasos.tsx:108`) — el layout
+   ya lo hacen los primitivos del DS, así que esta clase aporta **solo** el margen vertical, que es
+   lo que no tiene primitivo.
+
+   El `.section-title` que va adentro trae su propio `margin-bottom`, que acá sobra porque el
+   `z-flex` ya centra verticalmente: se anula para que el título no quede desplazado hacia arriba
+   respecto del botón. React lo resuelve con otro `style` en línea (`margin: 0`). */
+.section-bar {
+  margin: var(--zs-100) 0;
+}
+
+.section-bar .section-title {
+  margin-bottom: 0;
+}
+
+/* Visor de documentación a pantalla completa (`smartsupervision-api-docs`).
+
+   Es el `style` en línea del `<iframe>` de React (`SmartsupervisionApiDocs.tsx`), que acá no se
+   permite en el markup. Aporta **solo geometría**: el DS no tiene componente de visor y esto es
+   layout de pantalla, así que por la política de `shared.css` va como CSS propio y no como
+   candidato a `lib-*-z`.
+
+   `position: fixed` + `inset: 0` es lo que hace el trabajo: saca al iframe del flujo y lo mide contra
+   el viewport, no contra el padre. El `width/height: 100%` viene de React y se conserva porque un
+   `<iframe>` trae `width`/`height` propios de HTML (300×150 por defecto) y así queda explícito que no
+   gobiernan; con `inset: 0` es redundante, no contradictorio.
+
+   Que cubra el viewport entero es deliberado: es una pantalla de documentación, no una pieza de
+   formulario, y no comparte el flujo con nada.
+
+   No reusa `.loading-overlay`, que es la otra clase con `fixed`+`inset`: esa es un **scrim** (fondo
+   translúcido, centrado flex y `z-index`) y acá no va ninguna de las tres cosas. Coincidir en dos
+   declaraciones no las hace el mismo patrón.
+
+   Sin token en el `0` del `inset` ni en el `border: none`: no son escala de espaciado, son la
+   ausencia de offset y la ausencia de borde. */
+.doc-viewer-frame {
+  position: fixed;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  border: none;
+}
+
+/* Anclaje de un `za-badge` a su host (el catálogo lo muestra sobre un botón "Mensajes").
+
+   `ZrBadge` es un contador de notificación: está diseñado para flotar en la esquina de otro elemento,
+   no para vivir suelto en el flujo. React lo lograba metiéndolo DENTRO del `ZrButton` como hijo, y el
+   web-component lo posicionaba desde su propio shadow DOM. En Angular eso no se puede: `ButtonZ`
+   declara `ngContentSelectors: never` — no proyecta contenido, así que un hijo se descarta en
+   silencio. El anclaje tiene que resolverlo la pantalla.
+
+   Es layout puro y el DS no ofrece nada para esto (no hay componente "badge anclado" ni un input de
+   target en `za-badge`), así que por la política de la hoja va como CSS propio: el escalón de `za-*`
+   no aplica cuando el componente existe pero no cubre el posicionamiento.
+
+   `inline-block` y no `inline-flex`: el host es un solo hijo y no hay nada que distribuir; lo único
+   que se necesita del contenedor es que sea `relative` y que se mida por su contenido para que el
+   `top/right` del badge caiga sobre la esquina del botón y no sobre la de la fila entera.
+
+   Los offsets van negativos y en escala `--zs-*` (`--zs-50` = 8px): el badge monta MEDIO afuera, que
+   es como se ve en el DS. `line-height: 0` en el badge evita que su caja de texto le agregue alto
+   fantasma y lo desalinee del borde. */
+.badge-anclado {
+  position: relative;
+  display: inline-block;
+}
+
+.badge-anclado > za-badge {
+  position: absolute;
+  top: calc(-1 * var(--zs-50));
+  right: calc(-1 * var(--zs-50));
+  line-height: 0;
+}

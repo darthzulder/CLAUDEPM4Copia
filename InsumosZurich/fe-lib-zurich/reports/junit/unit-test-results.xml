@@ -1,0 +1,177 @@
+<?xml version="1.0"?>
+<testsuite name="Edge 144.0.0.0 (Windows 10)" package="" timestamp="2026-01-26T19:12:39" id="0" hostname="NCOADHKFP34" tests="164" errors="0" failures="0" time="0.203">
+  <properties>
+    <property name="browser.fullName" value="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/144.0.0.0 Safari/537.36 Edg/144.0.0.0"/>
+  </properties>
+  <testcase name="ButtonZ (class-only) defaults" time="0.004" classname="ButtonZ (class-only)"/>
+  <testcase name="ButtonZ (class-only) emits eventClick" time="0.005" classname="ButtonZ (class-only)"/>
+  <testcase name="CardZ (class-only) asigna header, content y footer en ngAfterContentInit" time="0.002" classname="CardZ (class-only)"/>
+  <testcase name="CardZ (class-only) elementos sin template: asigna undefined (no rompe)" time="0.001" classname="CardZ (class-only)"/>
+  <testcase name="CardZ (class-only) orden de los items no afecta el resultado final" time="0.001" classname="CardZ (class-only)"/>
+  <testcase name="CardZ (class-only) ignora ids desconocidos (no asigna slots)" time="0" classname="CardZ (class-only)"/>
+  <testcase name="CardZ (class-only) defaults" time="0" classname="CardZ (class-only)"/>
+  <testcase name="CardZ (class-only) ngOnInit y ngAfterViewInit no lanzan errores" time="0.003" classname="CardZ (class-only)"/>
+  <testcase name="CardZ (class-only) IDs duplicados: el último prevalece" time="0.001" classname="CardZ (class-only)"/>
+  <testcase name="CardZ (class-only) lista vacía: no rompe ni asigna" time="0" classname="CardZ (class-only)"/>
+  <testcase name="CardZ (class-only) cambiar flags showHeader/showFooter no afecta asignación interna" time="0" classname="CardZ (class-only)"/>
+  <testcase name="CardZ (class-only) re-ejecutar ngAfterContentInit no limpia slots previos (comportamiento actual)" time="0" classname="CardZ (class-only)"/>
+  <testcase name="ZTemplate should create an instance" time="0.001" classname="ZTemplate"/>
+  <testcase name="StageBannerZ (class-only) sanity: el objeto expone exactamente las propiedades esperadas como @Input" time="0" classname="StageBannerZ (class-only)"/>
+  <testcase name="StageBannerZ (class-only) múltiples asignaciones sucesivas actualizan el estado correctamente" time="0" classname="StageBannerZ (class-only)"/>
+  <testcase name="StageBannerZ (class-only) acepta strings vacíos en los @Input sin lanzar errores" time="0" classname="StageBannerZ (class-only)"/>
+  <testcase name="StageBannerZ (class-only) permite asignar valores personalizados a todos los @Input" time="0" classname="StageBannerZ (class-only)"/>
+  <testcase name="StageZ Ivy metadata (sin TestBed, robusto a versiones Angular) decls/vars/template están definidos" time="0.013" classname="StageZ Ivy metadata (sin TestBed, robusto a versiones Angular)"/>
+  <testcase name="StageZ Ivy metadata (sin TestBed, robusto a versiones Angular) mapea correctamente los @Input, incluyendo alias" time="0.001" classname="StageZ Ivy metadata (sin TestBed, robusto a versiones Angular)"/>
+  <testcase name="StageZ Ivy metadata (sin TestBed, robusto a versiones Angular) usa ChangeDetection OnPush" time="0" classname="StageZ Ivy metadata (sin TestBed, robusto a versiones Angular)"/>
+  <testcase name="StageZ Ivy metadata (sin TestBed, robusto a versiones Angular) tiene selector lib-stage-z" time="0.001" classname="StageZ Ivy metadata (sin TestBed, robusto a versiones Angular)"/>
+  <testcase name="StageZ Ivy metadata (sin TestBed, robusto a versiones Angular) expone ɵcmp y es standalone" time="0" classname="StageZ Ivy metadata (sin TestBed, robusto a versiones Angular)"/>
+  <testcase name="StageZ Ivy metadata (sin TestBed, robusto a versiones Angular) permite cubrir inicializador privado cdr = inject(ChangeDetectorRef) con fallback si no se puede espiar" time="0.001" classname="StageZ Ivy metadata (sin TestBed, robusto a versiones Angular)"/>
+  <testcase name="FooterZ (class-only) create" time="0" classname="FooterZ (class-only)"/>
+  <testcase name="ModalZ (class-only) ignora ids desconocidos (no asigna slots)" time="0" classname="ModalZ (class-only)"/>
+  <testcase name="ModalZ (class-only) ngOnInit no lanza errores" time="0" classname="ModalZ (class-only)"/>
+  <testcase name="ModalZ (class-only) ngAfterContentInit: asigna title, content y buttons según id" time="0.001" classname="ModalZ (class-only)"/>
+  <testcase name="ModalZ (class-only) defaults" time="0" classname="ModalZ (class-only)"/>
+  <testcase name="ModalZ (class-only) re-ejecutar ngAfterContentInit no limpia asignaciones previas (comportamiento actual)" time="0" classname="ModalZ (class-only)"/>
+  <testcase name="ModalZ (class-only) change(event): cierra el modal y emite close(false)" time="0.001" classname="ModalZ (class-only)"/>
+  <testcase name="ModalZ (class-only) IDs duplicados: el último prevalece" time="0.001" classname="ModalZ (class-only)"/>
+  <testcase name="ModalZ (class-only) lista vacía o templates undefined: no rompe" time="0" classname="ModalZ (class-only)"/>
+  <testcase name="ModalZ (class-only) ShowBackdrop/ open son inputs simples (no afectan lógica TS)" time="0.001" classname="ModalZ (class-only)"/>
+  <testcase name="ModalZ (class-only) simula lógica de clase CSS según tamanio (ngClass del template)" time="0" classname="ModalZ (class-only)"/>
+  <testcase name="AlertZ (class-only) cleanupTimersForRemoved: elimina timers de ids que ya no están" time="0.001" classname="AlertZ (class-only)"/>
+  <testcase name="AlertZ (class-only) close: cuando el alert existe pero sin onCloseAnimation -> remove inmediato" time="0" classname="AlertZ (class-only)"/>
+  <testcase name="AlertZ (class-only) getItemClasses: maneja alert con id undefined sin lanzar y sin clases activas" time="0" classname="AlertZ (class-only)"/>
+  <testcase name="AlertZ (class-only) schedule + cleanup: elimina timer de un id y solo dispara el restante" time="0.001" classname="AlertZ (class-only)"/>
+  <testcase name="AlertZ (class-only) getItemClasses: solo onCloseAnimation -> aplica clase solo si el id está cerrando" time="0" classname="AlertZ (class-only)"/>
+  <testcase name="AlertZ (class-only) close: sin id no hace nada" time="0.001" classname="AlertZ (class-only)"/>
+  <testcase name="AlertZ (class-only) close: si id es el mismo y ya está en closing, no duplica ni llama remove antes de tiempo" time="0" classname="AlertZ (class-only)"/>
+  <testcase name="AlertZ (class-only) ngOnDestroy: limpia todos los timeouts y hace unsubscribe" time="0.001" classname="AlertZ (class-only)"/>
+  <testcase name="AlertZ (class-only) close: con id no presente en alerts -> remove inmediato (no hay animación)" time="0.001" classname="AlertZ (class-only)"/>
+  <testcase name="AlertZ (class-only) getItemClasses: solo onShowAnimation y closing contiene OTRO id -> mantiene clase de show" time="0" classname="AlertZ (class-only)"/>
+  <testcase name="AlertZ (class-only) getAnimationDuration (privado): usa el mapa y el fallback de 300ms" time="0" classname="AlertZ (class-only)"/>
+  <testcase name="AlertZ (class-only) scheduleAutoCloseForNew: autoCloseAfter negativo se ignora" time="0.001" classname="AlertZ (class-only)"/>
+  <testcase name="AlertZ (class-only) getItemClasses: cuando NO hay animaciones, devuelve mapa sin clases verdaderas" time="0" classname="AlertZ (class-only)"/>
+  <testcase name="AlertZ (class-only) close: sin animación -> remove inmediato" time="0.001" classname="AlertZ (class-only)"/>
+  <testcase name="AlertZ (class-only) close: con animación shrink-out espera 280ms y luego remove" time="0.001" classname="AlertZ (class-only)"/>
+  <testcase name="AlertZ (class-only) scheduleAutoCloseForNew: crea timers solo para alerts válidos" time="0.001" classname="AlertZ (class-only)"/>
+  <testcase name="AlertZ (class-only) close: con animación conocida espera su duración (fade-out = 250ms) y luego remove" time="0" classname="AlertZ (class-only)"/>
+  <testcase name="AlertZ (class-only) cleanupTimersForRemoved: sin cambios si todos los ids siguen presentes" time="0" classname="AlertZ (class-only)"/>
+  <testcase name="AlertZ (class-only) close: ignora si id ya está en closing" time="0" classname="AlertZ (class-only)"/>
+  <testcase name="AlertZ (class-only) cleanupTimersForRemoved: sin timers existentes no llama clearTimeout" time="0" classname="AlertZ (class-only)"/>
+  <testcase name="AlertZ (class-only) scheduleAutoCloseForNew: no duplica timers si ya existe uno" time="0" classname="AlertZ (class-only)"/>
+  <testcase name="AlertZ (class-only) close: reentrancia bloqueada si el id ya está en closing" time="0" classname="AlertZ (class-only)"/>
+  <testcase name="AlertZ (class-only) getItemClasses: sin animaciones devuelve objeto con claves vacías en false" time="0" classname="AlertZ (class-only)"/>
+  <testcase name="AlertZ (class-only) close: animación desconocida usa duración default (300ms)" time="0.001" classname="AlertZ (class-only)"/>
+  <testcase name="AlertZ (class-only) defaults simulados (instancia plana)" time="0" classname="AlertZ (class-only)"/>
+  <testcase name="AlertZ (class-only) getItemClasses: activa onShowAnimation cuando no está cerrando; onCloseAnimation cuando sí" time="0.001" classname="AlertZ (class-only)"/>
+  <testcase name="NavigationZ (class-only) permite asignar social parcial (solo facebook)" time="0" classname="NavigationZ (class-only)"/>
+  <testcase name="NavigationZ (class-only) soporta listas grandes sin lanzar errores" time="0.001" classname="NavigationZ (class-only)"/>
+  <testcase name="NavigationZ (class-only) permite reasignar social" time="0" classname="NavigationZ (class-only)"/>
+  <testcase name="NavigationZ (class-only) permite asignar routes como arreglo vacío" time="0" classname="NavigationZ (class-only)"/>
+  <testcase name="NavigationZ (class-only) permite asignar social completo" time="0" classname="NavigationZ (class-only)"/>
+  <testcase name="NavigationZ (class-only) defaults" time="0" classname="NavigationZ (class-only)"/>
+  <testcase name="NavigationZ (class-only) permite reasignar routes con un nuevo arreglo" time="0" classname="NavigationZ (class-only)"/>
+  <testcase name="NavigationZ (class-only) usa referencia directa del array (no clona)" time="0.001" classname="NavigationZ (class-only)"/>
+  <testcase name="InputTextZ (class-only) ngOnChanges: cuando group.status es VALID, no cambia valid ni emite" time="0.002" classname="InputTextZ (class-only)"/>
+  <testcase name="InputTextZ (class-only) ngOnInit: crea group/control cuando no existen y compone validadores" time="0.002" classname="InputTextZ (class-only)"/>
+  <testcase name="InputTextZ (class-only) defaults" time="0.001" classname="InputTextZ (class-only)"/>
+  <testcase name="InputTextZ (class-only) generateControl: compone validador existente + generateValidation" time="0.001" classname="InputTextZ (class-only)"/>
+  <testcase name="InputTextZ (class-only) simula la lógica del template para [config] según lineType" time="0" classname="InputTextZ (class-only)"/>
+  <testcase name="InputTextZ (class-only) ngOnChanges: cuando group.status es INVALID, marca valid=true y emite validChange" time="0.001" classname="InputTextZ (class-only)"/>
+  <testcase name="InputTextZ (class-only) generateValidation / validateRequired: retorna errorRequired cuando required=true y model vacío/espacios/null" time="0" classname="InputTextZ (class-only)"/>
+  <testcase name="InputTextZ (class-only) generateControl: si ya existe control con name, NO pide nuevo nombre" time="0.001" classname="InputTextZ (class-only)"/>
+  <testcase name="InputTextZ (class-only) updateControl: no lanza error si no hay group o el control no existe" time="0" classname="InputTextZ (class-only)"/>
+  <testcase name="InputTextZ (class-only) simula la lógica del template para [input-type]" time="0" classname="InputTextZ (class-only)"/>
+  <testcase name="InputTextZ (class-only) updateControl: asigna el valor del control si existe" time="0" classname="InputTextZ (class-only)"/>
+  <testcase name="InputTextZ (class-only) permite setear helpText, readonly, maxLength y maxNumber sin afectar lógica ts" time="0.001" classname="InputTextZ (class-only)"/>
+  <testcase name="InputTextZ (class-only) modelChange EventEmitter: puede emitir valores (usado en template)" time="0" classname="InputTextZ (class-only)"/>
+  <testcase name="InputTextZ (class-only) ngOnChanges(model): ejecuta updateControl con setTimeout" time="0.001" classname="InputTextZ (class-only)"/>
+  <testcase name="InputDateZ (class-only) permite setear todos los @Input" time="0" classname="InputDateZ (class-only)"/>
+  <testcase name="InputDateZ (class-only) simula la lógica del template para input-type" time="0.001" classname="InputDateZ (class-only)"/>
+  <testcase name="InputDateZ (class-only) ngOnInit no lanza errores" time="0" classname="InputDateZ (class-only)"/>
+  <testcase name="InputDateZ (class-only) defaults" time="0" classname="InputDateZ (class-only)"/>
+  <testcase name="InputSelectZ (class-only) permite setear options y otros @Input sin afectar lógica ts" time="0" classname="InputSelectZ (class-only)"/>
+  <testcase name="InputSelectZ (class-only) simula lógica del template para [config] según typeLine" time="0" classname="InputSelectZ (class-only)"/>
+  <testcase name="InputSelectZ (class-only) ngOnChanges: cuando group.status es VALID, no emite ni cambia invalid" time="0" classname="InputSelectZ (class-only)"/>
+  <testcase name="InputSelectZ (class-only) ngOnChanges: cuando group.status es INVALID, marca invalid=true y emite invalidChange" time="0.001" classname="InputSelectZ (class-only)"/>
+  <testcase name="InputSelectZ (class-only) ngOnChanges(model): ejecuta updateControl con setTimeout" time="0" classname="InputSelectZ (class-only)"/>
+  <testcase name="InputSelectZ (class-only) ngOnInit: crea group/control cuando no existen y compone validadores" time="0.001" classname="InputSelectZ (class-only)"/>
+  <testcase name="InputSelectZ (class-only) defaults" time="0.001" classname="InputSelectZ (class-only)"/>
+  <testcase name="InputSelectZ (class-only) generateControl: compone validador existente + generateValidation" time="0" classname="InputSelectZ (class-only)"/>
+  <testcase name="InputSelectZ (class-only) validateRequired (multiSelect): según implementación actual (truthy → error)" time="0" classname="InputSelectZ (class-only)"/>
+  <testcase name="InputSelectZ (class-only) modelChange EventEmitter: puede emitir valores (se usa en el template)" time="0.003" classname="InputSelectZ (class-only)"/>
+  <testcase name="InputSelectZ (class-only) updateControl: no lanza error si no hay group o el control no existe" time="0" classname="InputSelectZ (class-only)"/>
+  <testcase name="InputSelectZ (class-only) updateControl: asigna el valor del control si existe" time="0.001" classname="InputSelectZ (class-only)"/>
+  <testcase name="InputSelectZ (class-only) generateControl: si ya existe control con name, NO pide nuevo nombre" time="0" classname="InputSelectZ (class-only)"/>
+  <testcase name="InputSelectZ (class-only) generateValidation / validateRequired (single select): error cuando required=true y model vacío/espacios/null" time="0" classname="InputSelectZ (class-only)"/>
+  <testcase name="TableZ (class-only) simpleCheck: agrega y quita ítems cuando selectAllItems=false, emite lista y llama validIsCheck" time="0.001" classname="TableZ (class-only)"/>
+  <testcase name="TableZ (class-only) selectAll(false) tolera DOM sin .singleCheck (emite [])" time="0.001" classname="TableZ (class-only)"/>
+  <testcase name="TableZ (class-only) eventChangePage: múltiples emisiones actualizan page y orden de emisiones se conserva" time="0" classname="TableZ (class-only)"/>
+  <testcase name="TableZ (class-only) eventChangePage: actualiza page y emite eventChangePages" time="0" classname="TableZ (class-only)"/>
+  <testcase name="TableZ (class-only) getIdItem: devuelve los headers con id=true" time="0" classname="TableZ (class-only)"/>
+  <testcase name="TableZ (class-only) orderData: agrupación por clave numérica usa el fallback de comparación y agrupa correctamente" time="0.001" classname="TableZ (class-only)"/>
+  <testcase name="TableZ (class-only) simula lógica de zebra (template): typeStyle==&quot;odd&quot; => &quot;odd&quot;, otro => true" time="0" classname="TableZ (class-only)"/>
+  <testcase name="TableZ (class-only) getIdItem: cuando no hay headers con id=true devuelve []" time="0" classname="TableZ (class-only)"/>
+  <testcase name="TableZ (class-only) ngAfterViewInit (server): no intenta acceder al DOM cuando no es browser" time="0.001" classname="TableZ (class-only)"/>
+  <testcase name="TableZ (class-only) buildGroupingMeta: con [] no truena; con 1 elemento pone _rowspan=1 y _showGroup=true" time="0" classname="TableZ (class-only)"/>
+  <testcase name="TableZ (class-only) validIsCheck: si checkAllItem.checked=true, lo desmarca, apaga selectAllItems y emite lista filtrada" time="0.001" classname="TableZ (class-only)"/>
+  <testcase name="TableZ (class-only) simpleCheck: desmarcar un item no seleccionado no rompe ni cambia el estado" time="0" classname="TableZ (class-only)"/>
+  <testcase name="TableZ (class-only) selectAll(true) tolera .singleCheck sin shadowRoot/input (no truena y emite data)" time="0.001" classname="TableZ (class-only)"/>
+  <testcase name="TableZ (class-only) ngAfterViewInit (browser): si no existe .checkAll, no setea checkAllItem" time="0" classname="TableZ (class-only)"/>
+  <testcase name="TableZ (class-only) ngOnInit llama orderData" time="0" classname="TableZ (class-only)"/>
+  <testcase name="TableZ (class-only) orderData + buildGroupingMeta: ordena por clave de grupo y establece _showGroup/_rowspan" time="0.011" classname="TableZ (class-only)"/>
+  <testcase name="TableZ (class-only) orderData: si existe header con groupLabel pero SIN key, no agrupa (clona tal cual)" time="0" classname="TableZ (class-only)"/>
+  <testcase name="TableZ (class-only) defaults" time="0" classname="TableZ (class-only)"/>
+  <testcase name="TableZ (class-only) ngAfterContentInit: asigna genericStartT/genericEndT y columnTemplates (vía QueryList fake)" time="0.001" classname="TableZ (class-only)"/>
+  <testcase name="TableZ (class-only) simpleCheck con selectAllItems = true: no modifica selectedItems pero llama validIsCheck" time="0.001" classname="TableZ (class-only)"/>
+  <testcase name="TableZ (class-only) ngOnChanges: cuando cambia data, llama orderData" time="0" classname="TableZ (class-only)"/>
+  <testcase name="TableZ (class-only) validIsCheck con checkAllItem.checked = false: no emite ni modifica selectedItems" time="0.002" classname="TableZ (class-only)"/>
+  <testcase name="TableZ (class-only) orderData: sin groupLabel, conserva el arreglo (clonado) sin ordenar" time="0.001" classname="TableZ (class-only)"/>
+  <testcase name="CheckboxZ (class-only) defaults" time="0" classname="CheckboxZ (class-only)"/>
+  <testcase name="CheckboxZ (class-only) generateValidation / validRequired: retorna error cuando required=true y model=true" time="0.001" classname="CheckboxZ (class-only)"/>
+  <testcase name="CheckboxZ (class-only) generateControl: si ya existe control con name, NO pide nuevo nombre" time="0.001" classname="CheckboxZ (class-only)"/>
+  <testcase name="CheckboxZ (class-only) updateControl: setea el valor del control si existe" time="0.001" classname="CheckboxZ (class-only)"/>
+  <testcase name="CheckboxZ (class-only) generateValidation: retorna null cuando no aplica la regla" time="0" classname="CheckboxZ (class-only)"/>
+  <testcase name="CheckboxZ (class-only) ngOnInit: crea group/control cuando no existen y arma validaciones" time="0.001" classname="CheckboxZ (class-only)"/>
+  <testcase name="CheckboxZ (class-only) ngOnChanges(model): ejecuta updateControl con setTimeout" time="0.001" classname="CheckboxZ (class-only)"/>
+  <testcase name="CheckboxZ (class-only) generateControl: compone validador existente + generateValidation" time="0.001" classname="CheckboxZ (class-only)"/>
+  <testcase name="CheckboxZ (class-only) updateControl: no lanza error si no hay group/control" time="0" classname="CheckboxZ (class-only)"/>
+  <testcase name="InputPasswordZ (class-only) ngOnChanges: cuando group.status es INVALID, marca invalid=true y emite invalidChange" time="0.001" classname="InputPasswordZ (class-only)"/>
+  <testcase name="InputPasswordZ (class-only) generateControl: si ya existe control con name, NO pide nuevo nombre" time="0.001" classname="InputPasswordZ (class-only)"/>
+  <testcase name="InputPasswordZ (class-only) ngOnChanges: cuando group.status es VALID, no cambia invalid ni emite" time="0" classname="InputPasswordZ (class-only)"/>
+  <testcase name="InputPasswordZ (class-only) generateValidation / validateRequired: retorna errorRequired si required=true y model vacío/whitespace" time="0.001" classname="InputPasswordZ (class-only)"/>
+  <testcase name="InputPasswordZ (class-only) updateControl: no rompe si no hay group o control" time="0" classname="InputPasswordZ (class-only)"/>
+  <testcase name="InputPasswordZ (class-only) defaults" time="0.001" classname="InputPasswordZ (class-only)"/>
+  <testcase name="InputPasswordZ (class-only) ngOnInit: crea group/control cuando no existen y compone validadores" time="0.002" classname="InputPasswordZ (class-only)"/>
+  <testcase name="InputPasswordZ (class-only) ngOnChanges(model): dispara updateControl con setTimeout" time="0" classname="InputPasswordZ (class-only)"/>
+  <testcase name="InputPasswordZ (class-only) simula la lógica del template para [config] según lineType" time="0.001" classname="InputPasswordZ (class-only)"/>
+  <testcase name="InputPasswordZ (class-only) generateControl: compone validador existente + generateValidation" time="0" classname="InputPasswordZ (class-only)"/>
+  <testcase name="InputPasswordZ (class-only) EventEmitter modelChange: puede emitir valores (aunque se usa en el template)" time="0" classname="InputPasswordZ (class-only)"/>
+  <testcase name="InputPasswordZ (class-only) updateControl: setea el valor cuando existe el control" time="0.001" classname="InputPasswordZ (class-only)"/>
+  <testcase name="TabsZ Component (sin TestBed) activeTemplate debe devolver la plantilla activa" time="0.001" classname="TabsZ Component (sin TestBed)"/>
+  <testcase name="TabsZ Component (sin TestBed) activeTab debe devolver el tab activo" time="0.001" classname="TabsZ Component (sin TestBed)"/>
+  <testcase name="TabsZ Component (sin TestBed) debe construir templateMap en ngAfterContentInit" time="0.001" classname="TabsZ Component (sin TestBed)"/>
+  <testcase name="TabsZ Component (sin TestBed) debe cambiar activeKey en onTabChange" time="0" classname="TabsZ Component (sin TestBed)"/>
+  <testcase name="TabsZ Component (sin TestBed) debe inicializar tabs y activeKey en ngOnChanges" time="0.001" classname="TabsZ Component (sin TestBed)"/>
+  <testcase name="TileZ (Zoneless) debe recibir Inputs desde el host" time="0.069" classname="TileZ (Zoneless)"/>
+  <testcase name="TileZ (Zoneless) debe crearse" time="0.009" classname="TileZ (Zoneless)"/>
+  <testcase name="TileZ (Zoneless) debe emitir eventClick cuando eventButtonClick es llamado" time="0.009" classname="TileZ (Zoneless)"/>
+  <testcase name="RangeDateZ (class-only) onModeloChange acepta nulls en el rango y emite ([null, string] y [null, null])" time="0.002" classname="RangeDateZ (class-only) onModeloChange"/>
+  <testcase name="RangeDateZ (class-only) onModeloChange cuando detail tiene longitud distinta de 2 -> warning y NO emite" time="0.001" classname="RangeDateZ (class-only) onModeloChange"/>
+  <testcase name="RangeDateZ (class-only) onModeloChange actualiza modelo y emite cuando detail es [string, string]" time="0.001" classname="RangeDateZ (class-only) onModeloChange"/>
+  <testcase name="RangeDateZ (class-only) onModeloChange cuando detail NO es array -> warning y NO emite ni cambia modelo" time="0" classname="RangeDateZ (class-only) onModeloChange"/>
+  <testcase name="RangeDateZ (class-only) onModeloChange secuencia: válido -> inválido (modelo conserva el último válido)" time="0" classname="RangeDateZ (class-only) onModeloChange"/>
+  <testcase name="RangeDateZ (class-only) onModeloChange cuando hay tipos inválidos en detail -> warning y NO emite" time="0.001" classname="RangeDateZ (class-only) onModeloChange"/>
+  <testcase name="RangeDateZ (class-only) permite asignar @Input manualmente (incluyendo modelo y ztheme)" time="0" classname="RangeDateZ (class-only)"/>
+  <testcase name="RangeDateZ (class-only) inicializa @Input con valores por defecto" time="0" classname="RangeDateZ (class-only)"/>
+  <testcase name="TooltipZ (class-only) debe inicializar con valores por defecto" time="0" classname="TooltipZ (class-only)"/>
+  <testcase name="TooltipZ (class-only) debe permitir asignar config tipada" time="0.001" classname="TooltipZ (class-only)"/>
+  <testcase name="TooltipZ (class-only) debe permitir asignar text y customStr" time="0" classname="TooltipZ (class-only)"/>
+  <testcase name="TooltipZ (class-only) debe permitir config undefined (opcional)" time="0.001" classname="TooltipZ (class-only)"/>
+  <system-out>
+    <![CDATA[Edge 144.0.0.0 (Windows 10) WARN: 'NG0912: Component ID generation collision detected. Components '_ZaCalendar' and '_ZaRangeCalendar' with selector 'za-calendar' generated the same component ID. To fix this, you can change the selector of one of those components or add an extra host attribute to force a different ID. Find more at https://v20.angular.dev/errors/NG0912'
+,Edge 144.0.0.0 (Windows 10) WARN: 'Lit is in dev mode. Not recommended for production! See https://lit.dev/msg/dev-mode for more information.'
+
+]]>
+  </system-out>
+  <system-err/>
+</testsuite>

@@ -1,0 +1,15 @@
+<za-textarea
+  [id]="name"
+  [name]="name"
+  [config]="lineType? 'line': ''"
+  label="{{label}}"
+  [required]="required"
+  [disabled]="disabled"
+  [invalid]="valid"
+  [readonly]="readonly"
+  [(ngModel)]="model"
+  (ngModelChange)="modelChange.emit(model)"
+  help-text="{{helpText}}"
+  [elastic]="elastic"
+  [attr.max-length]="maxLength? maxNumber:''"
+/>

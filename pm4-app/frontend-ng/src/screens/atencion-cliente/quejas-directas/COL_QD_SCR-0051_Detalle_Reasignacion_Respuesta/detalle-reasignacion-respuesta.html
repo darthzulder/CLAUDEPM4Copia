@@ -1,0 +1,158 @@
+<!-- ⚠ Las dos celdas con markup del `InfoBar` se declaran ACÁ y fuera de todo `@if`/`@else`.
+     `cllInfoItems` las lee con `viewChild.required`, que resuelve una sola vez y no re-consulta: si
+     los `<ng-template>` vivieran dentro de la rama `@else` del cargando, el primer render los
+     encontraría ausentes y `viewChild.required` reventaría con NG0951 antes de que llegue la tarea.
+     Un `<ng-template>` no emite nada al DOM, así que declararlos al tope no cuesta render. -->
+<ng-template #tplSla>
+  @if (sigValores()[QD.strSlaAssigned]) {
+    {{ sigValores()[QD.strSlaAssigned] }} días hábiles
+    @if (blnSlaCalculable()) {
+      <br />
+      <!-- `Capt-12` es la tipografía chica del proyecto (shared.css), no un tamaño inventado. -->
+      <span class="Capt-12">({{ intDiasRestantes() }} días restantes)</span>
+    }
+  } @else {
+    —
+  }
+</ng-template>
+
+<ng-template #tplEstado>
+  <zds-status-badge [variante]="strVarianteSla()">{{ strEstadoSla() }}</zds-status-badge>
+</ng-template>
+
+@if (blnCargando()) {
+  <div class="screen-wrapper">
+    <div class="screen-loading"><lib-loader-z /></div>
+  </div>
+} @else if (strError()) {
+  <div class="screen-wrapper">
+    <!-- Alerta inline (`za-alert`), no la cola imperativa de `lib-alert-z`. `[hide-close]="true"`
+         bindeado y no el atributo pelado: el input está tipado `boolean` y un atributo sin valor vale
+         `''`, que Angular 21 rechaza (TS2322). Ver el punto 5b de zds-reexports.ts. -->
+    <za-alert config="negative" [hide-close]="true"
+      >Error al cargar el formulario: {{ strError() }}</za-alert
+    >
+  </div>
+} @else {
+  <div class="screen-wrapper">
+    <app-screen-header title="Detalle / Reasignación / Respuesta" />
+
+    <div class="screen-content">
+      <app-info-bar [items]="cllInfoItems()" />
+
+      <!-- RUL-0051-03 / MSG-0051-01 · banner de SLA crítico. -->
+      @if (blnSlaCritico()) {
+        <za-alert config="negative" [hide-close]="true">
+          ⚠ El caso tiene <strong>{{ intDiasRestantes() }}</strong> día(s) hábil(es) restante(s).
+          Priorice la gestión; puede <strong>solicitar prórroga regulatoria</strong>.
+        </za-alert>
+      }
+
+      <!-- `(ngSubmit)` va a `enviar()`: el submit nativo (un Enter en un campo) tiene que coincidir
+           con la acción principal. `enviar()` valida RUL-0051-08 antes de despachar, así que un Enter
+           con la respuesta vacía no manda nada. -->
+      <form [formGroup]="form" (ngSubmit)="enviar()" novalidate>
+        <app-seccion-detalle-caso
+          [form]="form"
+          [sigValores]="sigValores"
+          [nombre]="strNombre()"
+          [identificacion]="strIdentificacion()"
+          [requestId]="intRequestId()"
+        />
+
+        <!-- ⚠ `confirmarReasignacion` emite el **id numérico** de PM4, no el username: es lo único que
+             puede reasignar la tarea. Ver el docstring de `confirmarAsignacion()`.
+
+             Sin `[requestId]`, a diferencia de S1 y S8: esta sección no lista ni sube archivos, así que
+             no tiene para qué saber el request. Un input de más sería estado sin consumidor. -->
+        <app-seccion-asignacion
+          [form]="form"
+          [sigValores]="sigValores"
+          [enviando]="blnEnviando()"
+          (confirmarReasignacion)="confirmarAsignacion($event)"
+          (solicitarAyuda)="solicitarAyuda($event)"
+        />
+
+        <app-seccion-respuesta
+          [form]="form"
+          [sigValores]="sigValores"
+          [enviando]="blnEnviando()"
+          [slaCritico]="blnSlaCritico()"
+          [requestId]="intRequestId()"
+          (vistaPrevia)="abrirVistaPrevia()"
+          (solicitarProrroga)="solicitarProrroga()"
+        />
+
+        <!-- RUL-0051-08 / MSG-0051-02 · el motivo del bloqueo, visible antes de que el gestor busque
+             por qué el botón está apagado. -->
+        @if (!blnPuedeEnviar()) {
+          <za-alert config="info" [hide-close]="true">
+            El campo <strong>Respuesta al Cliente</strong> es obligatorio para enviar.
+          </za-alert>
+        }
+
+        <!-- El fallo del último envío. Va acá, pegado a la barra de acciones que lo produjo. -->
+        @if (strErrorEnvio()) {
+          <za-alert config="negative" [hide-close]="true"
+            >No se pudo completar la acción: {{ strErrorEnvio() }}</za-alert
+          >
+        }
+
+        <!-- ACT-0051-06/07/08. `[disabled]` explícito en los tres: el default de `lib-button-z` es
+             `disabled = true`, así que un botón sin ese input nace muerto.
+
+             `type` es la **variante del DS** (`link`/`secondary`/`positive`), no el `type` del HTML:
+             `ButtonZ` renderiza un `<za-button>` → `<z-button>` (custom element de Lit), así que estos
+             tres botones **no** participan del submit implícito del `<form>` y no hay handler nativo
+             que suprimir. Verificado en el `.mjs` y ya documentado igual en SCR-012.
+
+             El corte real de "Enviar" vive en `enviar()`, no en el `[disabled]`: un `lib-button-z`
+             deshabilitado igual dispara su handler bajo jsdom (trampa 1 de testing-conventions.md). -->
+        <app-action-bar>
+          <lib-button-z
+            label="Ver Expediente Completo"
+            type="link"
+            icon="file-text:line"
+            [disabled]="false"
+            (eventClick)="abrirExpediente()"
+          />
+          <lib-button-z
+            label="Guardar Borrador"
+            type="secondary"
+            [disabled]="blnEnviando()"
+            [loading]="blnEnviando()"
+            (eventClick)="guardarBorrador()"
+          />
+          <lib-button-z
+            label="Enviar ▶"
+            type="positive"
+            [disabled]="!blnPuedeEnviar() || blnEnviando()"
+            [loading]="blnEnviando()"
+            (eventClick)="enviar()"
+          />
+        </app-action-bar>
+      </form>
+    </div>
+  </div>
+
+  <!-- ACT-0051-06 · el expediente se monta solo abierto: `ModalZ` lee sus slots una vez, así que
+       montarlo cerrado y solo alternar su `open` dejaría el contenido resuelto con el form vacío. -->
+  @if (blnExpedienteAbierto()) {
+    <app-expediente-completo-modal
+      [datos]="sigValores()"
+      [infoItems]="cllInfoItems()"
+      [nombre]="strNombre()"
+      [identificacion]="strIdentificacion()"
+      [requestId]="intRequestId()"
+      (cerrar)="cerrarExpediente()"
+    />
+  }
+
+  <!-- ACT-0051-05 · vista previa de la carta. `app-preview-modal` sí se monta siempre: resuelve su
+       propio slot y gatea el visor por dentro con su `@if (abierto())`. -->
+  <app-preview-modal
+    [abierto]="blnVistaPreviaAbierta()"
+    [documento]="objDocumentoPrevia()"
+    (cerrar)="cerrarVistaPrevia()"
+  />
+}

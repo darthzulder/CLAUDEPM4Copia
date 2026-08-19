@@ -1,0 +1,22 @@
+<za-card config="grid" [custom-str]="customStr">
+  <!-- <za-card config="grid" style="background-color: rgb(21, 76, 195)"> -->
+  @if (showHeader) {
+  <div class="grid">
+    <div class="col">
+      <ng-template [ngTemplateOutlet]="header"></ng-template>
+    </div>
+  </div>
+  }
+  <div class="grid">
+    <div class="col">
+      <ng-template [ngTemplateOutlet]="content"></ng-template>
+    </div>
+  </div>
+  @if (showFooter) {
+  <div class="grid">
+    <div class="col">
+      <ng-template [ngTemplateOutlet]="footer"></ng-template>
+    </div>
+  </div>
+  }
+</za-card>

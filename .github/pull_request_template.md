@@ -28,7 +28,12 @@ Base correcta según el tipo de cambio:
 <!-- Marcá solo las que este cambio toca. Referencia: pm4-app/CLAUDE.md → "Reglas obligatorias". -->
 
 - [ ] **Nomenclatura** `qd_*` respetada (`docs/guides/nomenclatura-variables.md`)
-- [ ] **UI desde el DS**: revisé `frontend/vendor` / `outputs/react/` antes de crear nada nuevo
+- [ ] **UI desde el DS**: revisé el DS antes de crear nada nuevo. En Angular (`frontend-ng`, el
+      frontend desplegado) el DS son paquetes instalados —`frontend-ng/node_modules/@zurich/*@0.8.2`
+      y `@zurich-col/lib-zurich`—, con los `.d.ts` de `InsumosZurich/lib-zurich-2.6.16/package/types/`
+      como fuente de verdad de los inputs (no grep sobre el `.mjs`, que va en una sola línea y
+      devuelve inputs del componente vecino). En React (`frontend`, referencia de paridad) es
+      `frontend/vendor/*.tgz@0.8.1` + `outputs/react/`.
 - [ ] **BFF**: ninguna llamada externa sale directo de una pantalla
 - [ ] **PM4 por nombre**: sin ids/uuids hardcodeados; resueltos vía el registro
 - [ ] **Comentarios técnicos** donde el porqué no es evidente en el código

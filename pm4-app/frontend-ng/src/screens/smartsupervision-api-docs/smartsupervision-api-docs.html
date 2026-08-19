@@ -1,0 +1,10 @@
+<!-- ── Visor de la doc del Web Service Smartsupervisión ────────────────────────────────────────────
+     El `src` va como atributo ESTÁTICO: `iframe[src]` es contexto `RESOURCE_URL` y un binding sin
+     sanear es NG0904 en tiempo de render. Estático no es binding, así que no hay nada que sanear ni
+     que saltear — ver el ⚠ de la clase.
+
+     El `[title]` sí va enlazado: es texto, no URL, así que no pasa por ese contexto.
+
+     La geometría (pantalla completa, sin borde) va en `.doc-viewer-frame` de `shared.css`. React la
+     ponía como `style` en línea; acá no se permite CSS ad-hoc en el markup. -->
+<iframe class="doc-viewer-frame" src="docs/smartsupervision-webservice.html" [title]="STR_TITULO"></iframe>

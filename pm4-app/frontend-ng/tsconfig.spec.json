@@ -1,0 +1,32 @@
+/* To learn more about Typescript configuration file: https://www.typescriptlang.org/docs/handbook/tsconfig-json.html. */
+/* To learn more about Angular compiler options: https://angular.dev/reference/configs/angular-compiler-options. */
+{
+  "extends": "./tsconfig.json",
+  "compilerOptions": {
+    "outDir": "./out-tsc/spec",
+    "types": [
+      "vitest/globals",
+      // `node` va SOLO acá, nunca en `tsconfig.app.json`. Lo necesita `env-generated.spec.ts`, que
+      // ejecuta `scripts/gen-env-define.mjs` en un subproceso y por lo tanto importa `node:fs`,
+      // `node:child_process` y compañía — sin estos tipos, cada import muere con
+      // `TS2307: Cannot find module 'node:fs'`.
+      //
+      // ⚠ Que esté acá y no en el tsconfig de la app **es la parte que importa**: los specs corren en
+      // Node, así que ahí `process` y `fs` existen de verdad; el código de `src/` que se bundlea para
+      // el navegador sigue compilando contra `tsconfig.app.json`, donde `process` NO está declarado y
+      // un `process.env` en una pantalla sigue siendo un error de compilación. Eso es lo que evita
+      // repetir el defecto que documenta el encabezado del generador (un `process.env` que pasa los
+      // tests porque jsdom corre sobre Node, y explota en el navegador con `process is not defined`).
+      "node"
+    ]
+  },
+  "include": [
+    "src/**/*.d.ts",
+    "src/**/*.spec.ts",
+    // `test-setup.ts` va explícito: el `ng new` no lo incluye y el builder lo bundlea igual,
+    // pero fuera del programa de TS queda SIN chequeo de tipos (el builder lo avisa con un
+    // WARNING que es fácil pasar por alto). Es el archivo que shimea `matchMedia` para toda
+    // la suite, así que un error de tipos ahí rompería todos los specs a la vez.
+    "src/test-setup.ts"
+  ]
+}

@@ -1,0 +1,22 @@
+<div [ngClass]="roundedBanner? 'banner-redondeado': ''">
+  @if(!addImage) {
+  <z-stage-banner
+    [category]="category"
+    [custom-str]="customStr"
+    [config]="config"
+    [shape]="shape? shape : undefined"
+  >
+    {{ content }}
+  </z-stage-banner>
+  } @else {
+  <z-stage-banner
+    [category]="category"
+    [custom-str]="customStr"
+    [config]="config"
+    [shape]="shape? shape : undefined"
+    [image-src]="imageSrc"
+  >
+    {{ content }}
+  </z-stage-banner>
+  }
+</div>
