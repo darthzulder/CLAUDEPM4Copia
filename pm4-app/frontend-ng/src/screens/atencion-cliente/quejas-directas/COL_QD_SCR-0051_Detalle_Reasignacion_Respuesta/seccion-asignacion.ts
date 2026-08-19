@@ -483,7 +483,10 @@ export class SeccionAsignacion {
     { title: 'Fecha', key: 'fecha' },
     { title: 'De', key: 'de' },
     { title: 'Para', key: 'para' },
-    { title: 'Motivo', key: 'motivo' },
+    // Sin columna *Motivo*: `CAT-MOTIVO-REASIG` quedó retirado (ver `registrarAyuda()`), así que la
+    // columna pintaba `''` en todas las filas nuevas. La clave `motivo` **sigue** en
+    // `AsignacionHistorial` porque los casos históricos ya la traen con dato y el spread de
+    // `registrarRespuesta()` la conserva: se deja de mostrar, no se saca del modelo.
     { title: 'Observaciones', key: 'observaciones' },
     { title: 'Respondió', key: 'respondioTexto' },
     { title: 'Comentario', key: 'comentarioTexto' },

@@ -150,7 +150,7 @@ seleccionada, evitando vaciar los valores heredados de M1 mientras la matriz aú
 > **⚠ corregido en 2.0 — FLD-093 está retirado, no obligatorio.** La 1.0 lo declara `zds-select`
 > (CAT-MOTIVO-REASIG) y **obligatorio**; la implementación real (React y Angular) ya no lo captura ni
 > lo valida. `qd_strReassignReason` **sigue viajando vacío** en el payload de la ayuda, a propósito,
-> por compatibilidad con SCR-0052, que lo lee. Está anotado en el docstring de `blnAyudaCompleta` en
+> por compatibilidad con el resto del proceso. Está anotado en el docstring de `blnAyudaCompleta` en
 > `seccion-asignacion.ts`. El gate real de la ayuda son **dos** campos (área destino + observaciones),
 > no tres — ver la corrección de RUL-0051-04 en §7. **A reportar al negocio:** el Anexo02 sigue
 > declarando FLD-093 como obligatorio.
@@ -159,7 +159,13 @@ seleccionada, evitando vaciar los valores heredados de M1 mientras la matriz aú
 
 | Campo (UI) | Variable | Tipo | Fuente |
 |---|---|---|---|
-| Historial de asignaciones previas | `qd_lstAssignHistory` | Tabla `za-table` (Fecha\|De\|Para\|Motivo\|Observaciones\|Respondió\|Comentario\|Adjunto) | FLD-095 |
+| Historial de asignaciones previas | `qd_lstAssignHistory` | Tabla `za-table` (Fecha\|De\|Para\|Observaciones\|Respondió\|Comentario\|Adjunto) | FLD-095 |
+
+> **⚠ ago-2026 — la columna *Motivo* salió de la tabla.** Es el mismo FLD-093 retirado de S6: como ya
+> no se captura, `registrarAyuda()` escribe `motivo: ''` y la columna pintaba vacío en todas las filas
+> nuevas. La clave **sigue** en `AsignacionHistorial` (los casos históricos ya la traen con dato y el
+> spread de `registrarRespuesta()` la conserva): se deja de mostrar, no se saca del modelo. El
+> Expediente completo (ACT-0051-06) ya la omitía, así que ahí no cambió nada.
 
 ### S8 — Elaboración de Respuesta Técnica (SEC-054) — `SeccionRespuesta.tsx`
 

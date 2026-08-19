@@ -12,6 +12,8 @@ import {
 } from '../fields/fields';
 import type { AsignacionHistorial } from '../fields/types';
 import { DetalleReasignacionRespuesta } from './detalle-reasignacion-respuesta';
+// Solo para el `By.directive()` del caso de las columnas de S7 — ver ahí por qué no va por el DOM.
+import { SeccionAsignacion } from './seccion-asignacion';
 
 /**
  * SCR-0051 · Detalle / Reasignación / Respuesta — **un caso por RUL del anexo**, no un smoke.
@@ -481,6 +483,39 @@ describe('SCR-0051 · Detalle / Reasignación / Respuesta', () => {
     await montar({ ...datosTarea(), [QD.lstAssignHistory]: 'no soy un array' });
 
     expect(objPantalla.form.get(QD.lstAssignHistory)?.value).toEqual([]);
+  });
+
+  it('S7 · el historial no tiene columna Motivo (CAT-MOTIVO-REASIG retirado)', async () => {
+    // ⚠ Hay que **sembrar** el historial: S7 va dentro de `@if (blnMostrarAyuda() || cllHistorial().length)`,
+    // así que con el fixture por defecto la sección no existe y el `query` devuelve `null`. La primera
+    // versión de este caso montaba pelado y fallaba por eso, no por las columnas — lo delató la guarda
+    // de "la tabla tiene que estar montada", que por eso se queda.
+    await montar({
+      ...datosTarea(),
+      [QD.lstAssignHistory]: [
+        { fecha: '2026-08-01', de: 'jperez', para: 'mrios', motivo: 'dato histórico', observaciones: 'Revisar' },
+      ],
+    });
+
+    // El *Motivo* (FLD-093) ya no se captura: `registrarAyuda()` escribe `motivo: ''`, así que la
+    // columna pintaba vacío en todas las filas nuevas y salió en ago-2026. La clave **sigue** en
+    // `AsignacionHistorial` —la fila de arriba la trae con dato a propósito— porque los casos
+    // históricos ya la tienen guardada: esto asevera el display, no el modelo.
+    //
+    // ⚠ Se asevera el array de la sección y **no** el DOM de la tabla, y no por comodidad: bajo jsdom
+    // `lib-table-z` es un custom element de Lit que no hace upgrade, y medido con una sonda, los
+    // bindings de propiedad (`[headers]`, `[data]`, `[showGenericEnd]`) **no llegan a ninguna parte** —
+    // ni a `nativeElement`, ni a `debugElement.properties`, ni a `attributes`, donde solo sobreviven
+    // los atributos estáticos (`generciEndName`, `typeStyle`). O sea que un `querySelectorAll('th')` o
+    // un `.headers` sale vacío con las columnas correctas Y con las incorrectas: sería la tautología
+    // que el spec de SCR-0052 documenta. El array es el contrato que el componente ofrece a la tabla.
+    const objSeccion = objFixture.debugElement.query(By.directive(SeccionAsignacion))
+      ?.componentInstance as { cllColumnasHistorial?: readonly { title: string }[] } | undefined;
+    const cllTitulos = (objSeccion?.cllColumnasHistorial ?? []).map((in_objCol) => in_objCol.title);
+
+    expect(cllTitulos, 'la sección del historial tiene que estar montada').not.toHaveLength(0);
+    expect(cllTitulos).not.toContain('Motivo');
+    expect(cllTitulos).toEqual(['Fecha', 'De', 'Para', 'Observaciones', 'Respondió', 'Comentario']);
   });
 
   // ── RUL-0051-01 / 01-bis · reasignación y el usuario resuelto ──────────────────────────────────

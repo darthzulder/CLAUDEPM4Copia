@@ -119,9 +119,16 @@ comentario" (continúa SP2-T02); también permite guardar borrador o volver a la
 |---|---|---|---|
 | Fecha de solicitud | `qd_lstAssignHistory[qd_intHelpNumber - 1].fecha` | texto (`info-bar-value`) | — (ver abajo) |
 | Solicitado por | `…[…].de` | texto (`info-bar-value`) | — |
-| Motivo | `…[…].motivo` | texto (`info-bar-value`) | — |
+| ~~Motivo~~ | `…[…].motivo` | **retirado de la UI (ago-2026)** | — |
 | Observaciones | `…[…].observaciones` | texto multilínea (`pre-wrap`) | — |
 
+> **⚠ ago-2026 — el *Motivo* se dejó de pintar.** Es `CAT-MOTIVO-REASIG` (FLD-093 de la SCR-0051),
+> retirado desde la 2.0 de esa pantalla: ya no se captura, así que la fila del historial llegaba acá
+> con `motivo: ''` y la sección mostraba un rótulo con un guion. La clave **sigue** en
+> `AsignacionHistorial` y `qd_strReassignReason` sigue viajando vacío en el payload por
+> compatibilidad con el proceso — se deja de mostrar, no se saca del contrato. Los casos históricos
+> conservan el dato guardado, simplemente no se muestra.
+>
 > **⚠ corregido en 2.0 — la ficha de React documentaba esta sección como "Datos de la Asignación" con
 > tres campos propios (`qd_strAssigneeArea` / `qd_strAssigneeUser` / `qd_strAssignmentRemarks`,
 > FLD-351/352/353), y eso NO es lo que el código monta.** El `.tsx` pinta los **cuatro** campos de la

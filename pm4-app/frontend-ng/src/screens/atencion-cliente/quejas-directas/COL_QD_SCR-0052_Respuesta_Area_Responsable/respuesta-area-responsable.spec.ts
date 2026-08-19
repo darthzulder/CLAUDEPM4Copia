@@ -117,11 +117,17 @@ const DIC_ROTULOS_ZA: Record<string, string> = {
  * (`strNombre()`, `strIdentificacion()`), cuatro salen de un catálogo vía `descDe()` y cuatro más de
  * la fila del historial. No los ve `cllCamposDs()`, así que se aseveran leyendo el DOM.
  *
- * ⚠ Los cuatro de S4 (*Fecha de solicitud*, *Solicitado por*, *Motivo*, *Observaciones*) **no están
- * en el anexo**: el anexo documenta esa sección como "Datos de la Asignación" con FLD-351/352/353
- * (*Área*, *Responsable*, *Observaciones*) y el código envía otra cosa. La ficha quedó vieja; se porta
- * el código y la divergencia se documenta. Estos cuatro son los únicos rótulos de este archivo
- * copiados del `.tsx` de React y no del insumo, y por eso van en su propio bloque.
+ * ⚠ Los de S4 (*Fecha de solicitud*, *Solicitado por*, *Observaciones*) **no están en el anexo**: el
+ * anexo documenta esa sección como "Datos de la Asignación" con FLD-351/352/353 (*Área*,
+ * *Responsable*, *Observaciones*) y el código envía otra cosa. La ficha quedó vieja; se porta el
+ * código y la divergencia se documenta. Son los únicos rótulos de este archivo copiados del `.tsx` de
+ * React y no del insumo, y por eso van en su propio bloque.
+ *
+ * ⚠ *Motivo* estaba acá y salió con el campo (`CAT-MOTIVO-REASIG` retirado, ago-2026). Ojo con el
+ * modo de falla: la aserción es un `toContain` sobre el texto de TODO el DOM, y `'Motivo'` es
+ * substring de `'Motivo SFC'` (FLD-072, que sigue vigente en S1) — o sea que para esa entrada el
+ * test pasaba con el campo y sin él. Sacarla de la lista no debilita la guarda: le quita una
+ * tautología.
  */
 const DIC_ROTULOS_TEXTO: string[] = [
   'Nombre del Consumidor', // FLD-066
@@ -131,10 +137,9 @@ const DIC_ROTULOS_TEXTO: string[] = [
   'Motivo SFC', // FLD-072
   'Admisión', // FLD-074
   'Asunto de la Queja', // FLD-076
-  // Los cuatro de S4, del `.tsx` — ver el bloque de arriba.
+  // Los de S4, del `.tsx` — ver el bloque de arriba.
   'Fecha de solicitud',
   'Solicitado por',
-  'Motivo',
   'Observaciones',
 ];
 
@@ -471,6 +476,21 @@ function strTextoDelForm(): string {
 }
 
 /**
+ * Los rótulos de solo lectura tal como están en el DOM, **uno por nodo y con el texto exacto**.
+ *
+ * Existe porque el `toContain` sobre el texto completo del form no puede aseverar una **ausencia**: un
+ * rótulo que es substring de otro pasa igual. `'Motivo'` (retirado en ago-2026) es substring de
+ * `'Motivo SFC'` (FLD-072, vigente en S1), así que el bucle de `DIC_ROTULOS_TEXTO` seguía en verde con
+ * el campo y sin él — comprobado mutando la lista. Comparando el conjunto de nodos, el match es
+ * completo y reponer un rótulo retirado pone el caso en rojo.
+ */
+function cllRotulosDeSoloLectura(): readonly string[] {
+  const cllNodos = (objFixture.nativeElement as HTMLElement)
+    .querySelectorAll<HTMLElement>('.info-bar-label');
+  return Array.from(cllNodos, (in_objNodo) => in_objNodo.textContent?.trim() ?? '');
+}
+
+/**
  * Suplanta `window.top` por un doble cuyo `location.href` es una propiedad **escribible**, y devuelve
  * un lector de lo último que se le asignó (`null` si nadie navegó) junto con el `restaurar()`.
  *
@@ -640,6 +660,22 @@ describe('SCR-0052 · Respuesta del Área Responsable', () => {
     for (const strRotulo of DIC_ROTULOS_TEXTO) {
       expect(strTexto, `falta el rótulo de solo lectura "${strRotulo}"`).toContain(strRotulo);
     }
+  });
+
+  it('el Motivo retirado no se pinta, y el Motivo SFC sí', async () => {
+    await montar();
+
+    // El campo *Motivo* de S4 es `CAT-MOTIVO-REASIG` (FLD-093 de la SCR-0051), retirado: ya no se
+    // captura, así que la fila del historial llega con `motivo: ''` y la sección mostraba un rótulo
+    // con un guion. Se dejó de pintar en ago-2026.
+    //
+    // ⚠ La aserción va sobre el **texto exacto de cada nodo** y no sobre el texto del form, porque
+    // `'Motivo'` es substring de `'Motivo SFC'`: un `not.toContain` sobre el texto completo saldría
+    // rojo por el rótulo VIGENTE de S1, y un `toContain` no distingue los dos casos. Ver
+    // `cllRotulosDeSoloLectura()`.
+    const cllRotulos = cllRotulosDeSoloLectura();
+    expect(cllRotulos).not.toContain('Motivo');
+    expect(cllRotulos, 'el Motivo SFC (FLD-072) sigue vigente y debe estar').toContain('Motivo SFC');
   });
 
   // ── S1 · los dos valores derivados ─────────────────────────────────────────────────────────────
