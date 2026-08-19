@@ -9,6 +9,8 @@ LocalFiles/
 
 # Claude Code — configuración local personal
 .claude/settings.local.json
+# Config de servidores MCP: es local de cada máquina y suele llevar credenciales/URL de PM4.
+.mcp.json
 
 # Graphify outputs
 #graphify-out/
