@@ -19,8 +19,15 @@ Un test de lógica pura va en `.test.ts`; un test que renderiza JSX va en `.test
 Vitest lo enruta automáticamente al project correcto por la extensión, no hace falta
 configurar nada por archivo.
 
-Comandos: `npm run verify` (el gate completo) · `npm run test --workspace=frontend`
-(Vitest, ambos projects) · `npm run test --workspace=backend`.
+Comandos: `npm run verify` (el gate completo) · `npm run test --workspace=frontend-ng`
+(Angular, el frontend desplegado) · `npm run test --workspace=frontend` (React, la referencia
+de paridad; Vitest con ambos projects) · `npm run test --workspace=backend`.
+
+> **⚠ Esta tabla de projects y la convención `.test.ts`/`.test.tsx` son del workspace `frontend`
+> (React).** En `frontend-ng` (Angular) los tests son `.spec.ts` y corren por `ng test`, sin la
+> división `logic`/`components`: no hay dos entornos, y un spec que necesita DOM lo tiene siempre.
+> Las trampas de testear controles del DS bajo jsdom aplican a los dos; las de Angular zoneless y
+> Reactive Forms están en `pm4-app/CONTEXTO_MIGRACION_ANGULAR.md` §5.
 
 ### Tres consecuencias de esa configuración que muerden
 
@@ -212,7 +219,7 @@ disparadas por typing, watchers y el flujo de submit se validan **a mano**.
 
 **Esto no reemplaza la verificación manual.** El flujo completo (precarga real desde PM4,
 watchers, subida de archivos, guardado de borrador) solo se valida de verdad en Docker:
-`docker restart pm4-app-container` + `http://localhost:5173/?screen=<slug>` (o dentro del
+`docker restart pm4-app-container` + `http://localhost:4200/?screen=<slug>` (o dentro del
 iframe de PM4). El smoke test de RTL atrapa regresiones de render/props entre commits; no
 sustituye probar la pantalla real antes de un cambio grande.
 
@@ -221,11 +228,15 @@ sustituye probar la pantalla real antes de un cambio grande.
 ## Antes de dar por terminada cualquier tarea
 
 ```bash
-docker exec pm4-app-container sh -c "cd /app && npm run build --workspace=frontend"
+docker exec pm4-app-container sh -c "cd /app && npm run build --workspace=frontend-ng"
 docker exec pm4-app-container sh -c "cd /app && npm run build --workspace=backend"
-docker exec pm4-app-container sh -c "cd /app && npm run lint --workspace=frontend"
-docker exec pm4-app-container sh -c "cd /app && npm run test --workspace=frontend"
+docker exec pm4-app-container sh -c "cd /app && npm run lint --workspace=frontend-ng"
+docker exec pm4-app-container sh -c "cd /app && npm run test --workspace=frontend-ng"
 ```
+
+`frontend-ng` (Angular) es el frontend desplegado desde la Fase 7. El workspace `frontend`
+(React) sigue en el árbol como referencia de paridad y **debe seguir compilando** —
+`npm run verify` lo cubre mientras la carpeta exista—, pero ya no se buildea en el deploy.
 
 No dar una tarea por terminada con build, lint o tests rotos — ni con un test viejo que dejó
 de pasar por el cambio actual (arreglarlo o el cambio no está completo).

@@ -21,22 +21,24 @@ This project runs **inside Docker** — Node/npm are not expected to be availabl
 docker compose up --build
 ```
 
-This builds and starts `pm4-app-container` — Express backend (proxy to PM4) + Vite/React frontend, using `pm4-app/Dockerfile`.
+This builds and starts `pm4-app-container` — Express backend (proxy to PM4) + Angular frontend, using `pm4-app/Dockerfile`.
+
+> ⚠ **The repository currently has no `docker-compose.yml`** (the only container file is `pm4-app/Dockerfile`), so the command above does not work as written. Build and run the image directly, or restore a compose file. Pre-existing gap, reported rather than silently patched.
 
 Once running, exec into the app container to run npm scripts (there is no host-level `npm`):
 
 ```bash
-docker exec pm4-app-container sh -c "cd /app && npm run build --workspace=frontend"
+docker exec pm4-app-container sh -c "cd /app && npm run build --workspace=frontend-ng"
 ```
 
 ## 2. Software dependencies
 
 - **Docker** / Docker Compose
-- **Node 24** + npm workspaces (`backend`, `frontend`) — provided by the container, pinned in `pm4-app/Dockerfile`
-- **React 19.2**, **TypeScript 5.9**, **Vite 8.1** (frontend)
+- **Node 24** + npm workspaces (`backend`, `frontend-ng`, `frontend`) — provided by the container, pinned in `pm4-app/Dockerfile`
+- **Angular 21**, **TypeScript 5.9** (`frontend-ng` — the deployed frontend since Phase 7)
 - **Express 5.2** (backend/proxy)
-- **react-hook-form 7.80**
-- `@zurich/web-components` / `@zurich/css-components` **0.8.1** — vendored as `.tgz` under `pm4-app/frontend/vendor/` (the ZDS DevKit registry was decommissioned; see `pm4-app/frontend/vendor/README.md` and the `[[project-zds-decommission]]` note before touching these)
+- `@zurich/web-components` / `@zurich/css-components` **0.8.2** + `@zurich-col/lib-zurich` — installed from the Azure feed (see `InsumosZurich/FEED-ZURICH.md`)
+- **`frontend` (React 19.2 / Vite 8.1 / react-hook-form 7.80) is still in the tree but is no longer built or deployed.** It stays as the live parity reference; `@zurich/*` **0.8.1** is vendored as `.tgz` under `pm4-app/frontend/vendor/` and `package-lock.json` resolves those four entries to `file:` paths, so removing the folder requires regenerating the lock in the same commit (see `pm4-app/frontend/vendor/README.md` and the `[[project-zds-decommission]]` note before touching these)
 
 ## 3. Configuration
 
@@ -57,8 +59,12 @@ VITE_PM4_TOKEN=eyJ...
 Once the app is running, a screen is loaded inside PM4 as an iframe pointed at:
 
 ```
-http://localhost:5173/?screen=<screen-slug>&task_id=<id>&token=<jwt>
+http://localhost:4200/?screen=<screen-slug>&task_id=<id>&token=<jwt>
 ```
+
+The Angular router translates `?screen=<slug>` into a real path at the edge, preserving `task_id` and `token` — so PM4 keeps generating the exact same iframe URL it did for React. In production the Express server serves the Angular build and falls back to `index.html` for navigations, which is what makes a direct refresh on `/<slug>` work.
+
+> ⚠ `VITE_PM4_TOKEN` / `VITE_TASK_ID` / `VITE_CASE_ID` are development fallbacks only: since Phase 7 they are baked as empty strings when `NODE_ENV=production`, so a production bundle cannot carry a token even if the variable is set in the deploy environment. The names keep the `VITE_` prefix for continuity with the React setup; the Angular build reads them via `frontend-ng/scripts/gen-env-define.mjs`.
 
 ## 4. Latest releases
 
@@ -75,14 +81,17 @@ Deployment target is [Render](https://render.com) (`pm4-app/render.yaml`), build
 All commands run inside `pm4-app-container` (no host npm):
 
 ```bash
-# Dev servers (backend :3001, frontend :5173) — already running continuously in the container
+# Dev servers (backend :3001, Angular :4200)
 docker exec pm4-app-container sh -c "cd /app && npm run dev"
 
-# Production build (frontend then backend)
+# Same, against the React reference instead (backend :3001, Vite :5173)
+docker exec pm4-app-container sh -c "cd /app && npm run dev:react"
+
+# Production build (frontend-ng then backend). React is deliberately not built.
 docker exec pm4-app-container sh -c "cd /app && npm run build"
 
-# Lint (frontend)
-docker exec pm4-app-container sh -c "cd /app && npm run lint --workspace=frontend"
+# Lint (Angular)
+docker exec pm4-app-container sh -c "cd /app && npm run lint --workspace=frontend-ng"
 ```
 
 The container has no HMR against the Windows-mounted volume, so after editing CSS/static assets restart it to pick up changes:
@@ -103,11 +112,11 @@ Automated tests are **mandatory** for new or modified pure logic, own components
 — see [docs/guides/testing-conventions.md](docs/guides/testing-conventions.md) for what needs a
 test and the ZDS-specific gotchas. They do not replace manual verification of the screens
 themselves, which is still done inside the PM4 iframe (or directly at
-`http://localhost:5173/?screen=...`) and via the `?screen=ds-catalog` live component reference:
+`http://localhost:4200/?screen=...`) and via the `?screen=ds-catalog` live component reference:
 
 ```bash
-# Frontend — Vitest, lógica pura de core/*.ts y utilidades de pantalla
-docker exec pm4-app-container sh -c "cd /app && npm run test --workspace=frontend"
+# Angular — Vitest, lógica pura de core/*.ts, componentes y pantallas
+docker exec pm4-app-container sh -c "cd /app && npm run test --workspace=frontend-ng"
 ```
 
 # Contribute

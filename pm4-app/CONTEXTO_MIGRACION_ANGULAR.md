@@ -1,4 +1,4 @@
-# Contexto de trabajo — migración a Angular 21 (Fase 5)
+# Contexto de trabajo — migración a Angular 21 (Fase 7)
 
 > **Qué es este archivo.** El contexto vivo de la sesión de migración, para sobrevivir un `/clear`.
 > No reemplaza al plan (`~/.claude/plans/ahora-debemos-crear-un-calm-hearth.md`, o su copia archivada)
@@ -9,7 +9,7 @@
 > la evidencia (qué se mutó, qué se puso rojo). Cuando crezca demasiado, se compacta — pero **nunca se
 > borra un hallazgo con evidencia**, se resume.
 >
-> Última actualización: 2026-08-16.
+> Última actualización: 2026-08-18.
 
 ---
 
@@ -18,30 +18,28 @@
 | Cosa | Estado |
 |---|---|
 | Rama | `feat/angular-migration` |
-| Fase | **5** (las 12 pantallas de negocio, de a una) |
-| Pantallas portadas | **5 de 12** — SCR-008 · SCR-004 · SCR-011 · SCR-012 · SCR-003 |
-| Último commit | `7d680f4` — SCR-011 (Fase 5, 3/12) |
-| Suite, última corrida verde | **909 passed (909)** en 66 archivos, 16.71 s |
-| `lint` + `verify` | ✅ **verdes** (2026-08-16, 110.7 s, 11/12 pasos — pytest saltado por no existir `cotizador-service/`) |
-| Revisión visual Playwright | ✅ **hecha para SCR-003** — dos defectos encontrados y corregidos (§9). Pendiente para SCR-011 y SCR-012 |
+| Fase | **7** (que el despliegue sirva Angular). La Fase 5 quedó cerrada con las 13 pantallas |
+| Pantallas portadas | **13** (12 de negocio + `smartsupervision-api-docs`; la SCR-010 se eliminó por orden del usuario) |
+| Último commit | `93a8fc9` — Deuda 4 (la última de las cuatro previas a la Fase 7) |
+| `lint` + `verify` | ✅ verdes al cierre de las deudas (11/12 pasos — pytest saltado por no existir `cotizador-service/`) |
+| Revisión visual Playwright | ✅ hecha para SCR-003, SCR-011 y SCR-012 (§6-bis, §6-ter) |
+| Qué se sirve en producción | **Angular** (`frontend-ng/dist/frontend-ng/browser`). React quedó fuera del build y del deploy, pero sigue en el árbol (§6-quinquies) |
 
 ### Trabajo sin commitear (regla 8: nadie commitea sin confirmación explícita)
 
-Son **dos concernos distintos**; al pedir confirmación hay que separarlos:
+Todo lo de la Fase 7, en **tres concernos separados** para que cada commit sea reversible solo:
 
-**(a) El porte de pantallas** — SCR-012 y SCR-003 completas:
-- `screens/.../COL_QD_SCR-012_Revision_Error_Funcional_Prorroga/` (nuevo, 4 archivos + DOCUMENTACION)
-- `screens/.../COL_QD_SCR-003_Correccion_Error_Funcional/` (nuevo: `.ts` `.html` `.spec.ts` +
-  `seccion-campos-payload.ts` `.html` + DOCUMENTACION)
-- `core/catalogos.service.ts` + `.spec.ts` (nuevos)
-- `screens/.../quejas-directas/fields/matriz-motivos.service.ts` + `.spec.ts` (nuevos)
-- `app/pantallas.ts` · `app/pantallas.spec.ts` · `components/fields/paridad-react.spec.ts` (los 3
-  archivos de registro)
+**(a) Servidor** — `backend/src/lib/estaticos.ts` + `.test.ts` (nuevos) y el bloque estático de
+`backend/src/server.ts`. Es el cambio que hace que Render sirva Angular, y el que arregla el fallback
+abierto.
 
-**(b) Arreglos en pantallas YA COMMITEADAS** — `shared.css` + `components/recaptcha-modal.ts` +
-`components/fields/zds-select.ts` + `.spec.ts`. Reparan **cuatro** defectos reales, no son parte del
-porte. Van aparte porque tocan código ya entregado — y el de `zds-select` es **transversal**: toca
-toda pantalla con un select deshabilitado, no solo SCR-003.
+**(b) Build y entorno** — `frontend-ng/scripts/gen-env-define.mjs` (las tres claves de dev fuera de
+producción) · `package.json` (`build` sin React; `dev` → Angular, `dev:react` para la comparación) ·
+`render.yaml` (solo el comentario de la site key) · `scripts/verify.mjs` (los tres pasos de React con
+`saltarPorque` condicional) · `Dockerfile` (el `COPY frontend-ng/package.json` que faltaba).
+
+**(c) Documentación** — este archivo, `pm4-app/CLAUDE.md`, `README.md`,
+`docs/guides/testing-conventions.md` y `.github/pull_request_template.md`.
 
 **Y para reportar sin arreglar:** `--zf-h-20--700` está vivo en **8 archivos de React**. Es un token
 muerto. Por *"si aparece un bug de la app React, se reporta y se decide aparte"*, la decisión es del
@@ -108,8 +106,10 @@ Todas heredadas, todas vinculantes. Verbatim donde importa.
 4. **Deuda declarada, no bloqueante:** la sección de payload no tiene specs de comportamiento (nada
    asevera las cascadas, el `disable()/enable()` de filas, la traducción del picker de producto, ni el
    restaurar-al-destildar). `fmtPayload()` y `esSenalado()` están exportados y marcados en el código.
-5. **Pantallas que faltan (7):** OS_SCR-003 · SCR-0052 · SCR-009 · SCR-0051 · SCR-013 · SCR-000 ·
-   `smartsupervision-api-docs`.
+5. ~~**Pantallas que faltan (7)**~~ — **las 13 portadas.** La Fase 5 quedó cerrada.
+6. **Fase 7 hecha (§6-quinquies), sin commitear.** Lo que queda es del usuario: validar el deploy en
+   Render con un caso real, y recién después decidir el commit aparte que borra `frontend/` (React) y
+   regenera `package-lock.json` en el mismo movimiento.
 
 ### Pendientes de fondo (no urgentes)
 
@@ -126,12 +126,12 @@ Todas heredadas, todas vinculantes. Verbatim donde importa.
   `"Calcular validez de la oferta"`, de otro proceso.
 - **Chequeo de mixed content:** la instancia PM4 de dev es HTTPS; un iframe HTTPS embebiendo
   `http://localhost:4200` puede quedar bloqueado.
-- **Alcance de `gen-env-define.mjs`:** hoy hornea `VITE_CASE_ID`/`VITE_TASK_ID`/`VITE_PM4_TOKEN` en el
-  bundle, donde React reenviaba solo la site key de reCAPTCHA. Angostarlo es un **cambio funcional** →
-  decisión del usuario.
+- ~~**Alcance de `gen-env-define.mjs`**~~ — **decidido y hecho** en la Fase 7: las tres claves de dev
+  salen vacías solo en producción (§6-quinquies).
 - **Antes del PR:** confirmar si Azure Pipelines también saltea el paso de pytest.
-- **Fase 7 (no ahora):** adaptar `docker-compose.yml` / `Dockerfile` / `render.yaml` / `server.ts` para
-  servir `frontend-ng`.
+- ~~**Fase 7:** adaptar `Dockerfile` / `render.yaml` / `server.ts` para servir `frontend-ng`~~ —
+  **hecha** (§6-quinquies). No hay `docker-compose.yml` en el árbol: el único archivo de contenedor es
+  `pm4-app/Dockerfile`.
 - **Corregir el plan archivado:** la suposición sobre `za-fieldset[config=row]` (Fase 7, paso 5).
 - **Guarda contra el defecto de CSS silencioso:** un spec o regla de lint que se ponga rojo cuando un
   `class=` de una plantilla no matchea ninguna regla de `shared.css`, y/o cuando un `var(--…)` no
@@ -584,6 +584,116 @@ de trampas que el §5.3.
 
 ---
 
+## 6-quinquies. La Fase 7 (2026-08-18) — servir Angular con las rutas de React
+
+Directiva del usuario: *"quiero que se las rutas de las pantallas se mantengan como las de react, pero
+ahora apunten a las pantallas de Angular"* · *"Ajusta de maneraprofecional para que funcione en
+angular"* · *"verifica lo que se pueda, lo demas lo hare una vez se deploye en la nube."*
+`--base-href /ng/` quedó **descartado** por decisión suya: Angular se sirve en la raíz.
+
+### El hallazgo que redujo la fase a la mitad: el router ya estaba terminado
+
+`app/app.routes.ts` **ya replicaba el contrato de `App.tsx` entero** — slug en `?screen=`, `task_id`
+y `token` sobreviviendo la redirección, lazy por pantalla, índice y comodín. O sea que *"las rutas se
+mantienen como las de React"* estaba cumplido por construcción desde la Fase 2, y **la Fase 7 no tocó
+el router**: solo el servidor y el build. Vale como recordatorio de método — verificar el estado antes
+de planificar el trabajo cambió el alcance por completo.
+
+### Qué se sirve, y de dónde sale esa ruta
+
+`resolverRaizEstatica()` (`backend/src/lib/estaticos.ts`) devuelve
+`frontend-ng/dist/frontend-ng/browser`. El segmento **`browser/` no es opcional**:
+`@angular/build:application` sin `outputPath` en `angular.json` reserva el nivel de arriba para
+separar la salida de navegador de la de servidor (SSR), así que `dist/frontend-ng/index.html` **no
+existe**. Apuntar un nivel más arriba da un `express.static` que no encuentra nada y un `sendFile` que
+404ea todo: **app en blanco, backend sano, logs limpios y build verde**. De ahí que la ruta esté
+extraída a una función con spec, y no inline en `server.ts` (que no puede tener spec: llama
+`app.listen()` en el nivel superior).
+
+### ⚠ La trampa de la fase, y es de método: `req.accepts('html')` no distingue una navegación
+
+El fallback de la SPA estaba abierto (`app.use((_req,res) => res.sendFile(index.html))`), y eso
+producía **200 + HTML** para `/api/loQueSea` inexistente (el cliente hacía `JSON.parse` de un
+`<!doctype html>`) y para un chunk viejo pedido desde una cache stale (`Unexpected token '<'`). Los dos
+son especialmente caros dentro del iframe de PM4, donde no hay barra de direcciones.
+
+La primera implementación guardó por `Accept: text/html`. **Medido contra Express: no funciona.**
+`req.accepts('html')` devuelve `'html'` para el comodín que manda un `fetch()` **y** para un
+`Accept: text/css` seguido del comodín con `q=0.1`, porque ese comodín de cola matchea todo. Solo
+filtra un `Accept` explícitamente sin HTML.
+
+**Y el spec de esa versión estaba verde mientras el bug seguía abierto**, porque le pasaba `false` a
+mano al parámetro en vez de medir qué produce Express. Se descubrió levantando el servidor en modo
+producción y pidiendo `/chunk-VIEJO123.js`: `200 text/html`. La guarda pasó a ser la **extensión del
+último segmento del path** — señal del lado del servidor, no un header que el cliente controla.
+
+> **La lección, que es la del §5.5 otra vez:** un test que fabrica el valor de entrada en vez de
+> medirlo no prueba el contrato, prueba la fabricación. Cuando el sujeto es la frontera con un
+> framework, hay que hacer pasar un request de verdad.
+
+### La excepción de inventario: 14 rutas en React, 13 en Angular
+
+El delta es **exactamente** el alias `COL_QD_SCR-010_cierre-m3` de `App.tsx:52`, y la SCR-010 se
+eliminó por orden explícita del usuario. `DIC_ALIAS` queda `{}` con el mecanismo intacto. **No se
+reinstaló el alias** — es una excepción documentada, no una pérdida de paridad.
+
+### Las dos decisiones del usuario en esta fase
+
+1. **React (`frontend/`) NO se borra todavía.** Deja de buildearse y de servirse, pero queda en el
+   árbol: es la única referencia de paridad viva si algo falla en la nube, y `package-lock.json`
+   resuelve cuatro `@zurich/* 0.8.1` a `file:frontend/vendor/*.tgz`, así que borrar la carpeta obliga a
+   regenerar el lock en el mismo commit — y un `npm ci` roto en Render sería un deploy caído con dos
+   causas posibles en vez de una. El borrado va en un commit aparte, después de que el usuario valide
+   el deploy. Los tres pasos de React en `verify.mjs` **no se borraron**: se marcaron con
+   `saltarPorque` condicionado a que exista `frontend/`, así que el gate sigue verde el día que la
+   carpeta se vaya, sin tocar `verify.mjs` en ese commit, y mientras exista sigue avisando si React se
+   rompe.
+2. **`gen-env-define.mjs` se acotó solo en producción.** `VITE_PM4_TOKEN`/`VITE_TASK_ID`/`VITE_CASE_ID`
+   se emiten **vacías** cuando `NODE_ENV=production`; desarrollo no cambia. Se emiten **vacías y no
+   omitidas** porque `core/pm4-context.service.ts` importa las tres por nombre: omitirlas daría
+   `TS2305` y rompería el deploy para proteger un valor que `''` ya protege. Y el override por
+   `process.env` **no puede** saltear la regla de producción a propósito — un `VITE_PM4_TOKEN` puesto
+   en el dashboard de Render es exactamente el escenario que se está previniendo.
+
+### Lo que ya funcionaba y no hacía falta tocar
+
+La site key de reCAPTCHA en Render: `gen-env-define.mjs` ya daba precedencia a `process.env` sobre
+`.env`, y `render.yaml` ya la declaraba en el entorno de build. La key de producción **difiere a
+propósito** de la del `.env` local porque las keys de reCAPTCHA están atadas al dominio.
+
+### El defecto preexistente que la fase destapó
+
+`Dockerfile` copiaba `frontend/package.json` y `frontend/vendor/` antes del `npm ci`, pero **nunca
+`frontend-ng/package.json`** — o sea que el `npm ci` del contenedor jamás instaló las dependencias de
+Angular. Corregido con un comentario `CORREGIDO (Fase 7)`. `EXPOSE` pasó de 5173 (Vite) a 4200
+(ng serve). **No hay `docker-compose.yml` ni `.dockerignore`** en el árbol — verificado, no asumido.
+
+### Lo verificado en local
+
+| Qué | Resultado |
+|---|---|
+| `/`, cualquier slug, `/gate-fachada`, `/loQueSea` | `200 text/html` con `<app-root>` y **sin** el `id="root"` de React |
+| Refresh directo en `/COL_QD_SCR-003_…` | 200 — el caso que solo aparece con el build servido por Express (`ng serve` lo resuelve solo y no prueba nada del backend) |
+| `/chunk-VIEJO123.js`, `/assets/no-existe.svg`, `/styles-VIEJO.css` | **404** (antes `200 text/html`) |
+| Assets reales | `200 text/javascript` / `200 text/css` — el MIME se conserva |
+| `/api/inexistente` · `/health` | 404 · `200 application/json` |
+| `?screen=<slug>&task_id=12345&token=eyJ…` sobre el bundle **optimizado** | pathname correcto, los dos params preservados, `screen` **no** duplicado |
+| Secretos en el bundle de producción | sin JWT y sin el `case_id` de dev; la site key (pública) presente |
+
+**⚠ El grep de secretos sobre `.css` da falso positivo.** `styles-*.css` matcheó `eyJ[A-Za-z0-9_-]{20,}`
+en el interior de la fuente ZurichSans embebida como data-URI base64 (30 KB de blob que arranca con
+`d09GMgAB…` = firma `wOF2` y cierra con `format("woff2")`). El match tenía **una sola parte**, no las
+tres de un JWT. El chequeo que discrimina es el de tres partes separadas por punto, y sobre `.js`.
+
+### Lo que queda para el usuario en la nube
+
+Su propia postergación: *"la revision de flujo real en PM4 necesariamente deve ser en la etapa 7."*
+Abrir una tarea real desde un nodo del BPM con el iframe y el token de verdad; el widget de reCAPTCHA
+con la site key de Render; y las colecciones 14/15 de la Deuda 3, que son un defecto de dato inmedible
+desde acá (TLS handshake, exit 35).
+
+---
+
 ## 7. Para documentar en `docs/guides/testing-conventions.md`
 
 Todo el §5 de este archivo es candidato. Lo más valioso, en orden:
@@ -610,6 +720,12 @@ Todo el §5 de este archivo es candidato. Lo más valioso, en orden:
    prueba y verificar las dos direcciones** (aparece en los capturados **y** no aparece en el log del
    backend) antes de tocar un botón de submit.
 8. Todas las trampas del §5.1 y §5.3.
+9. **La lección del §6-quinquies, hermana de la #7 y de la del §5.5:** un test que **fabrica** el valor
+   de entrada en vez de medirlo prueba la fabricación, no el contrato. El caso concreto: un spec verde
+   que le pasaba `false` a mano a la guarda del fallback SPA, mientras el servidor real devolvía
+   `200 text/html` para un chunk inexistente porque `req.accepts('html')` responde `'html'` al comodín
+   que manda un `fetch()`. **Regla: cuando el sujeto es la frontera con un framework, hacer pasar un
+   request de verdad antes de creerle al spec.**
 
 ---
 

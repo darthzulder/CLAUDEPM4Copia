@@ -11,8 +11,30 @@ Las pantallas se crean aquí con ayuda de Claude (este chat), **no dentro de PM4
 **Docs OpenAPI:** `../docs (4).json` (un nivel arriba de pm4-app)
 **Paquetes JSON de pantallas originales:** `../*.json` (un nivel arriba de pm4-app)
 
-**Stack (migrado a React 19, 2026-07-01):** React 19.2.7 + TypeScript 5.9.3 + Vite 8.1.2
-(frontend) · Express 5.2.1 + Node 24 (backend/proxy) · react-hook-form 7.80.0 ·
+### ⚠ Cuál es el frontend vivo (Fase 7, ago-2026)
+
+**El frontend desplegado es `frontend-ng` (Angular 21).** El workspace `frontend` (React 19) sigue en
+el árbol como **referencia de paridad** —hay que poder abrir la misma pantalla en los dos y
+compararlas— pero ya **no se buildea ni se sirve**: `npm run build` encadena `frontend-ng && backend`,
+y el Express de producción monta `frontend-ng/dist/frontend-ng/browser`. React debe seguir compilando
+mientras exista (lo cubre `npm run verify`); su borrado es un commit aparte, pendiente de que el
+usuario valide el deploy, y arrastra regenerar `package-lock.json` en el mismo movimiento porque cuatro
+`@zurich/*@0.8.1` resuelven a `file:frontend/vendor/*.tgz`.
+
+**Este archivo describe mayoritariamente el proyecto React**, que es donde se escribieron las
+convenciones. Casi todo sigue vigente conceptualmente (BFF, nomenclatura `qd_*`, jerarquía de UI,
+tokens, tests obligatorios), pero **los detalles de implementación son de React**: `App.tsx`,
+`ZdsFields.tsx`, react-hook-form, `.test.tsx`. Los equivalentes de Angular son `app/pantallas.ts`,
+`components/fields/`, Reactive Forms y `.spec.ts` — y sus trampas propias (zoneless, `NG0201`/`NG0203`,
+el DS `lib-*-z`) están en **`CONTEXTO_MIGRACION_ANGULAR.md`**, que es lectura obligatoria antes de
+tocar `frontend-ng`.
+
+**Stack Angular (`frontend-ng`, desplegado):** Angular 21 + TypeScript 5.9 · Reactive Forms ·
+`@zurich/web-components`/`css-components`/`angular-components` **0.8.2** + `@zurich-col/lib-zurich`
+2.6.16, instalados del feed de Azure (ver `InsumosZurich/FEED-ZURICH.md`), **no vendorizados**.
+
+**Stack React (`frontend`, referencia de paridad):** React 19.2.7 + TypeScript 5.9.3 + Vite 8.1.2 ·
+Express 5.2.1 + Node 24 (backend/proxy, compartido) · react-hook-form 7.80.0 ·
 `@zurich/web-components`/`css-components` 0.8.1 **vendorizados** en `frontend/vendor/*.tgz`
 (ver `Bootstrap y registro de ZDS` abajo y `frontend/vendor/README.md`).
 
@@ -25,7 +47,9 @@ Aplican a **todo** cambio de código en este proyecto, no solo a pantallas nueva
 1. **Nomenclatura de campos `qd_*`** — prefijo de tipo + CamelCase inglés, fechas como `str`.
    Ver [`../docs/guides/nomenclatura-variables.md`](../docs/guides/nomenclatura-variables.md).
 2. **Nunca inventar UI** — seguir la [Jerarquía de decisión de UI](#jerarquía-de-decisión-de-ui-obligatorio)
-   y, si vas a crear algo, revisar primero `frontend/vendor/*.tgz` (contenido real del DS) vía
+   y, si vas a crear algo, revisar primero el contenido real del DS. En **Angular**: los `.d.ts` de
+   `InsumosZurich/lib-zurich-2.6.16/package/types/` (nunca por grep sobre el `.mjs`, que va en una sola
+   línea y devuelve inputs del componente vecino). En **React**: `frontend/vendor/*.tgz` vía
    [`outputs/react/VENDOR_COMPONENT_CATALOG.md`](outputs/react/VENDOR_COMPONENT_CATALOG.md).
 3. **Arquitectura BFF** — toda llamada externa (PM4, futuras APIs) pasa por `backend/`,
    nunca directo desde una pantalla. Ver [Principio arquitectónico: BFF](#principio-arquitectónico-backend-for-frontend-bff).
@@ -139,12 +163,22 @@ npm run dev
 ```
 
 - **Backend** → `http://localhost:3001` (Express, proxy a PM4 API)
-- **Frontend** → `http://localhost:5173` (Vite + React + TS)
+- **Frontend** → `http://localhost:4200` (Angular, `frontend-ng` — el desplegado)
+
+Para levantar el React de referencia en su lugar: `npm run dev:react` → `http://localhost:5173`. Para
+compararlos, los dos a la vez (cada uno con su backend).
 
 URL del iframe en PM4:
 ```
-http://localhost:5173/?screen=COL_QD_SCR-000_CrearRecibirQueja&task_id=123&token=eyJ...
+http://localhost:4200/?screen=COL_QD_SCR-000_CrearRecibirQueja&task_id=123&token=eyJ...
 ```
+
+El contrato de la URL es **el mismo que tenía React**, por decisión explícita del usuario: PM4 sigue
+generando `?screen=<slug>` y el router de Angular lo traduce a un path real preservando `task_id` y
+`token` (`app/app.routes.ts`). En producción el Express sirve el build de Angular y hace fallback al
+`index.html` solo para las navegaciones — que es lo que hace que un refresh directo en `/<slug>`
+funcione, y por qué un `/api/*` inexistente o un asset faltante siguen dando 404 y no HTML
+(`backend/src/lib/estaticos.ts`).
 
 ---
 
@@ -216,16 +250,47 @@ El task_id se resuelve en este orden:
 1. Query param `?task_id=` en la URL del iframe
 2. `VITE_TASK_ID` en `.env`
 
+> **⚠ Los fallbacks de `.env` son solo de desarrollo (Fase 7).** En Angular las variables entran al
+> bundle por `frontend-ng/scripts/gen-env-define.mjs`, y cuando `NODE_ENV=production` las tres de dev
+> —`VITE_PM4_TOKEN`, `VITE_TASK_ID`, `VITE_CASE_ID`— se emiten **vacías**: un bundle de producción no
+> puede llevar un token ni aunque la variable esté definida en el dashboard de Render. Se emiten vacías
+> y **no omitidas** porque `core/pm4-context.service.ts` importa las tres por nombre; omitirlas daría
+> `TS2305` y rompería el deploy para proteger un valor que `''` ya protege. En producción, entonces, el
+> token y el task_id **solo** pueden venir del query param del iframe. El prefijo `VITE_` se conserva
+> por continuidad con React, aunque Angular no use Vite.
+
 ---
 
 ## Arquitectura de archivos
+
+### `frontend-ng` (Angular) — el desplegado
 
 ```
 pm4-app/
 ├── .env                          ← NO subir a git
 ├── backend/src/
 │   ├── server.ts                 ← Express puerto 3001, CORS abierto
-│   └── routes/pm4.routes.ts     ← Proxy: lee token del header x-pm4-token o PM4_TOKEN env
+│   ├── lib/estaticos.ts          ← QUÉ carpeta se sirve y CUÁNDO va el fallback SPA (con spec)
+│   └── routes/pm4.routes.ts      ← Proxy: lee token del header x-pm4-token o PM4_TOKEN env
+└── frontend-ng/src/
+    ├── main.ts                   ← bootstrapApplication
+    ├── env.generated.ts          ← generado por scripts/gen-env-define.mjs — GITIGNOREADO (trae el JWT de dev)
+    ├── app/
+    │   ├── app.routes.ts         ← traduce ?screen=<slug> a path preservando task_id/token
+    │   ├── pantallas.ts          ← DIC_PANTALLAS (el equivalente del objeto SCREENS de App.tsx)
+    │   ├── indice-pantallas.ts   ← índice cuando no hay ?screen=
+    │   └── pantalla-no-encontrada.ts
+    ├── api/                      ← cliente HTTP, inyecta x-pm4-token
+    ├── core/                     ← servicios (task, collection, catalogos, attachments…) + lógica pura
+    ├── components/               ← componentes propios; `fields/` es la fachada del DS
+    └── screens/<area>/<slug>/    ← una carpeta por pantalla: .ts .html .spec.ts + DOCUMENTACION_<slug>.md
+```
+
+Los tests viven **al lado** del archivo que prueban (`x.ts` + `x.spec.ts`), no en una carpeta aparte.
+
+### `frontend/` (React) — referencia de paridad, ya no se despliega
+
+```
 └── frontend/src/
     ├── App.tsx                   ← Router: lee ?screen= y carga el componente
     ├── api/pm4Client.ts          ← axios base, inyecta x-pm4-token
@@ -443,9 +508,10 @@ Necesitan test, si son nuevos o los estás modificando:
 
 Comandos:
 ```bash
-npm run verify                      # build + lint + tests (frontend y backend) — el gate completo
-npm run test --workspace=frontend   # vitest — projects 'logic' (node) y 'components' (jsdom)
-npm run test --workspace=backend    # vitest — lib/*.ts
+npm run verify                         # build + lint + tests de los 3 workspaces — el gate completo
+npm run test --workspace=frontend-ng   # Angular (el desplegado) — ng test, specs .spec.ts
+npm run test --workspace=frontend      # React (referencia) — vitest, projects 'logic' y 'components'
+npm run test --workspace=backend       # vitest — lib/*.ts
 ```
 
 - Qué necesita test y cómo escribirlo (incluidas las 4 trampas de testear controles del DS
@@ -627,15 +693,24 @@ Todo `@zurich/*` se consume desde dos módulos, enforced por ESLint (`no-restric
 
 Para habilitar un `z-*` nuevo: re-exportar su wrapper en `ZdsFields` (queda registrado al importarlo). No hay registro manual ni `customElements.define` propio.
 
-**ZDS vendorizado (desde jul-2026):** `@zurich/web-components` y `@zurich/css-components` (0.8.1)
-ya no vienen del registro npm público — el ZDS DevKit fue decomisionado (31-dic-2025) y ambos
-paquetes están **vendorizados** como `.tgz` en `frontend/vendor/`, referenciados en
-`frontend/package.json` via `file:vendor/*.tgz`. Ambos llevan un **parche** que reemplaza su
-`dist/react/jsx-runtime.js` (ESM y CJS) por un shim que usa el jsx-runtime real de React en vez
-de una copia congelada de React 18 (necesario para React 19 — ver `frontend/vendor/README.md`
-para el detalle completo y cómo reproducir el parche). **No actualizar estos `.tgz` a mano ni
-correr `npm update` sobre `@zurich/*`** — no hay versión nueva que instalar (el paquete está
-descontinuado) y una actualización involuntaria perdería el parche.
+**ZDS vendorizado — ⚠ aplica SOLO a React (`frontend`), que ya no se despliega.** Desde jul-2026,
+`@zurich/web-components` y `@zurich/css-components` (0.8.1) no vienen del registro npm público — el ZDS
+DevKit fue decomisionado (31-dic-2025) y ambos paquetes están **vendorizados** como `.tgz` en
+`frontend/vendor/`, referenciados en `frontend/package.json` via `file:vendor/*.tgz`. Ambos llevan un
+**parche** que reemplaza su `dist/react/jsx-runtime.js` (ESM y CJS) por un shim que usa el jsx-runtime
+real de React en vez de una copia congelada de React 18 (necesario para React 19 — ver
+`frontend/vendor/README.md` para el detalle completo y cómo reproducir el parche). **No actualizar
+estos `.tgz` a mano ni correr `npm update` sobre `@zurich/*`** — no hay versión nueva que instalar (el
+paquete está descontinuado) y una actualización involuntaria perdería el parche.
+
+> **En Angular (`frontend-ng`) NO hay vendorizado ni parche.** El DS son paquetes instalados del feed
+> de Azure: `@zurich/{web,css,angular}-components@0.8.2` + `@zurich-col/lib-zurich@2.6.16` (ver
+> `InsumosZurich/FEED-ZURICH.md`). La colisión de versiones la resuelve el hoisting de npm sola: la
+> 0.8.1 de React queda hoisteada en el `node_modules` raíz y la 0.8.2 anidada en
+> `frontend-ng/node_modules`, así que cada workspace resuelve la suya por resolución de Node.
+> **Y la política ante un defecto del vendor es la opuesta a la de React:** por decisión explícita del
+> usuario, en Angular el defecto se **envuelve en nuestro código documentándolo** (`modelo-za.ts`,
+> `boton-habilitado.ts`), nunca se parchea el paquete. Ver `CONTEXTO_MIGRACION_ANGULAR.md` §Deudas.
 
 | Wrapper | Componente Zurich | Cuándo usar |
 |---|---|---|
