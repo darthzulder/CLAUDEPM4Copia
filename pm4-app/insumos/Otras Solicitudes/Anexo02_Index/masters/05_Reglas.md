@@ -17,8 +17,6 @@
 | RUL-081-04 | SCR-081 | adjuntoEvidencia | Restricción | modificacionViable = Sí y adjuntoEvidencia vacío | Bloquear. Se requiere evidencia de la modificación. Mostrar MSG-081-03 | 🔴 BLOQUEA | Sí | MSG-081-03 | Solo aplica si tipoRequerimiento = Modificación. |
 | RUL-081-05 | SCR-081 | plantillaSeleccionada | Restricción | plantillaSeleccionada vacía al enviar a aprobación | Bloquear. No se permite texto libre sin plantilla corporativa. Mostrar MSG-081-04 | 🔴 BLOQUEA | Sí | MSG-081-04 | Hereda la restricción corporativa de SP05 (RUL-006-01). |
 | RUL-081-06 | SCR-081 | respuestaFinal | Control | respuestaFinal tiene menos de 100 caracteres | Bloquear. Mostrar MSG-081-05 | 🔴 BLOQUEA | Sí | MSG-081-05 | — |
-| RUL-010-01 | SCR-010 | plantillaSeleccionada | Restricción | plantillaSeleccionada vacía al enviar a aprobación | Bloquear. No se permite texto libre sin plantilla corporativa. Mostrar MSG-010-01 | 🔴 BLOQUEA | Sí | MSG-010-01 | Solo aplica si requiereComunicacion = Sí. |
-| RUL-010-02 | SCR-010 | respuestaFinal | Control | respuestaFinal tiene menos de 100 caracteres | Bloquear. Mostrar MSG-010-02 | 🔴 BLOQUEA | Sí | MSG-010-02 | Solo aplica si requiereComunicacion = Sí. |
 | RUL-012-01 | SCR-012 | obsLiderSAC | Restricción | Acción = Devolver y obsLiderSAC vacío | Bloquear devolución. Mostrar MSG-012-01 | 🔴 BLOQUEA | Sí | MSG-012-01 | — |
 | RUL-012-02 | SCR-012 | versionRevision | Regla de Negocio | Número de rechazos consecutivos = 2 | Escalar automáticamente al siguiente nivel jerárquico | 🔵 RN | No | — | — |
 | RUL-SP06-01 | SP06 | Correo al cliente | Restricción | estadoCaso != 'Respuesta Aprobada' | Bloquear envío de correo al cliente | 🔴 BLOQUEA | Sí | MSG-SP06-01 | — |
