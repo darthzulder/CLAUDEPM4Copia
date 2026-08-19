@@ -44,6 +44,19 @@
  *   camino sino por el `define` de `vite.config.ts` (`__RECAPTCHA_SITE_KEY__`), que ahí **sí** puede
  *   computar `JSON.stringify(...)` porque es un `.ts`; `angular.json` no. O sea que no es un cambio de
  *   diseño: es el mismo mecanismo de Vite escrito donde Angular lo admite.
+ * - ⚠ **Las tres claves de desarrollo salen VACÍAS cuando `NODE_ENV=production`** (ver
+ *   `LST_CLAVES_SOLO_DEV`). `VITE_PM4_TOKEN`, `VITE_TASK_ID` y `VITE_CASE_ID` existen para abrir una
+ *   pantalla en local sin PM4 delante; en el flujo real esos tres datos viajan en el query string que
+ *   arma PM4 (`?screen=…&task_id=…&token=…`), así que en un build de producción no cumplen ninguna
+ *   función y lo único que pueden hacer es hornear un JWT en un bundle que sirve un servidor público.
+ *   Se acotó en la Fase 7, cuando Angular pasó a ser el frontend desplegado: React nunca tuvo esta
+ *   exposición porque su `vite.config.ts` solo inyectaba la site key de reCAPTCHA.
+ *
+ *   **Se emiten vacías, no se omiten**, y la diferencia importa: `core/pm4-context.service.ts`
+ *   importa las tres por nombre, así que omitirlas sería un `TS2305` en el build de producción — o
+ *   sea, romper el deploy para proteger un dato que ya está protegido con `''`. El tipo del archivo
+ *   generado tampoco cambia (siguen siendo seis `export const … : string`), así que ningún consumidor
+ *   se entera.
  * - La lista de claves es **cerrada y explícita** (ver `LST_CLAVES`): se declara la que se necesita,
  *   no se vuelca el `.env` entero. Es lo que impide que un secreto del backend —`PM4_TOKEN`,
  *   `RECAPTCHA_SECRET_KEY`, `IFRAME_ENCRYPTION_KEY`— llegue al bundle del navegador por el solo hecho
@@ -79,6 +92,18 @@ import { fileURLToPath } from 'node:url';
 const STR_DIR = dirname(fileURLToPath(import.meta.url));
 const STR_ENV = resolve(STR_DIR, '../../.env');
 const STR_SALIDA = resolve(STR_DIR, '../src/env.generated.ts');
+
+/**
+ * Las tres que son **solo para desarrollo**: fallbacks para abrir una pantalla sin PM4 delante.
+ *
+ * En un build de producción se emiten vacías (ver el bullet del contrato). No se sacan de
+ * `LST_CLAVES` porque el archivo generado tiene que seguir exportando los seis nombres: los
+ * consumidores los importan estáticamente y omitir uno rompería el build en vez de proteger algo.
+ *
+ * `VITE_RECAPTCHA_SITE_KEY`, `VITE_DEFAULT_COUNTRY_CODE` y `VITE_LOCK_COUNTRY` **no** están acá a
+ * propósito: son configuración legítima de producción y Render las provee en el entorno de build.
+ */
+const LST_CLAVES_SOLO_DEV = ['VITE_PM4_TOKEN', 'VITE_TASK_ID', 'VITE_CASE_ID'];
 
 // Las que tienen fallback por entorno (ver el bloque de contrato arriba).
 const LST_CLAVES = [
@@ -168,11 +193,21 @@ function resolverCommitHash() {
 
 const dicEnv = existsSync(STR_ENV) ? parsearEnv(readFileSync(STR_ENV, 'utf8')) : {};
 
+const blnEsProduccion = process.env.NODE_ENV === 'production';
+
 // `process.env` gana sobre el `.env`: es lo que permite `VITE_TASK_ID=123 npm run build` en CI y en
 // una corrida puntual, sin editar el archivo. Mismo orden de precedencia que usa Vite.
+//
+// La excepción son las claves de `LST_CLAVES_SOLO_DEV` en un build de producción: ahí se ignoran las
+// dos fuentes y sale `''`. Es deliberado que el override por `process.env` NO pueda saltearlo —
+// justamente el `VITE_PM4_TOKEN` definido a mano en el dashboard de Render es el escenario que esto
+// previene, y un mecanismo de protección que se desactiva con una variable de entorno no protege.
 const dicValores = {};
 for (const strClave of LST_CLAVES) {
-  dicValores[strClave] = process.env[strClave] ?? dicEnv[strClave] ?? '';
+  dicValores[strClave] =
+    blnEsProduccion && LST_CLAVES_SOLO_DEV.includes(strClave)
+      ? ''
+      : (process.env[strClave] ?? dicEnv[strClave] ?? '');
 }
 
 const strCommitHash = resolverCommitHash();
@@ -195,8 +230,15 @@ export const STR_COMMIT_HASH: string = ${JSON.stringify(strCommitHash)};
 writeFileSync(STR_SALIDA, strContenido, 'utf8');
 
 // Se reporta solo la presencia, jamás el valor: uno de los tres es un token PM4.
-const strResumen = LST_CLAVES.map(
-  (in_strClave) => `${in_strClave}=${dicValores[in_strClave] ? '<presente>' : '<vacío>'}`,
-).join(' · ');
+//
+// `<omitido:prod>` se distingue de `<vacío>` a propósito: sin esa diferencia, un build de producción
+// se vería igual que un `.env` mal configurado, y alguien perdería una tarde buscando por qué "no
+// tomó la variable" cuando en realidad la estamos descartando por diseño.
+const strResumen = LST_CLAVES.map((in_strClave) => {
+  if (blnEsProduccion && LST_CLAVES_SOLO_DEV.includes(in_strClave)) {
+    return `${in_strClave}=<omitido:prod>`;
+  }
+  return `${in_strClave}=${dicValores[in_strClave] ? '<presente>' : '<vacío>'}`;
+}).join(' · ');
 // eslint-disable-next-line no-console
 console.log(`env.generated.ts → ${strResumen} · commit=${strCommitHash}`);

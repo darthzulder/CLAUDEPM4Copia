@@ -159,20 +159,38 @@ const STR_CMD_PYTEST_DOCKER = [
  * `lint` y `typecheck` tardan segundos y atrapan la mayoría de los errores de tipeo, así que
  * van antes de los builds y de los ~13s de la suite de jsdom.
  */
-// Durante la migración a Angular (ver docs/archive/ cuando cierre) hay DOS frontends vivos:
-// `frontend` (React, desplegado) y `frontend-ng` (Angular, en construcción). Los pasos de
-// `frontend-ng` se SUMAN, no reemplazan: hasta la Fase 7 el gate cubre los tres workspaces, así
-// que una rotura en el que todavía sirve al negocio no puede pasar inadvertida. El `lint` de
-// `frontend-ng` incluye su propio `tsc --noEmit`, así que no necesita paso de typecheck aparte.
+/**
+ * ── El estado de los DOS frontends después de la Fase 7 ─────────────────────────────────────────
+ *
+ * La Fase 7 cerró la migración: **el frontend desplegado es Angular** (`frontend-ng`). React
+ * (`frontend`) ya no se buildea en el deploy —salió del script `build` de la raíz— ni lo sirve el
+ * backend, pero **sigue en el árbol** como referencia de paridad viva mientras el usuario valida el
+ * despliegue en la nube.
+ *
+ * Por eso sus tres pasos siguen acá y no se borraron: mientras el código exista, tiene que compilar
+ * y pasar sus tests, porque un React roto silenciosamente deja de servir para comparar justo cuando
+ * hace falta. Van con `saltarPorque` condicionado a que la carpeta exista, así que el día que se
+ * borre el gate sigue verde sin tener que tocar este archivo en ese mismo commit — que es
+ * exactamente el tipo de acoplamiento que hace que un borrado "simple" salga rojo por otra causa.
+ *
+ * El `lint` de `frontend-ng` incluye su propio `tsc --noEmit`, así que no necesita paso de typecheck
+ * aparte.
+ */
+// `STR_DIR_RAIZ` es `pm4-app/` (este script vive en `pm4-app/scripts/`), no la raíz del repo.
+const STR_DIR_REACT = path.join(STR_DIR_RAIZ, 'frontend');
+const STR_SALTO_REACT = !existsSync(STR_DIR_REACT)
+  ? 'el workspace `frontend` (React) ya no está en el árbol — retirado tras la Fase 7'
+  : null;
+
 const CLL_PASOS = [
-  { nombre: 'lint · frontend',     cmd: 'npm run lint --workspace=frontend' },
+  { nombre: 'lint · frontend',     cmd: 'npm run lint --workspace=frontend',  saltarPorque: STR_SALTO_REACT },
   { nombre: 'lint · frontend-ng',  cmd: 'npm run lint --workspace=frontend-ng' },
   { nombre: 'lint · backend',      cmd: 'npm run lint --workspace=backend' },
   { nombre: 'typecheck · backend', cmd: 'npm run typecheck --workspace=backend' },
-  { nombre: 'build · frontend',    cmd: 'npm run build --workspace=frontend' },
+  { nombre: 'build · frontend',    cmd: 'npm run build --workspace=frontend', saltarPorque: STR_SALTO_REACT },
   { nombre: 'build · frontend-ng', cmd: 'npm run build --workspace=frontend-ng' },
   { nombre: 'build · backend',     cmd: 'npm run build --workspace=backend' },
-  { nombre: 'test · frontend',     cmd: 'npm run test --workspace=frontend' },
+  { nombre: 'test · frontend',     cmd: 'npm run test --workspace=frontend',  saltarPorque: STR_SALTO_REACT },
   { nombre: 'test · frontend-ng',  cmd: 'npm run test --workspace=frontend-ng' },
   { nombre: 'test · backend',      cmd: 'npm run test --workspace=backend' },
   // Los utilitarios de scripts/ no pertenecen a ningún workspace, así que necesitan su propio

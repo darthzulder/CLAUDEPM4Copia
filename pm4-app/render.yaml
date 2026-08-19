@@ -13,7 +13,16 @@ services:
       - key: PM4_TOKEN
         sync: false
       # reCAPTCHA v2. La site key es PÚBLICA (viaja en el HTML) → se puede commitear.
-      # Debe estar presente en BUILD para que Vite la inyecte (__RECAPTCHA_SITE_KEY__).
+      #
+      # Debe estar presente en BUILD, no en runtime: es un literal horneado en el bundle del
+      # navegador, no algo que el servidor lea. Desde la Fase 7 el frontend desplegado es Angular,
+      # así que quien la hornea es `frontend-ng/scripts/gen-env-define.mjs` (→ `env.generated.ts`)
+      # y no el `define` de Vite (`__RECAPTCHA_SITE_KEY__`), que era el mecanismo de React. Render
+      # expone los `envVars` al proceso de build, y el generador da precedencia a `process.env`
+      # sobre el `.env` (que en el contenedor no existe), así que esto funciona sin más config.
+      #
+      # ⚠ Esta es la site key de PRODUCCIÓN y es distinta de la del `.env` local, a propósito: una
+      # site key de reCAPTCHA está atada a una lista de dominios. Igualarlas rompería el widget.
       - key: VITE_RECAPTCHA_SITE_KEY
         value: 6Lf8IkgtAAAAAO5z1J1gKek_pl83NM4hP0tfhy8Y
       # El secret es PRIVADO → cargar el valor en el dashboard de Render (no en el repo).
