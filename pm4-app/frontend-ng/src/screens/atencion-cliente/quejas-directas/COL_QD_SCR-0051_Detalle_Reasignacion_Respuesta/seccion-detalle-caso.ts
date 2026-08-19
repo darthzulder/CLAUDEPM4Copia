@@ -155,8 +155,12 @@ export class SeccionDetalleCaso {
     // El picker: el satélite guarda `código::etiqueta` y acá se traduce al control real.
     this.objGrupoUi.get(this.strNombreUiProducto)?.valueChanges.subscribe((in_genUi: unknown) => {
       const strUi = String(in_genUi ?? '');
-      in_objForm.get(QD.strSfcProduct)?.setValue(codeFromUiValue(strUi));
+      // El `_desc` **antes** del código, por lo mismo que en SCR-000: `syncProductDesc()` escribe con
+      // `emitEvent: false`, así que la única emisión de este handler es la del código y es la que
+      // refresca el espejo `sigValores`. Al revés, el espejo queda un paso atrás y el expediente
+      // completo —que se alimenta de `sigValores()`— pintaría el producto anterior al cambio.
       this.objMatriz.syncProductDesc(strUi);
+      in_objForm.get(QD.strSfcProduct)?.setValue(codeFromUiValue(strUi));
     });
   }
 

@@ -7,11 +7,13 @@ import { cllCamposDeLaFachada } from '../../../../components/fields/contrato-pan
 import { PM4_ENV_FALLBACKS } from '../../../../core/pm4-context.service';
 import {
   QD,
+  QD_COLLECTIONS,
   SCR0051_MAX_AYUDANTES,
   SCR0051_SLA_UMBRAL_PRORROGA,
 } from '../fields/fields';
 import type { AsignacionHistorial } from '../fields/types';
 import { DetalleReasignacionRespuesta } from './detalle-reasignacion-respuesta';
+import { SeccionDetalleCaso } from './seccion-detalle-caso';
 
 /**
  * SCR-0051 · Detalle / Reasignación / Respuesta — **un caso por RUL del anexo**, no un smoke.
@@ -743,6 +745,53 @@ describe('SCR-0051 · Detalle / Reasignación / Respuesta', () => {
 
     await escribir({ [QD.strPlate]: 'ABC123' });
     expect(objPantalla.form.get(QD.strMarking)?.value).toBe('1');
+  });
+
+  // ── El `_desc` del producto ────────────────────────────────────────────────────────────────────
+
+  /**
+   * Cambiar el producto tiene que dejar la etiqueta nueva **en el espejo**, no solo en el form.
+   *
+   * El `_desc` del producto no lo escribe `sincronizarDesc()` —la colección 16 repite códigos: `104`
+   * es "Garantía extendida" y "Copropiedades"—, sino `syncProductDesc()` con la etiqueta que el usuario
+   * eligió, y con `emitEvent: false` para no reentrar en los otros `sincronizarDesc` del form. Como no
+   * emite, la única emisión del handler del picker es la del **código**, así que el `_desc` tiene que
+   * escribirse antes: si va después, esa emisión fotografía el `_desc` viejo y el espejo queda un paso
+   * atrás. El expediente completo se alimenta de `sigValores()`, así que ahí se ve el producto anterior.
+   *
+   * Se escribe por el control satélite y no con `patchValue` sobre `qd_strSfcProduct`, porque el
+   * satélite es el único camino que produce el `_desc`. Y se elige el **segundo** de los dos registros
+   * que comparten el 104: es lo que distingue este mecanismo de un `sincronizarDesc`, que resolvería por
+   * código y devolvería el primero.
+   */
+  it('⚠ cambiar el producto deja la etiqueta nueva en el espejo, no solo en el form', async () => {
+    await montar();
+
+    const objSeccion = objFixture.debugElement.query(By.directive(SeccionDetalleCaso))
+      .componentInstance as SeccionDetalleCaso;
+    const objCatalogo = objSeccion['objMatriz']['objProducto'];
+
+    // La colección 16 con los dos homónimos. El drenado genérico responde `{data:[]}`, así que sin esta
+    // siembra `labelFromUiValue` no tendría con qué desambiguar y el caso sería vacuo.
+    void objCatalogo.cargar(QD_COLLECTIONS.sfcProduct);
+    await asentar();
+    objMock
+      .expectOne((in_objReq) => in_objReq.url.includes('/collections/16/records'))
+      .flush({
+        data: [
+          { data: { codigo_producto_sfc: '104', nombre_producto_sfc: 'Garantía extendida' } },
+          { data: { codigo_producto_sfc: '104', nombre_producto_sfc: 'Copropiedades' } },
+        ],
+      });
+    await asentar();
+
+    objSeccion['objGrupoUi'].get(`ui-${QD.strSfcProduct}`)?.setValue('104::Copropiedades');
+    await responderGrupos();
+
+    expect(objPantalla.form.getRawValue()[QD.strSfcProduct]).toBe('104');
+    expect(objPantalla.form.getRawValue()[`${QD.strSfcProduct}_desc`]).toBe('Copropiedades');
+    // El que se pone rojo si el `_desc` se escribe después del código.
+    expect(objPantalla.sigValores()[`${QD.strSfcProduct}_desc`]).toBe('Copropiedades');
   });
 
   // ── RUL-0051-08 · el gate de envío ─────────────────────────────────────────────────────────────
