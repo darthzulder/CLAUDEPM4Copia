@@ -3,12 +3,12 @@
 # ANILLO 2 de verificación — "no rompí lo que toqué".
 #
 # Corre `npm run verify` (= scripts/verify.mjs, la ÚNICA definición de verde del proyecto:
-# lint front+back, typecheck, builds, tests front+back y pytest del cotizador). Los otros dos
-# anillos son `.githooks/pre-push` (anillo 3) y GitHub Actions (anillo 4, el autoritativo).
+# lint front+back, typecheck, builds y tests de los tres workspaces más los de scripts/). Los
+# otros dos anillos son `.githooks/pre-push` (anillo 3) y GitHub Actions (anillo 4, el autoritativo).
 #
 # Los tres invocan el MISMO script a propósito: antes cada uno mantenía su propia lista de
-# pasos y ya habían divergido —este hook no corría pytest, CI sí— con el resultado clásico de
-# "en mi máquina pasaba".
+# pasos y ya habían divergido —este hook no corría el pytest del microservicio Python que
+# entonces vivía en el árbol, CI sí— con el resultado clásico de "en mi máquina pasaba".
 #
 # Versionado en .githooks/ y activado con `npm run setup:hooks` desde pm4-app/
 # (= `git config core.hooksPath .githooks`). No usa husky: no hace falta una dependencia.

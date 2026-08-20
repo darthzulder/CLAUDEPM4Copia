@@ -124,29 +124,60 @@ describe('PreviewModalComponent', () => {
     expect(objFixture.nativeElement.querySelector('.visor-doble')).not.toBeNull();
   });
 
-  it('⚠ anula el padding del modal y aclara el backdrop por custom property (paridad React)', async () => {
-    // El caso del tamaño de la vista previa, y va sobre el `style` **inline** del `lib-modal-z` porque
-    // ahí es donde el DS lee las dos propiedades: su SCSS declara
-    // `padding: var(--z-modal--padding, var(--zs-150))` y `background-color: var(--z-modal--backdrop, …)`
-    // en el `section`/`main` de su shadow DOM, así que el valor tiene que estar en el host para heredar.
+  it('⚠ la ventana del modal sale ANCHA: `modal-window--l`, no el `--xs` por defecto', async () => {
+    // El caso del "la vista previa sale muy chica comparada con React".
     //
-    // ⚠ Vale un caso propio, aunque parezca cosmético, por dos motivos medidos:
-    //   1. El desajuste que esto arregla se diagnosticó mal una vez. El culpable señalado fue un
-    //      `tamanio="l"` que **no existe en el DS** (ni en `web-components/dist/modal.js` ni en
-    //      `angular-components`): era un atributo inerte. El ancho lo movía el padding heredado, que es
-    //      justo lo que estas dos líneas anulan — y sin test, volver a perderlas no rompe nada visible
-    //      en la suite.
-    //   2. Un `[style.--z-modal--padding]` mal escrito **no da error de compilación**: Angular acepta
-    //      cualquier nombre de propiedad custom y simplemente no aplica nada. El modo de falla es
-    //      silencioso, que es la definición de lo que hay que aseverar.
+    // Lo que gobierna el ancho es `ModalZ` —que es lo que `ZrModal` re-exporta acá, NO el `z-modal`
+    // del DS— con un `[ngClass]` alimentado por su input `tamanio`:
+    //   .modal-window--l{width:60vw}  --m{50vw}  --s{40vw}  --xs{30vw}   ← default `xs`
+    //
+    // ⚠ Se asevera la **clase que termina en el DOM**, no el atributo `tamanio` del host, y esa
+    // diferencia es el punto entero del caso. Un `expect(attr('tamanio')).toBe('l')` habría pasado
+    // igual mientras el atributo era considerado inerte, y no habría detectado nada: lo que hay que
+    // fijar es que el input llega a `ngClass` y produce el ancho. Al quitar `tamanio="l"` de la
+    // plantilla esto se pone rojo con `modal-window--xs` (mutación verificada).
+    //
+    // ⚠⚠ Y lo que este caso NO prueba, medido en navegador y documentado en `shared.css`: `tamanio="l"`
+    // **no alcanza** para igualar a React. Deja el marco en 60vw (960px a 1600px de ancho) contra un
+    // contenido de 1080px, o sea desbordando. Lo que iguala los dos frontends es la regla
+    // `.modal-window:has(> .grid .preview-modal){width:max-content}` de `shared.css` —más su regla
+    // hermana, que acota el contenido a `min(1080px, 90vw - 4rem)` para dejarle lugar al padding—, y
+    // **jsdom no puede verificarlas**: no aplica el CSS de la librería ni resuelve layout, así que acá
+    // `max-content` no existe. Eso se verificó con sonda en Chrome sobre el `shared.css` real (a 1600px
+    // marco 1144 / contenido 1080, el número de React; a 800px marco 720 / contenido 656, las dos con
+    // 32px de padding por lado). Este caso queda como el **piso**: si la regla no aplicara, el modal
+    // cae en 60vw y no en los 30vw del default.
     await objFixture.whenStable();
 
-    const objModal = objFixture.nativeElement.querySelector('lib-modal-z') as HTMLElement;
-    expect(objModal.style.getPropertyValue('--z-modal--padding')).toBe('0');
-    // El mismo `color-mix` que pone React en el `style` de su `ZrModal` (`PreviewModal.tsx:27-31`).
-    expect(objModal.style.getPropertyValue('--z-modal--backdrop')).toBe(
-      'color-mix(in srgb, var(--z-modal-backdrop) 55%, transparent)',
-    );
+    const objVentana = objFixture.nativeElement.querySelector('.modal-window') as HTMLElement;
+    expect(objVentana, 'ModalZ tiene que haber pintado su .modal-window').not.toBeNull();
+    expect(objVentana.classList.contains('modal-window--l')).toBe(true);
+    expect(objVentana.classList.contains('modal-window--xs')).toBe(false);
+  });
+
+  it('⚠ el cuerpo cuelga de `.modal-window > .grid` (es la estructura que el `:has()` de shared.css asume)', async () => {
+    // La regla que arregla el ancho es un selector estructural sobre la plantilla de `ModalZ`:
+    //   .modal-window:has(> .grid .preview-modal) { width: max-content }
+    //
+    // O sea que depende de un detalle INTERNO de la librería: que el slot `content` viaje dentro de un
+    // `<div class="grid overflow_content mb-3"><div class="col">` que es hijo directo de
+    // `.modal-window`. Si una actualización de `@zurich-col/lib-zurich` renombra ese `.grid` o le mete
+    // un nivel más, el `:has()` deja de matchear y la vista previa **vuelve a salir chica en silencio**:
+    // no hay error, no hay consola, y el test del `tamanio` de arriba seguiría verde porque la clase
+    // sigue estando.
+    //
+    // Este caso es la alarma de eso, y es lo único de la regla que jsdom sí puede sostener: el árbol
+    // del DOM lo construye igual, lo que no hace es aplicar CSS. Si se pone rojo, no hay que "arreglar
+    // el test" — hay que ir a leer la plantilla nueva de `ModalZ` y reescribir el selector.
+    await objFixture.whenStable();
+
+    const objVentana = objFixture.nativeElement.querySelector('.modal-window') as HTMLElement;
+    expect(objVentana).not.toBeNull();
+    // `> .grid` (hijo directo) y desde ahí el cuerpo a cualquier profundidad: exactamente el selector.
+    expect(
+      objVentana.querySelector(':scope > .grid .preview-modal'),
+      'ModalZ cambió su plantilla: el `:has(> .grid .preview-modal)` de shared.css ya no matchea',
+    ).not.toBeNull();
   });
 
   it('con abierto=false no pinta el cuerpo', async () => {

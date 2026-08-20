@@ -4,7 +4,9 @@ import {
   ChangeDetectionStrategy, Component, computed, effect, inject, Injector, type OnDestroy,
   type OnInit, runInInjectionContext, signal,
 } from '@angular/core';
-import { FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
+import {
+  FormControl, FormGroup, ReactiveFormsModule, type ValidatorFn, Validators,
+} from '@angular/forms';
 import { firstValueFrom } from 'rxjs';
 
 import { urlApi } from '../../../../api/pm4Client';
@@ -12,6 +14,7 @@ import { RecaptchaWidgetComponent } from '../../../../components/recaptcha-widge
 import { ZdsCheckboxField } from '../../../../components/fields/zds-checkbox-field';
 import { ZdsInput } from '../../../../components/fields/zds-input';
 import { ZdsSelect } from '../../../../components/fields/zds-select';
+import { ZdsTextarea } from '../../../../components/fields/zds-textarea';
 import {
   ZrAlertInline, ZrButton, ZrIcon, ZrLoader, ZrModal, ZrTemplate,
 } from '../../../../components/fields/zds-reexports';
@@ -23,8 +26,10 @@ import { scrollToFirstError } from '../../../../core/scroll-to-first-error';
 import { sincronizarDesc } from '../../../../core/sincronizar-desc';
 import { TaskService } from '../../../../core/task.service';
 import {
-  buildSfcCode, QD, QD_COLLECTIONS,
+  aPrefijoOs, buildSfcCode, conPrefijoOs, esTipoQueja, QD, QD_COLLECTIONS,
   SCR000_ADJUNTO_KEYS, SCR000_DEFAULTS,
+  SCR000_OS_SIMILAR_CASES_SCRIPT_ID,
+  SCR000_OS_WEB_ENTRY_EVENT_ID, SCR000_OS_WEB_ENTRY_PROCESS_ID,
   SCR000_SIMILAR_CASES_SCRIPT_ID,
   SCR000_WEB_ENTRY_EVENT_ID, SCR000_WEB_ENTRY_PROCESS_ID,
 } from '../fields/fields';
@@ -84,6 +89,49 @@ const INT_MAX_TEXTO = 2000;
 /** Mínimo del texto de la queja: sin esto la SFC rechaza la radicación por descripción insuficiente. */
 const INT_MIN_QUEJA = 50;
 
+/** El mínimo de 50 del relato de la queja, como referencia única para el form y para la tabla de ramas. */
+const FN_MIN_QUEJA: ValidatorFn = Validators.minLength(INT_MIN_QUEJA);
+
+/** El tope de 2000, ídem: lo comparten los dos detalles y el argumento de réplica. */
+const FN_MAX_TEXTO: ValidatorFn = Validators.maxLength(INT_MAX_TEXTO);
+
+/** Las dos ramas de detalle, como nombres y no como un booleano: el guardia de rama las compara. */
+const STR_RAMA_QUEJA = 'queja';
+const STR_RAMA_SOLICITUD = 'solicitud';
+
+/**
+ * Los validadores de los cinco campos de detalle, **completos y por rama**: la columna que aplica
+ * según lo elegido en S1 es el estado final del control, no un delta sobre lo que había.
+ *
+ * Va como lista de tripletes y no como dos diccionarios paralelos porque así el tipo **obliga** a
+ * declarar las dos ramas de cada campo: un campo que solo apareciera en una de las dos columnas
+ * quedaría con los validadores de la rama anterior al cruzar, que es exactamente el defecto que la
+ * tabla existe para cerrar.
+ *
+ * `strSfcProduct`/`strInteraction`/`strSfcReason` no llevan nada en la rama de solicitud: sus campos
+ * ni se montan ahí. Los dos textarea conservan el tope de 2000 en las dos (tolera vacío por
+ * definición) y se cambian el `required`; el mínimo de 50 es de la queja y solo de la queja.
+ */
+const CLL_VALIDADORES_DETALLE: readonly {
+  readonly strCampo: string;
+  readonly cllQueja: readonly ValidatorFn[];
+  readonly cllSolicitud: readonly ValidatorFn[];
+}[] = [
+  { strCampo: QD.strSfcProduct, cllQueja: [Validators.required], cllSolicitud: [] },
+  { strCampo: QD.strInteraction, cllQueja: [Validators.required], cllSolicitud: [] },
+  { strCampo: QD.strSfcReason, cllQueja: [Validators.required], cllSolicitud: [] },
+  {
+    strCampo: QD.strComplaintText,
+    cllQueja: [Validators.required, FN_MIN_QUEJA, FN_MAX_TEXTO],
+    cllSolicitud: [FN_MAX_TEXTO],
+  },
+  {
+    strCampo: QD.strCaseDescription,
+    cllQueja: [FN_MAX_TEXTO],
+    cllSolicitud: [Validators.required, FN_MAX_TEXTO],
+  },
+];
+
 /** `ABC123` o `ABC 123`. Placa colombiana, tal como la valida React. */
 const RGX_PLACA = /^[A-Za-z]{3} ?[0-9]{3}$/;
 
@@ -118,7 +166,7 @@ interface AvisoSimilares {
  *
  * ── 1 · Dos modos de envío en el mismo componente ────────────────────────────────────────────────
  * `TaskService.blnEsWebEntry` (un **getter**: `!taskId() && !caseId()`) decide la rama:
- * - **Web Entry** → `POST /process_events/31?event=node_661`, que crea el caso.
+ * - **Web Entry** → `POST /process_events/{destino}`, que crea el caso.
  * - **Tarea normal** → `completarTarea()`, que avanza el caso que ya existe.
  *
  * ⚠ **Y la rama de Web Entry NO usa `TaskService.iniciarProceso()`, a propósito.** Es lo primero que
@@ -129,6 +177,22 @@ interface AvisoSimilares {
  * ids de esta pantalla vienen del **registro** (`SCR000_WEB_ENTRY_PROCESS_ID` / `_EVENT_ID`, resueltos
  * por nombre — regla 6), no de la URL. React esquiva su propio hook por exactamente el mismo motivo
  * (`CrearRecibirQueja.tsx:236-238`), así que este POST directo es paridad, no atajo.
+ *
+ * ── 1-bis · Y radica en DOS procesos distintos según el tipo de solicitud ────────────────────────
+ * El formulario es uno, el destino no: **una queja** abre un caso de *Gestión de Quejas Directas*
+ * (proceso 31) con variables `qd_*` y chequea similitud con el script 70; **cualquier otro tipo**
+ * —solicitud, felicitación, sugerencia, derecho de petición, vulneración de datos— abre un caso de
+ * *Otras Solicitudes* (proceso 36) con variables `os_*` y el script 101. La bifurcación entera cuelga
+ * de `blnEsQueja()`, y cambia también qué sección de detalle se monta ("Detalle de la queja" completa
+ * vs "Detalle de la Solicitud", un solo campo).
+ *
+ * Dos consecuencias que no se ven leyendo el `@if` de la plantilla, y las dos tienen su propio
+ * docstring porque son los modos de falla del diseño:
+ * - **El vocabulario se traduce en el borde HTTP, no en el form** — adentro todo es `qd_` siempre. Ver
+ *   `conVocabularioDestino()`, que además explica por qué la rama de tarea normal queda afuera.
+ * - **Los `required` viajan de una sección a la otra** — un `@if` desmonta widgets pero no toca el
+ *   `FormGroup`, así que sin `alternarValidadoresDetalle()` la rama de solicitud sería inenviable sin
+ *   un solo campo en rojo que lo explique.
  *
  * ── 2 · Lo que no existe hasta después del envío ─────────────────────────────────────────────────
  * `case_number`, `qd_strSfcCode` y el estado ante la SFC **no existen** mientras se llena el
@@ -163,8 +227,8 @@ interface AvisoSimilares {
  * municipio viajaría ausente a PM4 en el caso más común de todos.
  *
  * ── El chequeo de similares es best-effort, y el orden del flujo es contrato ─────────────────────
- * Submit → captcha presente → script 70 (similares) → [modal si hay coincidencias] → verify del
- * captcha server-side → envío. Si el script 70 falla, se **radica igual** (un detector de duplicados
+ * Submit → captcha presente → script de similares (70 u 101) → [modal si hay coincidencias] → verify
+ * del captcha server-side → envío. Si el script falla, se **radica igual** (un detector de duplicados
  * caído no puede bloquear el derecho a radicar); si el verify falla, **no** se radica (un captcha sin
  * verificar no es un captcha, ver el docstring de `recaptcha-modal.ts`).
  */
@@ -181,6 +245,9 @@ interface AvisoSimilares {
     ZdsCheckboxField,
     ZdsInput,
     ZdsSelect,
+    // Solo para el detalle de "Detalle de la Solicitud", que se maqueta acá y no en una sección
+    // propia — ver el `@else` de la plantilla.
+    ZdsTextarea,
     ZrAlertInline,
     ZrButton,
     BotonHabilitado,
@@ -311,13 +378,18 @@ export class CrearRecibirQueja implements OnInit, OnDestroy {
     // Placa: el `pattern` es incondicional (tolera vacío por definición), el `required` no puede serlo
     // porque el campo solo existe en la familia Autos.
     [QD.strPlate]: new FormControl('', [Validators.pattern(RGX_PLACA)]),
-    [QD.strComplaintText]: new FormControl('', [
-      Validators.required,
-      Validators.minLength(INT_MIN_QUEJA),
-      Validators.maxLength(INT_MAX_TEXTO),
-    ]),
+    // ⚠ Lo que se declara acá es la rama **queja**, y es la declaración que la pantalla muestra al
+    //   abrirse (sin tipo elegido) porque `alternarValidadoresDetalle()` corre en el primer efecto y
+    //   aplica la columna de solicitud sobre estos cinco campos. Los dos estados son la tabla
+    //   `CLL_VALIDADORES_DETALLE`; esto es solo el valor inicial del control.
+    [QD.strComplaintText]: new FormControl('', [Validators.required, FN_MIN_QUEJA, FN_MAX_TEXTO]),
+    // El detalle de "Detalle de la Solicitud" — el espejo del anterior para todo tipo que **no** es
+    // queja. Su `required` lo pone la columna de solicitud de la tabla. Sin mínimo de 50: ese piso es
+    // un requisito de la SFC sobre la descripción de una **queja**, y el Anexo 02 no lo pide para el
+    // resto de las PQR.
+    [QD.strCaseDescription]: new FormControl('', [FN_MAX_TEXTO]),
     [QD.strReply]: new FormControl('NO'),
-    [QD.strReplyArgument]: new FormControl('', [Validators.maxLength(INT_MAX_TEXTO)]),
+    [QD.strReplyArgument]: new FormControl('', [FN_MAX_TEXTO]),
     [QD.strProductDetail]: new FormControl(''),
     // Los cinco que deriva la matriz del motivo elegido, sin widget.
     [QD.strResponsableRole]: new FormControl(''),
@@ -393,7 +465,8 @@ export class CrearRecibirQueja implements OnInit, OnDestroy {
   private readonly dicSimilaresPendiente = signal<Record<string, unknown>>({});
 
   /**
-   * Registra las cinco derivaciones de S1.
+   * Registra las cinco derivaciones de S1 más el traspaso de validadores entre las dos secciones de
+   * detalle (que también depende de S1, por el tipo de solicitud).
    *
    * ⚠ **Va en el constructor y no en `ngOnInit`**, por dos motivos distintos: `effect()` exige contexto
    * de inyección (`ngOnInit` lo es solo mientras corre sincrónicamente, y este `ngOnInit` tiene un
@@ -418,6 +491,7 @@ export class CrearRecibirQueja implements OnInit, OnDestroy {
     effect(() => this.sembrarInstancia());
     effect(() => this.bloquearInstancia());
     effect(() => this.limpiarAlianza());
+    effect(() => this.alternarValidadoresDetalle());
   }
 
   public async ngOnInit(): Promise<void> {
@@ -490,6 +564,30 @@ export class CrearRecibirQueja implements OnInit, OnDestroy {
   );
 
   // ── Estado derivado de S1 ───────────────────────────────────────────────────────────────────────
+
+  /**
+   * **La bifurcación de la pantalla**: `true` si el tipo elegido en S1 es una queja.
+   *
+   * De este booleano cuelgan cuatro cosas, y no tres de ellas son de UI:
+   *  1. Qué sección de detalle se monta — "Detalle de la queja" (S3 completa) o "Detalle de la
+   *     Solicitud" (un solo campo).
+   *  2. Qué proceso recibe la radicación — 31 (Quejas Directas) o 36 (Otras Solicitudes).
+   *  3. Con qué prefijo viajan las variables — `qd_` o `os_`.
+   *  4. Qué script chequea similitudes — 70 o 101.
+   *
+   * La regla vive en `esTipoQueja()` (etiqueta primero, código de respaldo) y su docstring explica por
+   * qué en ese orden. Acá se resuelve la etiqueta contra el catálogo de S1, igual que lo hace
+   * `MatrizMotivosService` para alimentar la cascada de la matriz.
+   *
+   * Sin tipo elegido devuelve `false`: la lectura literal de la regla es que el detalle de la queja se
+   * muestra **solo si** hay queja, así que el formulario abre con "Detalle de la Solicitud".
+   */
+  protected readonly blnEsQueja = computed(() => {
+    const strCodigo = this.leer(QD.strRequestType);
+    const strEtiqueta = this.cllTiposSolicitud()
+      .find((in_objOpt) => in_objOpt.value === strCodigo)?.label ?? '';
+    return esTipoQueja(strCodigo, strEtiqueta);
+  });
 
   /** **RUL-000-01** · solo el Empleado Zurich (rol `'3'`) ve el campo Alianza. */
   protected readonly blnEsEmpleadoZurich = computed(
@@ -610,6 +708,131 @@ export class CrearRecibirQueja implements OnInit, OnDestroy {
     if (objControl?.enabled) objControl.disable({ emitEvent: false });
   }
 
+  // ── El traspaso de validadores entre las dos secciones de detalle ──────────────────────────────
+
+  /**
+   * La rama de detalle cuya columna de validadores está aplicada sobre el `FormGroup` — el guardia que
+   * hace que la tabla se escriba solo al cruzar de una rama a la otra. Ver `alternarValidadoresDetalle()`.
+   *
+   * Arranca en `''` (ninguna) a propósito: así el primer efecto aplica la columna que corresponde al
+   * montaje, que es la de solicitud porque al abrir no hay tipo elegido.
+   */
+  private strRamaDetalle: '' | typeof STR_RAMA_QUEJA | typeof STR_RAMA_SOLICITUD = '';
+
+  /**
+   * Aplica sobre el `FormGroup` la columna de `CLL_VALIDADORES_DETALLE` que le toca al tipo elegido en
+   * S1: mueve los obligatorios de "Detalle de la queja" a "Detalle de la Solicitud" y al revés.
+   *
+   * ⚠ **Sin esto la pantalla se cuelga sin síntoma, y es el único modo de falla no obvio del cambio.**
+   * Ocultar S3 con un `@if` desmonta sus widgets pero **no** toca el `FormGroup`: los `required` que
+   * esta pantalla declaró sobre `strComplaintText`/`strSfcProduct`/`strInteraction`/`strSfcReason`
+   * siguen ahí, así que `this.form.invalid` sería `true` para siempre en la rama de solicitud. Y el
+   * submit no muestra nada: `scrollToFirstError()` busca el `id="field-<name>"` de campos que no
+   * existen en el DOM, así que el ciudadano vería el botón responder y nada más pasar.
+   *
+   * **`strSfcProduct` no tiene red del DS**: su `[obligatorio]` viaja sobre el control satélite
+   * `objProductoUi` (la colección 16 repite códigos — ver `seccion-detalle-queja.ts`), no sobre el
+   * control real, así que el `required` de la tabla es el único que ese campo tiene. Lo mismo del otro
+   * lado: `zds-textarea` **no** compone el `required` del DS —sobreescribe `ngOnChanges` para cortar el
+   * contagio de validez de la lib, ver su cabecera—, así que el detalle de la solicitud solo es
+   * obligatorio por lo que pone esta tabla. Sin este método su sección se podría enviar vacía.
+   *
+   * El mínimo de 50 viaja con el `required` de la queja y por un motivo propio: un ciudadano que
+   * escribió 20 caracteres en el relato y **después** cambió el tipo dejaría el form inválido por un
+   * `minlength` de un campo invisible, que es el mismo cuelgue con otro nombre.
+   *
+   * ── ⚠ Por qué `setValidators()` de la tabla entera y no un `addValidators`/`removeValidators` ──
+   * Los `zds-select` de S3 (`strInteraction`, `strSfcReason`) llevan `[obligatorio]="true"`, y el DS
+   * **compone su propio `required` sobre el control real de esta pantalla** al montarse:
+   * `generateControl()` hace `setValidators(Validators.compose([elValidadorQueHabía, () =>
+   * generateValidation()]))` (ver `campo-base.ts`). Después de eso el control ya **no** tiene
+   * `Validators.required` como validador propio, tiene un closure compuesto — así que un
+   * `removeValidators(Validators.required)`, que compara por identidad de función, **no saca nada y no
+   * falla**. Y ningún componente de campo de la lib tiene `ngOnDestroy`: cuando el `@if` desmonta S3,
+   * ese closure sigue enganchado al control, leyendo el `model` de un componente destruido. Con
+   * `removeValidators` el resultado era la rama de solicitud inválida para siempre por dos campos que
+   * no están en el DOM, sin nada en rojo y con `scrollToFirstError()` buscando ids inexistentes.
+   *
+   * Escribir la columna completa con `setValidators()` deja el control exactamente en el estado que le
+   * corresponde a la rama, sin importar qué le compuso el DS antes.
+   *
+   * ── Y por qué el guardia de rama ──
+   * El efecto corre con cada `valueChanges`, o sea con cada tecla. Reescribir la tabla en cada tecla
+   * borraría el `required` compuesto del DS mientras los widgets siguen montados, así que la rama queja
+   * perdería en la primera pulsación los validadores que el DS pone al montar y que nada vuelve a
+   * componer hasta un remontaje. El guardia hace que la tabla se aplique **solo al cruzar** de una rama
+   * a la otra, que es cuando el estado tiene que cambiar; el `''` inicial fuerza la primera aplicación
+   * al montar (sin tipo elegido la rama es la de solicitud).
+   *
+   * `emitEvent: false` es obligatorio: esto corre desde un efecto alimentado por `valueChanges`, y
+   * emitir reentraría. No hace falta refrescar `sigValores` para que el mensaje de error aparezca —
+   * un efecto de componente corre **antes** de que se refresque su plantilla, así que
+   * `mensajeDeError()` ya se evalúa con los validadores nuevos puestos, y por el mismo orden la tabla
+   * se aplica **antes** de que el `@if` monte o desmonte la sección.
+   */
+  private alternarValidadoresDetalle(): void {
+    const strRama = this.blnEsQueja() ? STR_RAMA_QUEJA : STR_RAMA_SOLICITUD;
+    if (strRama === this.strRamaDetalle) return;
+    this.strRamaDetalle = strRama;
+
+    for (const objCampo of CLL_VALIDADORES_DETALLE) {
+      const objControl = this.form.get(objCampo.strCampo);
+      if (!objControl) continue;
+
+      const cllValidadores = strRama === STR_RAMA_QUEJA ? objCampo.cllQueja : objCampo.cllSolicitud;
+      objControl.setValidators([...cllValidadores]);
+      objControl.updateValueAndValidity({ emitEvent: false });
+    }
+  }
+
+  // ── El destino de la radicación (proceso, evento, script y vocabulario) ────────────────────────
+
+  /**
+   * Proceso PM4 que recibe el caso: **31** (Quejas Directas) si es una queja, **36** (Otras
+   * Solicitudes) en cualquier otro caso.
+   *
+   * Es un getter y no un `computed()` a propósito: lo leen métodos del submit, no la plantilla, y un
+   * getter no puede quedar “congelado” por leerse fuera de un contexto reactivo.
+   */
+  private get intProcesoDestino(): number {
+    return this.blnEsQueja() ? SCR000_WEB_ENTRY_PROCESS_ID : SCR000_OS_WEB_ENTRY_PROCESS_ID;
+  }
+
+  /** Start event del proceso destino. Va siempre en pareja con `intProcesoDestino`. */
+  private get strEventoDestino(): string {
+    return this.blnEsQueja() ? SCR000_WEB_ENTRY_EVENT_ID : SCR000_OS_WEB_ENTRY_EVENT_ID;
+  }
+
+  /** Watcher de casos similares del proceso destino: **70** para quejas, **101** para el resto. */
+  private get intScriptSimilares(): number {
+    return this.blnEsQueja() ? SCR000_SIMILAR_CASES_SCRIPT_ID : SCR000_OS_SIMILAR_CASES_SCRIPT_ID;
+  }
+
+  /**
+   * Traduce un diccionario al vocabulario del proceso destino: intacto para quejas, `qd_` → `os_` para
+   * Otras Solicitudes.
+   *
+   * ⚠ **Se aplica en el borde HTTP y solo ahí.** Adentro la pantalla habla `qd_` siempre —los controles
+   * del form, los `_desc`, los `computed`, el resumen—, y el renombre ocurre en el último momento: el
+   * POST que crea el caso, el PUT que le agrega el código SFC y los ids de adjuntos, y el `data` del
+   * script de similitud. Un form con nombres variables obligaría a reconstruirlo al cambiar el tipo, y
+   * con él se irían los valores ya escritos.
+   *
+   * ⚠ **Y no se aplica en `enviarPorTarea()`, también a propósito.** Esa rama no crea nada: completa una
+   * tarea de un caso que **ya existe** en el proceso 31 con sus variables `qd_*` escritas. Renombrarlas
+   * ahí no movería el caso a otro proceso —eso no lo hace un PUT—, solo dejaría el caso con dos juegos
+   * de variables y las pantallas del 31 leyendo las viejas. El cambio de proceso es una decisión de
+   * **radicación**, así que vive donde se radica.
+   */
+  private conVocabularioDestino(in_dic: Record<string, unknown>): Record<string, unknown> {
+    return this.blnEsQueja() ? in_dic : aPrefijoOs(in_dic);
+  }
+
+  /** Una sola clave traducida al vocabulario del destino — para leer la salida del script. */
+  private clave(in_strClave: string): string {
+    return this.blnEsQueja() ? in_strClave : conPrefijoOs(in_strClave);
+  }
+
   // ── El submit ──────────────────────────────────────────────────────────────────────────────────
 
   /**
@@ -653,8 +876,17 @@ export class CrearRecibirQueja implements OnInit, OnDestroy {
   }
 
   /**
-   * Ejecuta el script PM4 (id 70) que busca casos **activos** con el mismo motivo + producto +
-   * identificación.
+   * Ejecuta el watcher de similitud del proceso destino —**70** para quejas, **101** para Otras
+   * Solicitudes— que busca casos **activos** con el mismo motivo + producto + identificación.
+   *
+   * Los dos scripts son el mismo script con otro prefijo: el 101 lee `os_strSfcReason`/
+   * `os_strSfcProduct`/`os_strIdNumber` y devuelve `os_intCountSimilarCases`/`os_arridSimilarCases`.
+   * Por eso la entrada pasa por `conVocabularioDestino()` y la salida se lee con `clave()`, y no hay
+   * dos implementaciones. `similar_check_status` y `process_id` **no** llevan prefijo en ninguno de los
+   * dos, y no lo reciben porque el renombre es por prefijo `qd_` (ver `conPrefijoOs()`).
+   *
+   * Lo que devuelve este método está siempre en el vocabulario canónico `qd_`: quien lo consume es el
+   * modal de similares y el payload, que se traduce solo en el borde.
    *
    * ⚠ **No se manda la clave `_request`**, y no es un olvido: PM4 la trata como reservada y sobrescribe
    * el `$data` del script, borrando las variables de entrada — el script devolvía "Faltan variables
@@ -668,12 +900,14 @@ export class CrearRecibirQueja implements OnInit, OnDestroy {
    */
   private async chequearSimilares(): Promise<Record<string, unknown>> {
     const dicValores = this.form.getRawValue() as Record<string, unknown>;
-    const dicEntrada = {
+    const dicEntrada = this.conVocabularioDestino({
       [QD.strSfcReason]: dicValores[QD.strSfcReason],
       [QD.strSfcProduct]: dicValores[QD.strSfcProduct],
       [QD.strIdNumber]: dicValores[QD.strIdNumber],
-      process_id: SCR000_WEB_ENTRY_PROCESS_ID,
-    };
+      // Acota la búsqueda al proceso donde va a caer el caso, así que sigue al destino. Sin prefijo:
+      // es un parámetro del script, no una variable del proyecto.
+      process_id: this.intProcesoDestino,
+    });
     const objCuerpo = {
       data: JSON.stringify(dicEntrada),
       config: JSON.stringify({}),
@@ -683,20 +917,21 @@ export class CrearRecibirQueja implements OnInit, OnDestroy {
     try {
       const genResp = await firstValueFrom(
         this.objHttp.post<Record<string, unknown>>(
-          urlApi(`/scripts/${SCR000_SIMILAR_CASES_SCRIPT_ID}/execute`),
+          urlApi(`/scripts/${this.intScriptSimilares}/execute`),
           objCuerpo,
         ),
       );
       // La salida puede venir en `.response`, en `.output` o directamente en la raíz.
       const dicSalida = (genResp['response'] ?? genResp['output'] ?? genResp) as Record<string, unknown>;
-      const cllIds = (dicSalida[QD.arridSimilarCases] ?? []) as number[];
+      const cllIds = (dicSalida[this.clave(QD.arridSimilarCases)] ?? []) as number[];
       // `qd_arrSimilarCases` viene vacío del script (está comentado allá), así que el detalle de cada
       // caso se resuelve acá contra `/requests/{id}` — ver `detallarSimilares()`.
       const cllDetalle = cllIds.length > 0 ? await this.detallarSimilares(cllIds) : [];
       return {
+        // `similar_check_status` ya viene sin prefijo de los dos scripts, así que no pasa por `clave()`.
         [QD.strSimilarCheckStatus]: dicSalida[QD.strSimilarCheckStatus],
         [QD.arridSimilarCases]: cllIds,
-        [QD.intCountSimilarCases]: dicSalida[QD.intCountSimilarCases] ?? 0,
+        [QD.intCountSimilarCases]: dicSalida[this.clave(QD.intCountSimilarCases)] ?? 0,
         [QD.arrSimilarCases]: cllDetalle,
       };
     } catch (excError) {
@@ -828,13 +1063,19 @@ export class CrearRecibirQueja implements OnInit, OnDestroy {
     await this.enviarPorTarea(in_dicDatos);
   }
 
-  /** Rama Web Entry: crea el caso y después le escribe el código SFC y los ids de adjuntos. */
+  /**
+   * Rama Web Entry: crea el caso y después le escribe el código SFC y los ids de adjuntos.
+   *
+   * Es **la única rama que elige proceso**, y por eso es la única donde el destino y el vocabulario se
+   * deciden: una queja abre un caso del 31 con variables `qd_*`, cualquier otro tipo abre uno del 36 con
+   * variables `os_*`. Ver `conVocabularioDestino()` para por qué el renombre vive acá y no en el form.
+   */
   private async enviarPorWebEntry(in_dicDatos: Record<string, unknown>): Promise<void> {
     const genResp = await firstValueFrom(
       this.objHttp.post<Record<string, unknown>>(
-        urlApi(`/process_events/${SCR000_WEB_ENTRY_PROCESS_ID}`),
-        in_dicDatos,
-        { params: new HttpParams().set('event', SCR000_WEB_ENTRY_EVENT_ID) },
+        urlApi(`/process_events/${this.intProcesoDestino}`),
+        this.conVocabularioDestino(in_dicDatos),
+        { params: new HttpParams().set('event', this.strEventoDestino) },
       ),
     );
 
@@ -851,8 +1092,14 @@ export class CrearRecibirQueja implements OnInit, OnDestroy {
       // el número de queja que PM4 acaba de asignar.
       if (numCaso) dicExtra[QD.strSfcCode] = buildSfcCode(numCaso);
       if (Object.keys(dicExtra).length > 0) {
+        // Mismo renombre que el POST, y por el mismo motivo: este PUT escribe sobre el caso que se
+        // acaba de crear, así que sus claves tienen que ser las del proceso que lo recibió — si no, el
+        // 36 quedaría con un `qd_strSfcCode` que ninguna de sus pantallas lee.
         await firstValueFrom(
-          this.objHttp.put(urlApi(`/requests/${intRequestId}`), { data: dicExtra }),
+          this.objHttp.put(
+            urlApi(`/requests/${intRequestId}`),
+            { data: this.conVocabularioDestino(dicExtra) },
+          ),
         );
       }
     }

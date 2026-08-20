@@ -76,6 +76,38 @@
  * cerrar desde el backdrop o la X; hay que escuchar `(close)` y bajar la bandera de la pantalla.
  * No tiene `ngOnDestroy`, así que no limpia nada al desmontarse.
  *
+ * **3-bis. ⚠⚠ `ZrModal` es `ModalZ`, y NO envuelve ningún `z-modal`. Su ancho es un `vw` FIJO.**
+ * Este alias (`ModalZ as ZrModal`, más abajo) engañó a dos diagnósticos seguidos del tamaño de la
+ * vista previa, así que queda acá y no solo en el componente. `ModalZ` es un modal escrito a mano —sin
+ * shadow DOM, sin `z-modal` adentro— y su CSS propio es:
+ *
+ * ```css
+ * .modal-window{position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);padding:2rem;
+ *   border-radius:1.5rem;min-width:300px;max-width:90vw}
+ * .modal-window--l{width:60vw} .modal-window--m{width:50vw}
+ * .modal-window--s{width:40vw} .modal-window--xs{width:30vw}
+ * .modal-backdrop{position:fixed;inset:0;background:#00000080}
+ * ```
+ *
+ * Las tres consecuencias que hay que tener presentes al escribir una modal nueva:
+ * - **`tamanio` NO es inerte** (es un `@Input()`, y sus cinco miembros son `open`, `close`, `tamanio`,
+ *   `ShowBackdrop`, `template`). Alimenta un `[ngClass]` y su **default es `xs` = 30vw**. Omitirlo
+ *   deja la modal a un tercio del ancho: es exactamente lo que le pasó a `preview-modal.ts`, el único
+ *   sitio que no lo pasaba.
+ * - **⚠⚠ Pero elegir bien el `tamanio` NO da paridad con React, y esto es lo que más cuesta ver.** Los
+ *   dos modales dimensionan al revés: el `<section>` del `z-modal` del DS **no declara ancho** (es un
+ *   ítem de grilla que se mide por su contenido, así que el marco iguala al contenido siempre),
+ *   mientras `ModalZ` fija un `vw`. Un contenido de ancho propio —los `min(1080px, 94vw)` de
+ *   `.preview-modal` y `.modal-wide`— **desborda el marco** en cualquier viewport donde el `vw` no
+ *   coincida: medido a 1600x900, marco 960px contra contenido 1080px. Y **no se ve como scroll**
+ *   (`.modal-window` tiene `padding: 2rem` y no declara `overflow`, así que el hijo se escapa sin que
+ *   `scrollWidth` lo registre), de ahí que un chequeo anterior lo diera por bueno. La salida, cuando el
+ *   contenido tiene ancho propio, es que **el contenido mande**: ver la regla `:has()` al final de
+ *   `shared.css`, hoy acotada a la vista previa (los otros dos modales anchos son deuda medida).
+ * - **Las custom properties `--z-modal--*` del DS no aplican acá.** El padding (`2rem`) y el backdrop
+ *   (`#00000080`) están hardcodeados en su hoja. Portar el `style` de un `ZrModal` de React —que sí
+ *   monta el `z-modal` del DS y sí declara esos `var(--z-modal--…)`— no hace nada.
+ *
  * **4. `TableZ.generciEndName` — el typo es real y hay que escribirlo así.** Verificado en el campo de
  * la clase. Su hermano `genericStartName` sí está bien escrito, lo que hace el error más fácil de
  * cometer. Y el límite que el plan anticipaba también es real: `checkAll` se resuelve con un query

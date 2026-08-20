@@ -284,6 +284,24 @@ export class SeccionCamposPayload {
    * placeholder es una acción legítima del gestor (el prompt es elegible — ver `ZdsSelect`). Sembrar
    * ataca la causa: el satélite deja de mentir sobre lo que hay elegido.
    *
+   * ── ⚠ Por qué esto SIGUE haciendo falta con el arreglo de la fachada puesto ─────────────────────
+   * La fachada ya cierra el mismo defecto de raíz para todos los campos: `CampoBase.genModeloParaVendor`
+   * hace que el `lib-*-z` nunca reciba un `''` que borraría un valor que el control ya tiene (ver ese
+   * getter en [campo-base.ts](../../../../components/fields/campo-base.ts)). Se intentó quitar este
+   * efecto apoyándose en eso y **dos casos de este spec se pusieron rojos**: *"un producto SFC
+   * precargado enciende la cascada del motivo y no se autoborra"* (`expected '' to be '101::Autos'`) y
+   * *"siembra desde task.data aunque el código del form ya esté borrado"* (`expected '' to be '101'`).
+   *
+   * La razón es estructural y vale entenderla antes de volver a intentarlo: la fachada **defiende** un
+   * valor precargado, y este satélite **no tiene ninguno que defender**. Nace en `''` en el constructor
+   * y `precargar()` no lo toca —hace `form.patchValue()` sobre el form real, y el satélite vive en
+   * `objGrupoEdicion`—, así que `genModeloParaVendor` encuentra `model` vacío *y* el control vacío, y
+   * devuelve `''` con toda razón. Lo que falta no es protección: es que **alguien escriba** el valor de
+   * UI (`101::Autos`) que ningún otro escritor produce. Eso es este efecto, y es un trabajo distinto.
+   *
+   * En la SCR-0051 el reparto es el otro: ahí el satélite se siembra desde `strInsuranceUiValue()` y lo
+   * que hacía falta era justamente la protección del código precargado, que ahora da la fachada.
+   *
    * ── ⚠ Por qué la fuente es `dicOriginales` y NO `strInsuranceUiValue()` ───────────────────────
    * Porque derivar del form es **circular**, y la primera versión de este arreglo lo hacía: cuando
    * este efecto corre, el borrado ya pasó y `qd_strSfcProduct` está en `''`. Y `strInsuranceUiValue`

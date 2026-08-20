@@ -1,4 +1,14 @@
-import { Component, computed, effect, inject, input, output, viewChild } from '@angular/core';
+import {
+  afterRenderEffect,
+  Component,
+  computed,
+  effect,
+  ElementRef,
+  inject,
+  input,
+  output,
+  viewChild,
+} from '@angular/core';
 import { ReactiveFormsModule } from '@angular/forms';
 import { ZaFileInput } from '@zurich/angular-components';
 import { findDuplicateAttachment } from '../../core/file-hash';
@@ -18,6 +28,24 @@ interface ElementoFileInput extends HTMLElement {
   reset?: () => void;
   _fileName?: string | null;
 }
+
+/**
+ * La regla que revive el botón de eliminar adjunto. Ver el bloque "DEFECTO DEL DS" de la cabecera de
+ * `ZdsFileInput` y `revivirBotonDeBorrado()`.
+ *
+ * Se **exporta** para que [`guarda-borrado-adjunto.spec.ts`](./guarda-borrado-adjunto.spec.ts) asevere
+ * sobre este string en vez de repetirlo: un selector duplicado en el spec se desincroniza en el primer
+ * ajuste y la guarda pasaría a custodiar una regla que ya no es la que se inyecta.
+ *
+ * El `!important` no es decorativo: las reglas del DS son igual de específicas y ganan por orden de
+ * cascada al estar en la hoja propia del componente (las hojas adoptadas se ordenan, y la nuestra se
+ * concatena después, pero el empate de especificidad no es algo que convenga dejar al orden).
+ */
+export const STR_REGLA_BORRADO =
+  'label div[data-input] z-button[config="secondary"]{pointer-events:auto !important;}';
+
+/** Marca de idempotencia sobre el shadow root. Ver `revivirBotonDeBorrado()`. */
+const STR_MARCA_HOJA = '__zdsBorradoRevivido';
 
 /**
  * Campo de adjunto. Envuelve `za-file-input` y preserva el contrato de `ZdsFileInput` de la fachada
@@ -109,6 +137,57 @@ interface ElementoFileInput extends HTMLElement {
  * validador que la pantalla haya declarado. Se emite `rechazado` con el mensaje y la pantalla decide
  * —normalmente pasándolo de vuelta como `[error]`, que es el mismo `input` que ya usan los otros
  * cinco wrappers para `setError`.
+ *
+ * ── ⚠ DEFECTO DEL DS: el botón de eliminar adjunto viene INERTE, y hay que revivirlo ──────────
+ * **REPORTAR A ZURICH.** Esto es un bug del paquete, no una decisión de diseño nuestra, y el
+ * workaround de abajo debería borrarse el día que se corrija upstream. Ver `revivirBotonDeBorrado()`
+ * y su guarda [`guarda-borrado-adjunto.spec.ts`](./guarda-borrado-adjunto.spec.ts), que **se pone
+ * roja cuando el DS lo arregle** para forzar justamente eso.
+ *
+ * Cuando hay un archivo cargado, `z-file-input` cambia el ícono de su botón a `trash:line` y le
+ * cablea `@click=${onDelete}` (verificado en `web-components/dist/file-input.js`). O sea que la
+ * intención del componente es que ese botón borre el adjunto. **No lo hace nunca**, en ninguna
+ * pantalla: el CSS de su propio shadow DOM (`dist/z-file-input.js`) le pone `pointer-events: none`
+ * con dos reglas que en la práctica son incondicionales:
+ *
+ * ```css
+ * :host([droppable]) div[data-input]{…;pointer-events:none}
+ * :host label div[data-input]:not(:has(~div[part=output-text] z-icon)) z-button{pointer-events:none}
+ * ```
+ *
+ * La primera aplica porque `droppable` es `true` por defecto (acá y en React). La segunda **no
+ * depende de `droppable`**, así que `[droppable]="false"` no alcanza como salida; y su `:not(:has())`
+ * se cumple siempre, porque `div[part=output-text]` —la condición de escape que el autor de la regla
+ * imaginó— aparece **solo en la hoja de estilos y en ninguna plantilla del DS** (0 ocurrencias en
+ * `file-input.js` e `input.js`). Cero reglas reactivan `pointer-events` en todo el archivo. Ese es el
+ * bug a reportar: la regla depende de un nodo que el componente no renderiza.
+ *
+ * **El síntoma engaña, y por eso nadie lo reportó antes.** El click atraviesa el botón inerte y cae
+ * en el `<input type="file">` que ocupa toda el área droppable debajo, así que **se abre el explorador
+ * de archivos**. Parece "el botón reemplaza el adjunto", que es un comportamiento plausible, en vez
+ * de "el botón está muerto".
+ *
+ * **No es una regresión de versión ni algo propio de Angular.** Las mismas 4 reglas
+ * `pointer-events:none` están en la 0.8.1 vendorizada que usa React y en la 0.8.2 del feed que usa
+ * Angular, y en las dos falta `output-text` en la plantilla. En React el bug también existe: está
+ * latente y no observado, porque el botón que la gente usaba era el de fila de `DocSupportUploader`
+ * (`lib-button-z` propio), no el del web component.
+ *
+ * ── Por qué el arreglo tiene que ser este y no otro ───────────────────────────────────────────
+ * Se descartaron, en este orden:
+ *
+ * - **Parchear `node_modules` / `patch-package`** — prohibido por CLAUDE.md, y contradice el consumo
+ *   directo del feed de Azure (Angular no vendoriza; solo React tiene `vendor/*.tgz`).
+ * - **`::part()` desde `shared.css`** — el `z-button` interno **no expone `part`**, y `::part` solo
+ *   alcanza lo que el autor decidió exponer.
+ * - **Configurarlo por input** — no hay palanca: ni `droppable` (ver arriba) ni ningún otro atributo
+ *   levanta `pointer-events`.
+ *
+ * Queda una sola vía real: inyectar la regla **dentro del shadow root**, porque el `shared.css`
+ * global no entra ahí. Y conviene tener claro qué es y qué no es: no customiza el comportamiento del
+ * DS —eso es lo que hacía React manipulando campos privados, y acá no se replica— sino que **repone
+ * el comportamiento que el propio componente declara y no cumple**. Lo único que hace es dejar que
+ * el click llegue al handler que el DS ya cableó.
  */
 @Component({
   selector: 'zds-file-input',
@@ -152,11 +231,88 @@ export class ZdsFileInput extends CampoZaBase {
    */
   private readonly objHijo = viewChild.required<ZaFileInput>('objHijo');
 
+  private readonly objAnfitrion = inject(ElementRef<HTMLElement>);
+
   constructor() {
     super();
     effect(() => {
       this.objHijo().required = this.obligatorio();
     });
+
+    // Ver el bloque "DEFECTO DEL DS" de la cabecera. Va en `afterRenderEffect` por los mismos dos
+    // motivos que el `max-length` de `zds-textarea`: el `z-file-input` lo pinta el template de
+    // `za-file-input` —dos niveles abajo, no necesariamente presente en el primer pasaje— y el
+    // shadow root recién existe cuando Lit hizo el upgrade del custom element. El efecto reintenta
+    // en cada pasaje de render, así que si el elemento no estaba listo todavía, lo agarra después.
+    afterRenderEffect(() => this.revivirBotonDeBorrado());
+  }
+
+  /**
+   * Repone `pointer-events` en el botón de eliminar adjunto, que el CSS del shadow DOM del
+   * `z-file-input` deja inerte. **El porqué completo, incluido que esto hay que reportarlo a Zurich y
+   * borrarlo cuando lo arreglen, está en el bloque "DEFECTO DEL DS" de la cabecera.**
+   *
+   * ── El selector es angosto a propósito ────────────────────────────────────────────────────────
+   * Solo `z-button[config="secondary"]`, que es el botón de acción (el que con archivo cargado lleva
+   * el ícono `trash:line`). **Nunca `config="link"`**: ese es el nombre del archivo, y su
+   * `pointer-events: none` es deliberado del DS —al hacerle clic abre el blob en otra pestaña, que no
+   * es lo que el usuario espera al tocar el nombre de un adjunto que acaba de subir. Revivirlo sería
+   * introducir un defecto nuevo mientras se arregla otro.
+   *
+   * ── Por qué `adoptedStyleSheets` y no un `<style>` inyectado ──────────────────────────────────
+   * Es la API estándar para aportar estilos a un shadow root desde afuera, y es **aditiva**: se
+   * concatena a lo que el componente ya adoptó sin reemplazarlo, así que una actualización del DS que
+   * cambie su hoja no entra en conflicto. Un `<style>` insertado en el shadow root funcionaría igual
+   * pero mete un nodo en un árbol que Lit gobierna, y Lit puede re-renderizarlo.
+   *
+   * ── Idempotencia, y por qué importa acá ──────────────────────────────────────────────────────
+   * `afterRenderEffect` corre en cada pasaje de render, así que sin guarda esto acumularía una hoja
+   * por pasaje — un leak silencioso que crece mientras el usuario usa la pantalla. Se marca el
+   * elemento con una propiedad en vez de comparar contenidos de hojas, que sería frágil.
+   *
+   * ── Auto-desactivable: qué pasa el día que el DS lo arregle ──────────────────────────────────
+   * Nada. `pointer-events: auto` sobre algo que ya es `auto` es un no-op, así que esto no rompe la
+   * versión corregida — pero tampoco queremos arrastrarlo para siempre, y por eso la deuda no se
+   * confía a un comentario: [`guarda-borrado-adjunto.spec.ts`](./guarda-borrado-adjunto.spec.ts) lee
+   * el SCSS del paquete y **se pone roja cuando las reglas desaparecen**, obligando a borrar esto.
+   *
+   * ── ⚠ Esto NO se puede testear en jsdom, y está medido ───────────────────────────────────────
+   * No es que el test sea difícil: la API **no existe** en el runner. Sondeado:
+   * `'replaceSync' in CSSStyleSheet.prototype` → `false`, y `shadowRoot.adoptedStyleSheets` →
+   * `undefined`. Encima jsdom no computa `pointer-events` ni hace hit-testing, así que un spec que
+   * despacha `click` sobre el botón pasa en verde con el bug presente — fue lo que dejó pasar el
+   * defecto pese a 113 specs del wrapper.
+   *
+   * Así que el spec asevera solo lo verificable ahí (que sin la API esto es un no-op que no tira, y que
+   * el selector no se ensanchó al `config=link`), y la validación real se hizo **midiendo en Chrome**:
+   * con la regla puesta, `elementFromPoint` sobre el centro del botón devuelve un nodo (antes `null`),
+   * `_fileName` pasa de `"prueba.pdf"` a `null`, el ícono vuelve de `trash:line` a `export:line` y ya
+   * no se abre el explorador de archivos. El detalle del sondeo está en el bloque correspondiente de
+   * [`zds-file-input.spec.ts`](./zds-file-input.spec.ts).
+   */
+  private revivirBotonDeBorrado(): void {
+    const objElemento = (this.objAnfitrion.nativeElement as HTMLElement).querySelector(
+      'za-file-input z-file-input',
+    );
+    const objRaizSombra = objElemento?.shadowRoot;
+
+    // Sin elemento o sin shadow root todavía: el `z-file-input` lo pinta el template de
+    // `za-file-input`, o sea que puede no existir en el primer pasaje, y Lit crea el shadow root en su
+    // `connectedCallback`. No es un error —el efecto vuelve a correr en el próximo pasaje de render.
+    if (!objRaizSombra) return;
+
+    const objMarcado = objRaizSombra as ShadowRoot & { [STR_MARCA_HOJA]?: boolean };
+    if (objMarcado[STR_MARCA_HOJA]) return;
+
+    // `adoptedStyleSheets` y `CSSStyleSheet` construible no existen en jsdom viejos ni en algún
+    // navegador embebido de PM4. Se degrada a no hacer nada —el botón queda inerte, o sea el
+    // comportamiento actual— en vez de tirar y romper el montaje del campo entero.
+    if (typeof CSSStyleSheet === 'undefined' || !('replaceSync' in CSSStyleSheet.prototype)) return;
+
+    const objHoja = new CSSStyleSheet();
+    objHoja.replaceSync(STR_REGLA_BORRADO);
+    objRaizSombra.adoptedStyleSheets = [...objRaizSombra.adoptedStyleSheets, objHoja];
+    objMarcado[STR_MARCA_HOJA] = true;
   }
 
   /**

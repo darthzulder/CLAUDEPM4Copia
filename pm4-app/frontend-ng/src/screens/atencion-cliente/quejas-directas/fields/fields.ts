@@ -79,6 +79,13 @@ export const QD = {
   strServiceProvided: 'qd_strServiceProvided',         // Anexo02 #31 (nuevo) · servicio (cat_matriz_motivos.servicioPrestado; solo si momento = Asistencias)
   strSfcReason: 'qd_strSfcReason',                     // FLD-328 · antes qd_motivoSFC
   strComplaintText: 'qd_strComplaintText',             // FLD-329 · antes qd_textoQueja
+  // ⚠ Detalle de una PQR que **no es queja** (SCR-000, sección "Detalle de la Solicitud").
+  //   No es un campo nuevo de Quejas Directas: existe para viajar **renombrado**. La rama de
+  //   Otras Solicitudes reprefija `qd_` → `os_` (ver `aPrefijoOs()`), así que este control llega
+  //   al proceso 36 como `os_strCaseDescription`, que es FLD-047 (`descripcion`) del Anexo 02 y
+  //   la variable que ya leen las pantallas de ese proceso (`otras-solicitudes/.../gestion-linea2`).
+  //   De ahí el nombre en espejo: elegir cualquier otro dejaría la descripción invisible en OS.
+  strCaseDescription: 'qd_strCaseDescription',         // → os_strCaseDescription · Anexo02 FLD-047
   strAttach01: 'qd_strAttach01',                       // FLD-330 · antes qd_adjunto_01
   strAttach02: 'qd_strAttach02',                       // antes qd_adjunto_02
   strAttach03: 'qd_strAttach03',                       // antes qd_adjunto_03
@@ -295,6 +302,7 @@ export interface QdFields {
   qd_strServiceProvided: string;
   qd_strSfcReason: string;
   qd_strComplaintText: string;
+  qd_strCaseDescription: string;
   qd_strAttach01: string;
   qd_strAttach02: string;
   qd_strAttach03: string;
@@ -539,6 +547,106 @@ export const SCR000_WEB_ENTRY_EVENT_ID = _webEntry.eventId;
 // Ver instancia actual en https://<PM4_BASE_URL>/designer/scripts/70/builder
 export const SCR000_SIMILAR_CASES_SCRIPT_ID = resolveScriptId('similarCasesQuejas', 70);
 
+// ═══════════════════════════════════════════════════════════════════════════
+// SCR-000 — la rama de OTRAS SOLICITUDES (todo lo que NO es una queja)
+// ═══════════════════════════════════════════════════════════════════════════
+//
+// El mismo formulario público radica dos cosas distintas según el tipo elegido en S1
+// (`qd_strRequestType`): una **queja** arranca un caso del proceso 31 con variables `qd_*`, y
+// cualquier otro tipo (solicitud, felicitación, sugerencia, derecho de petición, vulneración de
+// datos) arranca un caso de **Otras Solicitudes** — proceso 36, variables `os_*`, watcher de
+// similitud propio. Los tres ids de esa rama viven acá, al lado de los de la rama de queja.
+
+// Verificado contra PM4 real (2026-08-19): processId 36 = "COL - Otras Solicitudes - Proceso",
+// eventId 'node_535' = su único start event ("Start Event") ✓
+// ⚠ Su `config` trae `web_entry: null`, igual que el `node_661` que ya usa la rama de queja: eso
+//   NO inhabilita el `POST /process_events/{id}?event={node}` (que es un arranque por API, no una
+//   página publicada), así que no es motivo para buscar otro nodo.
+const _webEntryOs = resolveProcessEvent('otrasSolicitudesWebEntry', { processId: 36, eventId: 'node_535' });
+export const SCR000_OS_WEB_ENTRY_PROCESS_ID = _webEntryOs.processId;
+export const SCR000_OS_WEB_ENTRY_EVENT_ID = _webEntryOs.eventId;
+
+// Gemelo `os_` del script 70. Verificado contra PM4 real (2026-08-19): id 101 =
+// "COL_OS_Check_Similitud" (uuid a2805fe0-…-630d6c480845) ✓
+// Lee `os_strSfcReason` + `os_strSfcProduct` + `os_strIdNumber` y devuelve
+// `os_intCountSimilarCases` / `os_arridSimilarCases` — o sea el MISMO contrato del 70 con el
+// prefijo cambiado, que es lo que hace que `aPrefijoOs()` alcance para las dos direcciones.
+export const SCR000_OS_SIMILAR_CASES_SCRIPT_ID = resolveScriptId('similarCasesOtrasSolicitudes', 101);
+
+/**
+ * Código de "Queja" en CAT-TIPO-SOL (colección 18).
+ *
+ * Verificado contra PM4 dev (2026-08-19): 1=Solicitud, 2=Felicitación, **3=Queja**,
+ * 4=Sugerencia, 5=Derecho de petición, 6=Vulneración de Datos.
+ *
+ * Es el criterio de **respaldo**, no el principal — ver `esTipoQueja()`.
+ */
+export const SCR000_REQUEST_TYPE_QUEJA = '3';
+
+/**
+ * `true` si el tipo de solicitud elegido en S1 es una **queja**.
+ *
+ * Es la bifurcación de SCR-000: decide qué sección de detalle se pinta, a qué proceso se radica
+ * (31 vs 36), con qué prefijo viajan las variables y qué script de similitud corre.
+ *
+ * ⚠ **La etiqueta manda y el código es el respaldo, en ese orden y a propósito.** El código sale
+ * de los registros de la colección 18, que es **dato** y no estructura: el sync del registro PM4
+ * resuelve ids de colecciones, no los códigos de sus filas, así que un `=== '3'` a secas se
+ * rompería en silencio en una instancia donde negocio recargó el catálogo con otra numeración —
+ * y el modo de falla sería radicar todas las quejas en el proceso 36. La etiqueta, en cambio, ya
+ * es contrato en esta pantalla: la cascada de `cat_matriz_motivos` compara el **texto** del tipo
+ * de solicitud contra la columna `tipoSolicitud` de la matriz (ver `MatrizMotivosService`), así
+ * que si la etiqueta dejara de decir "Queja" la cascada se caería primero.
+ *
+ * El código cubre el único instante en que no hay etiqueta: un caso precargado cuyo catálogo
+ * todavía no respondió. Sin tipo elegido devuelve `false`, que es la lectura literal de la regla
+ * ("mostrar el detalle de la queja **solo si** está escogida queja").
+ */
+export function esTipoQueja(in_strCodigo: string, in_strEtiqueta: string): boolean {
+  if (in_strEtiqueta) return /queja/i.test(in_strEtiqueta);
+  return in_strCodigo === SCR000_REQUEST_TYPE_QUEJA;
+}
+
+/** Prefijo de proyecto de Quejas Directas. */
+export const PREFIJO_QD = 'qd_';
+
+/** Prefijo de proyecto de Otras Solicitudes. */
+export const PREFIJO_OS = 'os_';
+
+/**
+ * Renombra **una** clave `qd_*` a `os_*`. Lo que no arranca con `qd_` vuelve tal cual.
+ *
+ * Esa guarda es la mitad importante: en el diccionario que viaja hay claves que **no** son del
+ * proyecto y renombrarlas rompería el contrato con PM4 — `similar_check_status` (salida del
+ * watcher, sin prefijo en los dos scripts), `process_id` (parámetro del script) y las claves de
+ * sistema del `data` de un caso (`_request`, `case_number`, …).
+ */
+export function conPrefijoOs(in_strClave: string): string {
+  return in_strClave.startsWith(PREFIJO_QD)
+    ? `${PREFIJO_OS}${in_strClave.slice(PREFIJO_QD.length)}`
+    : in_strClave;
+}
+
+/**
+ * El diccionario entero con las claves `qd_*` renombradas a `os_*`.
+ *
+ * Es un renombre **mecánico**, y eso es exactamente lo que pide el proceso 36: su watcher de
+ * similitud (script 101) lee `os_strSfcReason`/`os_strSfcProduct`/`os_strIdNumber` — los mismos
+ * nombres del 70 con otro prefijo—, así que la rama de Otras Solicitudes no necesita un segundo
+ * vocabulario, solo el mismo con la marca de proyecto cambiada. Los `_desc` acompañantes
+ * (`qd_strRequestType_desc` → `os_strRequestType_desc`) y las claves de adjuntos
+ * (`qd_strAttach01_id` → `os_strAttach01_id`) entran por el mismo camino, porque el renombre es
+ * por **prefijo** y no por lista de campos: una lista habría que ampliarla cada vez que la
+ * pantalla agregue un campo, y el olvido viajaría a PM4 sin que nada lo nombre.
+ */
+export function aPrefijoOs(in_dic: Record<string, unknown>): Record<string, unknown> {
+  const dicSalida: Record<string, unknown> = {};
+  for (const [strClave, genValor] of Object.entries(in_dic)) {
+    dicSalida[conPrefijoOs(strClave)] = genValor;
+  }
+  return dicSalida;
+}
+
 // Componentes fijos del código SFC (qd_strSfcCode), mismos valores que
 // SCR009_DEFAULT_ENTITY_TYPE/CODE (Excel Cierre #46/#47): tipo de entidad (13,
 // Zurich) + código de entidad (9). El código completo solo puede construirse
@@ -569,7 +677,7 @@ export type CrearRecibirQuejaFormData = Pick<QdFields,
   | typeof QD.strProductDetail | typeof QD.strReply | typeof QD.strReplyArgument
   | typeof QD.strOmbudsmanEscalation | typeof QD.strResponsableRole | typeof QD.strCompensation | typeof QD.strSlaAssigned
   | typeof QD.strInteraction | typeof QD.strServiceProvided | typeof QD.strFraudRelated
-  | typeof QD.strSfcReason | typeof QD.strComplaintText
+  | typeof QD.strSfcReason | typeof QD.strComplaintText | typeof QD.strCaseDescription
   | typeof QD.strAttach01 | typeof QD.strAttach02 | typeof QD.strAttach03 | typeof QD.strAttach04 | typeof QD.strAttach05
   | typeof QD.strAdmission | typeof QD.strControlEntity | typeof QD.strTutela | typeof QD.strExpressComplaint
   | typeof QD.blnDataAuth | typeof QD.blnCaptcha | typeof QD.strCcEmail
@@ -630,6 +738,10 @@ export const SCR000_DEFAULTS = {
   [QD.strFraudRelated]: 'NO',  // Derivado de cat_matriz_motivos.relacionFraude (SI/NO) según el motivo
   [QD.strSfcReason]: '',
   [QD.strComplaintText]: '',
+  // S3' — Detalle de la Solicitud (la sección que reemplaza a S3 cuando el tipo NO es queja).
+  // Viaja renombrado a `os_strCaseDescription` en la rama de Otras Solicitudes — ver esa entrada
+  // en `QD` y `aPrefijoOs()`.
+  [QD.strCaseDescription]: '',
   [QD.strAttach01]: '',
   [QD.strAttach02]: '',        // Solo se registra al agregar el 2do documento (DocSupportUploader)
   [QD.strAttach03]: '',        // Solo se registra al agregar el 3er documento

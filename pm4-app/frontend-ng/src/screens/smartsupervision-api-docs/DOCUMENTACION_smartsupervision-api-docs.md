@@ -203,5 +203,6 @@ portadas. Esta no tiene campos, así que no lleva entrada en `CLL_PORTADAS` ni e
 ✅ npm run verify                           11/11 aplicables · 177,7s
 ```
 
-El paso `test · cotizador (pytest)` sale **saltado** porque no existe `cotizador-service/` en este
-árbol. Es preexistente y ajeno a este cambio.
+En esa corrida `verify` enumeraba 12 pasos y el de `pytest` salía **saltado**, porque el
+microservicio Python ya no estaba en el árbol (lo eliminó `d4e63a4`). Ese paso se retiró después,
+así que hoy los 11 son la lista completa y no hay nada que se salte.

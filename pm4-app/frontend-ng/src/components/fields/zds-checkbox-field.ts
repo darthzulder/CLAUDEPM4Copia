@@ -115,9 +115,18 @@ export class ZdsCheckboxField extends CampoBase<string | boolean> {
    *     **booleano** que el `za-checkbox` necesita (`blnTildado`). Con el group real, ese `setValue`
    *     pisa el contrato de texto de PM4: un campo declarado `'SI'`/`'NO'` termina en `false`.
    *     Medido: con el group compartido, `qd_strAutoriza` pasaba de `'NO'` a `false` solo por montar.
-   *     Es el único wrapper afectado porque es el único que **transforma** el valor — en el input, el
-   *     select, el textarea y el date la lib reescribe el mismo valor que recibió, así que ahí es
-   *     redundante y no destructiva (también medido, en los cuatro).
+   *     Es el único wrapper afectado **por el cambio de tipo**, porque es el único que
+   *     **transforma** el valor.
+   *
+   *     ⚠ Lo que decía acá antes —que en los otros cuatro ese `setValue` "reescribe el mismo valor
+   *     que recibió, así que es redundante y no destructiva"— es cierto **en régimen y falso al
+   *     montar**, y esa medición se hizo solo en régimen. Al montar, el `model` del wrapper todavía
+   *     es el `null` del constructor mientras el control ya tiene el valor de `precargar()`, así que
+   *     el echo escribía un vacío encima. Es el defecto de "los selects precargados salen en blanco",
+   *     y se cierra en el binding: los cuatro pasan `genModeloParaVendor` en vez de `model() ?? ''`
+   *     (ver ese getter en [campo-base.ts](./campo-base.ts)). Este wrapper no lo necesita: su group
+   *     satélite ya le quita a la lib el acceso al control de la pantalla, que es la misma frontera
+   *     por otro camino.
    *  2. **`validRequired()` está invertido** (ver el bloque de la cabecera) y no hay
    *     `manualValidation` para apagarlo. Con el group satélite ese validador se compone sobre el
    *     control satélite, no sobre el de la pantalla, así que el bug de la lib deja de poder marcar

@@ -21,7 +21,7 @@
 | Fase | **7** (que el despliegue sirva Angular). La Fase 5 quedó cerrada con las 13 pantallas |
 | Pantallas portadas | **10** hoy. La Fase 5 portó 13 (12 de negocio + `smartsupervision-api-docs`); la SCR-010 se eliminó por orden del usuario, y en ago-2026 salieron las **SCR-004, 011 y 012** porque el proceso en PM4 dejó de usarlas (§6-sexies) |
 | Último commit | `93a8fc9` — Deuda 4 (la última de las cuatro previas a la Fase 7) |
-| `lint` + `verify` | ✅ verdes al cierre de las deudas (11/12 pasos — pytest saltado por no existir `cotizador-service/`) |
+| `lint` + `verify` | ✅ verdes al cierre de las deudas (entonces 11/12 pasos, con el `pytest` saltado; hoy `verify` son 11 pasos y ninguno se salta — el microservicio Python salió del árbol en `d4e63a4`, y su paso de `verify` se retiró después) |
 | Revisión visual Playwright | ✅ hecha para SCR-003, SCR-011 y SCR-012 (§6-bis, §6-ter) — las dos últimas ya eliminadas del proyecto; el registro se conserva porque las lecciones de método siguen valiendo |
 | Qué se sirve en producción | **Angular** (`frontend-ng/dist/frontend-ng/browser`). React quedó fuera del build y del deploy, pero sigue en el árbol (§6-quinquies) |
 

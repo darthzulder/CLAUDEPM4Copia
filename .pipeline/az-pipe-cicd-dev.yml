@@ -1,0 +1,33 @@
+# Pipeline Referenciador - bpm-screens-acz-processmaker
+# Author: @ruben.jimenez@zurich.com
+#
+# PROPÓSITO: CI + Deploy a producción. Se ejecuta en cada commit a main.
+# Toda la lógica real está en devops-processmaker.
+
+name: '$(Rev:rr)'
+
+trigger:
+  batch: false
+  branches:
+    include:
+    - refs/heads/main
+  paths:
+    include:
+    - 'pm4-app/**'
+    exclude:
+    - 'readme*'
+    - 'README*'
+    - 'Readme*'
+    - 'docs/**'
+    - '*.md'
+    - '.pipeline/*'
+
+resources:
+  repositories:
+    - repository:                              AppDevOpsRepo
+      type:                                    git
+      name:                                    LA-CO-FENIX/devops-processmaker
+      ref:                                     main
+
+extends:
+  template:                                    pipelines/azure/bpm-screens-acz-processmaker/azure-pipelines-cicd-dev.yml@AppDevOpsRepo
