@@ -325,8 +325,26 @@ const DIC_APERTURA_DE_RAMAS: Readonly<
   // ⚠ El valor es el literal `'SI'` y no un `true`: el checkbox de réplica es un `zds-checkbox-field` con
   // `checkedValue`/`uncheckedValue` en `'SI'`/`'NO'`, que es el contrato de PM4 para ese campo. Sembrar
   // `true` dejaría el `@if` cerrado y el caso fallaría nombrando el textarea que no montó.
+  //
+  // ⚠ **Y desde 2026-08-19 la réplica tiene un `@if` ANCESTRO que también hay que abrir.** La pantalla
+  // atiende dos procesos: la sección de detalle completa (con el relato, la réplica y su argumento) se
+  // monta **solo si el tipo de solicitud es una queja**; con cualquier otro tipo la reemplaza "Detalle de
+  // la Solicitud", de un solo campo. Sin `qd_strRequestType` sembrado no hay tipo elegido, así que la
+  // rama por default es la de solicitud y S3 entera desaparece: el caso de los contadores fallaba
+  // nombrando `qd_strReplyArgument` y el de los huérfanos nombraba `qd_strCaseDescription` (el campo de
+  // la otra rama, que React no declara porque **no existía**). Los dos son el mismo hecho.
+  //
+  // Se abre la rama de **queja** y no se exime el campo nuevo, y la razón es que este archivo compara
+  // contra el contrato congelado de React: la SCR-000 de React mostraba siempre el detalle de la queja,
+  // así que la rama de queja **es** la que corresponde comparar. Eximir `qd_strCaseDescription` en
+  // `DIC_NOMBRES_DINAMICOS` habría sido la salida corta y dejaba los ~12 campos de S3 sin comparar para
+  // siempre — que es justo el tipo de pérdida silenciosa que el resto de este archivo persigue.
+  //
+  // El `'3'` es el código de "Queja" del catálogo 18. `esTipoQueja()` decide por la **etiqueta** de la
+  // opción y cae al código solo si el catálogo no cargó; acá el helper drena todas las colecciones con
+  // `{data: []}`, así que el que aplica es el código.
   'COL_QD_SCR-000_CrearRecibirQueja': {
-    datos: { qd_strReply: 'SI' },
+    datos: { qd_strRequestType: '3', qd_strReply: 'SI' },
   },
 };
 

@@ -96,12 +96,40 @@
         [blnIntentoEnvio]="blnIntentoEnvio()"
       />
 
-      <!-- ── S3 · Detalle de la queja ──────────────────────────────────────────────────────────── -->
-      <app-seccion-detalle-queja
-        [form]="form"
-        [sigValores]="sigValores"
-        [blnIntentoEnvio]="blnIntentoEnvio()"
-      />
+      <!-- ── S3 · El detalle, que es UNA de dos secciones según el tipo de solicitud ──────────────
+           Una queja pide el detalle completo de la SFC (producto, interacción, motivo, relato de 50
+           caracteres mínimo); cualquier otro tipo de PQR pide un solo campo libre.
+
+           ⚠ Las dos secciones comparten el MISMO `form`, así que los `required` de la que se
+             desmonta seguirían contando para `form.invalid` — el `@if` esconde los widgets, no los
+             validadores. Eso lo resuelve `alternarValidadoresDetalle()` en la clase; sin ese efecto
+             el botón Enviar de la rama de solicitud no hace nada y no hay un solo campo en rojo que
+             lo explique. -->
+      @if (blnEsQueja()) {
+        <app-seccion-detalle-queja
+          [form]="form"
+          [sigValores]="sigValores"
+          [blnIntentoEnvio]="blnIntentoEnvio()"
+        />
+      } @else {
+        <!-- Se maqueta acá y no como componente propio porque es un campo: S1 y S4 están inlineadas
+             en esta misma plantilla por la misma razón, y el umbral de reúso del proyecto es ≥3. -->
+        <app-pqr-section titulo="Detalle de la Solicitud">
+          <div class="form-row cols-1">
+            <!-- Viaja como `os_strCaseDescription` (Anexo 02 FLD-047) — ver `QD.strCaseDescription`
+                 y `aPrefijoOs()` en `fields.ts`. Sin `helpText` de mínimo: el piso de 50 caracteres
+                 es un requisito de la SFC sobre el relato de una **queja**, no del resto de las PQR. -->
+            <zds-textarea
+              [formControlName]="QD.strCaseDescription"
+              [name]="QD.strCaseDescription"
+              label="Ingresa el detalle de la solicitud"
+              [maxLength]="INT_MAX_TEXTO"
+              [obligatorio]="true"
+              [error]="mensajeDeError(QD.strCaseDescription)"
+            />
+          </div>
+        </app-pqr-section>
+      }
 
       <!-- ── S4 · Autorización y envío ─────────────────────────────────────────────────────────── -->
       <app-pqr-section titulo="Autorización y envío">

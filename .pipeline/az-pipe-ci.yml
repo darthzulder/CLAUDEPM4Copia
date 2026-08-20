@@ -1,0 +1,35 @@
+# Pipeline Referenciador - bpm-screens-acz-processmaker
+# Author: @ruben.jimenez@zurich.com
+#
+# PROPÓSITO: Trigger de CI puro para ramas de trabajo (feat/*, fix/*, chore/*).
+# Toda la lógica real está en devops-processmaker.
+
+name: '$(Rev:rr)'
+
+trigger:
+  batch: false
+  branches:
+    include:
+    - refs/heads/feat/*
+    - refs/heads/fix/*
+    - refs/heads/chore/*
+  paths:
+    include:
+    - 'pm4-app/**'
+    exclude:
+    - 'readme*'
+    - 'README*'
+    - 'Readme*'
+    - 'docs/**'
+    - '*.md'
+    - '.pipeline/*'
+
+resources:
+  repositories:
+    - repository:                              AppDevOpsRepo
+      type:                                    git
+      name:                                    LA-CO-FENIX/devops-processmaker
+      ref:                                     main
+
+extends:
+  template:                                    pipelines/azure/bpm-screens-acz-processmaker/azure-pipelines-ci.yml@AppDevOpsRepo

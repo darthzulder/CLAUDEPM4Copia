@@ -167,7 +167,7 @@ interface OpcionLib {
         [group]="grupo"
         [name]="name()"
         [label]="label()"
-        [model]="model() ?? ''"
+        [model]="genModeloParaVendor"
         (modelChange)="alCambiarModelo($event)"
         [options]="cllOpcionesLib()"
         [multiSelect]="multiSelect()"

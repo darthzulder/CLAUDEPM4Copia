@@ -19,6 +19,12 @@ LocalFiles/
 #GRAPH_REPORT.md
 #.graphify/
 graphify-out/cache/
+# Markdown que graphify extrae de los .docx/.xlsx de `insumos/` para poder indexarlos. Es
+# derivado: el original versionado es el binario, y el nombre lleva un hash del contenido
+# —`CATALOGOS v2_79e7de80.md`— así que cada vez que cambia el insumo, o que graphify cambia
+# cómo lo convierte, aparece un archivo NUEVO en vez de un diff sobre el anterior. Estuvieron
+# commiteados hasta 0e595bf y ya habían duplicado los seis: se sacan del índice y se ignoran.
+graphify-out/converted/
 # Un graphify-out anidado fuera de la raíz es siempre un artefacto stray
 # (ver nota en CLAUDE.md sobre cache_root al correr extract() en subcarpetas).
 **/*/graphify-out/
@@ -29,6 +35,13 @@ graphify-out/20[0-9][0-9]-[0-9][0-9]-[0-9][0-9]/
 # Visualización generada (601 nodos de comunidad). Se regenera en cada update y no se lee
 # desde el código; `GRAPH_REPORT.md` es la salida que sí se consulta.
 graphify-out/graph.html
+# Ruta absoluta al intérprete de ESTA máquina, con el nombre de usuario adentro
+# (`C:\Users\<usuario>\...\python.exe`). Es caché local, no configuración del proyecto: lo
+# reescribe el Step 1 del skill con `sys.executable` en cuanto corre, y el hook de `hooks.py`
+# lo valida con `-x` + `find_spec` antes de usarlo, cayendo a las otras sondas (launcher en
+# PATH, shebang) si no sirve. Commiteado solo generaba un conflicto por desarrollador: ya pasó
+# dos veces (G:\DockerProys en b8ca4fd, y de EXTNELSON.BRAVO a EXTPABLO.PALACIOS acá).
+graphify-out/.graphify_python
 
 # Salida generada del scanner de SonarQube
 .scannerwork/

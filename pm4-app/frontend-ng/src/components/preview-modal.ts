@@ -123,36 +123,105 @@ export interface DocumentoVistaPrevia {
  * el comportamiento vigente — cambia lo que pasa el día que alguien pase otra cosa. Va con caso de
  * test para las dos ramas.
  *
- * ── ⚠ El tamaño: `tamanio="l"` NO existía, y el desajuste era el padding ──────────────────────────
- * La vista previa se veía más ancha que la de React. El diagnóstico previo —anotado en la ficha de la
- * SCR-003— era que `tamanio="l"` en `lib-modal-z` se traducía a un `width: 60vw` del DS que le ganaba
- * al `min(1080px, 94vw)` de `.preview-modal`. **Está mal, medido:** no hay ningún `tamanio` ni ningún
- * `60vw` en `@zurich/web-components/dist/modal.js` ni en `@zurich/angular-components`. El atributo era
- * inerte: llegaba al DOM como atributo desconocido y no gobernaba nada.
+ * ── ⚠⚠ El tamaño: `ZrModal` acá NO es el `z-modal` del DS, es `ModalZ` — y `tamanio` SÍ existe ────
+ * Este bloque contradice lo que decía antes, y la corrección es la que importa para entender el
+ * ancho. **`ZrModal` en Angular es un alias de `ModalZ`** (`zds-reexports.ts:277`:
+ * `ModalZ as ZrModal`), o sea `lib-modal-z` de `@zurich-col/lib-zurich` — **no** el `z-modal` de
+ * `@zurich/web-components`. Los dos razonamientos anteriores sobre el ancho apuntaban al componente
+ * equivocado, y por eso los dos fallaron.
  *
- * El contrato real del modal es su SCSS, y ahí está la diferencia:
- * `:host>main>section{min-width:20vw; max-width:calc(100vw - var(--zs-100));
- * padding:var(--z-modal--padding, var(--zs-150)); padding-top:var(--zs-300)}`. O sea que el `section`
- * suma su padding **alrededor** de un cuerpo que ya mide `min(1080px, 94vw)`, y React lo anula:
- * `--z-modal--padding: 0` en el `style` de su `ZrModal` (`components/PreviewModal.tsx:27-31`). Con el
- * padding heredado, el ancho total quedaba `1080px + 2·var(--zs-150)`.
+ * `ModalZ` no envuelve ningún `z-modal`: es un modal escrito a mano, sin shadow DOM, y su plantilla
+ * y su CSS son (extraídos del `.mjs`, `class ModalZ`):
  *
- * ⚠ `.preview-modal` es **idéntico byte a byte** entre los dos frontends, así que el CSS propio no
- * tenía nada que corregir: lo que faltaba portar eran las dos custom properties del `style` de React —
- * el padding y el `--z-modal--backdrop` más transparente. Van bindeadas y con test, porque un
- * `[style.--*]` mal escrito no da error de compilación: simplemente no se aplica.
+ * ```css
+ * .modal-window{position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);background:#fff;
+ *   padding:2rem;border-radius:1.5rem;min-width:300px;max-width:90vw}
+ * .modal-window--l{width:60vw} .modal-window--m{width:50vw}
+ * .modal-window--s{width:40vw} .modal-window--xs{width:30vw}
+ * .overflow_content{max-height:53vh;overflow-y:auto}
+ * ```
+ *
+ * De ahí las tres consecuencias medidas:
+ *
+ * 1. **`tamanio` NO es inerte.** Es un `@Input()` de `ModalZ` (sus cinco miembros son `open`, `close`,
+ *    `tamanio`, `ShowBackdrop` y `template`) y alimenta un `[ngClass]` que elige
+ *    `.modal-window--{l,m,s,xs}`. Su **default es `xs`**, o sea `width: 30vw`. Este componente era el
+ *    **único** de los ocho sitios vivos que no lo pasaba —se lo quitó cuando se creyó que no hacía
+ *    nada— así que su vista previa venía saliendo a 30vw. Sonda sobre el DOM montado:
+ *    `className = "modal-window modal-window--xs"`. Eso es lo que el usuario veía como "muy chica".
+ * 2. **`--z-modal--padding` y `--z-modal--backdrop` son inertes acá.** Nada en `ModalZ` las lee: su
+ *    padding es un `2rem` hardcodeado y su backdrop un `#00000080` hardcodeado. Eran un port fiel del
+ *    `style` de React (`PreviewModal.tsx:27-31`), pero React sí monta el `z-modal` del DS, que es
+ *    quien declara esos `var(--z-modal--…)`. Acá no había nada que anular, así que se quitan.
+ * 3. **El alto lo recorta `.overflow_content`, no nosotros.** `ModalZ` envuelve el slot `content` en
+ *    `<div class="grid overflow_content">` con `max-height: 53vh`. `intAlto()` pide
+ *    `min(82vh, 820px)` como React, así que dentro de una caja de 53vh el visor queda con scroll
+ *    propio. Se conserva la cuenta de React por paridad de intención y porque el recorte es del
+ *    contenedor de la librería; **no** se compensa bajando `intAlto()`, que solo movería el síntoma a
+ *    un visor más chico.
+ *
+ * ── ⚠⚠ Y `tamanio="l"` NO alcanza: los dos modales dimensionan al REVÉS ──────────────────────────
+ * Corrige lo que este bloque afirmaba hasta acá. Decía que con `tamanio="l"` la ventana mide `60vw` y
+ * el contenido "pide su ancho adentro", y **medido en navegador es falso**: el contenido se sale. A
+ * 1600x900, con `.preview-modal` idéntico byte a byte en los dos frontends:
+ *
+ * ```
+ * React, `z-modal` del DS   → marco 1080px · contenido 1080px · desborde 0
+ * Angular, `ModalZ` con `l` → marco  960px · contenido 1080px · desborde 152px
+ * Angular, `ModalZ` sin él  → marco  480px · contenido 1080px · desborde 632px
+ * ```
+ *
+ * La diferencia estructural: el `<section>` del `z-modal` del DS **no declara ancho** —es un ítem de
+ * grilla que se mide por su contenido— así que el marco iguala al contenido en cualquier viewport.
+ * `ModalZ` hardcodea un `vw` fijo, que no puede coincidir con el `min(1080px, 94vw)` del contenido
+ * salvo por casualidad. Elegir un `tamanio` más grande hace el marco *menos* equivocado, no correcto.
+ *
+ * ⚠ Y el desborde **no se ve como scroll**: `.modal-window` tiene `padding: 2rem` y no declara
+ * `overflow`, así que el hijo se escapa por la derecha sin que `scrollWidth` lo registre. Un chequeo
+ * anterior daba `desborda: false` por eso y dio el ancho por bueno.
+ *
+ * Lo que iguala los dos frontends es una regla en `shared.css` que restituye el comportamiento del DS
+ * solo acá (ver el bloque `⚠⚠ El marco de ModalZ se mide por su CONTENIDO` al final de la hoja):
+ *
+ * ```css
+ * .modal-window:has(> .grid .preview-modal) { width: max-content; max-width: 90vw; }
+ * .modal-window > .grid .preview-modal     { width: min(1080px, 90vw - 4rem); }
+ * ```
+ *
+ * ⚠ Son **dos** reglas y las dos hacen falta; el `max-content` solo no alcanza. En viewports chicos el
+ * `94vw` que `.preview-modal` pide en su regla base no deja lugar para los `4rem` de padding del marco,
+ * así que el contenido tiene que ceder esos `4rem` contra el MISMO `90vw` que topea el marco. Con
+ * `94vw - 4rem` el padding derecho se comprimía a 0 sin desbordar —invisible para un chequeo de
+ * desborde—; el detalle medido está en el bloque de `shared.css`.
+ *
+ * Verificado en Chrome sobre el `shared.css` real: a 1600px marco 1144 / contenido 1080 (el número de
+ * React) · a 800px marco 720 / contenido 656, en los dos con 32px de padding a cada lado. El
+ * `tamanio="l"` de la plantilla **se queda igual, como piso**: si esa regla no aplicara —por un cambio
+ * de plantilla del vendor— el modal cae en 60vw en vez de en los 30vw del default.
+ *
+ * ⚠ Deuda medida, no descubierta a medias: `expediente-completo-modal.html` y `detalle-caso-modal.html`
+ * tienen el **mismo** defecto (usan `tamanio="l"` con `.modal-wide`, que pide el mismo
+ * `min(1080px, 94vw)`). La regla va acotada a `.preview-modal` por decisión de alcance, no porque esos
+ * dos casos estén sanos.
+ *
+ * Va con dos tests, y con la aclaración de qué cubre cada uno: uno asevera la **clase** que termina en
+ * el DOM (no el atributo — el modo de falla era justamente que el atributo faltaba acá y estaba en los
+ * otros ocho sitios sin que nada se pusiera rojo), y otro asevera la **estructura**
+ * `.modal-window > .grid` de la que depende el `:has()`, que es la que rompería en silencio si el
+ * vendor cambia su plantilla. El `max-content` en sí **jsdom no lo puede verificar** (no aplica CSS de
+ * librería ni resuelve layout): eso se verificó con sonda en navegador.
  */
 @Component({
   selector: 'app-preview-modal',
   standalone: true,
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
-    <lib-modal-z
-      [open]="abierto()"
-      [style.--z-modal--padding]="'0'"
-      [style.--z-modal--backdrop]="STR_BACKDROP"
-      (close)="cerrar.emit()"
-    >
+    <!-- tamanio="l" (60vw) NO es decorativo ni inerte, pero tampoco es lo que arregla el ancho: es el
+         PISO. Quien iguala el marco al contenido, como en React, son las DOS reglas de shared.css:
+         .modal-window:has(> .grid .preview-modal){width:max-content} y la que acota el contenido a
+         min(1080px, 90vw - 4rem) para dejarle lugar al padding del marco. Sin ellas el modal cae en
+         60vw (y sin este atributo, en los 30vw del default). Ver el doble aviso del componente. -->
+    <lib-modal-z [open]="abierto()" tamanio="l" (close)="cerrar.emit()">
       <!-- Ver el doble aviso del componente: el id va como atributo ESTATICO y este template no
            puede quedar dentro de un @if, porque ModalZ lee los slots una sola vez. -->
       <ng-template libZTemplate id="content">
@@ -185,15 +254,6 @@ export interface DocumentoVistaPrevia {
   imports: [PdfViewerComponent, ZrIcon, ZrModal, ZrTemplate],
 })
 export class PreviewModalComponent {
-  /**
-   * El backdrop más transparente de React (`--z-modal--backdrop` en el `style` de su `ZrModal`).
-   *
-   * Va como constante y no inline en la plantilla porque un `color-mix(...)` con comas dentro de un
-   * binding de plantilla se lee peor y hay que escaparlo.
-   */
-  protected readonly STR_BACKDROP =
-    'color-mix(in srgb, var(--z-modal-backdrop) 55%, transparent)';
-
   private readonly objSanitizador = inject(DomSanitizer);
 
   public readonly abierto = input<boolean>(false);

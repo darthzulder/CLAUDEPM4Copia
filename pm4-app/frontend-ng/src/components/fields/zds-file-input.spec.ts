@@ -4,7 +4,7 @@ import { TestBed, type ComponentFixture } from '@angular/core/testing';
 import { ZaFileInput } from '@zurich/angular-components';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { FileRegistryService } from '../../core/file-registry.service';
-import { ZdsFileInput } from './zds-file-input';
+import { STR_REGLA_BORRADO, ZdsFileInput } from './zds-file-input';
 
 /**
  * El wrapper con más lógica propia de toda la fachada, y por lo tanto el que más puede romperse en
@@ -372,5 +372,91 @@ describe('ZdsFileInput', () => {
     await drenarAsincronia(objFixture, () => objRegistro.obtener('qd_strSoporte') !== undefined);
 
     expect(objRegistro.obtener('qd_strSoporte')?.name).toBe('CEDULA.PDF');
+  });
+
+  /**
+   * Workaround del botón de eliminar adjunto inerte. Ver el bloque "DEFECTO DEL DS" de la cabecera de
+   * `zds-file-input.ts`, y [`guarda-borrado-adjunto.spec.ts`](./guarda-borrado-adjunto.spec.ts) para la
+   * guarda que fuerza a borrar todo esto cuando Zurich lo corrija.
+   *
+   * ── ⚠ La mecánica de inyección es INOBSERVABLE en jsdom, y está medido ────────────────────────
+   * Se intentó aseverar la adopción de la hoja y no se puede. **Sondeado en este runner**:
+   *
+   * ```
+   * typeof CSSStyleSheet                        → "function"   (existe, pero es un stub)
+   * 'replaceSync' in CSSStyleSheet.prototype    → false
+   * getOwnPropertyNames(CSSStyleSheet.prototype)→ parentStyleSheet,constructor,insertRule,deleteRule,toString
+   * shadowRoot.adoptedStyleSheets               → undefined     ('adoptedStyleSheets' in sr → false)
+   * ```
+   *
+   * O sea que la API entera que usa `revivirBotonDeBorrado()` no existe acá: no hay `replaceSync` para
+   * construir la hoja ni `adoptedStyleSheets` donde adoptarla. Falsear un `ShadowRoot` con un objeto
+   * plano tampoco sirve —jsdom **sí** hace el upgrade de los custom elements, así que el
+   * `connectedCallback` real de Lit pisa el doble con su propio `attachShadow` y después explota con
+   * `renderRoot.appendChild is not a function`—, y un doble que sobreviviera estaría aseverando sobre
+   * una implementación inventada por el test, no sobre la del navegador.
+   *
+   * Así que **no se finge cobertura**. Lo que estos casos aseveran es lo que sí es real y verificable
+   * acá: que en un entorno sin la API el workaround **se degrada a no-op sin tirar** (que es la
+   * diferencia entre "el botón sigue inerte" y "el campo entero no monta"), y que el selector inyectado
+   * es el correcto y no se ensanchó.
+   *
+   * La adopción y el comportamiento se validaron **midiendo en Chrome**: con la regla puesta,
+   * `elementFromPoint` sobre el centro del botón devuelve un nodo (antes `null`), `_fileName` pasa de
+   * `"prueba.pdf"` a `null`, el ícono vuelve de `trash:line` a `export:line` y ya no se abre el
+   * explorador de archivos. Está anotado en el docstring del método.
+   *
+   * jsdom tampoco computa `pointer-events` ni hace hit-testing, así que un test que despache `click`
+   * sobre el botón pasa en verde con el bug presente — eso es exactamente lo que dejó pasar el defecto
+   * pese a los 113 casos de este archivo, y es la misma familia de agujero que documenta la cabecera.
+   */
+  describe('workaround del botón de borrado (pointer-events del shadow DOM)', () => {
+    /** Llama al método privado. Es el punto de entrada real del `afterRenderEffect`. */
+    function revivir(in_objWrapper: unknown): void {
+      (in_objWrapper as { revivirBotonDeBorrado(): void }).revivirBotonDeBorrado();
+    }
+
+    function wrapper(): ZdsFileInput {
+      return objFixture.debugElement.query(
+        (in_objNodo) => in_objNodo.componentInstance instanceof ZdsFileInput,
+      ).componentInstance as ZdsFileInput;
+    }
+
+    it('sin la API de adoptedStyleSheets se degrada a no-op, en vez de tirar', () => {
+      // El caso real de este runner (ver el sondeo de la cabecera) y de cualquier navegador embebido
+      // viejo de PM4. La consecuencia aceptada es que el botón queda inerte —el comportamiento de hoy—;
+      // la inaceptable sería tirar y romper el montaje del campo entero por un estilo.
+      expect(() => revivir(wrapper())).not.toThrow();
+    });
+
+    it('tampoco tira cuando el z-file-input todavía no existe en el DOM', () => {
+      // El primer pasaje de render: el `z-file-input` lo pinta el template de `za-file-input`, así que
+      // el `querySelector` puede volver `null`. El efecto reintenta en el pasaje siguiente.
+      objFixture.nativeElement.querySelector('za-file-input')?.remove();
+
+      expect(objFixture.nativeElement.querySelector('za-file-input z-file-input')).toBeNull();
+      expect(() => revivir(wrapper())).not.toThrow();
+    });
+
+    it('llamarlo muchas veces sigue siendo inofensivo (el efecto corre en cada pasaje)', () => {
+      // La idempotencia real —una sola hoja adoptada— no es observable acá; lo que sí se puede aseverar
+      // es que la repetición no acumula errores. La guarda del leak es la marca en el shadow root, y su
+      // verificación fue en navegador.
+      expect(() => {
+        revivir(wrapper());
+        revivir(wrapper());
+        revivir(wrapper());
+      }).not.toThrow();
+    });
+
+    it('la regla inyectada apunta al botón de acción y NO al link del nombre', () => {
+      // `config="link"` es el nombre del archivo: su `pointer-events:none` es deliberado del DS (al
+      // hacerle clic abre el blob en otra pestaña). Este caso existe para que un ensanchamiento del
+      // selector —"total, revivo todos los z-button"— se ponga rojo acá y no en producción. La guarda
+      // de `guarda-borrado-adjunto.spec.ts` asevera lo mismo desde el otro lado.
+      expect(STR_REGLA_BORRADO).toContain('z-button[config="secondary"]');
+      expect(STR_REGLA_BORRADO).toContain('pointer-events:auto');
+      expect(STR_REGLA_BORRADO).not.toContain('link');
+    });
   });
 });
