@@ -227,13 +227,21 @@
          el ancho es cosa del componente y no de nuestra hoja, y es lo que hacen las otras modales del
          proyecto.
 
-         ⚠ ago-2026 · este comentario decía que `tamanio` gobernaba el ancho. **No es cierto, medido**:
-         no existe ningún `tamanio` en `@zurich/web-components/dist/modal.js` ni en
-         `@zurich/angular-components`; llega al DOM como atributo desconocido y no hace nada. El ancho
-         real lo fija el SCSS del modal (`min-width:20vw; max-width:calc(100vw - var(--zs-100))`) más el
-         contenido. Se deja puesto porque quitarlo no cambia nada y está en 8 sitios vivos; lo que NO
-         hay que hacer es apoyarse en él para dimensionar algo. El caso donde esto sí importó y cómo se
-         corrigió está en `components/preview-modal.ts`.
+         ⚠⚠ ago-2026 · acá hubo DOS notas seguidas equivocadas. La segunda decía que `tamanio` era
+         inerte porque no existe en `@zurich/web-components/dist/modal.js`. Eso es cierto y a la vez
+         irrelevante: **`ZrModal` acá no es el `z-modal` del DS**, es `ModalZ` de `@zurich-col`
+         (`zds-reexports.ts:277`), un modal escrito a mano donde `tamanio` **sí** es un `@Input()` y
+         alimenta un `[ngClass]` → `.modal-window--l{width:60vw}` / `--m{50vw}` / `--s{40vw}` /
+         `--xs{30vw}`, **con default `xs`**. O sea que `tamanio="l"` es lo que hace ancha esta modal y
+         quitarlo la dejaría en 30vw. NO tocarlo. La medición completa (y la vista previa que salía a
+         30vw justamente por no tenerlo) está en `components/preview-modal.ts`.
+
+         ⚠ Y por qué esta modal SÍ está sana con solo el `tamanio`, a diferencia de la vista previa:
+         acá el contenido **no tiene ancho propio** (se dejó de usar `.modal-wide`, ver arriba), así que
+         llena el marco de 60vw y no hay nada que desborde. El problema medido aparece cuando el
+         contenido pide su propio ancho —`min(1080px, 94vw)`— contra un marco de `vw` fijo: le pasa a
+         `expediente-completo-modal.html` y a `detalle-caso-modal.html`, que sí envuelven `.modal-wide`.
+         Esta modal no está en ese grupo.
 
          El `(close)` es obligatorio, no opcional: `ModalZ.change()` escribe `this.open = false` sobre
          su propio input, así que sin bajar la bandera de la pantalla el segundo `abrirLog()` no

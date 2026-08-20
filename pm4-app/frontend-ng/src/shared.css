@@ -2021,3 +2021,89 @@ z-table :is(th, td)[config*="right"] {
   right: calc(-1 * var(--zs-50));
   line-height: 0;
 }
+
+/* ── ⚠⚠ El marco de `ModalZ` se mide por su CONTENIDO en la vista previa ───────────────────────────
+   Medido en navegador (no en jsdom, que no hace layout), a 1600x900:
+
+     React, `z-modal` del DS  → marco 1080px · contenido 1080px · desborde 0
+     Angular, `ModalZ` `l`    → marco  960px · contenido 1080px · desborde 152px
+     Angular, `ModalZ` sin él → marco  480px · contenido 1080px · desborde 632px
+
+   La causa NO es `.preview-modal` —es idéntico byte a byte entre los dos frontends— sino que los dos
+   modales dimensionan al revés. El `<section>` del `z-modal` del DS **no declara ancho**: es un ítem
+   de grilla que se mide por su contenido, así que el marco iguala al contenido siempre. `ModalZ`, en
+   cambio, hardcodea `width: {60,50,40,30}vw` según su input `tamanio` (default `xs`), un ancho fijo
+   que no puede coincidir con el `min(1080px, 94vw)` del contenido salvo por casualidad del viewport.
+
+   Por eso `tamanio="l"` es necesario pero no suficiente: llevó el marco de 480 a 960px, que es casi
+   toda la mejora visible, pero deja el contenido saliéndose 152px. Y el desborde no se ve como scroll
+   —`.modal-window` tiene `padding: 2rem` y no declara `overflow`, así que el hijo se escapa por la
+   derecha sin que `scrollWidth` lo registre—: es exactamente el modo de falla que hizo pasar por
+   bueno un chequeo anterior.
+
+   Este `:has()` restituye el comportamiento del DS solo donde hace falta: `width: max-content` mide
+   el marco por su contenido, y `max-width: 90vw` conserva el techo que `ModalZ` ya tenía (no lo
+   inventa esta regla). Se deja el `tamanio="l"` en el componente como piso: si esta regla no
+   aplicara, el modal cae en 60vw y no en los 30vw del default.
+
+   ⚠ Va acotado a `.preview-modal` **a propósito**, y eso deja dos casos vivos con el mismo defecto
+   medido: `expediente-completo-modal.html` y `detalle-caso-modal.html` usan `tamanio="l"` con
+   `.modal-wide`, que pide el mismo `min(1080px, 94vw)` — mismo desborde de 152px. No se los incluye
+   acá porque ampliar el alcance era una decisión del usuario, no una consecuencia técnica; queda
+   anotado como deuda medida, no como algo pendiente de descubrir.
+
+   El selector sigue la plantilla REAL de `ModalZ` (`.modal-window > .grid.overflow_content > .col >
+   contenido`), así que el `.grid` intermedio no es opcional: sin él el `:has()` no matchea.
+
+   ⚠⚠ Pero el `max-content` solo NO alcanza, y esto costó dos intentos medidos: hay que tocar también
+   el ancho del CONTENIDO, porque los topes del marco y del contenido se pisan. `.preview-modal` pide
+   `min(1080px, 94vw)` en su regla base —la que comparte byte a byte con React, más arriba en la hoja;
+   el `90vw` de acá abajo la pisa SOLO dentro de este modal—, así que sin ese override, por debajo de
+   **~1149px de viewport** (donde `1080px` deja de ser el
+   mínimo y `94vw` toma el control) el contenido reclama `94vw` — más de lo que el marco puede darle,
+   porque el marco necesita además sus `4rem` de padding. Medido a 800px de viewport, probando todos
+   los techos posibles SOBRE EL MARCO:
+
+   ```
+   max-width del marco  marco  contenido  desborda contenido  entra en pantalla
+   90vw (el de ModalZ)   720      752           +64px               sí
+   94vw                  752      752           +32px               sí
+   calc(94vw + 4rem)     816      752           −32px               NO (816 > 800)
+   none                  816      752           −32px               NO
+   ```
+
+   O sea que **ningún techo del marco satisface las dos cosas a la vez**: el contenido es un `width`
+   duro que no se encoge, cualquier marco menor que contenido+64 lo desborda, y contenido+64 con el
+   contenido en `94vw` ya se sale de la pantalla. El conflicto real es que el `94vw` de `.preview-modal`
+   no deja lugar para el padding del marco.
+
+   Por eso lo que se acota es el **contenido dentro de este modal**: `min(1080px, 90vw - 4rem)`. Los
+   1080px —el número que iguala a React— quedan intactos en cualquier pantalla normal, y en las chicas
+   el contenido cede los `4rem` que el marco necesita en vez de pelearlos. Con eso el marco vuelve a
+   poder medirse por su contenido y el `90vw` original de `ModalZ` alcanza como techo, sin inventar uno.
+   Los dos topes salen del MISMO `90vw`, y es lo que hace que el cruce de ~1149px deje de ser un salto.
+
+   Verificado en Chrome sobre este archivo: a 1600px marco 1144 / contenido 1080 (el número de React) ·
+   a 800px marco 720 / contenido 656. En los dos el padding queda **32px de cada lado** y el marco entra
+   en pantalla. Recorridos 360→2560px, el padding se mantiene simétrico en todo el rango y el contenido
+   llega a los 1080px desde 1280px de viewport.
+
+   Primer `:has()` de la hoja. El piso de `browserslist` acá es Chrome 109 / Firefox 140 / iOS 18.5, y
+   `:has()` está desde Chrome 105 / Firefox 121 / Safari 15.4 — cubierto en todos los targets. */
+.modal-window:has(> .grid .preview-modal) {
+  width: max-content;
+  max-width: 90vw;
+}
+
+/* El contenido cede los `4rem` del padding del marco. Ver el bloque de arriba: sin esto, por debajo de
+   ~1149px de viewport el `94vw` del contenido no deja lugar para el padding y vuelve a desbordar.
+
+   ⚠ El resto es `90vw` y NO `94vw`, y la diferencia es medible: el techo contra el que hay que dejar
+   lugar es el del MARCO (`max-width: 90vw`, arriba), no el del viewport. Con `94vw - 4rem` a 800px el
+   contenido pedía 688px y el marco quedaba clavado en su tope de 720 = 688 + 32, así que el `padding`
+   derecho se comprimía a **0** mientras el izquierdo conservaba sus 32px: la previa tocaba el borde
+   blanco del marco. No desbordaba —`desborde: 0`— y por eso el chequeo del desborde no lo veía; lo
+   delató medir los dos paddings por separado. */
+.modal-window > .grid .preview-modal {
+  width: min(1080px, 90vw - 4rem);
+}
