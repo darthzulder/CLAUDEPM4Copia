@@ -96,14 +96,14 @@
     "semantic_hash": ""
   },
   "pm4-app/frontend/src/App.smoke.test.tsx": {
-    "mtime": 1787162587.223644,
-    "seen": 1787169478.2107568,
+    "mtime": 1787172611.1062224,
+    "seen": 1787182814.4207401,
     "ast_hash": "19ef288b7748011c2a6e5a492ac1f32a",
     "semantic_hash": ""
   },
   "pm4-app/frontend/src/App.tsx": {
-    "mtime": 1787162575.1717334,
-    "seen": 1787169478.2107584,
+    "mtime": 1787172611.1062224,
+    "seen": 1787182814.4207416,
     "ast_hash": "c43d09cf8e0253812bd1d72f05dd74c6",
     "semantic_hash": ""
   },
@@ -456,8 +456,8 @@
     "semantic_hash": ""
   },
   "pm4-app/frontend/src/screens/atencion-cliente/quejas-directas/COL_QD_SCR-003_Correccion_Error_Funcional/CorreccionErrorFuncional.tsx": {
-    "mtime": 1787163665.759024,
-    "seen": 1787169478.2108195,
+    "mtime": 1787172611.1089098,
+    "seen": 1787182814.4262455,
     "ast_hash": "139abb42daac6c0411fd825640b48338",
     "semantic_hash": ""
   },
@@ -612,8 +612,8 @@
     "semantic_hash": ""
   },
   "pm4-app/frontend/src/screens/atencion-cliente/quejas-directas/fields/fields.ts": {
-    "mtime": 1787163231.2382088,
-    "seen": 1787169478.2108486,
+    "mtime": 1787172611.1089098,
+    "seen": 1787182814.429791,
     "ast_hash": "560c841d93471f83d6ce97901d639684",
     "semantic_hash": ""
   },
@@ -840,8 +840,8 @@
     "semantic_hash": ""
   },
   "pm4-app/CLAUDE.md": {
-    "mtime": 1787163597.6640995,
-    "seen": 1787169478.210943,
+    "mtime": 1787172611.028689,
+    "seen": 1787182814.4398537,
     "ast_hash": "f3df152e58d01da079087602c91bfac1",
     "semantic_hash": ""
   },
@@ -894,9 +894,9 @@
     "semantic_hash": ""
   },
   "pm4-app/frontend/src/screens/atencion-cliente/quejas-directas/COL_QD_SCR-003_Correccion_Error_Funcional/DOCUMENTACION_COL_QD_SCR-003_Correccion_Error_Funcional.md": {
-    "mtime": 1787163682.4417117,
-    "seen": 1787169478.211027,
-    "ast_hash": "0bb4a418fb6eeb4193924eda9e9ab5ac",
+    "mtime": 1787172611.1089098,
+    "seen": 1787182814.4456537,
+    "ast_hash": "8c7309f12e1e06518c3a4606ebfff83b",
     "semantic_hash": ""
   },
   "pm4-app/frontend/src/screens/atencion-cliente/quejas-directas/COL_QD_SCR-0051_Detalle_Reasignacion_Respuesta/DOCUMENTACION_COL_QD_SCR-0051_Detalle_Reasignacion_Respuesta.md": {
@@ -930,8 +930,8 @@
     "semantic_hash": ""
   },
   "pm4-app/frontend/src/screens/atencion-cliente/quejas-directas/fields/MAPEO_qd_old_new.md": {
-    "mtime": 1787163382.7496207,
-    "seen": 1787169478.2110393,
+    "mtime": 1787172611.1089098,
+    "seen": 1787182814.4462695,
     "ast_hash": "f4ac5b7068820931dc06e89c0f7533df",
     "semantic_hash": ""
   },
@@ -942,44 +942,44 @@
     "semantic_hash": ""
   },
   "pm4-app/insumos/Otras Solicitudes/Anexo02_Index/README.md": {
-    "mtime": 1787171181.7875414,
-    "seen": 1787171423.8734012,
+    "mtime": 1787172611.1089098,
+    "seen": 1787182814.446377,
     "ast_hash": "e4b94259348f14b154280912dbdd87d8",
     "semantic_hash": ""
   },
   "pm4-app/insumos/Otras Solicitudes/Anexo02_Index/masters/01_Pantallas.md": {
-    "mtime": 1787171181.7904925,
-    "seen": 1787171423.8734047,
+    "mtime": 1787172611.1199327,
+    "seen": 1787182814.4463785,
     "ast_hash": "e8291c5a5a8eb3d274ca3a90a20f9062",
     "semantic_hash": ""
   },
   "pm4-app/insumos/Otras Solicitudes/Anexo02_Index/masters/02_Secciones.md": {
-    "mtime": 1787171181.7939978,
-    "seen": 1787171423.8734064,
+    "mtime": 1787172611.1230445,
+    "seen": 1787182814.4463797,
     "ast_hash": "533f1e8d2f18711bd0497e92c4b08518",
     "semantic_hash": ""
   },
   "pm4-app/insumos/Otras Solicitudes/Anexo02_Index/masters/03_Campos.md": {
-    "mtime": 1787171181.7964284,
-    "seen": 1787171423.8734078,
+    "mtime": 1787172611.125324,
+    "seen": 1787182814.446381,
     "ast_hash": "bff6c62b06a84b7a3cde4cbc13919e49",
     "semantic_hash": ""
   },
   "pm4-app/insumos/Otras Solicitudes/Anexo02_Index/masters/04_Acciones.md": {
-    "mtime": 1787171181.8017197,
-    "seen": 1787171423.8734095,
+    "mtime": 1787172611.1274881,
+    "seen": 1787182814.446382,
     "ast_hash": "bb7743e40bc9ee7391100b5486874a9e",
     "semantic_hash": ""
   },
   "pm4-app/insumos/Otras Solicitudes/Anexo02_Index/masters/05_Reglas.md": {
-    "mtime": 1787171181.805352,
-    "seen": 1787171423.8734114,
+    "mtime": 1787172611.129503,
+    "seen": 1787182814.4463835,
     "ast_hash": "5527e08a6fed7b62dea848c8650fd26c",
     "semantic_hash": ""
   },
   "pm4-app/insumos/Otras Solicitudes/Anexo02_Index/masters/06_Mensajes.md": {
-    "mtime": 1787171181.8081052,
-    "seen": 1787171423.873413,
+    "mtime": 1787172611.129503,
+    "seen": 1787182814.4463844,
     "ast_hash": "e565841721372fce3ed2c2756ad349aa",
     "semantic_hash": ""
   },
@@ -996,8 +996,8 @@
     "semantic_hash": ""
   },
   "pm4-app/insumos/Otras Solicitudes/Anexo02_Index/masters/10_Trazabilidad_BPMN.md": {
-    "mtime": 1787171181.8113594,
-    "seen": 1787171423.8737123,
+    "mtime": 1787172611.129503,
+    "seen": 1787182814.4466043,
     "ast_hash": "ff5fcf3c6e16c1643d890392b7fc211d",
     "semantic_hash": ""
   },
@@ -1032,14 +1032,14 @@
     "semantic_hash": ""
   },
   "pm4-app/insumos/Otras Solicitudes/Anexo02_Index/screens/SCR-010.md": {
-    "mtime": 1787171181.814371,
-    "seen": 1787171423.874345,
+    "mtime": 1787172611.129503,
+    "seen": 1787182814.447548,
     "ast_hash": "2167ca4bfb9bea98760dce3f9672bb07",
     "semantic_hash": ""
   },
   "pm4-app/insumos/Otras Solicitudes/Anexo02_Index/screens/SCR-012.md": {
-    "mtime": 1787171181.8173676,
-    "seen": 1787171423.8743465,
+    "mtime": 1787172611.129503,
+    "seen": 1787182814.4475505,
     "ast_hash": "7750f4575757ff844b9a1a0fd22d81db",
     "semantic_hash": ""
   },
@@ -2166,14 +2166,14 @@
     "semantic_hash": ""
   },
   "pm4-app/frontend-ng/src/app/pantallas.spec.ts": {
-    "mtime": 1787162533.0278535,
-    "seen": 1787169478.2105956,
+    "mtime": 1787172611.039564,
+    "seen": 1787182814.4056175,
     "ast_hash": "6ee8ded46d7d509dee1d58b7de8d8960",
     "semantic_hash": ""
   },
   "pm4-app/frontend-ng/src/app/pantallas.ts": {
-    "mtime": 1787162509.0437977,
-    "seen": 1787169478.2105966,
+    "mtime": 1787172611.0401406,
+    "seen": 1787182814.4056215,
     "ast_hash": "d75f98877c6d78a15e51333322768399",
     "semantic_hash": ""
   },
@@ -2232,9 +2232,9 @@
     "semantic_hash": ""
   },
   "pm4-app/frontend-ng/src/components/fields/campo-base.ts": {
-    "mtime": 1787163272.5359986,
-    "seen": 1787169478.2106059,
-    "ast_hash": "4e39df2c21016a847b31a127a4a6af7f",
+    "mtime": 1787182516.1555426,
+    "seen": 1787182814.406945,
+    "ast_hash": "1eb49f5cace84fb6564066ba1b407c8d",
     "semantic_hash": ""
   },
   "pm4-app/frontend-ng/src/components/fields/campo-za-base.ts": {
@@ -2292,8 +2292,8 @@
     "semantic_hash": ""
   },
   "pm4-app/frontend-ng/src/components/fields/paridad-react.spec.ts": {
-    "mtime": 1787162701.242468,
-    "seen": 1787169478.2106152,
+    "mtime": 1787172611.0401406,
+    "seen": 1787182814.407873,
     "ast_hash": "d0462d11934be27cc6a5e30f32011d3d",
     "semantic_hash": ""
   },
@@ -2310,9 +2310,9 @@
     "semantic_hash": ""
   },
   "pm4-app/frontend-ng/src/components/fields/zds-checkbox-field.ts": {
-    "mtime": 1787160705.008588,
-    "seen": 1787169478.210618,
-    "ast_hash": "b95e9c358eaf2f1da56e71b0164f06ae",
+    "mtime": 1787182318.933029,
+    "seen": 1787182814.4080698,
+    "ast_hash": "b312090899d434a4571aa529cde972bd",
     "semantic_hash": ""
   },
   "pm4-app/frontend-ng/src/components/fields/zds-date.spec.ts": {
@@ -2322,9 +2322,9 @@
     "semantic_hash": ""
   },
   "pm4-app/frontend-ng/src/components/fields/zds-date.ts": {
-    "mtime": 1787160705.008588,
-    "seen": 1787169478.21062,
-    "ast_hash": "c9968a5527d7e85b66525c63e212d6a4",
+    "mtime": 1787182293.3309734,
+    "seen": 1787182814.4081666,
+    "ast_hash": "158a9c6235bd6f937e62dfa481b2af06",
     "semantic_hash": ""
   },
   "pm4-app/frontend-ng/src/components/fields/zds-file-input.spec.ts": {
@@ -2346,9 +2346,9 @@
     "semantic_hash": ""
   },
   "pm4-app/frontend-ng/src/components/fields/zds-input.ts": {
-    "mtime": 1787160705.0242503,
-    "seen": 1787169478.210624,
-    "ast_hash": "7ea32706c5575e8cd14a7bee3834fb47",
+    "mtime": 1787182285.37206,
+    "seen": 1787182814.408455,
+    "ast_hash": "2291edef044d145d6d754b500021b9d5",
     "semantic_hash": ""
   },
   "pm4-app/frontend-ng/src/components/fields/zds-locale.spec.ts": {
@@ -2382,8 +2382,8 @@
     "semantic_hash": ""
   },
   "pm4-app/frontend-ng/src/components/fields/zds-required.spec.ts": {
-    "mtime": 1787163289.4412115,
-    "seen": 1787169478.2106295,
+    "mtime": 1787172611.0401406,
+    "seen": 1787182814.4089313,
     "ast_hash": "789aa2b8bf7fc1b840080ac973bf3e11",
     "semantic_hash": ""
   },
@@ -2394,9 +2394,9 @@
     "semantic_hash": ""
   },
   "pm4-app/frontend-ng/src/components/fields/zds-select.ts": {
-    "mtime": 1787160705.0409293,
-    "seen": 1787169478.2106314,
-    "ast_hash": "7ad6a4074eb21358ce79045f844766bc",
+    "mtime": 1787182250.4393015,
+    "seen": 1787182814.4090307,
+    "ast_hash": "ad883f8a9e6119e25b8c92aa8e5b8a9f",
     "semantic_hash": ""
   },
   "pm4-app/frontend-ng/src/components/fields/zds-status-badge.spec.ts": {
@@ -2418,9 +2418,9 @@
     "semantic_hash": ""
   },
   "pm4-app/frontend-ng/src/components/fields/zds-textarea.ts": {
-    "mtime": 1787160705.0577085,
-    "seen": 1787169478.2106352,
-    "ast_hash": "3ea32d2d444db4341cd1f18b4f5b0380",
+    "mtime": 1787182302.1111639,
+    "seen": 1787182814.4093506,
+    "ast_hash": "c9d870f45a4e712a4f7253888fffe088",
     "semantic_hash": ""
   },
   "pm4-app/frontend-ng/src/components/form-section.spec.ts": {
@@ -2460,14 +2460,14 @@
     "semantic_hash": ""
   },
   "pm4-app/frontend-ng/src/components/preview-modal.spec.ts": {
-    "mtime": 1787165784.5480337,
-    "seen": 1787169478.2106416,
+    "mtime": 1787172611.0401406,
+    "seen": 1787182814.4099317,
     "ast_hash": "84a9e14fae02bb54ef138029765761aa",
     "semantic_hash": ""
   },
   "pm4-app/frontend-ng/src/components/preview-modal.ts": {
-    "mtime": 1787165873.456042,
-    "seen": 1787169478.2106423,
+    "mtime": 1787172611.0401406,
+    "seen": 1787182814.409933,
     "ast_hash": "e5573f8d31cdbeae2c11dc18b3b46155",
     "semantic_hash": ""
   },
@@ -2568,8 +2568,8 @@
     "semantic_hash": ""
   },
   "pm4-app/frontend-ng/src/core/catalogos.service.ts": {
-    "mtime": 1787163269.6585646,
-    "seen": 1787169478.2106583,
+    "mtime": 1787172611.0401406,
+    "seen": 1787182814.4118419,
     "ast_hash": "e14b0e6a6b485eab802a1b282f9bc951",
     "semantic_hash": ""
   },
@@ -2760,14 +2760,14 @@
     "semantic_hash": ""
   },
   "pm4-app/frontend-ng/src/core/sincronizar-desc.spec.ts": {
-    "mtime": 1787161563.1232672,
-    "seen": 1787169478.2106886,
+    "mtime": 1787172611.0548315,
+    "seen": 1787182814.414912,
     "ast_hash": "0b10d91aa8634592aa39b100a5b1f028",
     "semantic_hash": ""
   },
   "pm4-app/frontend-ng/src/core/sincronizar-desc.ts": {
-    "mtime": 1787161713.563217,
-    "seen": 1787169478.2106895,
+    "mtime": 1787172611.0562513,
+    "seen": 1787182814.4149132,
     "ast_hash": "aee9425f04b01de76bf4fb1cd6555fcc",
     "semantic_hash": ""
   },
@@ -2832,14 +2832,14 @@
     "semantic_hash": ""
   },
   "pm4-app/frontend-ng/src/screens/atencion-cliente/quejas-directas/COL_QD_SCR-000_CrearRecibirQueja/crear-recibir-queja.spec.ts": {
-    "mtime": 1787170014.343095,
-    "seen": 1787170577.0288372,
+    "mtime": 1787172611.0611079,
+    "seen": 1787182814.415961,
     "ast_hash": "fde7b87919713a548c3e6b0fd6e9319a",
     "semantic_hash": ""
   },
   "pm4-app/frontend-ng/src/screens/atencion-cliente/quejas-directas/COL_QD_SCR-000_CrearRecibirQueja/crear-recibir-queja.ts": {
-    "mtime": 1787170014.3485665,
-    "seen": 1787170577.0288403,
+    "mtime": 1787172611.0611079,
+    "seen": 1787182814.415963,
     "ast_hash": "2dd6c390f2365caf822249aba00437f8",
     "semantic_hash": ""
   },
@@ -2886,8 +2886,8 @@
     "semantic_hash": ""
   },
   "pm4-app/frontend-ng/src/screens/atencion-cliente/quejas-directas/COL_QD_SCR-000_CrearRecibirQueja/seccion-detalle-queja.ts": {
-    "mtime": 1787170014.3485665,
-    "seen": 1787170577.0296314,
+    "mtime": 1787172611.0611079,
+    "seen": 1787182814.4166863,
     "ast_hash": "239548672a6783159e65984ec9c603e7",
     "semantic_hash": ""
   },
@@ -2904,14 +2904,14 @@
     "semantic_hash": ""
   },
   "pm4-app/frontend-ng/src/screens/atencion-cliente/quejas-directas/COL_QD_SCR-003_Correccion_Error_Funcional/seccion-campos-payload.ts": {
-    "mtime": 1787160705.327001,
-    "seen": 1787169478.2107112,
-    "ast_hash": "8a2f2892935a3164706a44b3ea1606a0",
+    "mtime": 1787182613.3749247,
+    "seen": 1787182814.416896,
+    "ast_hash": "6cbf4cb3f4a686bfee0aebbd525b5706",
     "semantic_hash": ""
   },
   "pm4-app/frontend-ng/src/screens/atencion-cliente/quejas-directas/COL_QD_SCR-0051_Detalle_Reasignacion_Respuesta/detalle-reasignacion-respuesta.spec.ts": {
-    "mtime": 1787170058.9900773,
-    "seen": 1787170577.0299754,
+    "mtime": 1787172611.0731187,
+    "seen": 1787182814.4168983,
     "ast_hash": "a4ffd1daf8942b9a252b0c47f592feac",
     "semantic_hash": ""
   },
@@ -2928,8 +2928,8 @@
     "semantic_hash": ""
   },
   "pm4-app/frontend-ng/src/screens/atencion-cliente/quejas-directas/COL_QD_SCR-0051_Detalle_Reasignacion_Respuesta/expediente-completo-modal.ts": {
-    "mtime": 1787164516.649191,
-    "seen": 1787169478.2107153,
+    "mtime": 1787172611.0731187,
+    "seen": 1787182814.4171104,
     "ast_hash": "4ba72ab989d838ef8d6be3500c68e9d8",
     "semantic_hash": ""
   },
@@ -2946,20 +2946,20 @@
     "semantic_hash": ""
   },
   "pm4-app/frontend-ng/src/screens/atencion-cliente/quejas-directas/COL_QD_SCR-0051_Detalle_Reasignacion_Respuesta/seccion-asignacion.ts": {
-    "mtime": 1787165164.7162993,
-    "seen": 1787169478.2107182,
+    "mtime": 1787172611.0731187,
+    "seen": 1787182814.4173458,
     "ast_hash": "52510aa2f5a2b4f7c5d117499ac88ed3",
     "semantic_hash": ""
   },
   "pm4-app/frontend-ng/src/screens/atencion-cliente/quejas-directas/COL_QD_SCR-0051_Detalle_Reasignacion_Respuesta/seccion-detalle-caso.spec.ts": {
-    "mtime": 1787167388.3546429,
-    "seen": 1787169478.2107193,
+    "mtime": 1787172611.0731187,
+    "seen": 1787182814.417347,
     "ast_hash": "16d93385f5f945da2f9768ed446d0f0c",
     "semantic_hash": ""
   },
   "pm4-app/frontend-ng/src/screens/atencion-cliente/quejas-directas/COL_QD_SCR-0051_Detalle_Reasignacion_Respuesta/seccion-detalle-caso.ts": {
-    "mtime": 1787170014.3571422,
-    "seen": 1787170577.0308528,
+    "mtime": 1787172611.0731187,
+    "seen": 1787182814.4173481,
     "ast_hash": "00bba2ea695bfe3eaf8301b8a997c9ea",
     "semantic_hash": ""
   },
@@ -2970,8 +2970,8 @@
     "semantic_hash": ""
   },
   "pm4-app/frontend-ng/src/screens/atencion-cliente/quejas-directas/COL_QD_SCR-0052_Respuesta_Area_Responsable/respuesta-area-responsable.spec.ts": {
-    "mtime": 1787164691.5293448,
-    "seen": 1787169478.210722,
+    "mtime": 1787172611.0894656,
+    "seen": 1787182814.4174564,
     "ast_hash": "150865214a15091a68f904d3be793158",
     "semantic_hash": ""
   },
@@ -3096,8 +3096,8 @@
     "semantic_hash": ""
   },
   "pm4-app/frontend-ng/src/screens/atencion-cliente/quejas-directas/fields/fields.ts": {
-    "mtime": 1787163229.7434366,
-    "seen": 1787169478.2107422,
+    "mtime": 1787172611.0894656,
+    "seen": 1787182814.4195726,
     "ast_hash": "d3c63260f0a701a1ddf13a449e3254f6",
     "semantic_hash": ""
   },
@@ -3108,8 +3108,8 @@
     "semantic_hash": ""
   },
   "pm4-app/frontend-ng/src/screens/atencion-cliente/quejas-directas/fields/matriz-motivos.service.ts": {
-    "mtime": 1787170014.3571422,
-    "seen": 1787170577.0337312,
+    "mtime": 1787172611.0894656,
+    "seen": 1787182814.4196804,
     "ast_hash": "d04f91e69d6c17c67b9cf2b031caa561",
     "semantic_hash": ""
   },
@@ -3126,8 +3126,8 @@
     "semantic_hash": ""
   },
   "pm4-app/frontend-ng/src/screens/ds-catalog/ds-catalog.ts": {
-    "mtime": 1787160705.541679,
-    "seen": 1787169478.2107468,
+    "mtime": 1787179364.6707716,
+    "seen": 1787182814.419894,
     "ast_hash": "dea59a858e291e4ec1e84166e00fcda1",
     "semantic_hash": ""
   },
@@ -3414,8 +3414,8 @@
     "semantic_hash": ""
   },
   "pm4-app/CONTEXTO_MIGRACION_ANGULAR.md": {
-    "mtime": 1787163411.1245327,
-    "seen": 1787169478.210944,
+    "mtime": 1787172611.028689,
+    "seen": 1787182814.4398556,
     "ast_hash": "c4f99304a27b78280519138168da99f7",
     "semantic_hash": ""
   },
@@ -3474,8 +3474,8 @@
     "semantic_hash": ""
   },
   "pm4-app/frontend-ng/src/screens/atencion-cliente/otras-solicitudes/COL_OS_SCR-003_Bandeja_Gestion_Linea2/DOCUMENTACION_COL_OS_SCR-003_Bandeja_Gestion_Linea2.md": {
-    "mtime": 1787163441.939245,
-    "seen": 1787169478.2109556,
+    "mtime": 1787172611.0605986,
+    "seen": 1787182814.4410088,
     "ast_hash": "4603156e53da77c9863a5b0fad357e68",
     "semantic_hash": ""
   },
@@ -3528,14 +3528,14 @@
     "semantic_hash": ""
   },
   "pm4-app/frontend-ng/src/screens/atencion-cliente/quejas-directas/COL_QD_SCR-003_Correccion_Error_Funcional/DOCUMENTACION_COL_QD_SCR-003_Correccion_Error_Funcional.md": {
-    "mtime": 1787165913.798134,
-    "seen": 1787169478.2109654,
-    "ast_hash": "d9b9224ad3c551608c06c8a89010fbbe",
+    "mtime": 1787172611.069944,
+    "seen": 1787182814.4420292,
+    "ast_hash": "813aad75b638dc30341d5974ff639542",
     "semantic_hash": ""
   },
   "pm4-app/frontend-ng/src/screens/atencion-cliente/quejas-directas/COL_QD_SCR-003_Correccion_Error_Funcional/correccion-error-funcional.html": {
-    "mtime": 1787165903.2361472,
-    "seen": 1787169478.210967,
+    "mtime": 1787172611.0731187,
+    "seen": 1787182814.4420314,
     "ast_hash": "26520653ceabc1e5bfe0225f4d3692cc",
     "semantic_hash": ""
   },
@@ -3546,8 +3546,8 @@
     "semantic_hash": ""
   },
   "pm4-app/frontend-ng/src/screens/atencion-cliente/quejas-directas/COL_QD_SCR-0051_Detalle_Reasignacion_Respuesta/DOCUMENTACION_COL_QD_SCR-0051_Detalle_Reasignacion_Respuesta.md": {
-    "mtime": 1787167723.9822786,
-    "seen": 1787169478.2109709,
+    "mtime": 1787172611.0731187,
+    "seen": 1787182814.4421823,
     "ast_hash": "b44b0a9768bd921194610157f28f703f",
     "semantic_hash": ""
   },
@@ -3582,14 +3582,14 @@
     "semantic_hash": ""
   },
   "pm4-app/frontend-ng/src/screens/atencion-cliente/quejas-directas/COL_QD_SCR-0052_Respuesta_Area_Responsable/DOCUMENTACION_COL_QD_SCR-0052_Respuesta_Area_Responsable.md": {
-    "mtime": 1787164549.8654988,
-    "seen": 1787169478.2109814,
+    "mtime": 1787172611.0890877,
+    "seen": 1787182814.442834,
     "ast_hash": "51b651ac18ac87de294632246d686626",
     "semantic_hash": ""
   },
   "pm4-app/frontend-ng/src/screens/atencion-cliente/quejas-directas/COL_QD_SCR-0052_Respuesta_Area_Responsable/respuesta-area-responsable.html": {
-    "mtime": 1787165252.3069575,
-    "seen": 1787169478.2109833,
+    "mtime": 1787172611.0894656,
+    "seen": 1787182814.442835,
     "ast_hash": "c66169191aaac3a72b832daf81853f42",
     "semantic_hash": ""
   },
@@ -3654,14 +3654,14 @@
     "semantic_hash": ""
   },
   "pm4-app/frontend-ng/src/screens/atencion-cliente/quejas-directas/fields/MAPEO_qd_old_new.md": {
-    "mtime": 1787163365.582119,
-    "seen": 1787169478.2110028,
+    "mtime": 1787172611.0894656,
+    "seen": 1787182814.4440837,
     "ast_hash": "14e3d0eb47dcb1aa447c772f1aad8683",
     "semantic_hash": ""
   },
   "pm4-app/frontend-ng/src/screens/ds-catalog/ds-catalog.html": {
-    "mtime": 1787160705.5399268,
-    "seen": 1787169478.2110045,
+    "mtime": 1787179364.6707716,
+    "seen": 1787182814.444085,
     "ast_hash": "38e84f7cfd735b0a3926613637a63633",
     "semantic_hash": ""
   },
@@ -3714,9 +3714,15 @@
     "semantic_hash": ""
   },
   "pm4-app/insumos/Otras Solicitudes/Anexo02_Mockups_TOBE_OtrasSolicitudes_v3_2.html": {
-    "mtime": 1787171181.8193655,
-    "seen": 1787171423.8744564,
+    "mtime": 1787172611.129503,
+    "seen": 1787182814.4478235,
     "ast_hash": "bc3964ef484376b679a705b326e127e2",
+    "semantic_hash": ""
+  },
+  "pm4-app/frontend-ng/src/components/fields/primer-echo-vendor.spec.ts": {
+    "mtime": 1787182455.4398978,
+    "seen": 1787182814.4079702,
+    "ast_hash": "ce989fe0314f7d2e0b913df4d4add5e4",
     "semantic_hash": ""
   }
 }

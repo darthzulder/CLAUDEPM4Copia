@@ -51,7 +51,7 @@ import { CampoBase } from './campo-base';
         [group]="grupo"
         [name]="name()"
         [label]="label()"
-        [model]="model() ?? ''"
+        [model]="genModeloParaVendor"
         (modelChange)="alCambiarModelo($event)"
         [inputType]="inputType()"
         [min]="min()"

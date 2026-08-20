@@ -41,12 +41,24 @@ import {
  * `setTimeout`, detrás de un `if (changes.model)`. O sea que **la autoridad es `model`**: cuando
  * cambia, la lib sincroniza el control sola.
  *
- * El valor llega bien igual — eso está aseverado y **no** es lo que se rompe. Lo que necesita el
- * barrido forzado es la **validez**: el validador que la lib compone lee `this.model` **del hijo**, y
- * si el binding no le llegó todavía marca `errorRequired` sobre un campo que sí tiene dato. Se corrige
- * solo dos macrotasks después, pero la pantalla lee `form.valid` mucho antes. Medido en la pantalla
- * del gate 2 — la traza está en el comentario de `writeValue`, y el guardián en
- * [precarga-patchvalue.spec.ts](./precarga-patchvalue.spec.ts).
+ * Lo que necesita el barrido forzado es la **validez**: el validador que la lib compone lee
+ * `this.model` **del hijo**, y si el binding no le llegó todavía marca `errorRequired` sobre un campo
+ * que sí tiene dato. Se corrige solo dos macrotasks después, pero la pantalla lee `form.valid` mucho
+ * antes. Medido en la pantalla del gate 2 — la traza está en el comentario de `writeValue`, y el
+ * guardián en [precarga-patchvalue.spec.ts](./precarga-patchvalue.spec.ts).
+ *
+ * ── ⚠ Corrección: esa autoridad SÍ destruye valor, en su primera aplicación ────────────────
+ * Este bloque afirmaba que "el valor llega bien igual — eso está aseverado y **no** es lo que se
+ * rompe". **Es falso en el caso precargado**, y la afirmación sobrevivió porque el escenario que la
+ * desmiente no se puede reproducir bajo jsdom. Medido en el navegador sobre la tarea 180901 de la
+ * SCR-0051: el primer echo de `updateControl()` escribe el `model` **inicial** (`''`) sobre el valor
+ * que `precargar()` acababa de poner, y de ahí salían cuatro selects en blanco.
+ *
+ * Lo neutraliza el getter `genModeloParaVendor`, que es lo que los cuatro wrappers de texto/select
+ * pasan por `[model]` en vez de `model() ?? ''`. Ahí está el mecanismo completo, por qué la frontera
+ * va en el binding y no del lado del control, y las dos alternativas falsificadas con sonda. Lo que
+ * sigue siendo cierto de este bloque es lo de la **validez**, que es un problema distinto y con su
+ * propio guardián.
  *
  * ── Corrección: agregar un `setValue` acá NO produce una carrera (se intentó probar y no existe) ─
  * Una versión anterior de este comentario decía que un `setValue` extra en `writeValue` haría que
@@ -212,6 +224,95 @@ export abstract class CampoBase<T> implements ControlValueAccessor, OnInit {
 
   ngOnInit(): void {
     this.ngControl = this.objInjector.get(NgControl, null, { optional: true, self: true });
+  }
+
+  /**
+   * Lo que se le pasa al `lib-*-z` por `[model]`. **Nunca un vacío que el control no tenga.**
+   *
+   * Es el arreglo de "los selects con valor precargado salen en blanco", medido sobre la tarea 180901
+   * de la SCR-0051. Vive acá y no en las pantallas por lo mismo que el arreglo de catálogo tardío de
+   * [zds-select](./zds-select.ts): la condición es **universal** de esta capa y se decide sin saber
+   * nada de la pantalla.
+   *
+   * ── El mecanismo, leído del vendor y medido ──────────────────────────────────────────────────────
+   * `InputSelectZ.ngOnChanges` hace `if (changes.model) setTimeout(() => this.updateControl())`, y
+   * `updateControl()` es, literal (`fesm2022/zurich-col-lib-zurich.mjs:733`):
+   *
+   * ```js
+   * updateControl() {
+   *   if (this.group && this.group.get(this.name)) {
+   *     this.group.get(this.name)?.setValue(this.model);   // incondicional, y EMITIENDO
+   *   }
+   * }
+   * ```
+   *
+   * Tres hechos que hay que tener juntos para ver el defecto:
+   *  1. **Escribe sobre NUESTRO control.** `generateControl()` solo inventa un nombre aleatorio si el
+   *     control no existe ya en el group, y la fachada lo pre-crea con el `name` real (`qd_*`) — o sea
+   *     que el resquicio que hace viable esta capa es también el que le da al vendor la llave.
+   *     Verificado con sonda de stack: el emisor es `InputSelectZ.updateControl` con ese nombre.
+   *  2. **Angular reporta el PRIMER binding de `model` como cambio.** Así que ese `setTimeout` se
+   *     agenda al montar, sin que nadie haya cambiado nada.
+   *  3. **Ese echo escribe lo que el binding diga en ese momento.** Y el binding era `model() ?? ''`:
+   *     con `model` todavía en el `null` del constructor, le entregaba un `''` al vendor para que lo
+   *     escribiera sobre el valor que `precargar()` acababa de poner.
+   *
+   * O sea que la autoridad de `model` que documenta la cabecera de esta clase es correcta; lo que
+   * estaba mal era **alimentarla con un vacío que no era el del control**. Por eso el arreglo es el
+   * binding y no un interceptor: se corrige el dato en su origen, y el vendor sigue mandando.
+   *
+   * ── Por qué en la SCR-0051 eso vaciaba CUATRO selects y no uno ───────────────────────────────────
+   * El producto SFC se pinta con un **control satélite** (`ui-qd_strSfcProduct`, en su propio group)
+   * porque la colección 16 repite códigos. La pantalla suscribe su `valueChanges` para traducir
+   * UI → form, así que el `''` del vendor entra por esa suscripción y ejecuta
+   * `setValue(codeFromUiValue(''))` → `''` sobre el código real, más `syncProductDesc('')` sobre el
+   * `_desc`. Con el código en `''`, `strProductLabel()` sale vacío y `cllRowsForProduct()` queda en
+   * `[]`: momento, servicio y motivo se quedan sin opciones. Medido: 0/0/0 donde React daba 8/7/7.
+   *
+   * ── ⚠ Por qué NO se puede blindar del lado del control ───────────────────────────────────────────
+   * Se intentaron dos fronteras del lado receptor y **ninguna existe**, las dos falsificadas con sonda:
+   *
+   *  - **"antes del primer `writeValue`"** (un flag puesto en `writeValue`). No separa nada: la traza
+   *    de montaje es `writeValue="101" → tick0 → updateControl` — o sea que `writeValue` corre
+   *    **antes** del echo y el flag ya está en `true` cuando el echo llega.
+   *  - **"el control quedó vacío mientras `model` tiene valor"** (un `valueChanges` que repone la
+   *    discrepancia). Esa discrepancia **nunca se observa**: la traza es
+   *    `writeValue="" | vc="" model=""`, porque el pipeline del CVA sincroniza `model` **antes** de
+   *    notificar a los suscriptores del control. Cuando el suscriptor mira, ya no hay nada que ver.
+   *
+   * Las dos quedan escritas porque suenan plausibles y volverían a escribirse. La lección es que el
+   * único punto donde el valor destructivo es **distinguible** es antes de entregárselo al vendor.
+   *
+   * ── Por qué el vacío legítimo del gestor SÍ pasa ────────────────────────────────────────────────
+   * Porque cuando el gestor vacía, el DS emite `modelChange` y `alCambiarModelo` escribe el control:
+   * los dos quedan en `''`, así que `objControl.value` también está vacío y este getter devuelve el
+   * vacío sin más. La guarda solo se activa cuando el vacío es **del wrapper y no del control**, que
+   * es exactamente la firma del echo. Ignorar todos los `''` —la alternativa descartada en la
+   * SCR-003— habría hecho imposible volver al placeholder, que es una acción legítima (el prompt es
+   * elegible, ver `ZdsSelect`).
+   *
+   * ── ⚠ Lo que NO cubre el spec, y por qué no es un descuido ──────────────────────────────────────
+   * **jsdom no reproduce el echo destructivo**: ahí `writeValue` gana la carrera y el vendor escribe
+   * el valor ya sincronizado, o sea el no-op de régimen. El spec asevera el **contrato de este
+   * getter** (qué entrega según el estado de `model` y del control), que es lo que sí es determinista.
+   * El síntoma de negocio (0/0/0 → 8/7/7) es verificación de navegador — mismo límite de entorno que
+   * el otro arreglo de esta fachada. Ver [primer-echo-vendor.spec.ts](./primer-echo-vendor.spec.ts).
+   */
+  protected get genModeloParaVendor(): T | '' {
+    const genModel = this.model();
+    if (genModel !== null && genModel !== undefined && (genModel as unknown) !== '') {
+      return genModel;
+    }
+
+    // `model` está vacío. Si el control TIENE valor, este vacío no es un dato: es el `null` inicial
+    // del wrapper antes de que `writeValue` lo sembrara. Entregárselo al vendor es lo que borraba el
+    // valor precargado, así que se entrega el del control — que es la fuente de verdad.
+    const genControl = this.ngControl?.control?.value as T | null | undefined;
+    if (genControl !== null && genControl !== undefined && (genControl as unknown) !== '') {
+      return genControl;
+    }
+
+    return '';
   }
 
   /**
