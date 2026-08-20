@@ -2328,15 +2328,15 @@
     "semantic_hash": ""
   },
   "pm4-app/frontend-ng/src/components/fields/zds-file-input.spec.ts": {
-    "mtime": 1787160705.008588,
-    "seen": 1787169478.2106209,
-    "ast_hash": "cf7e7caca960c38c64148cc1b679a8eb",
+    "mtime": 1787235941.7490063,
+    "seen": 1787236210.7838092,
+    "ast_hash": "284bad765103294d4b5e91b7be68cf81",
     "semantic_hash": ""
   },
   "pm4-app/frontend-ng/src/components/fields/zds-file-input.ts": {
-    "mtime": 1787160705.008588,
-    "seen": 1787169478.2106218,
-    "ast_hash": "8faba18d910f02616f7358c3776a9e65",
+    "mtime": 1787235956.5065525,
+    "seen": 1787236210.7838113,
+    "ast_hash": "ba1acf8c0f3a745ab944dc80d9d613ae",
     "semantic_hash": ""
   },
   "pm4-app/frontend-ng/src/components/fields/zds-input.spec.ts": {
@@ -3723,6 +3723,12 @@
     "mtime": 1787184292.4285686,
     "seen": 1787186643.5495605,
     "ast_hash": "b9cdad1439ed8acfebb52ce8fef8329e",
+    "semantic_hash": ""
+  },
+  "pm4-app/frontend-ng/src/components/fields/guarda-borrado-adjunto.spec.ts": {
+    "mtime": 1787235576.7122977,
+    "seen": 1787236210.7817442,
+    "ast_hash": "67ec80a7f2e0544b7091450fd0ef8e18",
     "semantic_hash": ""
   }
 }
