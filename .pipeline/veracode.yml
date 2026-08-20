@@ -1,0 +1,176 @@
+# Proceso automatico para generar el analisis del aplicativo: fe-okta-integration-bus en Veracode
+trigger: none
+
+pr: none
+
+pool:
+  vmImage: ubuntu-latest
+
+variables:
+  buildConfiguration: 'Release'
+
+steps:
+# Paso 1: Validar estructura del código fuente
+- task: Bash@3
+  displayName: 'Validar estructura del código fuente'
+  inputs:
+    targetType: 'inline'
+    script: |
+      echo "==========================================="
+      echo "VALIDACIÓN DE CÓDIGO FUENTE"
+      echo "==========================================="
+      echo "Build.SourcesDirectory: $(Build.SourcesDirectory)"
+      echo "Working directory: $(pwd)"
+
+      PROJECT_ROOT=""
+
+      if [ -f "$(Build.SourcesDirectory)/package.json" ]; then
+        PROJECT_ROOT="$(Build.SourcesDirectory)"
+      elif [ -d "$(Build.SourcesDirectory)/fe-okta-integration-bus" ] && [ -f "$(Build.SourcesDirectory)/fe-okta-integration-bus/package.json" ]; then
+        PROJECT_ROOT="$(Build.SourcesDirectory)/fe-okta-integration-bus"
+      elif [ -f "package.json" ]; then
+        PROJECT_ROOT="$(pwd)"
+      fi
+
+      if [ -n "$PROJECT_ROOT" ] && [ -d "$PROJECT_ROOT" ]; then
+        echo "✓ Directorio del proyecto encontrado: $PROJECT_ROOT"
+        echo "##vso[task.setvariable variable=projectRoot]$PROJECT_ROOT"
+        echo ""
+        echo "=== Estructura del proyecto ==="
+        ls -la "$PROJECT_ROOT" | head -15
+        echo ""
+        echo "=== Estadísticas de código TypeScript ==="
+        TS_FILES=$(find "$PROJECT_ROOT" -name "*.ts" -o -name "*.tsx" | wc -l)
+        TSX_FILES=$(find "$PROJECT_ROOT" -name "*.tsx" -type f | wc -l)
+        echo "✓ Archivos TypeScript encontrados: $TS_FILES"
+        echo "✓ Archivos TSX encontrados: $TSX_FILES"
+        echo ""
+        echo "=== Información de package.json ==="
+        if [ -f "$PROJECT_ROOT/package.json" ]; then
+          echo "✓ package.json encontrado"
+          grep -E '"name"|"version"' "$PROJECT_ROOT/package.json" | head -2
+        fi
+        echo ""
+        echo "=== Directorios principales ==="
+        find "$PROJECT_ROOT" -maxdepth 1 -mindepth 1 -type d
+      else
+        echo "✗ ERROR: No se encontró el directorio raíz del proyecto"
+        exit 1
+      fi
+  condition: succeeded()
+
+# Paso 2: Compilación y empaque del aplicativo
+- task: NodeTool@0
+  displayName: 'Instalar Node.js'
+  inputs:
+    versionSpec: '18.x'
+  condition: succeeded()
+
+- task: Bash@3
+  displayName: 'Instalar dependencias y compilar'
+  inputs:
+    targetType: 'inline'
+    script: |
+      echo ""
+      echo "=== Compilación y empaque de fe-okta-integration-bus ==="
+      cd "$(projectRoot)"
+      
+      if [ -f "package.json" ]; then
+        echo "✓ package.json encontrado"
+        echo ""
+        echo "=== Instalando dependencias ==="
+        npm ci
+        
+        echo ""
+        echo "=== Compilando aplicativo ==="
+        npm run build
+        
+        echo ""
+        echo "=== Empaque generado ==="
+        if [ -d "dist" ]; then
+          echo "✓ Directorio dist creado exitosamente"
+          du -sh dist
+          echo "✓ Archivos generados:"
+          find dist -type f | head -10
+        else
+          echo "⚠ Directorio dist no encontrado"
+        fi
+      else
+        echo "✗ ERROR: package.json no encontrado en $(projectRoot)"
+        exit 1
+      fi
+  condition: succeeded()
+
+# Paso 3: Escaneo de seguridad con Veracode
+- task: Bash@3
+  displayName: 'Empaquetar código fuente para Veracode'
+  inputs:
+    targetType: 'inline'
+    script: |
+      echo ""
+      echo "=== Preparación de paquete para Veracode ==="
+      SCAN_PACKAGE="$(Agent.TempDirectory)/veracode_upload_$(Build.BuildId).zip"
+
+      if [ ! -d "$(projectRoot)" ]; then
+        echo "✗ ERROR: projectRoot no es válido: $(projectRoot)"
+        exit 1
+      fi
+
+      cd "$(projectRoot)"
+
+      zip -r "$SCAN_PACKAGE" . \
+        -x ".git/*" \
+        -x "node_modules/*" \
+        -x "dist/*" \
+        -x "build/*" \
+        -x ".cache/*" \
+        -x ".vite/*" \
+        -x ".turbo/*" \
+        -x "log/*" \
+        -x ".next/*" \
+        -x ".env*" \
+        -x "*.pem"
+
+      if [ -f "$SCAN_PACKAGE" ]; then
+        echo "✓ Paquete creado: $SCAN_PACKAGE"
+        echo "##vso[task.setvariable variable=veracodePackagePath]$SCAN_PACKAGE"
+      else
+        echo "✗ ERROR: No se pudo generar el paquete para Veracode"
+        exit 1
+      fi
+  condition: succeeded()
+
+- task: Veracode@3
+  displayName: 'Veracode Security Scan - Upload & Analyze'
+  inputs:
+    ConnectionDetailsSelection: 'Service Connection'
+    AnalysisService: 'okta-one'
+    veracodeAppProfile: 'LATAM_Colombia_Okta_One_fe-okta-integration-bus'
+    version: '$(Build.BuildNumber) - Build $(Build.BuildId)'
+    filepath: '$(veracodePackagePath)'
+    scanAction: 'UploadAndScan'
+    importResults: true
+    maximumWaitTime: '360'
+    failOnScanFailure: false
+  condition: succeeded()
+
+# Paso 4: Resumen del escaneo Veracode
+- task: Bash@3
+  displayName: 'Resumen de escaneo Veracode'
+  inputs:
+    targetType: 'inline'
+    script: |
+      echo ""
+      echo "=========================================="
+      echo "ESCANEO VERACODE COMPLETADO"
+      echo "=========================================="
+      echo "Aplicación: LATAM_Colombia_Okta_One_fe-okta-integration-bus"
+      echo "Tipo de scan: Source Code Analysis (Angular)"
+      echo "Build Version: $(Build.BuildNumber)"
+      echo "Build ID: $(Build.BuildId)"
+      echo ""
+      echo "✓ El análisis ha sido enviado a Veracode"
+      echo "✓ Tipo credential: HMAC (Recomendado para CI/CD)"
+      echo "✓ Revisa los resultados en: https://analysiscenter.veracode.com/auth/index.jsp#HomeAppProfile:11054:3080423::::::"
+      echo "=========================================="
+  condition: succeeded()
