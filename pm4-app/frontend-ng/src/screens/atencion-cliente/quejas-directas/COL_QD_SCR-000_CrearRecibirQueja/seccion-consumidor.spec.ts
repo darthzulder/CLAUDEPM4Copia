@@ -8,7 +8,7 @@ import { FormControl, FormGroup, Validators } from '@angular/forms';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { GLOBAL_COLLECTIONS } from '../../../../core/collections';
 import { DEFAULT_COUNTRY_CODE, QD } from '../fields/fields';
-import { SeccionConsumidor } from './seccion-consumidor';
+import { RGX_SOLO_LETRAS, SeccionConsumidor } from './seccion-consumidor';
 
 /**
  * S2 · Datos del Consumidor Financiero — **un caso por regla**, no un smoke.
@@ -51,17 +51,20 @@ const INT_COL_LGBTIQ = GLOBAL_COLLECTIONS.lgbtiq.id;
 const INT_COL_SPECIAL = GLOBAL_COLLECTIONS.specialCondition.id;
 
 /**
- * Los tres regex de la pantalla, **copiados** de `crear-recibir-queja.ts:90-96`.
+ * Dos de los tres regex de la pantalla, **copiados** de `crear-recibir-queja.ts`.
  *
  * ⚠ Se copian y no se importan porque allá son constantes de módulo privadas. La copia es deuda
  * declarada y acotada: lo que este archivo asevera es **qué mensaje sale por qué clave de error**, no
  * que el regex sea el correcto (eso lo cubre la pantalla, cuyo `llenarObligatorios()` no pasaría con
  * un regex distinto). Si divergen, los casos de patrón siguen siendo válidos: lo único que cambiaría
  * es qué string de entrada hace fallar el control, y las entradas de acá son claramente inválidas para
- * cualquier versión razonable de estos tres.
+ * cualquier versión razonable de los dos.
+ *
+ * `RGX_SOLO_LETRAS` es la excepción y **sí se importa**: desde el arreglo de la obligatoriedad por rama
+ * lo exporta `seccion-consumidor.ts`, porque su tabla `CLL_VALIDADORES_PERSONA` lo necesita. Acá se usa
+ * el de verdad, así que los cinco campos de nombre del fixture quedan idénticos a los de producción.
  */
 const RGX_EMAIL = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-const RGX_SOLO_LETRAS = /^[A-Za-zÁÉÍÓÚáéíóúÑñÜü\s]+$/;
 const RGX_CELULAR = /^\d{10}$/;
 
 /**
@@ -79,9 +82,10 @@ const RGX_CELULAR = /^\d{10}$/;
  * - `strEmail` falla por **`pattern`**, no por `Validators.email`: la pantalla usa `RGX_EMAIL`. O sea
  *   que un correo mal escrito da el mensaje de formato, no el genérico.
  *
- * ⚠ Los cinco campos de nombre **no llevan `required`**: su obligatoriedad la compone el DS desde el
- * `[obligatorio]="true"` de la plantilla, y sigue a la rama que el `@if` montó. Ver el ⚠ de esos cinco
- * campos en `crear-recibir-queja.ts`.
+ * ⚠ Los cinco campos de nombre **no llevan `required` en su declaración**, igual que en la pantalla: lo
+ * pone `alternarValidadoresPersona()` por rama, y por eso el fixture tiene que arrancar **sin** él — si
+ * se lo pusiera acá, los casos de rama pasarían por vacuidad y no verían si el efecto corre. Ver el ⚠
+ * de ese método.
  */
 function crearForm(): FormGroup {
   return new FormGroup({
@@ -557,6 +561,121 @@ describe('RUL-000-02/03 · tipo de persona derivado del tipo de documento', () =
       (objFixture.nativeElement as HTMLElement)
         .querySelector(`zds-select[name="${QD.strPersonType}"]`),
     ).toBeNull();
+  });
+});
+
+/**
+ * La obligatoriedad de los cinco nombres, que es de la rama — `alternarValidadoresPersona()`.
+ *
+ * ── Qué se asevera acá y qué NO puede aseverarse bajo jsdom ──────────────────────────────────────
+ * Los dos bugs que este método arregla nacen de un closure que el DS **compone** sobre el control real
+ * y que sobrevive al desmontaje del widget (`errorRequired` con el `model` congelado en `''`). Ese
+ * closure **no se puede reproducir en estos casos**: los custom elements de Lit no hacen upgrade bajo
+ * jsdom, así que `lib-input-text-z` nunca corre su `ngOnInit` y nunca compone nada. Fingirlo con un
+ * `setValidators` a mano probaría que nuestro `setValidators` gana contra un validador que nosotros
+ * mismos pusimos — un test tautológico.
+ *
+ * Lo que sí es aseverable, y es lo que decide los dos bugs, es **la tabla**: que la columna de la rama
+ * quede aplicada sobre el `FormGroup` y que la de la otra rama **se vaya**. Con eso, el estado final
+ * del control es el correcto sin importar qué le compuso el DS antes, que es justamente el argumento
+ * del arreglo. La prueba de que el closure existía es la medición en el navegador que documenta el
+ * método; acá se asevera el invariante que la vuelve inofensiva.
+ */
+describe('RUL-000-02/03 · la obligatoriedad de los nombres sigue a la rama', () => {
+  async function montarConTiposDoc(): Promise<void> {
+    await montar(() => {
+      responderCatalogo(INT_COL_ID_TYPE, [
+        tipoDoc('1', 'Cédula de ciudadanía', STR_COD_NATURAL),
+        tipoDoc('31', 'NIT', STR_COD_JURIDICA),
+      ]);
+      responderCatalogo(INT_COL_PERSON_TYPE, [
+        catPlano(STR_COD_NATURAL, 'Natural'),
+        catPlano(STR_COD_JURIDICA, 'Jurídica'),
+      ]);
+    });
+  }
+
+  /** `true` si el control exige valor, preguntándoselo al validador y no a una lista de identidades. */
+  function exigeValor(in_strCampo: string): boolean {
+    return !!objHost.form.get(in_strCampo)?.hasError('required');
+  }
+
+  it('al montar, sin documento elegido, los obligatorios son los de persona NATURAL', async () => {
+    // La rama inicial es la natural porque al abrir no hay documento — y el guardia arranca en `''`
+    // justamente para que esta primera aplicación ocurra sin esperar un cambio de tipo.
+    await montarConTiposDoc();
+
+    expect(exigeValor(QD.strFirstName)).toBe(true);
+    expect(exigeValor(QD.strLastName)).toBe(true);
+    expect(exigeValor(QD.strCompanyName)).toBe(false);
+    expect(exigeValor(QD.strContactFirstName)).toBe(false);
+    expect(exigeValor(QD.strContactLastName)).toBe(false);
+  });
+
+  it('⚠ con NIT, los nombres del titular DEJAN de ser obligatorios y el form se puede enviar', async () => {
+    // Éste es el bug #1: antes, `qd_strFirstName`/`qd_strLastName` quedaban inválidos **estando
+    // desmontados**, así que el form nunca era válido y "Enviar" no hacía nada. Y no había nada en rojo
+    // que lo explicara, porque `scrollToFirstError()` busca el `id` de un campo que no está en el DOM.
+    await montarConTiposDoc();
+
+    await escribir({ [QD.strIdType]: '31' });
+
+    expect(exigeValor(QD.strFirstName)).toBe(false);
+    expect(exigeValor(QD.strLastName)).toBe(false);
+    // Y la obligatoriedad se mudó al bloque que sí está montado, no desapareció.
+    expect(exigeValor(QD.strCompanyName)).toBe(true);
+    expect(exigeValor(QD.strContactFirstName)).toBe(true);
+    expect(exigeValor(QD.strContactLastName)).toBe(true);
+  });
+
+  it('⚠ volviendo de NIT a Cédula, un nombre con texto correcto queda VÁLIDO', async () => {
+    // Éste es el bug #2, y es el que se veía en pantalla: los campos decían "Campo requerido" con
+    // "Nelson" y "Bravo" escritos. Se asevera sobre `valid` y no sobre `hasError('required')` para que
+    // el caso cubra **cualquier** clave de error pegada al control, que es la forma real del defecto
+    // (la clave del DS era `errorRequired`, no `required`).
+    await montarConTiposDoc();
+
+    await escribir({ [QD.strIdType]: '31' });
+    await escribir({ [QD.strIdType]: '1', [QD.strFirstName]: 'Nelson', [QD.strLastName]: 'Bravo' });
+
+    expect(objHost.form.get(QD.strFirstName)?.valid).toBe(true);
+    expect(objHost.form.get(QD.strLastName)?.valid).toBe(true);
+  });
+
+  it('el `pattern` sobrevive a los dos cruces: sigue siendo "solo letras" en las dos ramas', async () => {
+    // La tabla escribe la columna **completa**, así que el riesgo real de este arreglo es perder por el
+    // camino un validador que no es de la rama. "Solo letras" es del dato, no de la rama: un apellido
+    // con números tiene que fallar tanto con CC como con NIT.
+    await montarConTiposDoc();
+
+    await escribir({ [QD.strIdType]: '31', [QD.strContactLastName]: 'Bravo123' });
+    expect(objHost.form.get(QD.strContactLastName)?.hasError('pattern')).toBe(true);
+
+    await escribir({ [QD.strIdType]: '1', [QD.strLastName]: 'Bravo123' });
+    expect(objHost.form.get(QD.strLastName)?.hasError('pattern')).toBe(true);
+  });
+
+  it('la obligatoriedad de la rama SOBREVIVE a la escritura de otro campo', async () => {
+    // El efecto corre con cada tecla de cualquiera de los 46 controles, así que lo aseverable es que
+    // pasar por él muchas veces no degrade el estado: la columna de la rama sigue puesta después de
+    // escribir un campo que no tiene nada que ver.
+    //
+    // ⚠ **Esto NO asevera el guardia de rama**, y conviene decirlo acá porque el nombre del test se
+    // presta a creer lo contrario. Mutación verificada: comentando el `if (strRama === ...) return;` la
+    // suite queda **verde, 1304/1304**. El daño real de perder el guardia es que la reescritura por
+    // tecla borra el validador que el DS **compuso** sobre el control mientras el widget está montado,
+    // y bajo jsdom los custom elements de Lit no hacen upgrade, así que el DS no compone nada y no hay
+    // nada que borrar — el escenario que lo distinguiría no existe en este entorno. El guardia se
+    // conserva por el argumento de diseño (y por paridad con `alternarValidadoresDetalle()`, que lo
+    // documenta igual), no porque un test lo defienda. Si algún día la fachada se prueba con los
+    // componentes del DS montados de verdad, **este** es el párrafo que hay que leer.
+    await montarConTiposDoc();
+    await escribir({ [QD.strIdType]: '31' });
+
+    await escribir({ [QD.strAddress]: 'Calle 1' });
+
+    expect(exigeValor(QD.strCompanyName)).toBe(true);
+    expect(exigeValor(QD.strFirstName)).toBe(false);
   });
 });
 
