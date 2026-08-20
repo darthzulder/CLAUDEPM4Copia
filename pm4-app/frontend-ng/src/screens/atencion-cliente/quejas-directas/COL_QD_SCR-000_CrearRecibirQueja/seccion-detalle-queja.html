@@ -114,6 +114,31 @@
     </div>
   }
 
+  <!-- FLD-331 · Admisión: la elige SOLO el Defensor del Consumidor (rol '4'). En los demás roles no se
+       muestra y queda fija en "No aplica" (código '9') — ver `sembrarAdmision()`.
+
+       ⚠ El `@if` esconde el widget pero **no** toca el `FormGroup`, así que el `required` lo pone y lo
+         saca `alternarValidadorAdmision()`. Sin ese efecto, un ciudadano que pasa por Defensor y se
+         va a otro rol deja el formulario inenviable sin ningún campo en rojo: el mismo defecto que
+         §13.6/§13.7 ya cobraron en S3 y en S2.
+
+       Ente de control (FLD-332), Tutela (FLD-333) y Queja exprés (FLD-334) sí son variables de back
+       sin widget: viajan con el default que siembra `sembrarDefaultsDeBack()`. -->
+  @if (blnEsDefensor()) {
+    <div class="form-row cols-2">
+      <zds-select
+        [formControlName]="QD.strAdmission"
+        [name]="QD.strAdmission"
+        label="Admisión"
+        [options]="cllAdmision()"
+        [obligatorio]="true"
+        [error]="mensajeDeError(QD.strAdmission)"
+      />
+      <!-- Hueco: sin él "Admisión" se estiraría a las dos columnas. Es lo que hace React. -->
+      <div></div>
+    </div>
+  }
+
   <!-- Los adjuntos, detrás de un switch que es estado de UI y NO un campo de PM4.
        `za-switch` es un CVA nativo, pero acá no se ata a ningún control a propósito: lo que viaja al
        proceso son las cinco claves `qd_strDoc*`, no la decisión de mostrarlas. Se lee/escribe por

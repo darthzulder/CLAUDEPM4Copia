@@ -759,6 +759,100 @@ describe('FLD-331/332/333/334 · los cuatro defaults de back', () => {
   });
 });
 
+/**
+ * **FLD-331 / RUL-000-01 · el widget de admisión, que el porte a Angular había perdido.**
+ *
+ * El anexo lo dice con estas palabras: *"Visible (ZdsSelect requerido) solo si rol = Defensor del
+ * Consumidor (código 4). En los demás roles: oculto, fijo en 'No Aplica' (código 9)"*. React lo pinta
+ * (`SeccionDetalleQueja.tsx`, `blnIsDefender`); la sección de Angular se había portado con la mitad de
+ * la regla —la semilla respetaba el rol— pero sin el campo, así que el Defensor no tenía dónde elegir.
+ *
+ * ⚠ Los dos casos del `required` son los que importan y no son decorativos: el `@if` desmonta el widget
+ * pero **no** toca el `FormGroup`, así que sin `alternarValidadorAdmision()` un ciudadano que pasa por
+ * Defensor y se va a otro rol deja el form inenviable sin nada en rojo. Es el defecto de §13.6/§13.7,
+ * cobrado ya dos veces en esta pantalla.
+ */
+describe('FLD-331 · la admisión la ve y la elige SOLO el Defensor', () => {
+  /** El catálogo de admisión real: el '9' del default más una opción que solo el Defensor elegiría. */
+  function responderAdmision(): void {
+    responderCatalogo(INT_COL_ADMISSION, [catPlano('9', 'No aplica'), catPlano('1', 'Admitida')]);
+  }
+
+  it('el campo NO se monta para un rol cualquiera, y SÍ para el Defensor', async () => {
+    await montar(responderAdmision);
+    await escribir({ [QD.strFilerRole]: '3' });          // Empleado Zurich
+    expect(montoCampo(QD.strAdmission)).toBe(false);
+
+    await escribir({ [QD.strFilerRole]: '4' });          // Defensor del Consumidor
+
+    expect(seccion()['blnEsDefensor']()).toBe(true);
+    expect(montoCampo(QD.strAdmission)).toBe(true);
+  });
+
+  it('⚠ el `required` LLEGA con el Defensor y SE VA con el rol siguiente', async () => {
+    // La segunda mitad es la que atrapa el defecto: si el `required` se quedara puesto, el form sería
+    // inválido por un campo que ya no está en el DOM — sin mensaje, y `scrollToFirstError()` sin nada
+    // que enfocar. Se asevera por `hasError('required')` y no por identidad del validador: lo que
+    // importa es el estado observable del control.
+    await montar(responderAdmision);
+    await escribir({ [QD.strFilerRole]: '4', [QD.strAdmission]: '' });
+
+    const objControl = objHost.form.get(QD.strAdmission);
+    expect(objControl?.hasError('required')).toBe(true);
+
+    await escribir({ [QD.strFilerRole]: '3' });
+
+    expect(objControl?.hasError('required')).toBe(false);
+
+    // ⚠ Y se vacía a mano para probar que el validador **se fue**, no que está satisfecho.
+    // Al salir de Defensor el propio `sembrarAdmision()` fuerza '9' (el caso de abajo), y un control con
+    // valor no dispara `required` ni con el validador puesto: sin este vaciado la aserción de arriba pasa
+    // igual con un `alternarValidadorAdmision()` que solo agrega y nunca saca. Lo verificó la mutación
+    // MUT5 de §13.8, que la primera versión de este caso NO atrapó.
+    objControl?.setValue('');
+    expect(objControl?.hasError('required')).toBe(false);
+  });
+
+  it('entrar al rol Defensor LIMPIA el "No aplica" que se había sembrado', async () => {
+    // Si no se limpiara, el select del Defensor abriría con "No aplica" ya elegido y su `required`
+    // quedaría satisfecho por el default: elegiría por omisión, que es justo lo que FLD-331 no quiere.
+    await montar(responderAdmision);
+    expect(leer(QD.strAdmission)).toBe('9');
+
+    await escribir({ [QD.strFilerRole]: '4' });
+
+    expect(leer(QD.strAdmission)).toBe('');
+  });
+
+  it('⚠ salir del rol Defensor FUERZA "No aplica" sobre lo que él había elegido', async () => {
+    // Diferencia de paridad **deliberada** con React (decisión del usuario, 2026-08-20): allá el
+    // effect corta con `if (blnIsDefender || …) return` y después solo escribe si el valor difiere, así
+    // que un '1' elegido por el Defensor sobrevive al cambio de rol y viaja al proceso con el campo ya
+    // oculto — una admisión que nadie puede ver ni corregir. El anexo pide "fijo en No Aplica".
+    await montar(responderAdmision);
+    await escribir({ [QD.strFilerRole]: '4' });
+    await escribir({ [QD.strAdmission]: '1' });          // "Admitida", elegida por el Defensor
+    expect(leer(QD.strAdmission)).toBe('1');
+
+    await escribir({ [QD.strFilerRole]: '3' });
+
+    expect(leer(QD.strAdmission)).toBe('9');
+    expect(montoCampo(QD.strAdmission)).toBe(false);
+  });
+
+  it('la elección del Defensor SOBREVIVE mientras siga siendo el radicador', async () => {
+    // El guardia de rama de `sembrarAdmision()` se apoya en el cruce, no en el rol de cada corrida: si
+    // se sembrara en cada pasada, cualquier tecla en otro campo le pisaría la elección al Defensor.
+    await montar(responderAdmision);
+    await escribir({ [QD.strFilerRole]: '4' });
+    await escribir({ [QD.strAdmission]: '1' });
+
+    await escribir({ [QD.strComplaintText]: 'x'.repeat(60) });
+
+    expect(leer(QD.strAdmission)).toBe('1');
+  });
+});
+
 describe('las tres ramas condicionales', () => {
   it('la placa se monta SOLO en la familia Autos', async () => {
     await montarCascada();
