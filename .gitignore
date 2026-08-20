@@ -19,6 +19,12 @@ LocalFiles/
 #GRAPH_REPORT.md
 #.graphify/
 graphify-out/cache/
+# Markdown que graphify extrae de los .docx/.xlsx de `insumos/` para poder indexarlos. Es
+# derivado: el original versionado es el binario, y el nombre lleva un hash del contenido
+# —`CATALOGOS v2_79e7de80.md`— así que cada vez que cambia el insumo, o que graphify cambia
+# cómo lo convierte, aparece un archivo NUEVO en vez de un diff sobre el anterior. Estuvieron
+# commiteados hasta 0e595bf y ya habían duplicado los seis: se sacan del índice y se ignoran.
+graphify-out/converted/
 # Un graphify-out anidado fuera de la raíz es siempre un artefacto stray
 # (ver nota en CLAUDE.md sobre cache_root al correr extract() en subcarpetas).
 **/*/graphify-out/
