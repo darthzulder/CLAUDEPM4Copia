@@ -1,3740 +1,3776 @@
 {
   "pm4-app/import_catalogs.py": {
-    "mtime": 1786657382.430719,
-    "seen": 1787239182.7314103,
+    "mtime": 1786659720.371272,
+    "seen": 1787255885.5908778,
     "ast_hash": "ab34f1e2832077ca0af47ada1fbdb6ed",
     "semantic_hash": ""
   },
   "pm4-app/populate_feriados_colombia.py": {
-    "mtime": 1786657382.6797085,
-    "seen": 1787239182.7314157,
+    "mtime": 1786659720.693822,
+    "seen": 1787255885.5908809,
     "ast_hash": "6a77538eeea4ab8798bcc4d0a19de7ad",
     "semantic_hash": ""
   },
   "pm4-app/update_catalogs_v2.py": {
-    "mtime": 1786657382.7356946,
-    "seen": 1787239182.7314441,
+    "mtime": 1786659720.7632337,
+    "seen": 1787255885.5908957,
     "ast_hash": "3e5070e01a4fddc0fd2e694ec37aac78",
     "semantic_hash": ""
   },
   "pm4-app/vitest.scripts.config.ts": {
-    "mtime": 1786657382.739689,
-    "seen": 1787239182.7314458,
+    "mtime": 1786659720.7653358,
+    "seen": 1787255885.5908964,
     "ast_hash": "8b0f38f2dca5f693e43ab13cea6926b1",
     "semantic_hash": ""
   },
   "pm4-app/backend/eslint.config.mjs": {
-    "mtime": 1786657382.0198505,
-    "seen": 1787239182.7310367,
+    "mtime": 1786659719.620943,
+    "seen": 1787255885.590578,
     "ast_hash": "0089483242d5586391e346f0cbb3bb51",
     "semantic_hash": ""
   },
   "pm4-app/backend/vitest.config.ts": {
-    "mtime": 1786657382.0443716,
-    "seen": 1787239182.7310529,
+    "mtime": 1786659719.6377418,
+    "seen": 1787255885.5905967,
     "ast_hash": "8ec17cbfcec0656d947a45aca3bfb7a2",
     "semantic_hash": ""
   },
   "pm4-app/backend/src/server.ts": {
-    "mtime": 1787165798.4775848,
-    "seen": 1787239182.7310503,
+    "mtime": 1787160704.8161902,
+    "seen": 1787255885.5905929,
     "ast_hash": "a6a40b4db3abd5a1b8d731079233df1f",
     "semantic_hash": ""
   },
   "pm4-app/backend/src/lib/recaptcha.test.ts": {
-    "mtime": 1786657382.0256577,
-    "seen": 1787239182.7310412,
+    "mtime": 1786659719.620943,
+    "seen": 1787255885.5905833,
     "ast_hash": "82bcd09c8b99e6bdfb7721284cdbfaa7",
     "semantic_hash": ""
   },
   "pm4-app/backend/src/lib/recaptcha.ts": {
-    "mtime": 1786657382.0276647,
-    "seen": 1787239182.7310426,
+    "mtime": 1786659719.620943,
+    "seen": 1787255885.5905845,
     "ast_hash": "e5c564bfa6455fddb5cf7ac1ebb091b8",
     "semantic_hash": ""
   },
   "pm4-app/backend/src/lib/tasks.test.ts": {
-    "mtime": 1786657382.0286586,
-    "seen": 1787239182.7310438,
+    "mtime": 1786659719.620943,
+    "seen": 1787255885.5905857,
     "ast_hash": "e87c932fea95585c7935919df28b3244",
     "semantic_hash": ""
   },
   "pm4-app/backend/src/lib/tasks.ts": {
-    "mtime": 1786657382.0296645,
-    "seen": 1787239182.7310448,
+    "mtime": 1786659719.6361969,
+    "seen": 1787255885.590587,
     "ast_hash": "3f48e972072035dc520d9913ad299ffe",
     "semantic_hash": ""
   },
   "pm4-app/backend/src/routes/pm4.routes.ts": {
-    "mtime": 1786657382.0351985,
-    "seen": 1787239182.7310479,
+    "mtime": 1786659719.6377418,
+    "seen": 1787255885.5905902,
     "ast_hash": "117757312410c43202ff94ee56063818",
     "semantic_hash": ""
   },
   "pm4-app/backend/src/routes/recaptcha.routes.ts": {
-    "mtime": 1786657382.0361955,
-    "seen": 1787239182.731049,
+    "mtime": 1786659719.6377418,
+    "seen": 1787255885.5905912,
     "ast_hash": "7509a2e53117c06727dd14cd80ee63fd",
     "semantic_hash": ""
   },
   "pm4-app/frontend/eslint.config.mjs": {
-    "mtime": 1786657382.052386,
-    "seen": 1787239182.7312636,
+    "mtime": 1786659719.670982,
+    "seen": 1787255885.590789,
     "ast_hash": "42197777c3292d8037369d02fc2cad38",
     "semantic_hash": ""
   },
   "pm4-app/frontend/vite.config.ts": {
-    "mtime": 1786657382.4277248,
-    "seen": 1787239182.731407,
+    "mtime": 1786659720.3645315,
+    "seen": 1787255885.5908759,
     "ast_hash": "9c77b29faba58b909eae9b073f395bb5",
     "semantic_hash": ""
   },
   "pm4-app/frontend/vitest.config.ts": {
-    "mtime": 1786657382.4287188,
-    "seen": 1787239182.731408,
+    "mtime": 1786659720.3645315,
+    "seen": 1787255885.5908763,
     "ast_hash": "7a69c55b3819e62cc696e83cac7b2288",
     "semantic_hash": ""
   },
   "pm4-app/frontend/src/App.smoke.test.tsx": {
-    "mtime": 1787172680.8981965,
-    "seen": 1787239182.7312672,
+    "mtime": 1787172611.1062224,
+    "seen": 1787255885.5907915,
     "ast_hash": "19ef288b7748011c2a6e5a492ac1f32a",
     "semantic_hash": ""
   },
   "pm4-app/frontend/src/App.tsx": {
-    "mtime": 1787172680.9002018,
-    "seen": 1787239182.7312691,
+    "mtime": 1787172611.1062224,
+    "seen": 1787255885.5907922,
     "ast_hash": "c43d09cf8e0253812bd1d72f05dd74c6",
     "semantic_hash": ""
   },
   "pm4-app/frontend/src/main.tsx": {
-    "mtime": 1786657382.1844518,
-    "seen": 1787239182.731338,
+    "mtime": 1786659719.8975194,
+    "seen": 1787255885.590833,
     "ast_hash": "8568f3e5290d4069717b57590a643181",
     "semantic_hash": ""
   },
   "pm4-app/frontend/src/test-setup.ts": {
-    "mtime": 1786657382.3597002,
-    "seen": 1787239182.7314003,
+    "mtime": 1786659720.2496328,
+    "seen": 1787255885.5908718,
     "ast_hash": "c48e73169c88fa686dd20a162c42811a",
     "semantic_hash": ""
   },
   "pm4-app/frontend/src/vite-env.d.ts": {
-    "mtime": 1786657382.3623781,
-    "seen": 1787239182.7314017,
+    "mtime": 1786659720.2496328,
+    "seen": 1787255885.5908728,
     "ast_hash": "7cf1d3d484e841e78e29512e8c6b4e9b",
     "semantic_hash": ""
   },
   "pm4-app/frontend/src/zds-layout.d.ts": {
-    "mtime": 1786657382.3634765,
-    "seen": 1787239182.731403,
+    "mtime": 1786659720.2543058,
+    "seen": 1787255885.5908737,
     "ast_hash": "f6897832ae0a8698ec9deccdeb511056",
     "semantic_hash": ""
   },
   "pm4-app/frontend/src/zds-setup.ts": {
-    "mtime": 1786657382.3656585,
-    "seen": 1787239182.731404,
+    "mtime": 1786659720.2543058,
+    "seen": 1787255885.5908744,
     "ast_hash": "e6a0c04f921be5ae26ce02f50b3b76a8",
     "semantic_hash": ""
   },
   "pm4-app/frontend/src/api/pm4Client.ts": {
-    "mtime": 1786657382.0930853,
-    "seen": 1787239182.7312713,
+    "mtime": 1786659719.7464683,
+    "seen": 1787255885.5907936,
     "ast_hash": "15bc00ff4272a983fbf26320398d7457",
     "semantic_hash": ""
   },
   "pm4-app/frontend/src/components/ActionBar.test.tsx": {
-    "mtime": 1786657382.0951111,
-    "seen": 1787239182.731273,
+    "mtime": 1786659719.7488284,
+    "seen": 1787255885.5907946,
     "ast_hash": "c041d5bbfd868a5cb6e7a037aa9fa949",
     "semantic_hash": ""
   },
   "pm4-app/frontend/src/components/ActionBar.tsx": {
-    "mtime": 1786657382.0971122,
-    "seen": 1787239182.7312748,
+    "mtime": 1786659719.7539423,
+    "seen": 1787255885.5907958,
     "ast_hash": "fde7a4e965ad522e99598fc2d440e46d",
     "semantic_hash": ""
   },
   "pm4-app/frontend/src/components/DocCard.test.tsx": {
-    "mtime": 1786657382.0991127,
-    "seen": 1787239182.7312765,
+    "mtime": 1786659719.7544992,
+    "seen": 1787255885.5907974,
     "ast_hash": "fbcfe15ff6cc8dd8531d6eea48d81ada",
     "semantic_hash": ""
   },
   "pm4-app/frontend/src/components/DocCard.tsx": {
-    "mtime": 1786657382.1001186,
-    "seen": 1787239182.7312784,
+    "mtime": 1786659719.7599933,
+    "seen": 1787255885.590798,
     "ast_hash": "9b85963c1b2452051c4bc9c2fcf07687",
     "semantic_hash": ""
   },
   "pm4-app/frontend/src/components/DocSupportUploader.test.tsx": {
-    "mtime": 1786657382.1021118,
-    "seen": 1787239182.73128,
+    "mtime": 1786659719.7599933,
+    "seen": 1787255885.5907986,
     "ast_hash": "a5ae53b1387468546bc694b20d39e2ac",
     "semantic_hash": ""
   },
   "pm4-app/frontend/src/components/DocSupportUploader.tsx": {
-    "mtime": 1786657382.1041276,
-    "seen": 1787239182.731282,
+    "mtime": 1786659719.766278,
+    "seen": 1787255885.5908,
     "ast_hash": "660e0fcd8186ea9d997e5794b87c60a3",
     "semantic_hash": ""
   },
   "pm4-app/frontend/src/components/FormSection.test.tsx": {
-    "mtime": 1786657382.107136,
-    "seen": 1787239182.7312834,
+    "mtime": 1786659719.770553,
+    "seen": 1787255885.590801,
     "ast_hash": "5cb154a1db9203a1b87bdced8afcc836",
     "semantic_hash": ""
   },
   "pm4-app/frontend/src/components/FormSection.tsx": {
-    "mtime": 1786657382.1093051,
-    "seen": 1787239182.731285,
+    "mtime": 1786659719.7710755,
+    "seen": 1787255885.5908022,
     "ast_hash": "0b07dd1fbc0e2d367e6e16abbb689643",
     "semantic_hash": ""
   },
   "pm4-app/frontend/src/components/InfoBar.test.tsx": {
-    "mtime": 1786657382.1120813,
-    "seen": 1787239182.7312865,
+    "mtime": 1786659719.775378,
+    "seen": 1787255885.590803,
     "ast_hash": "4283d3b4ee3c89c57a124b6dd996ae48",
     "semantic_hash": ""
   },
   "pm4-app/frontend/src/components/InfoBar.tsx": {
-    "mtime": 1786657382.114092,
-    "seen": 1787239182.7312884,
+    "mtime": 1786659719.775378,
+    "seen": 1787255885.5908036,
     "ast_hash": "cb6200e7fa04604f3fee5139a859c40b",
     "semantic_hash": ""
   },
   "pm4-app/frontend/src/components/PdfViewer.test.tsx": {
-    "mtime": 1786657382.11613,
-    "seen": 1787239182.73129,
+    "mtime": 1786659719.775378,
+    "seen": 1787255885.5908048,
     "ast_hash": "0611d93537e73d5b29d67b0d182c1a6e",
     "semantic_hash": ""
   },
   "pm4-app/frontend/src/components/PdfViewer.tsx": {
-    "mtime": 1786657382.1191275,
-    "seen": 1787239182.731292,
+    "mtime": 1786659719.775378,
+    "seen": 1787255885.5908058,
     "ast_hash": "d74244a4986c874f813a63343e49e73e",
     "semantic_hash": ""
   },
   "pm4-app/frontend/src/components/PreviewModal.test.tsx": {
-    "mtime": 1786657382.1201286,
-    "seen": 1787239182.7312934,
+    "mtime": 1786659719.7862337,
+    "seen": 1787255885.5908065,
     "ast_hash": "87689b59893299445ab1a0e31652db44",
     "semantic_hash": ""
   },
   "pm4-app/frontend/src/components/PreviewModal.tsx": {
-    "mtime": 1786657382.1221318,
-    "seen": 1787239182.7312949,
+    "mtime": 1786659719.7879157,
+    "seen": 1787255885.5908072,
     "ast_hash": "25f6510a93bbfbd0e2825906fa9482ca",
     "semantic_hash": ""
   },
   "pm4-app/frontend/src/components/RecaptchaModal.test.tsx": {
-    "mtime": 1786657382.124996,
-    "seen": 1787239182.731297,
+    "mtime": 1786659719.792271,
+    "seen": 1787255885.590808,
     "ast_hash": "14e928672ae26fc4c1899bf52d6814a5",
     "semantic_hash": ""
   },
   "pm4-app/frontend/src/components/RecaptchaModal.tsx": {
-    "mtime": 1786657382.1290052,
-    "seen": 1787239182.731299,
+    "mtime": 1786659719.792271,
+    "seen": 1787255885.5908086,
     "ast_hash": "0d267b0034782f101567a5882ea51e44",
     "semantic_hash": ""
   },
   "pm4-app/frontend/src/components/RequestFileList.test.tsx": {
-    "mtime": 1786657382.1300068,
-    "seen": 1787239182.7313006,
+    "mtime": 1786659719.792271,
+    "seen": 1787255885.5908096,
     "ast_hash": "923668d3eda16b2b5664f32a018c4ae4",
     "semantic_hash": ""
   },
   "pm4-app/frontend/src/components/RequestFileList.tsx": {
-    "mtime": 1786657382.1333072,
-    "seen": 1787239182.7313023,
+    "mtime": 1786659719.8028445,
+    "seen": 1787255885.5908103,
     "ast_hash": "7b5cb2db33eb734751a44ddc24f49c38",
     "semantic_hash": ""
   },
   "pm4-app/frontend/src/components/ScreenHeader.test.tsx": {
-    "mtime": 1786657382.1353054,
-    "seen": 1787239182.731304,
+    "mtime": 1786659719.8074987,
+    "seen": 1787255885.5908113,
     "ast_hash": "c26ddc3a0d45128188bea0e0516e042e",
     "semantic_hash": ""
   },
   "pm4-app/frontend/src/components/ScreenHeader.tsx": {
-    "mtime": 1786657382.1394687,
-    "seen": 1787239182.7313058,
+    "mtime": 1786659719.8074987,
+    "seen": 1787255885.590812,
     "ast_hash": "7a7ec09ab6a1684e75587dbe30468c2d",
     "semantic_hash": ""
   },
   "pm4-app/frontend/src/components/fields/ZdsFields.tsx": {
-    "mtime": 1786657382.1424809,
-    "seen": 1787239182.7313075,
+    "mtime": 1786659719.8154418,
+    "seen": 1787255885.5908127,
     "ast_hash": "1435cc0648addd5c5f4f74118623194b",
     "semantic_hash": ""
   },
   "pm4-app/frontend/src/config/pm4Registry.types.ts": {
-    "mtime": 1786657382.149508,
-    "seen": 1787239182.731309,
+    "mtime": 1786659719.8210416,
+    "seen": 1787255885.5908139,
     "ast_hash": "4589a0834b9dd373c7b187552ed68d3f",
     "semantic_hash": ""
   },
   "pm4-app/frontend/src/core/attachments.ts": {
-    "mtime": 1786657382.1504998,
-    "seen": 1787239182.731311,
+    "mtime": 1786659719.8260844,
+    "seen": 1787255885.5908148,
     "ast_hash": "a140e30f0d6eb7dbca0ceeebe9dfae04",
     "semantic_hash": ""
   },
   "pm4-app/frontend/src/core/businessDays.test.ts": {
-    "mtime": 1786657382.1524973,
-    "seen": 1787239182.7313128,
+    "mtime": 1786659719.8260844,
+    "seen": 1787255885.590816,
     "ast_hash": "ef6cc17d0cd5ff5883ed7cdd0e3937ad",
     "semantic_hash": ""
   },
   "pm4-app/frontend/src/core/businessDays.ts": {
-    "mtime": 1786657382.154532,
-    "seen": 1787239182.731314,
+    "mtime": 1786659719.8260844,
+    "seen": 1787255885.590817,
     "ast_hash": "9ab746682de22b25bf8c9858417e7b0d",
     "semantic_hash": ""
   },
   "pm4-app/frontend/src/core/collections.test.ts": {
-    "mtime": 1786657382.1565309,
-    "seen": 1787239182.7313154,
+    "mtime": 1786659719.8260844,
+    "seen": 1787255885.5908177,
     "ast_hash": "8cdb0be4c5a3b6d89341b8995ff5a718",
     "semantic_hash": ""
   },
   "pm4-app/frontend/src/core/collections.ts": {
-    "mtime": 1786657382.158533,
-    "seen": 1787239182.7313168,
+    "mtime": 1786659719.8260844,
+    "seen": 1787255885.5908186,
     "ast_hash": "5569822473731387bb57370c39e5d5b2",
     "semantic_hash": ""
   },
   "pm4-app/frontend/src/core/fechaHora.test.ts": {
-    "mtime": 1786657382.1595318,
-    "seen": 1787239182.7313178,
+    "mtime": 1786659719.8371935,
+    "seen": 1787255885.5908196,
     "ast_hash": "368097d13de850f9ae60c4c3dae757d5",
     "semantic_hash": ""
   },
   "pm4-app/frontend/src/core/fechaHora.ts": {
-    "mtime": 1786657382.16153,
-    "seen": 1787239182.731319,
+    "mtime": 1786659719.8375535,
+    "seen": 1787255885.5908203,
     "ast_hash": "832f1625d8fd86355a80ed730460e2c2",
     "semantic_hash": ""
   },
   "pm4-app/frontend/src/core/fileHash.ts": {
-    "mtime": 1786657382.1628177,
-    "seen": 1787239182.7313204,
+    "mtime": 1786659719.8416085,
+    "seen": 1787255885.590821,
     "ast_hash": "6f8cd8b7430097593f9c54d2832525b2",
     "semantic_hash": ""
   },
   "pm4-app/frontend/src/core/pm4Groups.test.ts": {
-    "mtime": 1786657382.1639662,
-    "seen": 1787239182.7313216,
+    "mtime": 1786659719.8443115,
+    "seen": 1787255885.590822,
     "ast_hash": "1dd8e6c58edf30a462db8477e1b15d47",
     "semantic_hash": ""
   },
   "pm4-app/frontend/src/core/pm4Groups.ts": {
-    "mtime": 1786657382.165989,
-    "seen": 1787239182.7313225,
+    "mtime": 1786659719.8483367,
+    "seen": 1787255885.5908227,
     "ast_hash": "840058faed79fd46885a33eec8ff8c0e",
     "semantic_hash": ""
   },
   "pm4-app/frontend/src/core/pm4Resolve.test.ts": {
-    "mtime": 1786657382.1673837,
-    "seen": 1787239182.731324,
+    "mtime": 1786659719.8549097,
+    "seen": 1787255885.5908234,
     "ast_hash": "d8fab7a88679c1e9e7bb96e06347f44c",
     "semantic_hash": ""
   },
   "pm4-app/frontend/src/core/pm4Resolve.ts": {
-    "mtime": 1786657382.1683927,
-    "seen": 1787239182.7313251,
+    "mtime": 1786659719.8650148,
+    "seen": 1787255885.5908246,
     "ast_hash": "85d73da7f334463a74ce731b5e9204aa",
     "semantic_hash": ""
   },
   "pm4-app/frontend/src/core/scrollToFirstError.ts": {
-    "mtime": 1786657382.170391,
-    "seen": 1787239182.7313268,
+    "mtime": 1786659719.8713818,
+    "seen": 1787255885.5908253,
     "ast_hash": "a00aa2d8ca84f699d588a8d5408df150",
     "semantic_hash": ""
   },
   "pm4-app/frontend/src/core/useCollection.test.ts": {
-    "mtime": 1786657382.1723957,
-    "seen": 1787239182.731328,
+    "mtime": 1786659719.8754134,
+    "seen": 1787255885.5908265,
     "ast_hash": "fc57fb2be5ccc4ad5700753725156796",
     "semantic_hash": ""
   },
   "pm4-app/frontend/src/core/useCollection.ts": {
-    "mtime": 1786657382.1744287,
-    "seen": 1787239182.7313292,
+    "mtime": 1786659719.8801527,
+    "seen": 1787255885.5908272,
     "ast_hash": "8b15bbd6b3e139933e744c352a0c0382",
     "semantic_hash": ""
   },
   "pm4-app/frontend/src/core/useRequestFiles.test.ts": {
-    "mtime": 1786657382.1764417,
-    "seen": 1787239182.7313309,
+    "mtime": 1786659719.8839104,
+    "seen": 1787255885.5908277,
     "ast_hash": "480c50c14f2d29a9377a254289e7612b",
     "semantic_hash": ""
   },
   "pm4-app/frontend/src/core/useRequestFiles.ts": {
-    "mtime": 1786657382.1784453,
-    "seen": 1787239182.731332,
+    "mtime": 1786659719.8877516,
+    "seen": 1787255885.590829,
     "ast_hash": "67968a6ad0bf128884f0eda52c054504",
     "semantic_hash": ""
   },
   "pm4-app/frontend/src/core/useTask.test.tsx": {
-    "mtime": 1786657382.1794395,
-    "seen": 1787239182.7313335,
+    "mtime": 1786659719.8877516,
+    "seen": 1787255885.5908296,
     "ast_hash": "4debfddd23e2b450bc793095f2fc82ba",
     "semantic_hash": ""
   },
   "pm4-app/frontend/src/core/useTask.ts": {
-    "mtime": 1786657382.1814387,
-    "seen": 1787239182.731335,
+    "mtime": 1786659719.8934948,
+    "seen": 1787255885.5908308,
     "ast_hash": "9e7eea595cd590be9baefafd568a1b8e",
     "semantic_hash": ""
   },
   "pm4-app/frontend/src/core/useToken.ts": {
-    "mtime": 1786657382.182944,
-    "seen": 1787239182.7313364,
+    "mtime": 1786659719.895508,
+    "seen": 1787255885.5908315,
     "ast_hash": "04aca533cb88a5b18b718c032f7df7e9",
     "semantic_hash": ""
   },
   "pm4-app/frontend/src/screens/atencion-cliente/otras-solicitudes/COL_OS_SCR-003_Bandeja_Gestion_Linea2/GestionLinea2.test.tsx": {
-    "mtime": 1786657382.2101953,
-    "seen": 1787239182.7313397,
+    "mtime": 1786659719.921024,
+    "seen": 1787255885.5908341,
     "ast_hash": "5404bc390efb725d46b7edeae35bf189",
     "semantic_hash": ""
   },
   "pm4-app/frontend/src/screens/atencion-cliente/otras-solicitudes/COL_OS_SCR-003_Bandeja_Gestion_Linea2/GestionLinea2.tsx": {
-    "mtime": 1786657382.2127218,
-    "seen": 1787239182.7313414,
+    "mtime": 1786659719.921024,
+    "seen": 1787255885.590835,
     "ast_hash": "baa9d07582ba5409c5555136f5a5807c",
     "semantic_hash": ""
   },
   "pm4-app/frontend/src/screens/atencion-cliente/otras-solicitudes/COL_OS_SCR-003_Bandeja_Gestion_Linea2/ReasignarCasoModal.tsx": {
-    "mtime": 1786657382.2152417,
-    "seen": 1787239182.7313428,
+    "mtime": 1786659719.9376125,
+    "seen": 1787255885.590836,
     "ast_hash": "48ac70662df13eb5886637f83cdf44fc",
     "semantic_hash": ""
   },
   "pm4-app/frontend/src/screens/atencion-cliente/otras-solicitudes/fields/fields.ts": {
-    "mtime": 1786657382.2184174,
-    "seen": 1787239182.7313442,
+    "mtime": 1786659719.9376125,
+    "seen": 1787255885.5908368,
     "ast_hash": "b9e2de535671f5314358a46f22bbb546",
     "semantic_hash": ""
   },
   "pm4-app/frontend/src/screens/atencion-cliente/quejas-directas/COL_QD_SCR-000_CrearRecibirQueja/CrearRecibirQueja.test.tsx": {
-    "mtime": 1786657382.2229247,
-    "seen": 1787239182.731346,
+    "mtime": 1786659719.9376125,
+    "seen": 1787255885.5908375,
     "ast_hash": "90619434ca08abcb85a265e2078b131f",
     "semantic_hash": ""
   },
   "pm4-app/frontend/src/screens/atencion-cliente/quejas-directas/COL_QD_SCR-000_CrearRecibirQueja/CrearRecibirQueja.tsx": {
-    "mtime": 1786657382.2258017,
-    "seen": 1787239182.7313476,
+    "mtime": 1786659719.9489903,
+    "seen": 1787255885.5908382,
     "ast_hash": "abfbb9f00d0cb6166f38fc15484977e7",
     "semantic_hash": ""
   },
   "pm4-app/frontend/src/screens/atencion-cliente/quejas-directas/COL_QD_SCR-000_CrearRecibirQueja/PqrPage.tsx": {
-    "mtime": 1786657382.2323174,
-    "seen": 1787239182.7313488,
+    "mtime": 1786659719.9544525,
+    "seen": 1787255885.5908394,
     "ast_hash": "c6b1ed1c83a44747befa04a79da3e385",
     "semantic_hash": ""
   },
   "pm4-app/frontend/src/screens/atencion-cliente/quejas-directas/COL_QD_SCR-000_CrearRecibirQueja/SeccionConsumidor.tsx": {
-    "mtime": 1786657382.2343402,
-    "seen": 1787239182.73135,
+    "mtime": 1786659719.9544525,
+    "seen": 1787255885.59084,
     "ast_hash": "5d987328d9698f7953729bb891656ee8",
     "semantic_hash": ""
   },
   "pm4-app/frontend/src/screens/atencion-cliente/quejas-directas/COL_QD_SCR-000_CrearRecibirQueja/SeccionDetalleQueja.tsx": {
-    "mtime": 1786657382.236352,
-    "seen": 1787239182.7313519,
+    "mtime": 1786659719.9736686,
+    "seen": 1787255885.5908408,
     "ast_hash": "8cbd07499495b194b1f7221ae0836419",
     "semantic_hash": ""
   },
   "pm4-app/frontend/src/screens/atencion-cliente/quejas-directas/COL_QD_SCR-003_Correccion_Error_Funcional/CorreccionErrorFuncional.test.tsx": {
-    "mtime": 1786657382.2393537,
-    "seen": 1787239182.7313535,
+    "mtime": 1786659719.9804072,
+    "seen": 1787255885.5908415,
     "ast_hash": "ee2d050935e880e4b9d74fad0387a512",
     "semantic_hash": ""
   },
   "pm4-app/frontend/src/screens/atencion-cliente/quejas-directas/COL_QD_SCR-003_Correccion_Error_Funcional/CorreccionErrorFuncional.tsx": {
-    "mtime": 1787172680.90221,
-    "seen": 1787239182.7313547,
+    "mtime": 1787172611.1089098,
+    "seen": 1787255885.5908427,
     "ast_hash": "139abb42daac6c0411fd825640b48338",
     "semantic_hash": ""
   },
   "pm4-app/frontend/src/screens/atencion-cliente/quejas-directas/COL_QD_SCR-003_Correccion_Error_Funcional/SeccionCamposPayload.tsx": {
-    "mtime": 1786657382.247421,
-    "seen": 1787239182.7313564,
+    "mtime": 1786659719.9884512,
+    "seen": 1787255885.5908434,
     "ast_hash": "bad6f7c7afc6812a2c6809a4c310198e",
     "semantic_hash": ""
   },
   "pm4-app/frontend/src/screens/atencion-cliente/quejas-directas/COL_QD_SCR-0051_Detalle_Reasignacion_Respuesta/DetalleReasignacionRespuesta.test.tsx": {
-    "mtime": 1786657382.2597892,
-    "seen": 1787239182.7313583,
+    "mtime": 1786659720.0328987,
+    "seen": 1787255885.5908442,
     "ast_hash": "19c19e1cb5328fc2a72dbe3683f2730c",
     "semantic_hash": ""
   },
   "pm4-app/frontend/src/screens/atencion-cliente/quejas-directas/COL_QD_SCR-0051_Detalle_Reasignacion_Respuesta/DetalleReasignacionRespuesta.tsx": {
-    "mtime": 1786657382.2607887,
-    "seen": 1787239182.7313595,
+    "mtime": 1786659720.0378792,
+    "seen": 1787255885.5908456,
     "ast_hash": "b8ffecfb977e8c894976c883a464c006",
     "semantic_hash": ""
   },
   "pm4-app/frontend/src/screens/atencion-cliente/quejas-directas/COL_QD_SCR-0051_Detalle_Reasignacion_Respuesta/DocumentosRadicador.tsx": {
-    "mtime": 1786657382.2643023,
-    "seen": 1787239182.731361,
+    "mtime": 1786659720.0498214,
+    "seen": 1787255885.5908465,
     "ast_hash": "a1b5a69c218d19ae384dedfcb24f94de",
     "semantic_hash": ""
   },
   "pm4-app/frontend/src/screens/atencion-cliente/quejas-directas/COL_QD_SCR-0051_Detalle_Reasignacion_Respuesta/ExpedienteCompletoModal.tsx": {
-    "mtime": 1786657382.2663107,
-    "seen": 1787239182.7313628,
+    "mtime": 1786659720.0545373,
+    "seen": 1787255885.5908475,
     "ast_hash": "29f115f04a5bb8b036f06f1ea15044a2",
     "semantic_hash": ""
   },
   "pm4-app/frontend/src/screens/atencion-cliente/quejas-directas/COL_QD_SCR-0051_Detalle_Reasignacion_Respuesta/respuestaFinalTemplate.test.ts": {
-    "mtime": 1786657382.2753186,
-    "seen": 1787239182.7313676,
+    "mtime": 1786659720.0816352,
+    "seen": 1787255885.5908518,
     "ast_hash": "e66c5df83a5bf41d11c7c86569626505",
     "semantic_hash": ""
   },
   "pm4-app/frontend/src/screens/atencion-cliente/quejas-directas/COL_QD_SCR-0051_Detalle_Reasignacion_Respuesta/respuestaFinalTemplate.ts": {
-    "mtime": 1786657382.2773314,
-    "seen": 1787239182.731369,
+    "mtime": 1786659720.0858145,
+    "seen": 1787255885.5908532,
     "ast_hash": "87bac8d0977ead466110281e4ffae6cf",
     "semantic_hash": ""
   },
   "pm4-app/frontend/src/screens/atencion-cliente/quejas-directas/COL_QD_SCR-0051_Detalle_Reasignacion_Respuesta/SeccionAsignacion.tsx": {
-    "mtime": 1786657382.2683098,
-    "seen": 1787239182.731364,
+    "mtime": 1786659720.0621412,
+    "seen": 1787255885.5908484,
     "ast_hash": "16eb703e102a794f552a68715f5aca88",
     "semantic_hash": ""
   },
   "pm4-app/frontend/src/screens/atencion-cliente/quejas-directas/COL_QD_SCR-0051_Detalle_Reasignacion_Respuesta/SeccionDetalleCaso.tsx": {
-    "mtime": 1786657382.270337,
-    "seen": 1787239182.7313654,
+    "mtime": 1786659720.0700216,
+    "seen": 1787255885.5908499,
     "ast_hash": "40eac176a51766ace4081313ca74cae5",
     "semantic_hash": ""
   },
   "pm4-app/frontend/src/screens/atencion-cliente/quejas-directas/COL_QD_SCR-0051_Detalle_Reasignacion_Respuesta/SeccionRespuesta.tsx": {
-    "mtime": 1786657382.2723372,
-    "seen": 1787239182.7313666,
+    "mtime": 1786659720.0755956,
+    "seen": 1787255885.590851,
     "ast_hash": "e62d15c3e776956b8a760e2d4de4e292",
     "semantic_hash": ""
   },
   "pm4-app/frontend/src/screens/atencion-cliente/quejas-directas/COL_QD_SCR-0052_Respuesta_Area_Responsable/RespuestaAreaResponsable.test.tsx": {
-    "mtime": 1786657382.2823358,
-    "seen": 1787239182.7313702,
+    "mtime": 1786659720.103403,
+    "seen": 1787255885.5908542,
     "ast_hash": "a28230acd14fbe685ced6209897838ac",
     "semantic_hash": ""
   },
   "pm4-app/frontend/src/screens/atencion-cliente/quejas-directas/COL_QD_SCR-0052_Respuesta_Area_Responsable/RespuestaAreaResponsable.tsx": {
-    "mtime": 1786657382.284365,
-    "seen": 1787239182.7313714,
+    "mtime": 1786659720.1043842,
+    "seen": 1787255885.590855,
     "ast_hash": "b312d1992e43c650d6e03f09ea14dfba",
     "semantic_hash": ""
   },
   "pm4-app/frontend/src/screens/atencion-cliente/quejas-directas/COL_QD_SCR-008_Revision_Respuesta_SAC/RevisionRespuestaSac.test.tsx": {
-    "mtime": 1786657382.2908974,
-    "seen": 1787239182.7313728,
+    "mtime": 1786659720.1210864,
+    "seen": 1787255885.5908556,
     "ast_hash": "4c3b4f35aecd60aee114328028ebc21d",
     "semantic_hash": ""
   },
   "pm4-app/frontend/src/screens/atencion-cliente/quejas-directas/COL_QD_SCR-008_Revision_Respuesta_SAC/RevisionRespuestaSac.tsx": {
-    "mtime": 1786657382.2924051,
-    "seen": 1787239182.7313743,
+    "mtime": 1786668016.6022804,
+    "seen": 1787255885.5908566,
     "ast_hash": "10791bff368b106f21c1637649205d6a",
     "semantic_hash": ""
   },
   "pm4-app/frontend/src/screens/atencion-cliente/quejas-directas/COL_QD_SCR-009_Formulario_Superintendencia/FormularioSuperintendencia.test.tsx": {
-    "mtime": 1786657382.2984276,
-    "seen": 1787239182.7313757,
+    "mtime": 1786659720.1380627,
+    "seen": 1787255885.5908573,
     "ast_hash": "0a032273275e8211a3376f9c0b5b744a",
     "semantic_hash": ""
   },
   "pm4-app/frontend/src/screens/atencion-cliente/quejas-directas/COL_QD_SCR-009_Formulario_Superintendencia/FormularioSuperintendencia.tsx": {
-    "mtime": 1786657382.3004243,
-    "seen": 1787239182.731377,
+    "mtime": 1786659720.1380627,
+    "seen": 1787255885.590858,
     "ast_hash": "d7f24c82fa428ebfea9a47d77a155a91",
     "semantic_hash": ""
   },
   "pm4-app/frontend/src/screens/atencion-cliente/quejas-directas/COL_QD_SCR-009_Formulario_Superintendencia/SeccionCierreEnvio.tsx": {
-    "mtime": 1786657382.3024232,
-    "seen": 1787239182.7313788,
+    "mtime": 1786659720.1380627,
+    "seen": 1787255885.5908587,
     "ast_hash": "645b06f23ea903776cc3ce0c1f39b35b",
     "semantic_hash": ""
   },
   "pm4-app/frontend/src/screens/atencion-cliente/quejas-directas/COL_QD_SCR-009_Formulario_Superintendencia/SeccionFraudeAnexos.tsx": {
-    "mtime": 1786657382.3045688,
-    "seen": 1787239182.7313797,
+    "mtime": 1786659720.1380627,
+    "seen": 1787255885.59086,
     "ast_hash": "d001ad93acf31ca69b47c1a135a38808",
     "semantic_hash": ""
   },
   "pm4-app/frontend/src/screens/atencion-cliente/quejas-directas/COL_QD_SCR-013_Dashboard_Gestion_Casos/DashboardGestionCasos.test.tsx": {
-    "mtime": 1786657382.3229444,
-    "seen": 1787239182.731381,
+    "mtime": 1786659720.1906526,
+    "seen": 1787255885.5908604,
     "ast_hash": "ab452f05b69707b6f1b82d26f8ac178c",
     "semantic_hash": ""
   },
   "pm4-app/frontend/src/screens/atencion-cliente/quejas-directas/COL_QD_SCR-013_Dashboard_Gestion_Casos/DashboardGestionCasos.tsx": {
-    "mtime": 1786657382.3264658,
-    "seen": 1787239182.7313824,
+    "mtime": 1786659720.1938362,
+    "seen": 1787255885.590861,
     "ast_hash": "1c672195c56a969d0b09bd9411334086",
     "semantic_hash": ""
   },
   "pm4-app/frontend/src/screens/atencion-cliente/quejas-directas/COL_QD_SCR-013_Dashboard_Gestion_Casos/dashboardHelpers.test.ts": {
-    "mtime": 1786657382.3330047,
-    "seen": 1787239182.7313867,
+    "mtime": 1786659720.2044432,
+    "seen": 1787255885.5908637,
     "ast_hash": "f0fc6c088af706550d912228bb38a8d7",
     "semantic_hash": ""
   },
   "pm4-app/frontend/src/screens/atencion-cliente/quejas-directas/COL_QD_SCR-013_Dashboard_Gestion_Casos/dashboardHelpers.ts": {
-    "mtime": 1786657382.3355234,
-    "seen": 1787239182.7313879,
+    "mtime": 1786659720.2044432,
+    "seen": 1787255885.5908644,
     "ast_hash": "c93d1b227e41f2e854f713887ec1518a",
     "semantic_hash": ""
   },
   "pm4-app/frontend/src/screens/atencion-cliente/quejas-directas/COL_QD_SCR-013_Dashboard_Gestion_Casos/DetalleCasoModal.tsx": {
-    "mtime": 1786657382.3294923,
-    "seen": 1787239182.7313838,
+    "mtime": 1786659720.1992972,
+    "seen": 1787255885.590862,
     "ast_hash": "a4405532a29877bb4897368a24eb14ba",
     "semantic_hash": ""
   },
   "pm4-app/frontend/src/screens/atencion-cliente/quejas-directas/COL_QD_SCR-013_Dashboard_Gestion_Casos/TablaCasos.tsx": {
-    "mtime": 1786657382.3314908,
-    "seen": 1787239182.731385,
+    "mtime": 1786659720.2044432,
+    "seen": 1787255885.5908628,
     "ast_hash": "89ac5d6195f89b77c07b11bc5a7d5dc8",
     "semantic_hash": ""
   },
   "pm4-app/frontend/src/screens/atencion-cliente/quejas-directas/COL_QD_SCR-013_Dashboard_Gestion_Casos/useCasosDashboard.ts": {
-    "mtime": 1786657382.337521,
-    "seen": 1787239182.7313893,
+    "mtime": 1786659720.2044432,
+    "seen": 1787255885.5908651,
     "ast_hash": "8986a151f942b5fdff4739dc7a66d4cf",
     "semantic_hash": ""
   },
   "pm4-app/frontend/src/screens/atencion-cliente/quejas-directas/fields/fields.ts": {
-    "mtime": 1787172680.9113107,
-    "seen": 1787239182.7313905,
+    "mtime": 1787172611.1089098,
+    "seen": 1787255885.5908659,
     "ast_hash": "560c841d93471f83d6ce97901d639684",
     "semantic_hash": ""
   },
   "pm4-app/frontend/src/screens/atencion-cliente/quejas-directas/fields/types.ts": {
-    "mtime": 1786657382.3461964,
-    "seen": 1787239182.7313914,
+    "mtime": 1786659720.2269292,
+    "seen": 1787255885.5908668,
     "ast_hash": "f6fb5deeabb9d7efe8d061f3c09ca08b",
     "semantic_hash": ""
   },
   "pm4-app/frontend/src/screens/atencion-cliente/quejas-directas/fields/useMatrizMotivos.ts": {
-    "mtime": 1786657382.3482013,
-    "seen": 1787239182.731393,
+    "mtime": 1786659720.2269292,
+    "seen": 1787255885.5908678,
     "ast_hash": "24e4dc07e069e3bef29e92d3566b6532",
     "semantic_hash": ""
   },
   "pm4-app/frontend/src/screens/ds-catalog/DsCatalog.test.tsx": {
-    "mtime": 1786657382.3501966,
-    "seen": 1787239182.7313943,
+    "mtime": 1786659720.2269292,
+    "seen": 1787255885.5908685,
     "ast_hash": "89fbcc4aa62425dfc5a74cf29901adbe",
     "semantic_hash": ""
   },
   "pm4-app/frontend/src/screens/ds-catalog/DsCatalog.tsx": {
-    "mtime": 1786657382.3521974,
-    "seen": 1787239182.7313955,
+    "mtime": 1786659720.2269292,
+    "seen": 1787255885.590869,
     "ast_hash": "8ef5df08195e2d4b6d864dfc85deae05",
     "semantic_hash": ""
   },
   "pm4-app/frontend/src/screens/smartsupervision-api-docs/SmartsupervisionApiDocs.test.tsx": {
-    "mtime": 1786657382.3545089,
-    "seen": 1787239182.7313972,
+    "mtime": 1786659720.240513,
+    "seen": 1787255885.59087,
     "ast_hash": "aaf8c13dc2da4e6f057fb6498cc75132",
     "semantic_hash": ""
   },
   "pm4-app/frontend/src/screens/smartsupervision-api-docs/SmartsupervisionApiDocs.tsx": {
-    "mtime": 1786657382.3555174,
-    "seen": 1787239182.7313986,
+    "mtime": 1786659720.2436495,
+    "seen": 1787255885.5908709,
     "ast_hash": "736cee91a1bfe7cf3b7aaad97e88ef42",
     "semantic_hash": ""
   },
   "pm4-app/insumos/Otras Solicitudes/index_anexo02.py": {
-    "mtime": 1786657382.481833,
-    "seen": 1787239182.7314117,
+    "mtime": 1786659720.4590526,
+    "seen": 1787255885.5908785,
     "ast_hash": "b2c3cfa21d434a04edcabec4a70ce431",
     "semantic_hash": ""
   },
   "pm4-app/insumos/Quejas directas/index_anexo02.py": {
-    "mtime": 1786657382.5593863,
-    "seen": 1787239182.731413,
+    "mtime": 1786659720.5497046,
+    "seen": 1787255885.5908792,
     "ast_hash": "0bb60b8a0d4341d19329a9be5658ee70",
     "semantic_hash": ""
   },
   "pm4-app/scripts/coverage-diff.mjs": {
-    "mtime": 1787165799.1483133,
-    "seen": 1787239182.7314172,
+    "mtime": 1787160705.6806383,
+    "seen": 1787255885.5908816,
     "ast_hash": "678f6cc12a093414d04782e1f7788e2c",
     "semantic_hash": ""
   },
   "pm4-app/scripts/integration-base.mjs": {
-    "mtime": 1787165799.1503046,
-    "seen": 1787239182.7314186,
+    "mtime": 1787160705.6806383,
+    "seen": 1787255885.5908823,
     "ast_hash": "af61b28ef6645e170fb7ce6d8757c034",
     "semantic_hash": ""
   },
   "pm4-app/scripts/pm4-registry-sync.mjs": {
-    "mtime": 1786657382.6987438,
-    "seen": 1787239182.7314203,
+    "mtime": 1786659720.7046447,
+    "seen": 1787255885.5908833,
     "ast_hash": "ea4c87a29b9cf29941883f885f9d46a2",
     "semantic_hash": ""
   },
   "pm4-app/scripts/verify.mjs": {
-    "mtime": 1787238658.3790543,
-    "seen": 1787239182.7314405,
+    "mtime": 1787243030.8605204,
+    "seen": 1787255885.590894,
     "ast_hash": "cfb03a3eef97915504895b7983af83f3",
     "semantic_hash": ""
   },
   "pm4-app/scripts/pm4-scripts/pm4-scripts.mjs": {
-    "mtime": 1786657382.7314084,
-    "seen": 1787239182.731439,
+    "mtime": 1786659720.7587123,
+    "seen": 1787255885.5908933,
     "ast_hash": "452d2c38a13fbbddda77d9f917f3c2f3",
     "semantic_hash": ""
   },
   "pm4-app/scripts/pm4-scripts/core/canonicalizar.mjs": {
-    "mtime": 1786657382.7024562,
-    "seen": 1787239182.7314217,
+    "mtime": 1786659720.7112727,
+    "seen": 1787255885.5908837,
     "ast_hash": "0ceebe295ab2067cc08277ae9f437216",
     "semantic_hash": ""
   },
   "pm4-app/scripts/pm4-scripts/core/canonicalizar.test.mjs": {
-    "mtime": 1786657382.7054741,
-    "seen": 1787239182.7314234,
+    "mtime": 1786659720.713281,
+    "seen": 1787255885.5908847,
     "ast_hash": "72fac75b9831ab79c09a39c41035b647",
     "semantic_hash": ""
   },
   "pm4-app/scripts/pm4-scripts/core/descubrir.mjs": {
-    "mtime": 1786657382.7079802,
-    "seen": 1787239182.731425,
+    "mtime": 1786659720.713281,
+    "seen": 1787255885.5908854,
     "ast_hash": "7f54578cc2f84429585ddca2abdfc5f2",
     "semantic_hash": ""
   },
   "pm4-app/scripts/pm4-scripts/core/descubrir.test.mjs": {
-    "mtime": 1786657382.710986,
-    "seen": 1787239182.7314262,
+    "mtime": 1786659720.7171373,
+    "seen": 1787255885.590886,
     "ast_hash": "5184acfe2a5800b78637131177b3ba3b",
     "semantic_hash": ""
   },
   "pm4-app/scripts/pm4-scripts/core/espejo.mjs": {
-    "mtime": 1786657382.7133489,
-    "seen": 1787239182.7314274,
+    "mtime": 1786659720.7213628,
+    "seen": 1787255885.590887,
     "ast_hash": "cbe56fc44acf059633f66c0da3e4d65a",
     "semantic_hash": ""
   },
   "pm4-app/scripts/pm4-scripts/core/espejo.test.mjs": {
-    "mtime": 1786657382.7153642,
-    "seen": 1787239182.7314289,
+    "mtime": 1786659720.7213628,
+    "seen": 1787255885.5908878,
     "ast_hash": "a66b649a58a0b9d0c0d4b3bc2bc616f2",
     "semantic_hash": ""
   },
   "pm4-app/scripts/pm4-scripts/core/estado.mjs": {
-    "mtime": 1786657382.7173624,
-    "seen": 1787239182.73143,
+    "mtime": 1786659720.726631,
+    "seen": 1787255885.5908885,
     "ast_hash": "d1f49ceefe5ac30681ded752e7f65a78",
     "semantic_hash": ""
   },
   "pm4-app/scripts/pm4-scripts/core/estado.test.mjs": {
-    "mtime": 1786657382.7193644,
-    "seen": 1787239182.7314317,
+    "mtime": 1786659720.726631,
+    "seen": 1787255885.5908895,
     "ast_hash": "07cf9e7471a405aee0b03a2e27a43779",
     "semantic_hash": ""
   },
   "pm4-app/scripts/pm4-scripts/core/historial.mjs": {
-    "mtime": 1787165799.1543067,
-    "seen": 1787239182.7314332,
+    "mtime": 1787160705.6806383,
+    "seen": 1787255885.5908902,
     "ast_hash": "df95cb2c959783fa06268bb96e048b0d",
     "semantic_hash": ""
   },
   "pm4-app/scripts/pm4-scripts/core/historial.test.mjs": {
-    "mtime": 1786657382.7234051,
-    "seen": 1787239182.7314348,
+    "mtime": 1786659720.7363014,
+    "seen": 1787255885.5908911,
     "ast_hash": "65edef128bbff936c3d34bd5bb20321f",
     "semantic_hash": ""
   },
   "pm4-app/scripts/pm4-scripts/core/payload.mjs": {
-    "mtime": 1786657382.726406,
-    "seen": 1787239182.7314363,
+    "mtime": 1786659720.74663,
+    "seen": 1787255885.5908918,
     "ast_hash": "b50d4e8094600b411db815b82a37046c",
     "semantic_hash": ""
   },
   "pm4-app/scripts/pm4-scripts/core/payload.test.mjs": {
-    "mtime": 1786657382.7284067,
-    "seen": 1787239182.731438,
+    "mtime": 1786659720.7523906,
+    "seen": 1787255885.5908923,
     "ast_hash": "ef018053fa78d70176510cc66a3ee2f9",
     "semantic_hash": ""
   },
   "CLAUDE.md": {
-    "mtime": 1786657381.0783088,
-    "seen": 1787239182.7314506,
+    "mtime": 1786659718.6043146,
+    "seen": 1787255885.5909042,
     "ast_hash": "aae4214dc7253e62d389a053e61d3acf",
     "semantic_hash": ""
   },
   "docker-compose.yml": {
-    "mtime": 1786657381.8960202,
-    "seen": 1787239182.7315087,
+    "mtime": 1786659719.4877968,
+    "seen": 1787255885.590936,
     "ast_hash": "77ba4ab3fdb03af69e1f88598ce1daa2",
     "semantic_hash": ""
   },
   "README.md": {
-    "mtime": 1787165798.447278,
-    "seen": 1787239182.7315073,
+    "mtime": 1787160704.7788658,
+    "seen": 1787255885.5909352,
     "ast_hash": "afc3047176b5682bfe327e291dc3f7b5",
     "semantic_hash": ""
   },
   "docs/archive/INSTRUCCIONES_CLAUDE_CODE.md": {
-    "mtime": 1786657381.9025466,
-    "seen": 1787239182.7315106,
+    "mtime": 1786659719.4932377,
+    "seen": 1787255885.590937,
     "ast_hash": "0ec344d37ed3065f29c0b80b7b582951",
     "semantic_hash": ""
   },
   "docs/archive/react19-migration.md": {
-    "mtime": 1787238658.2387564,
-    "seen": 1787239182.7315118,
+    "mtime": 1787243030.7621582,
+    "seen": 1787255885.5909376,
     "ast_hash": "577f44bc1aaaa4d023c75b668a9b9858",
     "semantic_hash": ""
   },
   "docs/guides/entorno-local-y-verificacion.md": {
-    "mtime": 1787165798.4502819,
-    "seen": 1787239182.731515,
+    "mtime": 1787160704.7829306,
+    "seen": 1787255885.590939,
     "ast_hash": "b73c09affcc361230d1630857d68e66d",
     "semantic_hash": ""
   },
   "docs/guides/GUIA_DOCUMENTACION_PANTALLAS.md": {
-    "mtime": 1786657381.9078078,
-    "seen": 1787239182.7315135,
+    "mtime": 1786659719.5027707,
+    "seen": 1787255885.5909383,
     "ast_hash": "95af1e9d3deda403de03b12f0e106fa5",
     "semantic_hash": ""
   },
   "docs/guides/historial-scripts-pm4.md": {
-    "mtime": 1787165798.4532847,
-    "seen": 1787239182.7315161,
+    "mtime": 1787160704.7869341,
+    "seen": 1787255885.59094,
     "ast_hash": "c14e84293203a22a2a9e99ee9dccd0ae",
     "semantic_hash": ""
   },
   "docs/guides/nomenclatura-variables.md": {
-    "mtime": 1786657381.914365,
-    "seen": 1787239182.7315178,
+    "mtime": 1786659719.5043595,
+    "seen": 1787255885.5909407,
     "ast_hash": "cd079af7ffd1bb8f4e0b19b9d8c2c592",
     "semantic_hash": ""
   },
   "docs/guides/testing-conventions.md": {
-    "mtime": 1787165798.456345,
-    "seen": 1787239182.731519,
+    "mtime": 1787160704.790539,
+    "seen": 1787255885.5909414,
     "ast_hash": "82fb608843740abd773ebb3b80fd11e7",
     "semantic_hash": ""
   },
   "docs/reference/pm4-export-format.md": {
-    "mtime": 1786657381.9173644,
-    "seen": 1787239182.7315207,
+    "mtime": 1786659719.5043595,
+    "seen": 1787255885.5909421,
     "ast_hash": "e55000e06e51ecc49fe2475255ceb4b2",
     "semantic_hash": ""
   },
   "docs/reference/proceso-31-quejas-directas/00-MANIFEST.md": {
-    "mtime": 1786657381.9193628,
-    "seen": 1787239182.7315223,
+    "mtime": 1786659719.5043595,
+    "seen": 1787255885.5909429,
     "ast_hash": "99efb05e5819a832beaea8df1be0ee54",
     "semantic_hash": ""
   },
   "pm4-app/CLAUDE.md": {
-    "mtime": 1787172680.804173,
-    "seen": 1787239182.731524,
+    "mtime": 1787172611.028689,
+    "seen": 1787255885.5909436,
     "ast_hash": "f3df152e58d01da079087602c91bfac1",
     "semantic_hash": ""
   },
   "pm4-app/render.yaml": {
-    "mtime": 1787165799.1447616,
-    "seen": 1787239182.7317219,
+    "mtime": 1787160705.677192,
+    "seen": 1787255885.5910597,
     "ast_hash": "a4fe0d3b8346f872edcf837262f79aef",
     "semantic_hash": ""
   },
   "pm4-app/docs/architecture/Diagrama.md": {
-    "mtime": 1786657382.0473874,
-    "seen": 1787239182.7315285,
+    "mtime": 1786659719.6543095,
+    "seen": 1787255885.590946,
     "ast_hash": "53958187a9bc734ade3fb54681bf5c47",
     "semantic_hash": ""
   },
   "pm4-app/frontend/index.html": {
-    "mtime": 1786657382.0547912,
-    "seen": 1787239182.7315974,
+    "mtime": 1786659719.6752782,
+    "seen": 1787255885.5909834,
     "ast_hash": "1baa1af98cb3579a316e007ac6a10e1d",
     "semantic_hash": ""
   },
   "pm4-app/frontend/public/docs/smartsupervision-openapi.yaml": {
-    "mtime": 1786657382.0598001,
-    "seen": 1787239182.7315984,
+    "mtime": 1786659719.6752782,
+    "seen": 1787255885.5909843,
     "ast_hash": "7750496bef319fbe0a5dadf73f268aff",
     "semantic_hash": ""
   },
   "pm4-app/frontend/public/docs/smartsupervision-webservice.html": {
-    "mtime": 1786657382.0633261,
-    "seen": 1787239182.7315996,
+    "mtime": 1786659719.687786,
+    "seen": 1787255885.5909853,
     "ast_hash": "d808a8f65606bbe41e6ca9fa7e87a33b",
     "semantic_hash": ""
   },
   "pm4-app/frontend/public/docs/swagger-ui.html": {
-    "mtime": 1786657382.066329,
-    "seen": 1787239182.731601,
+    "mtime": 1786659719.694175,
+    "seen": 1787255885.590986,
     "ast_hash": "d5890b1c8fc9c4e00142dee714b7d1cf",
     "semantic_hash": ""
   },
   "pm4-app/frontend/src/screens/atencion-cliente/otras-solicitudes/COL_OS_SCR-003_Bandeja_Gestion_Linea2/DOCUMENTACION_COL_OS_SCR-003_Bandeja_Gestion_Linea2.md": {
-    "mtime": 1786657382.2081988,
-    "seen": 1787239182.7316024,
+    "mtime": 1786659719.921024,
+    "seen": 1787255885.5909867,
     "ast_hash": "eb1d20855b42303d72788d4784854065",
     "semantic_hash": ""
   },
   "pm4-app/frontend/src/screens/atencion-cliente/quejas-directas/COL_QD_SCR-000_CrearRecibirQueja/DOCUMENTACION_COL_QD_SCR-000_CrearRecibirQueja.md": {
-    "mtime": 1786657382.2298093,
-    "seen": 1787239182.7316039,
+    "mtime": 1786659719.9544525,
+    "seen": 1787255885.5909874,
     "ast_hash": "2219a87f8b610b3426444782519292e2",
     "semantic_hash": ""
   },
   "pm4-app/frontend/src/screens/atencion-cliente/quejas-directas/COL_QD_SCR-003_Correccion_Error_Funcional/DOCUMENTACION_COL_QD_SCR-003_Correccion_Error_Funcional.md": {
-    "mtime": 1787172680.9047184,
-    "seen": 1787239182.7316055,
+    "mtime": 1787172611.1089098,
+    "seen": 1787255885.5909886,
     "ast_hash": "8c7309f12e1e06518c3a4606ebfff83b",
     "semantic_hash": ""
   },
   "pm4-app/frontend/src/screens/atencion-cliente/quejas-directas/COL_QD_SCR-0051_Detalle_Reasignacion_Respuesta/DOCUMENTACION_COL_QD_SCR-0051_Detalle_Reasignacion_Respuesta.md": {
-    "mtime": 1786657382.2577899,
-    "seen": 1787239182.731607,
+    "mtime": 1786659720.0212862,
+    "seen": 1787255885.5909894,
     "ast_hash": "6f8530ace4d7c9c6be01397463820263",
     "semantic_hash": ""
   },
   "pm4-app/frontend/src/screens/atencion-cliente/quejas-directas/COL_QD_SCR-0052_Respuesta_Area_Responsable/DOCUMENTACION_COL_QD_SCR-0052_Respuesta_Area_Responsable.md": {
-    "mtime": 1786657382.2803352,
-    "seen": 1787239182.7316082,
+    "mtime": 1786659720.093131,
+    "seen": 1787255885.5909903,
     "ast_hash": "14f686819f8fd6b0af9d0402a7c5b372",
     "semantic_hash": ""
   },
   "pm4-app/frontend/src/screens/atencion-cliente/quejas-directas/COL_QD_SCR-008_Revision_Respuesta_SAC/DOCUMENTACION_COL_QD_SCR-008_Revision_Respuesta_SAC.md": {
-    "mtime": 1786657382.2873776,
-    "seen": 1787239182.731609,
+    "mtime": 1786659720.1154673,
+    "seen": 1787255885.590991,
     "ast_hash": "6f3ca89e3ebffa17ec87ec1301fef882",
     "semantic_hash": ""
   },
   "pm4-app/frontend/src/screens/atencion-cliente/quejas-directas/COL_QD_SCR-009_Formulario_Superintendencia/DOCUMENTACION_COL_QD_SCR-009_Formulario_Superintendencia.md": {
-    "mtime": 1786657382.2954223,
-    "seen": 1787239182.73161,
+    "mtime": 1786659720.1272602,
+    "seen": 1787255885.590992,
     "ast_hash": "22147fe1ad9fe613d645b482c051d8bc",
     "semantic_hash": ""
   },
   "pm4-app/frontend/src/screens/atencion-cliente/quejas-directas/COL_QD_SCR-013_Dashboard_Gestion_Casos/DOCUMENTACION_COL_QD_SCR-013_Dashboard_Gestion_Casos.md": {
-    "mtime": 1786657382.3204308,
-    "seen": 1787239182.7316113,
+    "mtime": 1786659720.185429,
+    "seen": 1787255885.5909925,
     "ast_hash": "26c0da4bf4b8b21408379ee95c7b142b",
     "semantic_hash": ""
   },
   "pm4-app/frontend/src/screens/atencion-cliente/quejas-directas/fields/MAPEO_qd_old_new.md": {
-    "mtime": 1787172680.9093018,
-    "seen": 1787239182.7316127,
+    "mtime": 1787172611.1089098,
+    "seen": 1787255885.5909934,
     "ast_hash": "f4ac5b7068820931dc06e89c0f7533df",
     "semantic_hash": ""
   },
   "pm4-app/frontend/vendor/README.md": {
-    "mtime": 1786657382.369978,
-    "seen": 1787239182.731614,
+    "mtime": 1786659720.2543058,
+    "seen": 1787255885.590994,
     "ast_hash": "b3bee3df80c9d2f0be036b52c3bd333b",
     "semantic_hash": ""
   },
   "pm4-app/insumos/Otras Solicitudes/Anexo02_Index/README.md": {
-    "mtime": 1787172680.9143095,
-    "seen": 1787239182.7316155,
+    "mtime": 1787172611.1089098,
+    "seen": 1787255885.5909948,
     "ast_hash": "e4b94259348f14b154280912dbdd87d8",
     "semantic_hash": ""
   },
   "pm4-app/insumos/Otras Solicitudes/Anexo02_Index/masters/01_Pantallas.md": {
-    "mtime": 1787172680.9168274,
-    "seen": 1787239182.7316167,
+    "mtime": 1787172611.1199327,
+    "seen": 1787255885.5909958,
     "ast_hash": "e8291c5a5a8eb3d274ca3a90a20f9062",
     "semantic_hash": ""
   },
   "pm4-app/insumos/Otras Solicitudes/Anexo02_Index/masters/02_Secciones.md": {
-    "mtime": 1787172680.9193592,
-    "seen": 1787239182.7316177,
+    "mtime": 1787172611.1230445,
+    "seen": 1787255885.5909965,
     "ast_hash": "533f1e8d2f18711bd0497e92c4b08518",
     "semantic_hash": ""
   },
   "pm4-app/insumos/Otras Solicitudes/Anexo02_Index/masters/03_Campos.md": {
-    "mtime": 1787172680.9233606,
-    "seen": 1787239182.731619,
+    "mtime": 1787172611.125324,
+    "seen": 1787255885.5909972,
     "ast_hash": "bff6c62b06a84b7a3cde4cbc13919e49",
     "semantic_hash": ""
   },
   "pm4-app/insumos/Otras Solicitudes/Anexo02_Index/masters/04_Acciones.md": {
-    "mtime": 1787172680.9263566,
-    "seen": 1787239182.7316198,
+    "mtime": 1787172611.1274881,
+    "seen": 1787255885.590998,
     "ast_hash": "bb7743e40bc9ee7391100b5486874a9e",
     "semantic_hash": ""
   },
   "pm4-app/insumos/Otras Solicitudes/Anexo02_Index/masters/05_Reglas.md": {
-    "mtime": 1787172680.928497,
-    "seen": 1787239182.731621,
+    "mtime": 1787172611.129503,
+    "seen": 1787255885.590999,
     "ast_hash": "5527e08a6fed7b62dea848c8650fd26c",
     "semantic_hash": ""
   },
   "pm4-app/insumos/Otras Solicitudes/Anexo02_Index/masters/06_Mensajes.md": {
-    "mtime": 1787172680.9305053,
-    "seen": 1787239182.7316222,
+    "mtime": 1787172611.129503,
+    "seen": 1787255885.5909996,
     "ast_hash": "e565841721372fce3ed2c2756ad349aa",
     "semantic_hash": ""
   },
   "pm4-app/insumos/Otras Solicitudes/Anexo02_Index/masters/07_Catalogs.md": {
-    "mtime": 1787088312.337873,
-    "seen": 1787239182.7316232,
+    "mtime": 1786659720.390427,
+    "seen": 1787255885.5910003,
     "ast_hash": "a024ef63947a4822fae56e0a4b471c6d",
     "semantic_hash": ""
   },
   "pm4-app/insumos/Otras Solicitudes/Anexo02_Index/masters/08_Permisos.md": {
-    "mtime": 1787088312.347129,
-    "seen": 1787239182.7316241,
+    "mtime": 1787160705.6335113,
+    "seen": 1787255885.591001,
     "ast_hash": "739a5afe357c5e34f5151a880318cc74",
     "semantic_hash": ""
   },
   "pm4-app/insumos/Otras Solicitudes/Anexo02_Index/masters/10_Trazabilidad_BPMN.md": {
-    "mtime": 1787172680.9325037,
-    "seen": 1787239182.7316256,
+    "mtime": 1787172611.129503,
+    "seen": 1787255885.5910017,
     "ast_hash": "ff5fcf3c6e16c1643d890392b7fc211d",
     "semantic_hash": ""
   },
   "pm4-app/insumos/Otras Solicitudes/Anexo02_Index/masters/11_Checklist_QA.md": {
-    "mtime": 1787088312.3682516,
-    "seen": 1787239182.7316265,
+    "mtime": 1787160705.6430292,
+    "seen": 1787255885.5910027,
     "ast_hash": "9993440ffe635a875d70c9a153b89734",
     "semantic_hash": ""
   },
   "pm4-app/insumos/Otras Solicitudes/Anexo02_Index/screens/SCR-003.md": {
-    "mtime": 1787088312.399114,
-    "seen": 1787239182.7316277,
+    "mtime": 1786659720.404525,
+    "seen": 1787255885.5910034,
     "ast_hash": "175595097a9293a7458a65b93b4485ee",
     "semantic_hash": ""
   },
   "pm4-app/insumos/Otras Solicitudes/Anexo02_Index/screens/SCR-004.md": {
-    "mtime": 1787088312.4294112,
-    "seen": 1787239182.731629,
+    "mtime": 1786659720.414068,
+    "seen": 1787255885.5910044,
     "ast_hash": "aa8f5a58cb60e9e548c4155c50f6c0ee",
     "semantic_hash": ""
   },
   "pm4-app/insumos/Otras Solicitudes/Anexo02_Index/screens/SCR-005.md": {
-    "mtime": 1787088312.4564302,
-    "seen": 1787239182.7316298,
+    "mtime": 1786659720.4206421,
+    "seen": 1787255885.5910048,
     "ast_hash": "34ef7c435e4571e74fae62676ad93a86",
     "semantic_hash": ""
   },
   "pm4-app/insumos/Otras Solicitudes/Anexo02_Index/screens/SCR-006.md": {
-    "mtime": 1787088312.486044,
-    "seen": 1787239182.7316306,
+    "mtime": 1787160705.6472206,
+    "seen": 1787255885.5910058,
     "ast_hash": "2ff519d484e8a28881818242c8610ec2",
     "semantic_hash": ""
   },
   "pm4-app/insumos/Otras Solicitudes/Anexo02_Index/screens/SCR-010.md": {
-    "mtime": 1787172680.9344969,
-    "seen": 1787239182.7316315,
+    "mtime": 1787172611.129503,
+    "seen": 1787255885.5910065,
     "ast_hash": "2167ca4bfb9bea98760dce3f9672bb07",
     "semantic_hash": ""
   },
   "pm4-app/insumos/Otras Solicitudes/Anexo02_Index/screens/SCR-012.md": {
-    "mtime": 1787172680.9370217,
-    "seen": 1787239182.731633,
+    "mtime": 1787172611.129503,
+    "seen": 1787255885.591007,
     "ast_hash": "7750f4575757ff844b9a1a0fd22d81db",
     "semantic_hash": ""
   },
   "pm4-app/insumos/Quejas directas/Anexo02_Index/README.md": {
-    "mtime": 1786657382.4902272,
-    "seen": 1787239182.7316365,
+    "mtime": 1786659720.4679158,
+    "seen": 1787255885.5910099,
     "ast_hash": "e201d9997c4d73fb192c3b315d0e8104",
     "semantic_hash": ""
   },
   "pm4-app/insumos/Quejas directas/Anexo02_Index/masters/01_Pantallas.md": {
-    "mtime": 1786657382.4942873,
-    "seen": 1787239182.7316377,
+    "mtime": 1786659720.4709756,
+    "seen": 1787255885.5910106,
     "ast_hash": "abaf6979184ee6cb1630c7029c58a8ff",
     "semantic_hash": ""
   },
   "pm4-app/insumos/Quejas directas/Anexo02_Index/masters/02_Secciones.md": {
-    "mtime": 1786657382.4962957,
-    "seen": 1787239182.7316387,
+    "mtime": 1786659720.4709756,
+    "seen": 1787255885.5910113,
     "ast_hash": "c2fe66d56b7e2ec8bf1563c03bb3fc67",
     "semantic_hash": ""
   },
   "pm4-app/insumos/Quejas directas/Anexo02_Index/masters/03_Campos.md": {
-    "mtime": 1786657382.4992955,
-    "seen": 1787239182.7316396,
+    "mtime": 1786659720.475971,
+    "seen": 1787255885.591012,
     "ast_hash": "70eeb17110a40bc94eb14c7d95cb7f96",
     "semantic_hash": ""
   },
   "pm4-app/insumos/Quejas directas/Anexo02_Index/masters/04_Acciones.md": {
-    "mtime": 1786657382.5028021,
-    "seen": 1787239182.731641,
+    "mtime": 1786659720.479985,
+    "seen": 1787255885.591013,
     "ast_hash": "2527f88f8403a9e7e8ca56abf4a7364b",
     "semantic_hash": ""
   },
   "pm4-app/insumos/Quejas directas/Anexo02_Index/masters/05_Reglas.md": {
-    "mtime": 1786657382.505336,
-    "seen": 1787239182.731642,
+    "mtime": 1786659720.4819903,
+    "seen": 1787255885.5910137,
     "ast_hash": "dc562fff4eb82f757a08372ea308b815",
     "semantic_hash": ""
   },
   "pm4-app/insumos/Quejas directas/Anexo02_Index/masters/06_Mensajes.md": {
-    "mtime": 1786657382.5073352,
-    "seen": 1787239182.7316437,
+    "mtime": 1786659720.4839952,
+    "seen": 1787255885.5910144,
     "ast_hash": "78c26a6310ec97c3ce4420ce7a4cfeed",
     "semantic_hash": ""
   },
   "pm4-app/insumos/Quejas directas/Anexo02_Index/masters/07_Catalogs.md": {
-    "mtime": 1786657382.509341,
-    "seen": 1787239182.7316444,
+    "mtime": 1786659720.4860005,
+    "seen": 1787255885.5910153,
     "ast_hash": "52898febeb90ed62ee5da90d96ac126a",
     "semantic_hash": ""
   },
   "pm4-app/insumos/Quejas directas/Anexo02_Index/masters/08_Permisos.md": {
-    "mtime": 1786657382.5113342,
-    "seen": 1787239182.731646,
+    "mtime": 1786659720.4880764,
+    "seen": 1787255885.5910163,
     "ast_hash": "708189f1dfa80487d9a2b4554dec6986",
     "semantic_hash": ""
   },
   "pm4-app/insumos/Quejas directas/Anexo02_Index/masters/10_Trazabilidad_BPMN.md": {
-    "mtime": 1786657382.5134246,
-    "seen": 1787239182.7316473,
+    "mtime": 1786659720.4915607,
+    "seen": 1787255885.591017,
     "ast_hash": "5ca1d448ddac0e9b2177669e53d894a9",
     "semantic_hash": ""
   },
   "pm4-app/insumos/Quejas directas/Anexo02_Index/masters/11_Checklist_QA.md": {
-    "mtime": 1786657382.5157583,
-    "seen": 1787239182.7316484,
+    "mtime": 1786659720.4934883,
+    "seen": 1787255885.5910175,
     "ast_hash": "593a40f50d8668a75ee9400a64f72105",
     "semantic_hash": ""
   },
   "pm4-app/insumos/Quejas directas/Anexo02_Index/screens/SCR-000.md": {
-    "mtime": 1786657382.5187972,
-    "seen": 1787239182.7316494,
+    "mtime": 1786659720.495496,
+    "seen": 1787255885.5910184,
     "ast_hash": "c1210485d634057e493aaf4bb4a227ff",
     "semantic_hash": ""
   },
   "pm4-app/insumos/Quejas directas/Anexo02_Index/screens/SCR-003.md": {
-    "mtime": 1786657382.5207968,
-    "seen": 1787239182.7316504,
+    "mtime": 1786659720.4994948,
+    "seen": 1787255885.5910196,
     "ast_hash": "7ea20b20eea48690dda9d5ff4a608a0c",
     "semantic_hash": ""
   },
   "pm4-app/insumos/Quejas directas/Anexo02_Index/screens/SCR-004.md": {
-    "mtime": 1786657382.5243154,
-    "seen": 1787239182.7316518,
+    "mtime": 1786659720.4994948,
+    "seen": 1787255885.5910203,
     "ast_hash": "d987e1e0dc6431e015ae24d1c996cde1",
     "semantic_hash": ""
   },
   "pm4-app/insumos/Quejas directas/Anexo02_Index/screens/SCR-0051.md": {
-    "mtime": 1786657382.526313,
-    "seen": 1787239182.7316535,
+    "mtime": 1786659720.504946,
+    "seen": 1787255885.591021,
     "ast_hash": "07d9aa17c7b72a0afa9572ec673cb28f",
     "semantic_hash": ""
   },
   "pm4-app/insumos/Quejas directas/Anexo02_Index/screens/SCR-0052.md": {
-    "mtime": 1786657382.5293608,
-    "seen": 1787239182.7316544,
+    "mtime": 1786659720.504946,
+    "seen": 1787255885.5910218,
     "ast_hash": "b7694ede7ffca0f88f9e3312d2c783bd",
     "semantic_hash": ""
   },
   "pm4-app/insumos/Quejas directas/Anexo02_Index/screens/SCR-008.md": {
-    "mtime": 1786657382.5318098,
-    "seen": 1787239182.7316556,
+    "mtime": 1786659720.504946,
+    "seen": 1787255885.5910225,
     "ast_hash": "94644abcf1c195179a9a86c2e4f0626a",
     "semantic_hash": ""
   },
   "pm4-app/insumos/Quejas directas/Anexo02_Index/screens/SCR-009.md": {
-    "mtime": 1786657382.5333326,
-    "seen": 1787239182.731657,
+    "mtime": 1786659720.504946,
+    "seen": 1787255885.5910234,
     "ast_hash": "ab53e41da4b6c3e7a4d1635dda36dd20",
     "semantic_hash": ""
   },
   "pm4-app/insumos/Quejas directas/Anexo02_Index/screens/SCR-011.md": {
-    "mtime": 1786657382.5353312,
-    "seen": 1787239182.7316582,
+    "mtime": 1786659720.504946,
+    "seen": 1787255885.5910242,
     "ast_hash": "c0f25fbd65c88fa04f71a119c0be5465",
     "semantic_hash": ""
   },
   "pm4-app/insumos/Quejas directas/Anexo02_Index/screens/SCR-012.md": {
-    "mtime": 1786657382.5383327,
-    "seen": 1787239182.7316592,
+    "mtime": 1786659720.504946,
+    "seen": 1787255885.5910249,
     "ast_hash": "74d5a6e482828c1afa4baba0e187a7cf",
     "semantic_hash": ""
   },
   "pm4-app/insumos/Quejas directas/Anexo02_Index/screens/SCR-013.md": {
-    "mtime": 1786657382.5403318,
-    "seen": 1787239182.7316608,
+    "mtime": 1786659720.5211184,
+    "seen": 1787255885.5910254,
     "ast_hash": "636e964b9c98afa0b7c929a783dad98a",
     "semantic_hash": ""
   },
   "pm4-app/outputs/shared-css-catalog.md": {
-    "mtime": 1786657382.66169,
-    "seen": 1787239182.7317176,
+    "mtime": 1786659720.6711922,
+    "seen": 1787255885.5910573,
     "ast_hash": "3fff8198adf633d95b92bc89cd0ec3f2",
     "semantic_hash": ""
   },
   "pm4-app/outputs/zds-cheatsheet.md": {
-    "mtime": 1786657382.6642094,
-    "seen": 1787239182.731719,
+    "mtime": 1786659720.6759312,
+    "seen": 1787255885.5910583,
     "ast_hash": "409d63115c943fec2acd5a53860f7e2b",
     "semantic_hash": ""
   },
   "pm4-app/outputs/zurich-index.md": {
-    "mtime": 1786657382.6682093,
-    "seen": 1787239182.7317202,
+    "mtime": 1786659720.6789594,
+    "seen": 1787255885.591059,
     "ast_hash": "172557165ff08f1f6c52d454b227a4fc",
     "semantic_hash": ""
   },
   "pm4-app/outputs/react/VENDOR_COMPONENT_CATALOG.md": {
-    "mtime": 1786657382.564609,
-    "seen": 1787239182.7316625,
+    "mtime": 1786659720.5547147,
+    "seen": 1787255885.591026,
     "ast_hash": "55f8715b7b31b4ea661179fd4151205d",
     "semantic_hash": ""
   },
   "pm4-app/outputs/react/atoms/zurich-button.md": {
-    "mtime": 1786657382.566604,
-    "seen": 1787239182.7316642,
+    "mtime": 1786659720.5594983,
+    "seen": 1787255885.5910275,
     "ast_hash": "bacfe05a790e883f51a78e52fbd859d8",
     "semantic_hash": ""
   },
   "pm4-app/outputs/react/atoms/zurich-icon.md": {
-    "mtime": 1786657382.568594,
-    "seen": 1787239182.7316654,
+    "mtime": 1786659720.5615025,
+    "seen": 1787255885.5910282,
     "ast_hash": "9677b0d45a08277158be080ea01b3195",
     "semantic_hash": ""
   },
   "pm4-app/outputs/react/atoms/zurich-progressbar.md": {
-    "mtime": 1786657382.5705945,
-    "seen": 1787239182.7316668,
+    "mtime": 1786659720.5635066,
+    "seen": 1787255885.591029,
     "ast_hash": "26a1d60f583fede58a3d80814e429478",
     "semantic_hash": ""
   },
   "pm4-app/outputs/react/atoms/zurich-tooltip.md": {
-    "mtime": 1786657382.5721009,
-    "seen": 1787239182.7316678,
+    "mtime": 1786659720.56551,
+    "seen": 1787255885.5910296,
     "ast_hash": "e2fd2372540313b32a956be87cb6ffb9",
     "semantic_hash": ""
   },
   "pm4-app/outputs/react/foundations/zurich-colors-palettes.md": {
-    "mtime": 1786657382.5791168,
-    "seen": 1787239182.731672,
+    "mtime": 1786659720.5750358,
+    "seen": 1787255885.5910323,
     "ast_hash": "c5ceec372fc2adf406ab549676fb96c9",
     "semantic_hash": ""
   },
   "pm4-app/outputs/react/foundations/zurich-colors.md": {
-    "mtime": 1786657382.5811186,
-    "seen": 1787239182.731674,
+    "mtime": 1786659720.57604,
+    "seen": 1787255885.591033,
     "ast_hash": "8aa0af75cbd677ecd6b49fd7bce04e73",
     "semantic_hash": ""
   },
   "pm4-app/outputs/react/foundations/zurich-layouts-flex.md": {
-    "mtime": 1786657382.5821152,
-    "seen": 1787239182.7316756,
+    "mtime": 1786659720.5800478,
+    "seen": 1787255885.591034,
     "ast_hash": "d82dee20671778014160e95b88432659",
     "semantic_hash": ""
   },
   "pm4-app/outputs/react/foundations/zurich-layouts-grid.md": {
-    "mtime": 1786657382.5855255,
-    "seen": 1787239182.7316775,
+    "mtime": 1786659720.5800478,
+    "seen": 1787255885.5910347,
     "ast_hash": "cbf78c76d1d0e4851af44830deb2c750",
     "semantic_hash": ""
   },
   "pm4-app/outputs/react/foundations/zurich-spacers.md": {
-    "mtime": 1786657382.5875306,
-    "seen": 1787239182.7316787,
+    "mtime": 1786659720.5841238,
+    "seen": 1787255885.5910358,
     "ast_hash": "64784b047d6f1da4478d56594fd8c9ba",
     "semantic_hash": ""
   },
   "pm4-app/outputs/react/foundations/zurich-typography-styles.md": {
-    "mtime": 1786657382.5890398,
-    "seen": 1787239182.7316804,
+    "mtime": 1786659720.5871577,
+    "seen": 1787255885.5910366,
     "ast_hash": "ac456ae39d0d570d7bcd9654fc465e87",
     "semantic_hash": ""
   },
   "pm4-app/outputs/react/foundations/zurich-typography.md": {
-    "mtime": 1786657382.5920484,
-    "seen": 1787239182.7316818,
+    "mtime": 1786659720.5897436,
+    "seen": 1787255885.5910375,
     "ast_hash": "89d6062fcc54ca017fdc06c8417895e5",
     "semantic_hash": ""
   },
   "pm4-app/outputs/react/foundations/assets/zurich-brand-icons.md": {
-    "mtime": 1786657382.575117,
-    "seen": 1787239182.7316694,
+    "mtime": 1786659720.56952,
+    "seen": 1787255885.5910308,
     "ast_hash": "eca6afb0135bf57ea1d75b62a9b62970",
     "semantic_hash": ""
   },
   "pm4-app/outputs/react/foundations/assets/zurich-icons.md": {
-    "mtime": 1786657382.577116,
-    "seen": 1787239182.7316706,
+    "mtime": 1786659720.573031,
+    "seen": 1787255885.5910316,
     "ast_hash": "cb4f19f8bec878b025ac55fef467b009",
     "semantic_hash": ""
   },
   "pm4-app/outputs/react/input/zurich-calendar.md": {
-    "mtime": 1786657382.5952787,
-    "seen": 1787239182.731683,
+    "mtime": 1786659720.5937526,
+    "seen": 1787255885.5910385,
     "ast_hash": "e6995d5d48a7d9b8085bcc7559f2ddcb",
     "semantic_hash": ""
   },
   "pm4-app/outputs/react/input/zurich-checkbox.md": {
-    "mtime": 1786657382.5977435,
-    "seen": 1787239182.7316844,
+    "mtime": 1786659720.5957575,
+    "seen": 1787255885.5910392,
     "ast_hash": "87ba193bbda5259a8130fd347a364089",
     "semantic_hash": ""
   },
   "pm4-app/outputs/react/input/zurich-dateinput.md": {
-    "mtime": 1786657382.600757,
-    "seen": 1787239182.7316856,
+    "mtime": 1786659720.597762,
+    "seen": 1787255885.59104,
     "ast_hash": "9f33eecfeb1f0020fea0d73421d022aa",
     "semantic_hash": ""
   },
   "pm4-app/outputs/react/input/zurich-radioselect.md": {
-    "mtime": 1786657382.6032722,
-    "seen": 1787239182.731687,
+    "mtime": 1786659720.5997658,
+    "seen": 1787255885.5910408,
     "ast_hash": "c85e7e52b97b3ff5aa7eebd0f549d352",
     "semantic_hash": ""
   },
   "pm4-app/outputs/react/input/zurich-rangedateinput.md": {
-    "mtime": 1786657382.6052818,
-    "seen": 1787239182.731689,
+    "mtime": 1786659720.6045454,
+    "seen": 1787255885.5910413,
     "ast_hash": "34150b362274b513a579cb55a2a9ced2",
     "semantic_hash": ""
   },
   "pm4-app/outputs/react/input/zurich-select.md": {
-    "mtime": 1786657382.6072824,
-    "seen": 1787239182.7316906,
+    "mtime": 1786659720.6045454,
+    "seen": 1787255885.591042,
     "ast_hash": "780418b349afcee18a0b05092a0804bf",
     "semantic_hash": ""
   },
   "pm4-app/outputs/react/input/zurich-stepper.md": {
-    "mtime": 1786657382.6087925,
-    "seen": 1787239182.7316923,
+    "mtime": 1786659720.6045454,
+    "seen": 1787255885.5910428,
     "ast_hash": "b45d1ce8d172773c3d7a531eef3f3b35",
     "semantic_hash": ""
   },
   "pm4-app/outputs/react/input/zurich-switch.md": {
-    "mtime": 1786657382.6109002,
-    "seen": 1787239182.7316937,
+    "mtime": 1786659720.6045454,
+    "seen": 1787255885.5910435,
     "ast_hash": "58e70bba82c9407f16df6e8b1935ddfe",
     "semantic_hash": ""
   },
   "pm4-app/outputs/react/input/zurich-textarea.md": {
-    "mtime": 1786657382.612419,
-    "seen": 1787239182.7316952,
+    "mtime": 1786659720.6136482,
+    "seen": 1787255885.5910444,
     "ast_hash": "844ece4f3c53bef016dc6c085ed120c8",
     "semantic_hash": ""
   },
   "pm4-app/outputs/react/input/zurich-textinput.md": {
-    "mtime": 1786657382.6155586,
-    "seen": 1787239182.7316964,
+    "mtime": 1786659720.6156538,
+    "seen": 1787255885.5910451,
     "ast_hash": "a5fe67cfffa8d00a4653824b2ba327b3",
     "semantic_hash": ""
   },
   "pm4-app/outputs/react/layout/zurich-card.md": {
-    "mtime": 1786657382.617566,
-    "seen": 1787239182.7316973,
+    "mtime": 1786659720.6196632,
+    "seen": 1787255885.591046,
     "ast_hash": "2deb7d9bef5df27d3ce8b58d87159a15",
     "semantic_hash": ""
   },
   "pm4-app/outputs/react/layout/zurich-footer.md": {
-    "mtime": 1786657382.619567,
-    "seen": 1787239182.731699,
+    "mtime": 1786659720.6211896,
+    "seen": 1787255885.5910468,
     "ast_hash": "79b17ddd2393166f0843b599309f7f8f",
     "semantic_hash": ""
   },
   "pm4-app/outputs/react/layout/zurich-form.md": {
-    "mtime": 1786657382.6205661,
-    "seen": 1787239182.7317004,
+    "mtime": 1786659720.6211896,
+    "seen": 1787255885.5910478,
     "ast_hash": "d301cc657b02c463eb664a68a1c18cc8",
     "semantic_hash": ""
   },
   "pm4-app/outputs/react/layout/zurich-inputgroup.md": {
-    "mtime": 1786657382.6230872,
-    "seen": 1787239182.7317019,
+    "mtime": 1786659720.6275764,
+    "seen": 1787255885.5910485,
     "ast_hash": "cf9ab41d45d57a857397260bdfabe0c6",
     "semantic_hash": ""
   },
   "pm4-app/outputs/react/layout/zurich-modal.md": {
-    "mtime": 1786657382.6250992,
-    "seen": 1787239182.7317028,
+    "mtime": 1786659720.6295824,
+    "seen": 1787255885.5910492,
     "ast_hash": "b97e1f52f02bc7311e23b9d7d9efdfa4",
     "semantic_hash": ""
   },
   "pm4-app/outputs/react/layout/zurich-pagination.md": {
-    "mtime": 1786657382.628311,
-    "seen": 1787239182.7317045,
+    "mtime": 1786659720.6315892,
+    "seen": 1787255885.59105,
     "ast_hash": "66c8f4b604989b048cf8df75c0705af3",
     "semantic_hash": ""
   },
   "pm4-app/outputs/react/layout/zurich-sidebar.md": {
-    "mtime": 1786657382.6313086,
-    "seen": 1787239182.7317054,
+    "mtime": 1786659720.6376314,
+    "seen": 1787255885.5910504,
     "ast_hash": "7194f7083bc4dd4f7a7a210a217cbef6",
     "semantic_hash": ""
   },
   "pm4-app/outputs/react/layout/zurich-table.md": {
-    "mtime": 1786657382.634445,
-    "seen": 1787239182.7317066,
+    "mtime": 1786659720.6406064,
+    "seen": 1787255885.5910516,
     "ast_hash": "bbf60c06555687805f0459e902705ea0",
     "semantic_hash": ""
   },
   "pm4-app/outputs/react/layout/zurich-tabs.md": {
-    "mtime": 1786657382.6372247,
-    "seen": 1787239182.7317078,
+    "mtime": 1786659720.6446257,
+    "seen": 1787255885.591052,
     "ast_hash": "50db50865fad6f481254b809bdcd711e",
     "semantic_hash": ""
   },
   "pm4-app/outputs/react/molecules/zurich-emptystate.md": {
-    "mtime": 1786657382.6422067,
-    "seen": 1787239182.7317092,
+    "mtime": 1786659720.6491306,
+    "seen": 1787255885.5910528,
     "ast_hash": "1cf8f5d7d21038fde1ed8ca5c3ad025d",
     "semantic_hash": ""
   },
   "pm4-app/outputs/react/molecules/zurich-kpivalue.md": {
-    "mtime": 1786657382.6453688,
-    "seen": 1787239182.7317104,
+    "mtime": 1786659720.6549294,
+    "seen": 1787255885.5910535,
     "ast_hash": "31e8fc80798c3c9fb67ac69fb37173b8",
     "semantic_hash": ""
   },
   "pm4-app/outputs/react/molecules/zurich-promo.md": {
-    "mtime": 1786657382.6483793,
-    "seen": 1787239182.731712,
+    "mtime": 1786659720.6604266,
+    "seen": 1787255885.5910547,
     "ast_hash": "a06dfe1658a80a47b2c4f752f79e5006",
     "semantic_hash": ""
   },
   "pm4-app/outputs/react/molecules/zurich-stagebanner.md": {
-    "mtime": 1786657382.6506758,
-    "seen": 1787239182.731713,
+    "mtime": 1786659720.6604266,
+    "seen": 1787255885.5910552,
     "ast_hash": "0d696a9e34b45548f2b25bc0b8b9bdf3",
     "semantic_hash": ""
   },
   "pm4-app/outputs/react/molecules/zurich-tile.md": {
-    "mtime": 1786657382.6550012,
-    "seen": 1787239182.7317147,
+    "mtime": 1786659720.665561,
+    "seen": 1787255885.5910559,
     "ast_hash": "bdf36f245e127eb411638e1d35faaa00",
     "semantic_hash": ""
   },
   "pm4-app/outputs/react/navigation/zurich-navigation.md": {
-    "mtime": 1786657382.6583107,
-    "seen": 1787239182.7317162,
+    "mtime": 1786659720.6705651,
+    "seen": 1787255885.5910566,
     "ast_hash": "300a5d0e9204b328480d630b24762c9d",
     "semantic_hash": ""
   },
   "pm4_architecture.png": {
-    "mtime": 1786657382.7442143,
-    "seen": 1787239182.731749,
+    "mtime": 1786659720.769842,
+    "seen": 1787255885.5910718,
     "ast_hash": "30ecdf4334a309494a6165b54da610f0",
     "semantic_hash": ""
   },
   "pm4-app/docs/architecture/pm4_render_integration.svg": {
-    "mtime": 1786657382.050385,
-    "seen": 1787239182.7317286,
+    "mtime": 1786659719.6659677,
+    "seen": 1787255885.5910625,
     "ast_hash": "bacfcf93d8b848ea79918a2361121e2b",
     "semantic_hash": ""
   },
   "pm4-app/frontend/src/resources/zurich/ZurichLogo_Horz_Black_CMYK_no_R.jpeg": {
-    "mtime": 1786657382.18746,
-    "seen": 1787239182.7317324,
+    "mtime": 1786659719.89953,
+    "seen": 1787255885.5910642,
     "ast_hash": "c02982a798b9837324d57f4fd71beebb",
     "semantic_hash": ""
   },
   "pm4-app/frontend/src/resources/zurich/ZurichLogo_Horz_Blue_CMYK_no_R.jpeg": {
-    "mtime": 1786657382.188975,
-    "seen": 1787239182.731735,
+    "mtime": 1786659719.9049017,
+    "seen": 1787255885.5910652,
     "ast_hash": "8d92813d3faada8fd113c82a9edd1d2c",
     "semantic_hash": ""
   },
   "pm4-app/frontend/src/resources/zurich/ZurichLogo_Horz_White_CMYK_no_R.png": {
-    "mtime": 1786657382.1909952,
-    "seen": 1787239182.731737,
+    "mtime": 1786659719.9049017,
+    "seen": 1787255885.5910661,
     "ast_hash": "28d7a4a12eff6c453653726d30b3c2c0",
     "semantic_hash": ""
   },
   "pm4-app/frontend/src/resources/zurich/ZurichLogo_Ribbon_Black_CMYK_no_R.jpeg": {
-    "mtime": 1786657382.1925027,
-    "seen": 1787239182.7317386,
+    "mtime": 1786659719.9049017,
+    "seen": 1787255885.5910666,
     "ast_hash": "a0a82026f64d1cb114aaed6607ebe804",
     "semantic_hash": ""
   },
   "pm4-app/frontend/src/resources/zurich/ZurichLogo_Ribbon_Blue_CMYK_no_R.jpeg": {
-    "mtime": 1786657382.1945107,
-    "seen": 1787239182.7317402,
+    "mtime": 1786659719.9126136,
+    "seen": 1787255885.5910673,
     "ast_hash": "24bb66f9157ccc074c0881f552d6b028",
     "semantic_hash": ""
   },
   "pm4-app/frontend/src/resources/zurich/ZurichLogo_Ribbon_White_CMYK_no_R.png": {
-    "mtime": 1786657382.1965196,
-    "seen": 1787239182.731742,
+    "mtime": 1786659719.9163535,
+    "seen": 1787255885.5910685,
     "ast_hash": "696f2e2df866d99fa542cde4b43b84fb",
     "semantic_hash": ""
   },
   "pm4-app/frontend/src/resources/zurich/ZurichLogo_Vert_Black_CMYK_no_R.jpeg": {
-    "mtime": 1786657382.1975086,
-    "seen": 1787239182.7317438,
+    "mtime": 1786659719.9192498,
+    "seen": 1787255885.5910692,
     "ast_hash": "5cfb5b860020008789079441a7fc989b",
     "semantic_hash": ""
   },
   "pm4-app/frontend/src/resources/zurich/ZurichLogo_Vert_White_CMYK_no_R.png": {
-    "mtime": 1786657382.1995087,
-    "seen": 1787239182.7317457,
+    "mtime": 1786659719.921024,
+    "seen": 1787255885.59107,
     "ast_hash": "f88a324a93abde30e1d6303ad362f04c",
     "semantic_hash": ""
   },
   "pm4-app/frontend/src/resources/zurich/Zurich_Logo_Vert_Blue_CMYK_no_R.jpeg": {
-    "mtime": 1786657382.2015133,
-    "seen": 1787239182.7317476,
+    "mtime": 1786659719.921024,
+    "seen": 1787255885.591071,
     "ast_hash": "4284b3c7f3c18fc5b53b0ad8139a541b",
     "semantic_hash": ""
   },
   ".claude/hooks/pm4-capture.mjs": {
-    "mtime": 1786657381.0464752,
-    "seen": 1787239182.7308698,
+    "mtime": 1786659718.574265,
+    "seen": 1787255885.5904636,
     "ast_hash": "f38be619de735bb9cfac0b48501aa4bf",
     "semantic_hash": ""
   },
   ".claude/read-graph.ps1": {
-    "mtime": 1786657381.050477,
-    "seen": 1787239182.7308788,
+    "mtime": 1786659718.574265,
+    "seen": 1787255885.5904717,
     "ast_hash": "e6bdd0dc3a6d35137fb30ebcded17e5f",
     "semantic_hash": ""
   },
   ".githooks/pre-commit": {
-    "mtime": 1787238658.2288504,
-    "seen": 1787239182.7308817,
+    "mtime": 1787243030.7561543,
+    "seen": 1787255885.5904746,
     "ast_hash": "f5277bc490d7a5e2efe7e85e54467360",
     "semantic_hash": ""
   },
   ".githooks/pre-push": {
-    "mtime": 1786657381.0655558,
-    "seen": 1787239182.7308846,
+    "mtime": 1786659718.5933034,
+    "seen": 1787255885.5904768,
     "ast_hash": "41cf1fcb18858c48b32aaa210f33bea9",
     "semantic_hash": ""
   },
   "InsumosZurich/fe-lib-zurich/angular.json": {
-    "mtime": 1787165798.1394863,
-    "seen": 1787239182.730887,
-    "ast_hash": "b7d127d27533febd3129de372ad7a631",
+    "mtime": 1786644668.6667333,
+    "seen": 1787255885.5904791,
+    "ast_hash": "f086aa95e33e3635ab3726a86ab2bc0d",
     "semantic_hash": ""
   },
   "InsumosZurich/fe-lib-zurich/package.json": {
-    "mtime": 1787165798.1478553,
-    "seen": 1787239182.7308886,
-    "ast_hash": "ed8583d2662730526c1b76c4b334744d",
+    "mtime": 1786644668.7045093,
+    "seen": 1787255885.5904803,
+    "ast_hash": "108856f8d6ce0613a88d84760f6b6ce9",
     "semantic_hash": ""
   },
   "InsumosZurich/fe-lib-zurich/projects/lib-zurich/karma.conf.js": {
-    "mtime": 1787165798.1518655,
-    "seen": 1787239182.730891,
-    "ast_hash": "069a2259ff6ac00d51844cdb305f5edc",
+    "mtime": 1786644668.75978,
+    "seen": 1787255885.590482,
+    "ast_hash": "21e69136f2c63061855d73e72fb154fc",
     "semantic_hash": ""
   },
   "InsumosZurich/fe-lib-zurich/projects/lib-zurich/ng-package.json": {
-    "mtime": 1787165798.1528623,
-    "seen": 1787239182.7308936,
-    "ast_hash": "f6bf1b597d92bd9cc50eebece79f260e",
+    "mtime": 1786644668.774552,
+    "seen": 1787255885.5904832,
+    "ast_hash": "9f5674f355aafa30634a8eae7fb8bfd2",
     "semantic_hash": ""
   },
   "InsumosZurich/fe-lib-zurich/projects/lib-zurich/package.json": {
-    "mtime": 1787165798.1553898,
-    "seen": 1787239182.7308955,
-    "ast_hash": "eb0f76ea3411a6ae18afa97348b005f4",
+    "mtime": 1786644668.7943723,
+    "seen": 1787255885.5904846,
+    "ast_hash": "71b81b639a749c3f49b4d5d5fe331b48",
     "semantic_hash": ""
   },
   "InsumosZurich/fe-lib-zurich/projects/lib-zurich/src/lib/components/accordion-z/accordion-z.spec.ts": {
-    "mtime": 1787165798.162386,
-    "seen": 1787239182.7308972,
-    "ast_hash": "4de2d148b46418203bb085a4260121a9",
+    "mtime": 1786644669.0088382,
+    "seen": 1787255885.590486,
+    "ast_hash": "b9673f84ca1ff29abe445a3a58ac2756",
     "semantic_hash": ""
   },
   "InsumosZurich/fe-lib-zurich/projects/lib-zurich/src/lib/components/accordion-z/accordion-z.ts": {
-    "mtime": 1787165798.164904,
-    "seen": 1787239182.7308986,
-    "ast_hash": "b802f51d112e48b62649891dca6b0e57",
+    "mtime": 1786644669.0244815,
+    "seen": 1787255885.5904884,
+    "ast_hash": "9092486f623a5eb771de6df66ea0902e",
     "semantic_hash": ""
   },
   "InsumosZurich/fe-lib-zurich/projects/lib-zurich/src/lib/components/alert-z/alert-z.spec.ts": {
-    "mtime": 1787165798.169421,
-    "seen": 1787239182.7309003,
-    "ast_hash": "52bd51012cf84ceda595e044e0ca576a",
+    "mtime": 1786644669.0882835,
+    "seen": 1787255885.5904899,
+    "ast_hash": "f8fb7bd15a7618bee8e3bd81645d1066",
     "semantic_hash": ""
   },
   "InsumosZurich/fe-lib-zurich/projects/lib-zurich/src/lib/components/alert-z/alert-z.ts": {
-    "mtime": 1787165798.1714256,
-    "seen": 1787239182.7309022,
-    "ast_hash": "0d72e4775ae4166705c6be546c675f92",
+    "mtime": 1786644669.1040666,
+    "seen": 1787255885.590491,
+    "ast_hash": "070b168341fb8721107073767ff89233",
     "semantic_hash": ""
   },
   "InsumosZurich/fe-lib-zurich/projects/lib-zurich/src/lib/components/avatar-z/avatar-z.spec.ts": {
-    "mtime": 1787165798.1774511,
-    "seen": 1787239182.7309046,
-    "ast_hash": "a113e2f78e15402e6c2e523a17094742",
+    "mtime": 1786644669.1672156,
+    "seen": 1787255885.590493,
+    "ast_hash": "91ca2e246c5268b38855a4ae715c131b",
     "semantic_hash": ""
   },
   "InsumosZurich/fe-lib-zurich/projects/lib-zurich/src/lib/components/avatar-z/avatar-z.ts": {
-    "mtime": 1787165798.1794505,
-    "seen": 1787239182.7309067,
-    "ast_hash": "82f674f463b63e54f622ba4d126a7914",
+    "mtime": 1786644669.1833625,
+    "seen": 1787255885.5904946,
+    "ast_hash": "0f96606cd8c82e42b4592c13004d82f2",
     "semantic_hash": ""
   },
   "InsumosZurich/fe-lib-zurich/projects/lib-zurich/src/lib/components/button-z/button-z.spec.ts": {
-    "mtime": 1787165798.1834538,
-    "seen": 1787239182.7309082,
-    "ast_hash": "cc29bc839c17726809c3d0c1b8e0fe36",
+    "mtime": 1786644669.2308137,
+    "seen": 1787255885.590496,
+    "ast_hash": "0214fef28ab28b37965db0cc977cc30e",
     "semantic_hash": ""
   },
   "InsumosZurich/fe-lib-zurich/projects/lib-zurich/src/lib/components/button-z/button-z.ts": {
-    "mtime": 1787165798.185545,
-    "seen": 1787239182.7309096,
-    "ast_hash": "a2c4be6501a0d1bb77895b279f5701c9",
+    "mtime": 1786644669.246927,
+    "seen": 1787255885.5904973,
+    "ast_hash": "f371069476c1e1113ebf0ec688b92c9a",
     "semantic_hash": ""
   },
   "InsumosZurich/fe-lib-zurich/projects/lib-zurich/src/lib/components/card-z/card-z.spec.ts": {
-    "mtime": 1787165798.1905572,
-    "seen": 1787239182.7309113,
-    "ast_hash": "f21304a06c518a43b6d42d2c6079bf98",
+    "mtime": 1786644669.3100278,
+    "seen": 1787255885.5904984,
+    "ast_hash": "4d7eecf6f7b74055da0b3a968b2c02ef",
     "semantic_hash": ""
   },
   "InsumosZurich/fe-lib-zurich/projects/lib-zurich/src/lib/components/card-z/card-z.ts": {
-    "mtime": 1787165798.191555,
-    "seen": 1787239182.7309132,
-    "ast_hash": "9b505414ae56ecd97d9c0381840d48f4",
+    "mtime": 1786644669.3258638,
+    "seen": 1787255885.5905,
+    "ast_hash": "71308d0ed26d4cb48037caed4bbadaa7",
     "semantic_hash": ""
   },
   "InsumosZurich/fe-lib-zurich/projects/lib-zurich/src/lib/components/checkbox-z/checkbox-z.spec.ts": {
-    "mtime": 1787165798.1995368,
-    "seen": 1787239182.730915,
-    "ast_hash": "4949a1de7b66f9a0aea17b1ee7080ebd",
+    "mtime": 1786644669.3972476,
+    "seen": 1787255885.5905013,
+    "ast_hash": "9ccc2454c89ec6fdf0f966f54a54bb71",
     "semantic_hash": ""
   },
   "InsumosZurich/fe-lib-zurich/projects/lib-zurich/src/lib/components/checkbox-z/checkbox-z.ts": {
-    "mtime": 1787165798.200539,
-    "seen": 1787239182.7309165,
-    "ast_hash": "8b76b70c9889e8ca4a17210f581bdee1",
+    "mtime": 1786644669.4212267,
+    "seen": 1787255885.590503,
+    "ast_hash": "82215c027b35b1584f187b01e2d446f7",
     "semantic_hash": ""
   },
   "InsumosZurich/fe-lib-zurich/projects/lib-zurich/src/lib/components/footer-z/footer-z.spec.ts": {
-    "mtime": 1787165798.2060504,
-    "seen": 1787239182.7309182,
-    "ast_hash": "138e9673a260320f963fdde17e71c46c",
+    "mtime": 1786644669.5215757,
+    "seen": 1787255885.5905042,
+    "ast_hash": "607d94576d2d007708f7106179bc11b6",
     "semantic_hash": ""
   },
   "InsumosZurich/fe-lib-zurich/projects/lib-zurich/src/lib/components/footer-z/footer-z.ts": {
-    "mtime": 1787165798.2078032,
-    "seen": 1787239182.7309194,
-    "ast_hash": "d593b7f61bcfaa7ad09bddfc33432b66",
+    "mtime": 1786644669.5432923,
+    "seen": 1787255885.5905058,
+    "ast_hash": "9a4ac4b022bd77c9420815cbb6a86fec",
     "semantic_hash": ""
   },
   "InsumosZurich/fe-lib-zurich/projects/lib-zurich/src/lib/components/input-date-z/input-date-z.spec.ts": {
-    "mtime": 1787165798.2145464,
-    "seen": 1787239182.7309213,
-    "ast_hash": "8b88ced3da3ac515ca359449d78f5266",
+    "mtime": 1786644669.6239474,
+    "seen": 1787255885.5905073,
+    "ast_hash": "03382f7ce780135e7aa8ee6ae9bfff76",
     "semantic_hash": ""
   },
   "InsumosZurich/fe-lib-zurich/projects/lib-zurich/src/lib/components/input-date-z/input-date-z.ts": {
-    "mtime": 1787165798.2165608,
-    "seen": 1787239182.7309227,
-    "ast_hash": "90cd4eba9bf4ed847bd4605541ead573",
+    "mtime": 1786644669.6432478,
+    "seen": 1787255885.5905082,
+    "ast_hash": "d68981c62b0e8e44a05baf3a21567982",
     "semantic_hash": ""
   },
   "InsumosZurich/fe-lib-zurich/projects/lib-zurich/src/lib/components/input-password-z/input-password-z.spec.ts": {
-    "mtime": 1787165798.2205608,
-    "seen": 1787239182.7309244,
-    "ast_hash": "60cc1e705cd3209f6ec68cc5bc303e45",
+    "mtime": 1786644669.7217312,
+    "seen": 1787255885.5905097,
+    "ast_hash": "93ad102d248530a4195bf04759f8e908",
     "semantic_hash": ""
   },
   "InsumosZurich/fe-lib-zurich/projects/lib-zurich/src/lib/components/input-password-z/input-password-z.ts": {
-    "mtime": 1787165798.222562,
-    "seen": 1787239182.7309256,
-    "ast_hash": "0f7b84cef031221f39e5afcfd3243356",
+    "mtime": 1786644669.7554154,
+    "seen": 1787255885.5905113,
+    "ast_hash": "07bacd76d3c62336b638a794f2416d8f",
     "semantic_hash": ""
   },
   "InsumosZurich/fe-lib-zurich/projects/lib-zurich/src/lib/components/input-select-z/input-select-z.spec.ts": {
-    "mtime": 1787165798.2299254,
-    "seen": 1787239182.7309277,
-    "ast_hash": "44b3c9a0363eedae20a7f7c2a8515023",
+    "mtime": 1786644669.8422248,
+    "seen": 1787255885.590513,
+    "ast_hash": "9c525908ce3aa43f13a093d965d28249",
     "semantic_hash": ""
   },
   "InsumosZurich/fe-lib-zurich/projects/lib-zurich/src/lib/components/input-select-z/input-select-z.ts": {
-    "mtime": 1787165798.2319357,
-    "seen": 1787239182.7309294,
-    "ast_hash": "61e38b1b3f0d81925c68aa0edabfe2a3",
+    "mtime": 1786644669.862159,
+    "seen": 1787255885.590514,
+    "ast_hash": "30fb81693b3e9a403ee80377842dba67",
     "semantic_hash": ""
   },
   "InsumosZurich/fe-lib-zurich/projects/lib-zurich/src/lib/components/input-text-z/input-text-z.spec.ts": {
-    "mtime": 1787165798.2374194,
-    "seen": 1787239182.730931,
-    "ast_hash": "399db71879581a949593246d62a9573e",
+    "mtime": 1786644669.9387288,
+    "seen": 1787255885.5905156,
+    "ast_hash": "caaed97401f0b4dce2ac4116905083c0",
     "semantic_hash": ""
   },
   "InsumosZurich/fe-lib-zurich/projects/lib-zurich/src/lib/components/input-text-z/input-text-z.ts": {
-    "mtime": 1787165798.2404132,
-    "seen": 1787239182.7309325,
-    "ast_hash": "9b21e2b04debd8de71eb1449f6722ac1",
+    "mtime": 1786644669.95917,
+    "seen": 1787255885.590517,
+    "ast_hash": "7ea02cf4c442277be1ce48f7f7201c89",
     "semantic_hash": ""
   },
   "InsumosZurich/fe-lib-zurich/projects/lib-zurich/src/lib/components/input-time-z/input-time-z.spec.ts": {
-    "mtime": 1787165798.2474349,
-    "seen": 1787239182.7309344,
-    "ast_hash": "59d5c793a8b48acbfa252c90beb6debc",
+    "mtime": 1786644670.0399275,
+    "seen": 1787255885.590518,
+    "ast_hash": "05eff65352352182c1a8a5c92e1a63c0",
     "semantic_hash": ""
   },
   "InsumosZurich/fe-lib-zurich/projects/lib-zurich/src/lib/components/input-time-z/input-time-z.ts": {
-    "mtime": 1787165798.249442,
-    "seen": 1787239182.7309356,
-    "ast_hash": "c6878687c003dcea55fbbcbcfe6af436",
+    "mtime": 1786644670.0636995,
+    "seen": 1787255885.590519,
+    "ast_hash": "6362f10d7ebf901af65cb30b156c3d05",
     "semantic_hash": ""
   },
   "InsumosZurich/fe-lib-zurich/projects/lib-zurich/src/lib/components/loader-z/loader-z.ts": {
-    "mtime": 1787165798.253443,
-    "seen": 1787239182.7309368,
-    "ast_hash": "99d1cd33f267d87fcdbdcc27df9ba3ca",
+    "mtime": 1786644670.1333838,
+    "seen": 1787255885.5905204,
+    "ast_hash": "b54feaef2b39d0a9f88d6babe2c29a2c",
     "semantic_hash": ""
   },
   "InsumosZurich/fe-lib-zurich/projects/lib-zurich/src/lib/components/modal-z/modal-z.spec.ts": {
-    "mtime": 1787165798.259022,
-    "seen": 1787239182.7309384,
-    "ast_hash": "19dbf7ee1d1b1b9f3106fb9669e42713",
+    "mtime": 1786644670.2129261,
+    "seen": 1787255885.5905213,
+    "ast_hash": "8a98661083a0498970f66bb6904f35ef",
     "semantic_hash": ""
   },
   "InsumosZurich/fe-lib-zurich/projects/lib-zurich/src/lib/components/modal-z/modal-z.ts": {
-    "mtime": 1787165798.262023,
-    "seen": 1787239182.7309399,
-    "ast_hash": "79a7e41f646d679d15d7841dfa1db860",
+    "mtime": 1786644670.2308354,
+    "seen": 1787255885.5905228,
+    "ast_hash": "ddba584a6e0b33fcc968d28742ce6f29",
     "semantic_hash": ""
   },
   "InsumosZurich/fe-lib-zurich/projects/lib-zurich/src/lib/components/navigation-z/navigation-route.model.ts": {
-    "mtime": 1787165798.2645361,
-    "seen": 1787239182.7309418,
-    "ast_hash": "2396a735f2505f5312f8a9204a4214c1",
+    "mtime": 1786644670.2835696,
+    "seen": 1787255885.5905244,
+    "ast_hash": "cad93556503f2af4b96aa8b28f635d29",
     "semantic_hash": ""
   },
   "InsumosZurich/fe-lib-zurich/projects/lib-zurich/src/lib/components/navigation-z/navigation-z.spec.ts": {
-    "mtime": 1787165798.267566,
-    "seen": 1787239182.7309432,
-    "ast_hash": "d59c6fd6bb6ff53e049aec1abab2f8b4",
+    "mtime": 1786644670.3398118,
+    "seen": 1787255885.5905256,
+    "ast_hash": "7217d86cf4ec8997c12a47cc7936843a",
     "semantic_hash": ""
   },
   "InsumosZurich/fe-lib-zurich/projects/lib-zurich/src/lib/components/navigation-z/navigation-z.ts": {
-    "mtime": 1787165798.269078,
-    "seen": 1787239182.7309449,
-    "ast_hash": "282e5112bf60eedd04a554d60bea3838",
+    "mtime": 1786644670.355887,
+    "seen": 1787255885.5905273,
+    "ast_hash": "6361e915d41e9174b0a3c33652e0ee17",
     "semantic_hash": ""
   },
   "InsumosZurich/fe-lib-zurich/projects/lib-zurich/src/lib/components/pictogram-z/pictogram-z.spec.ts": {
-    "mtime": 1787165798.274494,
-    "seen": 1787239182.7309463,
-    "ast_hash": "b70c316538b5b64642e10acafde666d1",
+    "mtime": 1786644670.4291987,
+    "seen": 1787255885.5905287,
+    "ast_hash": "8ddf289cc8dc87f4315140570a74d05f",
     "semantic_hash": ""
   },
   "InsumosZurich/fe-lib-zurich/projects/lib-zurich/src/lib/components/pictogram-z/pictogram-z.ts": {
-    "mtime": 1787165798.275514,
-    "seen": 1787239182.7309477,
-    "ast_hash": "a56ddb82c728850e4681003aa5020ee1",
+    "mtime": 1786644670.451587,
+    "seen": 1787255885.5905304,
+    "ast_hash": "d61d287ee96a4a3496c859d1e18b15a6",
     "semantic_hash": ""
   },
   "InsumosZurich/fe-lib-zurich/projects/lib-zurich/src/lib/components/progress-tracker-z/progress-tracker-z.spec.ts": {
-    "mtime": 1787165798.2815268,
-    "seen": 1787239182.7309494,
-    "ast_hash": "ce965a5ab24ec24d0898402ff14f54ce",
+    "mtime": 1786644670.527596,
+    "seen": 1787255885.5905318,
+    "ast_hash": "f3a13446e21800b4830405b28ff1004c",
     "semantic_hash": ""
   },
   "InsumosZurich/fe-lib-zurich/projects/lib-zurich/src/lib/components/progress-tracker-z/progress-tracker-z.ts": {
-    "mtime": 1787165798.283525,
-    "seen": 1787239182.7309508,
-    "ast_hash": "ad9f2b3dc23f51a29ea150f7a34e7d3a",
+    "mtime": 1786644670.5470643,
+    "seen": 1787255885.590533,
+    "ast_hash": "a8629f7fcb6784fbc39f6b3518dc573b",
     "semantic_hash": ""
   },
   "InsumosZurich/fe-lib-zurich/projects/lib-zurich/src/lib/components/range-date-z/range-date-z.spec.ts": {
-    "mtime": 1787165798.287574,
-    "seen": 1787239182.7309527,
-    "ast_hash": "d0d69ae25f3482292579c949d016dd85",
+    "mtime": 1786644670.6104872,
+    "seen": 1787255885.5905344,
+    "ast_hash": "c6bebc093327c66066e8cb5f2e7c6ded",
     "semantic_hash": ""
   },
   "InsumosZurich/fe-lib-zurich/projects/lib-zurich/src/lib/components/range-date-z/range-date-z.ts": {
-    "mtime": 1787165798.2895677,
-    "seen": 1787239182.7309542,
-    "ast_hash": "6dce185095bc32b91287b09a7bba7df0",
+    "mtime": 1786644670.6370716,
+    "seen": 1787255885.5905356,
+    "ast_hash": "72aa2586137ebed3c9d31f06574db16b",
     "semantic_hash": ""
   },
   "InsumosZurich/fe-lib-zurich/projects/lib-zurich/src/lib/components/shape-z/shape-z.spec.ts": {
-    "mtime": 1787165798.2955809,
-    "seen": 1787239182.7309556,
-    "ast_hash": "c4b51fbed10280490aa755b577688bbc",
+    "mtime": 1786644670.7118587,
+    "seen": 1787255885.5905366,
+    "ast_hash": "55e259aae896a83c44dab1498a614f6d",
     "semantic_hash": ""
   },
   "InsumosZurich/fe-lib-zurich/projects/lib-zurich/src/lib/components/shape-z/shape-z.ts": {
-    "mtime": 1787165798.2975907,
-    "seen": 1787239182.7309566,
-    "ast_hash": "d9c4f5665b80c4e2360a6105e12b0914",
+    "mtime": 1786644670.7221532,
+    "seen": 1787255885.5905378,
+    "ast_hash": "ede7dc24702fc613e82e4288f0867c15",
     "semantic_hash": ""
   },
   "InsumosZurich/fe-lib-zurich/projects/lib-zurich/src/lib/components/stage-banner-z/stage-banner-z.spec.ts": {
-    "mtime": 1787165798.302827,
-    "seen": 1787239182.730958,
-    "ast_hash": "3c7d40b5ad816850acc95af1e90b6a0d",
+    "mtime": 1786644670.799344,
+    "seen": 1787255885.5905385,
+    "ast_hash": "49a5d65843d8de301eeff575588d603a",
     "semantic_hash": ""
   },
   "InsumosZurich/fe-lib-zurich/projects/lib-zurich/src/lib/components/stage-banner-z/stage-banner-z.ts": {
-    "mtime": 1787165798.3043423,
-    "seen": 1787239182.7309597,
-    "ast_hash": "bc60a9d84be15752dc54da4332010318",
+    "mtime": 1786644670.8254569,
+    "seen": 1787255885.5905397,
+    "ast_hash": "1b81c09928672f505fe2f4c1ab7d9f81",
     "semantic_hash": ""
   },
   "InsumosZurich/fe-lib-zurich/projects/lib-zurich/src/lib/components/stage-z/stage-z.spec.ts": {
-    "mtime": 1787165798.3083577,
-    "seen": 1787239182.7309606,
-    "ast_hash": "fac43f20cd5d293d776202e14df055e1",
+    "mtime": 1786644670.899636,
+    "seen": 1787255885.5905411,
+    "ast_hash": "5b13ba8ee281aaf75137579e8ac48f78",
     "semantic_hash": ""
   },
   "InsumosZurich/fe-lib-zurich/projects/lib-zurich/src/lib/components/stage-z/stage-z.ts": {
-    "mtime": 1787165798.3113558,
-    "seen": 1787239182.730962,
-    "ast_hash": "57078067c32ab4d479826e58cf6cf07e",
+    "mtime": 1786644670.918856,
+    "seen": 1787255885.5905418,
+    "ast_hash": "9ce737823d557012a0607ffedfccf885",
     "semantic_hash": ""
   },
   "InsumosZurich/fe-lib-zurich/projects/lib-zurich/src/lib/components/table-z/table-z.spec.ts": {
-    "mtime": 1787165798.317588,
-    "seen": 1787239182.7309637,
-    "ast_hash": "2b7a0a5259534cc27e56c2785ceae89c",
+    "mtime": 1786644670.9997814,
+    "seen": 1787255885.5905428,
+    "ast_hash": "9a773dad1ec8e2b6dceacd629b9d7c97",
     "semantic_hash": ""
   },
   "InsumosZurich/fe-lib-zurich/projects/lib-zurich/src/lib/components/table-z/table-z.ts": {
-    "mtime": 1787165798.3195863,
-    "seen": 1787239182.730965,
-    "ast_hash": "b600168aa7fc78e9aae9dfea4d49aa9e",
+    "mtime": 1786644671.0226662,
+    "seen": 1787255885.5905435,
+    "ast_hash": "588884d34c1a3c2e2a1be2ef609e010e",
     "semantic_hash": ""
   },
   "InsumosZurich/fe-lib-zurich/projects/lib-zurich/src/lib/components/tabs-z/tabs-z.spec.ts": {
-    "mtime": 1787165798.3235855,
-    "seen": 1787239182.7309666,
-    "ast_hash": "ad3c877fe8e3f20e69d0ceefaf784764",
+    "mtime": 1786644671.1016695,
+    "seen": 1787255885.5905447,
+    "ast_hash": "9b28cd1823fe60cde5c9d02ccfd01e99",
     "semantic_hash": ""
   },
   "InsumosZurich/fe-lib-zurich/projects/lib-zurich/src/lib/components/tabs-z/tabs-z.ts": {
-    "mtime": 1787165798.3250952,
-    "seen": 1787239182.7309678,
-    "ast_hash": "1bdd9b6ba92f7418c0bce7229ee2c608",
+    "mtime": 1786644671.1210523,
+    "seen": 1787255885.590546,
+    "ast_hash": "048af13f821765b75ff6b70654ce48d9",
     "semantic_hash": ""
   },
   "InsumosZurich/fe-lib-zurich/projects/lib-zurich/src/lib/components/tag-z/tag-z.spec.ts": {
-    "mtime": 1787165798.3313801,
-    "seen": 1787239182.7309697,
-    "ast_hash": "7f2a9dff091644e547baf09582ac6641",
+    "mtime": 1786644671.1970623,
+    "seen": 1787255885.590547,
+    "ast_hash": "eb36fd9a70afedf2b54e5ce3613dc853",
     "semantic_hash": ""
   },
   "InsumosZurich/fe-lib-zurich/projects/lib-zurich/src/lib/components/tag-z/tag-z.ts": {
-    "mtime": 1787165798.33339,
-    "seen": 1787239182.7309942,
-    "ast_hash": "c2a717db390fc068a346647135255c7e",
+    "mtime": 1786644671.2215478,
+    "seen": 1787255885.5905485,
+    "ast_hash": "1afae526698b010bd98c2b88c4e8af73",
     "semantic_hash": ""
   },
   "InsumosZurich/fe-lib-zurich/projects/lib-zurich/src/lib/components/textarea-z/textarea-z.spec.ts": {
-    "mtime": 1787165798.3377075,
-    "seen": 1787239182.731005,
-    "ast_hash": "2849f979e6661ad35e07f5f95f510ebd",
+    "mtime": 1786644671.2863743,
+    "seen": 1787255885.59055,
+    "ast_hash": "f50e1496aa4bab1b230274a2679215f3",
     "semantic_hash": ""
   },
   "InsumosZurich/fe-lib-zurich/projects/lib-zurich/src/lib/components/textarea-z/textarea-z.ts": {
-    "mtime": 1787165798.3387046,
-    "seen": 1787239182.7310066,
-    "ast_hash": "1668b40672fe8a2a4c1e8019e91a0d74",
+    "mtime": 1786644671.3103235,
+    "seen": 1787255885.5905511,
+    "ast_hash": "3ce1e2e12d5bf87926cb39d95dce6da5",
     "semantic_hash": ""
   },
   "InsumosZurich/fe-lib-zurich/projects/lib-zurich/src/lib/components/tile-z/tile-z.spec.ts": {
-    "mtime": 1787165798.3452365,
-    "seen": 1787239182.731008,
-    "ast_hash": "24c96c150bb87cd1b5e3e2e68c5d8d28",
+    "mtime": 1786644671.375365,
+    "seen": 1787255885.590552,
+    "ast_hash": "cca8796d4ca7a942319cb100204e539a",
     "semantic_hash": ""
   },
   "InsumosZurich/fe-lib-zurich/projects/lib-zurich/src/lib/components/tile-z/tile-z.ts": {
-    "mtime": 1787165798.3472438,
-    "seen": 1787239182.731009,
-    "ast_hash": "098634b4fd98677ce0e98175b6405331",
+    "mtime": 1786644671.4032257,
+    "seen": 1787255885.5905526,
+    "ast_hash": "d729abd60d668c02d9ca9217604d2dd9",
     "semantic_hash": ""
   },
   "InsumosZurich/fe-lib-zurich/projects/lib-zurich/src/lib/components/tooltip-z/tooltip-z.spec.ts": {
-    "mtime": 1787165798.352232,
-    "seen": 1787239182.73101,
-    "ast_hash": "96a9ba947b834b7cd52f6ee6184c8a60",
+    "mtime": 1786644671.4826052,
+    "seen": 1787255885.5905535,
+    "ast_hash": "2ed6b736750aeb31eb908012c863b2f8",
     "semantic_hash": ""
   },
   "InsumosZurich/fe-lib-zurich/projects/lib-zurich/src/lib/components/tooltip-z/tooltip-z.ts": {
-    "mtime": 1787165798.3532343,
-    "seen": 1787239182.7310114,
-    "ast_hash": "b924b8374f3988e3212565fd41eee10b",
+    "mtime": 1786644671.500324,
+    "seen": 1787255885.5905545,
+    "ast_hash": "c7f56df4bfa23bebbddbb8ace93c57ca",
     "semantic_hash": ""
   },
   "InsumosZurich/fe-lib-zurich/projects/lib-zurich/src/lib/core/constants/table-constants.ts": {
-    "mtime": 1787165798.356606,
-    "seen": 1787239182.7310128,
-    "ast_hash": "947e4108ce74b65b33157dfaae3d4e14",
+    "mtime": 1786644671.548931,
+    "seen": 1787255885.590555,
+    "ast_hash": "643f41acfe50e528561c9889737a621e",
     "semantic_hash": ""
   },
   "InsumosZurich/fe-lib-zurich/projects/lib-zurich/src/lib/core/pipes/dinamic-pipes.ts": {
-    "mtime": 1787165798.3586001,
-    "seen": 1787239182.7310138,
-    "ast_hash": "e1d5f46b50de7c0072b9fd8312ca5f2e",
+    "mtime": 1786644671.5781338,
+    "seen": 1787255885.590556,
+    "ast_hash": "677a52a720c83f9edba33bbb5081fb75",
     "semantic_hash": ""
   },
   "InsumosZurich/fe-lib-zurich/projects/lib-zurich/src/lib/core/utils/models/alertModel.ts": {
-    "mtime": 1787165798.362606,
-    "seen": 1787239182.731015,
-    "ast_hash": "eb2f44a1f582c6e0f1732eed0457d1ec",
+    "mtime": 1786644671.6418438,
+    "seen": 1787255885.5905566,
+    "ast_hash": "ac0a8afeb75df26511c5459e50166d31",
     "semantic_hash": ""
   },
   "InsumosZurich/fe-lib-zurich/projects/lib-zurich/src/lib/core/utils/models/selectModel.ts": {
-    "mtime": 1787165798.3651133,
-    "seen": 1787239182.731016,
-    "ast_hash": "8477b9124eda9539a864f31f7a05d12e",
+    "mtime": 1786644671.665057,
+    "seen": 1787255885.5905578,
+    "ast_hash": "532e5d3b3dcee5878a3064e25f09b903",
     "semantic_hash": ""
   },
   "InsumosZurich/fe-lib-zurich/projects/lib-zurich/src/lib/core/utils/models/tableModel.ts": {
-    "mtime": 1787165798.3665972,
-    "seen": 1787239182.7310166,
-    "ast_hash": "1621521d47baafe7c2df5331590470a2",
+    "mtime": 1786644671.6910636,
+    "seen": 1787255885.5905585,
+    "ast_hash": "922719ef6429a0ad233e786dc8865a62",
     "semantic_hash": ""
   },
   "InsumosZurich/fe-lib-zurich/projects/lib-zurich/src/lib/core/utils/services/alert-service.ts": {
-    "mtime": 1787165798.3686361,
-    "seen": 1787239182.7310178,
-    "ast_hash": "8197df4c72ed07cee2e50f81a5373609",
+    "mtime": 1786644671.7218742,
+    "seen": 1787255885.5905592,
+    "ast_hash": "62ca03ee294ce959e24ffd7253a737f5",
     "semantic_hash": ""
   },
   "InsumosZurich/fe-lib-zurich/projects/lib-zurich/src/lib/core/utils/services/util.service.ts": {
-    "mtime": 1787165798.3706417,
-    "seen": 1787239182.7310188,
-    "ast_hash": "5b4bfa099cc6feac7263e4bbb3a39138",
+    "mtime": 1786644671.7392507,
+    "seen": 1787255885.59056,
+    "ast_hash": "d43af8c7c93a27901bafd3795e3fe5bb",
     "semantic_hash": ""
   },
   "InsumosZurich/fe-lib-zurich/projects/lib-zurich/src/lib/derective/z-template.spec.ts": {
-    "mtime": 1787165798.3726435,
-    "seen": 1787239182.7310197,
-    "ast_hash": "b4fa7ceadaf532654fffb5b75a26722a",
+    "mtime": 1786644671.7695105,
+    "seen": 1787255885.5905614,
+    "ast_hash": "139121d954f3e13fc2a281ec3350b3b5",
     "semantic_hash": ""
   },
   "InsumosZurich/fe-lib-zurich/projects/lib-zurich/src/lib/derective/z-template.ts": {
-    "mtime": 1787165798.3741553,
-    "seen": 1787239182.7310212,
-    "ast_hash": "6c64427fabaf1e38c2d821ed28130be2",
+    "mtime": 1786644671.7855816,
+    "seen": 1787255885.5905623,
+    "ast_hash": "d5208c309093d074651c103129473359",
     "semantic_hash": ""
   },
   "InsumosZurich/fe-lib-zurich/projects/lib-zurich/src/public-api.ts": {
-    "mtime": 1787165798.3761673,
-    "seen": 1787239182.7310221,
-    "ast_hash": "2a74baba79d94c4554c158258291c6fb",
+    "mtime": 1786644668.8833263,
+    "seen": 1787255885.5905633,
+    "ast_hash": "67899f123b5c03275ead10dfd5d1ea21",
     "semantic_hash": ""
   },
   "InsumosZurich/fe-lib-zurich/src/app/app.config.server.ts": {
-    "mtime": 1787165798.39539,
-    "seen": 1787239182.731023,
-    "ast_hash": "f7b5c12b0dacd6692ee6042eb44f788b",
+    "mtime": 1786644671.9907627,
+    "seen": 1787255885.5905643,
+    "ast_hash": "4a74da4e40e3b8d991114b5f807b96c3",
     "semantic_hash": ""
   },
   "InsumosZurich/fe-lib-zurich/src/app/app.config.ts": {
-    "mtime": 1787165798.3973856,
-    "seen": 1787239182.731024,
-    "ast_hash": "55bfddbda93abc3fe403d3c2ea3e64ca",
+    "mtime": 1786644672.0088625,
+    "seen": 1787255885.5905657,
+    "ast_hash": "f9ba2bf4b14031923f2145d52859b29b",
     "semantic_hash": ""
   },
   "InsumosZurich/fe-lib-zurich/src/app/app.routes.server.ts": {
-    "mtime": 1787165798.402862,
-    "seen": 1787239182.7310255,
-    "ast_hash": "af9fd0d32a5a3ba2298a6e1f23a0b06e",
+    "mtime": 1786644672.0409324,
+    "seen": 1787255885.5905664,
+    "ast_hash": "8fcdaf6e67229219fb19599b93fb4d69",
     "semantic_hash": ""
   },
   "InsumosZurich/fe-lib-zurich/src/app/app.routes.ts": {
-    "mtime": 1787165798.4043734,
-    "seen": 1787239182.7310264,
-    "ast_hash": "41e4bac7a1d7cd48f4d03907407942d3",
+    "mtime": 1786644672.069944,
+    "seen": 1787255885.5905674,
+    "ast_hash": "9e82134f3e41732656270447c4c872fe",
     "semantic_hash": ""
   },
   "InsumosZurich/fe-lib-zurich/src/app/app.spec.ts": {
-    "mtime": 1787165798.4063928,
-    "seen": 1787239182.7310271,
-    "ast_hash": "20599804627aa1ed5766b61b8f4d5e6f",
+    "mtime": 1786644672.1051636,
+    "seen": 1787255885.5905685,
+    "ast_hash": "4c3a1f7faafca3cf4d3a7f6c331184f6",
     "semantic_hash": ""
   },
   "InsumosZurich/fe-lib-zurich/src/app/app.ts": {
-    "mtime": 1787165798.4083922,
-    "seen": 1787239182.7310283,
-    "ast_hash": "a30a1bbb3755daf5b44cbf2bb3a4c016",
+    "mtime": 1786644672.1228316,
+    "seen": 1787255885.5905697,
+    "ast_hash": "8f5ed99d25f30bf1f1bda3213996c51a",
     "semantic_hash": ""
   },
   "InsumosZurich/fe-lib-zurich/src/main.server.ts": {
-    "mtime": 1787165798.414907,
-    "seen": 1787239182.7310295,
-    "ast_hash": "f0bbda1e1fa86eb92684b1c0a1cde4bc",
+    "mtime": 1786644671.902762,
+    "seen": 1787255885.5905707,
+    "ast_hash": "0dfffcfabad2c23ee17bfb4cc03f4609",
     "semantic_hash": ""
   },
   "InsumosZurich/fe-lib-zurich/src/main.ts": {
-    "mtime": 1787165798.4174361,
-    "seen": 1787239182.7310307,
-    "ast_hash": "1289536d6d8f94242a4ffc598d094633",
+    "mtime": 1786644671.9271004,
+    "seen": 1787255885.590572,
+    "ast_hash": "ac0b277dca1867b341af9e2d25224ae9",
     "semantic_hash": ""
   },
   "InsumosZurich/fe-lib-zurich/src/server.ts": {
-    "mtime": 1787165798.4184387,
-    "seen": 1787239182.7310317,
-    "ast_hash": "f2a1c3edb9e2f2030ebbd3dd027c14a7",
+    "mtime": 1786644671.945192,
+    "seen": 1787255885.5905733,
+    "ast_hash": "fffcdae7bb32771a74142855ca54f435",
     "semantic_hash": ""
   },
   "InsumosZurich/lib-zurich-2.6.16/package/fesm2022/zurich-col-lib-zurich.mjs": {
-    "mtime": 1787165798.4326587,
-    "seen": 1787239182.7310326,
-    "ast_hash": "8f7842e7e061d003c907a62b16274f39",
+    "mtime": 499162500.0,
+    "seen": 1787255885.5905743,
+    "ast_hash": "563b7a55c3827966931f336f945288d9",
     "semantic_hash": ""
   },
   "InsumosZurich/lib-zurich-2.6.16/package/package.json": {
-    "mtime": 1787165798.4381726,
-    "seen": 1787239182.7310336,
-    "ast_hash": "aa34cc771251d627f5c0b1a306898627",
+    "mtime": 499162500.0,
+    "seen": 1787255885.5905755,
+    "ast_hash": "1b07aeb538c5dce351ecd6806739bf4c",
     "semantic_hash": ""
   },
   "InsumosZurich/lib-zurich-2.6.16/package/types/zurich-col-lib-zurich.d.ts": {
-    "mtime": 1787165798.4402206,
-    "seen": 1787239182.7310345,
-    "ast_hash": "122806cde5f9dfbfe2d50a7c229a5d95",
+    "mtime": 499162500.0,
+    "seen": 1787255885.5905764,
+    "ast_hash": "5b02fbe6896eae17b15c924220fb3e71",
     "semantic_hash": ""
   },
   "pm4-app/backend/package.json": {
-    "mtime": 1787165798.470096,
-    "seen": 1787239182.7310376,
+    "mtime": 1787160704.803947,
+    "seen": 1787255885.5905797,
     "ast_hash": "163826ef55e992cfae57cae97773b37a",
     "semantic_hash": ""
   },
   "pm4-app/backend/src/lib/estaticos.test.ts": {
-    "mtime": 1787165798.471796,
-    "seen": 1787239182.7310388,
+    "mtime": 1787160704.808215,
+    "seen": 1787255885.590581,
     "ast_hash": "2f79ac1c7faaab197b171f62a61efefe",
     "semantic_hash": ""
   },
   "pm4-app/backend/src/lib/estaticos.ts": {
-    "mtime": 1787165798.474326,
-    "seen": 1787239182.73104,
+    "mtime": 1787160704.8109815,
+    "seen": 1787255885.5905821,
     "ast_hash": "00ad047c7ed6a66ddad6afa0edaf7b12",
     "semantic_hash": ""
   },
   "pm4-app/backend/src/lib/token.test.ts": {
-    "mtime": 1786657382.030657,
-    "seen": 1787239182.731046,
+    "mtime": 1786659719.6377418,
+    "seen": 1787255885.5905879,
     "ast_hash": "6b9fa461b7545df3ada5e192146c9c30",
     "semantic_hash": ""
   },
   "pm4-app/backend/src/lib/token.ts": {
-    "mtime": 1786657382.0331821,
-    "seen": 1787239182.731047,
+    "mtime": 1786659719.6377418,
+    "seen": 1787255885.5905893,
     "ast_hash": "38cc692506549bd06d58416fd7a05293",
     "semantic_hash": ""
   },
   "pm4-app/backend/tsconfig.check.json": {
-    "mtime": 1786657382.0403376,
-    "seen": 1787239182.731051,
+    "mtime": 1786659719.6377418,
+    "seen": 1787255885.5905948,
     "ast_hash": "bc1f53858da2726f9b7072cdbc75ad64",
     "semantic_hash": ""
   },
   "pm4-app/backend/tsconfig.json": {
-    "mtime": 1786657382.042857,
-    "seen": 1787239182.731052,
+    "mtime": 1786659719.6377418,
+    "seen": 1787255885.5905955,
     "ast_hash": "0e0e3c8de74a49d6c6fd0962fa177f8b",
     "semantic_hash": ""
   },
   "pm4-app/frontend-ng/angular.json": {
-    "mtime": 1787165798.4917986,
-    "seen": 1787239182.7310538,
-    "ast_hash": "05b4225beddcf202d80333e96cd2e3b0",
+    "mtime": 1787256585.297373,
+    "seen": 1787259709.8451145,
+    "ast_hash": "781efa8876cfcffe9d76ce5be4fc5e86",
     "semantic_hash": ""
   },
   "pm4-app/frontend-ng/eslint.config.mjs": {
-    "mtime": 1787165798.494319,
-    "seen": 1787239182.7310545,
+    "mtime": 1787160704.8318741,
+    "seen": 1787255885.5905983,
     "ast_hash": "6dd163714e6daa192ff326364a6936ea",
     "semantic_hash": ""
   },
   "pm4-app/frontend-ng/package.json": {
-    "mtime": 1787165798.4979908,
-    "seen": 1787239182.7310555,
+    "mtime": 1787160704.8348768,
+    "seen": 1787255885.590599,
     "ast_hash": "6b94b99dcc39f127d044749a9722c2ce",
     "semantic_hash": ""
   },
   "pm4-app/frontend-ng/public/docs/swagger/swagger-ui-bundle.js": {
-    "mtime": 1787165798.521174,
-    "seen": 1787239182.7310567,
+    "mtime": 1787160704.8596306,
+    "seen": 1787255885.5906003,
     "ast_hash": "7c20e8c1d4174cd3cdc8dc0d9c862563",
     "semantic_hash": ""
   },
   "pm4-app/frontend-ng/public/docs/swagger/swagger-ui-standalone-preset.js": {
-    "mtime": 1787165798.5262015,
-    "seen": 1787239182.7310576,
+    "mtime": 1787160704.874357,
+    "seen": 1787255885.5906017,
     "ast_hash": "ae39cc590f970f7811ac1f62fd0b7944",
     "semantic_hash": ""
   },
   "pm4-app/frontend-ng/scripts/extraer-paridad-react.mjs": {
-    "mtime": 1787165798.5399375,
-    "seen": 1787239182.7310584,
+    "mtime": 1787160704.874357,
+    "seen": 1787255885.590603,
     "ast_hash": "73a2bb22a79a2d2afa233c5e9b22d640",
     "semantic_hash": ""
   },
   "pm4-app/frontend-ng/scripts/gen-env-define.mjs": {
-    "mtime": 1787165798.5429437,
-    "seen": 1787239182.7310593,
+    "mtime": 1787160704.8909645,
+    "seen": 1787255885.5906048,
     "ast_hash": "5c6727a56692fb9e142c06c0cc254906",
     "semantic_hash": ""
   },
   "pm4-app/frontend-ng/src/api/pm4Client.spec.ts": {
-    "mtime": 1787165798.547585,
-    "seen": 1787239182.7310603,
+    "mtime": 1787160704.8924732,
+    "seen": 1787255885.590606,
     "ast_hash": "8ee2d1a6bd4cea92c9ce3dc2065d1391",
     "semantic_hash": ""
   },
   "pm4-app/frontend-ng/src/api/pm4Client.ts": {
-    "mtime": 1787165798.549605,
-    "seen": 1787239182.731061,
+    "mtime": 1787160704.8924732,
+    "seen": 1787255885.5906074,
     "ast_hash": "99389b3cc2c539432547f463c7461506",
     "semantic_hash": ""
   },
   "pm4-app/frontend-ng/src/app/app.config.spec.ts": {
-    "mtime": 1787165798.5526059,
-    "seen": 1787239182.731062,
+    "mtime": 1787160704.8924732,
+    "seen": 1787255885.5906088,
     "ast_hash": "8dbcf151ac2a62386a52973cc3ff862b",
     "semantic_hash": ""
   },
   "pm4-app/frontend-ng/src/app/app.config.ts": {
-    "mtime": 1787165798.5546112,
-    "seen": 1787239182.7310631,
+    "mtime": 1787160704.8924732,
+    "seen": 1787255885.5906093,
     "ast_hash": "752c4b37b8cb79ba026fcf1d610ec6b9",
     "semantic_hash": ""
   },
   "pm4-app/frontend-ng/src/app/app.routes.spec.ts": {
-    "mtime": 1787165798.5594027,
-    "seen": 1787239182.731064,
+    "mtime": 1787160704.9066947,
+    "seen": 1787255885.5906107,
     "ast_hash": "24e40ee6c7a8116dd0cc11b5376fb986",
     "semantic_hash": ""
   },
   "pm4-app/frontend-ng/src/app/app.routes.ts": {
-    "mtime": 1787165798.5624037,
-    "seen": 1787239182.7310648,
+    "mtime": 1787160704.9075933,
+    "seen": 1787255885.590612,
     "ast_hash": "77c7eab89397064b48580d7295bf8842",
     "semantic_hash": ""
   },
   "pm4-app/frontend-ng/src/app/app.spec.ts": {
-    "mtime": 1787165798.5644038,
-    "seen": 1787239182.7310658,
+    "mtime": 1787160704.9075933,
+    "seen": 1787255885.5906126,
     "ast_hash": "d2f72e80cc5d3f672ee380d1d7a5ea72",
     "semantic_hash": ""
   },
   "pm4-app/frontend-ng/src/app/app.ts": {
-    "mtime": 1787165798.5667915,
-    "seen": 1787239182.7310667,
+    "mtime": 1787160704.9075933,
+    "seen": 1787255885.590614,
     "ast_hash": "a8d97ea489743634344f7fbdd642f06f",
     "semantic_hash": ""
   },
   "pm4-app/frontend-ng/src/app/error-render.service.spec.ts": {
-    "mtime": 1787165798.568249,
-    "seen": 1787239182.7310677,
+    "mtime": 1787160704.9075933,
+    "seen": 1787255885.5906148,
     "ast_hash": "c8b69491d2272bfe1a5ee76a635740de",
     "semantic_hash": ""
   },
   "pm4-app/frontend-ng/src/app/error-render.service.ts": {
-    "mtime": 1787165798.5702589,
-    "seen": 1787239182.7310686,
+    "mtime": 1787160704.9075933,
+    "seen": 1787255885.5906157,
     "ast_hash": "0d27636b232eec34472b3bcba92ba683",
     "semantic_hash": ""
   },
   "pm4-app/frontend-ng/src/app/indice-pantallas.spec.ts": {
-    "mtime": 1787165798.572264,
-    "seen": 1787239182.7310698,
+    "mtime": 1787160704.9075933,
+    "seen": 1787255885.5906165,
     "ast_hash": "a3471a12b64118127298d743521c4e33",
     "semantic_hash": ""
   },
   "pm4-app/frontend-ng/src/app/indice-pantallas.ts": {
-    "mtime": 1787165798.5745482,
-    "seen": 1787239182.7310705,
+    "mtime": 1787160704.9075933,
+    "seen": 1787255885.5906177,
     "ast_hash": "080463e7c2a72ba4890347b0a65de325",
     "semantic_hash": ""
   },
   "pm4-app/frontend-ng/src/app/pantalla-no-encontrada.spec.ts": {
-    "mtime": 1787165798.5771837,
-    "seen": 1787239182.7310715,
+    "mtime": 1787160704.9242659,
+    "seen": 1787255885.5906184,
     "ast_hash": "a9e99d47a566d6c5c53f5476cf04000f",
     "semantic_hash": ""
   },
   "pm4-app/frontend-ng/src/app/pantalla-no-encontrada.ts": {
-    "mtime": 1787165798.5796902,
-    "seen": 1787239182.7310724,
+    "mtime": 1787160704.9242659,
+    "seen": 1787255885.590619,
     "ast_hash": "4c0e04614dcc0158890318d54a95e0e3",
     "semantic_hash": ""
   },
   "pm4-app/frontend-ng/src/app/pantallas.spec.ts": {
-    "mtime": 1787172680.811234,
-    "seen": 1787239182.7310739,
+    "mtime": 1787172611.039564,
+    "seen": 1787255885.5906198,
     "ast_hash": "6ee8ded46d7d509dee1d58b7de8d8960",
     "semantic_hash": ""
   },
   "pm4-app/frontend-ng/src/app/pantallas.ts": {
-    "mtime": 1787172680.8132367,
-    "seen": 1787239182.7310743,
+    "mtime": 1787172611.0401406,
+    "seen": 1787255885.5906208,
     "ast_hash": "d75f98877c6d78a15e51333322768399",
     "semantic_hash": ""
   },
   "pm4-app/frontend-ng/src/components/action-bar.spec.ts": {
-    "mtime": 1787165798.5872405,
-    "seen": 1787239182.7310753,
+    "mtime": 1787160704.9242659,
+    "seen": 1787255885.5906217,
     "ast_hash": "d719be69bbbe83d6f8a4dcdcc048769a",
     "semantic_hash": ""
   },
   "pm4-app/frontend-ng/src/components/action-bar.ts": {
-    "mtime": 1787165798.5896678,
-    "seen": 1787239182.731076,
+    "mtime": 1787160704.9242659,
+    "seen": 1787255885.590623,
     "ast_hash": "d325288a4fba674956950fa4b0d38c46",
     "semantic_hash": ""
   },
   "pm4-app/frontend-ng/src/components/doc-card.spec.ts": {
-    "mtime": 1787165798.590667,
-    "seen": 1787239182.7310777,
+    "mtime": 1787160704.9405518,
+    "seen": 1787255885.5906239,
     "ast_hash": "cfe7029e712c9948a75b60040deaf120",
     "semantic_hash": ""
   },
   "pm4-app/frontend-ng/src/components/doc-card.ts": {
-    "mtime": 1787165798.5941565,
-    "seen": 1787239182.7310786,
+    "mtime": 1787160704.9409966,
+    "seen": 1787255885.5906248,
     "ast_hash": "30cfa4587852caeeed22910ec0ee5864",
     "semantic_hash": ""
   },
   "pm4-app/frontend-ng/src/components/doc-support-uploader.spec.ts": {
-    "mtime": 1787165798.5964816,
-    "seen": 1787239182.7310793,
+    "mtime": 1787160704.9446483,
+    "seen": 1787255885.5906255,
     "ast_hash": "75cd02b002e080b77c792d7aa8e9f470",
     "semantic_hash": ""
   },
   "pm4-app/frontend-ng/src/components/doc-support-uploader.ts": {
-    "mtime": 1787165798.5990005,
-    "seen": 1787239182.7310805,
+    "mtime": 1787160704.946651,
+    "seen": 1787255885.5906262,
     "ast_hash": "a7470abec103807c912391e5c484c247",
     "semantic_hash": ""
   },
   "pm4-app/frontend-ng/src/components/fields/adopcion-grupo.spec.ts": {
-    "mtime": 1787165798.6065562,
-    "seen": 1787239182.7310812,
+    "mtime": 1787160704.9555335,
+    "seen": 1787255885.590627,
     "ast_hash": "b0775c6917b8fdf4b52a7241e82262bb",
     "semantic_hash": ""
   },
   "pm4-app/frontend-ng/src/components/fields/boton-habilitado.spec.ts": {
-    "mtime": 1787165798.6085536,
-    "seen": 1787239182.7310822,
+    "mtime": 1787160704.9590964,
+    "seen": 1787255885.5906281,
     "ast_hash": "4b72cfcf9dbed4f72d7298d4e2d1148a",
     "semantic_hash": ""
   },
   "pm4-app/frontend-ng/src/components/fields/boton-habilitado.ts": {
-    "mtime": 1787165798.6105545,
-    "seen": 1787239182.7310832,
+    "mtime": 1787160704.962725,
+    "seen": 1787255885.5906289,
     "ast_hash": "b514ee85337b81ce6b41397ae20d2db8",
     "semantic_hash": ""
   },
   "pm4-app/frontend-ng/src/components/fields/campo-base.ts": {
-    "mtime": 1787238920.531856,
-    "seen": 1787239182.731084,
+    "mtime": 1787184292.4233282,
+    "seen": 1787255885.5906293,
     "ast_hash": "47a1b7eb634a15d5941986ff97f4b986",
     "semantic_hash": ""
   },
   "pm4-app/frontend-ng/src/components/fields/campo-za-base.ts": {
-    "mtime": 1787165798.6165679,
-    "seen": 1787239182.7310848,
+    "mtime": 1787160704.9667315,
+    "seen": 1787255885.5906303,
     "ast_hash": "f57112acabab42c85d91b8f4cd9be038",
     "semantic_hash": ""
   },
   "pm4-app/frontend-ng/src/components/fields/colision-escritores.spec.ts": {
-    "mtime": 1787165798.6185746,
-    "seen": 1787239182.7310855,
+    "mtime": 1787160704.9725523,
+    "seen": 1787255885.5906312,
     "ast_hash": "f5ac39ef7863923acd7f59a6065a0d88",
     "semantic_hash": ""
   },
   "pm4-app/frontend-ng/src/components/fields/contrato-pantalla.spec.ts": {
-    "mtime": 1787165798.6205769,
-    "seen": 1787239182.7310863,
+    "mtime": 1787160704.9748719,
+    "seen": 1787255885.590632,
     "ast_hash": "d4618371579d6f2ca860aa4d92816c8e",
     "semantic_hash": ""
   },
   "pm4-app/frontend-ng/src/components/fields/contrato-pantalla.ts": {
-    "mtime": 1787165798.6225843,
-    "seen": 1787239182.7310872,
+    "mtime": 1787160704.9778757,
+    "seen": 1787255885.5906327,
     "ast_hash": "763417c6de686b1ed1d02b668162d1b1",
     "semantic_hash": ""
   },
   "pm4-app/frontend-ng/src/components/fields/guarda-boton-habilitado.spec.ts": {
-    "mtime": 1787165798.6235826,
-    "seen": 1787239182.7310896,
+    "mtime": 1787160704.9808755,
+    "seen": 1787255885.590635,
     "ast_hash": "db71780e448a1c73beea4a1d224f0b31",
     "semantic_hash": ""
   },
   "pm4-app/frontend-ng/src/components/fields/guarda-formcontrolname.spec.ts": {
-    "mtime": 1787165798.6250956,
-    "seen": 1787239182.7310905,
+    "mtime": 1787160704.9844613,
+    "seen": 1787255885.5906358,
     "ast_hash": "af0f6abd4b9eae67a31ee755bfd223c7",
     "semantic_hash": ""
   },
   "pm4-app/frontend-ng/src/components/fields/guarda-ngmodel.spec.ts": {
-    "mtime": 1787165798.628631,
-    "seen": 1787239182.7310913,
+    "mtime": 1787160704.9867778,
+    "seen": 1787255885.5906365,
     "ast_hash": "0236fe237a033825149a57c3ec7d3828",
     "semantic_hash": ""
   },
   "pm4-app/frontend-ng/src/components/fields/modelo-za.spec.ts": {
-    "mtime": 1787165798.6306262,
-    "seen": 1787239182.731092,
+    "mtime": 1787160704.9910047,
+    "seen": 1787255885.5906372,
     "ast_hash": "0c0761359ac4c44a5cbb439f63c5fb44",
     "semantic_hash": ""
   },
   "pm4-app/frontend-ng/src/components/fields/modelo-za.ts": {
-    "mtime": 1787165798.6316268,
-    "seen": 1787239182.7310927,
+    "mtime": 1787160704.9925103,
+    "seen": 1787255885.5906382,
     "ast_hash": "7324b91927be1cf019db396828629c78",
     "semantic_hash": ""
   },
   "pm4-app/frontend-ng/src/components/fields/paridad-react.spec.ts": {
-    "mtime": 1787238658.3074703,
-    "seen": 1787239182.7310934,
+    "mtime": 1787243030.8239565,
+    "seen": 1787255885.5906389,
     "ast_hash": "e5ba69a88f34a9f1388f9124846ace99",
     "semantic_hash": ""
   },
   "pm4-app/frontend-ng/src/components/fields/precarga-patchvalue.spec.ts": {
-    "mtime": 1787165798.6396587,
-    "seen": 1787239182.7310946,
+    "mtime": 1787160705.0057957,
+    "seen": 1787255885.5906396,
     "ast_hash": "c8e44b94635a8368fbda96fb656978ba",
     "semantic_hash": ""
   },
   "pm4-app/frontend-ng/src/components/fields/zds-checkbox-field.spec.ts": {
-    "mtime": 1787165798.6406548,
-    "seen": 1787239182.7310963,
+    "mtime": 1787160705.008588,
+    "seen": 1787255885.5906415,
     "ast_hash": "7f2ebb6d23cc11af0a09bbb07489fe6a",
     "semantic_hash": ""
   },
   "pm4-app/frontend-ng/src/components/fields/zds-checkbox-field.ts": {
-    "mtime": 1787238920.538855,
-    "seen": 1787239182.731097,
+    "mtime": 1787182318.933029,
+    "seen": 1787255885.5906422,
     "ast_hash": "b312090899d434a4571aa529cde972bd",
     "semantic_hash": ""
   },
   "pm4-app/frontend-ng/src/components/fields/zds-date.spec.ts": {
-    "mtime": 1787165798.6462674,
-    "seen": 1787239182.731098,
+    "mtime": 1787160705.008588,
+    "seen": 1787255885.590643,
     "ast_hash": "b41db676f6f9fcfb4d384c3af8c9857c",
     "semantic_hash": ""
   },
   "pm4-app/frontend-ng/src/components/fields/zds-date.ts": {
-    "mtime": 1787238920.5419602,
-    "seen": 1787239182.7310987,
+    "mtime": 1787182293.3309734,
+    "seen": 1787255885.5906436,
     "ast_hash": "158a9c6235bd6f937e62dfa481b2af06",
     "semantic_hash": ""
   },
   "pm4-app/frontend-ng/src/components/fields/zds-file-input.spec.ts": {
-    "mtime": 1787238920.5449615,
-    "seen": 1787239182.7310994,
+    "mtime": 1787238468.6396215,
+    "seen": 1787255885.5906446,
     "ast_hash": "284bad765103294d4b5e91b7be68cf81",
     "semantic_hash": ""
   },
   "pm4-app/frontend-ng/src/components/fields/zds-file-input.ts": {
-    "mtime": 1787238920.548961,
-    "seen": 1787239182.7311003,
+    "mtime": 1787238468.6396215,
+    "seen": 1787255885.5906453,
     "ast_hash": "ba1acf8c0f3a745ab944dc80d9d613ae",
     "semantic_hash": ""
   },
   "pm4-app/frontend-ng/src/components/fields/zds-input.spec.ts": {
-    "mtime": 1787165798.652689,
-    "seen": 1787239182.7311013,
+    "mtime": 1787160705.0242503,
+    "seen": 1787255885.5906463,
     "ast_hash": "64d1786b427a2f85d890ea3db6968bce",
     "semantic_hash": ""
   },
   "pm4-app/frontend-ng/src/components/fields/zds-input.ts": {
-    "mtime": 1787238920.5519755,
-    "seen": 1787239182.731102,
+    "mtime": 1787182285.37206,
+    "seen": 1787255885.5906467,
     "ast_hash": "2291edef044d145d6d754b500021b9d5",
     "semantic_hash": ""
   },
   "pm4-app/frontend-ng/src/components/fields/zds-locale.spec.ts": {
-    "mtime": 1787165798.6577406,
-    "seen": 1787239182.7311027,
+    "mtime": 1787160705.0242503,
+    "seen": 1787255885.5906477,
     "ast_hash": "37e40fb1e814402377ad059207eb7325",
     "semantic_hash": ""
   },
   "pm4-app/frontend-ng/src/components/fields/zds-radio.spec.ts": {
-    "mtime": 1787165798.6594222,
-    "seen": 1787239182.731104,
+    "mtime": 1787160705.0242503,
+    "seen": 1787255885.5906487,
     "ast_hash": "ed9b805a94550bf4b1476abfcc66ee1c",
     "semantic_hash": ""
   },
   "pm4-app/frontend-ng/src/components/fields/zds-radio.ts": {
-    "mtime": 1787165798.6624467,
-    "seen": 1787239182.731105,
+    "mtime": 1787160705.0242503,
+    "seen": 1787255885.5906496,
     "ast_hash": "067cfb4049bde2798992a8e1725a9dd5",
     "semantic_hash": ""
   },
   "pm4-app/frontend-ng/src/components/fields/zds-reexports.spec.ts": {
-    "mtime": 1787165798.6644404,
-    "seen": 1787239182.731106,
+    "mtime": 1787160705.0242503,
+    "seen": 1787255885.59065,
     "ast_hash": "938f411e007599479d1bfceaf83fa378",
     "semantic_hash": ""
   },
   "pm4-app/frontend-ng/src/components/fields/zds-reexports.ts": {
-    "mtime": 1787238920.5549755,
-    "seen": 1787239182.7311068,
+    "mtime": 1787238468.6396215,
+    "seen": 1787255885.5906508,
     "ast_hash": "5cb74010b554deda011bed2a9b1893a6",
     "semantic_hash": ""
   },
   "pm4-app/frontend-ng/src/components/fields/zds-required.spec.ts": {
-    "mtime": 1787172680.821702,
-    "seen": 1787239182.7311075,
+    "mtime": 1787172611.0401406,
+    "seen": 1787255885.5906518,
     "ast_hash": "789aa2b8bf7fc1b840080ac973bf3e11",
     "semantic_hash": ""
   },
   "pm4-app/frontend-ng/src/components/fields/zds-select.spec.ts": {
-    "mtime": 1787165798.6704783,
-    "seen": 1787239182.7311084,
+    "mtime": 1787160705.0409293,
+    "seen": 1787255885.5906525,
     "ast_hash": "abff4b0400f2efd0e7187d6524e6c803",
     "semantic_hash": ""
   },
   "pm4-app/frontend-ng/src/components/fields/zds-select.ts": {
-    "mtime": 1787238920.5579748,
-    "seen": 1787239182.7311091,
+    "mtime": 1787182250.4393015,
+    "seen": 1787255885.5906532,
     "ast_hash": "ad883f8a9e6119e25b8c92aa8e5b8a9f",
     "semantic_hash": ""
   },
   "pm4-app/frontend-ng/src/components/fields/zds-status-badge.spec.ts": {
-    "mtime": 1787165798.6730933,
-    "seen": 1787239182.7311099,
+    "mtime": 1787160705.0409293,
+    "seen": 1787255885.590654,
     "ast_hash": "e2193258d49c17f53c823f059f9afacc",
     "semantic_hash": ""
   },
   "pm4-app/frontend-ng/src/components/fields/zds-status-badge.ts": {
-    "mtime": 1787165798.6746306,
-    "seen": 1787239182.7311108,
+    "mtime": 1787160705.0563402,
+    "seen": 1787255885.590655,
     "ast_hash": "6cea5a066e856b6c1e232bd8e6812ab1",
     "semantic_hash": ""
   },
   "pm4-app/frontend-ng/src/components/fields/zds-textarea.spec.ts": {
-    "mtime": 1787165798.6766832,
-    "seen": 1787239182.7311118,
+    "mtime": 1787160705.0577085,
+    "seen": 1787255885.5906565,
     "ast_hash": "15fada9deef605023c888661d7db011e",
     "semantic_hash": ""
   },
   "pm4-app/frontend-ng/src/components/fields/zds-textarea.ts": {
-    "mtime": 1787238920.5600598,
-    "seen": 1787239182.7311125,
+    "mtime": 1787182302.1111639,
+    "seen": 1787255885.5906575,
     "ast_hash": "c9d870f45a4e712a4f7253888fffe088",
     "semantic_hash": ""
   },
   "pm4-app/frontend-ng/src/components/form-section.spec.ts": {
-    "mtime": 1787165798.682271,
-    "seen": 1787239182.7311134,
+    "mtime": 1787160705.0577085,
+    "seen": 1787255885.5906582,
     "ast_hash": "d62f49c037e61ce45236204d670c19d5",
     "semantic_hash": ""
   },
   "pm4-app/frontend-ng/src/components/form-section.ts": {
-    "mtime": 1787165798.684275,
-    "seen": 1787239182.7311141,
+    "mtime": 1787160705.0577085,
+    "seen": 1787255885.590659,
     "ast_hash": "ec41fa54d09511b1bc610c90d68e29ff",
     "semantic_hash": ""
   },
   "pm4-app/frontend-ng/src/components/info-bar.spec.ts": {
-    "mtime": 1787165798.6847959,
-    "seen": 1787239182.731115,
+    "mtime": 1787160705.0700655,
+    "seen": 1787255885.5906596,
     "ast_hash": "08347a5671e543349e95a7d5f4336ff3",
     "semantic_hash": ""
   },
   "pm4-app/frontend-ng/src/components/info-bar.ts": {
-    "mtime": 1787165798.6873178,
-    "seen": 1787239182.7311158,
+    "mtime": 1787160705.0727174,
+    "seen": 1787255885.5906603,
     "ast_hash": "212e199c7a50b1401a5ad0dc48997791",
     "semantic_hash": ""
   },
   "pm4-app/frontend-ng/src/components/pdf-viewer.spec.ts": {
-    "mtime": 1787165798.6887074,
-    "seen": 1787239182.7311165,
+    "mtime": 1787160705.0755284,
+    "seen": 1787255885.5906613,
     "ast_hash": "760ce5915a7156d116267403bdc9c16f",
     "semantic_hash": ""
   },
   "pm4-app/frontend-ng/src/components/pdf-viewer.ts": {
-    "mtime": 1787165798.6908486,
-    "seen": 1787239182.7311172,
+    "mtime": 1787160705.079955,
+    "seen": 1787255885.590662,
     "ast_hash": "8ddfda09f0253765b173f9fde2553ad6",
     "semantic_hash": ""
   },
   "pm4-app/frontend-ng/src/components/preview-modal.spec.ts": {
-    "mtime": 1787238920.5625648,
-    "seen": 1787239182.731118,
+    "mtime": 1787238468.6396215,
+    "seen": 1787255885.5906632,
     "ast_hash": "edb3927549c3bc1c6efc633384cc3e20",
     "semantic_hash": ""
   },
   "pm4-app/frontend-ng/src/components/preview-modal.ts": {
-    "mtime": 1787238920.567134,
-    "seen": 1787239182.7311192,
+    "mtime": 1787238468.656109,
+    "seen": 1787255885.590664,
     "ast_hash": "7b673697bc2649666ef8963a2c82987f",
     "semantic_hash": ""
   },
   "pm4-app/frontend-ng/src/components/recaptcha-loader.service.spec.ts": {
-    "mtime": 1787165798.6974027,
-    "seen": 1787239182.7311199,
+    "mtime": 1787160705.0910676,
+    "seen": 1787255885.5906649,
     "ast_hash": "5bbb1ae299bc2b486b2f66cfc88860ec",
     "semantic_hash": ""
   },
   "pm4-app/frontend-ng/src/components/recaptcha-loader.service.ts": {
-    "mtime": 1787165798.6999345,
-    "seen": 1787239182.7311206,
+    "mtime": 1787160705.0942276,
+    "seen": 1787255885.5906658,
     "ast_hash": "73369dc15e9979597a999d3f8c16c317",
     "semantic_hash": ""
   },
   "pm4-app/frontend-ng/src/components/recaptcha-modal.spec.ts": {
-    "mtime": 1787165798.7009385,
-    "seen": 1787239182.7311218,
+    "mtime": 1787160705.097325,
+    "seen": 1787255885.5906665,
     "ast_hash": "bb36b501c09d41ab43c89e3f60ca96c2",
     "semantic_hash": ""
   },
   "pm4-app/frontend-ng/src/components/recaptcha-modal.ts": {
-    "mtime": 1787165798.7029335,
-    "seen": 1787239182.7311225,
+    "mtime": 1787160705.1006725,
+    "seen": 1787255885.590667,
     "ast_hash": "45b8b100c75e7e4b9473c94ab1368387",
     "semantic_hash": ""
   },
   "pm4-app/frontend-ng/src/components/recaptcha-widget.spec.ts": {
-    "mtime": 1787165798.7054532,
-    "seen": 1787239182.7311234,
+    "mtime": 1787160705.102193,
+    "seen": 1787255885.5906682,
     "ast_hash": "51e7677b5a53a02b0d406a456f6af8d1",
     "semantic_hash": ""
   },
   "pm4-app/frontend-ng/src/components/recaptcha-widget.ts": {
-    "mtime": 1787165798.7064655,
-    "seen": 1787239182.7311242,
+    "mtime": 1787160705.1072297,
+    "seen": 1787255885.5906692,
     "ast_hash": "8035aaf4e032147721bf0629b16c8901",
     "semantic_hash": ""
   },
   "pm4-app/frontend-ng/src/components/request-file-list.spec.ts": {
-    "mtime": 1787165798.7084608,
-    "seen": 1787239182.7311249,
+    "mtime": 1787160705.1107223,
+    "seen": 1787255885.5906699,
     "ast_hash": "e593074aeffc289be6fd06721af5cd45",
     "semantic_hash": ""
   },
   "pm4-app/frontend-ng/src/components/request-file-list.ts": {
-    "mtime": 1787165798.7127972,
-    "seen": 1787239182.7311258,
+    "mtime": 1787160705.1112826,
+    "seen": 1787255885.5906708,
     "ast_hash": "bd62b7f01deb4d5fb1fe2f22f6b1cc5d",
     "semantic_hash": ""
   },
   "pm4-app/frontend-ng/src/components/screen-header.spec.ts": {
-    "mtime": 1787165798.7148387,
-    "seen": 1787239182.7311265,
+    "mtime": 1787160705.1180153,
+    "seen": 1787255885.5906718,
     "ast_hash": "02a8c630bfa1cdb814a9ff11d0bd2158",
     "semantic_hash": ""
   },
   "pm4-app/frontend-ng/src/components/screen-header.ts": {
-    "mtime": 1787165798.7174153,
-    "seen": 1787239182.7311273,
+    "mtime": 1787160705.12059,
+    "seen": 1787255885.590673,
     "ast_hash": "bc235c80cdb3637a56351198d3b2e734",
     "semantic_hash": ""
   },
   "pm4-app/frontend-ng/src/config/pm4-registry.types.ts": {
-    "mtime": 1787165798.7204156,
-    "seen": 1787239182.7311282,
+    "mtime": 1787160705.1250231,
+    "seen": 1787255885.5906737,
     "ast_hash": "4589a0834b9dd373c7b187552ed68d3f",
     "semantic_hash": ""
   },
   "pm4-app/frontend-ng/src/core/attachments.service.spec.ts": {
-    "mtime": 1787165798.7224157,
-    "seen": 1787239182.731129,
+    "mtime": 1787160705.128009,
+    "seen": 1787255885.5906744,
     "ast_hash": "dc8fc87003fb168a82d16d220d28c160",
     "semantic_hash": ""
   },
   "pm4-app/frontend-ng/src/core/attachments.service.ts": {
-    "mtime": 1787165798.723416,
-    "seen": 1787239182.73113,
+    "mtime": 1787160705.1311574,
+    "seen": 1787255885.590675,
     "ast_hash": "d67714f976ed0a08b72cc655889ed970",
     "semantic_hash": ""
   },
   "pm4-app/frontend-ng/src/core/business-days.spec.ts": {
-    "mtime": 1787165798.7249298,
-    "seen": 1787239182.7311306,
+    "mtime": 1787160705.1340585,
+    "seen": 1787255885.5906763,
     "ast_hash": "e92d50b72ff5da2dac4973f4df671b9d",
     "semantic_hash": ""
   },
   "pm4-app/frontend-ng/src/core/business-days.ts": {
-    "mtime": 1787165798.7284691,
-    "seen": 1787239182.7311313,
+    "mtime": 1787160705.1340585,
+    "seen": 1787255885.5906775,
     "ast_hash": "de1cd5c21757ea4f2728231ff4508a7d",
     "semantic_hash": ""
   },
   "pm4-app/frontend-ng/src/core/catalogos.service.spec.ts": {
-    "mtime": 1787165798.7304738,
-    "seen": 1787239182.7311325,
+    "mtime": 1787160705.1340585,
+    "seen": 1787255885.5906782,
     "ast_hash": "c543abc071e3d18e3fdd4dfd14614a4e",
     "semantic_hash": ""
   },
   "pm4-app/frontend-ng/src/core/catalogos.service.ts": {
-    "mtime": 1787172680.8299754,
-    "seen": 1787239182.731133,
+    "mtime": 1787172611.0401406,
+    "seen": 1787255885.5906787,
     "ast_hash": "e14b0e6a6b485eab802a1b282f9bc951",
     "semantic_hash": ""
   },
   "pm4-app/frontend-ng/src/core/collection-helpers.spec.ts": {
-    "mtime": 1787165798.7334886,
-    "seen": 1787239182.731134,
+    "mtime": 1787160705.141649,
+    "seen": 1787255885.5906804,
     "ast_hash": "198accdff2559bf1909200d09a66361b",
     "semantic_hash": ""
   },
   "pm4-app/frontend-ng/src/core/collection-helpers.ts": {
-    "mtime": 1787165798.7359686,
-    "seen": 1787239182.7311347,
+    "mtime": 1787160705.141649,
+    "seen": 1787255885.590681,
     "ast_hash": "d0a033a62df68d5d2c0053e221d8b26c",
     "semantic_hash": ""
   },
   "pm4-app/frontend-ng/src/core/collection.service.spec.ts": {
-    "mtime": 1787165798.7379665,
-    "seen": 1787239182.7311358,
+    "mtime": 1787160705.141649,
+    "seen": 1787255885.5906818,
     "ast_hash": "7c6f9d2fec8c9673410daf326bf7212e",
     "semantic_hash": ""
   },
   "pm4-app/frontend-ng/src/core/collection.service.ts": {
-    "mtime": 1787165798.7389715,
-    "seen": 1787239182.7311366,
+    "mtime": 1787160705.141649,
+    "seen": 1787255885.590683,
     "ast_hash": "553b1282cb8f12c8112982900db50410",
     "semantic_hash": ""
   },
   "pm4-app/frontend-ng/src/core/collection.types.ts": {
-    "mtime": 1787165798.740972,
-    "seen": 1787239182.7311373,
+    "mtime": 1787160705.141649,
+    "seen": 1787255885.590684,
     "ast_hash": "e84e647a7c41deede8deb9b9cb1441a7",
     "semantic_hash": ""
   },
   "pm4-app/frontend-ng/src/core/collections.spec.ts": {
-    "mtime": 1787165798.7429748,
-    "seen": 1787239182.7311382,
+    "mtime": 1787160705.141649,
+    "seen": 1787255885.5906847,
     "ast_hash": "1be2622b6c51fa008c94066b352811e3",
     "semantic_hash": ""
   },
   "pm4-app/frontend-ng/src/core/collections.ts": {
-    "mtime": 1787165798.7444909,
-    "seen": 1787239182.7311392,
+    "mtime": 1787160705.141649,
+    "seen": 1787255885.5906858,
     "ast_hash": "886631ee7de368e44cef97c8185c55db",
     "semantic_hash": ""
   },
   "pm4-app/frontend-ng/src/core/css-global.spec.ts": {
-    "mtime": 1787165798.748034,
-    "seen": 1787239182.73114,
+    "mtime": 1787160705.1581986,
+    "seen": 1787255885.5906873,
     "ast_hash": "14ed9a269c50dbdc13f14d429fcfe756",
     "semantic_hash": ""
   },
   "pm4-app/frontend-ng/src/core/fecha-hora.spec.ts": {
-    "mtime": 1787165798.749035,
-    "seen": 1787239182.7311406,
+    "mtime": 1787160705.159202,
+    "seen": 1787255885.5906882,
     "ast_hash": "693751323ca53b081c38a89874bfd18a",
     "semantic_hash": ""
   },
   "pm4-app/frontend-ng/src/core/fecha-hora.ts": {
-    "mtime": 1787165798.7500343,
-    "seen": 1787239182.7311413,
+    "mtime": 1787160705.159202,
+    "seen": 1787255885.5906894,
     "ast_hash": "f9d5b6ef37f47ac694838a68c7948c37",
     "semantic_hash": ""
   },
   "pm4-app/frontend-ng/src/core/file-hash.spec.ts": {
-    "mtime": 1787165798.7520354,
-    "seen": 1787239182.7311423,
+    "mtime": 1787160705.159202,
+    "seen": 1787255885.5906904,
     "ast_hash": "c402d076d0670bad735b0c13af199cd3",
     "semantic_hash": ""
   },
   "pm4-app/frontend-ng/src/core/file-hash.ts": {
-    "mtime": 1787165798.7530358,
-    "seen": 1787239182.7311435,
+    "mtime": 1787160705.159202,
+    "seen": 1787255885.5906916,
     "ast_hash": "329b0c18b6fc607476c030f3bef92952",
     "semantic_hash": ""
   },
   "pm4-app/frontend-ng/src/core/file-registry.service.spec.ts": {
-    "mtime": 1787165798.7545516,
-    "seen": 1787239182.7311442,
+    "mtime": 1787160705.159202,
+    "seen": 1787255885.5906932,
     "ast_hash": "19ae77135280200de165192e59cd1e89",
     "semantic_hash": ""
   },
   "pm4-app/frontend-ng/src/core/file-registry.service.ts": {
-    "mtime": 1787165798.7565863,
-    "seen": 1787239182.731145,
+    "mtime": 1787160705.159202,
+    "seen": 1787255885.590694,
     "ast_hash": "baa3c11c3a0a141b4bd6271dcbe086ec",
     "semantic_hash": ""
   },
   "pm4-app/frontend-ng/src/core/holidays.service.spec.ts": {
-    "mtime": 1787165798.7585876,
-    "seen": 1787239182.7311456,
+    "mtime": 1787160705.173899,
+    "seen": 1787255885.5906951,
     "ast_hash": "186c62833e511106ee7e236c7a173362",
     "semantic_hash": ""
   },
   "pm4-app/frontend-ng/src/core/holidays.service.ts": {
-    "mtime": 1787165798.7605817,
-    "seen": 1787239182.7311466,
+    "mtime": 1787160705.174221,
+    "seen": 1787255885.5906963,
     "ast_hash": "30aac141f4232fbc2381f523b8ec025d",
     "semantic_hash": ""
   },
   "pm4-app/frontend-ng/src/core/http-error.ts": {
-    "mtime": 1787165798.7644138,
-    "seen": 1787239182.7311473,
+    "mtime": 1787160705.174221,
+    "seen": 1787255885.5906978,
     "ast_hash": "cfac6ca095903a3f950b5ff79ebccf46",
     "semantic_hash": ""
   },
   "pm4-app/frontend-ng/src/core/parent-request.service.spec.ts": {
-    "mtime": 1787165798.7664433,
-    "seen": 1787239182.731148,
+    "mtime": 1787160705.174221,
+    "seen": 1787255885.5906987,
     "ast_hash": "506a22379faefc2bab020e976cca2476",
     "semantic_hash": ""
   },
   "pm4-app/frontend-ng/src/core/parent-request.service.ts": {
-    "mtime": 1787165798.768435,
-    "seen": 1787239182.731149,
+    "mtime": 1787160705.174221,
+    "seen": 1787255885.5907006,
     "ast_hash": "f8effffaa92a23f036fc6105e2bf36bf",
     "semantic_hash": ""
   },
   "pm4-app/frontend-ng/src/core/pm4-context.service.spec.ts": {
-    "mtime": 1787165798.7714436,
-    "seen": 1787239182.73115,
+    "mtime": 1787160705.174221,
+    "seen": 1787255885.5907016,
     "ast_hash": "2bf4f30e3612739238ae2955b62cf935",
     "semantic_hash": ""
   },
   "pm4-app/frontend-ng/src/core/pm4-context.service.ts": {
-    "mtime": 1787165798.772441,
-    "seen": 1787239182.7311506,
+    "mtime": 1787160705.174221,
+    "seen": 1787255885.590703,
     "ast_hash": "fe72bc7cf5d53934e876fae3d5033dcc",
     "semantic_hash": ""
   },
   "pm4-app/frontend-ng/src/core/pm4-groups.service.spec.ts": {
-    "mtime": 1787165798.7755773,
-    "seen": 1787239182.7311516,
+    "mtime": 1787160705.1896574,
+    "seen": 1787255885.5907042,
     "ast_hash": "31b2902d356aff2ff5af4c5ba45d8695",
     "semantic_hash": ""
   },
   "pm4-app/frontend-ng/src/core/pm4-groups.service.ts": {
-    "mtime": 1787165798.777996,
-    "seen": 1787239182.7311523,
+    "mtime": 1787160705.192876,
+    "seen": 1787255885.5907054,
     "ast_hash": "27cd4977e3a17fea8aa7c1ed922a72ce",
     "semantic_hash": ""
   },
   "pm4-app/frontend-ng/src/core/pm4-resolve.spec.ts": {
-    "mtime": 1787165798.7803416,
-    "seen": 1787239182.7311532,
+    "mtime": 1787160705.192876,
+    "seen": 1787255885.5907063,
     "ast_hash": "f6a429c60fe3c3b3da2a75ef915ec5b5",
     "semantic_hash": ""
   },
   "pm4-app/frontend-ng/src/core/pm4-resolve.ts": {
-    "mtime": 1787165798.7823458,
-    "seen": 1787239182.731154,
+    "mtime": 1787160705.192876,
+    "seen": 1787255885.5907073,
     "ast_hash": "bb19a4c8b2a679a4008acfd12a7ed6bd",
     "semantic_hash": ""
   },
   "pm4-app/frontend-ng/src/core/request-files.service.spec.ts": {
-    "mtime": 1787165798.7833412,
-    "seen": 1787239182.731155,
+    "mtime": 1787160705.199546,
+    "seen": 1787255885.5907085,
     "ast_hash": "730e62a7b7f51d6639371328c53e0903",
     "semantic_hash": ""
   },
   "pm4-app/frontend-ng/src/core/request-files.service.ts": {
-    "mtime": 1787165798.7843554,
-    "seen": 1787239182.7311559,
+    "mtime": 1787160705.2028978,
+    "seen": 1787255885.5907094,
     "ast_hash": "2c96fab78c95d188c72948c64f734816",
     "semantic_hash": ""
   },
   "pm4-app/frontend-ng/src/core/request-files.types.spec.ts": {
-    "mtime": 1787165798.786545,
-    "seen": 1787239182.7311566,
+    "mtime": 1787160705.2049077,
+    "seen": 1787255885.5907109,
     "ast_hash": "c9318d226427db8f4dfb3a582c2cc65b",
     "semantic_hash": ""
   },
   "pm4-app/frontend-ng/src/core/request-files.types.ts": {
-    "mtime": 1787165798.7885396,
-    "seen": 1787239182.7311573,
+    "mtime": 1787160705.2090144,
+    "seen": 1787255885.5907118,
     "ast_hash": "3fc282ca203b863da6af90c4587a1fd6",
     "semantic_hash": ""
   },
   "pm4-app/frontend-ng/src/core/scroll-to-first-error.spec.ts": {
-    "mtime": 1787165798.790626,
-    "seen": 1787239182.731158,
+    "mtime": 1787160705.2120218,
+    "seen": 1787255885.590713,
     "ast_hash": "05300a78e69ca5174969e37daf5fc6e6",
     "semantic_hash": ""
   },
   "pm4-app/frontend-ng/src/core/scroll-to-first-error.ts": {
-    "mtime": 1787165798.7934098,
-    "seen": 1787239182.7311587,
+    "mtime": 1787160705.2134354,
+    "seen": 1787255885.5907142,
     "ast_hash": "8f0abb2929f895c9e546741ecaf164b8",
     "semantic_hash": ""
   },
   "pm4-app/frontend-ng/src/core/sincronizar-desc.spec.ts": {
-    "mtime": 1787172680.8319776,
-    "seen": 1787239182.73116,
+    "mtime": 1787172611.0548315,
+    "seen": 1787255885.5907154,
     "ast_hash": "0b10d91aa8634592aa39b100a5b1f028",
     "semantic_hash": ""
   },
   "pm4-app/frontend-ng/src/core/sincronizar-desc.ts": {
-    "mtime": 1787172680.833979,
-    "seen": 1787239182.7311606,
+    "mtime": 1787172611.0562513,
+    "seen": 1787255885.5907164,
     "ast_hash": "aee9425f04b01de76bf4fb1cd6555fcc",
     "semantic_hash": ""
   },
   "pm4-app/frontend-ng/src/core/task.service.spec.ts": {
-    "mtime": 1787165798.80198,
-    "seen": 1787239182.7311614,
+    "mtime": 1787160705.2158186,
+    "seen": 1787255885.5907178,
     "ast_hash": "6a5835d673beca87f2f05b2499fd2dea",
     "semantic_hash": ""
   },
   "pm4-app/frontend-ng/src/core/task.service.ts": {
-    "mtime": 1787165798.804485,
-    "seen": 1787239182.7311623,
+    "mtime": 1787160705.2262595,
+    "seen": 1787255885.590719,
     "ast_hash": "ca2bc7d5f39798a415b53fa0cbeef4da",
     "semantic_hash": ""
   },
   "pm4-app/frontend-ng/src/core/zona-horaria.spec.ts": {
-    "mtime": 1787165798.8067162,
-    "seen": 1787239182.731163,
+    "mtime": 1787160705.2262595,
+    "seen": 1787255885.5907197,
     "ast_hash": "cbcc3940f1c5f33e1babf97268e84bcc",
     "semantic_hash": ""
   },
   "pm4-app/frontend-ng/src/env-generated.spec.ts": {
-    "mtime": 1787165798.8087265,
-    "seen": 1787239182.7311642,
+    "mtime": 1787160705.2262595,
+    "seen": 1787255885.5907211,
     "ast_hash": "d333209e7b9a28a43d48d0dba45df15b",
     "semantic_hash": ""
   },
   "pm4-app/frontend-ng/src/main.ts": {
-    "mtime": 1787165798.8143177,
-    "seen": 1787239182.731165,
+    "mtime": 1787160705.2262595,
+    "seen": 1787255885.5907223,
     "ast_hash": "9840415b4dc905c79868d1915d66c331",
     "semantic_hash": ""
   },
   "pm4-app/frontend-ng/src/screens/atencion-cliente/otras-solicitudes/COL_OS_SCR-003_Bandeja_Gestion_Linea2/gestion-linea2.spec.ts": {
-    "mtime": 1787165798.8251295,
-    "seen": 1787239182.731166,
+    "mtime": 1787160705.2441308,
+    "seen": 1787255885.590723,
     "ast_hash": "7877b0914214e496f3de726df85566af",
     "semantic_hash": ""
   },
   "pm4-app/frontend-ng/src/screens/atencion-cliente/otras-solicitudes/COL_OS_SCR-003_Bandeja_Gestion_Linea2/gestion-linea2.ts": {
-    "mtime": 1787165798.8301084,
-    "seen": 1787239182.7311673,
+    "mtime": 1787160705.2441308,
+    "seen": 1787255885.5907245,
     "ast_hash": "4f5a6970bb52808a6c67b92b5443f80c",
     "semantic_hash": ""
   },
   "pm4-app/frontend-ng/src/screens/atencion-cliente/otras-solicitudes/COL_OS_SCR-003_Bandeja_Gestion_Linea2/reasignar-caso-modal.spec.ts": {
-    "mtime": 1787165798.8331378,
-    "seen": 1787239182.7311685,
+    "mtime": 1787160705.2441308,
+    "seen": 1787255885.5907254,
     "ast_hash": "8030e7f6ebedd5e300f6416a3f170ba0",
     "semantic_hash": ""
   },
   "pm4-app/frontend-ng/src/screens/atencion-cliente/otras-solicitudes/COL_OS_SCR-003_Bandeja_Gestion_Linea2/reasignar-caso-modal.ts": {
-    "mtime": 1787165798.834648,
-    "seen": 1787239182.7311695,
+    "mtime": 1787160705.2441308,
+    "seen": 1787255885.5907266,
     "ast_hash": "2675b83124634c09932fc8df79d63123",
     "semantic_hash": ""
   },
   "pm4-app/frontend-ng/src/screens/atencion-cliente/otras-solicitudes/fields/fields.ts": {
-    "mtime": 1787165798.8385348,
-    "seen": 1787239182.7311707,
+    "mtime": 1787160705.2593286,
+    "seen": 1787255885.590728,
     "ast_hash": "b5373648ea37730b2afc3bf7c7b4ed24",
     "semantic_hash": ""
   },
   "pm4-app/frontend-ng/src/screens/atencion-cliente/quejas-directas/COL_QD_SCR-000_CrearRecibirQueja/crear-recibir-queja.spec.ts": {
-    "mtime": 1787238658.3503458,
-    "seen": 1787239182.7311716,
-    "ast_hash": "6e75ccb424e0232d1202184a894f635f",
+    "mtime": 1787254757.2711475,
+    "seen": 1787255885.5907292,
+    "ast_hash": "e87abc3d0619546fb95b7e48c99e199b",
     "semantic_hash": ""
   },
   "pm4-app/frontend-ng/src/screens/atencion-cliente/quejas-directas/COL_QD_SCR-000_CrearRecibirQueja/crear-recibir-queja.ts": {
-    "mtime": 1787238658.354872,
-    "seen": 1787239182.7311726,
-    "ast_hash": "493f53c96ad06257b0988770bd0be37a",
+    "mtime": 1787258323.7464166,
+    "seen": 1787259709.885693,
+    "ast_hash": "687cb37b2aa2e9ffc04703de0e7bec12",
     "semantic_hash": ""
   },
   "pm4-app/frontend-ng/src/screens/atencion-cliente/quejas-directas/COL_QD_SCR-000_CrearRecibirQueja/pqr-page.spec.ts": {
-    "mtime": 1787165798.856833,
-    "seen": 1787239182.731174,
+    "mtime": 1787160705.273922,
+    "seen": 1787255885.5907316,
     "ast_hash": "72c48f5e68187068f55a8e61b83336f7",
     "semantic_hash": ""
   },
   "pm4-app/frontend-ng/src/screens/atencion-cliente/quejas-directas/COL_QD_SCR-000_CrearRecibirQueja/pqr-page.ts": {
-    "mtime": 1787165798.859337,
-    "seen": 1787239182.7311754,
+    "mtime": 1787160705.273922,
+    "seen": 1787255885.5907326,
     "ast_hash": "14348afbc69c3bd9107a47f8a927c649",
     "semantic_hash": ""
   },
   "pm4-app/frontend-ng/src/screens/atencion-cliente/quejas-directas/COL_QD_SCR-000_CrearRecibirQueja/pqr-readonly.ts": {
-    "mtime": 1787165798.8643563,
-    "seen": 1787239182.7311764,
+    "mtime": 1787160705.273922,
+    "seen": 1787255885.5907338,
     "ast_hash": "fbb3f46039da05a490c1e2c6fe3cf607",
     "semantic_hash": ""
   },
   "pm4-app/frontend-ng/src/screens/atencion-cliente/quejas-directas/COL_QD_SCR-000_CrearRecibirQueja/pqr-section.ts": {
-    "mtime": 1787165798.868706,
-    "seen": 1787239182.7311776,
+    "mtime": 1787160705.2908802,
+    "seen": 1787255885.590735,
     "ast_hash": "690ff3b3276fec5e86509e4e5026de1a",
     "semantic_hash": ""
   },
   "pm4-app/frontend-ng/src/screens/atencion-cliente/quejas-directas/COL_QD_SCR-000_CrearRecibirQueja/seccion-consumidor.spec.ts": {
-    "mtime": 1787165798.871517,
-    "seen": 1787239182.731179,
-    "ast_hash": "5d58e44f5e38efb35c9f51878a934744",
+    "mtime": 1787254553.439599,
+    "seen": 1787255885.590736,
+    "ast_hash": "f5af8276dde5e3dc3e51f5a7b60cde18",
     "semantic_hash": ""
   },
   "pm4-app/frontend-ng/src/screens/atencion-cliente/quejas-directas/COL_QD_SCR-000_CrearRecibirQueja/seccion-consumidor.ts": {
-    "mtime": 1787165798.874561,
-    "seen": 1787239182.7311802,
-    "ast_hash": "f0a14c248a7d815ede4c6af74296ea8f",
+    "mtime": 1787254734.8503232,
+    "seen": 1787255885.5907369,
+    "ast_hash": "5195d30917d287d6e2ddd39139c2ca2b",
     "semantic_hash": ""
   },
   "pm4-app/frontend-ng/src/screens/atencion-cliente/quejas-directas/COL_QD_SCR-000_CrearRecibirQueja/seccion-detalle-queja.spec.ts": {
-    "mtime": 1787165798.8816278,
-    "seen": 1787239182.7311814,
-    "ast_hash": "e59f97c7a7e1dfd432407259f4eb78c5",
+    "mtime": 1787259010.167674,
+    "seen": 1787259709.8873627,
+    "ast_hash": "a95df88fd27a237c3f48bfc2eb77fa42",
     "semantic_hash": ""
   },
   "pm4-app/frontend-ng/src/screens/atencion-cliente/quejas-directas/COL_QD_SCR-000_CrearRecibirQueja/seccion-detalle-queja.ts": {
-    "mtime": 1787172680.8480952,
-    "seen": 1787239182.7311828,
-    "ast_hash": "239548672a6783159e65984ec9c603e7",
+    "mtime": 1787259104.336047,
+    "seen": 1787259709.8873649,
+    "ast_hash": "d7314e4f15fee87270c8d162e0494f18",
     "semantic_hash": ""
   },
   "pm4-app/frontend-ng/src/screens/atencion-cliente/quejas-directas/COL_QD_SCR-003_Correccion_Error_Funcional/correccion-error-funcional.spec.ts": {
-    "mtime": 1787165798.8926976,
-    "seen": 1787239182.7311847,
+    "mtime": 1787160705.3076267,
+    "seen": 1787255885.5907402,
     "ast_hash": "98e71448776dc0b6865e10a7fb75e563",
     "semantic_hash": ""
   },
   "pm4-app/frontend-ng/src/screens/atencion-cliente/quejas-directas/COL_QD_SCR-003_Correccion_Error_Funcional/correccion-error-funcional.ts": {
-    "mtime": 1787165798.8960373,
-    "seen": 1787239182.7311862,
+    "mtime": 1787160705.321689,
+    "seen": 1787255885.5907414,
     "ast_hash": "c89a3d60903f6ef3818e448594346f03",
     "semantic_hash": ""
   },
   "pm4-app/frontend-ng/src/screens/atencion-cliente/quejas-directas/COL_QD_SCR-003_Correccion_Error_Funcional/seccion-campos-payload.ts": {
-    "mtime": 1787238920.573645,
-    "seen": 1787239182.7311878,
+    "mtime": 1787184292.4285686,
+    "seen": 1787255885.5907428,
     "ast_hash": "f81dae8b6a799692936667f701b8c995",
     "semantic_hash": ""
   },
   "pm4-app/frontend-ng/src/screens/atencion-cliente/quejas-directas/COL_QD_SCR-0051_Detalle_Reasignacion_Respuesta/detalle-reasignacion-respuesta.spec.ts": {
-    "mtime": 1787172680.862257,
-    "seen": 1787239182.7311895,
+    "mtime": 1787172611.0731187,
+    "seen": 1787255885.5907438,
     "ast_hash": "a4ffd1daf8942b9a252b0c47f592feac",
     "semantic_hash": ""
   },
   "pm4-app/frontend-ng/src/screens/atencion-cliente/quejas-directas/COL_QD_SCR-0051_Detalle_Reasignacion_Respuesta/detalle-reasignacion-respuesta.ts": {
-    "mtime": 1787165798.9245248,
-    "seen": 1787239182.7311914,
+    "mtime": 1787160705.3474813,
+    "seen": 1787255885.5907445,
     "ast_hash": "a071c5dbdea0002d11f2124c22574a26",
     "semantic_hash": ""
   },
   "pm4-app/frontend-ng/src/screens/atencion-cliente/quejas-directas/COL_QD_SCR-0051_Detalle_Reasignacion_Respuesta/expediente-completo-modal.spec.ts": {
-    "mtime": 1787165798.9315567,
-    "seen": 1787239182.7311928,
+    "mtime": 1787160705.35762,
+    "seen": 1787255885.5907454,
     "ast_hash": "bbc058df33a3adae1ac9d6c4f2e26d2b",
     "semantic_hash": ""
   },
   "pm4-app/frontend-ng/src/screens/atencion-cliente/quejas-directas/COL_QD_SCR-0051_Detalle_Reasignacion_Respuesta/expediente-completo-modal.ts": {
-    "mtime": 1787172680.8652518,
-    "seen": 1787239182.7311943,
+    "mtime": 1787172611.0731187,
+    "seen": 1787255885.5907466,
     "ast_hash": "4ba72ab989d838ef8d6be3500c68e9d8",
     "semantic_hash": ""
   },
   "pm4-app/frontend-ng/src/screens/atencion-cliente/quejas-directas/COL_QD_SCR-0051_Detalle_Reasignacion_Respuesta/respuestaFinalTemplate.spec.ts": {
-    "mtime": 1787165798.9350514,
-    "seen": 1787239182.7311964,
+    "mtime": 1787160705.363483,
+    "seen": 1787255885.5907474,
     "ast_hash": "e66c5df83a5bf41d11c7c86569626505",
     "semantic_hash": ""
   },
   "pm4-app/frontend-ng/src/screens/atencion-cliente/quejas-directas/COL_QD_SCR-0051_Detalle_Reasignacion_Respuesta/respuestaFinalTemplate.ts": {
-    "mtime": 1787165798.9375632,
-    "seen": 1787239182.7311978,
+    "mtime": 1787160705.366912,
+    "seen": 1787255885.5907483,
     "ast_hash": "87bac8d0977ead466110281e4ffae6cf",
     "semantic_hash": ""
   },
   "pm4-app/frontend-ng/src/screens/atencion-cliente/quejas-directas/COL_QD_SCR-0051_Detalle_Reasignacion_Respuesta/seccion-asignacion.ts": {
-    "mtime": 1787172680.8686335,
-    "seen": 1787239182.7311995,
+    "mtime": 1787172611.0731187,
+    "seen": 1787255885.5907493,
     "ast_hash": "52510aa2f5a2b4f7c5d117499ac88ed3",
     "semantic_hash": ""
   },
   "pm4-app/frontend-ng/src/screens/atencion-cliente/quejas-directas/COL_QD_SCR-0051_Detalle_Reasignacion_Respuesta/seccion-detalle-caso.spec.ts": {
-    "mtime": 1787172680.870633,
-    "seen": 1787239182.7312016,
+    "mtime": 1787172611.0731187,
+    "seen": 1787255885.5907497,
     "ast_hash": "16d93385f5f945da2f9768ed446d0f0c",
     "semantic_hash": ""
   },
   "pm4-app/frontend-ng/src/screens/atencion-cliente/quejas-directas/COL_QD_SCR-0051_Detalle_Reasignacion_Respuesta/seccion-detalle-caso.ts": {
-    "mtime": 1787172680.8736289,
-    "seen": 1787239182.7312033,
+    "mtime": 1787172611.0731187,
+    "seen": 1787255885.590751,
     "ast_hash": "00bba2ea695bfe3eaf8301b8a997c9ea",
     "semantic_hash": ""
   },
   "pm4-app/frontend-ng/src/screens/atencion-cliente/quejas-directas/COL_QD_SCR-0051_Detalle_Reasignacion_Respuesta/seccion-respuesta.ts": {
-    "mtime": 1787165798.9533057,
-    "seen": 1787239182.7312052,
+    "mtime": 1787160705.3798587,
+    "seen": 1787255885.590752,
     "ast_hash": "3723e7c1388a740ba09260842618dd22",
     "semantic_hash": ""
   },
   "pm4-app/frontend-ng/src/screens/atencion-cliente/quejas-directas/COL_QD_SCR-0052_Respuesta_Area_Responsable/respuesta-area-responsable.spec.ts": {
-    "mtime": 1787172680.8831537,
-    "seen": 1787239182.731207,
+    "mtime": 1787172611.0894656,
+    "seen": 1787255885.5907528,
     "ast_hash": "150865214a15091a68f904d3be793158",
     "semantic_hash": ""
   },
   "pm4-app/frontend-ng/src/screens/atencion-cliente/quejas-directas/COL_QD_SCR-0052_Respuesta_Area_Responsable/respuesta-area-responsable.ts": {
-    "mtime": 1787165798.9644938,
-    "seen": 1787239182.7312093,
+    "mtime": 1787160705.3931088,
+    "seen": 1787255885.5907536,
     "ast_hash": "da454d6a88fd8c59cb1ae5e06f12ab4d",
     "semantic_hash": ""
   },
   "pm4-app/frontend-ng/src/screens/atencion-cliente/quejas-directas/COL_QD_SCR-008_Revision_Respuesta_SAC/revision-respuesta-sac.spec.ts": {
-    "mtime": 1787165798.9735107,
-    "seen": 1787239182.7312107,
+    "mtime": 1787160705.395114,
+    "seen": 1787255885.5907552,
     "ast_hash": "a2a3693ca2f47590af1be44f7762ee09",
     "semantic_hash": ""
   },
   "pm4-app/frontend-ng/src/screens/atencion-cliente/quejas-directas/COL_QD_SCR-008_Revision_Respuesta_SAC/revision-respuesta-sac.ts": {
-    "mtime": 1787165798.9769392,
-    "seen": 1787239182.7312126,
+    "mtime": 1787160705.395114,
+    "seen": 1787255885.5907564,
     "ast_hash": "d090a94f239c6be5fd2af5d8c96a9c2f",
     "semantic_hash": ""
   },
   "pm4-app/frontend-ng/src/screens/atencion-cliente/quejas-directas/COL_QD_SCR-009_Formulario_Superintendencia/confirmar-envio-modal.ts": {
-    "mtime": 1787165798.9864767,
-    "seen": 1787239182.7312143,
+    "mtime": 1787160705.4102285,
+    "seen": 1787255885.590758,
     "ast_hash": "79adfafefc2fe2685f925b23d4ea793e",
     "semantic_hash": ""
   },
   "pm4-app/frontend-ng/src/screens/atencion-cliente/quejas-directas/COL_QD_SCR-009_Formulario_Superintendencia/formulario-superintendencia.spec.ts": {
-    "mtime": 1787165798.991551,
-    "seen": 1787239182.731216,
+    "mtime": 1787160705.4102285,
+    "seen": 1787255885.5907593,
     "ast_hash": "a29e5b1a69ba8463d6d7a65e4c793051",
     "semantic_hash": ""
   },
   "pm4-app/frontend-ng/src/screens/atencion-cliente/quejas-directas/COL_QD_SCR-009_Formulario_Superintendencia/formulario-superintendencia.ts": {
-    "mtime": 1787165798.9950638,
-    "seen": 1787239182.7312176,
+    "mtime": 1787160705.423927,
+    "seen": 1787255885.5907607,
     "ast_hash": "9801a802715557d42f7eeb9dbd85bd8c",
     "semantic_hash": ""
   },
   "pm4-app/frontend-ng/src/screens/atencion-cliente/quejas-directas/COL_QD_SCR-009_Formulario_Superintendencia/hoy-bogota.spec.ts": {
-    "mtime": 1787165798.9991012,
-    "seen": 1787239182.7312195,
+    "mtime": 1787160705.424367,
+    "seen": 1787255885.590762,
     "ast_hash": "e8ba17bcb2a33bad899dfcbd6c3009f5",
     "semantic_hash": ""
   },
   "pm4-app/frontend-ng/src/screens/atencion-cliente/quejas-directas/COL_QD_SCR-009_Formulario_Superintendencia/hoy-bogota.ts": {
-    "mtime": 1787165799.0015914,
-    "seen": 1787239182.7312212,
+    "mtime": 1787160705.424367,
+    "seen": 1787255885.5907633,
     "ast_hash": "7a14558ff95e4016281938d198150039",
     "semantic_hash": ""
   },
   "pm4-app/frontend-ng/src/screens/atencion-cliente/quejas-directas/COL_QD_SCR-009_Formulario_Superintendencia/seccion-cierre-envio.ts": {
-    "mtime": 1787165799.0045862,
-    "seen": 1787239182.7312229,
+    "mtime": 1787160705.4309287,
+    "seen": 1787255885.5907648,
     "ast_hash": "3048c70597284b893b27d1782a847b7c",
     "semantic_hash": ""
   },
   "pm4-app/frontend-ng/src/screens/atencion-cliente/quejas-directas/COL_QD_SCR-009_Formulario_Superintendencia/seccion-fraude-anexos.ts": {
-    "mtime": 1787165799.0078063,
-    "seen": 1787239182.7312245,
+    "mtime": 1787160705.4396117,
+    "seen": 1787255885.5907655,
     "ast_hash": "afdd1460aa6d53de9a4e01b17d0776fd",
     "semantic_hash": ""
   },
   "pm4-app/frontend-ng/src/screens/atencion-cliente/quejas-directas/COL_QD_SCR-013_Dashboard_Gestion_Casos/casos-dashboard.service.spec.ts": {
-    "mtime": 1787165799.0411665,
-    "seen": 1787239182.7312262,
+    "mtime": 1787160705.4810965,
+    "seen": 1787255885.5907671,
     "ast_hash": "d59dd63c2e21e91a7049677406dbef97",
     "semantic_hash": ""
   },
   "pm4-app/frontend-ng/src/screens/atencion-cliente/quejas-directas/COL_QD_SCR-013_Dashboard_Gestion_Casos/casos-dashboard.service.ts": {
-    "mtime": 1787165799.0431676,
-    "seen": 1787239182.7312276,
+    "mtime": 1787160705.4827337,
+    "seen": 1787255885.590768,
     "ast_hash": "164745b5ba16d8c2e805ebabb13f6ea1",
     "semantic_hash": ""
   },
   "pm4-app/frontend-ng/src/screens/atencion-cliente/quejas-directas/COL_QD_SCR-013_Dashboard_Gestion_Casos/dashboard-gestion-casos.spec.ts": {
-    "mtime": 1787165799.0492258,
-    "seen": 1787239182.731229,
+    "mtime": 1787160705.4896715,
+    "seen": 1787255885.590769,
     "ast_hash": "113ffa4681c36a204848d9cc3e5a73b3",
     "semantic_hash": ""
   },
   "pm4-app/frontend-ng/src/screens/atencion-cliente/quejas-directas/COL_QD_SCR-013_Dashboard_Gestion_Casos/dashboard-gestion-casos.ts": {
-    "mtime": 1787165799.0533109,
-    "seen": 1787239182.731231,
+    "mtime": 1787160705.4931824,
+    "seen": 1787255885.5907707,
     "ast_hash": "83238ce1375ba49d3b4166b617ad666c",
     "semantic_hash": ""
   },
   "pm4-app/frontend-ng/src/screens/atencion-cliente/quejas-directas/COL_QD_SCR-013_Dashboard_Gestion_Casos/dashboard-helpers.spec.ts": {
-    "mtime": 1787165799.054819,
-    "seen": 1787239182.731233,
+    "mtime": 1787160705.496465,
+    "seen": 1787255885.5907717,
     "ast_hash": "673061c499d6f4c0bff253b268106a25",
     "semantic_hash": ""
   },
   "pm4-app/frontend-ng/src/screens/atencion-cliente/quejas-directas/COL_QD_SCR-013_Dashboard_Gestion_Casos/dashboard-helpers.ts": {
-    "mtime": 1787165799.058357,
-    "seen": 1787239182.7312343,
+    "mtime": 1787160705.4980702,
+    "seen": 1787255885.5907724,
     "ast_hash": "d599fac5028ec776f578b85c24568942",
     "semantic_hash": ""
   },
   "pm4-app/frontend-ng/src/screens/atencion-cliente/quejas-directas/COL_QD_SCR-013_Dashboard_Gestion_Casos/detalle-caso-modal.spec.ts": {
-    "mtime": 1787165799.063377,
-    "seen": 1787239182.7312357,
+    "mtime": 1787160705.4980702,
+    "seen": 1787255885.590774,
     "ast_hash": "507dfe1bb78b7a9b8ba81d62592a13c5",
     "semantic_hash": ""
   },
   "pm4-app/frontend-ng/src/screens/atencion-cliente/quejas-directas/COL_QD_SCR-013_Dashboard_Gestion_Casos/detalle-caso-modal.ts": {
-    "mtime": 1787165799.065429,
-    "seen": 1787239182.731238,
+    "mtime": 1787160705.5078492,
+    "seen": 1787255885.590775,
     "ast_hash": "4f5b2109318085dc5e40d1aad7f8879d",
     "semantic_hash": ""
   },
   "pm4-app/frontend-ng/src/screens/atencion-cliente/quejas-directas/COL_QD_SCR-013_Dashboard_Gestion_Casos/tabla-casos.spec.ts": {
-    "mtime": 1787165799.069424,
-    "seen": 1787239182.7312393,
+    "mtime": 1787160705.5078492,
+    "seen": 1787255885.590776,
     "ast_hash": "83c5481c3e45e50a12291e04e98ae5b1",
     "semantic_hash": ""
   },
   "pm4-app/frontend-ng/src/screens/atencion-cliente/quejas-directas/COL_QD_SCR-013_Dashboard_Gestion_Casos/tabla-casos.ts": {
-    "mtime": 1787165799.0714312,
-    "seen": 1787239182.7312415,
+    "mtime": 1787160705.5078492,
+    "seen": 1787255885.5907776,
     "ast_hash": "8bb4edf7c78ccd80b95b8c5fe68f5450",
     "semantic_hash": ""
   },
   "pm4-app/frontend-ng/src/screens/atencion-cliente/quejas-directas/fields/fields.ts": {
-    "mtime": 1787238658.3659544,
-    "seen": 1787239182.731243,
+    "mtime": 1787243030.8400967,
+    "seen": 1787255885.5907784,
     "ast_hash": "382303f1d20bd10abb6c2a72e41c747f",
     "semantic_hash": ""
   },
   "pm4-app/frontend-ng/src/screens/atencion-cliente/quejas-directas/fields/matriz-motivos.service.spec.ts": {
-    "mtime": 1787165799.0814354,
-    "seen": 1787239182.7312448,
+    "mtime": 1787160705.5240738,
+    "seen": 1787255885.5907793,
     "ast_hash": "3b7cb800a7e633aacead4bcbf5c9ff2c",
     "semantic_hash": ""
   },
   "pm4-app/frontend-ng/src/screens/atencion-cliente/quejas-directas/fields/matriz-motivos.service.ts": {
-    "mtime": 1787172680.8931856,
-    "seen": 1787239182.7312462,
+    "mtime": 1787172611.0894656,
+    "seen": 1787255885.5907805,
     "ast_hash": "d04f91e69d6c17c67b9cf2b031caa561",
     "semantic_hash": ""
   },
   "pm4-app/frontend-ng/src/screens/atencion-cliente/quejas-directas/fields/types.ts": {
-    "mtime": 1787165799.0876174,
-    "seen": 1787239182.7312481,
+    "mtime": 1787160705.5347154,
+    "seen": 1787255885.5907815,
     "ast_hash": "f6fb5deeabb9d7efe8d061f3c09ca08b",
     "semantic_hash": ""
   },
   "pm4-app/frontend-ng/src/screens/ds-catalog/ds-catalog.spec.ts": {
-    "mtime": 1787165799.09161,
-    "seen": 1787239182.7312498,
+    "mtime": 1787160705.541679,
+    "seen": 1787255885.5907822,
     "ast_hash": "bde4d70eb13b30917d55dd830dcf6f27",
     "semantic_hash": ""
   },
   "pm4-app/frontend-ng/src/screens/ds-catalog/ds-catalog.ts": {
-    "mtime": 1787165799.0954664,
-    "seen": 1787239182.7312517,
+    "mtime": 1787179364.6707716,
+    "seen": 1787255885.5907829,
     "ast_hash": "dea59a858e291e4ec1e84166e00fcda1",
     "semantic_hash": ""
   },
   "pm4-app/frontend-ng/src/screens/gate-fachada/gate-fachada.spec.ts": {
-    "mtime": 1787165799.1055408,
-    "seen": 1787239182.7312531,
+    "mtime": 1787160705.541679,
+    "seen": 1787255885.590784,
     "ast_hash": "5d7e4e76d9e420a6831fd770c758cb2f",
     "semantic_hash": ""
   },
   "pm4-app/frontend-ng/src/screens/gate-fachada/gate-fachada.ts": {
-    "mtime": 1787165799.1075559,
-    "seen": 1787239182.7312553,
+    "mtime": 1787160705.5572577,
+    "seen": 1787255885.5907848,
     "ast_hash": "1301eabecc0541015b7986df4fbbcf50",
     "semantic_hash": ""
   },
   "pm4-app/frontend-ng/src/screens/smartsupervision-api-docs/smartsupervision-api-docs.spec.ts": {
-    "mtime": 1787165799.1158452,
-    "seen": 1787239182.7312574,
+    "mtime": 1787160705.5650587,
+    "seen": 1787255885.5907855,
     "ast_hash": "c62ad36f8516c05abc464890a4fd38b6",
     "semantic_hash": ""
   },
   "pm4-app/frontend-ng/src/screens/smartsupervision-api-docs/smartsupervision-api-docs.ts": {
-    "mtime": 1787165799.1185703,
-    "seen": 1787239182.7312589,
+    "mtime": 1787160705.5650587,
+    "seen": 1787255885.5907862,
     "ast_hash": "4b1bb2b665f9c23f60bbd6e946f0d4ff",
     "semantic_hash": ""
   },
   "pm4-app/frontend-ng/src/test-setup.ts": {
-    "mtime": 1787165799.1235795,
-    "seen": 1787239182.7312603,
+    "mtime": 1787160705.5739174,
+    "seen": 1787255885.5907872,
     "ast_hash": "1159c4763e2036f7c05ac59b4c5df54f",
     "semantic_hash": ""
   },
   "pm4-app/frontend-ng/src/zds-setup.ts": {
-    "mtime": 1787165799.1257188,
-    "seen": 1787239182.7312622,
+    "mtime": 1787160705.5817513,
+    "seen": 1787255885.5907884,
     "ast_hash": "bc846cdf52de2c8061aa423c8145b26c",
     "semantic_hash": ""
   },
   "pm4-app/frontend/package.json": {
-    "mtime": 1786657382.0578039,
-    "seen": 1787239182.7312653,
+    "mtime": 1786659719.6752782,
+    "seen": 1787255885.5907898,
     "ast_hash": "989ac5bb46e0382663d7d7eac93c544a",
     "semantic_hash": ""
   },
   "pm4-app/frontend/tsconfig.json": {
-    "mtime": 1786657382.3679647,
-    "seen": 1787239182.7314055,
+    "mtime": 1786659720.2543058,
+    "seen": 1787255885.590875,
     "ast_hash": "32b1ccb5e123d519f96029df0bdc7848",
     "semantic_hash": ""
   },
   "pm4-app/package.json": {
-    "mtime": 1787165799.1412494,
-    "seen": 1787239182.7314146,
+    "mtime": 1787160705.6739855,
+    "seen": 1787255885.59088,
     "ast_hash": "b14e8e5207692f0178117c695834ae0c",
     "semantic_hash": ""
   },
   ".github/pull_request_template.md": {
-    "mtime": 1787165798.121423,
-    "seen": 1787239182.7314477,
+    "mtime": 1787160704.7691715,
+    "seen": 1787255885.590897,
     "ast_hash": "396122e55bba1ffcc7eb92f57a5d3de8",
     "semantic_hash": ""
   },
   ".github/workflows/ci.yml": {
-    "mtime": 1787238658.231892,
-    "seen": 1787239182.7314491,
+    "mtime": 1787243030.758154,
+    "seen": 1787255885.5908983,
     "ast_hash": "62e82239e39c76f6e5d44145d2bc4c8b",
     "semantic_hash": ""
   },
   "InsumosZurich/FEED-ZURICH.md": {
-    "mtime": 1787165798.1299489,
-    "seen": 1787239182.7314522,
-    "ast_hash": "e1d5fedff1f1e008f08bd3801503344c",
+    "mtime": 1786654007.6108823,
+    "seen": 1787255885.5909052,
+    "ast_hash": "d91ef75a8cc112860612a689755d3e18",
     "semantic_hash": ""
   },
   "InsumosZurich/fe-lib-zurich/DOCUMENTACION_TECNICA.md": {
-    "mtime": 1787165798.1354768,
-    "seen": 1787239182.7314541,
-    "ast_hash": "96c0bcd7ed39a3f35a8bb1d02c52072f",
+    "mtime": 1786644668.6401377,
+    "seen": 1787255885.5909061,
+    "ast_hash": "9fc49a417a2a0f0a80417ad3fb8c2ec9",
     "semantic_hash": ""
   },
   "InsumosZurich/fe-lib-zurich/README.md": {
-    "mtime": 1787165798.1374812,
-    "seen": 1787239182.731456,
-    "ast_hash": "bdf6d5139673243635f3d249d3851136",
+    "mtime": 1786644668.6522052,
+    "seen": 1787255885.5909069,
+    "ast_hash": "0b1205fefcacbae11d36e36ba9663bd5",
     "semantic_hash": ""
   },
   "InsumosZurich/fe-lib-zurich/azure-pipelines.yml": {
-    "mtime": 1787165798.1404889,
-    "seen": 1787239182.7314572,
-    "ast_hash": "a2e836796f1e69475308c31596e9a8bc",
+    "mtime": 1786644668.6797602,
+    "seen": 1787255885.5909078,
+    "ast_hash": "27cc723df28b805684dfd6642ee60a3a",
     "semantic_hash": ""
   },
   "InsumosZurich/fe-lib-zurich/projects/lib-zurich/README.md": {
-    "mtime": 1787165798.149858,
-    "seen": 1787239182.7314591,
-    "ast_hash": "fc3b6bee053d1cd8e4e1cfe964bd3b08",
+    "mtime": 1786644668.7475557,
+    "seen": 1787255885.5909088,
+    "ast_hash": "4566229845618fa6c10a5e5c4c7e2b70",
     "semantic_hash": ""
   },
   "InsumosZurich/fe-lib-zurich/projects/lib-zurich/src/lib/components/accordion-z/accordion-z.html": {
-    "mtime": 1787165798.1583874,
-    "seen": 1787239182.7314608,
-    "ast_hash": "b850f2ef73a9edc8d905394e50ebb1c7",
+    "mtime": 1786644668.9609413,
+    "seen": 1787255885.5909095,
+    "ast_hash": "667a9e4b9c701aaaa3f5707f45fac228",
     "semantic_hash": ""
   },
   "InsumosZurich/fe-lib-zurich/projects/lib-zurich/src/lib/components/alert-z/alert-z.html": {
-    "mtime": 1787165798.1664093,
-    "seen": 1787239182.7314625,
-    "ast_hash": "4ec091336f406ac22191161ac81b8542",
+    "mtime": 1786644669.0562518,
+    "seen": 1787255885.5909102,
+    "ast_hash": "da5dd62227686dd65dae6f8771562017",
     "semantic_hash": ""
   },
   "InsumosZurich/fe-lib-zurich/projects/lib-zurich/src/lib/components/avatar-z/avatar-z.html": {
-    "mtime": 1787165798.1744192,
-    "seen": 1787239182.7314637,
-    "ast_hash": "1cf26f4131980f5117a27d594dbb6aa4",
+    "mtime": 1786644669.13564,
+    "seen": 1787255885.5909111,
+    "ast_hash": "253833b6861b812e109cee8840446c4c",
     "semantic_hash": ""
   },
   "InsumosZurich/fe-lib-zurich/projects/lib-zurich/src/lib/components/button-z/button-z.html": {
-    "mtime": 1787165798.181457,
-    "seen": 1787239182.731465,
-    "ast_hash": "2c2d6e5c23418d39298c6a3c4b9cda71",
+    "mtime": 1786644669.2148569,
+    "seen": 1787255885.590912,
+    "ast_hash": "2d73319fee5b7f19d60a9e7434cc0d72",
     "semantic_hash": ""
   },
   "InsumosZurich/fe-lib-zurich/projects/lib-zurich/src/lib/components/card-z/card-z.html": {
-    "mtime": 1787165798.1875565,
-    "seen": 1787239182.7314668,
-    "ast_hash": "df037aa4460c8396cede94a3d90c8e48",
+    "mtime": 1786644669.2941818,
+    "seen": 1787255885.590913,
+    "ast_hash": "b41892616518b1505f72eecda7ecb836",
     "semantic_hash": ""
   },
   "InsumosZurich/fe-lib-zurich/projects/lib-zurich/src/lib/components/checkbox-z/checkbox-z.html": {
-    "mtime": 1787165798.1945584,
-    "seen": 1787239182.7314682,
-    "ast_hash": "a679b39c7da7d01e8a7b438c7c11842b",
+    "mtime": 1786644669.370464,
+    "seen": 1787255885.5909138,
+    "ast_hash": "13c7fb2404c2f42ff41e30d5f262706d",
     "semantic_hash": ""
   },
   "InsumosZurich/fe-lib-zurich/projects/lib-zurich/src/lib/components/footer-z/footer-z.html": {
-    "mtime": 1787165798.2050424,
-    "seen": 1787239182.7314696,
-    "ast_hash": "948a31ad0514a2c298013634b17ecadc",
+    "mtime": 1786644669.4924605,
+    "seen": 1787255885.5909145,
+    "ast_hash": "249929b4223d1fafa96ad5137d1ce24e",
     "semantic_hash": ""
   },
   "InsumosZurich/fe-lib-zurich/projects/lib-zurich/src/lib/components/input-date-z/input-date-z.html": {
-    "mtime": 1787165798.2110226,
-    "seen": 1787239182.7314708,
-    "ast_hash": "87ded14811b1aa6dbeb0e69b860c35a0",
+    "mtime": 1786644669.5871503,
+    "seen": 1787255885.5909154,
+    "ast_hash": "3f6e5cd737fee4189ac7a5e2f9555f7a",
     "semantic_hash": ""
   },
   "InsumosZurich/fe-lib-zurich/projects/lib-zurich/src/lib/components/input-password-z/input-password-z.html": {
-    "mtime": 1787165798.2185597,
-    "seen": 1787239182.7314725,
-    "ast_hash": "e80362e32450a5f4f6ee75a2e0cb141b",
+    "mtime": 1786644669.678947,
+    "seen": 1787255885.5909164,
+    "ast_hash": "2cf4183f99daa27469e4e4665500262d",
     "semantic_hash": ""
   },
   "InsumosZurich/fe-lib-zurich/projects/lib-zurich/src/lib/components/input-select-z/input-select-z.html": {
-    "mtime": 1787165798.2246103,
-    "seen": 1787239182.7314737,
-    "ast_hash": "2240763d2a6ed7070c45196567021bfd",
+    "mtime": 1786644669.8034732,
+    "seen": 1787255885.590917,
+    "ast_hash": "119d52e8b79b37529f655fcc12ae85c0",
     "semantic_hash": ""
   },
   "InsumosZurich/fe-lib-zurich/projects/lib-zurich/src/lib/components/input-text-z/input-text-z.html": {
-    "mtime": 1787165798.2346544,
-    "seen": 1787239182.731475,
-    "ast_hash": "de7b00f8f5e94b361848f5380478c0e5",
+    "mtime": 1786644669.8973293,
+    "seen": 1787255885.5909178,
+    "ast_hash": "a2347980603d3affd02648e79bd7075e",
     "semantic_hash": ""
   },
   "InsumosZurich/fe-lib-zurich/projects/lib-zurich/src/lib/components/input-time-z/input-time-z.html": {
-    "mtime": 1787165798.2444143,
-    "seen": 1787239182.7314773,
-    "ast_hash": "152246a5981517121bdddd874fa8297f",
+    "mtime": 1786644669.9974809,
+    "seen": 1787255885.5909185,
+    "ast_hash": "ebd753e098bae1bd94f352d3a517ad89",
     "semantic_hash": ""
   },
   "InsumosZurich/fe-lib-zurich/projects/lib-zurich/src/lib/components/loader-z/loader-z.html": {
-    "mtime": 1787165798.2524416,
-    "seen": 1787239182.7314785,
-    "ast_hash": "a8ff47eb7acde14f4741b3d4f22e8ae9",
+    "mtime": 1786644670.1174235,
+    "seen": 1787255885.5909195,
+    "ast_hash": "c06df9ac3c501374013db70ce13689b3",
     "semantic_hash": ""
   },
   "InsumosZurich/fe-lib-zurich/projects/lib-zurich/src/lib/components/modal-z/modal-z.html": {
-    "mtime": 1787165798.2549603,
-    "seen": 1787239182.7314801,
-    "ast_hash": "de6a265d16a2e379ed9b1dfcbbcb94f3",
+    "mtime": 1786644670.1837642,
+    "seen": 1787255885.59092,
+    "ast_hash": "ec4d16864165dae73c23dbc07b332e3e",
     "semantic_hash": ""
   },
   "InsumosZurich/fe-lib-zurich/projects/lib-zurich/src/lib/components/navigation-z/navigation-z.html": {
-    "mtime": 1787165798.2665656,
-    "seen": 1787239182.7314816,
-    "ast_hash": "1b78f28f4c8bba2a2812f60c10a9dd07",
+    "mtime": 1786644670.3240569,
+    "seen": 1787255885.590921,
+    "ast_hash": "21adbb8bb10fab5ec8549a1878d961b8",
     "semantic_hash": ""
   },
   "InsumosZurich/fe-lib-zurich/projects/lib-zurich/src/lib/components/pictogram-z/pictogram-z.html": {
-    "mtime": 1787165798.2713,
-    "seen": 1787239182.731483,
-    "ast_hash": "f5c92c081486d1f627d06dab0205194d",
+    "mtime": 1786644670.398391,
+    "seen": 1787255885.5909216,
+    "ast_hash": "daa5e13639c644d59270024f540ccb26",
     "semantic_hash": ""
   },
   "InsumosZurich/fe-lib-zurich/projects/lib-zurich/src/lib/components/progress-tracker-z/progress-tracker-z.html": {
-    "mtime": 1787165798.2785275,
-    "seen": 1787239182.7314847,
-    "ast_hash": "0ca0ca65a7638ac4547b49264807ea9a",
+    "mtime": 1786644670.4888754,
+    "seen": 1787255885.5909228,
+    "ast_hash": "653fb38eb514143a9e1db9f8471162b7",
     "semantic_hash": ""
   },
   "InsumosZurich/fe-lib-zurich/projects/lib-zurich/src/lib/components/range-date-z/range-date-z.html": {
-    "mtime": 1787165798.2850406,
-    "seen": 1787239182.7314866,
-    "ast_hash": "271569457c82ee05c92c08eba9a1cef1",
+    "mtime": 1786644670.580795,
+    "seen": 1787255885.5909235,
+    "ast_hash": "7e19bc1bad1fea544705aecbdf38d63b",
     "semantic_hash": ""
   },
   "InsumosZurich/fe-lib-zurich/projects/lib-zurich/src/lib/components/shape-z/shape-z.html": {
-    "mtime": 1787165798.2925746,
-    "seen": 1787239182.731488,
-    "ast_hash": "a2054cf0ed3ef693c36ab6d6a354c79a",
+    "mtime": 1786644670.692926,
+    "seen": 1787255885.5909243,
+    "ast_hash": "5e47328f795e72c07b9ffd331acfdcff",
     "semantic_hash": ""
   },
   "InsumosZurich/fe-lib-zurich/projects/lib-zurich/src/lib/components/stage-banner-z/stage-banner-z.html": {
-    "mtime": 1787165798.2998295,
-    "seen": 1787239182.7314892,
-    "ast_hash": "d41e68ad14007e1ee2c4ac7c3a469827",
+    "mtime": 1786644670.760094,
+    "seen": 1787255885.590925,
+    "ast_hash": "f286e553f63b80a8c9a13a9e0860d76c",
     "semantic_hash": ""
   },
   "InsumosZurich/fe-lib-zurich/projects/lib-zurich/src/lib/components/stage-z/stage-z.html": {
-    "mtime": 1787165798.3073575,
-    "seen": 1787239182.7314906,
-    "ast_hash": "2bced462111dabe7e4df46f62cd6a725",
+    "mtime": 1786644670.8822463,
+    "seen": 1787255885.590926,
+    "ast_hash": "82c408f61ef2df0bbc7a80cdb7644fff",
     "semantic_hash": ""
   },
   "InsumosZurich/fe-lib-zurich/projects/lib-zurich/src/lib/components/table-z/table-z.html": {
-    "mtime": 1787165798.3130364,
-    "seen": 1787239182.7314923,
-    "ast_hash": "88aebd5f0dc875e624b30a5219363c60",
+    "mtime": 1786644670.959781,
+    "seen": 1787255885.590927,
+    "ast_hash": "33d265b89f0bbd1cac9bb58de2994749",
     "semantic_hash": ""
   },
   "InsumosZurich/fe-lib-zurich/projects/lib-zurich/src/lib/components/tabs-z/tabs-z.html": {
-    "mtime": 1787165798.322587,
-    "seen": 1787239182.7314937,
-    "ast_hash": "d35aa7349b2e863e69abd05de019568f",
+    "mtime": 1786644671.0700667,
+    "seen": 1787255885.5909278,
+    "ast_hash": "81179f62a3d7c2244a139e54b1aa0fe2",
     "semantic_hash": ""
   },
   "InsumosZurich/fe-lib-zurich/projects/lib-zurich/src/lib/components/tag-z/tag-z.html": {
-    "mtime": 1787165798.328613,
-    "seen": 1787239182.7314954,
-    "ast_hash": "323d1633e827f17f4fdb9be0d90de8ec",
+    "mtime": 1786644671.1650553,
+    "seen": 1787255885.5909286,
+    "ast_hash": "dd01f928390d243e50c82d088829c461",
     "semantic_hash": ""
   },
   "InsumosZurich/fe-lib-zurich/projects/lib-zurich/src/lib/components/textarea-z/textarea-z.html": {
-    "mtime": 1787165798.334392,
-    "seen": 1787239182.7314968,
-    "ast_hash": "4a50591cda1cae342397efa902513e16",
+    "mtime": 1786644671.2605052,
+    "seen": 1787255885.5909295,
+    "ast_hash": "f15a35d9f34d5ce21ba827832e4b7fd5",
     "semantic_hash": ""
   },
   "InsumosZurich/fe-lib-zurich/projects/lib-zurich/src/lib/components/tile-z/tile-z.html": {
-    "mtime": 1787165798.3407106,
-    "seen": 1787239182.7314985,
-    "ast_hash": "f56288b29ed34000eaaba31b041fcd08",
+    "mtime": 1786644671.345085,
+    "seen": 1787255885.5909302,
+    "ast_hash": "621b7eefba4edb27641f3ff2fe6cd90c",
     "semantic_hash": ""
   },
   "InsumosZurich/fe-lib-zurich/projects/lib-zurich/src/lib/components/tooltip-z/tooltip-z.html": {
-    "mtime": 1787165798.3512325,
-    "seen": 1787239182.7314997,
-    "ast_hash": "2dd707976cff259bd8fb35311612d5d6",
+    "mtime": 1786644671.4510832,
+    "seen": 1787255885.590931,
+    "ast_hash": "7fc30d9d3e4883e5b533d47fc36b4430",
     "semantic_hash": ""
   },
   "InsumosZurich/fe-lib-zurich/src/app/app.html": {
-    "mtime": 1787165798.3998585,
-    "seen": 1787239182.7315013,
-    "ast_hash": "652f1ac699ca1b0cf9a6a33145f20f51",
+    "mtime": 1786644672.0226269,
+    "seen": 1787255885.590932,
+    "ast_hash": "bd3cf806b179873778b69a065a0eb7d4",
     "semantic_hash": ""
   },
   "InsumosZurich/fe-lib-zurich/src/index.html": {
-    "mtime": 1787165798.414392,
-    "seen": 1787239182.7315028,
-    "ast_hash": "2d33a4e0dd9d1740f37bec8bbdceb182",
+    "mtime": 1786644671.8865764,
+    "seen": 1787255885.5909328,
+    "ast_hash": "fee1dd2e42493453f16fed38dfb042ca",
     "semantic_hash": ""
   },
   "InsumosZurich/lib-angular_1.0.0.txt": {
-    "mtime": 1787165798.427667,
-    "seen": 1787239182.7315044,
+    "mtime": 1786644788.882457,
+    "seen": 1787255885.5909336,
     "ast_hash": "517f71cbacca7dc8a03fdb9bd5f3ebe2",
     "semantic_hash": ""
   },
   "InsumosZurich/lib-zurich-2.6.16/package/README.md": {
-    "mtime": 1787165798.4306557,
-    "seen": 1787239182.7315059,
+    "mtime": 499162500.0,
+    "seen": 1787255885.5909343,
     "ast_hash": "fc3b6bee053d1cd8e4e1cfe964bd3b08",
     "semantic_hash": ""
   },
   "pm4-app/CONTEXTO_MIGRACION_ANGULAR.md": {
-    "mtime": 1787238658.301468,
-    "seen": 1787239182.7315254,
+    "mtime": 1787243030.8189557,
+    "seen": 1787255885.5909445,
     "ast_hash": "61d3a198705d3bffa5dc786c652120d4",
     "semantic_hash": ""
   },
   "pm4-app/certs/README.md": {
-    "mtime": 1787165798.4815814,
-    "seen": 1787239182.7315269,
+    "mtime": 1787160704.8181963,
+    "seen": 1787255885.5909452,
     "ast_hash": "3420a0a39e483d65c96ce9fde95a8547",
     "semantic_hash": ""
   },
   "pm4-app/frontend-ng/README.md": {
-    "mtime": 1787165798.4897983,
-    "seen": 1787239182.73153,
+    "mtime": 1787160704.8258739,
+    "seen": 1787255885.590947,
     "ast_hash": "68e6506825cb13ec83509dafe78fc4c2",
     "semantic_hash": ""
   },
   "pm4-app/frontend-ng/public/docs/smartsupervision-openapi.yaml": {
-    "mtime": 1787165798.5030613,
-    "seen": 1787239182.7315316,
+    "mtime": 1787160704.8458784,
+    "seen": 1787255885.5909476,
     "ast_hash": "7750496bef319fbe0a5dadf73f268aff",
     "semantic_hash": ""
   },
   "pm4-app/frontend-ng/public/docs/smartsupervision-webservice.html": {
-    "mtime": 1787165798.505594,
-    "seen": 1787239182.731533,
+    "mtime": 1787160704.8502064,
+    "seen": 1787255885.5909483,
     "ast_hash": "d808a8f65606bbe41e6ca9fa7e87a33b",
     "semantic_hash": ""
   },
   "pm4-app/frontend-ng/public/docs/swagger-ui.html": {
-    "mtime": 1787165798.50961,
-    "seen": 1787239182.731535,
+    "mtime": 1787160704.85321,
+    "seen": 1787255885.590949,
     "ast_hash": "d5890b1c8fc9c4e00142dee714b7d1cf",
     "semantic_hash": ""
   },
   "pm4-app/frontend-ng/public/docs/swagger/VERSION.txt": {
-    "mtime": 1787165798.5131226,
-    "seen": 1787239182.7315364,
+    "mtime": 1787160704.8572056,
+    "seen": 1787255885.5909503,
     "ast_hash": "529add372f8ebfcde9183d2fa4b886f7",
     "semantic_hash": ""
   },
   "pm4-app/frontend-ng/src/app/app.html": {
-    "mtime": 1787165798.5571046,
-    "seen": 1787239182.731538,
+    "mtime": 1787160704.8924732,
+    "seen": 1787255885.590951,
     "ast_hash": "4d49aeeb992f23eddc4e32c56f730c28",
     "semantic_hash": ""
   },
   "pm4-app/frontend-ng/src/components/fields/README.md": {
-    "mtime": 1787165798.603017,
-    "seen": 1787239182.7315402,
+    "mtime": 1787160704.951526,
+    "seen": 1787255885.5909517,
     "ast_hash": "8492f8b5cc77f0ed0012b8f685e7d59e",
     "semantic_hash": ""
   },
   "pm4-app/frontend-ng/src/index.html": {
-    "mtime": 1787165798.8107314,
-    "seen": 1787239182.731542,
+    "mtime": 1787160705.2262595,
+    "seen": 1787255885.5909524,
     "ast_hash": "c6af3ebe0f231effafbd1806ffc936a9",
     "semantic_hash": ""
   },
   "pm4-app/frontend-ng/src/screens/atencion-cliente/otras-solicitudes/COL_OS_SCR-003_Bandeja_Gestion_Linea2/DOCUMENTACION_COL_OS_SCR-003_Bandeja_Gestion_Linea2.md": {
-    "mtime": 1787172680.8364923,
-    "seen": 1787239182.7315438,
+    "mtime": 1787172611.0605986,
+    "seen": 1787255885.5909536,
     "ast_hash": "4603156e53da77c9863a5b0fad357e68",
     "semantic_hash": ""
   },
   "pm4-app/frontend-ng/src/screens/atencion-cliente/otras-solicitudes/COL_OS_SCR-003_Bandeja_Gestion_Linea2/gestion-linea2.html": {
-    "mtime": 1787165798.8226137,
-    "seen": 1787239182.731545,
+    "mtime": 1787160705.2411437,
+    "seen": 1787255885.5909545,
     "ast_hash": "d9399c3e00939c64380345dee3198b10",
     "semantic_hash": ""
   },
   "pm4-app/frontend-ng/src/screens/atencion-cliente/quejas-directas/COL_QD_SCR-000_CrearRecibirQueja/DOCUMENTACION_COL_QD_SCR-000_CrearRecibirQueja.md": {
-    "mtime": 1787238658.3419309,
-    "seen": 1787239182.7315466,
-    "ast_hash": "e941a16f76ce2f017a5e9bda9a2b1bc6",
+    "mtime": 1787259666.4857895,
+    "seen": 1787259709.9210255,
+    "ast_hash": "47e02353d7a18f953e9c4b9067083720",
     "semantic_hash": ""
   },
   "pm4-app/frontend-ng/src/screens/atencion-cliente/quejas-directas/COL_QD_SCR-000_CrearRecibirQueja/crear-recibir-queja.html": {
-    "mtime": 1787238658.3469281,
-    "seen": 1787239182.731548,
-    "ast_hash": "d452f57e1b818ca9fdad3aa961a3d87b",
+    "mtime": 1787254905.2497468,
+    "seen": 1787255885.590956,
+    "ast_hash": "802ffa2289dcfe7a3c30742ba9b5ba65",
     "semantic_hash": ""
   },
   "pm4-app/frontend-ng/src/screens/atencion-cliente/quejas-directas/COL_QD_SCR-000_CrearRecibirQueja/pqr-page.html": {
-    "mtime": 1787165798.8546312,
-    "seen": 1787239182.7315502,
+    "mtime": 1787160705.273922,
+    "seen": 1787255885.5909567,
     "ast_hash": "7f3447353a73043f9f2ca5626a84abb7",
     "semantic_hash": ""
   },
   "pm4-app/frontend-ng/src/screens/atencion-cliente/quejas-directas/COL_QD_SCR-000_CrearRecibirQueja/pqr-readonly.html": {
-    "mtime": 1787165798.8613558,
-    "seen": 1787239182.7315514,
+    "mtime": 1787160705.273922,
+    "seen": 1787255885.5909579,
     "ast_hash": "f69a9e97d9910c872a73253ab3b53ecf",
     "semantic_hash": ""
   },
   "pm4-app/frontend-ng/src/screens/atencion-cliente/quejas-directas/COL_QD_SCR-000_CrearRecibirQueja/pqr-section.html": {
-    "mtime": 1787165798.8667114,
-    "seen": 1787239182.7315528,
+    "mtime": 1787160705.2895806,
+    "seen": 1787255885.5909586,
     "ast_hash": "2089b63aab080f5ff8452bd7cdfe0415",
     "semantic_hash": ""
   },
   "pm4-app/frontend-ng/src/screens/atencion-cliente/quejas-directas/COL_QD_SCR-000_CrearRecibirQueja/seccion-consumidor.html": {
-    "mtime": 1787165798.8699846,
-    "seen": 1787239182.7315545,
+    "mtime": 1787160705.2928884,
+    "seen": 1787255885.5909593,
     "ast_hash": "3ad393fa436d25627ab9d174a0e22e91",
     "semantic_hash": ""
   },
   "pm4-app/frontend-ng/src/screens/atencion-cliente/quejas-directas/COL_QD_SCR-000_CrearRecibirQueja/seccion-detalle-queja.html": {
-    "mtime": 1787165798.878587,
-    "seen": 1787239182.7315557,
-    "ast_hash": "018af3613d58f5514db4c78ef506d839",
+    "mtime": 1787258699.936835,
+    "seen": 1787259709.9217849,
+    "ast_hash": "3423d98b0faeb0a287c3c221083b4136",
     "semantic_hash": ""
   },
   "pm4-app/frontend-ng/src/screens/atencion-cliente/quejas-directas/COL_QD_SCR-003_Correccion_Error_Funcional/DOCUMENTACION_COL_QD_SCR-003_Correccion_Error_Funcional.md": {
-    "mtime": 1787172680.8516972,
-    "seen": 1787239182.7315571,
+    "mtime": 1787172611.069944,
+    "seen": 1787255885.5909615,
     "ast_hash": "813aad75b638dc30341d5974ff639542",
     "semantic_hash": ""
   },
   "pm4-app/frontend-ng/src/screens/atencion-cliente/quejas-directas/COL_QD_SCR-003_Correccion_Error_Funcional/correccion-error-funcional.html": {
-    "mtime": 1787238920.571645,
-    "seen": 1787239182.7315588,
+    "mtime": 1787238468.6592531,
+    "seen": 1787255885.5909622,
     "ast_hash": "ad6c176fc67187310bc14bf7ea8b8645",
     "semantic_hash": ""
   },
   "pm4-app/frontend-ng/src/screens/atencion-cliente/quejas-directas/COL_QD_SCR-003_Correccion_Error_Funcional/seccion-campos-payload.html": {
-    "mtime": 1787165798.899047,
-    "seen": 1787239182.7315607,
+    "mtime": 1787160705.3239894,
+    "seen": 1787255885.590963,
     "ast_hash": "ae37c9706d0ea8f795e5ebd21745b5ca",
     "semantic_hash": ""
   },
   "pm4-app/frontend-ng/src/screens/atencion-cliente/quejas-directas/COL_QD_SCR-0051_Detalle_Reasignacion_Respuesta/DOCUMENTACION_COL_QD_SCR-0051_Detalle_Reasignacion_Respuesta.md": {
-    "mtime": 1787172680.859246,
-    "seen": 1787239182.7315626,
+    "mtime": 1787172611.0731187,
+    "seen": 1787255885.5909643,
     "ast_hash": "b44b0a9768bd921194610157f28f703f",
     "semantic_hash": ""
   },
   "pm4-app/frontend-ng/src/screens/atencion-cliente/quejas-directas/COL_QD_SCR-0051_Detalle_Reasignacion_Respuesta/detalle-reasignacion-respuesta.html": {
-    "mtime": 1787165798.920016,
-    "seen": 1787239182.7315643,
+    "mtime": 1787160705.3474813,
+    "seen": 1787255885.5909648,
     "ast_hash": "09da4e77f56485def19eecb3f89dab5d",
     "semantic_hash": ""
   },
   "pm4-app/frontend-ng/src/screens/atencion-cliente/quejas-directas/COL_QD_SCR-0051_Detalle_Reasignacion_Respuesta/expediente-completo-modal.html": {
-    "mtime": 1787165798.928544,
-    "seen": 1787239182.7315662,
+    "mtime": 1787160705.35762,
+    "seen": 1787255885.5909655,
     "ast_hash": "58995391de32706df02dfa0d6ec6ab4e",
     "semantic_hash": ""
   },
   "pm4-app/frontend-ng/src/screens/atencion-cliente/quejas-directas/COL_QD_SCR-0051_Detalle_Reasignacion_Respuesta/seccion-asignacion.html": {
-    "mtime": 1787165798.9395628,
-    "seen": 1787239182.7315676,
+    "mtime": 1787160705.366912,
+    "seen": 1787255885.5909662,
     "ast_hash": "ac76307181be9eb44052dea926694845",
     "semantic_hash": ""
   },
   "pm4-app/frontend-ng/src/screens/atencion-cliente/quejas-directas/COL_QD_SCR-0051_Detalle_Reasignacion_Respuesta/seccion-detalle-caso.html": {
-    "mtime": 1787165798.945302,
-    "seen": 1787239182.7315693,
+    "mtime": 1787160705.3743546,
+    "seen": 1787255885.5909672,
     "ast_hash": "e53f676b43304229c69bf03088fc6c7b",
     "semantic_hash": ""
   },
   "pm4-app/frontend-ng/src/screens/atencion-cliente/quejas-directas/COL_QD_SCR-0051_Detalle_Reasignacion_Respuesta/seccion-respuesta.html": {
-    "mtime": 1787165798.9503021,
-    "seen": 1787239182.731571,
+    "mtime": 1787160705.3798587,
+    "seen": 1787255885.5909681,
     "ast_hash": "211e0575e942095fd45e334204c4cba6",
     "semantic_hash": ""
   },
   "pm4-app/frontend-ng/src/screens/atencion-cliente/quejas-directas/COL_QD_SCR-0052_Respuesta_Area_Responsable/DOCUMENTACION_COL_QD_SCR-0052_Respuesta_Area_Responsable.md": {
-    "mtime": 1787172680.8771584,
-    "seen": 1787239182.7315726,
+    "mtime": 1787172611.0890877,
+    "seen": 1787255885.5909688,
     "ast_hash": "51b651ac18ac87de294632246d686626",
     "semantic_hash": ""
   },
   "pm4-app/frontend-ng/src/screens/atencion-cliente/quejas-directas/COL_QD_SCR-0052_Respuesta_Area_Responsable/respuesta-area-responsable.html": {
-    "mtime": 1787172680.8801615,
-    "seen": 1787239182.731574,
+    "mtime": 1787172611.0894656,
+    "seen": 1787255885.5909696,
     "ast_hash": "c66169191aaac3a72b832daf81853f42",
     "semantic_hash": ""
   },
   "pm4-app/frontend-ng/src/screens/atencion-cliente/quejas-directas/COL_QD_SCR-008_Revision_Respuesta_SAC/DOCUMENTACION_COL_QD_SCR-008_Revision_Respuesta_SAC.md": {
-    "mtime": 1787165798.9685137,
-    "seen": 1787239182.7315757,
+    "mtime": 1787160705.395114,
+    "seen": 1787255885.5909705,
     "ast_hash": "749e76049de1c2b79bfed21f47cd6b33",
     "semantic_hash": ""
   },
   "pm4-app/frontend-ng/src/screens/atencion-cliente/quejas-directas/COL_QD_SCR-008_Revision_Respuesta_SAC/revision-respuesta-sac.html": {
-    "mtime": 1787165798.9705038,
-    "seen": 1787239182.7315774,
+    "mtime": 1787160705.395114,
+    "seen": 1787255885.5909715,
     "ast_hash": "0f45f0ad544e38e831a8e06532cef9d6",
     "semantic_hash": ""
   },
   "pm4-app/frontend-ng/src/screens/atencion-cliente/quejas-directas/COL_QD_SCR-009_Formulario_Superintendencia/DOCUMENTACION_COL_QD_SCR-009_Formulario_Superintendencia.md": {
-    "mtime": 1787165798.9819455,
-    "seen": 1787239182.7315786,
+    "mtime": 1787160705.395114,
+    "seen": 1787255885.5909722,
     "ast_hash": "9bc2a2c4884d22af2406a9d6f3f9ad79",
     "semantic_hash": ""
   },
   "pm4-app/frontend-ng/src/screens/atencion-cliente/quejas-directas/COL_QD_SCR-009_Formulario_Superintendencia/formulario-superintendencia.html": {
-    "mtime": 1787165798.9884672,
-    "seen": 1787239182.73158,
+    "mtime": 1787160705.4102285,
+    "seen": 1787255885.590973,
     "ast_hash": "173bd6830bca1b11693b364975ecd9b3",
     "semantic_hash": ""
   },
   "pm4-app/frontend-ng/src/screens/atencion-cliente/quejas-directas/COL_QD_SCR-009_Formulario_Superintendencia/seccion-cierre-envio.html": {
-    "mtime": 1787165799.0025878,
-    "seen": 1787239182.7315817,
+    "mtime": 1787160705.4309287,
+    "seen": 1787255885.5909736,
     "ast_hash": "0c8b33a09a64a98e92b9448ea8dd2453",
     "semantic_hash": ""
   },
   "pm4-app/frontend-ng/src/screens/atencion-cliente/quejas-directas/COL_QD_SCR-009_Formulario_Superintendencia/seccion-fraude-anexos.html": {
-    "mtime": 1787165799.0057974,
-    "seen": 1787239182.7315829,
+    "mtime": 1787160705.4309287,
+    "seen": 1787255885.5909748,
     "ast_hash": "1bd6eca7ff2196d9cadc47462ee03c67",
     "semantic_hash": ""
   },
   "pm4-app/frontend-ng/src/screens/atencion-cliente/quejas-directas/COL_QD_SCR-013_Dashboard_Gestion_Casos/DOCUMENTACION_COL_QD_SCR-013_Dashboard_Gestion_Casos.md": {
-    "mtime": 1787165799.03717,
-    "seen": 1787239182.7315848,
+    "mtime": 1787160705.4743462,
+    "seen": 1787255885.5909753,
     "ast_hash": "74ecb0993cf62be7657c058d6604a23f",
     "semantic_hash": ""
   },
   "pm4-app/frontend-ng/src/screens/atencion-cliente/quejas-directas/COL_QD_SCR-013_Dashboard_Gestion_Casos/dashboard-gestion-casos.html": {
-    "mtime": 1787165799.0472293,
-    "seen": 1787239182.7315862,
+    "mtime": 1787160705.4827337,
+    "seen": 1787255885.590976,
     "ast_hash": "be89be0b057c9f85440fb6875144ab7d",
     "semantic_hash": ""
   },
   "pm4-app/frontend-ng/src/screens/atencion-cliente/quejas-directas/COL_QD_SCR-013_Dashboard_Gestion_Casos/detalle-caso-modal.html": {
-    "mtime": 1787165799.059873,
-    "seen": 1787239182.7315874,
+    "mtime": 1787160705.4980702,
+    "seen": 1787255885.5909767,
     "ast_hash": "ca692ba3c6833a703a6955984166a971",
     "semantic_hash": ""
   },
   "pm4-app/frontend-ng/src/screens/atencion-cliente/quejas-directas/COL_QD_SCR-013_Dashboard_Gestion_Casos/tabla-casos.html": {
-    "mtime": 1787165799.0674314,
-    "seen": 1787239182.7315886,
+    "mtime": 1787160705.5078492,
+    "seen": 1787255885.590978,
     "ast_hash": "d1e8a1f0d87d7bd6727fd69d0403d233",
     "semantic_hash": ""
   },
   "pm4-app/frontend-ng/src/screens/atencion-cliente/quejas-directas/fields/MAPEO_qd_old_new.md": {
-    "mtime": 1787172680.8841598,
-    "seen": 1787239182.7315896,
+    "mtime": 1787172611.0894656,
+    "seen": 1787255885.5909786,
     "ast_hash": "14e3d0eb47dcb1aa447c772f1aad8683",
     "semantic_hash": ""
   },
   "pm4-app/frontend-ng/src/screens/ds-catalog/ds-catalog.html": {
-    "mtime": 1787165799.0896056,
-    "seen": 1787239182.731591,
+    "mtime": 1787179364.6707716,
+    "seen": 1787255885.5909793,
     "ast_hash": "38e84f7cfd735b0a3926613637a63633",
     "semantic_hash": ""
   },
   "pm4-app/frontend-ng/src/screens/gate-fachada/GATE2_VERIFICACION_MANUAL.md": {
-    "mtime": 1787165799.100021,
-    "seen": 1787239182.731592,
+    "mtime": 1787160705.541679,
+    "seen": 1787255885.59098,
     "ast_hash": "d368de87ee2747861705ca47bdf08ff5",
     "semantic_hash": ""
   },
   "pm4-app/frontend-ng/src/screens/gate-fachada/gate-fachada.html": {
-    "mtime": 1787165799.102013,
-    "seen": 1787239182.7315931,
+    "mtime": 1787160705.541679,
+    "seen": 1787255885.590981,
     "ast_hash": "4d4154848246a95b92e1da393059b62c",
     "semantic_hash": ""
   },
   "pm4-app/frontend-ng/src/screens/smartsupervision-api-docs/DOCUMENTACION_smartsupervision-api-docs.md": {
-    "mtime": 1787238658.3700354,
-    "seen": 1787239182.7315948,
+    "mtime": 1787243030.8535192,
+    "seen": 1787255885.590982,
     "ast_hash": "5e6b670abc62262db8d791e424c67651",
     "semantic_hash": ""
   },
   "pm4-app/frontend-ng/src/screens/smartsupervision-api-docs/smartsupervision-api-docs.html": {
-    "mtime": 1787165799.114319,
-    "seen": 1787239182.7315962,
+    "mtime": 1787160705.5650587,
+    "seen": 1787255885.5909827,
     "ast_hash": "0b966e545d27d3341e04316983e639c9",
     "semantic_hash": ""
   },
   "pm4-app/insumos/Otras Solicitudes/Anexo02_Index/screens/SCR-081.md": {
-    "mtime": 1787088312.5161848,
-    "seen": 1787239182.731634,
+    "mtime": 1787160705.6502142,
+    "seen": 1787255885.591008,
     "ast_hash": "a00b401e85733facc60ff9efd4ebf5fb",
     "semantic_hash": ""
   },
   "vendor/zurich-angular/README.md": {
-    "mtime": 1787165799.1603446,
-    "seen": 1787239182.7317245,
+    "mtime": 1787160705.6941042,
+    "seen": 1787255885.5910606,
     "ast_hash": "b523971f938af10df66f2b85e05e1d2a",
     "semantic_hash": ""
   },
   "InsumosZurich/fe-lib-zurich/src/assets/img/tendencias-futuro-tecnologia-2024.jpg": {
-    "mtime": 1787165798.4123993,
-    "seen": 1787239182.7317264,
+    "mtime": 1786644672.1802385,
+    "seen": 1787255885.5910616,
     "ast_hash": "023e014b699c3b2a007ae00cbaacbe3a",
     "semantic_hash": ""
   },
   "pm4-app/frontend-ng/public/resources/zurich/ZurichLogo_Horz_White_CMYK_no_R.png": {
-    "mtime": 1787165798.5377884,
-    "seen": 1787239182.7317302,
+    "mtime": 1787160704.874357,
+    "seen": 1787255885.5910635,
     "ast_hash": "28d7a4a12eff6c453653726d30b3c2c0",
     "semantic_hash": ""
   },
   "pm4-app/insumos/Otras Solicitudes/Anexo02_Mockups_TOBE_OtrasSolicitudes_v3_2.html": {
-    "mtime": 1787172680.9415631,
-    "seen": 1787239182.731635,
+    "mtime": 1787172611.129503,
+    "seen": 1787255885.5910091,
     "ast_hash": "bc3964ef484376b679a705b326e127e2",
     "semantic_hash": ""
   },
   "pm4-app/frontend-ng/src/components/fields/primer-echo-vendor.spec.ts": {
-    "mtime": 1787238920.5368648,
-    "seen": 1787239182.7310956,
+    "mtime": 1787184292.4285686,
+    "seen": 1787255885.5906405,
     "ast_hash": "b9cdad1439ed8acfebb52ce8fef8329e",
     "semantic_hash": ""
   },
   "pm4-app/frontend-ng/src/components/fields/guarda-borrado-adjunto.spec.ts": {
-    "mtime": 1787238920.534856,
-    "seen": 1787239182.7310886,
+    "mtime": 1787238468.6396215,
+    "seen": 1787255885.5906339,
     "ast_hash": "52a86922400af14f15047969c374e56f",
     "semantic_hash": ""
   },
   "pm4-app/scripts/verify.test.mjs": {
-    "mtime": 1787238658.3813305,
-    "seen": 1787239182.7314422,
+    "mtime": 1787243030.8615186,
+    "seen": 1787255885.5908947,
     "ast_hash": "a99f7c7a2c0abace0d3a7da35abf7fb4",
+    "semantic_hash": ""
+  },
+  ".pipeline/az-pipe-ci.yml": {
+    "mtime": 1787239439.4582593,
+    "seen": 1787255885.5908997,
+    "ast_hash": "ab3dacaa425ee5c9d9a81b90ea932838",
+    "semantic_hash": ""
+  },
+  ".pipeline/az-pipe-cicd-dev.yml": {
+    "mtime": 1787239439.4582593,
+    "seen": 1787255885.5909007,
+    "ast_hash": "27c782bbf29b8edb8d2f766392201861",
+    "semantic_hash": ""
+  },
+  ".pipeline/az-pipe-cicd-develop.yml": {
+    "mtime": 1787239439.4742408,
+    "seen": 1787255885.5909019,
+    "ast_hash": "dce793c16df2c734a51589f16d316e8c",
+    "semantic_hash": ""
+  },
+  ".pipeline/sonar.yml": {
+    "mtime": 1787239439.4747748,
+    "seen": 1787255885.5909023,
+    "ast_hash": "340998ee00fbe08977fb5512f1db9be2",
+    "semantic_hash": ""
+  },
+  ".pipeline/veracode.yml": {
+    "mtime": 1787239439.4747748,
+    "seen": 1787255885.5909033,
+    "ast_hash": "217d01c09572cd76609384f3b08f6c7e",
+    "semantic_hash": ""
+  },
+  "admision-defensor.png": {
+    "mtime": 1787259566.1819377,
+    "seen": 1787259709.9387774,
+    "ast_hash": "b379d92871bb8f058fb2d76b33d932f7",
     "semantic_hash": ""
   }
 }
