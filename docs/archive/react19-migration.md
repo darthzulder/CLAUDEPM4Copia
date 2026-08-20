@@ -162,8 +162,10 @@ de `main` si ya ocurrió.
 
 ### Etapa 7 (paralela) — Microservicio Python
 
-No confirmada en las memorias del proyecto al momento de archivar este documento — verificar
-`pm4-app/cotizador-service/Dockerfile` si se necesita el estado actual.
+No confirmada en las memorias del proyecto al momento de archivar este documento. **Nota de
+ago-2026:** el microservicio se eliminó del proyecto en `d4e63a4` junto con su integración en el
+backend, así que la etapa quedó cerrada por retiro y no hay estado actual que verificar — el
+`Dockerfile` que este párrafo mandaba a leer ya no existe.
 
 ---
 

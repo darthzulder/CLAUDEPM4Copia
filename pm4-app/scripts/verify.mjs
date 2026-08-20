@@ -5,10 +5,11 @@
  * Los tres anillos de verificación —`.githooks/pre-commit`, `.githooks/pre-push` y
  * `.github/workflows/ci.yml`— invocan ESTE script y nada más. La razón es histórica y
  * concreta: antes cada uno mantenía su propia lista de pasos y ya habían divergido (el hook
- * corría build+lint+test de los workspaces de Node, pero NO el `pytest` del
- * `cotizador-service`, que sí corría CI). El resultado era el clásico "en mi máquina
- * pasaba": commit verde en local, rojo en CI. Con un solo script, esa divergencia es
- * imposible por construcción.
+ * corría build+lint+test de los workspaces de Node, pero NO el `pytest` del microservicio
+ * Python que entonces vivía en el árbol, que sí corría CI). El resultado era el clásico "en mi
+ * máquina pasaba": commit verde en local, rojo en CI. Con un solo script, esa divergencia es
+ * imposible por construcción — y el motivo sigue en pie aunque desde `d4e63a4` todos los pasos
+ * sean de Node: la próxima lista paralela volvería a divergir igual.
  *
  * Uso:
  *   node scripts/verify.mjs              # salida silenciosa: solo imprime lo que falla
@@ -54,50 +55,8 @@ const STR_DIR_RAIZ = path.resolve(path.dirname(fileURLToPath(import.meta.url)), 
 const NUM_NODE_MAJOR_REQUERIDO = 24;
 const STR_CONTENEDOR = 'pm4-app-container';
 
-// Imagen del fallback de `pytest` (ver detectarPython). Versión fijada, no `python:alpine`: un
-// tag flotante haría que el gate cambie de intérprete sin que nadie lo decida, que es
-// exactamente el drift que el major fijo de Node evita del otro lado.
-const STR_IMAGEN_PYTHON = 'python:3.12-alpine';
-
 const blnVerbose = process.argv.includes('--verbose');
 const blnSoloListar = process.argv.includes('--list');
-
-/**
- * Dónde correr `pytest`: host si hay un intérprete con pytest, imagen efímera de Docker si no.
- * Devuelve `{ modo, detalle }` con `modo: null` cuando no hay ninguna de las dos.
- *
- * Se sondea en vez de asumirlo: en Windows es normal no tener Python instalado, y bloquear
- * cada commit del frontend por eso sería absurdo.
- *
- * ── Por qué hay fallback a Docker, y por qué es una imagen efímera y no un contenedor ────────
- * Este comentario decía que no había fallback porque "el cotizador vive en su propio contenedor
- * (`cotizador-service-container`, ver docker-compose.yml)". **Eso ya no es cierto**: hoy
- * `docker-compose.yml` declara UN solo servicio (`pm4-app`), así que ese contenedor no existe y
- * la razón para no tener fallback se cayó con él. En una máquina sin permisos para instalar
- * Python —el caso real que motivó esto— el paso quedaba saltado para siempre.
- *
- * Por eso el fallback usa `docker run --rm python:3.12-alpine`, que no depende de que ningún
- * servicio esté levantado: monta el directorio del cotizador y se borra al terminar. Instala las
- * dependencias en el mismo comando porque la imagen base no las trae (ver `STR_CMD_PYTEST_DOCKER`),
- * lo que cuesta unos segundos por corrida — aceptable para un paso que hoy no corre nunca, y el
- * lugar natural para optimizarlo es una imagen propia si algún día molesta.
- *
- * El orden host → docker → skip es el mismo de `detectarRunnerNode`, a propósito: dos criterios
- * distintos para "dónde corro esto" serían una divergencia más para mantener.
- */
-function detectarPython() {
-  for (const strCmd of ['python', 'python3', 'py']) {
-    const objProbe = spawnSync(`${strCmd} -m pytest --version`, { stdio: 'ignore', shell: true });
-    if (objProbe.status === 0) return { modo: 'host', detalle: strCmd };
-  }
-
-  // `docker info` y no `docker --version`: el binario puede existir con el daemon apagado, y en
-  // ese caso el `docker run` de abajo fallaría con un error que parecería un test roto.
-  const objDocker = spawnSync('docker', ['info'], { stdio: 'ignore' });
-  if (objDocker.status === 0) return { modo: 'docker', detalle: STR_IMAGEN_PYTHON };
-
-  return { modo: null, detalle: null };
-}
 
 /**
  * Dónde correr los pasos de Node/npm: host si tiene la versión correcta, `pm4-app-container`
@@ -122,36 +81,7 @@ function detectarRunnerNode() {
   return { modo: null, detalle: null };
 }
 
-const OBJ_RUNNER_PYTHON = detectarPython();
 const OBJ_RUNNER_NODE = detectarRunnerNode();
-const STR_DIR_COTIZADOR = path.join(STR_DIR_RAIZ, 'cotizador-service');
-
-/**
- * El `pytest` del cotizador dentro de una imagen efímera (ver detectarPython).
- *
- * Tres decisiones que no son obvias al leerlo:
- * - **`-v "<dir>:/app"`** monta el cotizador del host, así que el contenedor corre el código del
- *   working tree — no una copia. Es lo que hace que el paso sirva como gate y no como museo.
- * - **`sh -c` con el `pip install` adelante** porque `python:3.12-alpine` no trae pytest ni las
- *   dependencias del servicio. `-q` en los dos comandos para no ensuciar la salida del gate.
- * - **`requirements-dev.txt` si existe, si no `requirements.txt`**, resuelto DENTRO del shell del
- *   contenedor (`[ -f ... ]`) y no acá con `existsSync`: así la decisión la toma el árbol montado
- *   en el momento de correr, que es el único estado que importa.
- *
- * Verificado que el `-f` llega a `pytest` en los tres casos (sin ningún requirements, solo
- * `requirements.txt`, y ambos): el `&&`/`||` está agrupado en `{ ... }` para que un `[ -f ]` falso
- * no aborte la cadena, y el exit code que sale es el de `pytest`, que es el que lee el gate.
- *
- * **Ojo si lo copiás a mano en Git Bash:** MSYS reescribe `/app` a una ruta de Windows y docker
- * responde `the working directory '...' is invalid`. Hay que prefijar `MSYS_NO_PATHCONV=1`. Desde
- * acá no pasa —`spawnSync` no pasa por ese shell— así que es una trampa de depuración manual, no
- * del script.
- */
-const STR_CMD_PYTEST_DOCKER = [
-  `docker run --rm -v "${STR_DIR_COTIZADOR}:/app" -w /app ${STR_IMAGEN_PYTHON}`,
-  `sh -c "pip install -q pytest && { [ -f requirements-dev.txt ] && pip install -q -r requirements-dev.txt`,
-  `|| { [ -f requirements.txt ] && pip install -q -r requirements.txt; }; }; python -m pytest -q"`,
-].join(' ');
 
 /**
  * Los pasos, en orden de costo creciente: lo que falla barato falla primero.
@@ -197,35 +127,16 @@ const CLL_PASOS = [
   // paso: agregarlos al script `test` del package.json no tendría efecto acá, porque esta lista
   // no invoca `npm run test` sino cada workspace por separado.
   { nombre: 'test · scripts',      cmd: 'npm run test:scripts' },
-  {
-    nombre: 'test · cotizador (pytest)',
-    // Host: el intérprete detectado, con el cwd del servicio. Docker: una imagen efímera que monta
-    // ese mismo directorio (el `-w /app` de adentro hace de cwd, así que `cwd` acá es indistinto).
-    cmd: OBJ_RUNNER_PYTHON.modo === 'docker'
-      ? STR_CMD_PYTEST_DOCKER
-      : `${OBJ_RUNNER_PYTHON.detalle ?? 'python'} -m pytest -q`,
-    cwd: STR_DIR_COTIZADOR,
-    // Nunca se delega a `pm4-app-container` (ver detectarRunnerNode): ese contenedor no trae
-    // Python. Este paso tiene su propio runner —host o imagen efímera— resuelto en el `cmd`.
-    blnEsPython: true,
-    // Se salta —con aviso— si el servicio no está en el árbol, o si no hay NI Python NI Docker.
-    // El orden importa: sin el directorio, qué runner haya es irrelevante.
-    saltarPorque: !existsSync(STR_DIR_COTIZADOR)
-      ? 'no existe cotizador-service/ en este árbol'
-      : OBJ_RUNNER_PYTHON.modo === null
-        ? 'no hay Python con pytest en el PATH ni Docker disponible (CI sí lo corre; instalá: pip install -r cotizador-service/requirements-dev.txt, o levantá Docker)'
-        : null,
-  },
 ];
 
-// Sin runner Node válido (ni host con la versión correcta, ni el contenedor arriba), los
-// pasos de Node/npm se saltan con el mismo criterio que el de pytest sin intérprete: aviso
-// fuerte y seguir — CI, que sí tiene el runtime garantizado, es la red que no se puede saltar.
+// Sin runner Node válido (ni host con la versión correcta, ni el contenedor arriba) se saltan
+// TODOS los pasos, con aviso fuerte y siguiendo — CI, que sí tiene el runtime garantizado, es la
+// red que no se puede saltar. Desde `d4e63a4` la lista es 100% Node (el `pytest` del microservicio
+// de cotización salió del árbol junto con el servicio), así que ya no hay pasos exentos: si mañana
+// vuelve a entrar un paso con otro runtime, necesita su propia bandera acá.
 if (OBJ_RUNNER_NODE.modo === null) {
   for (const objPaso of CLL_PASOS) {
-    if (!objPaso.blnEsPython) {
-      objPaso.saltarPorque = `sin runner Node disponible: el host no tiene Node ${NUM_NODE_MAJOR_REQUERIDO} y '${STR_CONTENEDOR}' no está corriendo`;
-    }
+    objPaso.saltarPorque = `sin runner Node disponible: el host no tiene Node ${NUM_NODE_MAJOR_REQUERIDO} y '${STR_CONTENEDOR}' no está corriendo`;
   }
 }
 
@@ -241,12 +152,7 @@ const strRunnerNode = OBJ_RUNNER_NODE.modo === 'host'
   : OBJ_RUNNER_NODE.modo === 'docker'
     ? `docker (${OBJ_RUNNER_NODE.detalle})`
     : 'SIN RUNNER — pasos Node saltados';
-// El runner de Python se nombra igual que el de Node —modo + detalle— para que el banner diga de
-// dónde salió cada mitad del gate sin tener que leer el script.
-const strRunnerPython = OBJ_RUNNER_PYTHON.modo
-  ? ` · python: ${OBJ_RUNNER_PYTHON.modo} (${OBJ_RUNNER_PYTHON.detalle})`
-  : '';
-console.log(`[verify] ${CLL_PASOS.length} pasos · node/npm: ${strRunnerNode}${strRunnerPython}`);
+console.log(`[verify] ${CLL_PASOS.length} pasos · node/npm: ${strRunnerNode}`);
 
 const cllSaltados = [];
 const intInicioTotal = Date.now();
@@ -262,11 +168,10 @@ for (const objPaso of CLL_PASOS) {
   if (blnVerbose) console.log(`\n──────── ${objPaso.nombre} ────────`);
 
   // Delegado a `pm4-app-container` cuando el host no tiene la versión correcta de Node (ver
-  // detectarRunnerNode) — el de pytest nunca se delega, tiene su propio criterio host-only.
-  // El `cd /app` es seguro sin importar `objPaso.cwd`: los pasos que se delegan son siempre
-  // los de Node/npm, y ninguno de ellos pisa el cwd por defecto (STR_DIR_RAIZ ≡ /app dentro
-  // del contenedor, por el bind mount de docker-compose.yml).
-  const strCmd = (!objPaso.blnEsPython && OBJ_RUNNER_NODE.modo === 'docker')
+  // detectarRunnerNode). El `cd /app` es seguro sin importar `objPaso.cwd`: ningún paso pisa el
+  // cwd por defecto (STR_DIR_RAIZ ≡ /app dentro del contenedor, por el bind mount de
+  // docker-compose.yml).
+  const strCmd = OBJ_RUNNER_NODE.modo === 'docker'
     ? `docker exec ${STR_CONTENEDOR} sh -c "cd /app && ${objPaso.cmd}"`
     : objPaso.cmd;
 

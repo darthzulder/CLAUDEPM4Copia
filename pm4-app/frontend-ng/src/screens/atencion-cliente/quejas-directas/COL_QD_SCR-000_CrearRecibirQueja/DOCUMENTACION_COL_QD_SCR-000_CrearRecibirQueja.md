@@ -745,9 +745,10 @@ de la queja, así que la rama de queja es la que corresponde comparar, y la exce
 ~12 campos de S3 sin comparar para siempre. El `'3'` alcanza porque el helper drena los catálogos vacíos,
 así que la búsqueda de etiqueta de `esTipoQueja()` no encuentra nada y aplica el fallback por código.
 
-`npm run verify` **verde** (11 pasos, 128.9s; el paso de `cotizador-service/` sale saltado porque ese
-servicio no existe en este árbol, igual que antes del cambio). Suite Angular completa: **1285 casos en
-87 archivos**.
+`npm run verify` **verde** (128.9s). Esa corrida enumeraba 12 pasos y el `pytest` del microservicio
+Python salía saltado —el servicio ya no estaba en el árbol, lo eliminó `d4e63a4`—, igual que antes del
+cambio; ese paso se retiró después, así que hoy la lista son 11 pasos sin nada saltado. Suite Angular
+completa: **1285 casos en 87 archivos**.
 
 *(De paso: las cuentas de test de la 2.0 estaban corridas en uno — el archivo tenía **29** casos, no 28,
 y el total era **100**, no 99. Los números de §1 y de la tabla de arriba son los medidos hoy.)*

@@ -64,8 +64,9 @@ jobs:
         run: npm ci
 
       # Un solo paso a propósito. Antes este workflow enumeraba build/lint/test por su cuenta y
-      # ya había divergido del hook local (el hook no corría pytest), con el resultado clásico
-      # de "en mi máquina pasaba". Ahora los tres anillos ejecutan el mismo script.
+      # ya había divergido del hook local (el hook no corría el pytest del microservicio Python
+      # que entonces vivía en el árbol), con el resultado clásico de "en mi máquina pasaba".
+      # Ahora los tres anillos ejecutan el mismo script.
       - name: Verify
         working-directory: pm4-app
         run: npm run verify:verbose
