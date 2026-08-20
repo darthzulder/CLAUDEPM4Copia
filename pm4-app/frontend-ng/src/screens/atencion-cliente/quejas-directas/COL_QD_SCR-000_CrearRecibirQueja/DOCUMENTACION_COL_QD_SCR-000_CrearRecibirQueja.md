@@ -27,7 +27,7 @@
 | Versión del diseño | TO-BE v3.0 |
 | Slug / carpeta | `COL_QD_SCR-000_CrearRecibirQueja` |
 | Archivos de implementación (Angular) | `crear-recibir-queja.ts`/`.html` · `seccion-consumidor.ts`/`.html` · `seccion-detalle-queja.ts`/`.html` · `pqr-page.ts`/`.html` · `pqr-section.ts`/`.html` · `pqr-readonly.ts`/`.html` (config centralizada en `../fields/fields.ts`; cascada en `../fields/matriz-motivos.service.ts`; catálogos en `core/catalogos.service.ts`) |
-| Archivos de test | **cuatro** — `crear-recibir-queja.spec.ts` (28), `seccion-detalle-queja.spec.ts` (39), `seccion-consumidor.spec.ts` (27), `pqr-page.spec.ts` (5) · **99 casos en total** |
+| Archivos de test | **cuatro** — `crear-recibir-queja.spec.ts` (33), `seccion-detalle-queja.spec.ts` (39), `seccion-consumidor.spec.ts` (27), `pqr-page.spec.ts` (5) · **104 casos en total** |
 
 > ⚠️ **Nota de nomenclatura (se mantiene de la 1.0).** La carpeta y la pantalla implementada
 > corresponden a **SCR-000 (PQRS Autoservicio / P01-T00)** del insumo v3.0 — campos FLD-300…FLD-341,
@@ -48,12 +48,20 @@ presiona **Enviar PQR**. El sistema asigna automáticamente la **instancia** y e
 según el rol, crea el caso con ID único y ejecuta **P01-T01** (recepción y registro) → **P01-T06**
 (validación preventiva).
 
+> **⚠ Desde 2026-08-19 la pantalla atiende DOS procesos, no uno** (solicitud del usuario, §13.6). Lo
+> que se elige en "¿A qué está asociado tu comentario?" decide todo lo de abajo: una **queja** sigue el
+> camino histórico (S3 completa, proceso **31**, variables `qd_*`, similitudes por el script **70**);
+> cualquier otro tipo de PQR muestra la sección **"Detalle de la Solicitud"** de un solo campo y radica
+> en el proceso **36** (Otras Solicitudes) con las variables renombradas a **`os_*`** y las similitudes
+> por el script **101**. Al abrir la pantalla no hay tipo elegido, así que el estado inicial es el de
+> solicitud.
+
 **Es la única de las doce pantallas del port que se publica como página web (Web Entry) en vez de
 embeberse como tarea de PM4, y la única que CREA el caso.** De ahí sus tres rasgos estructurales, que
 condicionan todo el diseño del componente (§13.1):
 
-1. Dos modos de envío en el mismo componente: Web Entry (`POST /process_events/31?event=node_661`) o
-   tarea normal (`completarTarea`), según quién la abra.
+1. Dos modos de envío en el mismo componente: Web Entry (`POST /process_events/{31|36}?event={node_661|node_535}`)
+   o tarea normal (`completarTarea`), según quién la abra.
 2. `case_number`, `qd_strSfcCode` y el estado ante la SFC **no existen** mientras se llena el
    formulario. PM4 los asigna al radicar.
 3. Su chrome es de sitio público (`app-pqr-page`/`-section`/`-readonly`), no de bandeja de tareas
@@ -157,7 +165,9 @@ fallback de la instancia actual.
 | *(back, sin widget)* | `qd_strLgbtiq` | Default "No" (CAT-LGBTIQ, id 41) | — | Anexo02 > SCR-000 > FLD-321 (fila 37) — editable en SCR-009 |
 | *(back, sin widget)* | `qd_strSpecialCondition` | Default "No aplica" (CAT-COND-ESP, id 24) | — | Anexo02 > SCR-000 > FLD-322 (fila 38) |
 
-**S3 — Detalle de la Queja** (`seccion-detalle-queja.html`):
+**S3 — Detalle de la Queja** (`seccion-detalle-queja.html`) — **visible solo si el tipo de solicitud es
+una queja**; con cualquier otro tipo la reemplaza S3' (abajo). Ninguno de estos campos es obligatorio
+—ni existe— fuera de la rama queja:
 
 | Campo (UI) | Variable | Tipo | Obligatorio | Fuente |
 |---|---|---|---|---|
@@ -181,6 +191,16 @@ fallback de la instancia actual.
 | *(back, sin widget)* | `qd_strCompensation` | Derivado de `resarcimientoAdministrador` | Sí (al radicar) | Solicitud del usuario (2026-07-09) |
 | *(back, sin widget)* | `qd_strSlaAssigned` | Derivado de `sla` | Sí (al radicar) | Solicitud del usuario (2026-07-09) |
 | *(back, sin widget)* | `qd_strFraudRelated` | Derivado de `relacionFraude`, normalizado a `'SI'`/`'NO'` | Sí (al radicar) | **⚠ corregido en 2.0 (4 de 7)** — implementado en `SeccionDetalleQueja.tsx:154,169` y **ausente de la ficha 1.0** |
+
+**S3' — Detalle de la Solicitud** (`crear-recibir-queja.html`, maquetada en línea) — **la sección que
+ocupa el lugar de S3 cuando el tipo elegido NO es una queja**. Tiene un solo campo, por pedido explícito:
+
+| Campo (UI) | Variable | Tipo | Obligatorio | Fuente |
+|---|---|---|---|---|
+| Ingresa el detalle de la solicitud | `qd_strCaseDescription` → viaja como **`os_strCaseDescription`** | `zds-textarea` (máx 2000, **sin mínimo de 50**) | Sí (en esta rama) | Solicitud del usuario (2026-08-19) · Anexo02 > **FLD-047** (la variable que el proceso 36 ya lee en su propia pantalla de gestión) |
+
+> Se maqueta en la plantilla de la pantalla y **no** como componente propio porque es un campo: S1 y S4
+> están en línea por la misma razón, y el umbral de reúso del proyecto es ≥3.
 
 **S4 — Autorización y envío** (`crear-recibir-queja.html`):
 
@@ -217,6 +237,7 @@ sección que lo pinta. Es la misma separación que SCR-003.
 | Celular = exactamente 10 dígitos | `Validators.pattern(/^\d{10}$/)` | Anexo02 > 05_Reglas > **RUL-000-04** → MSG-000-01 |
 | Correo con formato válido | `Validators.pattern(/^[^\s@]+@[^\s@]+\.[^\s@]+$/)` en `qd_strEmail` | **RUL-000-05** → MSG-000-02 |
 | Detalle 50–2000 caracteres | `minLength(50)` + `maxLength(2000)` en `qd_strComplaintText` | **RUL-000-06** → MSG-000-03 |
+| Los obligatorios del detalle cambian de sección con el tipo | `CLL_VALIDADORES_DETALLE` + `alternarValidadoresDetalle()`: la rama queja exige producto/momento/motivo/relato (con el mínimo de 50), la rama solicitud exige **solo** `qd_strCaseDescription` (sin mínimo) | Solicitud del usuario (2026-08-19) — ver §13.6 |
 | Autorización de datos obligatoria | Gate `blnPuedeEnviar` (botón deshabilitado) + `za-alert config="alert"` al intentar enviar | **RUL-000-07** → MSG-000-04 |
 | Captcha obligatorio | Gate `blnPuedeEnviar` (exige token) + `za-alert config="negative"` | **RUL-000-08** → MSG-000-05 |
 | Nombres/Apellidos solo letras | `pattern(/^[A-Za-zÁÉÍÓÚáéíóúÑñÜü\s]+$/)` en los cuatro campos de nombre | Anexo02 > FLD-308/309/311/312 |
@@ -310,6 +331,7 @@ importante del port.
 | `qd_strReceptionPoint` | `qd_strChannel` | Tabla `DIC_CANAL_POR_PUNTO`. El punto arranca en Internet por defecto, así que el canal arranca en 13 | Solicitud del usuario (2026-07-22) |
 | `qd_strIdType` | `qd_strPersonType` + bloque de campos | NIT → Jurídica (Razón social + contacto); resto → Natural | RUL-000-02/03; FLD-315 |
 | `qd_strDepartment` | `qd_strCity` | Limpia la ciudad y recarga el catálogo (id 15, `dependsOn`); ciudad deshabilitada sin departamento | RUL-000-09; FLD-317/318 |
+| **`qd_strRequestType`** | **S3 vs S3', el proceso, el vocabulario y el script de similares** | Queja → S3 completa, proceso **31**, variables `qd_*`, script **70**; cualquier otro tipo → S3' *"Detalle de la Solicitud"*, proceso **36**, variables **`os_*`**, script **101**. Los obligatorios del detalle se recalculan por rama (`CLL_VALIDADORES_DETALLE`). Sin tipo elegido: rama solicitud | Solicitud del usuario (2026-08-19) — §13.6 |
 | `qd_strRequestType` + `qd_strSfcProduct` | `qd_strInteraction` | Cascada `matrixMotivos` (id 45) filtrada en cliente; al cambiar cualquiera se limpia el momento | #30 |
 | `qd_strInteraction` (= "Asistencias") | `qd_strServiceProvided` | Muestra el servicio y carga sus opciones; otros momentos lo ocultan/limpian | #31 |
 | Toda la cadena | `qd_strSfcReason` | Filtrado por los cuatro niveles; cambiar cualquier eslabón lo limpia | #32 |
@@ -357,13 +379,21 @@ inmediatamente en el front"*. El código abre un **modal resumen** con el númer
 público no salen del componente del DS que uno esperaría, y en los tres casos el motivo está verificado
 contra la librería, no supuesto. Ver §13.4.
 
+**10.19 (nueva, 2026-08-19) — Los cuatro supuestos de la bifurcación por tipo.** El pedido de dos
+procesos (§13.6) se implementó con la lectura literal de *"solo si está escogido queja"*, y eso deja
+cuatro decisiones tomadas por defecto: (a) el detalle de la solicitud **no** tiene mínimo de 50
+caracteres —el piso es de la SFC sobre el relato de una queja—; (b) al abrir la pantalla, sin tipo
+elegido, se muestra *"Detalle de la Solicitud"*; (c) los campos de queja ya tipeados **no se limpian** al
+cruzar de rama y viajan al 36 como `os_*` con el valor que quedó; (d) el 36 recibe el juego **completo**
+de variables espejado, no un subconjunto. Las cuatro están listadas para confirmación en §14.
+
 ---
 
 ## 11. Cobertura de Trazabilidad
 
 | Elemento | Cobertura | Observación |
 |---|---|---|
-| Campos documentados | 100% | 42/42 (FLD-300…FLD-341) trazados, **+1 no documentado en la 1.0** (`qd_strFraudRelated`). |
+| Campos documentados | 100% | 42/42 (FLD-300…FLD-341) trazados, **+1 no documentado en la 1.0** (`qd_strFraudRelated`) y **+1 nuevo en 2026-08-19** (`qd_strCaseDescription`, que viaja como `os_strCaseDescription` = **FLD-047** del Anexo 02 de Otras Solicitudes — el único campo de esta pantalla cuya trazabilidad apunta al anexo del otro proceso). |
 | Validaciones documentadas | 100% | RUL-000-04/05/06/07/08 implementadas; **RUL-000-13 documentada como NO implementada** (§5); RUL-000-11 delegada. |
 | Mensajes documentados | 100% | MSG-000-01…08 trazados; MSG-000-07 marcado **inalcanzable**. |
 | Reglas de negocio documentadas | 100% | Las cinco derivaciones de S1 tienen caso propio en el spec desde el port (§13.2). |
@@ -422,8 +452,9 @@ Entry/colecciones, texto del banner — todos en *Suposiciones realizadas*.
 ### 13.1 Tres rasgos únicos, y cómo condicionan el componente
 
 **Los dos modos de envío.** `TaskService.blnEsWebEntry` es un **getter** (`!taskId() && !caseId()`) y
-decide la rama: Web Entry → `POST /process_events/31?event=node_661` (crea el caso); tarea normal →
-`completarTarea()` (avanza el que ya existe).
+decide la rama: Web Entry → `POST /process_events/{31|36}?event={node_661|node_535}` (crea el caso, en
+el proceso que corresponda al tipo elegido — §13.6); tarea normal → `completarTarea()` (avanza el que ya
+existe, y ahí no hay elección de proceso posible: el caso ya está donde está).
 
 ⚠ **Y la rama de Web Entry NO usa `TaskService.iniciarProceso()`, a propósito.** Es lo primero que uno
 intenta y no puede funcionar: `iniciarProceso()` resuelve proceso y evento desde `Pm4ContextService`,
@@ -445,9 +476,11 @@ municipio mientras no haya departamento (único canal: `zds-select` no tiene inp
 control deshabilitado desaparece de `form.value`**. Con `value`, el municipio viajaría ausente a PM4 en
 el caso más común de todos.
 
-**El orden del flujo de envío es contrato:** submit → captcha presente → script 70 (similares) →
-[modal si hay coincidencias] → `verify` server-side → envío. Si el script 70 falla se **radica igual**;
-si el `verify` falla **no** se radica.
+**El orden del flujo de envío es contrato:** submit → captcha presente → script de similares
+(**70** en la rama queja, **101** en la de solicitud) → [modal si hay coincidencias] → `verify`
+server-side → envío. Si el script de similares falla se **radica igual**; si el `verify` falla **no** se
+radica. Lo único que cambia entre ramas es *cuál* script se llama y con qué prefijo viajan sus
+variables de entrada y de salida — el orden y las dos políticas de error son las mismas.
 
 ### 13.2 ⚠ El hallazgo del port: cinco reglas correctas, completas, y que nunca se ejecutaban
 
@@ -571,10 +604,15 @@ error, o sea después de fallar.
 
 | Archivo | Casos | Qué cubre |
 |---|---|---|
-| `crear-recibir-queja.spec.ts` | **28** | Los 10 de React + los 5 de las derivaciones de S1 (§13.2) + los dos modos de envío + la cadena similitud→captcha→envío + `(expirado)` |
+| `crear-recibir-queja.spec.ts` | **33** | Los 10 de React + los 5 de las derivaciones de S1 (§13.2) + los dos modos de envío + la cadena similitud→captcha→envío + `(expirado)` + los **4 de la bifurcación por tipo** (§13.6: qué sección monta, el traspaso de obligatorios en los dos sentidos, el proceso 36 con todo en `os_`, y el script 101 con su respuesta leída en `os_`) |
 | `seccion-detalle-queja.spec.ts` | **39** | La cascada de 4 niveles, los 5 derivados del motivo, los 4 defaults por etiqueta, la placa, la réplica, el switch de anexos, `contarGets(40) === 0` |
 | `seccion-consumidor.spec.ts` | **27** | Natural vs. Jurídica, RUL-000-09 (incluida la precarga), el bloqueo del municipio, el país fijo |
 | `pqr-page.spec.ts` | **5** | Las tres divergencias del chrome (§13.4): el logo, el `category=""`, los tokens por `customStr` |
+
+Hay un **quinto** archivo que vigila esta pantalla sin vivir en su carpeta:
+`components/fields/paridad-react.spec.ts`, la guarda de paridad que monta cada pantalla portada y compara
+sus campos contra el dataset congelado de React. No cuenta como cobertura de la pantalla, pero **cualquier
+`@if` nuevo alrededor de un campo la pone roja** — pasó con este cambio, ver §13.6.
 
 **El spec React declaraba por escrito que no cubría el envío exitoso** (`CrearRecibirQueja.test.tsx:1-25`):
 react-hook-form exige ~20 campos obligatorios repartidos en selects del DS que no se pueden interactuar
@@ -594,11 +632,162 @@ sus filtros.
 MUT-5 `sembrarPunto` → rojo (`'' to be '1'`) · MUT-6 la guarda de no-pisar → **verde**, que es cómo se
 descubrió el caso vacuo de §13.2; rehecho el caso, rojo (`'1' to be '4'`). Todas revertidas.
 
+### 13.6 ⚠ Una pantalla, dos procesos: la bifurcación por tipo de solicitud (2026-08-19)
+
+Pedido del usuario, cuatro cambios que son **uno**: lo que se elige en *"¿A qué está asociado tu
+comentario?"* (`qd_strRequestType`) decide sección, proceso, vocabulario y watcher.
+
+| | Rama **queja** | Rama **solicitud** (cualquier otro tipo) |
+|---|---|---|
+| Sección de detalle | S3 completa (`app-seccion-detalle-queja`) | S3' *"Detalle de la Solicitud"*, un solo campo |
+| Proceso (Web Entry) | **31** · `node_661` | **36** · `node_535` (*COL - Otras Solicitudes*) |
+| Vocabulario de variables | `qd_*` | **`os_*`** |
+| Script de similares | **70** (`COL_QD_Check_Similitud`) | **101** (`COL_OS_Check_Similitud`) |
+
+Los cuatro ids salen del registro por nombre (regla 6): `quejasDirectasWebEntry`,
+`otrasSolicitudesWebEntry`, `similarCasesQuejas`, `similarCasesOtrasSolicitudes`.
+
+**Sin tipo elegido no hay queja, así que la pantalla abre en la rama de solicitud.** Es la lectura
+literal del pedido —*"que se muestre Detalle de la queja **solo si** está escogido queja"*— y tiene una
+consecuencia visible: al montar, lo que se ve es *"Detalle de la Solicitud"*. `esTipoQueja()` decide por
+**etiqueta** (`/queja/i` sobre la opción del catálogo 18) y cae al **código `'3'`** solo si el catálogo
+no cargó todavía; al revés sería un id de colección hardcodeado disfrazado de constante.
+
+**El renombre `qd_` → `os_` vive en el borde HTTP, no en el form.** Adentro —controles, `sigValores`,
+`SCR000_DEFAULTS`, los `_desc`, el modal de similares, el resumen— **todo es `qd_` siempre**, y
+`aPrefijoOs()` traduce el diccionario en los cuatro puntos donde sale a la red: el
+`POST /process_events/36`, su PUT de seguimiento a `/requests/{id}`, la entrada del script 101 y —vía
+`clave()`— la lectura de su respuesta. Un renombre adentro obligaría a duplicar la mitad de la pantalla
+y dejaría a las secciones hijas leyendo claves que dependen de un select.
+
+⚠ **`enviarPorTarea()` queda deliberadamente afuera del renombre.** Un caso que llega como tarea **ya
+existe en el 31 con variables `qd_*`**, y un `PUT /tasks/{id}` no puede moverlo de proceso: traducir ahí
+solo lograría escribirle un juego paralelo de variables que ninguna pantalla del 31 lee. La elección de
+proceso es una decisión de **radicación**, y por eso vive donde se radica.
+
+⚠ **Las claves sin prefijo `qd_` no se tocan, y eso es intencional.** `similar_check_status` (el flag que
+lee el modal) y `process_id` (parámetro del script) atraviesan `conPrefijoOs()` sin cambio porque el
+renombre es *por prefijo*, no por nombre. Los dos scripts esperan exactamente eso.
+
+#### ⚠ La trampa que forzó reescribir el manejo de validadores
+
+Un `@if` desmonta widgets; **no toca el `FormGroup`**. Los `required` de la sección que se va siguen
+contando para `form.invalid`, y el gate de envío no diría nunca por qué. Eso ya se sabía. Lo que no era
+obvio es por qué **no** alcanza con agregar y quitar validadores:
+
+> Los `zds-select` de S3 (`qd_strInteraction`, `qd_strSfcReason`) llevan `[obligatorio]="true"`, y
+> `lib-input-select-z.ngOnInit()` **compone su propio `required` sobre el control real de esta
+> pantalla**: `setValidators(Validators.compose([elValidadorQueHabía, () => this.generateValidation()]))`.
+> Después de eso el control tiene **un solo** validador —una clausura anónima—, así que
+> `removeValidators(Validators.required)` (que compara por identidad) **no remueve nada y no falla**, y
+> `hasValidator(Validators.required)` devuelve `false`. Y **ningún componente `lib-*-z` tiene
+> `ngOnDestroy`**: al desmontarse S3, la clausura se queda. Resultado con `removeValidators`: la rama de
+> solicitud **inválida para siempre** por dos campos que no están en el DOM.
+
+Por eso `alternarValidadoresDetalle()` aplica **`setValidators()` con la columna entera** de
+`CLL_VALIDADORES_DETALLE` —los cinco campos de detalle, las dos ramas, completas— y no un delta: pisar
+es lo único que sobrevive a lo que el DS compuso. La tabla va como lista de tripletes y no como dos
+diccionarios paralelos porque así el tipo **obliga** a declarar las dos ramas de cada campo.
+
+El guardia `strRamaDetalle` (inicial `''`) no es una optimización: el efecto corre en **cada**
+`valueChanges`, y reescribir la tabla en cada tecleo borraría el `required` que el DS compuso mientras
+los widgets siguen montados. El `''` fuerza la primera aplicación al montar, donde la rama es solicitud.
+
+Que el efecto corra **antes** del refresco de la plantilla del propio componente es lo que hace correcto
+el orden: al cruzar a queja, los `required` se aplican y *después* monta S3, así que el DS compone sobre
+una base ya correcta. El `emitEvent: false` es seguro por lo mismo.
+
+**La medición de todo esto** es el tramo de vuelta de
+`it('los obligatorios del detalle viajan de una sección a la otra, en los dos sentidos')`: tras pasar de
+queja a solicitud, los `errors` de `qd_strSfcProduct`/`qd_strInteraction`/`qd_strSfcReason` tienen que
+quedar en `null`. Con `removeValidators` ese caso es rojo — **verificado, ver MUT-7b abajo**.
+
+#### Pasada de mutación de esta tanda (2026-08-19) — siete mutaciones, todas rojas y revertidas
+
+Baseline de la tanda: los 59 casos de `crear-recibir-queja.spec.ts` + `components/fields/paridad-react.spec.ts`
+en verde. Cada mutación nombra la línea rota y el caso que la atrapó.
+
+| # | Qué se rompió | Rojo |
+|---|---|---|
+| **1** | `intProcesoDestino` → `return SCR000_WEB_ENTRY_PROCESS_ID` (siempre el 31) | 2 casos · `expected '/api/process_events/31' to be '/api/process_events/36'` |
+| **2** | `conVocabularioDestino` → `return in_dic` (sin renombrar a `os_`) | 2 casos · `expected undefined to be 'Necesito el certificado de mi póliza…'` |
+| **3** | `intScriptSimilares` → `return SCR000_SIMILAR_CASES_SCRIPT_ID` (siempre el 70) | 1 caso · `expected '/api/scripts/70/execute' to be '/api/scripts/101/execute'` |
+| **4** | `clave()` → `return in_strClave` (lee la respuesta del 101 con nombres `qd_`) | 1 caso · el modal de similares **no abre** (cuenta 0 y sigue al captcha): `Expected one matching request… found none` |
+| **5** | `@if (blnEsQueja())` → `@if (true)` en la plantilla | 4 casos · `expected ' Radicación PQRs…' not to contain 'Detalle de la queja'` y los dos submit de `os_` con `obligatorios sin llenar: [qd_strInteraction…]` |
+| **6** | `alternarValidadoresDetalle()` con un `return` al principio | 3 casos · `expected false to be true` (el detalle nuevo no es obligatorio) + los dos submit con `[qd_strSfcProduct…]` |
+| **7** | La tabla aplicada con `removeValidators(Validators.required)` en vez de `setValidators()` | 3 casos, pero **el primero que corta es otro**: el mínimo de 50 sobrevive en la rama de solicitud (`qd_strComplaintText` inválido con `'Corto.'`, línea 661 del spec) |
+| **7b** | Ídem, pero **solo** sobre `strSfcProduct`/`strInteraction`/`strSfcReason`, para llegar al tramo de vuelta | 1 caso · exactamente la aserción de arriba: `expected 'qd_strInteraction {"required":true,"errorRequired":true}' to be 'qd_strInteraction null'` |
+
+MUT-7b es la que cierra el argumento de esta sección, y hacen falta las dos formas para verlo: con la
+mutación general (7) el caso muere **antes** del tramo de vuelta, por el mínimo de 50 que
+`removeValidators` no toca; aislándola a los tres selects (7b) el caso llega al final y falla ahí. El
+`errorRequired: true` junto al `required` es la huella del DS: es la clave que pone su
+`generateValidation()`, o sea la prueba directa de que **lo que quedó colgado es el closure compuesto por
+un widget ya desmontado**, no el `Validators.required` que había puesto la pantalla.
+
+Un matiz que la mutación corrige de la explicación de arriba: de los tres campos, `qd_strSfcProduct`
+**no** filtra — su `[obligatorio]` viaja sobre el control satélite `objProductoUi`, así que nunca hubo
+composición sobre el control real. Los que filtran son `qd_strInteraction` y `qd_strSfcReason`. La tabla
+los cubre a los tres igual, que es lo correcto: qué campo tiene red del DS y qué campo no es un detalle
+de implementación de la sección, no un contrato con el que valga la pena acoplar la clase.
+
+#### La guarda de paridad con React también pedía un ajuste
+
+`components/fields/paridad-react.spec.ts` monta cada pantalla portada y compara sus campos montados
+contra el dataset congelado de React. Con este cambio dio **2 rojos** —`qd_strCaseDescription` como campo
+"que no existe en el contrato de React", y `qd_strReplyArgument` sin el `maxLength=2000` que React
+pasaba— y los dos eran **el mismo hecho**: su fixture montaba SCR-000 sin tipo de solicitud, o sea en la
+rama de solicitud, donde S3 entera está ausente. El `@if` de la réplica ahora tiene un `@if` **ancestro**.
+
+Se arregló sembrando `qd_strRequestType: '3'` en `DIC_APERTURA_DE_RAMAS`, no exceptuando
+`qd_strCaseDescription` en `DIC_NOMBRES_DINAMICOS`: la SCR-000 de React **siempre** mostraba el detalle
+de la queja, así que la rama de queja es la que corresponde comparar, y la excepción habría dejado los
+~12 campos de S3 sin comparar para siempre. El `'3'` alcanza porque el helper drena los catálogos vacíos,
+así que la búsqueda de etiqueta de `esTipoQueja()` no encuentra nada y aplica el fallback por código.
+
+`npm run verify` **verde** (128.9s). Esa corrida enumeraba 12 pasos y el `pytest` del microservicio
+Python salía saltado —el servicio ya no estaba en el árbol, lo eliminó `d4e63a4`—, igual que antes del
+cambio; ese paso se retiró después, así que hoy la lista son 11 pasos sin nada saltado. Suite Angular
+completa: **1285 casos en 87 archivos**.
+
+*(De paso: las cuentas de test de la 2.0 estaban corridas en uno — el archivo tenía **29** casos, no 28,
+y el total era **100**, no 99. Los números de §1 y de la tabla de arriba son los medidos hoy.)*
+
+#### Deuda de la misma clase que este cambio deja a la vista
+
+`qd_strServiceProvided` (bajo el `@if` de Asistencias) y `qd_strPlate` (bajo el de Autos) son campos
+`[obligatorio]="true"` **dentro** de S3, detrás de sus propios `@if`. Es exactamente la misma situación
+—`required` del DS sobre un control cuyo widget puede no estar montado— y **no se tocó**: está fuera del
+alcance del pedido. Vale revisarla junto con el punto 5 de §14.
+
 ---
 
 ## 14. A reportar al negocio
 
-Ordenado por prioridad. **Nada de esto se cambió en el port.**
+**⚠ Primero, lo único de esta ficha que SÍ se cambió: los supuestos de la bifurcación por tipo
+(2026-08-19, §13.6).** Los cuatro cambios se implementaron según la lectura literal del pedido, y esa
+lectura dejó cuatro decisiones tomadas por defecto que conviene confirmar:
+
+- **El detalle de la solicitud no tiene mínimo de 50 caracteres**, solo el tope de 2000. El piso de 50 es
+  un requisito de la SFC sobre el relato de una **queja** (RUL-000-06), y extenderlo a una felicitación o
+  a una sugerencia no se pidió. Si negocio quiere un mínimo ahí, es una línea en
+  `CLL_VALIDADORES_DETALLE`.
+- **Al abrir la pantalla, sin tipo elegido, se ve *"Detalle de la Solicitud"*.** Es la consecuencia de
+  *"solo si está escogido queja"*. La alternativa —no mostrar ninguna de las dos hasta que haya tipo— es
+  igual de defendible y cambia la primera impresión de una pantalla pública.
+- **Los campos de queja ya tipeados no se limpian al cambiar a solicitud**, y por lo tanto viajan al
+  proceso 36 como `os_strSfcProduct`/`os_strSfcReason` con el valor que quedó. No estorban (el script 101
+  tolera cadenas vacías y el 36 no los usa en su flujo), pero si negocio prefiere que el caso de Otras
+  Solicitudes llegue limpio, hay que decidir **si se descartan** al cruzar de rama.
+- **El proceso 36 recibe el juego COMPLETO de variables espejado a `os_*`**, no un subconjunto: el
+  consumidor financiero, la autorización de datos, el correo adicional, el `os_strSfcCode`, todo. Es lo
+  que hace que el renombre sea mecánico y auditable; si el 36 espera menos, ignora lo que le sobra.
+
+Del lado técnico no queda pendiente: la pasada de mutación de esta tanda son **siete mutaciones rojas**
+y `npm run verify` está verde (§13.6). Lo único que no pudo correr es `graphify update .` — la
+herramienta no está instalada en esta máquina.
+
+El resto de la sección: ordenado por prioridad, y **nada de eso se cambió en el port.**
 
 1. **🔴 `qd_strProductDetail` (FLD-324) viaja VACÍO a PM4, hoy y en React producción** (§13.3). El
    desajuste `qd_strProductFilter` vs `dependsOn: 'qd_strLegacyInsurance'` no "omite el filtro": el

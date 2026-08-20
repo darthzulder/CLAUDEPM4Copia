@@ -156,6 +156,11 @@
       "id": 70,
       "uuid": "a23434ce-0eea-405f-9df7-aa781df863dc",
       "title": "COL_QD_Check_Similitud"
+    },
+    "similarCasesOtrasSolicitudes": {
+      "id": 101,
+      "uuid": "a2805fe0-fab2-4fc4-bb89-630d6c480845",
+      "title": "COL_OS_Check_Similitud"
     }
   },
   "processes": {
@@ -164,6 +169,12 @@
       "eventId": "node_661",
       "eventName": "Comenzar caso por WE",
       "title": "COL - Gestion de Quejas Directas - Proceso"
+    },
+    "otrasSolicitudesWebEntry": {
+      "processId": 36,
+      "eventId": "node_535",
+      "eventName": "Start Event",
+      "title": "COL - Otras Solicitudes - Proceso"
     }
   }
 }

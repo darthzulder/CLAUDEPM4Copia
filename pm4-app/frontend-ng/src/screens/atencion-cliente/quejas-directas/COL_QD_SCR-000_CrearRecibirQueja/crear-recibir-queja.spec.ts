@@ -10,6 +10,9 @@ import { RecaptchaWidgetComponent } from '../../../../components/recaptcha-widge
 import { PM4_ENV_FALLBACKS } from '../../../../core/pm4-context.service';
 import {
   buildSfcCode, QD, QD_COLLECTIONS,
+  SCR000_OS_SIMILAR_CASES_SCRIPT_ID,
+  SCR000_OS_WEB_ENTRY_EVENT_ID, SCR000_OS_WEB_ENTRY_PROCESS_ID,
+  SCR000_SIMILAR_CASES_SCRIPT_ID,
   SCR000_WEB_ENTRY_EVENT_ID, SCR000_WEB_ENTRY_PROCESS_ID,
 } from '../fields/fields';
 import { CrearRecibirQueja } from './crear-recibir-queja';
@@ -37,6 +40,11 @@ import { SeccionDetalleQueja } from './seccion-detalle-queja';
  *    que PM4 asigna al radicar. Se asevera sobre el **segundo** PUT, el de después de crear el caso.
  * 3. **El gate de envío es de dos mitades** (autorización + token de captcha) y una de ellas se
  *    apaga sola a los dos minutos. `(expirado)` tiene caso propio.
+ * 4. **Radica en DOS procesos distintos**, y la rama la decide el tipo de solicitud de S1: una queja
+ *    abre un caso del 31 con variables `qd_*` y el script 70; cualquier otro tipo abre uno del 36 con
+ *    variables `os_*` y el script 101. Los casos de esa bifurcación aseveran **el destino y el
+ *    vocabulario de la petición**, no el `computed()` que los elige: `blnEsQueja()` cableado a `true`
+ *    dejaría verde cualquier caso que solo mirara el signal.
  *
  * ── Se asevera sobre el `FormControl` y sobre la petición, no sobre el shadow DOM ────────────────
  * Bajo jsdom los custom elements de Lit no hacen upgrade (trampa 2 de
@@ -68,6 +76,9 @@ const INT_CASE_NUMBER = 4321;
 const STR_QUEJA_VALIDA = 'La póliza fue expedida con una placa distinta de la que informé al asesor '
   + 'en la sucursal, y llevo tres semanas sin respuesta.';
 
+/** El detalle de la **otra** sección, la que reemplaza a S3 cuando el tipo no es una queja. */
+const STR_DETALLE_SOLICITUD = 'Necesito el certificado de mi póliza de hogar para el banco.';
+
 /** Token que el widget emite al tildar el checkbox. */
 const STR_TOKEN = 'token-de-prueba-03AGdBq';
 
@@ -81,7 +92,16 @@ const STR_TOKEN = 'token-de-prueba-03AGdBq';
  * ⚠ El municipio (`strCity`) va acá pero **se escribe último y aparte** — ver `llenarObligatorios()`.
  */
 const dicObligatorios = (): Record<string, unknown> => ({
-  [QD.strRequestType]: '1',
+  // ⚠ **`'3'` es Queja, y el valor es una precondición, no un dato de relleno.** Los cuatro
+  // obligatorios de S3 (producto, interacción, motivo y el relato de 50 caracteres) solo existen en la
+  // rama de queja: con cualquier otro tipo la pantalla monta "Detalle de la Solicitud" y
+  // `alternarValidadoresDetalle()` los libera, así que este diccionario dejaría el form válido **por el
+  // motivo equivocado** y los once casos que dependen de él no ejercitarían S3. La rama de solicitud
+  // tiene su propio llenado: `llenarObligatoriosSolicitud()`.
+  //
+  // Va el **código** y no la etiqueta porque `drenarColecciones()` responde CAT-TIPO-SOL con `[]`: sin
+  // etiqueta, `esTipoQueja()` cae al código, que es exactamente el respaldo que ese helper documenta.
+  [QD.strRequestType]: '3',
   [QD.strFilerRole]: '1',
   [QD.strReceptionPoint]: '1',
   [QD.strIdType]: '1',
@@ -159,6 +179,10 @@ async function asentar(): Promise<void> {
  * más los siete de S2 más los `matriz:*` de S3, y fijar el número acá pondría rojo todo el archivo
  * cada vez que alguien agregue un catálogo a una sección — un cambio que este archivo no vigila y que
  * ya tiene guardas propias en `catalogos.service.spec.ts` y `matriz-motivos.service.spec.ts`.
+ *
+ * Los `matriz:*` de S3 **no** están entre los del montaje: la sección solo existe si el tipo de
+ * solicitud es Queja, y al montar no hay tipo elegido. Aparecen recién en el drenaje que sigue a
+ * elegir el tipo — que es el motivo por el que varios casos llaman a esta función dos veces.
  *
  * ⚠ **Y tiene que poder llamarse más de una vez.** El catálogo del municipio se recarga desde un
  * `effect` de S2, así que **cada escritura sobre el departamento dispara un GET nuevo** con el PMQL
@@ -347,11 +371,52 @@ async function llenarObligatorios(): Promise<void> {
   form().patchValue({ [QD.strCity]: '11001' });
   await asentar();
 
-  // ⚠ **La aserción va acá y no en el `it()`, y es deliberado.** Este helper es la precondición de
-  // once casos; si deja el form inválido, `enviar()` sale por el `return` del `form.invalid` y el
-  // fallo aparece doce líneas después como un `expectOne` que "no encontró el POST del script 70" —
-  // un mensaje que manda a depurar la cadena de envío cuando el defecto está en el llenado. Nombrar
-  // los controles inválidos acá convierte ese fallo en la lista de lo que falta.
+  exigirFormValido();
+}
+
+/**
+ * Lo mismo, pero para la rama de **Otras Solicitudes**: tipo distinto de Queja y el detalle de S3'.
+ *
+ * ⚠ **Los cuatro obligatorios de S3 se escriben VACÍOS a propósito, y ahí está la mordida del helper.**
+ * Es la precondición de los casos de la rama `os_`, y a la vez el único lugar donde se asevera que
+ * `alternarValidadoresDetalle()` **liberó** los `required` de la sección que el `@if` desmontó: sin ese
+ * efecto, producto/interacción/motivo/relato siguen siendo obligatorios sobre el mismo `FormGroup`, el
+ * `exigirFormValido()` de abajo los nombra y los tres casos de la rama se ponen rojos antes de llegar a
+ * la petición. Medido: borrando ese efecto, el fallo sale acá con los cuatro nombres.
+ *
+ * Y `strComplaintText` va con un texto **corto** en vez de `''`: así el caso también cubre la mitad
+ * fácil de olvidar, que es el `minLength(50)`. Un `''` la dejaría pasar por casualidad —el `required` y
+ * el mínimo fallan juntos sobre un campo vacío—, y el form quedaría inválido por un mínimo sobre un
+ * campo que ya no se ve sin que ningún caso lo notara.
+ */
+async function llenarObligatoriosSolicitud(): Promise<void> {
+  form().patchValue({
+    ...dicObligatorios(),
+    [QD.strRequestType]: '1', // "Solicitud" en CAT-TIPO-SOL: cualquier cosa que no sea queja.
+    [QD.strSfcProduct]: '',
+    [QD.strInteraction]: '',
+    [QD.strSfcReason]: '',
+    [QD.strComplaintText]: 'Corto.',
+    [QD.strCaseDescription]: STR_DETALLE_SOLICITUD,
+  });
+  await asentar();
+  drenarColecciones();
+  await asentar();
+
+  form().patchValue({ [QD.strCity]: '11001' });
+  await asentar();
+
+  exigirFormValido();
+}
+
+/**
+ * ⚠ **La aserción va en un helper y no en el `it()`, y es deliberado.** Es la precondición de catorce
+ * casos; si el llenado deja el form inválido, `enviar()` sale por el `return` del `form.invalid` y el
+ * fallo aparece doce líneas después como un `expectOne` que "no encontró el POST del script de
+ * similares" — un mensaje que manda a depurar la cadena de envío cuando el defecto está en el llenado.
+ * Nombrar los controles inválidos acá convierte ese fallo en la lista de lo que falta.
+ */
+function exigirFormValido(): void {
   const cllInvalidos = Object.entries(form().controls)
     .filter(([, in_objControl]) => in_objControl.invalid)
     // El nombre **y** los errores: `errorRequired` (del DS) y `required` (de Angular) son dos
@@ -397,15 +462,27 @@ function responderVerify(in_blnExito = true): void {
     .flush({ success: in_blnExito });
 }
 
-/** Responde el script 70 de similares con la cantidad pedida y sus ids. */
-function responderSimilares(in_intCantidad = 0, in_cllIds: number[] = []): void {
+/**
+ * Responde el script de similares con la cantidad pedida y sus ids.
+ *
+ * `in_blnOs` responde con las claves del script **101** (`os_*`) en vez de las del 70: son dos scripts
+ * distintos con el mismo contrato salvo el prefijo, y la pantalla lee la salida con el vocabulario del
+ * proceso destino. Un `false` acá contra la rama de Otras Solicitudes haría que la cantidad se lea como
+ * `undefined` → `0`, o sea "no hay similares" — el modal no se abriría y el caso pasaría vacuamente.
+ */
+function responderSimilares(
+  in_intCantidad = 0, in_cllIds: number[] = [], in_blnOs = false,
+): void {
+  const clave = (in_strClave: string): string =>
+    in_blnOs ? in_strClave.replace(/^qd_/, 'os_') : in_strClave;
   objMock
     .expectOne((in_objReq) => in_objReq.url.includes('/scripts/') && in_objReq.url.endsWith('/execute'))
     .flush({
       response: {
+        // Sin prefijo en los dos scripts: es el diagnóstico del watcher, no una variable del proyecto.
         [QD.strSimilarCheckStatus]: in_intCantidad > 0 ? 'DUPLICADOS' : 'OK',
-        [QD.arridSimilarCases]: in_cllIds,
-        [QD.intCountSimilarCases]: in_intCantidad,
+        [clave(QD.arridSimilarCases)]: in_cllIds,
+        [clave(QD.intCountSimilarCases)]: in_intCantidad,
       },
     });
 }
@@ -514,10 +591,111 @@ describe('SCR-000 · Crear/Recibir Queja', () => {
     // cabecera de la clase, y si alguien lo cambiara por `app-screen-header` esto lo nombra.
     expect(objFixture.debugElement.query(By.css('app-pqr-page'))).not.toBeNull();
     expect(objFixture.debugElement.query(By.css('app-seccion-consumidor'))).not.toBeNull();
-    expect(objFixture.debugElement.query(By.css('app-seccion-detalle-queja'))).not.toBeNull();
+
+    // ⚠ La cuarta sección al montar es **"Detalle de la Solicitud"**, no S3: sin tipo elegido el
+    // dropdown de S1 está vacío y vacío no es "queja". Es lectura literal de la regla, y es la que le
+    // da a la pantalla algo que mostrar en el estado inicial en vez de un hueco entre S2 y S4.
+    expect(objFixture.debugElement.query(By.css('app-seccion-detalle-queja'))).toBeNull();
+    expect(strTexto).toContain('Detalle de la Solicitud');
 
     expect(objErrores.lstErrores).toEqual([]);
   }, 15_000);
+
+  // ── S3 · las dos secciones de detalle ───────────────────────────────────────────────────────────
+
+  it('S3 · "Detalle de la queja" solo con Queja; con cualquier otro tipo, la de Solicitud', async () => {
+    await montarWebEntry();
+
+    // Arranca en la sección de solicitud, con **un solo** campo. El conteo es la mitad que asevera el
+    // "solo tenga el campo de Ingresa el detalle de la solicitud" del pedido: los otros dos textarea de
+    // la pantalla (el relato de la queja y el argumento de la réplica) viven los dos en S3, así que si
+    // alguien montara S3 acá o le agregara campos a la sección nueva, este número lo dice.
+    expect(objFixture.debugElement.queryAll(By.css('zds-textarea')).length).toBe(1);
+    expect(objFixture.nativeElement.textContent).not.toContain('Detalle de la queja');
+
+    // Queja (código '3' de CAT-TIPO-SOL) → se cambia de sección.
+    form().patchValue({ [QD.strRequestType]: '3' });
+    await asentar();
+    drenarColecciones(); // S3 recién montada pide sus catálogos `matriz:*`.
+    await asentar();
+
+    expect(objFixture.debugElement.query(By.css('app-seccion-detalle-queja'))).not.toBeNull();
+    expect(objFixture.nativeElement.textContent).toContain('Detalle de la queja');
+    expect(objFixture.nativeElement.textContent).not.toContain('Detalle de la Solicitud');
+
+    // Y de vuelta: la sección de solicitud reaparece. La transición en los dos sentidos importa
+    // porque el `@if` gobierna qué obligatorios cuentan — ver el caso de abajo.
+    form().patchValue({ [QD.strRequestType]: '5' }); // Derecho de petición.
+    await asentar();
+
+    expect(objFixture.debugElement.query(By.css('app-seccion-detalle-queja'))).toBeNull();
+    expect(objFixture.nativeElement.textContent).toContain('Detalle de la Solicitud');
+  });
+
+  /**
+   * ⚠ **Este caso cubre el modo de falla silencioso de todo el cambio.**
+   *
+   * Las dos secciones comparten el `FormGroup` de la pantalla, así que el `@if` esconde los widgets
+   * pero **no** los `Validators.required`. Sin `alternarValidadoresDetalle()` la rama de solicitud
+   * queda inenviable: `enviar()` sale por el `return` del `form.invalid` y `scrollToFirstError()` busca
+   * el `id="field-…"` de campos que no están en el DOM, así que el botón Enviar no hace **nada** y no
+   * hay un solo campo en rojo que lo explique.
+   *
+   * Se asevera por el estado de los controles y no con `hasValidator()` a propósito: el DS **compone**
+   * sus propios validadores encima (`setValidators(compose([previo, generateValidation]))`, ver
+   * `campo-base.ts`), así que el array de validadores crudos no es una lectura fiel de lo que el
+   * control exige. Lo que exige se ve en `errors`.
+   */
+  it('los obligatorios del detalle viajan de una sección a la otra, en los dos sentidos', async () => {
+    await montarWebEntry();
+
+    // Rama de solicitud (sin tipo elegido): el detalle nuevo es obligatorio y el relato de la queja no.
+    expect(form().get(QD.strCaseDescription)?.hasError('required')).toBe(true);
+    expect(form().get(QD.strComplaintText)?.valid).toBe(true);
+
+    // Y el mínimo de 50 tampoco cuenta: 'Corto.' es válido en esta rama. Es la mitad que se olvida —
+    // la columna de solicitud de `CLL_VALIDADORES_DETALLE` tiene que dejar el tope de 2000 y **soltar**
+    // el mínimo; si conservara los validadores declarados en el `FormControl`, este `valid` sería `false`.
+    form().patchValue({ [QD.strComplaintText]: 'Corto.' });
+    await asentar();
+    expect(form().get(QD.strComplaintText)?.valid).toBe(true);
+
+    // Queja: los obligatorios se dan vuelta.
+    form().patchValue({ [QD.strRequestType]: '3', [QD.strCaseDescription]: '' });
+    await asentar();
+    drenarColecciones();
+    await asentar();
+
+    expect(form().get(QD.strCaseDescription)?.valid).toBe(true);
+    // El relato de 6 caracteres que era válido hace tres líneas ahora falla por el mínimo de 50.
+    expect(form().get(QD.strComplaintText)?.hasError('minlength')).toBe(true);
+    // Y el producto SFC vuelve a ser obligatorio. Es el que **no tiene red del DS**: su
+    // `[obligatorio]` viaja sobre el control satélite `objProductoUi`, así que el `required` que pone
+    // `alternarValidadoresDetalle()` es el único que ese campo tiene en toda la pantalla.
+    expect(form().get(QD.strSfcProduct)?.hasError('required')).toBe(true);
+
+    form().patchValue({ [QD.strComplaintText]: STR_QUEJA_VALIDA });
+    await asentar();
+    expect(form().get(QD.strComplaintText)?.valid).toBe(true);
+
+    // ⚠ **Y la vuelta después de que S3 estuvo montada, que es el caso difícil y el motivo por el que
+    // `alternarValidadoresDetalle()` escribe la columna entera con `setValidators()`.** Los
+    // `zds-select` de la sección **componen** su propio `errorRequired` sobre el control real al
+    // montarse (`setValidators(compose([previo, generateValidation]))`, ver `campo-base.ts`), y ese
+    // closure no se va cuando el `@if` desmonta la sección —ningún campo de la lib tiene `ngOnDestroy`—:
+    // sobrevive al componente que lo puso, leyendo el `model` de una instancia destruida. Un
+    // `removeValidators(Validators.required)` no lo saca (después de la composición el control ya no
+    // tiene esa función, tiene el closure) y tampoco falla, así que la rama de solicitud quedaría
+    // inválida para siempre por dos campos que no están en el DOM. **Estos tres `errors` en `null` son
+    // la medición de que la tabla pisa lo que el DS compuso.**
+    form().patchValue({ [QD.strRequestType]: '1', [QD.strCaseDescription]: STR_DETALLE_SOLICITUD });
+    await asentar();
+
+    for (const strCampo of [QD.strSfcProduct, QD.strInteraction, QD.strSfcReason]) {
+      expect(`${strCampo} ${JSON.stringify(form().get(strCampo)?.errors)}`)
+        .toBe(`${strCampo} null`);
+    }
+  });
 
   it('S6 · la sección de responsable está ausente sin asignado y presente con él', async () => {
     await montarWebEntry();
@@ -827,6 +1005,132 @@ describe('SCR-000 · Crear/Recibir Queja', () => {
   });
 
   /**
+   * ⚠ **La radicación de la rama que NO es queja: otro proceso y otro vocabulario.**
+   *
+   * Las tres mitades del pedido que viven en el envío, en un solo caso porque son un solo POST:
+   * el **proceso 36** en vez del 31, el evento de ese proceso, y **todas** las variables con `os_`.
+   *
+   * Las dos aserciones que hacen que el caso signifique algo son las negativas:
+   * - `not.toBe(SCR000_WEB_ENTRY_PROCESS_ID)` — si alguien apuntara las dos ramas al mismo proceso,
+   *   la aserción positiva seguiría verde y este caso no diría nada;
+   * - `filter(k => k.startsWith('qd_'))` vacío — aseverar que `os_strIdNumber` **está** no prueba que
+   *   se haya renombrado: un payload con las dos familias de claves pasaría igual, y el proceso 36
+   *   recibiría el doble de variables de las que su BPMN conoce.
+   */
+  it('⚠ la rama de solicitud radica en el proceso 36 y con TODAS las variables en `os_`', async () => {
+    await montarWebEntry();
+    await llenarObligatoriosSolicitud();
+    await autorizar();
+    await verificarCaptcha();
+
+    const objEnvio = objPantalla['enviar']();
+    await asentar();
+    responderSimilares(0, [], true);
+    await asentar();
+    responderVerify(true);
+    await asentar();
+
+    const objPost = postWebEntry();
+    expect(objPost).not.toBeNull();
+    expect(objPost?.url).toBe(`/api/process_events/${SCR000_OS_WEB_ENTRY_PROCESS_ID}`);
+    expect(objPost?.params).toBe(SCR000_OS_WEB_ENTRY_EVENT_ID);
+    // Los dos procesos son distintos de verdad — si no, la aserción de arriba no distingue nada.
+    expect(SCR000_OS_WEB_ENTRY_PROCESS_ID).not.toBe(SCR000_WEB_ENTRY_PROCESS_ID);
+    expect(SCR000_OS_WEB_ENTRY_EVENT_ID).not.toBe(SCR000_WEB_ENTRY_EVENT_ID);
+
+    const dicCuerpo = objPost?.body ?? {};
+    // El campo de la sección nueva, que es el que el proceso 36 lee como `os_strCaseDescription`
+    // (Anexo 02 FLD-047, ya consumido por su propia pantalla de gestión en línea 2).
+    expect(dicCuerpo['os_strCaseDescription']).toBe(STR_DETALLE_SOLICITUD);
+    // Y el renombre alcanza a **todo**, no solo al campo nuevo: datos del consumidor, banderas de la
+    // pantalla y los `_desc` de colección (el sufijo tiene que quedar al final, no partir la clave).
+    expect(dicCuerpo['os_strIdNumber']).toBe('1020304050');
+    expect(dicCuerpo['os_blnCaptcha']).toBe(true);
+    expect(dicCuerpo['os_blnSmartSupervisionCase']).toBe(false);
+    expect('os_strRequestType_desc' in dicCuerpo).toBe(true);
+    expect(Object.keys(dicCuerpo).filter((in_strK) => in_strK.startsWith('qd_'))).toEqual([]);
+
+    // `similar_check_status` es la **excepción**: es el diagnóstico del watcher y no lleva prefijo de
+    // proyecto en ninguna de las dos ramas, así que el renombre mecánico tiene que dejarla quieta.
+    expect(dicCuerpo[QD.strSimilarCheckStatus]).toBe('OK');
+    expect('os_similar_check_status' in dicCuerpo).toBe(false);
+
+    objPost?.objPeticion.flush({ id: INT_REQUEST_CREADO, case_number: INT_CASE_NUMBER });
+    await asentar();
+
+    // El segundo PUT viaja con el mismo vocabulario: es el que lleva el código SFC, y si se quedara en
+    // `qd_` el caso del proceso 36 terminaría sin radicado visible.
+    const objPut = objMock.expectOne(
+      (in_objReq) => in_objReq.method === 'PUT'
+        && in_objReq.url === `/api/requests/${INT_REQUEST_CREADO}`,
+    );
+    const dicExtra = (objPut.request.body as { data: Record<string, unknown> }).data;
+    expect(dicExtra['os_strSfcCode']).toBe(buildSfcCode(INT_CASE_NUMBER));
+    expect(Object.keys(dicExtra).filter((in_strK) => in_strK.startsWith('qd_'))).toEqual([]);
+    objPut.flush({});
+
+    await objEnvio;
+    await asentar();
+    expect(objPantalla['blnEnviado']()).toBe(true);
+  });
+
+  /**
+   * ⚠ **El chequeo de similitudes de la rama de solicitud es OTRO script.**
+   *
+   * Son dos scripts distintos porque consultan procesos distintos: el 70 busca duplicados entre las
+   * quejas del proceso 31 y el 101 entre las solicitudes del 36. Mandarle el caso al script equivocado
+   * no da error — contesta que **no** hay similares, porque busca en el proceso donde el caso no está.
+   * O sea que el modo de falla es un falso negativo silencioso, y por eso va aseverado en los dos
+   * sentidos (`toBe` del correcto y `not.toBe` del otro).
+   *
+   * La segunda mitad cierra el círculo del renombre: la **respuesta** también viene con `os_`, así que
+   * la pantalla tiene que leerla con `clave()`. Si leyera las claves `qd_` fijas, el conteo sería
+   * `undefined → 0` y el modal de duplicados no se abriría nunca en esta rama.
+   */
+  it('⚠ la rama de solicitud chequea similitudes con el script 101, y lee su respuesta en `os_`', async () => {
+    await montarWebEntry();
+    await llenarObligatoriosSolicitud();
+    await autorizar();
+    await verificarCaptcha();
+
+    void objPantalla['enviar']();
+    await asentar();
+
+    const objReq = objMock.expectOne(
+      (in_objReq) => in_objReq.url.includes('/scripts/') && in_objReq.url.endsWith('/execute'),
+    );
+    expect(objReq.request.url).toBe(`/api/scripts/${SCR000_OS_SIMILAR_CASES_SCRIPT_ID}/execute`);
+    expect(SCR000_OS_SIMILAR_CASES_SCRIPT_ID).not.toBe(SCR000_SIMILAR_CASES_SCRIPT_ID);
+
+    const objCuerpo = objReq.request.body as { data: string; config: string; sync: boolean };
+    const dicEntrada = JSON.parse(objCuerpo.data) as Record<string, unknown>;
+    // La entrada del script va con el mismo vocabulario que el caso que va a buscar.
+    expect(dicEntrada['os_strIdNumber']).toBe('1020304050');
+    expect(Object.keys(dicEntrada).filter((in_strK) => in_strK.startsWith('qd_'))).toEqual([]);
+    // Y el proceso donde buscar es el 36: con el 31 acá, el script 101 no encontraría nada nunca.
+    expect(dicEntrada['process_id']).toBe(SCR000_OS_WEB_ENTRY_PROCESS_ID);
+
+    // La respuesta llega con las claves de **su** proceso.
+    objReq.flush({
+      response: {
+        [QD.strSimilarCheckStatus]: 'DUPLICADOS',
+        os_arridSimilarCases: [111],
+        os_intCountSimilarCases: 2,
+      },
+    });
+    await asentar();
+    objMock.expectOne((in_objReq) => in_objReq.url === '/api/requests/111').flush({ id: 111 });
+    await asentar();
+
+    // Que el conteo llegue al modal es la prueba de que la respuesta se leyó con `clave()`.
+    expect(objPantalla['objAvisoSimilares']()?.intCantidad).toBe(2);
+
+    objPantalla['cancelarSimilares']();
+    await asentar();
+    expect(objMock.match(() => true)).toEqual([]);
+  });
+
+  /**
    * ⚠ **Imposible en React** — la cadena completa en su orden, que es contrato.
    *
    * Submit → script 70 → **modal** → decisión del usuario → verify → envío. El modal es un aviso y
@@ -1123,6 +1427,15 @@ describe('SCR-000 · Crear/Recibir Queja', () => {
    */
   it('⚠ el `_desc` del producto llega al resumen MSG-000-08 y al payload', async () => {
     await montarWebEntry();
+
+    // S3 solo existe en la rama de queja, así que hay que elegir el tipo antes de poder alcanzar la
+    // sección: sin esto `seccionDetalle()` desreferencia un `null`. El `drenarColecciones()` contesta
+    // los `matriz:*` que la sección pide al montar; sin él, el `expectOne` de la colección 16 de más
+    // abajo encontraría dos peticiones y fallaría por ambigüedad, no por el mecanismo bajo prueba.
+    form().patchValue({ [QD.strRequestType]: '3' });
+    await asentar();
+    drenarColecciones();
+    await asentar();
 
     // El catálogo del producto lo pide la cascada (`matriz:sfcProduct`, colección 16). `drenarColecciones()`
     // ya lo respondió con `[]` al montar, así que hay que recargarlo con opciones de verdad: sin ellas
