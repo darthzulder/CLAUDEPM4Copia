@@ -182,7 +182,7 @@ una queja**; con cualquier otro tipo la reemplaza S3' (abajo). Ninguno de estos 
 | Argumento de la réplica | `qd_strReplyArgument` | `zds-textarea` (máx 2000), visible si réplica = `'SI'` | No | Anexo02 > SCR-000 > FLD-326 (fila 42) |
 | ¿Incluye anexos a la queja? | *(estado de UI, no viaja a PM4)* | `za-switch` que revela el cargador; al apagarlo descarta los archivos ya elegidos | No | Diseño web (switch al pie de la sección) |
 | Ingresa archivos adjuntos | `qd_strAttach01…05` | `app-doc-support-uploader` (máx 5), tras el switch | No | Anexo02 > SCR-000 > FLD-330 (fila 46) |
-| Admisión | `qd_strAdmission` | `zds-select` (CAT-ADMISION) visible solo si rol = Defensor (`'4'`); oculto y fijo en "No aplica" (código 9) en los demás roles | Sí (si Defensor) | Anexo02 > SCR-000 > FLD-331 (fila 47) |
+| Admisión | `qd_strAdmission` | `zds-select` (CAT-ADMISION) visible solo si rol = Defensor (`'4'`) y **sin la opción "No aplica"** (§13.10); oculto y fijo en "No aplica" (código 9) en los demás roles | Sí (si Defensor) | Anexo02 > SCR-000 > FLD-331 (fila 47); exclusión de "No aplica" por decisión del usuario (2026-08-21) |
 | *(back, sin widget)* | `qd_strControlEntity` | Default por etiqueta `/otros/i` | Sí (al radicar) | Anexo02 > SCR-000 > FLD-332 (fila 48) |
 | *(back, sin widget)* | `qd_strTutela` | Default por etiqueta `/^\d?\.?\s*no$/i` | Sí (al radicar) | Anexo02 > SCR-000 > FLD-333 (fila 49) |
 | *(back, sin widget)* | `qd_strExpressComplaint` | Default por etiqueta `/^\d?\.?\s*no$/i` | Sí (al radicar) | Anexo02 > SCR-000 > FLD-334 (fila 50) |
@@ -293,6 +293,7 @@ importante del port.
 | Al cambiar Departamento se **limpia** Municipio, siempre | `aplicarCascadaMunicipio()` en S2 — incluida la precarga desde `task.data` | **RUL-000-09**; FLD-317/318 |
 | País precargado a Colombia (`170`) | `fijarPais()` con `DEFAULT_COUNTRY_CODE` / `LOCK_COUNTRY` | **RUL-000-10**; FLD-316 |
 | Admisión visible solo si rol = Defensor; fija en "No aplica" (código 9) en los demás | `@if` en S3 + `sembrarAdmision()`, que resuelve primero por código `'9'` y cae a `/no aplica/i` sobre la etiqueta | **RUL-000-01**; FLD-331 |
+| Y al Defensor **no** se le ofrece "No aplica": el select sale de `cllAdmisionVisibles()` (catálogo sin esa fila), y un "No aplica" precargado con el rol ya en Defensor **se limpia** | `cllAdmisionVisibles` + `blnOpcionNoAplica()` + la rama de Defensor de `sembrarAdmision()` | Decisión del usuario (2026-08-21) — §13.10 |
 | Campos regulatorios con default **por etiqueta del catálogo** | Ente de control `/otros/i`; tutela y queja exprés `/^\d?\.?\s*no$/i` — el ancla y el prefijo opcional son obligatorios porque las etiquetas vienen numeradas (`"1. No"`) y un `/no/i` suelto haría match con "No aplica" | FLD-332/333/334 |
 | Los cinco campos derivados del motivo | `objSelectedReasonRow` de la matriz → `rolResponsable`, `escalamientoAdministrador`, `resarcimientoAdministrador`, `sla`, `relacionFraude` (este último normalizado a `'SI'`/`'NO'`) | Solicitud del usuario (2026-07-09); FLD-327 |
 | Argumento de réplica visible solo si réplica = `'SI'` | `@if` en S3 | **RUL-000-12**; FLD-325/326 |
@@ -328,7 +329,7 @@ importante del port.
 
 | Campo Origen | Campo Dependiente | Comportamiento | Fuente |
 |---|---|---|---|
-| `qd_strFilerRole` | `qd_strReceptionInstance`, `qd_strAdmission`, `qd_strAlliance` | Defensor (`'4'`) → instancia `'3'` + Admisión **visible**; roles `1/2/3/5` → instancia `'2'` + Admisión oculta y fija en `'9'`; rol ≠ `'3'` **limpia** la alianza | RUL-000-01; FLD-303/305/331 |
+| `qd_strFilerRole` | `qd_strReceptionInstance`, `qd_strAdmission`, `qd_strAlliance` | Defensor (`'4'`) → instancia `'3'` + Admisión **visible y sin "No aplica"** (§13.10); roles `1/2/3/5` → instancia `'2'` + Admisión oculta y fija en `'9'`; rol ≠ `'3'` **limpia** la alianza | RUL-000-01; FLD-303/305/331 |
 | `qd_strReceptionPoint` | `qd_strChannel` | Tabla `DIC_CANAL_POR_PUNTO`. El punto arranca en Internet por defecto, así que el canal arranca en 13 | Solicitud del usuario (2026-07-22) |
 | `qd_strIdType` | `qd_strPersonType` + bloque de campos | NIT → Jurídica (Razón social + contacto); resto → Natural | RUL-000-02/03; FLD-315 |
 | `qd_strDepartment` | `qd_strCity` | Limpia la ciudad y recarga el catálogo (id 15, `dependsOn`); ciudad deshabilitada sin departamento | RUL-000-09; FLD-317/318 |
@@ -1073,6 +1074,87 @@ se midieron en el navegador y quedan en la tabla de arriba.
 
 ---
 
+### 13.10 Al Defensor no se le ofrece "No aplica" en Admisión (2026-08-21)
+
+Pedido del usuario: *"Si se elige el rol Defensor del consumidor, la opción admisión que aparece no tiene
+que tener la opción de No aplica"*.
+
+Es coherente con FLD-331 y con §13.8: "No Aplica" (código `'9'`) es el valor que **la pantalla asigna
+sola** a los otros cuatro roles, cuando el campo está oculto. Ofrecérselo al Defensor era pedirle que
+decida "no decidir" en el único rol donde la admisión es su responsabilidad — y con el `required` puesto,
+era además la salida más fácil: un click y el campo queda satisfecho sin que nadie haya dictaminado.
+
+**El filtro es del widget, no del catálogo**, y esa distinción es la mitad del cambio:
+
+| Pieza | Dónde | Qué hace |
+|---|---|---|
+| `cllAdmisionVisibles` | `seccion-detalle-queja.ts` | `computed()` = `cllAdmision()` **sin** las opciones "No aplica". Es lo único que pinta la plantilla |
+| `blnOpcionNoAplica()` | `seccion-detalle-queja.ts` (módulo) | el predicado: código `'9'` **o** etiqueta `/no aplica/i` |
+| `blnEsNoAplica()` | `seccion-detalle-queja.ts` | la versión por **valor**, para decidir si lo que ya está en el form hay que limpiarlo |
+| Rama de Defensor de `sembrarAdmision()` | `seccion-detalle-queja.ts` | ahora limpia también un "No aplica" que aparezca **sin cruce de rol** (precarga) |
+| `[options]="cllAdmisionVisibles()"` | `seccion-detalle-queja.html` | el único consumo del computed |
+
+`cllAdmision()` —el catálogo completo— **se conserva y se sigue usando** en dos lugares donde filtrarlo en
+origen habría roto algo sin poner rojo ninguno de los casos nuevos:
+
+- `sembrarAdmision()`, que necesita encontrar el `'9'` para los otros cuatro roles. Sin él, la admisión
+  viajaría vacía a PM4 en el 100 % de las radicaciones que no son del Defensor.
+- `sincronizarDesc()` (`vincular()`), que resuelve `qd_strAdmission_desc`. Sin él, el proceso recibiría el
+  código `'9'` sin etiqueta legible. Hay un caso que lo asevera, justamente por eso.
+
+Es el mismo patrón que `cllPuntosVisibles` en la pantalla (los tres puntos de recepción retirados): se
+filtra lo que se **ofrece**, nunca lo que se **resuelve**.
+
+#### El caso que el pedido no menciona y que sí había que cerrar
+
+Con "No aplica" fuera del select, un caso que llegue **precargado** desde `task.data` con
+`qd_strFilerRole='4'` y `qd_strAdmission='9'` quedaba en el peor estado posible: el select mostrando vacío
+—su valor no está entre las opciones— y el `required` **ya satisfecho** por detrás. O sea una admisión que
+el Defensor nunca eligió, viajando al proceso como si la hubiera elegido.
+
+El guardia de §13.8 no lo cubría: detecta el **cruce** de rol (`blnRolDefensor === false`), y en una
+precarga no hay cruce. Así que la rama de Defensor ahora limpia por dos motivos —el cruce con el default,
+o que el valor actual *sea* un "No aplica"—, y el `required` queda a la vista como corresponde.
+
+`blnEsNoAplica()` reconoce el `'9'` **sin catálogo** y la etiqueta **contra `cllAdmision()`**; esa segunda
+lectura es además la que suscribe el efecto al catálogo, así que un "No aplica" renumerado se limpia
+cuando el GET responde y no solo si hubiera llegado antes que el rol. Hay un caso que fija ese camino.
+
+#### Casos agregados (5) y pasada de mutación
+
+Baseline del archivo: **50 casos** (desde 45), verde.
+
+| # | Qué se rompió | Rojo |
+|---|---|---|
+| **1** | `[options]="cllAdmisionVisibles()"` → `cllAdmision()` en la plantilla | **2** · `el select del Defensor NO ofrece "No aplica"…` y el del renumerado |
+| **2** | `blnOpcionNoAplica()` → solo el código `'9'` (sin la etiqueta) | **2** · el del renumerado y el de la precarga renumerada |
+| **3** | La condición `\|\| this.blnEsNoAplica(strActual)` quitada de la rama de Defensor | **2** · los dos de precarga |
+| **4** | `blnEsNoAplica()` con el corto-circuito del `'9'` adelante | **VERDE — y con razón**: ver abajo |
+| **5** | `cllAdmision` filtrado en origen (en vez de un computed aparte) | **7**, incluido `el _desc del "No aplica" de los OTROS roles sigue resolviendo` y los dos de la semilla de §13.8 |
+
+**MUT-4 sobrevivió porque no es un defecto: es la misma función escrita al revés.** La primera redacción
+de este cambio afirmaba que leer `cllAdmision()` *antes* del chequeo del código era lo que garantizaba la
+suscripción al catálogo. Es falso, y la mutación lo probó: el único valor que se resuelve sin mirar el
+catálogo es el `'9'`, y en ese caso se limpia en la misma corrida, así que no hay nada que esperar. Para
+cualquier otro valor el catálogo se lee igual, con o sin corto-circuito. El comentario quedó corregido —
+la afirmación estaba de más, no la lógica.
+
+MUT-5 es la que justifica el diseño: filtrar `cllAdmision()` en origen no rompe solo el `_desc`, se lleva
+también la semilla del `'9'` de los otros cuatro roles y los dos cruces de §13.8. Siete casos rojos por
+una línea, que es lo que se quería demostrar antes de dejar dos computeds donde parecía alcanzar con uno.
+
+El caso de las opciones se asevera sobre **el input del `zds-select` montado** (`opcionesDelSelect()`,
+vía `By.directive`) y no sobre el computed: escrito contra el computed, la mutación 1 —volver el binding de
+la plantilla— habría quedado verde. Bajo jsdom no hay `<option>` que contar, porque el `lib-input-select-z`
+de Lit no hace upgrade (la trampa 2 de las convenciones de testing); el input del componente sí es
+observable, y es lo que interesa: qué lista le entregó la sección al widget.
+
+**Paridad con React:** el `frontend` de referencia sigue ofreciendo "No aplica" al Defensor
+(`SeccionDetalleQueja.tsx` pasa `options={cllAdmission}` sin filtrar). Es una divergencia deliberada más,
+sobre el mismo campo que ya tenía la de §13.8 — va a §14.
+
+---
+
 ## 14. A reportar al negocio
 
 **⚠ Primero, lo único de esta ficha que SÍ se cambió: los supuestos de la bifurcación por tipo
@@ -1107,6 +1189,17 @@ usuario. **A confirmar con negocio:** si un caso llega a cambiar de radicador *d
 dictaminó, esta pantalla descarta el dictamen — y es probable que ese escenario no exista (el radicador se
 elige al abrir el caso), pero conviene decirlo en voz alta. Si negocio prefiere conservarlo, es la
 condición `!blnSalioDeDefensor` de `sembrarAdmision()`, con su caso de test.
+
+**⚠ Segundo-bis, la segunda divergencia deliberada sobre el MISMO campo (2026-08-21, §13.10).** Al
+Defensor del Consumidor ya no se le ofrece "No Aplica" (código `'9'`) entre las opciones de Admisión: es
+el valor que la pantalla asigna sola cuando el campo está oculto, no una respuesta que él pueda dar. React
+sigue ofreciéndolo. **A confirmar con negocio:** el catálogo real (colección 21) le deja entonces dos
+opciones —`1` "Queja o reclamo inadmitida y/o rechazada por el DCF" y `2` "Queja o reclamo admitida por el
+DCF"—, que es exactamente el dictamen que se le pide. Si negocio quisiera que el Defensor pueda declarar
+explícitamente "No Aplica", es quitar `cllAdmisionVisibles` y volver el binding a `cllAdmision()`, con sus
+casos de test. Y como efecto secundario del filtro: un caso precargado con rol Defensor y admisión `'9'`
+llega con el campo **en blanco y obligatorio**, o sea pidiendo dictamen — antes llegaba con "No Aplica"
+puesto y el `required` satisfecho sin que nadie decidiera.
 
 **⚠ Tercero, un defecto visual que React también tiene y que acá SÍ se corrigió (§13.9).** El argumento de
 la réplica quedaba pegado al checkbox porque `.form-row` no separa a sus hermanas — es de la hoja

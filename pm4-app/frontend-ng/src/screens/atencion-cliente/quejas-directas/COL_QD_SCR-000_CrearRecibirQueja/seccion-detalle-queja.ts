@@ -29,6 +29,13 @@ const STR_COD_ADMISION = '9';
 const STR_ROL_DEFENSOR = '4';
 
 /**
+ * Etiqueta del "No aplica" de CAT-ADMISION. Es el respaldo de `STR_COD_ADMISION` cuando negocio
+ * renumera el catálogo, y la usan los dos lados de la regla: la semilla del default y el filtro del
+ * select del Defensor (`blnOpcionNoAplica`).
+ */
+const RGX_ADMISION_NO_APLICA = /no aplica/i;
+
+/**
  * S3 · "Detalle de la queja".
  *
  * Porte de `SeccionDetalleQueja.tsx`. Es la sección más grande de la pantalla y la que concentra la
@@ -83,7 +90,9 @@ const STR_ROL_DEFENSOR = '4';
  *  - Admisión: código `'9'` si existe, y si no `/no aplica/i`. Y **solo si el radicador no es el
  *    Defensor** (`qd_strFilerRole !== '4'`): cuando lo es, la admisión la decide él y sembrarla acá
  *    pisaría su respuesta. ⚠ Es el único de los cuatro que **sí tiene widget**, y solo para ese rol
- *    — ver `blnEsDefensor` y `alternarValidadorAdmision()`.
+ *    — ver `blnEsDefensor` y `alternarValidadorAdmision()`. Y en ese widget "No aplica" **no se
+ *    ofrece**: es el default que la pantalla pone cuando el campo está oculto, no una respuesta que él
+ *    pueda dar (ver `cllAdmisionVisibles`).
  *  - Ente de control: `/otros/i`.
  *  - Tutela y queja exprés: `/^\d?\.?\s*no$/i` — el ancla y el prefijo opcional son obligatorios,
  *    porque las etiquetas reales vienen numeradas (`"1. No"`) y un `/no/i` suelto haría match con
@@ -225,10 +234,28 @@ export class SeccionDetalleQueja {
     () => this.objCatalogos.de('productDetail').options(),
   );
   /**
-   * **FLD-331** · lo lee la plantilla: la admisión es el único de los cuatro con widget, y solo cuando
-   * el radicador es el Defensor del Consumidor.
+   * **FLD-331** · el catálogo **completo** de admisión: es el que resuelve el default de back y el que
+   * lee `sincronizarDesc()`. La plantilla **no** lo pinta — para eso está `cllAdmisionVisibles`.
    */
   protected readonly cllAdmision = computed(() => this.objCatalogos.de('admission').options());
+
+  /**
+   * **FLD-331** · las opciones que el select del Defensor ofrece: el catálogo **sin** "No aplica"
+   * (decisión del usuario, 2026-08-21).
+   *
+   * "No aplica" es el valor que la pantalla asigna **por él misma** a los otros cuatro roles cuando el
+   * campo está oculto (`sembrarAdmision()`); ofrecérselo al Defensor sería pedirle que decida "no
+   * decidir" en el único rol donde la admisión es su responsabilidad, y encima con el `required` ya
+   * satisfecho. Así que se filtra del widget, no del catálogo.
+   *
+   * ⚠ **El filtro es del select y solo del select**, igual que `cllPuntosVisibles` en la pantalla:
+   * `sincronizarDesc()` sigue enganchado al catálogo completo (ver `vincular()`), así que un caso que
+   * llegue precargado con el código '9' conserva su `_desc` legible, y la semilla de los demás roles lo
+   * sigue encontrando. Filtrar el catálogo entero rompería las dos cosas.
+   */
+  protected readonly cllAdmisionVisibles = computed(
+    () => this.cllAdmision().filter((in_objO) => !blnOpcionNoAplica(in_objO)),
+  );
   private readonly cllEnteControl = computed(() => this.objCatalogos.de('controlEntity').options());
   private readonly cllTutela = computed(() => this.objCatalogos.de('tutela').options());
   private readonly cllQuejaExpres = computed(
@@ -397,7 +424,16 @@ export class SeccionDetalleQueja {
     // Al **entrar** a Defensor se limpia el default: si no, el '9' que se sembró para el rol anterior
     // quedaría preseleccionado y el guardia de abajo lo trataría como elección del Defensor.
     if (blnDefensor) {
-      if (this.blnRolDefensor === false && this.leer(QD.strAdmission) === this.strAdmisionSembrada) {
+      const strActual = this.leer(QD.strAdmission);
+      // Dos motivos para limpiar, y el segundo lo agregó el filtro de `cllAdmisionVisibles`:
+      //  · el **cruce** de rol con el default puesto — lo que sembró esta misma función;
+      //  · cualquier "No aplica" que aparezca con el rol **ya** en Defensor (el caso real es una
+      //    precarga desde `task.data`, donde no hubo cruce que detectar). Desde que "No aplica" no
+      //    está en el select, ese valor no es una opción que él pueda ver ni confirmar: quedaría
+      //    satisfaciendo el `required` a espaldas suyas, con el widget mostrando un select vacío.
+      const blnDefaultPorCruce = this.blnRolDefensor === false
+        && strActual === this.strAdmisionSembrada;
+      if (strActual && (blnDefaultPorCruce || this.blnEsNoAplica(strActual))) {
         this.form().get(QD.strAdmission)?.setValue('');
       }
       this.blnRolDefensor = true;
@@ -415,11 +451,28 @@ export class SeccionDetalleQueja {
     const objPorCodigo = cllOpciones.find((in_objO) => in_objO.value === STR_COD_ADMISION);
     const strCodigo = objPorCodigo
       ? objPorCodigo.value
-      : (cllOpciones.find((in_objO) => /no aplica/i.test(in_objO.label))?.value ?? '');
+      : (cllOpciones.find((in_objO) => RGX_ADMISION_NO_APLICA.test(in_objO.label))?.value ?? '');
     if (!strCodigo || this.leer(QD.strAdmission) === strCodigo) return;
 
     this.strAdmisionSembrada = strCodigo;
     this.form().get(QD.strAdmission)?.setValue(strCodigo);
+  }
+
+  /**
+   * ¿El valor guardado en `qd_strAdmission` es el "No aplica" que el select del Defensor ya no ofrece?
+   *
+   * Se pregunta por **valor** y no por opción porque el caso que importa es un dato que ya está en el
+   * form: la precarga desde `task.data`, donde no hubo cruce de rol que detectar.
+   *
+   * El código `'9'` se reconoce **sin catálogo**; una etiqueta no, así que ahí hace falta
+   * `cllAdmision()`. Y esa lectura es también lo que suscribe el efecto al catálogo, de modo que un
+   * "No aplica" **renumerado** (código propio + etiqueta) se limpia cuando el GET responde y no solo
+   * si hubiera llegado antes que el rol.
+   */
+  private blnEsNoAplica(in_strValor: string): boolean {
+    const blnPorCatalogo = this.cllAdmision()
+      .some((in_objO) => in_objO.value === in_strValor && blnOpcionNoAplica(in_objO));
+    return blnPorCatalogo || in_strValor === STR_COD_ADMISION;
   }
 
   /**
@@ -571,4 +624,17 @@ export class SeccionDetalleQueja {
  */
 function strSiNo(in_strValor: string): string {
   return /^s/i.test(in_strValor.trim()) ? 'SI' : 'NO';
+}
+
+/**
+ * ¿Es esta opción de CAT-ADMISION el "No aplica"?
+ *
+ * Código **o** etiqueta, con un `||` y no con el `??` en cascada de `sembrarAdmision()`: ahí se elige *un*
+ * default y el orden es el contrato (código primero, etiqueta de respaldo); acá se **excluye** del select,
+ * y una etiqueta "No aplica" bajo otro código sigue significando lo mismo para el Defensor. Si negocio
+ * dejara las dos filas en el catálogo, las dos tienen que desaparecer del widget.
+ */
+function blnOpcionNoAplica(in_objOpcion: CollectionOption): boolean {
+  return in_objOpcion.value === STR_COD_ADMISION
+    || RGX_ADMISION_NO_APLICA.test(in_objOpcion.label);
 }

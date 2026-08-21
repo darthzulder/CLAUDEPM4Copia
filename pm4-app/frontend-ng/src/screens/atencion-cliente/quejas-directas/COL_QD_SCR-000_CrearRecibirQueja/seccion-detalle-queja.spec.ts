@@ -31,8 +31,10 @@ import { provideHttpClient } from '@angular/common/http';
 import { HttpTestingController, provideHttpClientTesting } from '@angular/common/http/testing';
 import { ErrorHandler } from '@angular/core';
 import { TestBed, type ComponentFixture } from '@angular/core/testing';
+import { By } from '@angular/platform-browser';
 import { beforeEach, afterEach, describe, expect, it, vi } from 'vitest';
 
+import { ZdsSelect, type OpcionZds } from '../../../../components/fields/zds-select';
 import { CatalogosService } from '../../../../core/catalogos.service';
 import { FileRegistryService } from '../../../../core/file-registry.service';
 import { QD, QD_COLLECTIONS, SCR000_ADJUNTO_KEYS } from '../fields/fields';
@@ -316,6 +318,22 @@ function seccion(): SeccionDetalleQueja {
 function montoCampo(in_strCampo: string): boolean {
   return (objFixture.nativeElement as HTMLElement)
     .querySelector(`[name="${in_strCampo}"]`) !== null;
+}
+
+/**
+ * Las opciones que recibió el `zds-select` de ese campo, **tal como se las pasó la plantilla**.
+ *
+ * ⚠ Va por `By.directive()` y el input del componente, y no por los `<option>` del DOM: el select del
+ * DS alimenta su `za-select` por **slot** a través de un `lib-input-select-z` de Lit que no hace
+ * upgrade bajo jsdom (ver el ⚠ de la cabecera), así que en el DOM no hay nada que contar. Lo que sí es
+ * observable —y es lo que interesa aseverar— es qué lista le entregó la sección al widget.
+ *
+ * Devuelve `[]` si el campo no está montado, que es el estado de la admisión en los otros cuatro roles.
+ */
+function opcionesDelSelect(in_strCampo: string): readonly OpcionZds[] {
+  const objCampo = objFixture.debugElement.queryAll(By.directive(ZdsSelect))
+    .find((in_objDebug) => (in_objDebug.componentInstance as ZdsSelect).name() === in_strCampo);
+  return (objCampo?.componentInstance as ZdsSelect | undefined)?.options() ?? [];
 }
 
 /**
@@ -838,6 +856,81 @@ describe('FLD-331 · la admisión la ve y la elige SOLO el Defensor', () => {
 
     expect(leer(QD.strAdmission)).toBe('9');
     expect(montoCampo(QD.strAdmission)).toBe(false);
+  });
+
+  it('⚠ el select del Defensor NO ofrece "No aplica", y el catálogo COMPLETO sigue intacto', async () => {
+    // Decisión del usuario (2026-08-21): "No aplica" es el default que la pantalla asigna cuando el
+    // campo está oculto, así que como respuesta del Defensor no significa nada — y con el `required`
+    // puesto, ofrecerlo sería dejarle satisfacer el campo sin decidir.
+    //
+    // Se asevera sobre las opciones que recibió el **widget montado** y no solo sobre el computed: la
+    // mutación que importa es volver el binding de la plantilla a `cllAdmision()`, y un caso escrito
+    // contra el computed la dejaría pasar en verde.
+    await montar(responderAdmision);
+    await escribir({ [QD.strFilerRole]: '4' });
+
+    expect(opcionesDelSelect(QD.strAdmission).map((in_objO) => in_objO.value)).toEqual(['1']);
+    // Y el catálogo entero sigue disponible para la semilla y para `sincronizarDesc()`: filtrarlo en
+    // origen —en vez de agregar un computed aparte— rompería las dos cosas.
+    expect(seccion()['cllAdmision']().map((in_objO) => in_objO.value)).toEqual(['9', '1']);
+  });
+
+  it('el filtro saca también un "No aplica" RENUMERADO, por etiqueta', async () => {
+    // El catálogo es de negocio: si mañana "No aplica" deja de ser el '9', el select tiene que seguir
+    // sin ofrecerlo. Por eso `blnOpcionNoAplica()` mira código **o** etiqueta, con `||` y no con el
+    // `??` en cascada de la semilla (allá el orden es el contrato; acá es una exclusión).
+    await montar(() => {
+      responderCatalogo(INT_COL_ADMISSION, [
+        catPlano('77', 'No Aplica'),     // mayúscula distinta: el regex es case-insensitive
+        catPlano('1', 'Admitida'),
+      ]);
+    });
+    await escribir({ [QD.strFilerRole]: '4' });
+
+    expect(opcionesDelSelect(QD.strAdmission).map((in_objO) => in_objO.value)).toEqual(['1']);
+  });
+
+  it('⚠ una PRECARGA con "No aplica" y el rol ya en Defensor se limpia igual', async () => {
+    // Sin cruce de rol que detectar —el caso llega de PM4 con `qd_strFilerRole='4'` y
+    // `qd_strAdmission='9'`— el guardia del default no dispara, y desde que "No aplica" no está en el
+    // select el resultado sería el peor de los dos mundos: un select **vacío** en pantalla con el
+    // `required` ya satisfecho por detrás. O sea una admisión que el Defensor nunca eligió, viajando
+    // al proceso como si la hubiera elegido.
+    await montar();
+    await escribir({ [QD.strFilerRole]: '4', [QD.strAdmission]: '9' });
+
+    responderAdmision();
+    await asentar();
+
+    expect(leer(QD.strAdmission)).toBe('');
+    expect(objHost.form.get(QD.strAdmission)?.hasError('required')).toBe(true);
+  });
+
+  it('⚠ y también si el "No aplica" precargado viene RENUMERADO (el catálogo llega después)', async () => {
+    // El código '9' se reconoce sin catálogo; una etiqueta, no. Este caso cubre el segundo camino de
+    // `blnEsNoAplica()`: el valor precargado ('77') solo se puede reconocer contra `cllAdmision()`, y
+    // es esa lectura la que deja el efecto suscripto al catálogo para volver a correr cuando el GET
+    // responde. Sin ella, el caso queda con '77' puesto y el select vacío.
+    await montar();
+    await escribir({ [QD.strFilerRole]: '4', [QD.strAdmission]: '77' });
+    expect(leer(QD.strAdmission)).toBe('77');   // todavía no llegó el catálogo: nada que reconocer
+
+    responderCatalogo(INT_COL_ADMISSION, [catPlano('77', 'No aplica'), catPlano('1', 'Admitida')]);
+    await asentar();
+
+    expect(leer(QD.strAdmission)).toBe('');
+  });
+
+  it('el `_desc` del "No aplica" de los OTROS roles sigue resolviendo', async () => {
+    // La otra mitad de "el filtro es del widget, no del catálogo": `sincronizarDesc()` está enganchado
+    // a `cllAdmision()`, así que el código '9' que la pantalla siembra sola para los cuatro roles no
+    // Defensor viaja a PM4 con su etiqueta legible. Filtrar el catálogo en origen dejaría este `_desc`
+    // vacío — sin ningún caso rojo entre los de arriba.
+    await montar(responderAdmision);
+    await escribir({ [QD.strFilerRole]: '3' });          // Empleado Zurich
+
+    expect(leer(QD.strAdmission)).toBe('9');
+    expect(leer(`${QD.strAdmission}_desc`)).toBe('No aplica');
   });
 
   it('la elección del Defensor SOBREVIVE mientras siga siendo el radicador', async () => {

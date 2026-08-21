@@ -119,6 +119,11 @@
   <!-- FLD-331 · Admisión: la elige SOLO el Defensor del Consumidor (rol '4'). En los demás roles no se
        muestra y queda fija en "No aplica" (código '9') — ver `sembrarAdmision()`.
 
+       ⚠ Y a él "No aplica" NO se le ofrece: las opciones salen de `cllAdmisionVisibles()`, que es el
+         catálogo sin esa fila (decisión del usuario, 2026-08-21). Es el valor que la pantalla pone sola
+         cuando el campo está oculto, así que como elección del Defensor no significa nada. El filtro es
+         del widget, no del catálogo — ver el docstring del computed.
+
        ⚠ El `@if` esconde el widget pero **no** toca el `FormGroup`, así que el `required` lo pone y lo
          saca `alternarValidadorAdmision()`. Sin ese efecto, un ciudadano que pasa por Defensor y se
          va a otro rol deja el formulario inenviable sin ningún campo en rojo: el mismo defecto que
@@ -132,7 +137,7 @@
         [formControlName]="QD.strAdmission"
         [name]="QD.strAdmission"
         label="Admisión"
-        [options]="cllAdmision()"
+        [options]="cllAdmisionVisibles()"
         [obligatorio]="true"
         [error]="mensajeDeError(QD.strAdmission)"
       />
