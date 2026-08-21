@@ -2040,9 +2040,9 @@
     "semantic_hash": ""
   },
   "pm4-app/frontend-ng/angular.json": {
-    "mtime": 1787256585.297373,
-    "seen": 1787259709.8451145,
-    "ast_hash": "781efa8876cfcffe9d76ce5be4fc5e86",
+    "mtime": 1787260802.3603501,
+    "seen": 1787264841.0434036,
+    "ast_hash": "05b4225beddcf202d80333e96cd2e3b0",
     "semantic_hash": ""
   },
   "pm4-app/frontend-ng/eslint.config.mjs": {
@@ -2880,9 +2880,9 @@
     "semantic_hash": ""
   },
   "pm4-app/frontend-ng/src/screens/atencion-cliente/quejas-directas/COL_QD_SCR-000_CrearRecibirQueja/seccion-detalle-queja.spec.ts": {
-    "mtime": 1787259010.167674,
-    "seen": 1787259709.8873627,
-    "ast_hash": "a95df88fd27a237c3f48bfc2eb77fa42",
+    "mtime": 1787263922.2718427,
+    "seen": 1787264841.1238296,
+    "ast_hash": "bfdd49e35b8c41d443c074b38635be10",
     "semantic_hash": ""
   },
   "pm4-app/frontend-ng/src/screens/atencion-cliente/quejas-directas/COL_QD_SCR-000_CrearRecibirQueja/seccion-detalle-queja.ts": {
@@ -3486,9 +3486,9 @@
     "semantic_hash": ""
   },
   "pm4-app/frontend-ng/src/screens/atencion-cliente/quejas-directas/COL_QD_SCR-000_CrearRecibirQueja/DOCUMENTACION_COL_QD_SCR-000_CrearRecibirQueja.md": {
-    "mtime": 1787259666.4857895,
-    "seen": 1787259709.9210255,
-    "ast_hash": "47e02353d7a18f953e9c4b9067083720",
+    "mtime": 1787264187.1152065,
+    "seen": 1787264841.2593722,
+    "ast_hash": "810656c2b479448de351cd2c01514cc3",
     "semantic_hash": ""
   },
   "pm4-app/frontend-ng/src/screens/atencion-cliente/quejas-directas/COL_QD_SCR-000_CrearRecibirQueja/crear-recibir-queja.html": {
@@ -3522,9 +3522,9 @@
     "semantic_hash": ""
   },
   "pm4-app/frontend-ng/src/screens/atencion-cliente/quejas-directas/COL_QD_SCR-000_CrearRecibirQueja/seccion-detalle-queja.html": {
-    "mtime": 1787258699.936835,
-    "seen": 1787259709.9217849,
-    "ast_hash": "3423d98b0faeb0a287c3c221083b4136",
+    "mtime": 1787264117.4074762,
+    "seen": 1787264841.263389,
+    "ast_hash": "160faf08bd802400da932d7a96ea119f",
     "semantic_hash": ""
   },
   "pm4-app/frontend-ng/src/screens/atencion-cliente/quejas-directas/COL_QD_SCR-003_Correccion_Error_Funcional/DOCUMENTACION_COL_QD_SCR-003_Correccion_Error_Funcional.md": {
@@ -3765,12 +3765,6 @@
     "mtime": 1787239439.4747748,
     "seen": 1787255885.5909033,
     "ast_hash": "217d01c09572cd76609384f3b08f6c7e",
-    "semantic_hash": ""
-  },
-  "admision-defensor.png": {
-    "mtime": 1787259566.1819377,
-    "seen": 1787259709.9387774,
-    "ast_hash": "b379d92871bb8f058fb2d76b33d932f7",
     "semantic_hash": ""
   }
 }
