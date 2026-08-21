@@ -140,7 +140,7 @@ fallback de la instancia actual.
 | Selecciona tu rol | `qd_strFilerRole` | `zds-select` (CAT-ROL-RADICADOR) | Sí | Anexo02 > SCR-000 > FLD-303 (fila 19) — "Determina instancia y punto de recepción" |
 | *(back, sin widget)* | `qd_strChannel` | Texto, derivado del punto de recepción (`DIC_CANAL_POR_PUNTO`) | Sí (al radicar) | Solicitud del usuario (2026-07-22) |
 | Punto de recepción | `qd_strReceptionPoint` | `zds-select` (CAT-PUNTO, id 20) **editable**, default **Internet**, excluye los códigos 2 (Aplicación móvil), 6 (Audio respuesta) y 99 (Otros) | Sí | Anexo02 > SCR-000 > FLD-304 (fila 20) |
-| Instancia de recepción | `qd_strReceptionInstance` | `zds-select` (CAT-INSTANCIA, id 19) **deshabilitado**: la asigna la RUL-000-01 según el rol | Sí | Anexo02 > SCR-000 > FLD-305 (fila 21) |
+| *(back, sin widget desde 2026-08-20)* | `qd_strReceptionInstance` | **Sin select**: la asigna la RUL-000-01 según el rol y el control queda deshabilitado. Se escondió a pedido del usuario — es una variable que el BPM maneja por detrás. El valor y su `_desc` viajan igual (`getRawValue()`) | Sí (al radicar) | Anexo02 > SCR-000 > FLD-305 (fila 21) + solicitud del usuario (2026-08-20) |
 | Alianza | `qd_strAlliance` | `zds-select` (CAT-ALIANZA), visible solo si rol = Empleado Zurich (código `'3'`) | No | Requerimiento — colección `alliance` (id 44) |
 
 **S2 — Datos del Consumidor Financiero** (`seccion-consumidor.html`):
@@ -240,7 +240,8 @@ sección que lo pinta. Es la misma separación que SCR-003.
 | Los obligatorios del detalle cambian de sección con el tipo | `CLL_VALIDADORES_DETALLE` + `alternarValidadoresDetalle()`: la rama queja exige producto/momento/motivo/relato (con el mínimo de 50), la rama solicitud exige **solo** `qd_strCaseDescription` (sin mínimo) | Solicitud del usuario (2026-08-19) — ver §13.6 |
 | Autorización de datos obligatoria | Gate `blnPuedeEnviar` (botón deshabilitado) + `za-alert config="alert"` al intentar enviar | **RUL-000-07** → MSG-000-04 |
 | Captcha obligatorio | Gate `blnPuedeEnviar` (exige token) + `za-alert config="negative"` | **RUL-000-08** → MSG-000-05 |
-| Nombres/Apellidos solo letras | `pattern(/^[A-Za-zÁÉÍÓÚáéíóúÑñÜü\s]+$/)` en los cuatro campos de nombre | Anexo02 > FLD-308/309/311/312 |
+| Nombres/Apellidos solo letras | `pattern(/^[A-Za-zÁÉÍÓÚáéíóúÑñÜü\s]+$/)` en los cuatro campos de nombre, en **las dos** ramas de persona: es del dato, no de la rama | Anexo02 > FLD-308/309/311/312 |
+| Los obligatorios de los nombres cambian de bloque con el tipo de persona | `CLL_VALIDADORES_PERSONA` + `alternarValidadoresPersona()` (en `seccion-consumidor.ts`): la rama natural exige nombres+apellidos, la jurídica exige razón social + nombres/apellidos de contacto | **RUL-000-02/03** + arreglo de 2026-08-20 — ver §13.7 |
 | Placa colombiana | `pattern(/^[A-Za-z]{3} ?[0-9]{3}$/)` en `qd_strPlate` | Anexo02 > FormularioCreaciónPQRS #25 |
 | Correo de copia (opcional) con formato | Mismo patrón de email, sin `required` | Anexo02 > FLD-337 |
 | Argumento de réplica máx. 2000 | `maxLength(2000)` | Anexo02 > FLD-326 |
@@ -417,7 +418,7 @@ Entry/colecciones, texto del banner — todos en *Suposiciones realizadas*.
 | Hoja de secciones | `app-pqr-section` (`.pqr-section-title` + `-divider`) | Componente propio |
 | Pares label/valor de solo lectura | `app-pqr-readonly` | Componente propio |
 | Campos de texto / email / tel | `zds-input` (×12) | Fachada |
-| Selects de colección | `zds-select` (×12) | Fachada + `CatalogosService` |
+| Selects de colección | `zds-select` (×13, uno de ellos solo para el Defensor — §13.8) | Fachada + `CatalogosService` |
 | Textareas | `zds-textarea` (×2, con contador `maxLength`) | Fachada |
 | Checkboxes (autorización, réplica) | `zds-checkbox-field` (×2, con `checkedValue`/`uncheckedValue`) | Fachada |
 | Switch de anexos | `za-switch` (CVA nativo → `[formControl]` directo) | DS |
@@ -762,6 +763,316 @@ alcance del pedido. Vale revisarla junto con el punto 5 de §14.
 
 ---
 
+### 13.7 ⚠ La deuda de §13.6 se cobró en S2 (2026-08-20)
+
+Tres pedidos del usuario, y los dos primeros resultaron ser **un solo defecto** — el que la sección
+anterior había dejado anotado como deuda, cobrado en el bloque de nombres de S2.
+
+**Lo reportado:**
+
+1. Con el tipo de identificación **NIT** y todos los datos llenos, no aparece ningún error de validación
+   visible, pero "Enviar PQR" se comporta como si alguna validación hubiera fallado.
+2. Eligiendo NIT y volviendo después a, por ejemplo, Registro Civil de Nacimiento, **Nombres** y
+   **Apellidos** muestran "Campo requerido" con texto correcto escrito.
+3. *(ajuste aparte)* El campo **Instancia de recepción** no debería verse: la variable la maneja el back.
+
+**Reproducido en el navegador antes de tocar código**, con la pantalla corriendo como Web Entry y el
+estado del form leído por `window.ng.getComponent(...)`:
+
+```
+// con NIT y todo lo visible lleno con valores válidos:
+{"formValid": false, "invalid": {
+   "qd_strFirstName": {"value": "", "errors": {"errorRequired": true}},
+   "qd_strLastName":  {"value": "", "errors": {"errorRequired": true}}}}
+
+// tras volver a Cédula y escribir por los inputs reales del shadow DOM:
+{"firstName": {"v": "Nelson", "e": {"errorRequired": true}},
+ "lastName":  {"v": "Bravo",  "e": {"errorRequired": true}}}
+```
+
+Dos detalles de esa medición son los que cierran el diagnóstico. **Falta la clave `required`**: esos dos
+controles solo declaraban `Validators.pattern`, así que el error no lo puso Angular. Y `errorRequired`
+**no se cae**: ni con un `updateValueAndValidity()` sincrónico ni 400 ms después, porque el closure lee un
+`model` congelado en `''`.
+
+**La causa**, la misma que MUT-7b había dejado documentada: `generateControl()` de `lib-zurich`
+**compone** su validador sobre el control real de la pantalla, ese closure lee **`this.model` del
+componente hijo** —no el valor del control— y **ningún `lib-*-z` tiene `ngOnDestroy`** (`ngOnDestroy`
+aparece 2 veces en el `.mjs` contra 7 de `generateControl`). Cuando el `@if` de la rama desmonta el
+widget, el closure sobrevive enganchado al `FormControl`; y como cada remontaje compone **encima** de lo
+que ya había, los closures muertos se apilan.
+
+Por qué el síntoma 1 es invisible: `scrollToFirstError()` resuelve `document.getElementById('field-<name>')`,
+y `field-qd_strFirstName` no está en el DOM. Por qué el síntoma 2 dice "Campo requerido": el
+`mensajeDeError()` de S2 solo distingue `pattern`, así que cualquier otra clave —incluida la del DS— cae
+al mensaje genérico.
+
+**El arreglo** es el mismo patrón que §13.6, aplicado ahora en S2: `CLL_VALIDADORES_PERSONA` +
+`alternarValidadoresPersona()`, con guardia de rama y `setValidators()` de la **columna completa**. Escribir
+la columna entera deja el control en el estado que le toca a la rama sin importar qué le compuso el DS
+antes, que es lo que un `removeValidators` no puede hacer (compara por identidad de función contra un
+closure compuesto: no saca nada y no falla). Los `[obligatorio]="true"` de la plantilla **se conservan** —
+pintan el asterisco—, pero ya no son la fuente de verdad de la validez.
+
+De paso, `RGX_SOLO_LETRAS` pasó a exportarse desde `seccion-consumidor.ts`: ahora el patrón lo necesitan
+la declaración del `FormGroup` y la tabla de ramas, y dos copias que se desincronizaran dejarían el
+`pattern` puesto en una rama y ausente en la otra. El spec de S2 también lo importa, así que su fixture
+dejó de tener copia propia.
+
+**El ajuste 3** salió del mismo cambio: se quitó el `zds-select` de la instancia de recepción y su fila
+quedó en `cols-1` con el punto de recepción solo. Lo que **no** se tocó es nada de la escritura del dato:
+`sembrarInstancia()` sigue derivándolo del rol, `bloquearInstancia()` sigue deshabilitando el control
+—hace falta igual, para que un `patchValue` no pueda dejar la pantalla inválida por un campo que nadie
+puede corregir porque nadie lo ve— y `sincronizarDesc()` sigue manteniendo el `_desc`; ese último llega
+por la vía de las opciones y no por `valueChanges`, que es justo el caso que su docstring nombra para
+este campo. `cllInstancias()` pasó a `private`: ya no lo lee la plantilla, pero sí `sembrarInstancia()`
+para resolver el código contra el catálogo.
+
+#### Pasada de mutación de esta tanda (2026-08-20) — cuatro mutaciones
+
+Baseline: **1305 casos en 89 archivos**, verde.
+
+| # | Qué se rompió | Rojo |
+|---|---|---|
+| **1** | `effect(() => this.alternarValidadoresPersona())` comentado | 3 casos de los 5 nuevos de S2 |
+| **2** | El guardia `if (strRama === this.strRamaPersona) return;` quitado | **VERDE, 1304/1304** — ver abajo |
+| **3** | Tabla rota en dos columnas a la vez: `cllJuridica` de `strCompanyName` vaciada y el `pattern` sacado de la rama jurídica de `strContactLastName` | 3 casos (incluido el de "el `pattern` sobrevive a los dos cruces") |
+| **4** | El `zds-select` de la instancia de recepción repuesto en la plantilla | 1 caso · `⚠ la instancia de recepción NO se pinta, y el valor viaja igual` |
+
+**MUT-2 quedó verde, y es un hueco real que conviene no disimular.** El guardia de rama existe para que
+la tabla no se reescriba en cada tecla, porque una reescritura con los widgets montados borra el validador
+que el DS compuso al montar y que nada vuelve a componer hasta un remontaje. Ese escenario **no es
+observable bajo jsdom**: los custom elements de Lit no hacen upgrade (trampa 2 de
+`docs/guides/testing-conventions.md`), así que el DS no compone nada y no hay nada que borrar. Fingirlo con
+un `setValidators` a mano probaría que nuestro `setValidators` gana contra un validador que pusimos
+nosotros — un test tautológico. El guardia se conserva por el argumento de diseño y por paridad con
+`alternarValidadoresDetalle()`, que lo documenta igual; el caso "la obligatoriedad de la rama SOBREVIVE a
+la escritura de otro campo" **nombra el hueco en el propio test** en vez de decorarlo. Si algún día la
+fachada se prueba con los componentes del DS montados de verdad, ése es el momento de escribirlo.
+
+**Lo que estos 5 casos nuevos SÍ aseveran** es la tabla: que la columna de la rama quede aplicada y que la
+de la otra se vaya. Con eso el estado final del control es el correcto sin importar qué compuso el DS, que
+es el argumento entero del arreglo. La prueba de que el closure existía es la medición en el navegador de
+arriba, no un caso de jsdom.
+
+#### Comprobación en el navegador DESPUÉS del arreglo (2026-08-20)
+
+Como el defecto solo era observable con el DS montado de verdad, el cierre se midió donde se había medido
+el síntoma: la pantalla como Web Entry (`?screen=COL_QD_SCR-000_CrearRecibirQueja&case_id=&task_id=`,
+los dos parámetros **vacíos a propósito** para vencer los fallbacks de `.env`), manejando los `zds-select`
+por su radio real dentro del shadow DOM y leyendo el form con `window.ng.getComponent(...)`.
+
+```
+// 1) NIT elegido, y los campos de la rama jurídica llenos:
+{"valid": false, "campos": {
+   "qd_strIdType":           {"v": "7",                     "e": null},
+   "qd_strFirstName":        {"v": "",                      "e": null},   // ← antes: {errorRequired: true}
+   "qd_strLastName":         {"v": "",                      "e": null},   // ← antes: {errorRequired: true}
+   "qd_strCompanyName":      {"v": "Zurich Colombia S.A.S", "e": null},
+   "qd_strContactFirstName": {"v": "Nelson",                "e": null},
+   "qd_strContactLastName":  {"v": "Bravo",                 "e": null}}}
+
+// 2) de vuelta a Registro Civil de Nacimiento, con los nombres del titular escritos:
+{"valid": false, "campos": {
+   "qd_strIdType":    {"v": "1",      "e": null},
+   "qd_strFirstName": {"v": "Nelson", "e": null},   // ← antes: {errorRequired: true}
+   "qd_strLastName":  {"v": "Bravo",  "e": null}}}
+```
+
+Dos cosas que vale leer con cuidado de esa medición:
+
+- **Los dos nombres del titular quedan `null` estando VACÍOS bajo NIT** (medición 1). Eso es el síntoma 1
+  cerrado: eran los dos controles que bloqueaban el envío sin pintar nada.
+- **`valid` sigue en `false` en las dos**, y está bien: quedan sin llenar los obligatorios que no son parte
+  de este arreglo (tipo de solicitud, rol, correo, teléfono, departamento, detalle…). Lo que se aseveró es
+  el estado de las **seis** columnas de la tabla, no la validez global de un formulario a medio llenar.
+- Un barrido del DOM **incluyendo los shadow roots** buscando `/requerid/i` devolvió **cero nodos** con los
+  nombres escritos: el "Campo requerido" del síntoma 2 no aparece ni dentro del DS.
+
+El único error de consola es un `ERR_CERT_DATE_INVALID` sobre `ZurichSans-Regular.ttf` de
+`bpm.beesmart.ec` — el certificado de la fuente corporativa remota, ajeno a la aplicación.
+
+El ajuste 3 se comprobó en la misma corrida: "Punto de recepción" se ve, "Instancia de recepción" no
+aparece por ningún lado.
+
+#### Lo que este cambio corrige de la ficha y del código
+
+El bloque de comentario de `crear-recibir-queja.ts` que justificaba dejarle la obligatoriedad al DS
+afirmaba que el validador "**se monta y desmonta con el `@if`**", y descartaba explícitamente la
+alternativa del `setValidators()` por efecto con el argumento de que "su ventaja no se cobra porque el DS
+compone igual". La primera mitad es falsa y la segunda es justamente al revés — el DS compone igual, y
+**por eso** hace falta escribir la columna completa. El bloque quedó reescrito apuntando acá.
+
+#### Deuda que este cambio NO cierra
+
+La de §13.6 sigue abierta tal cual: `qd_strServiceProvided` y `qd_strPlate` siguen siendo
+`[obligatorio]="true"` detrás de sus propios `@if` dentro de S3, sin tabla que los cubra. Con dos
+secciones ya cobradas por el mismo defecto del vendor, esa tercera es el próximo lugar donde va a
+aparecer.
+
+---
+
+### 13.8 ⚠ El campo de Admisión nunca se portó: un widget entero que faltaba (2026-08-20)
+
+Reporte del usuario: *"cuando seleccionamos Defensor del consumidor debería aparecer el campo Admisión
+pero no lo hace en Detalle queja, ese comportamiento funcionaba en react"*. Es exacto, y es una
+**regresión del port**, no una decisión de diseño.
+
+**La ficha tenía razón y el código se le había apartado** — al revés de §13.6/§13.7, donde lo que estaba
+mal era la ficha. Las filas de §4 (FLD-331), §5, §7 (RUL-000-01) y §9 ya decían lo correcto desde 1.0:
+*"`zds-select` (CAT-ADMISION) visible solo si rol = Defensor (`'4'`); oculto y fijo en "No aplica"
+(código 9) en los demás roles"*, con las mismas palabras que el anexo (`03_Campos.md:113` y
+`05_Reglas.md:15`). React lo pinta (`SeccionDetalleQueja.tsx`, `blnIsDefender`).
+
+Lo que se portó fue **la mitad invisible**: `sembrarAdmision()` ya respetaba el rol —no sembraba el `'9'`
+cuando el radicador era el Defensor, justamente para no pisarle su respuesta— pero el `zds-select` que le
+daba de dónde responder nunca se escribió. El efecto quedaba cuidando un valor que nadie podía elegir. Y
+la cabecera de la clase de S3 sellaba el hueco declarando los cuatro catálogos planos como *"variables de
+back sin widget"*, que era cierto para tres.
+
+#### Por qué el arreglo no fue una línea de plantilla
+
+Poner el `@if` y salir habría reproducido, por tercera vez en esta pantalla, el defecto de §13.6/§13.7: un
+`[obligatorio]="true"` compone el `required` del DS sobre el control, el `@if` desmonta el widget, y el
+validador **sobrevive en el `FormGroup`**. Un ciudadano que pasara por el rol Defensor y siguiera a otro
+rol dejaría el formulario inenviable sin un solo campo en rojo, porque `scrollToFirstError()` busca un
+`field-qd_strAdmission` que ya no está en el DOM. Así que el widget llegó con el tratamiento completo:
+
+| Pieza | Dónde | Qué hace |
+|---|---|---|
+| `blnEsDefensor` | `seccion-detalle-queja.ts` | `computed()` del rol contra `'4'` — lo leen la plantilla y los dos efectos |
+| `@if (blnEsDefensor())` | `seccion-detalle-queja.html` | pinta el `zds-select` a media fila (con el hueco de la segunda columna, como React) |
+| `alternarValidadorAdmision()` | `seccion-detalle-queja.ts` | pone y **saca** el `required` con el rol, con guardia de cruce; `setValidators()` de la columna completa, no `removeValidators()` (que compara por identidad contra el closure compuesto del DS y no saca nada) |
+| `sembrarAdmision()`, reescrito | `seccion-detalle-queja.ts` | detecta los **dos cruces** del rol: al entrar limpia el `'9'` del default, al salir lo fuerza de vuelta |
+
+El `required` **no** se declara en el `FormGroup` de la pantalla, y el comentario de esa línea lo dice: es
+del rol, no del campo.
+
+#### ⚠ Una divergencia de paridad DELIBERADA con React (decisión del usuario, 2026-08-20)
+
+Los dos cruces del rol no son simetría decorativa:
+
+- **Al entrar** a Defensor se limpia el `'9'` que se había sembrado para el rol anterior. Si no, su select
+  abriría con "No Aplica" ya elegido y el `required` quedaría satisfecho por el default — elegiría por
+  omisión, que es justo lo que FLD-331 no quiere. Solo se limpia lo que puso el default
+  (`strAdmisionSembrada`), nunca una elección propia.
+- **Al salir** se fuerza `'9'` **sobre lo que el Defensor hubiera elegido**. Acá React tiene un hueco: su
+  effect corta con `if (blnIsDefender || …) return` y después solo escribe si el valor difiere, así que un
+  "Queja o reclamo admitida por el DCF" elegido por el Defensor sobrevive al cambio de rol y viaja al
+  proceso con el campo ya **oculto** — una admisión que nadie puede ver ni corregir. Se cierra porque el
+  anexo dice "fijo en No Aplica" y por decisión explícita del usuario. Es la única divergencia
+  intencional de este arreglo, y va a §14.
+
+#### Pasada de mutación de esta tanda (2026-08-20) — cinco mutaciones
+
+Baseline: **1310 casos en 89 archivos**, verde (desde 1305).
+
+| # | Qué se rompió | Rojo |
+|---|---|---|
+| **1** | `effect(() => this.alternarValidadorAdmision())` comentado | 1 caso · `⚠ el required LLEGA con el Defensor y SE VA con el rol siguiente` |
+| **2** | `@if (blnEsDefensor())` → `@if (true)` en la plantilla | **13 casos**, incluido `el campo NO se monta para un rol cualquiera, y SÍ para el Defensor` |
+| **3** | El forzado de salida: `&& !blnSalioDeDefensor` quitado (o sea, el comportamiento de React) | 1 caso · `⚠ salir del rol Defensor FUERZA "No aplica" sobre lo que él había elegido` |
+| **4** | La limpieza de entrada quitada de `sembrarAdmision()` | 1 caso · `entrar al rol Defensor LIMPIA el "No aplica" que se había sembrado` |
+| **5** | `setValidators(blnDefensor ? [required] : [])` → solo agrega, nunca saca | **VERDE la primera vez** — ver abajo |
+
+**MUT-5 sobrevivió, y el caso que decía cubrirla estaba mal escrito.** El caso aseveraba
+`hasError('required') === false` después de salir del rol Defensor — pero `sembrarAdmision()` acababa de
+forzar `'9'` en ese mismo control, y **un control con valor no dispara `required` ni con el validador
+puesto**. La aserción pasaba por el motivo equivocado. MUT-1 sí la había atrapado, pero por otra vía: allá
+el efecto no corría nunca y fallaba la aserción *anterior*, la de que el `required` llega. O sea que el
+"se va" no estaba probado por nadie.
+
+Se agregó una tercera aserción que **vacía el control a mano** después del cruce
+(`seccion-detalle-queja.spec.ts:806-812`): con el campo vacío, `hasError('required') === false` solo puede
+significar que el validador se fue. Con eso MUT-5 se puso roja. Queda anotado en el propio caso, porque es
+el tipo de aserción que la próxima persona borraría por parecer redundante.
+
+#### Comprobación en el navegador (2026-08-20)
+
+Bajo jsdom los `lib-*-z` no hacen upgrade, así que el `required` del DS —el que de verdad se apila— no
+existe en el spec. Se midió en la pantalla como Web Entry
+(`?screen=COL_QD_SCR-000_CrearRecibirQueja&case_id=&task_id=`), con tipo de solicitud = Queja (`'3'`),
+moviendo `qd_strFilerRole` y leyendo el control con `window.ng.getComponent(...)`:
+
+```
+{"paso": "tipo=Queja, sin rol",   "valor": "",  "montado": false, "errores": null,                                      "invalido": false}
+{"paso": "rol=3 (no Defensor)",   "valor": "9", "montado": false, "errores": null,                                      "invalido": false}
+{"paso": "rol=4 (DEFENSOR)",      "valor": "",  "montado": true,  "errores": {"required": true, "errorRequired": true}, "invalido": true}
+{"paso": "Defensor elige '1'",    "valor": "1", "montado": true,  "errores": null,                                      "invalido": false}
+{"paso": "salió a rol=1",         "valor": "9", "montado": false, "errores": null,                                      "invalido": false}
+{"paso": "oculto y vaciado",      "valor": "9", "montado": false, "errores": null,                                      "invalido": false}
+```
+
+Cuatro cosas que confirma esa medición y el spec no puede:
+
+- **`errorRequired` junto a `required`** en el paso del Defensor: es el validador del DS apilándose sobre el
+  nuestro, exactamente lo que §13.7 describe. Confirma que la elección de `setValidators()` de la columna
+  completa era la correcta y no una precaución teórica.
+- **El `'1'` del Defensor se fuerza a `'9'` al salir** — la divergencia deliberada, en el DOM real.
+- **El `required` viejo se fue de verdad**: `errores: null` e `invalido: false` incluso vaciando el control
+  oculto a mano. Es la mitad que MUT-5 destapó, medida donde el validador del vendor sí existe. (El vaciado
+  lo vuelve a sembrar en `'9'` acto seguido, que es lo correcto.)
+- El `zds-select` mide **489×48 px** con la etiqueta "Admisión" visible en un barrido que atraviesa los
+  shadow roots: media fila, con el hueco de la segunda columna como en React.
+
+**El catálogo real (colección 21) trae `1` "Queja o reclamo inadmitida y/o rechazada por el DCF", `2`
+"Queja o reclamo admitida por el DCF" y `9` "No Aplica".** O sea que la vía del **código** `'9'` es la que
+dispara contra los datos de producción, y el respaldo `/no aplica/i` también haría match — el orden que
+documenta `sembrarAdmision()` se comprobó contra el dato, no solo contra el fixture.
+
+El único error de consola sigue siendo el `ERR_CERT_DATE_INVALID` de `ZurichSans-Regular.ttf` en
+`bpm.beesmart.ec`, ajeno a la aplicación. Ningún NG0xxx.
+
+#### Lo que este cambio corrige de la ficha y del código
+
+La cabecera de la clase de S3 decía *"Los cuatro son variables de back sin widget"*. Son **tres**: la
+admisión sí tiene widget, y solo para un rol. Quedó reescrita, y §12 pasó a contar 13 `zds-select` en vez
+de 12. Las filas de campos, validaciones, reglas y dependencias **no se tocaron**: ya estaban bien.
+
+---
+
+### 13.9 El argumento de la réplica quedaba pegado al checkbox: un defecto de la grilla, compartido con React (2026-08-20)
+
+Al marcar *"¿Ya habías radicado previamente la misma queja o es una reconsideración?"* (FLD-325), el
+textarea del argumento (FLD-326) aparecía **sin ningún aire** contra el texto de la pregunta.
+
+**La causa no es de la réplica: `.form-row` no separa a sus hermanas.** El bloque es
+`display: grid; gap: var(--zs-150); margin-bottom: 0`, y el `gap` de una grilla separa las celdas
+**dentro** de una fila, no una fila de la siguiente. Medido en el navegador sobre S3, el `bottom` de cada
+fila es exactamente el `top` de la que sigue:
+
+| Fila | `top` | `bottom` | `margin-top` |
+|---|---|---|---|
+| Producto SFC + momento | 1215 | 1283 | 0px |
+| (huecos de servicio/placa) | 1283 | 1283 | 0px |
+| Motivo SFC | 1283 | 1351 | 0px |
+| Detalle de la queja | 1351 | 1517 | 0px |
+| Checkbox de réplica | 1517 | **1541** | 0px |
+
+En las filas de inputs no se ve porque el control del DS trae su propio padding vertical. La fila del
+checkbox mide **24px** de alto (1517→1541): es la única que no aporta relleno, así que es la única donde
+el defecto queda a la vista.
+
+**Se corrige con una clase de la fila que aparece, no tocando `.form-row`.** `.form-row` la usan las ~11
+pantallas de los dos frontends y su propio bloque cita el requisito de paridad, así que un
+`margin-bottom` global movería el espaciado de todas. Va entonces
+`.form-row.row-tras-checkbox { margin-top: var(--zs-100) }` al final de `shared.css` — el mismo recurso y
+el mismo token que ya usan `.pqr-toggle-row` y `.section-spacer`. Verificado en el navegador:
+`marginTop: 16px`, hueco **0px → 16px**.
+
+**⚠ React tiene el defecto IGUAL**, mismo markup (`SeccionDetalleQueja.tsx`) y misma hoja
+(`shared.css`, el bloque es byte-idéntico). **No es una divergencia del port**, así que la paridad no da
+la respuesta acá: la decisión es criterio visual, y queda como divergencia deliberada a favor de Angular
+(ver §14).
+
+**El test asevera la clase, no los 16px.** `getBoundingClientRect()` devuelve 0 para todo bajo jsdom, así
+que el hueco real **no es observable** en el spec — lo que sí se puede romper en silencio editando la
+plantilla es que la clase llegue al `div`, y eso es lo que cubre el caso nuevo de `las tres ramas
+condicionales`. La mutación (quitar `row-tras-checkbox` del markup) lo pone rojo nombrándolo; los 16px
+se midieron en el navegador y quedan en la tabla de arriba.
+
+---
+
 ## 14. A reportar al negocio
 
 **⚠ Primero, lo único de esta ficha que SÍ se cambió: los supuestos de la bifurcación por tipo
@@ -786,6 +1097,24 @@ lectura dejó cuatro decisiones tomadas por defecto que conviene confirmar:
 Del lado técnico no queda pendiente: la pasada de mutación de esta tanda son **siete mutaciones rojas**
 y `npm run verify` está verde (§13.6). Lo único que no pudo correr es `graphify update .` — la
 herramienta no está instalada en esta máquina.
+
+**⚠ Segundo, la única divergencia DELIBERADA con React que introdujo la tanda de fixes (2026-08-20,
+§13.8).** Al salir del rol Defensor del Consumidor, la admisión se **fuerza** a "No Aplica" (`'9'`) aunque
+el Defensor hubiera elegido otra cosa. React deja el valor: un "Queja o reclamo admitida por el DCF"
+elegido por el Defensor sobrevive al cambio de rol y viaja al proceso con el campo ya **oculto**, donde
+nadie puede verlo ni corregirlo. Se cerró porque FLD-331 dice "fijo en No Aplica" y por decisión del
+usuario. **A confirmar con negocio:** si un caso llega a cambiar de radicador *después* de que el Defensor
+dictaminó, esta pantalla descarta el dictamen — y es probable que ese escenario no exista (el radicador se
+elige al abrir el caso), pero conviene decirlo en voz alta. Si negocio prefiere conservarlo, es la
+condición `!blnSalioDeDefensor` de `sembrarAdmision()`, con su caso de test.
+
+**⚠ Tercero, un defecto visual que React también tiene y que acá SÍ se corrigió (§13.9).** El argumento de
+la réplica quedaba pegado al checkbox porque `.form-row` no separa a sus hermanas — es de la hoja
+compartida, no del port. Angular quedó con `+16px` en esa fila y React sin ellos, así que las dos
+pantallas ya **no se ven idénticas en ese punto**. Es la corrección de un defecto, no deriva; si se
+quisiera paridad estricta, la misma clase va a `frontend/src/shared.css` y al `div` de
+`SeccionDetalleQueja.tsx`. **Vale revisarlo con negocio/diseño para las demás pantallas:** el hueco de 0px
+entre filas está en las ~11 que usan `.form-row`, y solo se nota donde arriba hay un control bajo.
 
 El resto de la sección: ordenado por prioridad, y **nada de eso se cambió en el port.**
 

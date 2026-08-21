@@ -2,7 +2,7 @@ import {
   ChangeDetectionStrategy, Component, computed, effect, inject, Injector, input, signal,
   runInInjectionContext, type Signal,
 } from '@angular/core';
-import { FormControl, FormGroup, ReactiveFormsModule } from '@angular/forms';
+import { FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 
 import { DocSupportUploaderComponent } from '../../../../components/doc-support-uploader';
 import { ZdsCheckboxField } from '../../../../components/fields/zds-checkbox-field';
@@ -77,12 +77,13 @@ const STR_ROL_DEFENSOR = '4';
  *
  * ── Los cuatro catálogos planos y sus defaults por etiqueta ─────────────────────────────────────
  * `admission` (FLD-331) · `controlEntity` (FLD-332) · `tutela` (FLD-333) · `expressComplaint`
- * (FLD-334). Los cuatro son variables de back sin widget, igual que sexo/LGBTIQ+ en S2, y los cuatro
- * resuelven su default **contra la etiqueta del catálogo** con los regex exactos de React:
+ * (FLD-334). Tres de los cuatro son variables de back sin widget, igual que sexo/LGBTIQ+ en S2, y los
+ * cuatro resuelven su default **contra la etiqueta del catálogo** con los regex exactos de React:
  *
  *  - Admisión: código `'9'` si existe, y si no `/no aplica/i`. Y **solo si el radicador no es el
  *    Defensor** (`qd_strFilerRole !== '4'`): cuando lo es, la admisión la decide él y sembrarla acá
- *    pisaría su respuesta.
+ *    pisaría su respuesta. ⚠ Es el único de los cuatro que **sí tiene widget**, y solo para ese rol
+ *    — ver `blnEsDefensor` y `alternarValidadorAdmision()`.
  *  - Ente de control: `/otros/i`.
  *  - Tutela y queja exprés: `/^\d?\.?\s*no$/i` — el ancla y el prefijo opcional son obligatorios,
  *    porque las etiquetas reales vienen numeradas (`"1. No"`) y un `/no/i` suelto haría match con
@@ -154,6 +155,7 @@ export class SeccionDetalleQueja {
     effect(() => this.derivarCamposDelMotivo());
     effect(() => this.recargarDetalleProducto());
     effect(() => this.sembrarDefaultsDeBack());
+    effect(() => this.alternarValidadorAdmision());
     effect(() => this.sembrarDetalleProducto());
     effect(() => this.preseleccionarProductoUi());
   }
@@ -222,7 +224,11 @@ export class SeccionDetalleQueja {
   protected readonly cllDetalleProducto = computed(
     () => this.objCatalogos.de('productDetail').options(),
   );
-  private readonly cllAdmision = computed(() => this.objCatalogos.de('admission').options());
+  /**
+   * **FLD-331** · lo lee la plantilla: la admisión es el único de los cuatro con widget, y solo cuando
+   * el radicador es el Defensor del Consumidor.
+   */
+  protected readonly cllAdmision = computed(() => this.objCatalogos.de('admission').options());
   private readonly cllEnteControl = computed(() => this.objCatalogos.de('controlEntity').options());
   private readonly cllTutela = computed(() => this.objCatalogos.de('tutela').options());
   private readonly cllQuejaExpres = computed(
@@ -355,6 +361,19 @@ export class SeccionDetalleQueja {
   }
 
   /**
+   * **RUL-000-01 / FLD-331** · solo el Defensor del Consumidor (rol `'4'`) elige la admisión.
+   *
+   * Es la mitad que faltaba del porte: `sembrarAdmision()` ya respetaba el rol, pero el `zds-select`
+   * nunca se portó y la ficha de esta clase daba los cuatro catálogos por "variables de back sin
+   * widget". El anexo (FLD-331, y RUL-000-01 con las mismas palabras) pide lo contrario: *"Visible
+   * (ZdsSelect requerido) solo si rol = Defensor del Consumidor (código 4). En los demás roles:
+   * oculto, fijo en 'No Aplica'"*. React sí lo pinta (`SeccionDetalleQueja.tsx`, `blnIsDefender`).
+   */
+  protected readonly blnEsDefensor = computed(
+    () => this.leer(QD.strFilerRole) === STR_ROL_DEFENSOR,
+  );
+
+  /**
    * **FLD-331** · admisión, con dos particularidades que no comparte con los otros tres.
    *
    * 1. Se intenta primero por **código** (`'9'`) y solo si ese código no está en el catálogo se cae a
@@ -362,20 +381,87 @@ export class SeccionDetalleQueja {
    *    con la Superintendencia, la etiqueta es el respaldo por si negocio lo renumera.
    * 2. **No se siembra si el radicador es el Defensor del Consumidor** (`qd_strFilerRole === '4'`):
    *    en ese caso la admisión la decide él, y escribirla acá pisaría su respuesta.
+   *
+   * ⚠ **Dejar de ser Defensor sí pisa el valor, y ahí se aparta de React a propósito.** El guardia
+   * `this.leer(QD.strAdmission)` de abajo hace que un valor ya puesto no se toque, así que sin la
+   * relectura de `blnRolDefensor` un código que eligió el Defensor —"Admitida", digamos— sobreviviría
+   * al cambio de rol y viajaría al proceso con el campo ya **oculto**: una admisión que nadie puede
+   * ver ni corregir. React tiene ese hueco hoy (su effect corta con `if (blnIsDefender || …) return` y
+   * después solo escribe si el valor difiere); acá se cierra porque el anexo dice "fijo en No Aplica"
+   * y porque decisión del usuario (2026-08-20). El precio es una diferencia de paridad **deliberada**,
+   * anotada en la ficha.
    */
   private sembrarAdmision(): void {
-    if (this.leer(QD.strFilerRole) === STR_ROL_DEFENSOR) return;
+    const blnDefensor = this.blnEsDefensor();
 
-    const cllOpciones = this.cllAdmision();
-    if (cllOpciones.length === 0 || this.leer(QD.strAdmission)) return;
-
-    const objPorCodigo = cllOpciones.find((in_objO) => in_objO.value === STR_COD_ADMISION);
-    if (objPorCodigo) {
-      this.form().get(QD.strAdmission)?.setValue(objPorCodigo.value);
+    // Al **entrar** a Defensor se limpia el default: si no, el '9' que se sembró para el rol anterior
+    // quedaría preseleccionado y el guardia de abajo lo trataría como elección del Defensor.
+    if (blnDefensor) {
+      if (this.blnRolDefensor === false && this.leer(QD.strAdmission) === this.strAdmisionSembrada) {
+        this.form().get(QD.strAdmission)?.setValue('');
+      }
+      this.blnRolDefensor = true;
       return;
     }
-    this.sembrarPorEtiqueta(QD.strAdmission, cllOpciones, /no aplica/i);
+
+    const cllOpciones = this.cllAdmision();
+    if (cllOpciones.length === 0) return;
+
+    // Al **salir** de Defensor se fuerza el default aunque ya haya valor: es el "fijo en No Aplica".
+    const blnSalioDeDefensor = this.blnRolDefensor === true;
+    this.blnRolDefensor = false;
+    if (this.leer(QD.strAdmission) && !blnSalioDeDefensor) return;
+
+    const objPorCodigo = cllOpciones.find((in_objO) => in_objO.value === STR_COD_ADMISION);
+    const strCodigo = objPorCodigo
+      ? objPorCodigo.value
+      : (cllOpciones.find((in_objO) => /no aplica/i.test(in_objO.label))?.value ?? '');
+    if (!strCodigo || this.leer(QD.strAdmission) === strCodigo) return;
+
+    this.strAdmisionSembrada = strCodigo;
+    this.form().get(QD.strAdmission)?.setValue(strCodigo);
   }
+
+  /**
+   * El rol de la última corrida de `sembrarAdmision()`, para distinguir los dos **cruces** del rol de
+   * las corridas en que el rol no cambió. `null` es "todavía no corrió".
+   */
+  private blnRolDefensor: boolean | null = null;
+
+  /**
+   * El código que sembró `sembrarAdmision()`. Se compara al entrar a Defensor para no borrarle una
+   * elección propia: solo se limpia lo que puso el default.
+   */
+  private strAdmisionSembrada = '';
+
+  /**
+   * **FLD-331** · el `required` de la admisión sigue al rol, porque un `@if` **no** toca el `FormGroup`.
+   *
+   * ⚠ Es el mismo modo de falla que ya se cobró dos veces en esta pantalla —
+   * `alternarValidadoresDetalle()` en la clase de la pantalla y `alternarValidadoresPersona()` en S2:
+   * un `required` puesto sobre un control cuyo widget se desmonta deja el formulario **inenviable sin
+   * un solo campo en rojo**, porque `scrollToFirstError()` busca un `field-<name>` que ya no está en el
+   * DOM. React no lo sufre porque react-hook-form da de baja las `rules` al desmontar el campo; acá los
+   * validadores viven en el `FormGroup` y sobreviven.
+   *
+   * `setValidators()` de la columna completa y no `removeValidators()`: el DS **compone** su propio
+   * validador sobre este control al montar el `zds-select` (ver §13.7 de la ficha), y `removeValidators`
+   * compara por identidad de función contra ese closure compuesto — no saca nada y no falla.
+   */
+  private alternarValidadorAdmision(): void {
+    const blnDefensor = this.blnEsDefensor();
+    if (blnDefensor === this.blnAdmisionExigida) return;
+    this.blnAdmisionExigida = blnDefensor;
+
+    const objControl = this.form().get(QD.strAdmission);
+    if (!objControl) return;
+
+    objControl.setValidators(blnDefensor ? [Validators.required] : []);
+    objControl.updateValueAndValidity({ emitEvent: false });
+  }
+
+  /** Guardia de rama de `alternarValidadorAdmision()`, con la misma razón de ser que `strRamaDetalle`. */
+  private blnAdmisionExigida: boolean | null = null;
 
   private sembrarPorEtiqueta(
     in_strCampo: string,

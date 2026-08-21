@@ -40,7 +40,15 @@
           />
         </div>
 
-        <div class="form-row cols-2">
+        <!-- ⚠ `cols-1` y un solo hijo: la instancia de recepción **no tiene widget a propósito**.
+             RUL-000-01 la deriva del rol y la escribe `sembrarInstancia()`; el ciudadano no la elige y
+             ya no la ve, porque es una variable que el BPM maneja por detrás.
+             Sigue viajando a PM4: el control existe en el `FormGroup` (deshabilitado, y el payload se
+             arma con `getRawValue()`), `sembrarInstancia()` le escribe el código y `sincronizarDesc()`
+             mantiene su `_desc`. Ninguna de esas tres cosas depende de que el select esté montado — así
+             que quitar el widget no le saca el dato al backend. Y `cllInstancias()` sigue en uso: es
+             donde `sembrarInstancia()` resuelve el código contra el catálogo. -->
+        <div class="form-row cols-1">
           <!-- Los tres puntos retirados (móvil, audio respuesta, otros) no se ofrecen — ver la clase.
                El catálogo completo sigue enganchado al `_desc`, así que un caso histórico con uno de
                ellos conserva su descripción legible. -->
@@ -51,15 +59,6 @@
             [options]="cllPuntosVisibles()"
             [obligatorio]="true"
             [error]="mensajeDeError(QD.strReceptionPoint)"
-          />
-          <!-- Sin `[disabled]`: `zds-select` no tiene ese input. El bloqueo es estado del control y lo
-               pone `bloquearInstancia()` — RUL-000-01 la asigna, el ciudadano no la elige. -->
-          <zds-select
-            [formControlName]="QD.strReceptionInstance"
-            [name]="QD.strReceptionInstance"
-            label="Instancia de recepción"
-            [options]="cllInstancias()"
-            helpText="Se asigna automáticamente según tu rol."
           />
         </div>
 

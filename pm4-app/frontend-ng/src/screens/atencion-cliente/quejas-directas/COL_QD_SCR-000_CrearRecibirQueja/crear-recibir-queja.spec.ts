@@ -802,6 +802,33 @@ describe('SCR-000 · Crear/Recibir Queja', () => {
     expect(form().get(QD.strReceptionInstance)?.disabled).toBe(true);
   });
 
+  it('⚠ la instancia de recepción NO se pinta, y el valor viaja igual', async () => {
+    // Negocio pidió esconderla: es una variable que el BPM maneja por detrás. Las dos mitades van en el
+    // mismo caso a propósito — quitar el widget es trivial, y el riesgo entero está en que al hacerlo se
+    // le corte el dato al backend sin que nada lo note (el campo no se ve, así que nadie lo extrañaría
+    // hasta que el proceso bifurque mal). El `_desc` va también: es la convención del proyecto y lo que
+    // hace legible el caso en PM4.
+    await montarConCatalogosS1();
+
+    form().patchValue({ [QD.strFilerRole]: '1' });
+    await asentar();
+
+    expect(
+      (objFixture.nativeElement as HTMLElement)
+        .querySelector(`[name="${QD.strReceptionInstance}"]`),
+    ).toBeNull();
+    // El punto de recepción, que compartía la fila, sí sigue pintado.
+    expect(
+      (objFixture.nativeElement as HTMLElement)
+        .querySelector(`[name="${QD.strReceptionPoint}"]`),
+    ).not.toBeNull();
+
+    // Y el dato sigue ahí, con su `_desc`: se lee por `getRawValue()` porque el control va deshabilitado.
+    const dicCrudo = form().getRawValue() as Record<string, unknown>;
+    expect(dicCrudo[QD.strReceptionInstance]).toBe('2');
+    expect(dicCrudo[`${QD.strReceptionInstance}_desc`]).toBeTruthy();
+  });
+
   it('RUL-000-01 · al salir del rol Empleado Zurich se LIMPIA la alianza elegida', async () => {
     // La otra mitad de RUL-000-01: el caso de arriba asevera que el campo se oculta, éste que el valor
     // no se queda escondido detrás del `@if`. Sin esto una alianza elegida por error viajaría a PM4

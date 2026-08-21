@@ -2107,3 +2107,24 @@ z-table :is(th, td)[config*="right"] {
 .modal-window > .grid .preview-modal {
   width: min(1080px, 90vw - 4rem);
 }
+
+/* ── Fila condicional que aparece pegada a la de arriba ──────────────────────────────────────────
+   `.form-row` es `display: grid` con `margin: 0` y su `gap` **solo** separa las celdas de UNA fila:
+   entre dos `.form-row` hermanas no queda nada. Medido en la SCR-000: los bordes coinciden al píxel
+   (`bottom: 287` → `top: 287`).
+
+   En las filas de inputs no se nota porque el control del DS trae su propio padding vertical. Sí se
+   nota debajo de un `zds-checkbox-field`, que es bajo y ajustado: al marcar la réplica, el textarea del
+   argumento aparece **pegado** al texto de la pregunta.
+
+   Va como clase de la fila que aparece y **no** como `margin-bottom` global de `.form-row`, por dos
+   razones: la usan las ~11 pantallas de los dos frontends —tocarla mueve el espaciado de todas, contra
+   el requisito de paridad que documenta su propio bloque— y el hueco solo hace falta cuando lo de
+   arriba es un control bajo. Es el mismo recurso que ya usan `.pqr-toggle-row` y `.section-spacer`, con
+   el mismo token.
+
+   ⚠ React tiene el defecto IGUAL (mismo markup, misma hoja): no es una divergencia del port, así que la
+     paridad no da la respuesta acá y el criterio visual es la decisión. */
+.form-row.row-tras-checkbox {
+  margin-top: var(--zs-100);
+}

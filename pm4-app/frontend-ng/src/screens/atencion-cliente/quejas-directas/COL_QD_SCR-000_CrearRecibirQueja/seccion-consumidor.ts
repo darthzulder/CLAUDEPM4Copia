@@ -2,7 +2,7 @@ import {
   ChangeDetectionStrategy, Component, computed, effect, inject, Injector, input,
   runInInjectionContext, type Signal,
 } from '@angular/core';
-import { FormGroup, ReactiveFormsModule } from '@angular/forms';
+import { FormGroup, ReactiveFormsModule, Validators, type ValidatorFn } from '@angular/forms';
 
 import { ZdsInput } from '../../../../components/fields/zds-input';
 import { ZdsSelect } from '../../../../components/fields/zds-select';
@@ -15,6 +15,62 @@ import { PqrSectionComponent } from './pqr-section';
 
 /** Código de `codigo_tipo_persona` que marca persona **jurídica** en `cat_tipo_identificacion`. */
 const STR_COD_JURIDICA = '2';
+
+/**
+ * Solo letras y espacios (incluidas tildes y ñ), para nombres y apellidos.
+ *
+ * Se exporta y la pantalla la importa —en vez de tener cada archivo su copia— porque ahora el patrón
+ * aparece en **dos** lugares que tienen que coincidir: la declaración de los controles en el
+ * `FormGroup` de la pantalla y la tabla `CLL_VALIDADORES_PERSONA` de acá abajo. Dos copias que se
+ * desincronizaran dejarían el `pattern` puesto en una rama y ausente en la otra, y el síntoma sería
+ * "el apellido acepta números pero solo cuando el documento es un NIT".
+ */
+export const RGX_SOLO_LETRAS = /^[A-Za-zÁÉÍÓÚáéíóúÑñÜü\s]+$/;
+
+/** La rama de nombres que está aplicada sobre el form. `''` es "ninguna todavía". */
+const STR_RAMA_NATURAL = 'natural';
+const STR_RAMA_JURIDICA = 'juridica';
+
+/**
+ * Los validadores de los cinco campos de nombres, **completos y por rama**: la columna que aplica
+ * según el tipo de persona derivado es el estado final del control, no un delta sobre lo que había.
+ *
+ * Es el gemelo de `CLL_VALIDADORES_DETALLE` de la pantalla, con la misma forma de triplete y por el
+ * mismo motivo: así el tipo **obliga** a declarar las dos ramas de cada campo, y un campo que
+ * apareciera en una sola quedaría con los validadores de la rama anterior al cruzar — que es
+ * exactamente el defecto que la tabla cierra.
+ *
+ * El `pattern` va en las **dos** ramas de los cuatro campos que lo tienen: "solo letras" es del dato,
+ * no de la rama. Lo que cambia entre columnas es únicamente el `required`.
+ */
+const CLL_VALIDADORES_PERSONA: readonly {
+  readonly strCampo: string;
+  readonly cllNatural: readonly ValidatorFn[];
+  readonly cllJuridica: readonly ValidatorFn[];
+}[] = [
+  {
+    strCampo: QD.strFirstName,
+    cllNatural: [Validators.required, Validators.pattern(RGX_SOLO_LETRAS)],
+    cllJuridica: [Validators.pattern(RGX_SOLO_LETRAS)],
+  },
+  {
+    strCampo: QD.strLastName,
+    cllNatural: [Validators.required, Validators.pattern(RGX_SOLO_LETRAS)],
+    cllJuridica: [Validators.pattern(RGX_SOLO_LETRAS)],
+  },
+  // La razón social no lleva `pattern`: un nombre de empresa trae puntos, números y "&" ("3M", "S.A.S").
+  { strCampo: QD.strCompanyName, cllNatural: [], cllJuridica: [Validators.required] },
+  {
+    strCampo: QD.strContactFirstName,
+    cllNatural: [Validators.pattern(RGX_SOLO_LETRAS)],
+    cllJuridica: [Validators.required, Validators.pattern(RGX_SOLO_LETRAS)],
+  },
+  {
+    strCampo: QD.strContactLastName,
+    cllNatural: [Validators.pattern(RGX_SOLO_LETRAS)],
+    cllJuridica: [Validators.required, Validators.pattern(RGX_SOLO_LETRAS)],
+  },
+];
 
 /**
  * S2 · "Datos del Consumidor Financiero".
@@ -109,6 +165,7 @@ export class SeccionConsumidor {
 
     effect(() => this.aplicarCascadaMunicipio());
     effect(() => this.derivarTipoPersona());
+    effect(() => this.alternarValidadoresPersona());
     effect(() => this.sembrarDefaultsDeBack());
     effect(() => this.fijarPais());
     effect(() => this.sincronizarBloqueoMunicipio());
@@ -298,6 +355,91 @@ export class SeccionConsumidor {
     if (!strCodigo) return;
     const objControl = this.form().get(QD.strPersonType);
     if (objControl && objControl.value !== strCodigo) objControl.setValue(strCodigo);
+  }
+
+  // ── La obligatoriedad de los nombres, que es de la rama y vive acá ─────────────────────────────
+
+  /**
+   * La rama de nombres cuya columna está aplicada sobre el `FormGroup` — el guardia que hace que la
+   * tabla se escriba solo al cruzar de una rama a la otra.
+   *
+   * Arranca en `''` (ninguna) a propósito: así la primera corrida aplica la columna que corresponde al
+   * montaje, que es la natural porque al abrir no hay documento elegido.
+   */
+  private strRamaPersona: '' | typeof STR_RAMA_NATURAL | typeof STR_RAMA_JURIDICA = '';
+
+  /**
+   * Aplica sobre el `FormGroup` la columna de `CLL_VALIDADORES_PERSONA` que le toca al tipo de persona
+   * derivado: mueve los obligatorios del bloque natural (nombres + apellidos) al jurídico (razón
+   * social + contacto) y al revés.
+   *
+   * ⚠ **Esto arregla dos bugs reportados sobre la pantalla en vivo, y los dos son el mismo defecto.**
+   * Antes, la obligatoriedad de estos cinco campos no la ponía esta pantalla: la componía el DS desde
+   * el `[obligatorio]="true"` de la plantilla, apostando a que el validador **se montara y desmontara
+   * con el `@if`**. La primera mitad de esa apuesta es cierta; la segunda es falsa, y de ahí salen los
+   * dos síntomas:
+   *
+   *  1. **Con NIT y todo lleno, "Enviar" no hace nada y no hay un solo campo en rojo.** Medido en el
+   *     navegador: `qd_strFirstName` y `qd_strLastName` quedan en `{errorRequired: true}` con valor
+   *     `''` **estando desmontados**. Nótese la ausencia de la clave `required`: el error no es de
+   *     Angular, esos dos controles solo declaraban `Validators.pattern`. Y `scrollToFirstError()`
+   *     busca `id="field-qd_strFirstName"`, que no está en el DOM, así que no scrollea a nada — el
+   *     ciudadano ve el botón responder y nada más.
+   *  2. **Volviendo de NIT a Cédula, Nombres y Apellidos dicen "Campo requerido" con texto correcto.**
+   *     Medido: `{v: "Nelson", e: {errorRequired: true}}`. `mensajeDeError()` no reconoce
+   *     `errorRequired` (no es `pattern`), así que cae al mensaje genérico y acusa de vacío un campo
+   *     lleno.
+   *
+   * La causa es una sola: `generateControl()` de la lib **compone** su validador sobre el control real
+   * de la pantalla (`setValidators(compose([elQueHabía, () => generateValidation()]))`), ese closure
+   * lee **`this.model` del componente hijo** y no el valor del control, y **ningún `lib-*-z` tiene
+   * `ngOnDestroy`** (`ngOnDestroy` aparece 2 veces en el `.mjs` contra 7 de `generateControl`). Cuando
+   * el `@if` desmonta el widget, el closure sigue enganchado leyendo el `model` congelado en `''` de un
+   * componente destruido, así que `errorRequired` es **permanente**: verificado que no se cae ni con un
+   * `updateValueAndValidity()` sincrónico ni 400 ms después. Y como cada remontaje **vuelve** a
+   * componer sobre lo que ya había, los closures muertos se **apilan**.
+   *
+   * Por eso el arreglo es mudar la obligatoriedad a esta tabla, que es nuestra: escribir la columna
+   * completa con `setValidators()` deja el control exactamente en el estado que le corresponde a la
+   * rama, **sin importar qué le compuso el DS antes**. Un `removeValidators(Validators.required)` no
+   * serviría —compara por identidad de función y el validador ya es un closure compuesto, así que no
+   * saca nada y no falla—; es el mismo razonamiento que ya documenta `alternarValidadoresDetalle()` en
+   * la pantalla, y esta es la segunda vez que el mismo defecto del vendor se cobra una sección.
+   *
+   * Los `[obligatorio]="true"` de la plantilla **se conservan**: son lo que pinta el asterisco. Lo que
+   * cambia es que ya no son la fuente de verdad de la validez, solo de la marca visual.
+   *
+   * ── Y por qué el guardia de rama (con una mutación que dio un resultado incómodo) ──
+   * Este efecto depende de `sigValores()` vía `strCodigoTipoPersona()`, o sea que corre con cada tecla
+   * de cualquiera de los 46 controles. Sin el guardia, cada pulsación reescribiría la columna y borraría
+   * el `required` compuesto del DS mientras los widgets siguen montados — que en la rama visible no se
+   * nota, pero es la misma clase de borrado accidental que documenta el precedente. Se aplica **solo al
+   * cruzar**, que es cuando el estado tiene que cambiar.
+   *
+   * ⚠ Eso es un argumento de diseño, **no** un invariante que la suite defienda hoy: comentando el
+   * `if` de abajo la suite queda **verde, 1304/1304** (mutación verificada y revertida). El motivo es
+   * que el escenario que lo distinguiría —que el DS haya compuesto algo que la reescritura borre—
+   * necesita los componentes de Lit montados de verdad, y bajo jsdom no hacen upgrade. Se conserva
+   * porque cuesta lo mismo y elimina la clase de bug entera; ver el caso "la obligatoriedad de la rama
+   * SOBREVIVE a la escritura de otro campo" del spec, que nombra el hueco en vez de decorarlo.
+   *
+   * `emitEvent: false` es obligatorio: esto corre desde un efecto alimentado por `valueChanges`, y
+   * emitir reentraría.
+   */
+  private alternarValidadoresPersona(): void {
+    const strRama = this.blnEsJuridica() ? STR_RAMA_JURIDICA : STR_RAMA_NATURAL;
+    if (strRama === this.strRamaPersona) return;
+    this.strRamaPersona = strRama;
+
+    for (const objCampo of CLL_VALIDADORES_PERSONA) {
+      const objControl = this.form().get(objCampo.strCampo);
+      if (!objControl) continue;
+
+      const cllValidadores =
+        strRama === STR_RAMA_JURIDICA ? objCampo.cllJuridica : objCampo.cllNatural;
+      objControl.setValidators([...cllValidadores]);
+      objControl.updateValueAndValidity({ emitEvent: false });
+    }
   }
 
   // ── FLD-320/321/322 · los tres defaults que se resuelven contra su catálogo ────────────────────
