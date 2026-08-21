@@ -101,8 +101,10 @@
     />
   </div>
 
+  <!-- `row-tras-checkbox` da el aire que el `gap` de la grilla no da: entre dos `.form-row` hermanas no
+       hay separación, y debajo de un checkbox —que es bajo— el textarea queda pegado a la pregunta. -->
   @if (blnReplica()) {
-    <div class="form-row cols-1">
+    <div class="form-row cols-1 row-tras-checkbox">
       <zds-textarea
         [formControlName]="QD.strReplyArgument"
         [name]="QD.strReplyArgument"

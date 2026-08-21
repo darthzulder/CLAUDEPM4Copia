@@ -887,6 +887,25 @@ describe('las tres ramas condicionales', () => {
     expect(seccion()['blnReplica']()).toBe(true);
     expect(montoCampo(QD.strReplyArgument)).toBe(true);
   });
+
+  it('la fila del argumento lleva `row-tras-checkbox`, que le da el aire tras el checkbox', async () => {
+    // Entre dos `.form-row` hermanas no hay separación —`gap` de grilla solo separa celdas DENTRO de
+    // una fila, y el `margin` es 0—, así que debajo de un checkbox, que es bajo, el textarea quedaba
+    // pegado a la pregunta. Lo corrige `.form-row.row-tras-checkbox` en `shared.css`.
+    //
+    // ⚠ Esto asevera que la CLASE llega al DOM, no los 16px: `getBoundingClientRect()` devuelve 0 en
+    //   jsdom para todo, así que el hueco real NO es observable acá. Se midió en el navegador
+    //   (`bottom: 1541` → `top: 1557`, `marginTop: 16px`); acá se cubre lo único que se puede romper
+    //   en silencio editando la plantilla.
+    await montar();
+    await escribir({ [QD.strReply]: 'SI' });
+
+    const objTextarea = (objFixture.nativeElement as HTMLElement).querySelector(
+      `[name="${QD.strReplyArgument}"]`,
+    );
+
+    expect(objTextarea?.closest('.form-row')?.classList.contains('row-tras-checkbox')).toBe(true);
+  });
 });
 
 describe('el switch de adjuntos', () => {

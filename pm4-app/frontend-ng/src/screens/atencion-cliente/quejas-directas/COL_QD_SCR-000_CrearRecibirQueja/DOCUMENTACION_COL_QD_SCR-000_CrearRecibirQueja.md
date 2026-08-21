@@ -1031,6 +1031,48 @@ de 12. Las filas de campos, validaciones, reglas y dependencias **no se tocaron*
 
 ---
 
+### 13.9 El argumento de la réplica quedaba pegado al checkbox: un defecto de la grilla, compartido con React (2026-08-20)
+
+Al marcar *"¿Ya habías radicado previamente la misma queja o es una reconsideración?"* (FLD-325), el
+textarea del argumento (FLD-326) aparecía **sin ningún aire** contra el texto de la pregunta.
+
+**La causa no es de la réplica: `.form-row` no separa a sus hermanas.** El bloque es
+`display: grid; gap: var(--zs-150); margin-bottom: 0`, y el `gap` de una grilla separa las celdas
+**dentro** de una fila, no una fila de la siguiente. Medido en el navegador sobre S3, el `bottom` de cada
+fila es exactamente el `top` de la que sigue:
+
+| Fila | `top` | `bottom` | `margin-top` |
+|---|---|---|---|
+| Producto SFC + momento | 1215 | 1283 | 0px |
+| (huecos de servicio/placa) | 1283 | 1283 | 0px |
+| Motivo SFC | 1283 | 1351 | 0px |
+| Detalle de la queja | 1351 | 1517 | 0px |
+| Checkbox de réplica | 1517 | **1541** | 0px |
+
+En las filas de inputs no se ve porque el control del DS trae su propio padding vertical. La fila del
+checkbox mide **24px** de alto (1517→1541): es la única que no aporta relleno, así que es la única donde
+el defecto queda a la vista.
+
+**Se corrige con una clase de la fila que aparece, no tocando `.form-row`.** `.form-row` la usan las ~11
+pantallas de los dos frontends y su propio bloque cita el requisito de paridad, así que un
+`margin-bottom` global movería el espaciado de todas. Va entonces
+`.form-row.row-tras-checkbox { margin-top: var(--zs-100) }` al final de `shared.css` — el mismo recurso y
+el mismo token que ya usan `.pqr-toggle-row` y `.section-spacer`. Verificado en el navegador:
+`marginTop: 16px`, hueco **0px → 16px**.
+
+**⚠ React tiene el defecto IGUAL**, mismo markup (`SeccionDetalleQueja.tsx`) y misma hoja
+(`shared.css`, el bloque es byte-idéntico). **No es una divergencia del port**, así que la paridad no da
+la respuesta acá: la decisión es criterio visual, y queda como divergencia deliberada a favor de Angular
+(ver §14).
+
+**El test asevera la clase, no los 16px.** `getBoundingClientRect()` devuelve 0 para todo bajo jsdom, así
+que el hueco real **no es observable** en el spec — lo que sí se puede romper en silencio editando la
+plantilla es que la clase llegue al `div`, y eso es lo que cubre el caso nuevo de `las tres ramas
+condicionales`. La mutación (quitar `row-tras-checkbox` del markup) lo pone rojo nombrándolo; los 16px
+se midieron en el navegador y quedan en la tabla de arriba.
+
+---
+
 ## 14. A reportar al negocio
 
 **⚠ Primero, lo único de esta ficha que SÍ se cambió: los supuestos de la bifurcación por tipo
@@ -1065,6 +1107,14 @@ usuario. **A confirmar con negocio:** si un caso llega a cambiar de radicador *d
 dictaminó, esta pantalla descarta el dictamen — y es probable que ese escenario no exista (el radicador se
 elige al abrir el caso), pero conviene decirlo en voz alta. Si negocio prefiere conservarlo, es la
 condición `!blnSalioDeDefensor` de `sembrarAdmision()`, con su caso de test.
+
+**⚠ Tercero, un defecto visual que React también tiene y que acá SÍ se corrigió (§13.9).** El argumento de
+la réplica quedaba pegado al checkbox porque `.form-row` no separa a sus hermanas — es de la hoja
+compartida, no del port. Angular quedó con `+16px` en esa fila y React sin ellos, así que las dos
+pantallas ya **no se ven idénticas en ese punto**. Es la corrección de un defecto, no deriva; si se
+quisiera paridad estricta, la misma clase va a `frontend/src/shared.css` y al `div` de
+`SeccionDetalleQueja.tsx`. **Vale revisarlo con negocio/diseño para las demás pantallas:** el hueco de 0px
+entre filas está en las ~11 que usan `.form-row`, y solo se nota donde arriba hay un control bajo.
 
 El resto de la sección: ordenado por prioridad, y **nada de eso se cambió en el port.**
 
