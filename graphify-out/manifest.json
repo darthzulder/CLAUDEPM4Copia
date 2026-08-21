@@ -2040,8 +2040,8 @@
     "semantic_hash": ""
   },
   "pm4-app/frontend-ng/angular.json": {
-    "mtime": 1787260802.3603501,
-    "seen": 1787264841.0434036,
+    "mtime": 1787320647.6438427,
+    "seen": 1787322658.173621,
     "ast_hash": "05b4225beddcf202d80333e96cd2e3b0",
     "semantic_hash": ""
   },
@@ -3414,9 +3414,9 @@
     "semantic_hash": ""
   },
   "pm4-app/CONTEXTO_MIGRACION_ANGULAR.md": {
-    "mtime": 1787243030.8189557,
-    "seen": 1787255885.5909445,
-    "ast_hash": "61d3a198705d3bffa5dc786c652120d4",
+    "mtime": 1787322613.1215093,
+    "seen": 1787322658.2150111,
+    "ast_hash": "f7b6d4d521f42b706a045337b0f29ba5",
     "semantic_hash": ""
   },
   "pm4-app/certs/README.md": {
@@ -3738,27 +3738,27 @@
     "semantic_hash": ""
   },
   ".pipeline/az-pipe-ci.yml": {
-    "mtime": 1787239439.4582593,
-    "seen": 1787255885.5908997,
-    "ast_hash": "ab3dacaa425ee5c9d9a81b90ea932838",
+    "mtime": 1787322613.01,
+    "seen": 1787322658.2082193,
+    "ast_hash": "1f9324909f717dfd702c5483dededbba",
     "semantic_hash": ""
   },
   ".pipeline/az-pipe-cicd-dev.yml": {
-    "mtime": 1787239439.4582593,
-    "seen": 1787255885.5909007,
-    "ast_hash": "27c782bbf29b8edb8d2f766392201861",
+    "mtime": 1787322613.0138404,
+    "seen": 1787322658.2082212,
+    "ast_hash": "1d0377d2de3dea74608e785fbed65a4f",
     "semantic_hash": ""
   },
   ".pipeline/az-pipe-cicd-develop.yml": {
-    "mtime": 1787239439.4742408,
-    "seen": 1787255885.5909019,
-    "ast_hash": "dce793c16df2c734a51589f16d316e8c",
+    "mtime": 1787322613.0138404,
+    "seen": 1787322658.2082226,
+    "ast_hash": "51d6723ecbdf5d719abc8e38219d5a47",
     "semantic_hash": ""
   },
   ".pipeline/sonar.yml": {
-    "mtime": 1787239439.4747748,
-    "seen": 1787255885.5909023,
-    "ast_hash": "340998ee00fbe08977fb5512f1db9be2",
+    "mtime": 1787322613.0039406,
+    "seen": 1787322658.208224,
+    "ast_hash": "10c8e10eb77acc28463e0160ca177635",
     "semantic_hash": ""
   },
   ".pipeline/veracode.yml": {

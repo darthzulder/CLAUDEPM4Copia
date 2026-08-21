@@ -95,7 +95,7 @@ Todas heredadas, todas vinculantes. Verbatim donde importa.
 
 1. ~~`lint` + `verify`~~ — **hechos, verdes.** El comando, para la próxima:
    ```bash
-   npm run verify --prefix /c/Proyectos/bpm-screens-acz-processmaker/pm4-app
+   npm run verify --prefix /c/Proyectos/fe-processmaker-acz-screens/pm4-app
    ```
 2. ~~Revisión visual con Playwright MCP de SCR-003, SCR-011 y SCR-012~~ — **las tres hechas**
    (§6-bis y §6-ter). Método, para la próxima pantalla: React `:5173` vs Angular `:4200`, mismo

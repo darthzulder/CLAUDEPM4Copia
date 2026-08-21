@@ -1,4 +1,4 @@
-# Pipeline Referenciador - bpm-screens-acz-processmaker
+# Pipeline Referenciador - fe-processmaker-acz-screens
 # Author: @ruben.jimenez@zurich.com
 #
 # PROPÓSITO: CI + Deploy a producción. Se ejecuta en cada commit a main.
@@ -30,4 +30,4 @@ resources:
       ref:                                     main
 
 extends:
-  template:                                    pipelines/azure/bpm-screens-acz-processmaker/azure-pipelines-cicd-dev.yml@AppDevOpsRepo
+  template:                                    pipelines/azure/fe-processmaker-acz-screens/azure-pipelines-cicd-dev.yml@AppDevOpsRepo
