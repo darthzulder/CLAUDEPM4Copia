@@ -35,7 +35,10 @@ import {
 } from '../fields/fields';
 import { PqrPageComponent } from './pqr-page';
 import { PqrSectionComponent } from './pqr-section';
-import { SeccionConsumidor } from './seccion-consumidor';
+// `RGX_SOLO_LETRAS` viene de S2 y no se declara acá: es la misma constante que usa su tabla de
+// validadores por rama, y dos copias que se desincronizaran dejarían el `pattern` puesto en una rama
+// y ausente en la otra. Ver el comentario de la constante.
+import { RGX_SOLO_LETRAS, SeccionConsumidor } from './seccion-consumidor';
 import { SeccionDetalleQueja } from './seccion-detalle-queja';
 
 /** Titular y descripción del banner. Literales de React, sin cambios. */
@@ -137,9 +140,6 @@ const RGX_PLACA = /^[A-Za-z]{3} ?[0-9]{3}$/;
 
 /** Correo, mismo patrón que React usa en los dos campos de email. */
 const RGX_EMAIL = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-
-/** Solo letras y espacios (incluidas tildes y ñ), para nombres y apellidos. */
-const RGX_SOLO_LETRAS = /^[A-Za-zÁÉÍÓÚáéíóúÑñÜü\s]+$/;
 
 /** Exactamente 10 dígitos, para el celular. */
 const RGX_CELULAR = /^\d{10}$/;
@@ -297,8 +297,8 @@ export class CrearRecibirQueja implements OnInit, OnDestroy {
     [QD.strRequestType]: new FormControl('', [Validators.required]),
     [QD.strFilerRole]: new FormControl('', [Validators.required]),
     [QD.strReceptionPoint]: new FormControl('', [Validators.required]),
-    // Sin `required`: la asigna RUL-000-01 y el control va deshabilitado, así que exigirla sería
-    // exigirle al ciudadano algo que no puede tocar.
+    // Sin `required`: la asigna RUL-000-01, el control va deshabilitado y **no tiene widget** (negocio
+    // la maneja por detrás), así que exigirla sería exigirle al ciudadano algo que no puede ni ver.
     [QD.strReceptionInstance]: new FormControl(''),
     // El canal se deriva del punto (DIC_CANAL_POR_PUNTO) y no tiene widget.
     [QD.strChannel]: new FormControl(''),
@@ -308,31 +308,29 @@ export class CrearRecibirQueja implements OnInit, OnDestroy {
     // ── S2 · Datos del Consumidor Financiero ──────────────────────────────────────────────────────
     [QD.strIdType]: new FormControl('', [Validators.required]),
     [QD.strIdNumber]: new FormControl('', [Validators.required]),
-    // ── ⚠ Los cinco campos de nombre NO llevan `Validators.required`, y la obligatoriedad la pone el
-    //    DS. Está medido, no supuesto, y es la única de las tres opciones que da la regla correcta ──
+    // ── ⚠ Los cinco campos de nombre no llevan su `required` acá: lo pone `CLL_VALIDADORES_PERSONA`
+    //    en S2, por rama. Estos son solo el `pattern` del dato y el valor inicial ──
     //
     // RUL-000-02/03 los hacen obligatorios **cada uno en su rama**: nombre+apellido si es persona
     // natural, razón social + contacto si es jurídica. Un `Validators.required` fijo acá exigiría los
     // cinco a la vez —incluidos los tres de la rama que el `@if` no montó— y el form nunca sería válido.
     //
-    // Lo que resuelve la rama es el `[obligatorio]="true"` de la plantilla: `zds-input` lo reenvía como
-    // `[required]` a `lib-input-text-z`, que **compone su propio validador** (`{errorRequired: true}`)
-    // sobre el control. Como el validador se monta y desmonta con el `@if`, la obligatoriedad sigue a la
-    // rama visible sola. Medido con una sonda sobre los tres wrappers: `zds-input` y `zds-select`
-    // invalidan un control vacío con solo `obligatorio`; `zds-textarea` **no** (sobreescribe
-    // `ngOnChanges`, así que la composición no lo alcanza). El error se limpia en el mismo tick al
-    // escribir un valor.
+    // ⚠ **La versión anterior le dejaba esa rama al DS y era un bug con dos síntomas en producción.**
+    // La apuesta era que el `[obligatorio]="true"` de la plantilla —que `zds-input` reenvía como
+    // `[required]` a `lib-input-text-z`, que **compone** su `{errorRequired: true}` sobre el control—
+    // "se montara y desmontara con el `@if`". Se monta; **no se desmonta**: ningún `lib-*-z` tiene
+    // `ngOnDestroy`, así que el closure sobrevive al widget leyendo un `model` congelado en `''`. El
+    // resultado medido era la rama jurídica inenviable por dos campos invisibles, y los nombres
+    // acusados de "Campo requerido" con texto correcto al volver a la rama natural. El detalle completo
+    // está en `alternarValidadoresPersona()` de [seccion-consumidor.ts](./seccion-consumidor.ts), que
+    // es quien ahora manda; este comentario solo dice por qué acá **no** hay un `required`.
     //
-    // ⚠ Corolario, y el motivo de que esto esté escrito acá y no solo en la fachada: el docstring de
-    // `obligatorio` en `campo-base.ts` dice que es "el asterisco del rótulo, nada más". **Para
-    // `zds-input`/`zds-select` eso es falso** — también invalida. Va al reporte al negocio junto con lo
-    // demás de la fachada. Corolario práctico: en esta pantalla la validez de un campo de nombre no se
-    // lee del `FormControl` de acá, así que un spec que llene "los obligatorios del form" y no mire la
-    // rama montada deja el form inválido sin que nada nombre por qué.
+    // Los `[obligatorio]="true"` de la plantilla se conservan: pintan el asterisco. Ya no son la fuente
+    // de verdad de la validez.
     //
-    // La alternativa —`setValidators()` desde un efecto al cambiar `strPersonType`— se descartó: agrega
-    // un escritor más sobre los validadores del form para reproducir lo que el `@if` ya da gratis, y su
-    // ventaja (que el `FormControl` declare la verdad) no se cobra porque el DS compone igual.
+    // ⚠ Corolario que sigue vigente: el docstring de `obligatorio` en `campo-base.ts` dice que es "el
+    // asterisco del rótulo, nada más". **Para `zds-input`/`zds-select` eso es falso** — también
+    // invalida, y encima de forma permanente. Va al reporte al negocio junto con lo demás de la fachada.
     [QD.strFirstName]: new FormControl('', [Validators.pattern(RGX_SOLO_LETRAS)]),
     [QD.strLastName]: new FormControl('', [Validators.pattern(RGX_SOLO_LETRAS)]),
     [QD.strCompanyName]: new FormControl(''),
@@ -397,7 +395,9 @@ export class CrearRecibirQueja implements OnInit, OnDestroy {
     [QD.strCompensation]: new FormControl(''),
     [QD.strSlaAssigned]: new FormControl(''),
     [QD.strFraudRelated]: new FormControl(''),
-    // Los cuatro de back que S3 resuelve contra su catálogo, sin widget.
+    // Los cuatro que S3 resuelve contra su catálogo. Tres no tienen widget; la admisión SÍ lo tiene,
+    // pero solo para el Defensor del Consumidor, así que su `required` no se declara acá: lo pone y lo
+    // saca `alternarValidadorAdmision()` de S3 según el rol (FLD-331 / RUL-000-01).
     [QD.strAdmission]: new FormControl(''),
     [QD.strControlEntity]: new FormControl(''),
     [QD.strTutela]: new FormControl(''),
@@ -547,7 +547,13 @@ export class CrearRecibirQueja implements OnInit, OnDestroy {
   protected readonly cllRoles = computed(() => this.objCatalogos.de('filerRole').options());
   private readonly cllCanales = computed(() => this.objCatalogos.de('channel').options());
   private readonly cllPuntos = computed(() => this.objCatalogos.de('receptionPoint').options());
-  protected readonly cllInstancias = computed(
+  /**
+   * `private` y no `protected`: la instancia de recepción **no tiene select** —la maneja el BPM por
+   * detrás—, así que la plantilla no lee este catálogo. Se sigue cargando porque es donde
+   * `sembrarInstancia()` resuelve el código contra el registro, y `sincronizarDesc()` contra la
+   * etiqueta.
+   */
+  private readonly cllInstancias = computed(
     () => this.objCatalogos.de('receptionInstance').options(),
   );
   protected readonly cllAlianzas = computed(() => this.objCatalogos.de('alliance').options());
@@ -697,11 +703,15 @@ export class CrearRecibirQueja implements OnInit, OnDestroy {
   }
 
   /**
-   * Baja a estado del control el `disabled` que React pone como atributo en la instancia de recepción.
+   * Deshabilita el control de la instancia de recepción.
    *
-   * `zds-select` **no tiene input `disabled`** (el `disable` sin "d" que declara la lib nunca se lee),
-   * así que el único canal es el `FormControl`. `emitEvent: false` es obligatorio: esto corre desde un
-   * efecto alimentado por `valueChanges`, y emitir reentraría.
+   * ⚠ **Sigue haciendo falta aunque el campo ya no se pinte**, y no es defensa por si acaso: un control
+   * deshabilitado queda fuera de `form.value` y de `form.valid`, así que es lo que garantiza que un
+   * `patchValue` de precarga o un watcher no puedan dejar la pantalla inválida por un campo que nadie
+   * puede corregir porque nadie lo ve. El dato viaja igual: el payload se arma con `getRawValue()`.
+   *
+   * `emitEvent: false` es obligatorio: esto corre desde un efecto alimentado por `valueChanges`, y
+   * emitir reentraría.
    */
   private bloquearInstancia(): void {
     const objControl = this.form.get(QD.strReceptionInstance);

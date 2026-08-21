@@ -1,4 +1,4 @@
-# Pipeline Referenciador - bpm-screens-acz-processmaker
+# Pipeline Referenciador - fe-processmaker-acz-screens
 # Author: @ruben.jimenez@zurich.com
 #
 # PROPÓSITO: Análisis Sonar bajo demanda (manual trigger).
@@ -16,4 +16,4 @@ resources:
       ref:                                     main
 
 extends:
-  template:                                    pipelines/azure/bpm-screens-acz-processmaker/azure-pipelines-ci.yml@AppDevOpsRepo
+  template:                                    pipelines/azure/fe-processmaker-acz-screens/azure-pipelines-ci.yml@AppDevOpsRepo
